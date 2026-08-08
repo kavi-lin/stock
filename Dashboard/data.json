@@ -1,6 +1,6 @@
 {
   "status": "success",
-  "last_updated": "2026-08-08 12:19:35",
+  "last_updated": "2026-08-08 19:49:10",
   "market": {
     "regime": "RISK_ON",
     "cycle_phase": "Early",
@@ -640,40 +640,40 @@
           "company": "Apple Inc.",
           "industry": "Consumer Electronics",
           "ceo": "Timothy D. Cook",
-          "market_cap": 4588476887960.0,
-          "price": 312.41
+          "market_cap": 4601989255480.0,
+          "price": 313.33
         },
         {
           "ticker": "MSFT",
           "company": "Microsoft Corporation",
           "industry": "Software - Infrastructure",
           "ceo": "Satya Nadella",
-          "market_cap": 3711735423000.0,
-          "price": 499.86
+          "market_cap": 3712700744500.0,
+          "price": 499.99
         },
         {
           "ticker": "NVDA",
           "company": "NVIDIA Corporation",
           "industry": "Semiconductors",
           "ceo": "Jen-Hsun Huang",
-          "market_cap": 5304156790000.0,
-          "price": 218.99
+          "market_cap": 5424535160000.0,
+          "price": 223.96
         },
         {
           "ticker": "AVGO",
           "company": "Broadcom Inc.",
           "industry": "Semiconductors",
           "ceo": "Hock E. Tan",
-          "market_cap": 2000871632700.0,
-          "price": 420.565
+          "market_cap": 2035102420800.0,
+          "price": 427.76
         },
         {
           "ticker": "ORCL",
           "company": "Oracle Corporation",
           "industry": "Software - Infrastructure",
           "ceo": "Michael D. Sicilia",
-          "market_cap": 413126512951.0,
-          "price": 143.4233
+          "market_cap": 423256261800.0,
+          "price": 146.94
         }
       ],
       "valuation": {
@@ -732,40 +732,40 @@
           "company": "Eli Lilly and Company",
           "industry": "Drug Manufacturers - General",
           "ceo": "David A. Ricks",
-          "market_cap": 1123308664800.0,
-          "price": 1192.8
+          "market_cap": 1116631721110.0,
+          "price": 1185.71
         },
         {
           "ticker": "UNH",
           "company": "UnitedHealth Group Incorporated",
           "industry": "Medical - Healthcare Plans",
           "ceo": "Stephen J. Hemsley",
-          "market_cap": 366863094884.0,
-          "price": 403.97
+          "market_cap": 369687423980.0,
+          "price": 407.08
         },
         {
           "ticker": "JNJ",
           "company": "Johnson & Johnson",
           "industry": "Drug Manufacturers - General",
           "ceo": "Joaquin Duato",
-          "market_cap": 619295694944.0,
-          "price": 256.98
+          "market_cap": 624742065364.0,
+          "price": 259.24
         },
         {
           "ticker": "ABBV",
           "company": "AbbVie Inc.",
           "industry": "Drug Manufacturers - General",
           "ceo": "Robert A. Michael",
-          "market_cap": 430867765257.0,
-          "price": 243.87
+          "market_cap": 434701705679.0,
+          "price": 246.04
         },
         {
           "ticker": "MRK",
           "company": "Merck & Co., Inc.",
           "industry": "Drug Manufacturers - General",
           "ceo": "Robert Davis",
-          "market_cap": 317001397000.0,
-          "price": 128.35
+          "market_cap": 317544757400.0,
+          "price": 128.57
         }
       ],
       "valuation": {
@@ -825,40 +825,40 @@
           "company": "Exxon Mobil Corporation",
           "industry": "Oil & Gas Integrated",
           "ceo": "Darren W. Woods",
-          "market_cap": 641686741800.0,
-          "price": 154.83
+          "market_cap": 633853712400.0,
+          "price": 152.94
         },
         {
           "ticker": "CVX",
           "company": "Chevron Corporation",
           "industry": "Oil & Gas Integrated",
           "ceo": "Michael K. Wirth",
-          "market_cap": 376900342000.0,
-          "price": 189.245
+          "market_cap": 371562854000.0,
+          "price": 186.565
         },
         {
           "ticker": "COP",
           "company": "ConocoPhillips",
           "industry": "Oil & Gas Exploration & Production",
           "ceo": "Ryan Lance",
-          "market_cap": 142248008257.0,
-          "price": 116.76
+          "market_cap": 143283558163.0,
+          "price": 117.61
         },
         {
           "ticker": "EOG",
           "company": "EOG Resources, Inc.",
           "industry": "Oil & Gas Exploration & Production",
           "ceo": "Ezra Y. Yacob",
-          "market_cap": 72544069800.0,
-          "price": 136.2
+          "market_cap": 71766431460.0,
+          "price": 134.74
         },
         {
           "ticker": "SLB",
           "company": "Slb N.V.",
           "industry": "Oil & Gas Equipment & Services",
           "ceo": "Olivier Le Peuch",
-          "market_cap": 76492744033.0,
-          "price": 51.54
+          "market_cap": 74993759332.0,
+          "price": 50.53
         }
       ],
       "valuation": {
@@ -917,40 +917,40 @@
           "company": "Berkshire Hathaway Inc.",
           "industry": "Insurance - Diversified",
           "ceo": "Gregory Edward Abel",
-          "market_cap": 1131506964473.0,
-          "price": 524.61
+          "market_cap": 1125446205871.0,
+          "price": 521.8
         },
         {
           "ticker": "JPM",
           "company": "JPMorgan Chase & Co.",
           "industry": "Banks - Diversified",
           "ceo": "James Dimon",
-          "market_cap": 954709413000.0,
-          "price": 356.3
+          "market_cap": 957978415200.0,
+          "price": 357.52
         },
         {
           "ticker": "BAC",
           "company": "Bank of America Corporation",
           "industry": "Banks - Diversified",
           "ceo": "Brian Thomas Moynihan",
-          "market_cap": 447085170000.0,
-          "price": 63.0
+          "market_cap": 448291590300.0,
+          "price": 63.17
         },
         {
           "ticker": "WFC",
           "company": "Wells Fargo & Company",
           "industry": "Banks - Diversified",
           "ceo": "Charles W. Scharf",
-          "market_cap": 264902400000.0,
-          "price": 87.6
+          "market_cap": 263844000000.0,
+          "price": 87.25
         },
         {
           "ticker": "GS",
           "company": "The Goldman Sachs Group, Inc.",
           "industry": "Financial - Capital Markets",
           "ceo": "David Solomon",
-          "market_cap": 304618328060.0,
-          "price": 1032.58
+          "market_cap": 306692227270.0,
+          "price": 1039.61
         }
       ],
       "valuation": {
@@ -1010,40 +1010,40 @@
           "company": "GE Aerospace",
           "industry": "Aerospace & Defense",
           "ceo": "H. Lawrence Culp Jr.",
-          "market_cap": 388619039244.0,
-          "price": 374.55
+          "market_cap": 383981134811.0,
+          "price": 370.08
         },
         {
           "ticker": "CAT",
           "company": "Caterpillar Inc.",
           "industry": "Agricultural - Machinery",
           "ceo": "Joseph E. Creed",
-          "market_cap": 394747483520.0,
-          "price": 856.96
+          "market_cap": 387943875030.0,
+          "price": 842.19
         },
         {
           "ticker": "RTX",
           "company": "RTX Corporation",
           "industry": "Aerospace & Defense",
           "ceo": "Christopher T. Calio",
-          "market_cap": 300886996048.0,
-          "price": 223.25
+          "market_cap": 300590489266.0,
+          "price": 223.03
         },
         {
           "ticker": "HON",
           "company": "Honeywell International Inc.",
           "industry": "Conglomerates",
           "ceo": "Vimal Kapur",
-          "market_cap": 76300135600.0,
-          "price": 240.74
+          "market_cap": 78033797400.0,
+          "price": 246.21
         },
         {
           "ticker": "UNP",
           "company": "Union Pacific Corporation",
           "industry": "Railroads",
           "ceo": "Vincenzo James Vena",
-          "market_cap": 175478020599.0,
-          "price": 295.38
+          "market_cap": 174141350729.0,
+          "price": 293.13
         }
       ],
       "valuation": {
@@ -1102,40 +1102,40 @@
           "company": "Linde plc",
           "industry": "Chemicals - Specialty",
           "ceo": "Sanjiv Lamba",
-          "market_cap": 226724886000.0,
-          "price": 490.11
+          "market_cap": 226664748000.0,
+          "price": 489.98
         },
         {
           "ticker": "SHW",
           "company": "The Sherwin-Williams Company",
           "industry": "Chemicals - Specialty",
           "ceo": "Heidi G. Petz",
-          "market_cap": 88223167236.0,
-          "price": 363.42
+          "market_cap": 89754971169.0,
+          "price": 369.73
         },
         {
           "ticker": "FCX",
           "company": "Freeport-McMoRan Inc.",
           "industry": "Copper",
           "ceo": "Kathleen Lynne Quirk",
-          "market_cap": 98027216400.0,
-          "price": 68.19
+          "market_cap": 100082927200.0,
+          "price": 69.62
         },
         {
           "ticker": "APD",
           "company": "Air Products and Chemicals, Inc.",
           "industry": "Chemicals - Specialty",
           "ceo": "Eduardo F. Menezes",
-          "market_cap": 66787844158.0,
-          "price": 299.92
+          "market_cap": 67571697223.0,
+          "price": 303.44
         },
         {
           "ticker": "ECL",
           "company": "Ecolab Inc.",
           "industry": "Chemicals - Specialty",
           "ceo": "Christophe Beck",
-          "market_cap": 79776415480.0,
-          "price": 283.46
+          "market_cap": 80257674460.0,
+          "price": 285.17
         }
       ],
       "valuation": {
@@ -1194,16 +1194,16 @@
           "company": "Alphabet Inc.",
           "industry": "Internet Content & Information",
           "ceo": "Sundar Pichai",
-          "market_cap": 4329530312567.0005,
-          "price": 357.75
+          "market_cap": 4287778028630.0,
+          "price": 354.3
         },
         {
           "ticker": "META",
           "company": "Meta Platforms, Inc.",
           "industry": "Internet Content & Information",
           "ceo": "Mark Elliot Zuckerberg",
-          "market_cap": 1502762327643.0,
-          "price": 589.9
+          "market_cap": 1508366798097.0,
+          "price": 592.1
         },
         {
           "ticker": "NFLX",
@@ -1287,40 +1287,40 @@
           "company": "Amazon.com, Inc.",
           "industry": "Specialty Retail",
           "ceo": "Andrew R. Jassy",
-          "market_cap": 2928728046000.0,
-          "price": 272.26
+          "market_cap": 2952608808000.0,
+          "price": 274.48
         },
         {
           "ticker": "TSLA",
           "company": "Tesla, Inc.",
           "industry": "Auto - Manufacturers",
           "ceo": "Elon R. Musk",
-          "market_cap": 1261998878805.0,
-          "price": 319.53
+          "market_cap": 1297742282721.0,
+          "price": 328.58
         },
         {
           "ticker": "HD",
           "company": "The Home Depot, Inc.",
           "industry": "Home Improvement",
           "ceo": "Edward Decker",
-          "market_cap": 348512333840.0,
-          "price": 349.52
+          "market_cap": 354594747540.0,
+          "price": 355.62
         },
         {
           "ticker": "MCD",
           "company": "McDonald's Corporation",
           "industry": "Restaurants",
           "ceo": "Christopher J. Kempczinski",
-          "market_cap": 196284387560.0,
-          "price": 276.26
+          "market_cap": 195019686880.0,
+          "price": 274.48
         },
         {
           "ticker": "NKE",
           "company": "NIKE, Inc.",
           "industry": "Apparel - Footwear & Accessories",
           "ceo": "Elliott J. Hill",
-          "market_cap": 62152071450.0,
-          "price": 42.0
+          "market_cap": 61708128083.0,
+          "price": 41.7
         }
       ],
       "valuation": {
@@ -1379,40 +1379,40 @@
           "company": "The Procter & Gamble Company",
           "industry": "Household & Personal Products",
           "ceo": "Shailesh G. Jejurikar",
-          "market_cap": 349425941650.0,
-          "price": 146.99
+          "market_cap": 346525746746.0,
+          "price": 145.77
         },
         {
           "ticker": "COST",
           "company": "Costco Wholesale Corporation",
           "industry": "Discount Stores",
           "ceo": "Ron Vachris",
-          "market_cap": 420928092850.0,
-          "price": 949.15
+          "market_cap": 420338265780.0,
+          "price": 947.82
         },
         {
           "ticker": "KO",
           "company": "The Coca-Cola Company",
           "industry": "Beverages - Non-Alcoholic",
           "ceo": "Henrique Braun",
-          "market_cap": 373676374918.0,
-          "price": 86.85
+          "market_cap": 374536884705.0,
+          "price": 87.05
         },
         {
           "ticker": "PEP",
           "company": "PepsiCo, Inc.",
           "industry": "Beverages - Non-Alcoholic",
           "ceo": "Ramon Luis Laguarta",
-          "market_cap": 189109040000.0,
-          "price": 138.44
+          "market_cap": 189901320000.0,
+          "price": 139.02
         },
         {
           "ticker": "WMT",
           "company": "Walmart Inc.",
           "industry": "Discount Stores",
           "ceo": "John R. Furner",
-          "market_cap": 891862025600.0,
-          "price": 112.07
+          "market_cap": 890111248000.0,
+          "price": 111.85
         }
       ],
       "valuation": {
@@ -1473,40 +1473,40 @@
           "company": "NextEra Energy, Inc.",
           "industry": "Regulated Electric",
           "ceo": "John W. Ketchum",
-          "market_cap": 176473755212.0,
-          "price": 84.6
+          "market_cap": 176578054122.0,
+          "price": 84.65
         },
         {
           "ticker": "SO",
           "company": "The Southern Company",
           "industry": "Regulated Electric",
           "ceo": "Christopher C. Womack",
-          "market_cap": 106868444000.0,
-          "price": 92.9
+          "market_cap": 106626868400.0,
+          "price": 92.69
         },
         {
           "ticker": "DUK",
           "company": "Duke Energy Corporation",
           "industry": "Regulated Electric",
           "ceo": "Harry K. Sideris",
-          "market_cap": 96591944400.0,
-          "price": 123.9
+          "market_cap": 97332560600.0,
+          "price": 124.85
         },
         {
           "ticker": "AEP",
           "company": "American Electric Power Company, Inc.",
           "industry": "Regulated Electric",
           "ceo": "William J. Fehrman",
-          "market_cap": 68191168220.0,
-          "price": 125.26
+          "market_cap": 68447034810.0,
+          "price": 125.73
         },
         {
           "ticker": "SRE",
           "company": "Sempra",
           "industry": "Diversified Utilities",
           "ceo": "Jeffrey Walker Martin",
-          "market_cap": 55129072431.0,
-          "price": 84.333
+          "market_cap": 54832943160.0,
+          "price": 83.88
         }
       ],
       "valuation": {
@@ -1567,40 +1567,40 @@
           "company": "Prologis, Inc.",
           "industry": "REIT - Industrial",
           "ceo": "Daniel Stephen Letter",
-          "market_cap": 129828194640.0,
-          "price": 139.14
+          "market_cap": 130779932160.0,
+          "price": 140.16
         },
         {
           "ticker": "AMT",
           "company": "American Tower Corporation",
           "industry": "REIT - Specialty",
           "ceo": "Steven O. Vondran",
-          "market_cap": 79772352000.0,
-          "price": 171.2
+          "market_cap": 80396738400.0,
+          "price": 172.54
         },
         {
           "ticker": "EQIX",
           "company": "Equinix, Inc.",
           "industry": "REIT - Specialty",
           "ceo": "Adaire Rita Fox-Martin",
-          "market_cap": 103887471322.0,
-          "price": 1052.86
+          "market_cap": 102877073257.0,
+          "price": 1042.62
         },
         {
           "ticker": "WELL",
           "company": "Welltower Inc.",
           "industry": "REIT - Healthcare Facilities",
           "ceo": "Shankh S. Mitra",
-          "market_cap": 170054994596.0,
-          "price": 236.0
+          "market_cap": 170717920846.0,
+          "price": 236.92
         },
         {
           "ticker": "CCI",
           "company": "Crown Castle Inc.",
           "industry": "REIT - Specialty",
           "ceo": "Christian H. Hillabrant",
-          "market_cap": 32740040000.0,
-          "price": 74.92
+          "market_cap": 33032830000.0,
+          "price": 75.59
         }
       ],
       "valuation": {
@@ -33215,6 +33215,33 @@
       "profile_image": "https://images.financialmodelingprep.com/symbol/COHR.png"
     },
     {
+      "id": "fmp-earnings_TRMB_2026-08-12",
+      "date": "2026-08-12",
+      "time": null,
+      "category": "earnings",
+      "title": "TRMB 財報",
+      "description": "EPS est. $0.802 / Rev est. $1.0B",
+      "tickers": [
+        "TRMB"
+      ],
+      "sectors": [],
+      "impact": "low",
+      "is_binary": false,
+      "within_48h": false,
+      "source": "fmp-earnings",
+      "source_payload": {
+        "symbol": "TRMB",
+        "epsEstimated": 0.802,
+        "revenueEstimated": 952091500,
+        "time": "",
+        "_merged_from_sources": [
+          "fmp-earnings"
+        ]
+      },
+      "links": {},
+      "profile_image": "https://images.financialmodelingprep.com/symbol/TRMB.png"
+    },
+    {
       "id": "amat-earnings_2026-08-13",
       "date": "2026-08-13",
       "time": null,
@@ -34489,7 +34516,7 @@
         "margin_normalized": false,
         "held_net_margin": -0.1066,
         "base_net_margin": null,
-        "as_of": "2026-08-07T08:59:44.502089+00:00",
+        "as_of": "2026-08-08T05:05:02.366674+00:00",
         "shadow_only": true,
         "status": "advisory_band_only",
         "is_forecast": false,
@@ -34504,7 +34531,7 @@
             "date": "2026-12-31",
             "years_out": 0.4,
             "thin_coverage": true,
-            "base_target": 124.22,
+            "base_target": 135.63,
             "base_annualized_pct": 0.0,
             "base_cumulative_pct": 0.0
           },
@@ -34512,7 +34539,7 @@
             "date": "2027-12-31",
             "years_out": 1.4,
             "thin_coverage": true,
-            "base_target": 124.22,
+            "base_target": 135.63,
             "base_annualized_pct": 0.0,
             "base_cumulative_pct": 0.0
           },
@@ -34520,15 +34547,15 @@
             "date": "2028-12-31",
             "years_out": 2.4,
             "thin_coverage": true,
-            "base_target": 124.22,
+            "base_target": 135.63,
             "base_annualized_pct": 0.0,
             "base_cumulative_pct": 0.0
           }
         ],
         "range": {
-          "bear": 76.73,
-          "base": 124.22,
-          "bull": 186.54
+          "bear": 83.78,
+          "base": 135.63,
+          "bull": 203.67
         },
         "upside_pct": {
           "bear": -38.2,
@@ -39284,16 +39311,16 @@
       "hot_zone_probe": false,
       "forward_expectations": {
         "compressed": false,
-        "growth_tier": null,
+        "growth_tier": "hypergrowth",
         "margin_normalized": false,
         "held_net_margin": -0.1298,
         "base_net_margin": null,
-        "as_of": "2026-08-07T11:04:31.645737+00:00",
+        "as_of": "2026-08-08T07:09:45.074099+00:00",
         "shadow_only": true,
-        "status": "advisory_band_only",
-        "is_forecast": false,
-        "multiple_quality": "derived",
-        "method": "eps_x_pe",
+        "status": "low_confidence_terminal_range",
+        "is_forecast": true,
+        "multiple_quality": "historical",
+        "method": "revenue_per_share_x_ps",
         "horizon_date": "2028-12-31",
         "horizon_basis": "terminal_margin_normalized",
         "horizon_years": 2.4,
@@ -39303,44 +39330,41 @@
             "date": "2026-12-31",
             "years_out": 0.4,
             "thin_coverage": true,
-            "base_target": 114.92,
-            "base_annualized_pct": 0.0,
-            "base_cumulative_pct": 0.0
+            "base_target": 178.73,
+            "base_annualized_pct": 110.1,
+            "base_cumulative_pct": 34.3
           },
           {
             "date": "2027-12-31",
             "years_out": 1.4,
             "thin_coverage": true,
-            "base_target": 114.92,
-            "base_annualized_pct": 0.0,
-            "base_cumulative_pct": 0.0
+            "base_target": 375.32,
+            "base_annualized_pct": 110.1,
+            "base_cumulative_pct": 182.0
           },
           {
             "date": "2028-12-31",
             "years_out": 2.4,
             "thin_coverage": true,
-            "base_target": 114.92,
-            "base_annualized_pct": 0.0,
-            "base_cumulative_pct": 0.0
+            "base_target": 789.74,
+            "base_annualized_pct": 110.1,
+            "base_cumulative_pct": 493.3
           }
         ],
         "range": {
-          "bear": 97.68,
-          "base": 114.92,
-          "bull": 226.75
+          "bear": 297.79,
+          "base": 789.74,
+          "bull": 1221.78
         },
         "upside_pct": {
-          "bear": -15.0,
-          "base": 0.0,
-          "bull": 97.3
+          "bear": 123.7,
+          "base": 493.3,
+          "bull": 817.9
         },
         "expectations_gap_status": "bridge_risk_only",
         "base_rate_median": null,
         "base_rate_basis": null,
         "warnings": [
-          "derived_current_market_multiple_used",
-          "current_price_volatility_band_not_forecast",
-          "currency_unit_suspect",
           "multi_year_terminal_range_not_12m_target",
           "thin_terminal_analyst_coverage"
         ]
@@ -49286,16 +49310,16 @@
       "hot_zone_probe": false,
       "forward_expectations": {
         "compressed": false,
-        "growth_tier": null,
+        "growth_tier": "hypergrowth",
         "margin_normalized": false,
         "held_net_margin": -0.1298,
         "base_net_margin": null,
-        "as_of": "2026-08-07T11:04:31.645737+00:00",
+        "as_of": "2026-08-08T07:09:45.074099+00:00",
         "shadow_only": true,
-        "status": "advisory_band_only",
-        "is_forecast": false,
-        "multiple_quality": "derived",
-        "method": "eps_x_pe",
+        "status": "low_confidence_terminal_range",
+        "is_forecast": true,
+        "multiple_quality": "historical",
+        "method": "revenue_per_share_x_ps",
         "horizon_date": "2028-12-31",
         "horizon_basis": "terminal_margin_normalized",
         "horizon_years": 2.4,
@@ -49305,44 +49329,41 @@
             "date": "2026-12-31",
             "years_out": 0.4,
             "thin_coverage": true,
-            "base_target": 114.92,
-            "base_annualized_pct": 0.0,
-            "base_cumulative_pct": 0.0
+            "base_target": 178.73,
+            "base_annualized_pct": 110.1,
+            "base_cumulative_pct": 34.3
           },
           {
             "date": "2027-12-31",
             "years_out": 1.4,
             "thin_coverage": true,
-            "base_target": 114.92,
-            "base_annualized_pct": 0.0,
-            "base_cumulative_pct": 0.0
+            "base_target": 375.32,
+            "base_annualized_pct": 110.1,
+            "base_cumulative_pct": 182.0
           },
           {
             "date": "2028-12-31",
             "years_out": 2.4,
             "thin_coverage": true,
-            "base_target": 114.92,
-            "base_annualized_pct": 0.0,
-            "base_cumulative_pct": 0.0
+            "base_target": 789.74,
+            "base_annualized_pct": 110.1,
+            "base_cumulative_pct": 493.3
           }
         ],
         "range": {
-          "bear": 97.68,
-          "base": 114.92,
-          "bull": 226.75
+          "bear": 297.79,
+          "base": 789.74,
+          "bull": 1221.78
         },
         "upside_pct": {
-          "bear": -15.0,
-          "base": 0.0,
-          "bull": 97.3
+          "bear": 123.7,
+          "base": 493.3,
+          "bull": 817.9
         },
         "expectations_gap_status": "bridge_risk_only",
         "base_rate_median": null,
         "base_rate_basis": null,
         "warnings": [
-          "derived_current_market_multiple_used",
-          "current_price_volatility_band_not_forecast",
-          "currency_unit_suspect",
           "multi_year_terminal_range_not_12m_target",
           "thin_terminal_analyst_coverage"
         ]
@@ -49732,7 +49753,7 @@
         "margin_normalized": false,
         "held_net_margin": 0.3221,
         "base_net_margin": null,
-        "as_of": "2026-08-07T11:06:43.012320+00:00",
+        "as_of": "2026-08-08T07:14:55.231442+00:00",
         "shadow_only": true,
         "status": "low_confidence_terminal_range",
         "is_forecast": true,
@@ -49747,25 +49768,25 @@
             "date": "2028-12-31",
             "years_out": 2.4,
             "thin_coverage": false,
-            "base_target": 459.89,
-            "base_annualized_pct": 11.0,
-            "base_cumulative_pct": 28.5
+            "base_target": 457.8,
+            "base_annualized_pct": 11.3,
+            "base_cumulative_pct": 29.2
           },
           {
             "date": "2029-12-31",
             "years_out": 3.4,
             "thin_coverage": true,
-            "base_target": 510.56,
-            "base_annualized_pct": 11.0,
-            "base_cumulative_pct": 42.7
+            "base_target": 509.4,
+            "base_annualized_pct": 11.3,
+            "base_cumulative_pct": 43.8
           },
           {
             "date": "2030-12-31",
             "years_out": 4.4,
             "thin_coverage": true,
             "base_target": 566.81,
-            "base_annualized_pct": 11.0,
-            "base_cumulative_pct": 58.4
+            "base_annualized_pct": 11.3,
+            "base_cumulative_pct": 60.0
           }
         ],
         "range": {
@@ -49774,9 +49795,9 @@
           "bull": 675.5
         },
         "upside_pct": {
-          "bear": 37.6,
-          "base": 58.4,
-          "bull": 88.8
+          "bear": 39.0,
+          "base": 60.0,
+          "bull": 90.7
         },
         "expectations_gap_status": "bridge_risk_only",
         "base_rate_median": null,
@@ -53601,7 +53622,7 @@
         "margin_normalized": false,
         "held_net_margin": 0.3221,
         "base_net_margin": null,
-        "as_of": "2026-08-07T11:06:43.012320+00:00",
+        "as_of": "2026-08-08T07:14:55.231442+00:00",
         "shadow_only": true,
         "status": "low_confidence_terminal_range",
         "is_forecast": true,
@@ -53616,25 +53637,25 @@
             "date": "2028-12-31",
             "years_out": 2.4,
             "thin_coverage": false,
-            "base_target": 459.89,
-            "base_annualized_pct": 11.0,
-            "base_cumulative_pct": 28.5
+            "base_target": 457.8,
+            "base_annualized_pct": 11.3,
+            "base_cumulative_pct": 29.2
           },
           {
             "date": "2029-12-31",
             "years_out": 3.4,
             "thin_coverage": true,
-            "base_target": 510.56,
-            "base_annualized_pct": 11.0,
-            "base_cumulative_pct": 42.7
+            "base_target": 509.4,
+            "base_annualized_pct": 11.3,
+            "base_cumulative_pct": 43.8
           },
           {
             "date": "2030-12-31",
             "years_out": 4.4,
             "thin_coverage": true,
             "base_target": 566.81,
-            "base_annualized_pct": 11.0,
-            "base_cumulative_pct": 58.4
+            "base_annualized_pct": 11.3,
+            "base_cumulative_pct": 60.0
           }
         ],
         "range": {
@@ -53643,9 +53664,9 @@
           "bull": 675.5
         },
         "upside_pct": {
-          "bear": 37.6,
-          "base": 58.4,
-          "bull": 88.8
+          "bear": 39.0,
+          "base": 60.0,
+          "bull": 90.7
         },
         "expectations_gap_status": "bridge_risk_only",
         "base_rate_median": null,
@@ -61264,7 +61285,7 @@
         "margin_normalized": false,
         "held_net_margin": 0.3221,
         "base_net_margin": null,
-        "as_of": "2026-08-07T11:06:43.012320+00:00",
+        "as_of": "2026-08-08T07:14:55.231442+00:00",
         "shadow_only": true,
         "status": "low_confidence_terminal_range",
         "is_forecast": true,
@@ -61279,25 +61300,25 @@
             "date": "2028-12-31",
             "years_out": 2.4,
             "thin_coverage": false,
-            "base_target": 459.89,
-            "base_annualized_pct": 11.0,
-            "base_cumulative_pct": 28.5
+            "base_target": 457.8,
+            "base_annualized_pct": 11.3,
+            "base_cumulative_pct": 29.2
           },
           {
             "date": "2029-12-31",
             "years_out": 3.4,
             "thin_coverage": true,
-            "base_target": 510.56,
-            "base_annualized_pct": 11.0,
-            "base_cumulative_pct": 42.7
+            "base_target": 509.4,
+            "base_annualized_pct": 11.3,
+            "base_cumulative_pct": 43.8
           },
           {
             "date": "2030-12-31",
             "years_out": 4.4,
             "thin_coverage": true,
             "base_target": 566.81,
-            "base_annualized_pct": 11.0,
-            "base_cumulative_pct": 58.4
+            "base_annualized_pct": 11.3,
+            "base_cumulative_pct": 60.0
           }
         ],
         "range": {
@@ -61306,9 +61327,9 @@
           "bull": 675.5
         },
         "upside_pct": {
-          "bear": 37.6,
-          "base": 58.4,
-          "bull": 88.8
+          "bear": 39.0,
+          "base": 60.0,
+          "bull": 90.7
         },
         "expectations_gap_status": "bridge_risk_only",
         "base_rate_median": null,
@@ -65436,7 +65457,7 @@
         "margin_normalized": false,
         "held_net_margin": -0.1066,
         "base_net_margin": null,
-        "as_of": "2026-08-07T08:59:44.502089+00:00",
+        "as_of": "2026-08-08T05:05:02.366674+00:00",
         "shadow_only": true,
         "status": "advisory_band_only",
         "is_forecast": false,
@@ -65451,7 +65472,7 @@
             "date": "2026-12-31",
             "years_out": 0.4,
             "thin_coverage": true,
-            "base_target": 124.22,
+            "base_target": 135.63,
             "base_annualized_pct": 0.0,
             "base_cumulative_pct": 0.0
           },
@@ -65459,7 +65480,7 @@
             "date": "2027-12-31",
             "years_out": 1.4,
             "thin_coverage": true,
-            "base_target": 124.22,
+            "base_target": 135.63,
             "base_annualized_pct": 0.0,
             "base_cumulative_pct": 0.0
           },
@@ -65467,15 +65488,15 @@
             "date": "2028-12-31",
             "years_out": 2.4,
             "thin_coverage": true,
-            "base_target": 124.22,
+            "base_target": 135.63,
             "base_annualized_pct": 0.0,
             "base_cumulative_pct": 0.0
           }
         ],
         "range": {
-          "bear": 76.73,
-          "base": 124.22,
-          "bull": 186.54
+          "bear": 83.78,
+          "base": 135.63,
+          "bull": 203.67
         },
         "upside_pct": {
           "bear": -38.2,
@@ -71900,7 +71921,7 @@
         "margin_normalized": false,
         "held_net_margin": 0.3221,
         "base_net_margin": null,
-        "as_of": "2026-08-07T11:06:43.012320+00:00",
+        "as_of": "2026-08-08T07:14:55.231442+00:00",
         "shadow_only": true,
         "status": "low_confidence_terminal_range",
         "is_forecast": true,
@@ -71915,25 +71936,25 @@
             "date": "2028-12-31",
             "years_out": 2.4,
             "thin_coverage": false,
-            "base_target": 459.89,
-            "base_annualized_pct": 11.0,
-            "base_cumulative_pct": 28.5
+            "base_target": 457.8,
+            "base_annualized_pct": 11.3,
+            "base_cumulative_pct": 29.2
           },
           {
             "date": "2029-12-31",
             "years_out": 3.4,
             "thin_coverage": true,
-            "base_target": 510.56,
-            "base_annualized_pct": 11.0,
-            "base_cumulative_pct": 42.7
+            "base_target": 509.4,
+            "base_annualized_pct": 11.3,
+            "base_cumulative_pct": 43.8
           },
           {
             "date": "2030-12-31",
             "years_out": 4.4,
             "thin_coverage": true,
             "base_target": 566.81,
-            "base_annualized_pct": 11.0,
-            "base_cumulative_pct": 58.4
+            "base_annualized_pct": 11.3,
+            "base_cumulative_pct": 60.0
           }
         ],
         "range": {
@@ -71942,9 +71963,9 @@
           "bull": 675.5
         },
         "upside_pct": {
-          "bear": 37.6,
-          "base": 58.4,
-          "bull": 88.8
+          "bear": 39.0,
+          "base": 60.0,
+          "bull": 90.7
         },
         "expectations_gap_status": "bridge_risk_only",
         "base_rate_median": null,
@@ -78692,7 +78713,7 @@
         "margin_normalized": false,
         "held_net_margin": 0.3221,
         "base_net_margin": null,
-        "as_of": "2026-08-07T11:06:43.012320+00:00",
+        "as_of": "2026-08-08T07:14:55.231442+00:00",
         "shadow_only": true,
         "status": "low_confidence_terminal_range",
         "is_forecast": true,
@@ -78707,25 +78728,25 @@
             "date": "2028-12-31",
             "years_out": 2.4,
             "thin_coverage": false,
-            "base_target": 459.89,
-            "base_annualized_pct": 11.0,
-            "base_cumulative_pct": 28.5
+            "base_target": 457.8,
+            "base_annualized_pct": 11.3,
+            "base_cumulative_pct": 29.2
           },
           {
             "date": "2029-12-31",
             "years_out": 3.4,
             "thin_coverage": true,
-            "base_target": 510.56,
-            "base_annualized_pct": 11.0,
-            "base_cumulative_pct": 42.7
+            "base_target": 509.4,
+            "base_annualized_pct": 11.3,
+            "base_cumulative_pct": 43.8
           },
           {
             "date": "2030-12-31",
             "years_out": 4.4,
             "thin_coverage": true,
             "base_target": 566.81,
-            "base_annualized_pct": 11.0,
-            "base_cumulative_pct": 58.4
+            "base_annualized_pct": 11.3,
+            "base_cumulative_pct": 60.0
           }
         ],
         "range": {
@@ -78734,9 +78755,9 @@
           "bull": 675.5
         },
         "upside_pct": {
-          "bear": 37.6,
-          "base": 58.4,
-          "bull": 88.8
+          "bear": 39.0,
+          "base": 60.0,
+          "bull": 90.7
         },
         "expectations_gap_status": "bridge_risk_only",
         "base_rate_median": null,
@@ -80216,6 +80237,17 @@
       "key_risks": []
     },
     {
+      "ticker": "AXTI",
+      "decision": "ARCHIVE",
+      "score": 0.0,
+      "time": "2026-08-08",
+      "report_url": "reports/2026-08-08_AXTI_earnings.md",
+      "report_type": "analysis",
+      "profile_image": "https://images.financialmodelingprep.com/symbol/AXTI.png",
+      "on_watchlist": false,
+      "key_risks": []
+    },
+    {
       "ticker": "DDOG",
       "decision": "ARCHIVE",
       "score": 0.0,
@@ -80912,7 +80944,7 @@
     "snap_date": "2026-08-07",
     "generated_at": "2026-08-07 22:36",
     "freshness": "STALE",
-    "age_label": "13.7h",
+    "age_label": "21.2h",
     "total_rows": 528,
     "rows": [
       {
@@ -197576,7 +197608,7 @@
     "journal": {
       "total_entries": 24110,
       "stats": {
-        "generated_at": "2026-08-06T20:28:37",
+        "generated_at": "2026-08-08T13:36:51",
         "total_entries": 24110,
         "date_range": {
           "earliest": "2026-04-19",
@@ -197585,7 +197617,7 @@
         "fill_counts": {
           "5d": 24089,
           "20d": 24089,
-          "60d": 19640
+          "60d": 21215
         },
         "by_signal": {
           "stage2_uptrend_intact": {
@@ -197610,12 +197642,12 @@
               "max": 125.08
             },
             "60d": {
-              "n": 4402,
-              "win_rate": 0.593,
-              "mean": 5.14,
-              "median": 2.91,
-              "p25": -6.35,
-              "p75": 13.48,
+              "n": 4725,
+              "win_rate": 0.588,
+              "mean": 5.06,
+              "median": 2.81,
+              "p25": -6.41,
+              "p75": 13.37,
               "min": -90.22,
               "max": 189.93
             }
@@ -197642,12 +197674,12 @@
               "max": 188.35
             },
             "60d": {
-              "n": 922,
-              "win_rate": 0.515,
-              "mean": 0.46,
-              "median": 0.63,
-              "p25": -10.38,
-              "p75": 11.55,
+              "n": 971,
+              "win_rate": 0.531,
+              "mean": 0.97,
+              "median": 1.07,
+              "p25": -9.84,
+              "p75": 11.75,
               "min": -87.97,
               "max": 185.94
             }
@@ -197674,14 +197706,14 @@
               "max": 100.87
             },
             "60d": {
-              "n": 1725,
-              "win_rate": 0.544,
-              "mean": 2.87,
-              "median": 3.56,
-              "p25": -12.72,
-              "p75": 18.92,
+              "n": 1851,
+              "win_rate": 0.553,
+              "mean": 3.34,
+              "median": 3.94,
+              "p25": -12.29,
+              "p75": 19.3,
               "min": -84.72,
-              "max": 93.05
+              "max": 100.0
             }
           },
           "fresh_golden_cross_20_50": {
@@ -197706,12 +197738,12 @@
               "max": 95.72
             },
             "60d": {
-              "n": 4738,
-              "win_rate": 0.628,
-              "mean": 5.21,
-              "median": 4.4,
-              "p25": -4.88,
-              "p75": 14.19,
+              "n": 4936,
+              "win_rate": 0.632,
+              "mean": 5.43,
+              "median": 4.41,
+              "p25": -4.74,
+              "p75": 14.22,
               "min": -87.63,
               "max": 204.66
             }
@@ -197738,12 +197770,12 @@
               "max": 73.08
             },
             "60d": {
-              "n": 104,
+              "n": 107,
               "win_rate": 0.019,
-              "mean": -22.41,
-              "median": -20.79,
-              "p25": -36.59,
-              "p75": -6.73,
+              "mean": -22.7,
+              "median": -21.01,
+              "p25": -36.53,
+              "p75": -6.75,
               "min": -48.08,
               "max": 2.36
             }
@@ -197770,12 +197802,12 @@
               "max": 100.87
             },
             "60d": {
-              "n": 295,
-              "win_rate": 0.617,
-              "mean": 7.48,
-              "median": 3.49,
-              "p25": -7.13,
-              "p75": 12.93,
+              "n": 322,
+              "win_rate": 0.618,
+              "mean": 7.56,
+              "median": 3.42,
+              "p25": -6.52,
+              "p75": 13.79,
               "min": -22.51,
               "max": 83.59
             }
@@ -197802,12 +197834,12 @@
               "max": 81.55
             },
             "60d": {
-              "n": 8258,
-              "win_rate": 0.553,
-              "mean": 2.31,
-              "median": 1.2,
-              "p25": -5.76,
-              "p75": 10.07,
+              "n": 8906,
+              "win_rate": 0.562,
+              "mean": 2.61,
+              "median": 1.48,
+              "p25": -5.5,
+              "p75": 10.38,
               "min": -90.22,
               "max": 210.0
             }
@@ -197834,12 +197866,12 @@
               "max": 130.36
             },
             "60d": {
-              "n": 350,
-              "win_rate": 0.494,
-              "mean": 0.53,
-              "median": -0.42,
+              "n": 352,
+              "win_rate": 0.491,
+              "mean": 0.48,
+              "median": -0.51,
               "p25": -11.64,
-              "p75": 15.35,
+              "p75": 15.24,
               "min": -84.26,
               "max": 93.05
             }
@@ -197866,12 +197898,12 @@
               "max": 95.72
             },
             "60d": {
-              "n": 3487,
-              "win_rate": 0.552,
-              "mean": 3.06,
-              "median": 1.37,
-              "p25": -6.56,
-              "p75": 11.23,
+              "n": 4035,
+              "win_rate": 0.576,
+              "mean": 3.96,
+              "median": 2.27,
+              "p25": -5.85,
+              "p75": 12.88,
               "min": -90.22,
               "max": 204.66
             }
@@ -197898,12 +197930,12 @@
               "max": 58.19
             },
             "60d": {
-              "n": 273,
-              "win_rate": 0.527,
-              "mean": 0.33,
-              "median": 0.56,
-              "p25": -8.94,
-              "p75": 7.42,
+              "n": 314,
+              "win_rate": 0.541,
+              "mean": 1.74,
+              "median": 0.6,
+              "p25": -7.9,
+              "p75": 10.72,
               "min": -37.45,
               "max": 53.69
             }
@@ -197930,12 +197962,12 @@
               "max": 125.08
             },
             "60d": {
-              "n": 500,
-              "win_rate": 0.372,
-              "mean": -2.37,
-              "median": -4.94,
-              "p25": -17.32,
-              "p75": 10.09,
+              "n": 680,
+              "win_rate": 0.378,
+              "mean": -2.14,
+              "median": -4.81,
+              "p25": -16.39,
+              "p75": 10.38,
               "min": -90.22,
               "max": 108.16
             }
@@ -197962,12 +197994,12 @@
               "max": 69.89
             },
             "60d": {
-              "n": 281,
-              "win_rate": 0.683,
-              "mean": 6.49,
-              "median": 6.65,
-              "p25": -1.37,
-              "p75": 14.35,
+              "n": 376,
+              "win_rate": 0.699,
+              "mean": 7.24,
+              "median": 7.63,
+              "p25": -1.09,
+              "p75": 14.52,
               "min": -61.5,
               "max": 66.56
             }
@@ -197994,13 +198026,13 @@
               "max": 76.6
             },
             "60d": {
-              "n": 78,
-              "win_rate": 0.474,
-              "mean": 1.74,
+              "n": 92,
+              "win_rate": 0.478,
+              "mean": 2.18,
               "median": -0.31,
-              "p25": -10.03,
-              "p75": 10.46,
-              "min": -27.06,
+              "p25": -8.13,
+              "p75": 11.12,
+              "min": -63.61,
               "max": 53.53
             }
           },
@@ -198026,12 +198058,12 @@
               "max": 105.68
             },
             "60d": {
-              "n": 680,
+              "n": 926,
               "win_rate": 0.569,
-              "mean": 3.26,
-              "median": 1.9,
-              "p25": -6.28,
-              "p75": 11.35,
+              "mean": 3.02,
+              "median": 2.05,
+              "p25": -6.41,
+              "p75": 10.91,
               "min": -90.22,
               "max": 189.93
             }
@@ -198058,12 +198090,12 @@
               "max": 125.08
             },
             "60d": {
-              "n": 1366,
-              "win_rate": 0.654,
-              "mean": 5.84,
-              "median": 4.83,
-              "p25": -3.5,
-              "p75": 14.45,
+              "n": 1949,
+              "win_rate": 0.661,
+              "mean": 6.28,
+              "median": 5.35,
+              "p25": -2.91,
+              "p75": 14.72,
               "min": -90.22,
               "max": 210.0
             }
@@ -198090,14 +198122,14 @@
               "max": 84.6
             },
             "60d": {
-              "n": 48,
-              "win_rate": 0.5,
-              "mean": 4.2,
-              "median": 1.25,
-              "p25": -10.81,
-              "p75": 13.95,
+              "n": 81,
+              "win_rate": 0.519,
+              "mean": 5.96,
+              "median": 4.23,
+              "p25": -10.71,
+              "p75": 17.22,
               "min": -33.72,
-              "max": 69.85
+              "max": 71.88
             }
           },
           "vol_dryup_spike": {
@@ -198156,12 +198188,12 @@
               "max": 100.87
             },
             "60d": {
-              "n": 484,
-              "win_rate": 0.535,
-              "mean": 3.39,
-              "median": 1.19,
-              "p25": -10.7,
-              "p75": 12.39,
+              "n": 498,
+              "win_rate": 0.532,
+              "mean": 3.17,
+              "median": 1.16,
+              "p25": -10.68,
+              "p75": 11.92,
               "min": -88.01,
               "max": 98.53
             }
@@ -198188,14 +198220,14 @@
               "max": 125.08
             },
             "60d": {
-              "n": 3019,
-              "win_rate": 0.602,
-              "mean": 4.76,
-              "median": 3.67,
-              "p25": -6.34,
-              "p75": 14.0,
+              "n": 3203,
+              "win_rate": 0.601,
+              "mean": 4.87,
+              "median": 3.61,
+              "p25": -6.29,
+              "p75": 13.95,
               "min": -90.22,
-              "max": 188.63
+              "max": 188.93
             }
           },
           "50-60": {
@@ -198220,12 +198252,12 @@
               "max": 188.35
             },
             "60d": {
-              "n": 5750,
-              "win_rate": 0.588,
-              "mean": 4.54,
-              "median": 2.79,
-              "p25": -5.39,
-              "p75": 12.63,
+              "n": 6237,
+              "win_rate": 0.594,
+              "mean": 4.7,
+              "median": 3.07,
+              "p25": -5.25,
+              "p75": 12.89,
               "min": -89.45,
               "max": 204.66
             }
@@ -198252,12 +198284,12 @@
               "max": 147.72
             },
             "60d": {
-              "n": 10333,
-              "win_rate": 0.581,
-              "mean": 4.01,
-              "median": 2.32,
-              "p25": -5.52,
-              "p75": 11.31,
+              "n": 11223,
+              "win_rate": 0.596,
+              "mean": 4.53,
+              "median": 2.81,
+              "p25": -5.06,
+              "p75": 12.01,
               "min": -61.26,
               "max": 210.0
             }
@@ -198318,12 +198350,12 @@
               "max": 125.08
             },
             "60d": {
-              "n": 4402,
-              "win_rate": 0.593,
-              "mean": 5.14,
-              "median": 2.91,
-              "p25": -6.35,
-              "p75": 13.48,
+              "n": 4725,
+              "win_rate": 0.588,
+              "mean": 5.06,
+              "median": 2.81,
+              "p25": -6.41,
+              "p75": 13.37,
               "min": -90.22,
               "max": 189.93
             }
@@ -198350,12 +198382,12 @@
               "max": 99.87
             },
             "60d": {
-              "n": 10473,
-              "win_rate": 0.59,
-              "mean": 4.39,
-              "median": 2.66,
-              "p25": -5.09,
-              "p75": 11.99,
+              "n": 11146,
+              "win_rate": 0.599,
+              "mean": 4.68,
+              "median": 3.04,
+              "p25": -4.83,
+              "p75": 12.38,
               "min": -89.2,
               "max": 204.66
             }
@@ -198382,12 +198414,12 @@
               "max": 55.83
             },
             "60d": {
-              "n": 2113,
-              "win_rate": 0.599,
-              "mean": 4.1,
-              "median": 2.54,
-              "p25": -6.02,
-              "p75": 10.84,
+              "n": 2321,
+              "win_rate": 0.608,
+              "mean": 4.37,
+              "median": 2.84,
+              "p25": -5.34,
+              "p75": 11.05,
               "min": -35.02,
               "max": 210.0
             }
@@ -198414,14 +198446,14 @@
               "max": 46.8
             },
             "60d": {
-              "n": 2601,
-              "win_rate": 0.542,
-              "mean": 2.51,
-              "median": 1.51,
-              "p25": -7.46,
-              "p75": 12.12,
+              "n": 2966,
+              "win_rate": 0.578,
+              "mean": 3.91,
+              "median": 2.98,
+              "p25": -6.69,
+              "p75": 14.34,
               "min": -36.75,
-              "max": 63.37
+              "max": 100.0
             }
           },
           "unknown": {
@@ -198446,12 +198478,12 @@
               "max": 188.35
             },
             "60d": {
-              "n": 51,
-              "win_rate": 0.294,
-              "mean": -8.8,
-              "median": -4.74,
-              "p25": -10.0,
-              "p75": 2.1,
+              "n": 57,
+              "win_rate": 0.263,
+              "mean": -10.97,
+              "median": -5.63,
+              "p25": -12.39,
+              "p75": 1.43,
               "min": -61.5,
               "max": 24.48
             }
@@ -198480,12 +198512,12 @@
               "max": 69.27
             },
             "60d": {
-              "n": 131,
-              "win_rate": 0.557,
-              "mean": 5.61,
-              "median": 2.27,
-              "p25": -7.06,
-              "p75": 12.39,
+              "n": 140,
+              "win_rate": 0.579,
+              "mean": 5.74,
+              "median": 2.88,
+              "p25": -6.47,
+              "p75": 12.36,
               "min": -38.09,
               "max": 185.94
             }
@@ -198512,11 +198544,11 @@
               "max": 62.2
             },
             "60d": {
-              "n": 61,
-              "win_rate": 0.59,
-              "mean": 5.07,
-              "median": 2.48,
-              "p25": -8.65,
+              "n": 64,
+              "win_rate": 0.609,
+              "mean": 5.26,
+              "median": 2.45,
+              "p25": -8.29,
               "p75": 13.79,
               "min": -38.52,
               "max": 98.53
@@ -198544,14 +198576,14 @@
               "max": 100.27
             },
             "60d": {
-              "n": 1108,
-              "win_rate": 0.681,
-              "mean": 7.02,
-              "median": 4.13,
+              "n": 1146,
+              "win_rate": 0.682,
+              "mean": 7.15,
+              "median": 4.25,
               "p25": -1.82,
-              "p75": 13.6,
+              "p75": 13.66,
               "min": -89.45,
-              "max": 117.47
+              "max": 188.93
             }
           },
           "stable | Stage 2 uptrend | 1.0-1.3": {
@@ -198576,14 +198608,14 @@
               "max": 90.23
             },
             "60d": {
-              "n": 471,
-              "win_rate": 0.501,
-              "mean": 3.37,
-              "median": 0.11,
-              "p25": -8.49,
-              "p75": 11.07,
+              "n": 541,
+              "win_rate": 0.505,
+              "mean": 3.66,
+              "median": 0.15,
+              "p25": -8.3,
+              "p75": 10.71,
               "min": -90.22,
-              "max": 99.83
+              "max": 188.93
             }
           },
           "expanding | Stage 1 basing | 2.0-3.0": {
@@ -198608,12 +198640,12 @@
               "max": 69.08
             },
             "60d": {
-              "n": 60,
-              "win_rate": 0.467,
-              "mean": -5.07,
-              "median": -0.27,
-              "p25": -24.09,
-              "p75": 8.82,
+              "n": 63,
+              "win_rate": 0.492,
+              "mean": -4.74,
+              "median": -0.02,
+              "p25": -21.49,
+              "p75": 8.11,
               "min": -87.97,
               "max": 51.28
             }
@@ -198640,12 +198672,12 @@
               "max": 85.63
             },
             "60d": {
-              "n": 326,
-              "win_rate": 0.521,
-              "mean": 5.82,
-              "median": 1.5,
-              "p25": -8.84,
-              "p75": 18.28,
+              "n": 346,
+              "win_rate": 0.514,
+              "mean": 5.45,
+              "median": 0.91,
+              "p25": -9.2,
+              "p75": 17.99,
               "min": -89.09,
               "max": 117.4
             }
@@ -198672,13 +198704,13 @@
               "max": 95.58
             },
             "60d": {
-              "n": 889,
-              "win_rate": 0.602,
-              "mean": 6.13,
-              "median": 2.48,
-              "p25": -6.42,
-              "p75": 16.57,
-              "min": -88.41,
+              "n": 983,
+              "win_rate": 0.592,
+              "mean": 5.53,
+              "median": 2.4,
+              "p25": -6.94,
+              "p75": 16.19,
+              "min": -89.2,
               "max": 189.93
             }
           },
@@ -198704,12 +198736,12 @@
               "max": 64.97
             },
             "60d": {
-              "n": 92,
-              "win_rate": 0.478,
-              "mean": 2.89,
-              "median": -0.37,
-              "p25": -8.2,
-              "p75": 9.05,
+              "n": 104,
+              "win_rate": 0.481,
+              "mean": 3.31,
+              "median": -0.05,
+              "p25": -7.79,
+              "p75": 8.48,
               "min": -41.11,
               "max": 188.63
             }
@@ -198736,12 +198768,12 @@
               "max": 87.12
             },
             "60d": {
-              "n": 682,
-              "win_rate": 0.614,
-              "mean": 4.09,
-              "median": 2.91,
-              "p25": -5.22,
-              "p75": 11.96,
+              "n": 725,
+              "win_rate": 0.618,
+              "mean": 4.3,
+              "median": 3.15,
+              "p25": -5.08,
+              "p75": 12.46,
               "min": -89.2,
               "max": 105.33
             }
@@ -198768,12 +198800,12 @@
               "max": 75.1
             },
             "60d": {
-              "n": 280,
-              "win_rate": 0.536,
-              "mean": -0.13,
-              "median": 1.2,
-              "p25": -10.78,
-              "p75": 11.5,
+              "n": 304,
+              "win_rate": 0.553,
+              "mean": 1.21,
+              "median": 2.85,
+              "p25": -9.8,
+              "p75": 11.9,
               "min": -87.82,
               "max": 75.49
             }
@@ -198800,11 +198832,11 @@
               "max": 104.07
             },
             "60d": {
-              "n": 117,
-              "win_rate": 0.581,
-              "mean": 4.71,
-              "median": 4.22,
-              "p25": -11.24,
+              "n": 141,
+              "win_rate": 0.553,
+              "mean": 4.29,
+              "median": 3.5,
+              "p25": -10.45,
               "p75": 13.83,
               "min": -40.87,
               "max": 113.71
@@ -198832,12 +198864,12 @@
               "max": 67.98
             },
             "60d": {
-              "n": 201,
-              "win_rate": 0.542,
-              "mean": 1.76,
+              "n": 210,
+              "win_rate": 0.543,
+              "mean": 2.46,
               "median": 3.56,
               "p25": -9.38,
-              "p75": 10.42,
+              "p75": 10.73,
               "min": -40.44,
               "max": 175.32
             }
@@ -198864,12 +198896,12 @@
               "max": 77.8
             },
             "60d": {
-              "n": 963,
-              "win_rate": 0.575,
-              "mean": 5.74,
-              "median": 2.68,
-              "p25": -6.0,
-              "p75": 13.39,
+              "n": 1071,
+              "win_rate": 0.592,
+              "mean": 5.98,
+              "median": 3.1,
+              "p25": -5.56,
+              "p75": 13.98,
               "min": -89.03,
               "max": 188.72
             }
@@ -198896,12 +198928,12 @@
               "max": 85.91
             },
             "60d": {
-              "n": 34,
-              "win_rate": 0.471,
-              "mean": -1.66,
-              "median": -1.05,
-              "p25": -19.83,
-              "p75": 12.95,
+              "n": 45,
+              "win_rate": 0.422,
+              "mean": -0.92,
+              "median": -1.72,
+              "p25": -13.15,
+              "p75": 13.08,
               "min": -41.61,
               "max": 65.76
             }
@@ -198960,12 +198992,12 @@
               "max": 49.5
             },
             "60d": {
-              "n": 76,
-              "win_rate": 0.474,
-              "mean": -1.44,
-              "median": -0.71,
+              "n": 93,
+              "win_rate": 0.484,
+              "mean": -0.58,
+              "median": -0.68,
               "p25": -11.37,
-              "p75": 9.0,
+              "p75": 9.28,
               "min": -54.65,
               "max": 95.4
             }
@@ -198992,13 +199024,13 @@
               "max": 86.86
             },
             "60d": {
-              "n": 2120,
-              "win_rate": 0.582,
-              "mean": 5.12,
-              "median": 2.44,
-              "p25": -4.68,
-              "p75": 12.05,
-              "min": -83.05,
+              "n": 2333,
+              "win_rate": 0.595,
+              "mean": 5.34,
+              "median": 3.02,
+              "p25": -4.36,
+              "p75": 12.76,
+              "min": -89.02,
               "max": 197.26
             }
           },
@@ -199024,12 +199056,12 @@
               "max": 60.0
             },
             "60d": {
-              "n": 191,
-              "win_rate": 0.513,
-              "mean": 0.56,
-              "median": 1.07,
-              "p25": -8.12,
-              "p75": 6.99,
+              "n": 196,
+              "win_rate": 0.526,
+              "mean": 1.15,
+              "median": 1.54,
+              "p25": -7.74,
+              "p75": 7.6,
               "min": -48.11,
               "max": 82.64
             }
@@ -199056,12 +199088,12 @@
               "max": 41.81
             },
             "60d": {
-              "n": 292,
-              "win_rate": 0.596,
-              "mean": 1.7,
-              "median": 3.65,
-              "p25": -4.91,
-              "p75": 10.67,
+              "n": 309,
+              "win_rate": 0.602,
+              "mean": 1.99,
+              "median": 3.57,
+              "p25": -4.37,
+              "p75": 10.68,
               "min": -82.61,
               "max": 68.89
             }
@@ -199088,9 +199120,9 @@
               "max": 67.19
             },
             "60d": {
-              "n": 123,
-              "win_rate": 0.593,
-              "mean": 2.61,
+              "n": 127,
+              "win_rate": 0.591,
+              "mean": 3.05,
               "median": 5.07,
               "p25": -2.2,
               "p75": 9.75,
@@ -199120,13 +199152,13 @@
               "max": 105.68
             },
             "60d": {
-              "n": 261,
-              "win_rate": 0.67,
-              "mean": 4.99,
-              "median": 7.21,
-              "p25": -3.85,
-              "p75": 12.87,
-              "min": -27.62,
+              "n": 288,
+              "win_rate": 0.649,
+              "mean": 4.59,
+              "median": 5.89,
+              "p25": -3.58,
+              "p75": 12.76,
+              "min": -28.52,
               "max": 85.27
             }
           },
@@ -199152,12 +199184,12 @@
               "max": 49.58
             },
             "60d": {
-              "n": 381,
-              "win_rate": 0.575,
-              "mean": 1.41,
-              "median": 3.55,
-              "p25": -5.23,
-              "p75": 12.02,
+              "n": 405,
+              "win_rate": 0.598,
+              "mean": 2.68,
+              "median": 4.14,
+              "p25": -5.04,
+              "p75": 12.36,
               "min": -88.86,
               "max": 66.56
             }
@@ -199184,12 +199216,12 @@
               "max": 62.42
             },
             "60d": {
-              "n": 268,
-              "win_rate": 0.552,
-              "mean": 9.41,
-              "median": 2.69,
-              "p25": -7.89,
-              "p75": 14.07,
+              "n": 317,
+              "win_rate": 0.587,
+              "mean": 9.4,
+              "median": 3.91,
+              "p25": -6.87,
+              "p75": 14.56,
               "min": -84.25,
               "max": 107.71
             }
@@ -199216,12 +199248,12 @@
               "max": 63.87
             },
             "60d": {
-              "n": 636,
-              "win_rate": 0.538,
-              "mean": 2.89,
-              "median": 1.79,
-              "p25": -11.29,
-              "p75": 11.62,
+              "n": 669,
+              "win_rate": 0.541,
+              "mean": 3.1,
+              "median": 1.85,
+              "p25": -11.11,
+              "p75": 11.98,
               "min": -83.88,
               "max": 117.54
             }
@@ -199248,12 +199280,12 @@
               "max": 71.7
             },
             "60d": {
-              "n": 3245,
-              "win_rate": 0.625,
-              "mean": 5.09,
-              "median": 3.06,
-              "p25": -3.03,
-              "p75": 12.22,
+              "n": 3358,
+              "win_rate": 0.632,
+              "mean": 5.29,
+              "median": 3.25,
+              "p25": -2.93,
+              "p75": 12.36,
               "min": -83.54,
               "max": 191.76
             }
@@ -199280,12 +199312,12 @@
               "max": 38.6
             },
             "60d": {
-              "n": 170,
-              "win_rate": 0.612,
-              "mean": 2.74,
-              "median": 2.62,
-              "p25": -6.26,
-              "p75": 9.22,
+              "n": 189,
+              "win_rate": 0.619,
+              "mean": 3.23,
+              "median": 2.73,
+              "p25": -5.59,
+              "p75": 9.69,
               "min": -27.54,
               "max": 201.58
             }
@@ -199312,12 +199344,12 @@
               "max": 24.71
             },
             "60d": {
-              "n": 228,
-              "win_rate": 0.557,
-              "mean": 3.39,
-              "median": 2.04,
-              "p25": -9.59,
-              "p75": 9.34,
+              "n": 273,
+              "win_rate": 0.586,
+              "mean": 3.99,
+              "median": 2.29,
+              "p25": -6.77,
+              "p75": 10.04,
               "min": -27.29,
               "max": 210.0
             }
@@ -199344,12 +199376,12 @@
               "max": 30.34
             },
             "60d": {
-              "n": 492,
-              "win_rate": 0.614,
-              "mean": 2.77,
-              "median": 2.53,
-              "p25": -6.46,
-              "p75": 9.77,
+              "n": 541,
+              "win_rate": 0.628,
+              "mean": 3.14,
+              "median": 2.84,
+              "p25": -4.41,
+              "p75": 10.02,
               "min": -27.29,
               "max": 206.31
             }
@@ -199376,12 +199408,12 @@
               "max": 15.1
             },
             "60d": {
-              "n": 58,
-              "win_rate": 0.448,
-              "mean": 1.05,
-              "median": -6.28,
-              "p25": -11.18,
-              "p75": 13.52,
+              "n": 59,
+              "win_rate": 0.458,
+              "mean": 1.07,
+              "median": -5.37,
+              "p25": -11.17,
+              "p75": 12.91,
               "min": -35.02,
               "max": 28.16
             }
@@ -199408,12 +199440,12 @@
               "max": 46.8
             },
             "60d": {
-              "n": 120,
-              "win_rate": 0.55,
-              "mean": 0.34,
-              "median": 1.14,
-              "p25": -8.87,
-              "p75": 11.35,
+              "n": 128,
+              "win_rate": 0.578,
+              "mean": 0.75,
+              "median": 1.16,
+              "p25": -7.86,
+              "p75": 11.77,
               "min": -34.49,
               "max": 33.79
             }
@@ -199440,12 +199472,12 @@
               "max": 46.8
             },
             "60d": {
-              "n": 59,
-              "win_rate": 0.458,
-              "mean": 4.47,
+              "n": 61,
+              "win_rate": 0.475,
+              "mean": 4.78,
               "median": -0.01,
-              "p25": -5.77,
-              "p75": 16.62,
+              "p25": -4.76,
+              "p75": 16.61,
               "min": -21.84,
               "max": 50.95
             }
@@ -199472,14 +199504,14 @@
               "max": 33.39
             },
             "60d": {
-              "n": 282,
-              "win_rate": 0.539,
-              "mean": 1.95,
-              "median": 0.91,
-              "p25": -7.03,
-              "p75": 10.46,
+              "n": 354,
+              "win_rate": 0.61,
+              "mean": 4.72,
+              "median": 3.58,
+              "p25": -4.25,
+              "p75": 14.09,
               "min": -36.13,
-              "max": 42.16
+              "max": 51.15
             }
           },
           "stable | unknown | 0.7-1.0": {
@@ -199536,12 +199568,12 @@
               "max": 34.43
             },
             "60d": {
-              "n": 64,
-              "win_rate": 0.469,
-              "mean": -2.16,
-              "median": -2.52,
-              "p25": -13.19,
-              "p75": 7.6,
+              "n": 70,
+              "win_rate": 0.514,
+              "mean": -0.66,
+              "median": 0.81,
+              "p25": -11.42,
+              "p75": 10.14,
               "min": -31.44,
               "max": 25.85
             }
@@ -199568,12 +199600,12 @@
               "max": 35.22
             },
             "60d": {
-              "n": 118,
-              "win_rate": 0.568,
-              "mean": 1.32,
+              "n": 126,
+              "win_rate": 0.563,
+              "mean": 2.12,
               "median": 2.65,
-              "p25": -12.23,
-              "p75": 11.33,
+              "p25": -11.58,
+              "p75": 11.55,
               "min": -34.56,
               "max": 63.37
             }
@@ -199600,12 +199632,12 @@
               "max": 42.36
             },
             "60d": {
-              "n": 145,
-              "win_rate": 0.738,
-              "mean": 5.97,
+              "n": 163,
+              "win_rate": 0.761,
+              "mean": 6.87,
               "median": 7.06,
-              "p25": -0.3,
-              "p75": 16.78,
+              "p25": 1.0,
+              "p75": 17.35,
               "min": -34.33,
               "max": 46.63
             }
@@ -199632,12 +199664,12 @@
               "max": 34.43
             },
             "60d": {
-              "n": 87,
-              "win_rate": 0.563,
-              "mean": 1.22,
-              "median": 1.6,
-              "p25": -10.0,
-              "p75": 11.96,
+              "n": 98,
+              "win_rate": 0.571,
+              "mean": 2.08,
+              "median": 2.51,
+              "p25": -9.51,
+              "p75": 12.5,
               "min": -27.59,
               "max": 25.99
             }
@@ -199664,12 +199696,12 @@
               "max": 54.77
             },
             "60d": {
-              "n": 39,
-              "win_rate": 0.692,
-              "mean": 6.63,
+              "n": 58,
+              "win_rate": 0.672,
+              "mean": 6.89,
               "median": 6.15,
-              "p25": -1.5,
-              "p75": 12.87,
+              "p25": -0.53,
+              "p75": 13.12,
               "min": -11.82,
               "max": 30.44
             }
@@ -199696,12 +199728,12 @@
               "max": 38.35
             },
             "60d": {
-              "n": 521,
-              "win_rate": 0.593,
-              "mean": 4.25,
-              "median": 3.73,
-              "p25": -6.56,
-              "p75": 14.42,
+              "n": 632,
+              "win_rate": 0.623,
+              "mean": 5.33,
+              "median": 5.03,
+              "p25": -5.62,
+              "p75": 15.14,
               "min": -36.07,
               "max": 55.22
             }
@@ -199728,14 +199760,14 @@
               "max": 38.81
             },
             "60d": {
-              "n": 200,
-              "win_rate": 0.505,
-              "mean": 3.51,
-              "median": 0.57,
-              "p25": -8.34,
-              "p75": 15.88,
+              "n": 240,
+              "win_rate": 0.554,
+              "mean": 4.7,
+              "median": 2.79,
+              "p25": -6.71,
+              "p75": 16.29,
               "min": -29.76,
-              "max": 48.87
+              "max": 50.79
             }
           },
           "stable | Stage 4 downtrend | <0.7": {
@@ -199760,12 +199792,12 @@
               "max": 37.0
             },
             "60d": {
-              "n": 474,
-              "win_rate": 0.466,
-              "mean": 0.89,
-              "median": -1.0,
-              "p25": -7.79,
-              "p75": 7.59,
+              "n": 523,
+              "win_rate": 0.503,
+              "mean": 1.84,
+              "median": 0.22,
+              "p25": -7.33,
+              "p75": 9.82,
               "min": -36.21,
               "max": 53.05
             }
@@ -199792,14 +199824,14 @@
               "max": 40.23
             },
             "60d": {
-              "n": 85,
-              "win_rate": 0.529,
-              "mean": 0.08,
-              "median": 3.18,
-              "p25": -11.47,
-              "p75": 12.65,
+              "n": 109,
+              "win_rate": 0.615,
+              "mean": 6.18,
+              "median": 7.41,
+              "p25": -6.99,
+              "p75": 17.37,
               "min": -30.23,
-              "max": 31.51
+              "max": 95.6
             }
           },
           "expanding | Stage 1 basing | <0.7": {
@@ -199824,12 +199856,12 @@
               "max": 43.37
             },
             "60d": {
-              "n": 275,
-              "win_rate": 0.636,
-              "mean": 4.96,
-              "median": 4.71,
-              "p25": -5.64,
-              "p75": 11.94,
+              "n": 289,
+              "win_rate": 0.644,
+              "mean": 5.3,
+              "median": 4.81,
+              "p25": -4.98,
+              "p75": 11.98,
               "min": -83.34,
               "max": 87.95
             }
@@ -199856,12 +199888,12 @@
               "max": 38.56
             },
             "60d": {
-              "n": 522,
-              "win_rate": 0.63,
-              "mean": 7.23,
-              "median": 3.8,
-              "p25": -4.18,
-              "p75": 10.81,
+              "n": 555,
+              "win_rate": 0.625,
+              "mean": 7.05,
+              "median": 3.52,
+              "p25": -4.04,
+              "p75": 10.8,
               "min": -28.61,
               "max": 200.39
             }
@@ -199888,12 +199920,12 @@
               "max": 55.57
             },
             "60d": {
-              "n": 82,
-              "win_rate": 0.476,
-              "mean": 4.23,
-              "median": -2.05,
-              "p25": -5.26,
-              "p75": 16.77,
+              "n": 95,
+              "win_rate": 0.495,
+              "mean": 4.65,
+              "median": -1.05,
+              "p25": -5.31,
+              "p75": 16.2,
               "min": -19.31,
               "max": 30.21
             }
@@ -199952,12 +199984,12 @@
               "max": 43.47
             },
             "60d": {
-              "n": 103,
-              "win_rate": 0.544,
-              "mean": 2.96,
-              "median": 2.02,
-              "p25": -8.35,
-              "p75": 14.25,
+              "n": 122,
+              "win_rate": 0.582,
+              "mean": 4.65,
+              "median": 3.51,
+              "p25": -7.41,
+              "p75": 16.24,
               "min": -34.18,
               "max": 39.64
             }
@@ -199984,12 +200016,12 @@
               "max": 40.83
             },
             "60d": {
-              "n": 79,
-              "win_rate": 0.709,
-              "mean": 4.74,
+              "n": 81,
+              "win_rate": 0.704,
+              "mean": 4.85,
               "median": 2.83,
-              "p25": -0.35,
-              "p75": 10.64,
+              "p25": -0.38,
+              "p75": 10.82,
               "min": -36.75,
               "max": 29.7
             }
@@ -200048,14 +200080,14 @@
               "max": 9.73
             },
             "60d": {
-              "n": 62,
-              "win_rate": 0.645,
-              "mean": 4.29,
+              "n": 66,
+              "win_rate": 0.636,
+              "mean": 4.35,
               "median": 0.79,
-              "p25": -0.31,
-              "p75": 14.01,
+              "p25": -0.37,
+              "p75": 15.44,
               "min": -18.6,
-              "max": 18.71
+              "max": 20.4
             }
           },
           "stable | Stage 1 basing | >=3.0": {
@@ -200112,12 +200144,12 @@
               "max": 87.98
             },
             "60d": {
-              "n": 105,
-              "win_rate": 0.552,
-              "mean": 5.69,
-              "median": 2.06,
-              "p25": -7.74,
-              "p75": 14.97,
+              "n": 107,
+              "win_rate": 0.542,
+              "mean": 5.54,
+              "median": 1.19,
+              "p25": -7.66,
+              "p75": 14.46,
               "min": -88.01,
               "max": 98.14
             }
@@ -200208,12 +200240,12 @@
               "max": 99.87
             },
             "60d": {
-              "n": 58,
-              "win_rate": 0.517,
-              "mean": 4.87,
+              "n": 68,
+              "win_rate": 0.515,
+              "mean": 4.45,
               "median": 0.49,
-              "p25": -7.6,
-              "p75": 11.71,
+              "p25": -7.5,
+              "p75": 10.8,
               "min": -53.66,
               "max": 104.69
             }
@@ -200944,14 +200976,14 @@
               "max": 43.38
             },
             "60d": {
-              "n": 50,
-              "win_rate": 0.56,
-              "mean": 4.28,
-              "median": 6.47,
-              "p25": -9.11,
-              "p75": 13.76,
+              "n": 58,
+              "win_rate": 0.621,
+              "mean": 9.32,
+              "median": 9.52,
+              "p25": -8.35,
+              "p75": 26.92,
               "min": -32.1,
-              "max": 40.66
+              "max": 100.0
             }
           },
           "stable | unknown | 2.0-3.0": {
@@ -201040,12 +201072,12 @@
               "max": 40.51
             },
             "60d": {
-              "n": 36,
-              "win_rate": 0.417,
-              "mean": -1.71,
+              "n": 38,
+              "win_rate": 0.395,
+              "mean": -2.01,
               "median": -0.57,
               "p25": -17.31,
-              "p75": 8.74,
+              "p75": 8.41,
               "min": -33.26,
               "max": 28.4
             }
@@ -201072,14 +201104,14 @@
               "max": 34.83
             },
             "60d": {
-              "n": 26,
-              "win_rate": 0.154,
-              "mean": -6.93,
-              "median": -5.63,
-              "p25": -8.86,
-              "p75": -5.28,
+              "n": 28,
+              "win_rate": 0.214,
+              "mean": -1.65,
+              "median": -5.49,
+              "p25": -8.47,
+              "p75": -4.55,
               "min": -26.59,
-              "max": 24.78
+              "max": 66.95
             }
           },
           "contracting | Stage 4 downtrend | 2.0-3.0": {
@@ -201264,14 +201296,14 @@
               "max": 9.92
             },
             "60d": {
-              "n": 14,
-              "win_rate": 0.714,
-              "mean": 9.44,
-              "median": 15.44,
-              "p25": -1.55,
-              "p75": 17.61,
+              "n": 20,
+              "win_rate": 0.8,
+              "mean": 10.88,
+              "median": 14.34,
+              "p25": 3.22,
+              "p75": 18.46,
               "min": -10.62,
-              "max": 22.51
+              "max": 25.94
             }
           },
           "contracting | Stage 3 top | 1.3-2.0": {
@@ -201296,12 +201328,12 @@
               "max": 23.97
             },
             "60d": {
-              "n": 13,
-              "win_rate": 0.692,
-              "mean": 7.4,
-              "median": 3.27,
-              "p25": -0.21,
-              "p75": 18.08,
+              "n": 15,
+              "win_rate": 0.733,
+              "mean": 6.43,
+              "median": 0.81,
+              "p25": -0.03,
+              "p75": 17.2,
               "min": -6.46,
               "max": 24.39
             }
@@ -201328,13 +201360,13 @@
               "max": 147.72
             },
             "60d": {
-              "n": 4,
-              "win_rate": 0.25,
-              "mean": -14.35,
-              "median": -10.81,
-              "p25": -23.91,
-              "p75": -1.25,
-              "min": -42.71,
+              "n": 5,
+              "win_rate": 0.2,
+              "mean": -20.56,
+              "median": -17.65,
+              "p25": -42.71,
+              "p75": -3.98,
+              "min": -45.41,
               "max": 6.94
             }
           },
@@ -201392,12 +201424,12 @@
               "max": 20.68
             },
             "60d": {
-              "n": 4,
-              "win_rate": 0.25,
-              "mean": -13.12,
-              "median": -2.48,
-              "p25": -14.98,
-              "p75": -0.62,
+              "n": 6,
+              "win_rate": 0.167,
+              "mean": -24.44,
+              "median": -25.32,
+              "p25": -47.09,
+              "p75": -1.96,
               "min": -49.31,
               "max": 1.82
             }
@@ -201518,6 +201550,16 @@
               "p75": -4.2,
               "min": -4.37,
               "max": -4.2
+            },
+            "60d": {
+              "n": 3,
+              "win_rate": 0.0,
+              "mean": -12.28,
+              "median": -12.23,
+              "p25": -12.31,
+              "p75": -12.23,
+              "min": -12.39,
+              "max": -12.23
             }
           },
           "expanding | unknown | <0.7": {
@@ -225433,10 +225475,10 @@
     ],
     "global_warnings": [],
     "status": "success",
-    "_cache_age_sec": 60408,
-    "_cache_age_hr": 16.8,
+    "_cache_age_sec": 87445,
+    "_cache_age_hr": 24.3,
     "_source_file": "2026-08-07.json",
-    "_freshness": "FRESH",
+    "_freshness": "STALE",
     "_total_log_days": 81,
     "retail_sector_pulse": {
       "version": "1.1",
@@ -226076,8 +226118,8 @@
         }
       },
       "status": "success",
-      "_cache_age_sec": 49525,
-      "_cache_age_hr": 13.8,
+      "_cache_age_sec": 76561,
+      "_cache_age_hr": 21.3,
       "_freshness": "FRESH"
     },
     "trending": {
@@ -226318,7 +226360,7 @@
           "polarity_score": 0.24
         }
       ],
-      "_cache_age_hr": 13.8,
+      "_cache_age_hr": 21.3,
       "_freshness": "FRESH"
     }
   },
@@ -226476,6 +226518,176 @@
   "news_content_date": "2026-08-07",
   "earnings_analyses": [
     {
+      "ticker": "AXTI",
+      "last_earnings_date": "2026-06-30",
+      "as_of_date": "2026-08-08",
+      "next_earnings_est": "2026-10-29",
+      "next_earnings_source": "fmp_confirmed",
+      "next_earnings_eps_estimate": 0.306,
+      "next_earnings_revenue_estimate": 66004800,
+      "composite_score": 53,
+      "verdict": "MIXED",
+      "quality_flags": [
+        "accruals_warning_negative",
+        "negative_fcf"
+      ],
+      "score_components": {
+        "quality": 20,
+        "growth": 22,
+        "valuation": 0,
+        "analyst": 11
+      },
+      "report_path": "reports/2026-08-08_AXTI_earnings.md",
+      "cache_age_days": 0.3,
+      "company_name": "AXT, Inc.",
+      "sector": "Technology",
+      "industry": "Semiconductors",
+      "price": 88.58,
+      "margins_8q": [
+        {
+          "date": "2026-06-30",
+          "gross": 0.4489692996280653
+        },
+        {
+          "date": "2026-03-31",
+          "gross": 0.29631555489526074
+        },
+        {
+          "date": "2025-12-31",
+          "gross": 0.20945271472592336
+        },
+        {
+          "date": "2025-09-30",
+          "gross": 0.2226435342514756
+        },
+        {
+          "date": "2025-06-30",
+          "gross": 0.07972627128073885
+        },
+        {
+          "date": "2025-03-31",
+          "gross": -0.06411448646414548
+        },
+        {
+          "date": "2024-12-31",
+          "gross": 0.17558255327623978
+        },
+        {
+          "date": "2024-09-30",
+          "gross": 0.24030450412349333
+        }
+      ],
+      "has_infographic": true,
+      "fiscal_label": "FY26 Q2",
+      "pe_ttm": 3706.28,
+      "forward_pe": null,
+      "ev_ebitda": 246.88,
+      "structural_shift": {
+        "tier": "CANDIDATE",
+        "candidate": true,
+        "signals": {
+          "eps_qoq_jump": false,
+          "gm_breakout": true,
+          "rev_accel": true
+        },
+        "metrics": {
+          "eps_qoq": null,
+          "gm_latest": 0.449,
+          "gm_hist_mean": 0.1657,
+          "gm_hist_std": 0.1122,
+          "gm_z_score": 2.53,
+          "rev_yoy": 1.6477,
+          "prior_q_yoy": 0.391
+        },
+        "prior_quarter_candidate": false
+      }
+    },
+    {
+      "ticker": "AMZN",
+      "last_earnings_date": "2026-06-30",
+      "as_of_date": "2026-08-08",
+      "next_earnings_est": "2026-10-29",
+      "next_earnings_source": "fmp_confirmed",
+      "next_earnings_eps_estimate": 1.96,
+      "next_earnings_revenue_estimate": 201836700000,
+      "composite_score": 66,
+      "verdict": "SOLID",
+      "quality_flags": [
+        "capex_outpaces_ocf",
+        "negative_fcf"
+      ],
+      "score_components": {
+        "quality": 22,
+        "growth": 27,
+        "valuation": 2,
+        "analyst": 15
+      },
+      "report_path": "reports/2026-08-08_AMZN_earnings.md",
+      "cache_age_days": 0.3,
+      "company_name": "Amazon.com, Inc.",
+      "sector": "Consumer Cyclical",
+      "industry": "Specialty Retail",
+      "price": 272.26,
+      "margins_8q": [
+        {
+          "date": "2026-06-30",
+          "gross": 0.5225566533403787
+        },
+        {
+          "date": "2026-03-31",
+          "gross": 0.5181606333221316
+        },
+        {
+          "date": "2025-12-31",
+          "gross": 0.48469440356911886
+        },
+        {
+          "date": "2025-09-30",
+          "gross": 0.5078509621522015
+        },
+        {
+          "date": "2025-06-30",
+          "gross": 0.5181393185531479
+        },
+        {
+          "date": "2025-03-31",
+          "gross": 0.5055085535148747
+        },
+        {
+          "date": "2024-12-31",
+          "gross": 0.47339077276987307
+        },
+        {
+          "date": "2024-09-30",
+          "gross": 0.4903164082906903
+        }
+      ],
+      "has_infographic": true,
+      "fiscal_label": "FY26 Q2",
+      "pe_ttm": 21.78,
+      "forward_pe": 26.34,
+      "ev_ebitda": 12.2,
+      "structural_shift": {
+        "tier": "NONE",
+        "candidate": false,
+        "signals": {
+          "eps_qoq_jump": true,
+          "gm_breakout": false,
+          "rev_accel": false
+        },
+        "metrics": {
+          "eps_qoq": 1.0683,
+          "gm_latest": 0.5226,
+          "gm_hist_mean": 0.4997,
+          "gm_hist_std": 0.016,
+          "gm_z_score": 1.43,
+          "rev_yoy": 0.1962,
+          "prior_q_yoy": 0.1661
+        },
+        "prior_quarter_candidate": false
+      }
+    },
+    {
       "ticker": "SPCX",
       "last_earnings_date": "2026-06-30",
       "as_of_date": "2026-08-07",
@@ -226498,7 +226710,7 @@
         "analyst": 15
       },
       "report_path": null,
-      "cache_age_days": 0.7,
+      "cache_age_days": 1.0,
       "company_name": "Space Exploration Technologies Corp.",
       "sector": "Industrials",
       "industry": "Aerospace & Defense",
@@ -226551,7 +226763,7 @@
         "analyst": 13
       },
       "report_path": "reports/2026-08-07_NOK_earnings.md",
-      "cache_age_days": 1.2,
+      "cache_age_days": 1.5,
       "company_name": "Nokia Oyj",
       "sector": "Technology",
       "industry": "Communication Equipment",
@@ -226633,7 +226845,7 @@
         "analyst": 13
       },
       "report_path": "reports/2026-08-07_LLY_earnings.md",
-      "cache_age_days": 1.2,
+      "cache_age_days": 1.5,
       "company_name": "Eli Lilly and Company",
       "sector": "Healthcare",
       "industry": "Drug Manufacturers - General",
@@ -226717,7 +226929,7 @@
         "analyst": 8
       },
       "report_path": "reports/2026-08-07_INTC_earnings.md",
-      "cache_age_days": 1.2,
+      "cache_age_days": 1.5,
       "company_name": "Intel Corp.",
       "sector": "Technology",
       "industry": "Semiconductors",
@@ -226801,7 +227013,7 @@
         "analyst": 15
       },
       "report_path": "reports/2026-08-07_DDOG_earnings.md",
-      "cache_age_days": 0.6,
+      "cache_age_days": 0.9,
       "company_name": "Datadog, Inc.",
       "sector": "Technology",
       "industry": "Software - Application",
@@ -226886,7 +227098,7 @@
         "analyst": 15
       },
       "report_path": "reports/2026-08-07_CEG_earnings.md",
-      "cache_age_days": 0.8,
+      "cache_age_days": 1.1,
       "company_name": "Constellation Energy Corporation",
       "sector": "Utilities",
       "industry": "Independent Power Producers",
@@ -226971,7 +227183,7 @@
         "analyst": 10
       },
       "report_path": "reports/2026-08-07_AAOI_earnings.md",
-      "cache_age_days": 0.7,
+      "cache_age_days": 1.0,
       "company_name": "Applied Optoelectronics, Inc.",
       "sector": "Technology",
       "industry": "Communication Equipment",
@@ -227053,7 +227265,7 @@
         "analyst": 15
       },
       "report_path": "reports/2026-08-06_SNDK_earnings.md",
-      "cache_age_days": 1.6,
+      "cache_age_days": 1.9,
       "company_name": "Sandisk Corporation",
       "sector": "Technology",
       "industry": "Computer Hardware",
@@ -227135,7 +227347,7 @@
         "analyst": 11
       },
       "report_path": "reports/2026-08-06_PLTR_earnings.md",
-      "cache_age_days": 1.6,
+      "cache_age_days": 1.9,
       "company_name": "Palantir Technologies Inc.",
       "sector": "Technology",
       "industry": "Software - Infrastructure",
@@ -227221,7 +227433,7 @@
         "analyst": 15
       },
       "report_path": "reports/2026-07-31_MSFT_earnings.md",
-      "cache_age_days": 0.7,
+      "cache_age_days": 1.0,
       "company_name": "Microsoft Corporation",
       "sector": "Technology",
       "industry": "Software - Infrastructure",
@@ -227305,7 +227517,7 @@
         "analyst": 15
       },
       "report_path": "reports/2026-07-31_META_earnings.md",
-      "cache_age_days": 8.5,
+      "cache_age_days": 8.8,
       "company_name": "Meta Platforms, Inc.",
       "sector": "Communication Services",
       "industry": "Internet Content & Information",
@@ -227370,92 +227582,6 @@
       }
     },
     {
-      "ticker": "AMZN",
-      "last_earnings_date": "2026-03-31",
-      "as_of_date": "2026-07-31",
-      "next_earnings_est": "2026-06-30",
-      "next_earnings_source": "estimated_91d",
-      "next_earnings_eps_estimate": null,
-      "next_earnings_revenue_estimate": null,
-      "composite_score": 66,
-      "verdict": "SOLID",
-      "quality_flags": [
-        "cash_conversion_positive_gap_clean",
-        "capex_outpaces_ocf",
-        "negative_fcf"
-      ],
-      "score_components": {
-        "quality": 22,
-        "growth": 27,
-        "valuation": 2,
-        "analyst": 15
-      },
-      "report_path": "reports/2026-07-31_AMZN_earnings.md",
-      "cache_age_days": 8.5,
-      "company_name": "Amazon.com, Inc.",
-      "sector": "Consumer Cyclical",
-      "industry": "Specialty Retail",
-      "price": 226.65,
-      "margins_8q": [
-        {
-          "date": "2026-03-31",
-          "gross": 0.5181606333221316
-        },
-        {
-          "date": "2025-12-31",
-          "gross": 0.48469440356911886
-        },
-        {
-          "date": "2025-09-30",
-          "gross": 0.5078509621522015
-        },
-        {
-          "date": "2025-06-30",
-          "gross": 0.5181393185531479
-        },
-        {
-          "date": "2025-03-31",
-          "gross": 0.5055085535148747
-        },
-        {
-          "date": "2024-12-31",
-          "gross": 0.47339077276987307
-        },
-        {
-          "date": "2024-09-30",
-          "gross": 0.4903164082906903
-        },
-        {
-          "date": "2024-06-30",
-          "gross": 0.501375213715645
-        }
-      ],
-      "has_infographic": true,
-      "fiscal_label": "FY26 Q1",
-      "pe_ttm": 28.1,
-      "forward_pe": 26.34,
-      "ev_ebitda": 14.19,
-      "structural_shift": {
-        "tier": "NONE",
-        "candidate": false,
-        "signals": {
-          "eps_qoq_jump": true,
-          "gm_breakout": false,
-          "rev_accel": false
-        },
-        "metrics": {
-          "eps_qoq": 0.4256,
-          "gm_latest": 0.5182,
-          "gm_hist_mean": 0.4973,
-          "gm_hist_std": 0.0142,
-          "gm_z_score": 1.47,
-          "rev_yoy": 0.1661,
-          "prior_q_yoy": 0.1363
-        },
-        "prior_quarter_candidate": false
-      }
-    },
-    {
       "ticker": "MU",
       "last_earnings_date": "2026-05-28",
       "as_of_date": "2026-06-25",
@@ -227473,7 +227599,7 @@
         "analyst": 15
       },
       "report_path": "reports/2026-06-25_MU_earnings.md",
-      "cache_age_days": 43.6,
+      "cache_age_days": 43.9,
       "company_name": "Micron Technology, Inc.",
       "sector": "Technology",
       "industry": "Semiconductors",
@@ -227558,7 +227684,7 @@
         "analyst": 13
       },
       "report_path": null,
-      "cache_age_days": 47.4,
+      "cache_age_days": 47.7,
       "company_name": "IonQ, Inc.",
       "sector": "Technology",
       "industry": "Computer Hardware",
@@ -227640,7 +227766,7 @@
         "analyst": 7
       },
       "report_path": "reports/2026-06-18_MRVL_earnings.md",
-      "cache_age_days": 51.5,
+      "cache_age_days": 51.8,
       "company_name": "Marvell Technology, Inc.",
       "sector": "Technology",
       "industry": "Semiconductors",
@@ -227726,7 +227852,7 @@
         "analyst": 15
       },
       "report_path": null,
-      "cache_age_days": 52.1,
+      "cache_age_days": 52.4,
       "company_name": "Oracle Corporation",
       "sector": "Technology",
       "industry": "Software - Infrastructure",
@@ -227790,7 +227916,7 @@
         "analyst": 15
       },
       "report_path": null,
-      "cache_age_days": 52.2,
+      "cache_age_days": 52.5,
       "company_name": "NVIDIA Corporation",
       "sector": "Technology",
       "industry": "Semiconductors",
@@ -227856,7 +227982,7 @@
         "analyst": 5
       },
       "report_path": null,
-      "cache_age_days": 52.1,
+      "cache_age_days": 52.4,
       "company_name": "Advanced Micro Devices, Inc.",
       "sector": "Technology",
       "industry": "Semiconductors",
@@ -227920,7 +228046,7 @@
         "analyst": 15
       },
       "report_path": null,
-      "cache_age_days": 52.6,
+      "cache_age_days": 52.9,
       "company_name": "Taiwan Semiconductor Manufacturing Company Limited",
       "sector": "Technology",
       "industry": "Semiconductors",
@@ -228007,7 +228133,7 @@
         "analyst": 5
       },
       "report_path": null,
-      "cache_age_days": 1.2,
+      "cache_age_days": 1.5,
       "company_name": "Nebius Group N.V.",
       "sector": "Communication Services",
       "industry": "Internet Content & Information",
@@ -228089,7 +228215,7 @@
         "analyst": 11
       },
       "report_path": null,
-      "cache_age_days": 57.9,
+      "cache_age_days": 58.2,
       "company_name": "Apple Inc.",
       "sector": "Technology",
       "industry": "Consumer Electronics",
@@ -228153,7 +228279,7 @@
         "analyst": 10
       },
       "report_path": "reports/2026-06-04_AVGO_earnings.md",
-      "cache_age_days": 64.6,
+      "cache_age_days": 64.9,
       "company_name": "Broadcom Inc.",
       "sector": "Technology",
       "industry": "Semiconductors",
@@ -228237,7 +228363,7 @@
         "analyst": 5
       },
       "report_path": "reports/2026-06-02_HPE_earnings.md",
-      "cache_age_days": 66.6,
+      "cache_age_days": 66.9,
       "company_name": "Hewlett Packard Enterprise Company",
       "sector": "Technology",
       "industry": "Computer Hardware",
@@ -228319,7 +228445,7 @@
         "analyst": 5
       },
       "report_path": "reports/2026-05-30_DELL_earnings.md",
-      "cache_age_days": 70.5,
+      "cache_age_days": 70.8,
       "company_name": "Dell Technologies Inc.",
       "sector": "Technology",
       "industry": "Computer Hardware",
@@ -228403,7 +228529,7 @@
         "analyst": 13
       },
       "report_path": "reports/2026-05-10_ASML_earnings.md",
-      "cache_age_days": 89.6,
+      "cache_age_days": 89.9,
       "company_name": "ASML Holding N.V.",
       "sector": "Technology",
       "industry": "Semiconductors",
@@ -228485,7 +228611,7 @@
         "analyst": 15
       },
       "report_path": "reports/2026-05-10_APP_earnings.md",
-      "cache_age_days": 89.6,
+      "cache_age_days": 89.9,
       "company_name": "AppLovin Corporation",
       "sector": "Technology",
       "industry": "Software - Application",
@@ -228551,11 +228677,23 @@
     }
   ],
   "fred_macro": {
-    "generated_at": "2026-08-08T04:19:36+00:00",
+    "generated_at": "2026-08-08T10:54:19+00:00",
     "asof": null,
     "cache_hit": false,
     "cache_age_sec": 0,
     "series": {
+      "T10Y2Y": {
+        "value": 0.46,
+        "value_smooth_3d": 0.45,
+        "date": "2026-08-07",
+        "data_freshness_days": 1,
+        "delta_bps_1m": 11.0,
+        "delta_bps_3m": -2.0,
+        "delta_bps_1y": -5.0,
+        "percentile_1y": 19,
+        "trend_30d": "rising",
+        "trend_90d": "stable"
+      },
       "T10Y3M": {
         "value": 0.78,
         "value_smooth_3d": 0.77,
@@ -228567,6 +228705,18 @@
         "percentile_1y": 94,
         "trend_30d": "stable",
         "trend_90d": "stable"
+      },
+      "DGS10": {
+        "value": 4.69,
+        "value_smooth_3d": 4.65,
+        "date": "2026-08-06",
+        "data_freshness_days": 2,
+        "delta_bps_1m": 14.0,
+        "delta_bps_3m": 31.0,
+        "delta_bps_1y": 47.0,
+        "percentile_1y": 98,
+        "trend_30d": "rising",
+        "trend_90d": "rising"
       },
       "DGS2": {
         "value": 4.25,
@@ -228580,26 +228730,14 @@
         "trend_30d": "stable",
         "trend_90d": "rising"
       },
-      "T10Y2Y": {
-        "value": 0.46,
-        "value_smooth_3d": 0.45,
-        "date": "2026-08-07",
-        "data_freshness_days": 1,
-        "delta_bps_1m": 11.0,
-        "delta_bps_3m": -2.0,
-        "delta_bps_1y": -5.0,
-        "percentile_1y": 19,
-        "trend_30d": "rising",
-        "trend_90d": "stable"
-      },
-      "DGS10": {
-        "value": 4.69,
-        "value_smooth_3d": 4.65,
+      "DFII10": {
+        "value": 2.43,
+        "value_smooth_3d": 2.4133,
         "date": "2026-08-06",
         "data_freshness_days": 2,
-        "delta_bps_1m": 14.0,
-        "delta_bps_3m": 31.0,
-        "delta_bps_1y": 47.0,
+        "delta_bps_1m": 13.0,
+        "delta_bps_3m": 50.0,
+        "delta_bps_1y": 55.0,
         "percentile_1y": 98,
         "trend_30d": "rising",
         "trend_90d": "rising"
@@ -228616,17 +228754,27 @@
         "trend_30d": "stable",
         "trend_90d": "stable"
       },
-      "DFII10": {
-        "value": 2.43,
-        "value_smooth_3d": 2.4133,
-        "date": "2026-08-06",
-        "data_freshness_days": 2,
-        "delta_bps_1m": 13.0,
-        "delta_bps_3m": 50.0,
-        "delta_bps_1y": 55.0,
-        "percentile_1y": 98,
-        "trend_30d": "rising",
-        "trend_90d": "rising"
+      "PCEPILFE": {
+        "value": 130.266,
+        "date": "2026-06-01",
+        "data_freshness_days": 68,
+        "yoy_change_pct": 3.29,
+        "mom_change_pct": 0.13,
+        "wow_change": 0.0,
+        "percentile_1y": 92,
+        "trend_30d": "stable",
+        "trend_90d": "stable"
+      },
+      "CPILFESL": {
+        "value": 336.065,
+        "date": "2026-06-01",
+        "data_freshness_days": 68,
+        "yoy_change_pct": 2.57,
+        "mom_change_pct": -0.02,
+        "wow_change": 0.0,
+        "percentile_1y": 83,
+        "trend_30d": "stable",
+        "trend_90d": "stable"
       },
       "CPIAUCSL": {
         "value": 332.568,
@@ -228650,17 +228798,6 @@
         "trend_30d": "falling",
         "trend_90d": "falling"
       },
-      "PCEPILFE": {
-        "value": 130.266,
-        "date": "2026-06-01",
-        "data_freshness_days": 68,
-        "yoy_change_pct": 3.29,
-        "mom_change_pct": 0.13,
-        "wow_change": 0.0,
-        "percentile_1y": 92,
-        "trend_30d": "stable",
-        "trend_90d": "stable"
-      },
       "ICSA": {
         "value": 199000.0,
         "date": "2026-08-01",
@@ -228682,28 +228819,6 @@
         "percentile_1y": 77,
         "trend_30d": "stable",
         "trend_90d": "stable"
-      },
-      "CPILFESL": {
-        "value": 336.065,
-        "date": "2026-06-01",
-        "data_freshness_days": 68,
-        "yoy_change_pct": 2.57,
-        "mom_change_pct": -0.02,
-        "wow_change": 0.0,
-        "percentile_1y": 83,
-        "trend_30d": "stable",
-        "trend_90d": "stable"
-      },
-      "SAHMREALTIME": {
-        "value": -0.03,
-        "date": "2026-07-01",
-        "data_freshness_days": 38,
-        "yoy_change_pct": -130.0,
-        "mom_change_pct": -142.86,
-        "wow_change": 0.0,
-        "percentile_1y": 0,
-        "trend_30d": "falling",
-        "trend_90d": "falling"
       },
       "RSXFS": {
         "value": 666056.0,
@@ -228727,17 +228842,6 @@
         "trend_30d": "rising",
         "trend_90d": "falling"
       },
-      "NFCI": {
-        "value": -0.529,
-        "date": "2026-07-31",
-        "data_freshness_days": 8,
-        "yoy_change_pct": -2.12,
-        "mom_change_pct": -2.32,
-        "wow_change": 0.001,
-        "percentile_1y": 17,
-        "trend_30d": "falling",
-        "trend_90d": "falling"
-      },
       "BAMLH0A0HYM2": {
         "value": 2.71,
         "value_smooth_3d": 2.73,
@@ -228748,6 +228852,28 @@
         "delta_bps_1y": -27.0,
         "percentile_1y": 8,
         "trend_30d": "stable",
+        "trend_90d": "falling"
+      },
+      "SAHMREALTIME": {
+        "value": -0.03,
+        "date": "2026-07-01",
+        "data_freshness_days": 38,
+        "yoy_change_pct": -130.0,
+        "mom_change_pct": -142.86,
+        "wow_change": 0.0,
+        "percentile_1y": 0,
+        "trend_30d": "falling",
+        "trend_90d": "falling"
+      },
+      "NFCI": {
+        "value": -0.529,
+        "date": "2026-07-31",
+        "data_freshness_days": 8,
+        "yoy_change_pct": -2.12,
+        "mom_change_pct": -2.32,
+        "wow_change": 0.001,
+        "percentile_1y": 17,
+        "trend_30d": "falling",
         "trend_90d": "falling"
       }
     },
@@ -228908,12 +229034,12 @@
       "missing": [],
       "errors": []
     },
-    "_cache_age_sec": 17
+    "_cache_age_sec": 3371
   },
   "industry_trend": {
     "status": "success",
     "as_of": "2026-08-06 20:28:18",
-    "_cache_age_hr": 39.8,
+    "_cache_age_hr": 47.3,
     "_freshness": "STALE",
     "_source_file": "theme_detector_2026-08-06_203104.json",
     "leaders": [
@@ -229442,8 +229568,8 @@
     },
     "_partial": false,
     "status": "success",
-    "_cache_age_sec": 49538,
-    "_cache_age_hr": 13.8,
+    "_cache_age_sec": 76574,
+    "_cache_age_hr": 21.3,
     "_freshness": "FRESH"
   },
   "theme_overrides": [
@@ -229536,6 +229662,6 @@
       "first_hit_filtered": 0,
       "digests_scanned": 12
     },
-    "_freshness_hr": 13.8
+    "_freshness_hr": 21.3
   }
 }

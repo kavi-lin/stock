@@ -1,9 +1,9 @@
 {
   "version": "1.0",
-  "as_of": "2026-08-08T02:30:04+00:00",
-  "as_of_et": "2026-08-07T22:30:04-04:00",
+  "as_of": "2026-08-08T04:54:42+00:00",
+  "as_of_et": "2026-08-08T00:54:42-04:00",
   "market_open": false,
-  "session_fraction": 1.0,
+  "session_fraction": 0.0,
   "regime": {
     "label": "中性/區間",
     "posture": "neutral",
@@ -320,44 +320,7 @@
       "note": "資金流向價值/防禦板塊"
     }
   ],
-  "themes": [
-    {
-      "name": "Communication Services Sector Concentration",
-      "direction": "bearish",
-      "lifecycle": "Accelerating",
-      "heat": null
-    },
-    {
-      "name": "Quantum Computing",
-      "direction": "bullish",
-      "lifecycle": "Trending",
-      "heat": null
-    },
-    {
-      "name": "AI & Semiconductors",
-      "direction": "bullish",
-      "lifecycle": "Trending",
-      "heat": null
-    },
-    {
-      "name": "Robotics & Automation",
-      "direction": "bullish",
-      "lifecycle": "Trending",
-      "heat": null
-    },
-    {
-      "name": "Space Economy",
-      "direction": "bullish",
-      "lifecycle": "Mature",
-      "heat": null
-    },
-    {
-      "name": "Defense & Aerospace",
-      "direction": "bullish",
-      "lifecycle": "Mature",
-      "heat": null
-    }
-  ],
+  "themes": [],
   "ideas": [
     {
       "ticker": "TEAM",
@@ -451,10 +414,10 @@
         "領漲：PLTR +9.42%",
         "領漲：NOW +6.04%"
       ],
-      "streak": 40,
-      "day_count": 40,
+      "streak": 2,
+      "day_count": 2,
       "highlight": true,
-      "day_motif": true
+      "day_motif": false
     },
     {
       "id": "value_defensive_rotation",
@@ -468,10 +431,10 @@
         "Industrials"
       ],
       "evidence": [],
-      "streak": 35,
-      "day_count": 35,
+      "streak": 2,
+      "day_count": 2,
       "highlight": true,
-      "day_motif": true
+      "day_motif": false
     },
     {
       "id": "event_risk_guard",
@@ -481,10 +444,10 @@
       "rationale": "出貨日堆疊 + 機構買尾部避險，重大數據/財報前先降槓桿、留現金彈性。",
       "tickers": [],
       "evidence": [],
-      "streak": 41,
-      "day_count": 41,
+      "streak": 2,
+      "day_count": 2,
       "highlight": true,
-      "day_motif": true
+      "day_motif": false
     }
   ],
   "warnings": [],
@@ -495,28 +458,23 @@
     "intraday_spikes": true,
     "retail_sector_pulse": true,
     "kill_triggers": true,
-    "thematic": true,
+    "thematic": false,
     "sector_stance": false
   },
   "recurrence": {
-    "window_index": 41,
-    "windows_today": 41,
+    "window_index": 2,
+    "windows_today": 2,
     "highlighted": [
       "software_momentum",
       "value_defensive_rotation",
       "event_risk_guard"
     ],
-    "day_motifs": [
-      "software_momentum",
-      "value_defensive_rotation",
-      "event_risk_guard"
-    ],
+    "day_motifs": [],
     "streak_highlight_min": 2,
     "day_motif_min": 3
   },
   "_narration_meta": {
-    "cached": false,
-    "model_used": "claude"
+    "cached": true
   },
-  "narrative_zh": "Regime 維持中性／區間，淨曝險上限 40–60%，單日反彈不構成上調理由。市寬 66.5%、中位數 +0.45%，屬普遍參與；但近 25 日出貨日 6 天，是限制加碼的主因。\n\n主旋律一：軟體／平台順勢連 40 天在榜，族群均漲 3.07%，觀察 TEAM、PLTR、NOW、WDAY。主旋律二：資金外溢至 Materials、Healthcare、Industrials，5 日預估與市寬均優於大盤，可作半導體之外的分散。\n\n風險：VIX 14.86 偏低但 SKEW 134.7 偏高，尾部定價不便宜；「二元事件前控部位」已連 41 天，事件前別把倉位推到上限。"
+  "narrative_zh": "regime 判定中性／區間：盤中分數 32 偏強、市寬 66.5% 上漲，但近 25 日仍有 6 個出貨日，曝險上限維持 40-60%，單日反彈不構成加碼理由。主旋律一是軟體／平台順勢，族群均漲 3.07%、17 漲 4 跌明顯領先，觀察 TEAM、PLTR、NOW、WDAY、EPAM，半導體 +2.13% 可作交叉驗證。二是資金向 Materials、Healthcare、Industrials 擴散，三者市寬皆逾 70%、5 日預測為正，屬輪動擴散而非防禦性撤退，Technology 與 Consumer Discretionary 同列 WARM。風險提醒：VIX 14.86 偏低但 SKEW 134.7 偏高、Fear & Greed 63.5 落在貪婪區，尾部風險定價不便宜，二元事件前先控部位。"
 }
