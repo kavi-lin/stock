@@ -17,6 +17,13 @@
 - [x] **stale test 修復批**(v4.113.2 完成):theme-detector 460 / ftd 65 / market-top 210 全綠(原 29+11+12=52 紅)。三種不同根因——(a) mock 打在 fmp_pool 重構後已無人使用的 `session.get`,每個測試靜默打真網路(12-13 秒 → 0.10 秒);(b) 斷言 V4.111.6 已刪除的 v3 fallback;(c) V2.19.2 換掉全部四個 heat 公式而測試沒跟上。**順帶挖出共用 `rsi_14` 的真 bug**(無損失回 NaN 而非 100 → 最極端超買變成 `zone=unknown`),已修並補 14 個測試。
 - [x] **風控三支改版 Batch A**(v4.111.7 完成):burry 價格失敗誤觸 T4_VETO、rm sector 分母膨脹兩個真 bug + top-level try/except + 死參數清理 + 三份文件詐欺/漂移修正 + 106 個測試(零網路,兩個 bug 皆種回確認紅)。基線 diff 僅刻意移除的 `portfolio_size_usd` 一處差異;replay 三 cohort current-rule mismatched 皆 0。
 - [x] **風控三支改版 Batch B 第一波**(v4.112.0,使用者逐項拍板後執行):B2 刪 ×0.7/×1.15 文件宣稱、B3 sector enum 收斂為 3 值 + 刪 `EXTREMELY_FRAGILE` 死規則 + 移除 `fragility_downgrade`、B7 兩個 off-band 門檻對齊 60(`<40`→`<60`、`>70`→`≥60`)+ `downside_deviation` NaN 修復、B1 天花板參數化 `--max-cap`(預設不變)。另修 `investment/README.md` 相關性表(review 新發現,原盤點漏掉,含不存在的 ×1.1)。決策備忘 `docs/plan_risk_trio_B.md`。
+- [x] **B4 — 風控三支遷 technical_core**(v4.113.3 完成):零翻轉閘門過真實 code path(16 檔 0 翻轉,|Δscore| 最大 0.400)。**⚠ 餘裕不大**:最接近帶邊的樣本距 0.60 分,落在帶邊 0.4 分內的標的會翻。
+- [x] **引入 dual-axis-skill-reviewer**(v4.113.4):上游 `b814274` vendored 進 `skills/`,報告落 `reports/skill_reviews/`。三支風控 final 75 / 73 / 71。**讀 breakdown 不要只看總分**——auto 軸的三個子項量的是上游 SKILL.md 章節模板符合度,與本 repo 風格不同故三支同扣。
+- [ ] **dual-axis LLM 軸點出、尚未處理的項目**(v4.113.4 評估產出,詳見 `reports/skill_reviews/llm_review_*.json`):
+  - rm:vol-scaling 失能未解(參數化 ≠ 修好);sector 檢查任一失敗即全盤停用過於粗糙(應只在未定價權重會改變判定時才停用);`load_positions` 對畸形 entry 靜默補 0 不進 warnings
+  - burry:insider string-sniffing 可能**誤判**而非只是失敗(含 'Sale' 字樣的無關欄位會投 SELL);`burry_voice`/`veto_flag` 分工只有散文約束,validator 未驗;FCF 的 OpCF×0.85 代打未標記來源
+  - tail-risk:normalizer 2026-04 校準無漂移偵測;無 `band_margin` 欄位讓消費者分辨「穩的 MODERATE」與「離 FRAGILE 0.2 分的 MODERATE」;無 cache
+
 - [ ] **`auto_adjust` 慣例盤點(標註,非統一)**(v4.113.1 立項,排在 B4 之後):repo 內至少三套並存——`auto_adjust=True`(technical_core / tail_risk / burry / risk_manager / sector `*_yfinance` / journal / sentiment / mood / fred-macro / weekly-tech-playbook)、`auto_adjust=False`(short-term-target `predict.py` + `weekly_review.py` / thematic-screener / build_event_index / backtest_postmortem)。**問題從來不是慣例不同,是慣例隱形。** 產出物:每個取價位點一列(位置 / 慣例 / deliberate 或 accidental / 一行理由)。已知先例直接填:`predict.py` = deliberate(`weights.yaml` 在該基準校準)、`build_event_index` 很可能 deliberate(事件價應對得上當日報價)。**標不出理由的就是下一個候選修正。** 順帶立規範:新取價 code 必須明示 adjust 慣例。**不預設任何統一動作**——盤點完每個 accidental 個案逐項拍板。
 
 - [ ] **風控三支 Batch B 餘三項——備忘結論為「維持現狀」,重啟需先解決前置條件**(證據見 `docs/plan_risk_trio_B.md`):

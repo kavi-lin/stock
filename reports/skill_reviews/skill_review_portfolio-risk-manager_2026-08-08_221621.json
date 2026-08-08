@@ -1,0 +1,198 @@
+{
+  "generated_at": "2026-08-08 22:16:21",
+  "seed": null,
+  "selection_mode": "manual",
+  "skill_name": "portfolio-risk-manager",
+  "skill_file": "skills/portfolio-risk-manager/SKILL.md",
+  "auto_review": {
+    "skill_name": "portfolio-risk-manager",
+    "skill_file": "skills/portfolio-risk-manager/SKILL.md",
+    "skill_type": "execution_or_hybrid",
+    "score": 72,
+    "score_breakdown": {
+      "metadata_use_case": 20,
+      "workflow_coverage": 5,
+      "execution_safety_reproducibility": 21,
+      "supporting_artifacts": 6,
+      "test_health": 20
+    },
+    "findings": [
+      {
+        "severity": "medium",
+        "path": "skills/portfolio-risk-manager/SKILL.md",
+        "line": null,
+        "message": "Missing section: `## When to Use`.",
+        "improvement": "Add `## When to Use` to improve operator guidance."
+      },
+      {
+        "severity": "medium",
+        "path": "skills/portfolio-risk-manager/SKILL.md",
+        "line": null,
+        "message": "Missing section: `## Prerequisites`.",
+        "improvement": "Add `## Prerequisites` to improve operator guidance."
+      },
+      {
+        "severity": "medium",
+        "path": "skills/portfolio-risk-manager/SKILL.md",
+        "line": null,
+        "message": "Missing section: `## Workflow`.",
+        "improvement": "Add `## Workflow` to improve operator guidance."
+      },
+      {
+        "severity": "medium",
+        "path": "skills/portfolio-risk-manager/SKILL.md",
+        "line": null,
+        "message": "Missing section: `## Resources`.",
+        "improvement": "Add `## Resources` to improve operator guidance."
+      },
+      {
+        "severity": "medium",
+        "path": "skills/portfolio-risk-manager/SKILL.md",
+        "line": null,
+        "message": "No markdown reference files found in `references/`.",
+        "improvement": "Add methodology/reference docs to support consistent interpretation."
+      }
+    ],
+    "improvements_required": true,
+    "improvement_items": [
+      "Missing section: `## When to Use`. -> Add `## When to Use` to improve operator guidance.",
+      "Missing section: `## Prerequisites`. -> Add `## Prerequisites` to improve operator guidance.",
+      "Missing section: `## Workflow`. -> Add `## Workflow` to improve operator guidance.",
+      "Missing section: `## Resources`. -> Add `## Resources` to improve operator guidance.",
+      "No markdown reference files found in `references/`. -> Add methodology/reference docs to support consistent interpretation."
+    ],
+    "test_status": "passed",
+    "test_command": "uv run --extra dev pytest /Users/kavi/Developer/Claude/Projects/ai-investment-committee/skills/portfolio-risk-manager/scripts/tests -q",
+    "test_output": "\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m                                  [100%]\u001b[0m\n\u001b[32m\u001b[32m\u001b[1m39 passed\u001b[0m\u001b[32m in 0.43s\u001b[0m\u001b[0m\n\n\u001b[1m\u001b[33mwarning\u001b[39m\u001b[0m\u001b[1m:\u001b[0m \u001b[1m`--extra dev` has no effect when used outside of a project\u001b[0m"
+  },
+  "llm_review": {
+    "provided": true,
+    "source_file": "/private/tmp/dar/llm/portfolio-risk-manager.json",
+    "score": 70,
+    "summary": "Robustness and honesty both improved sharply: the sector check no longer shrinks its own denominator, failures now surface as a structured error the consumer can degrade on, and the 20% ceiling's dominance is documented with the 47-trade lattice evidence rather than asserted. But the headline feature still does not work. Step 2 is named vol-adjusted sizing while the ceiling binds for essentially every normal equity, so the correlation multiplier is doing all the differentiating. V4.112.0 made that observable via --max-cap without changing the default, which was the right call — it is not a fix, and the skill's core promise remains unmet.",
+    "findings": [
+      {
+        "severity": "high",
+        "path": "skills/portfolio-risk-manager/scripts/risk_manager.py",
+        "line": 110,
+        "message": "vol-scaling is effectively inert. At the default 0.6%/day budget the 20% ceiling binds for any daily vol <= 3.0%, and back-solving 47 historical trades showed the implied base clustering on the ceiling lattice (0.140 appears 8 times) with only ~6-8 trades ever escaping it. A caller reading 'vol_adjusted_limit_pct' reasonably believes volatility sized the position; it did not.",
+        "improvement": "Either lower the default budget so the formula has range, or rename the output to reflect what it is (a correlation-adjusted cap). Leaving an accurate-sounding name on an inert computation is the more expensive of the two failure modes."
+      },
+      {
+        "severity": "medium",
+        "path": "skills/portfolio-risk-manager/scripts/risk_manager.py",
+        "line": 126,
+        "message": "One unpriceable holding disarms the sector check for the entire portfolio. That is the right direction (better to under-punish than mis-punish), but it is coarse: a 20-position portfolio loses concentration protection because a single ticker failed to fetch.",
+        "improvement": "Compute the ratio over the priced subset and only disarm when the unpriced weight could change the verdict — i.e. when best case and worst case for the missing holdings straddle the 30% threshold."
+      },
+      {
+        "severity": "medium",
+        "path": "skills/portfolio-risk-manager/scripts/risk_manager.py",
+        "line": 22,
+        "message": "load_positions() accepts anything shaped roughly like a position and coerces silently: a missing shares field becomes 0.0, so a malformed entry contributes zero exposure and quietly weakens the sector denominator instead of being reported.",
+        "improvement": "Count and report skipped/degenerate entries in warnings[] — the same failure-path-only convention the sector check already uses."
+      },
+      {
+        "severity": "low",
+        "path": "skills/portfolio-risk-manager/scripts/risk_manager.py",
+        "line": 132,
+        "message": "The sector loop is serial with no cache: one yf.Ticker per holding, .info plus .history each. For a 20-name portfolio that is 20 sequential round trips on every candidate evaluation.",
+        "improvement": "Route sector metadata through skills/_shared/company_context.py, which already provides the same data with a 24h cache."
+      }
+    ]
+  },
+  "final_review": {
+    "score": 71,
+    "weights": {
+      "auto_weight": 0.5,
+      "llm_weight": 0.5
+    },
+    "improvements_required": true,
+    "improvement_items": [
+      "vol-scaling is effectively inert. At the default 0.6%/day budget the 20% ceiling binds for any daily vol <= 3.0%, and back-solving 47 historical trades showed the implied base clustering on the ceiling lattice (0.140 appears 8 times) with only ~6-8 trades ever escaping it. A caller reading 'vol_adjusted_limit_pct' reasonably believes volatility sized the position; it did not. -> Either lower the default budget so the formula has range, or rename the output to reflect what it is (a correlation-adjusted cap). Leaving an accurate-sounding name on an inert computation is the more expensive of the two failure modes.",
+      "Missing section: `## When to Use`. -> Add `## When to Use` to improve operator guidance.",
+      "Missing section: `## Prerequisites`. -> Add `## Prerequisites` to improve operator guidance.",
+      "Missing section: `## Workflow`. -> Add `## Workflow` to improve operator guidance.",
+      "Missing section: `## Resources`. -> Add `## Resources` to improve operator guidance.",
+      "No markdown reference files found in `references/`. -> Add methodology/reference docs to support consistent interpretation.",
+      "One unpriceable holding disarms the sector check for the entire portfolio. That is the right direction (better to under-punish than mis-punish), but it is coarse: a 20-position portfolio loses concentration protection because a single ticker failed to fetch. -> Compute the ratio over the priced subset and only disarm when the unpriced weight could change the verdict — i.e. when best case and worst case for the missing holdings straddle the 30% threshold.",
+      "load_positions() accepts anything shaped roughly like a position and coerces silently: a missing shares field becomes 0.0, so a malformed entry contributes zero exposure and quietly weakens the sector denominator instead of being reported. -> Count and report skipped/degenerate entries in warnings[] — the same failure-path-only convention the sector check already uses.",
+      "The sector loop is serial with no cache: one yf.Ticker per holding, .info plus .history each. For a 20-name portfolio that is 20 sequential round trips on every candidate evaluation. -> Route sector metadata through skills/_shared/company_context.py, which already provides the same data with a 24h cache."
+    ],
+    "findings": [
+      {
+        "severity": "high",
+        "path": "skills/portfolio-risk-manager/scripts/risk_manager.py",
+        "line": 110,
+        "message": "vol-scaling is effectively inert. At the default 0.6%/day budget the 20% ceiling binds for any daily vol <= 3.0%, and back-solving 47 historical trades showed the implied base clustering on the ceiling lattice (0.140 appears 8 times) with only ~6-8 trades ever escaping it. A caller reading 'vol_adjusted_limit_pct' reasonably believes volatility sized the position; it did not.",
+        "improvement": "Either lower the default budget so the formula has range, or rename the output to reflect what it is (a correlation-adjusted cap). Leaving an accurate-sounding name on an inert computation is the more expensive of the two failure modes.",
+        "axis": "llm"
+      },
+      {
+        "severity": "medium",
+        "path": "skills/portfolio-risk-manager/SKILL.md",
+        "line": null,
+        "message": "Missing section: `## When to Use`.",
+        "improvement": "Add `## When to Use` to improve operator guidance.",
+        "axis": "auto"
+      },
+      {
+        "severity": "medium",
+        "path": "skills/portfolio-risk-manager/SKILL.md",
+        "line": null,
+        "message": "Missing section: `## Prerequisites`.",
+        "improvement": "Add `## Prerequisites` to improve operator guidance.",
+        "axis": "auto"
+      },
+      {
+        "severity": "medium",
+        "path": "skills/portfolio-risk-manager/SKILL.md",
+        "line": null,
+        "message": "Missing section: `## Workflow`.",
+        "improvement": "Add `## Workflow` to improve operator guidance.",
+        "axis": "auto"
+      },
+      {
+        "severity": "medium",
+        "path": "skills/portfolio-risk-manager/SKILL.md",
+        "line": null,
+        "message": "Missing section: `## Resources`.",
+        "improvement": "Add `## Resources` to improve operator guidance.",
+        "axis": "auto"
+      },
+      {
+        "severity": "medium",
+        "path": "skills/portfolio-risk-manager/SKILL.md",
+        "line": null,
+        "message": "No markdown reference files found in `references/`.",
+        "improvement": "Add methodology/reference docs to support consistent interpretation.",
+        "axis": "auto"
+      },
+      {
+        "severity": "medium",
+        "path": "skills/portfolio-risk-manager/scripts/risk_manager.py",
+        "line": 126,
+        "message": "One unpriceable holding disarms the sector check for the entire portfolio. That is the right direction (better to under-punish than mis-punish), but it is coarse: a 20-position portfolio loses concentration protection because a single ticker failed to fetch.",
+        "improvement": "Compute the ratio over the priced subset and only disarm when the unpriced weight could change the verdict — i.e. when best case and worst case for the missing holdings straddle the 30% threshold.",
+        "axis": "llm"
+      },
+      {
+        "severity": "medium",
+        "path": "skills/portfolio-risk-manager/scripts/risk_manager.py",
+        "line": 22,
+        "message": "load_positions() accepts anything shaped roughly like a position and coerces silently: a missing shares field becomes 0.0, so a malformed entry contributes zero exposure and quietly weakens the sector denominator instead of being reported.",
+        "improvement": "Count and report skipped/degenerate entries in warnings[] — the same failure-path-only convention the sector check already uses.",
+        "axis": "llm"
+      },
+      {
+        "severity": "low",
+        "path": "skills/portfolio-risk-manager/scripts/risk_manager.py",
+        "line": 132,
+        "message": "The sector loop is serial with no cache: one yf.Ticker per holding, .info plus .history each. For a 20-name portfolio that is 20 sequential round trips on every candidate evaluation.",
+        "improvement": "Route sector metadata through skills/_shared/company_context.py, which already provides the same data with a 24h cache.",
+        "axis": "llm"
+      }
+    ]
+  },
+  "llm_prompt_file": null
+}

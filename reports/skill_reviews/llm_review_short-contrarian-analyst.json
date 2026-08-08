@@ -1,0 +1,18 @@
+{
+  "score": 74,
+  "summary": "The V4.111.7 fix removed a genuine hazard: a failed price fetch used to score 20 and vote as real data, letting a network blip manufacture a T4 veto from an agent that can force HOLD. That path is now renormalized out and pinned by a seeded regression, and the frontmatter no longer claims an FMP dependency that never existed. What remains is structural rather than arithmetical: one input is parsed by string-sniffing, one output key is knowingly misnamed, and the Phase 2 contract is split between this script and the PM in a way only prose enforces.",
+  "findings": [
+    {"severity": "high", "path": "skills/short-contrarian-analyst/scripts/burry_score.py", "line": 62,
+     "message": "get_insider_net() flattens each yfinance row to a string and substring-matches 'buy'/'purchase'/'sale'/'sell'. It carries 10% of the score and will silently degrade to UNKNOWN on any upstream column change — fail-safe, but it can also mislabel: a row containing the word 'Sale' in an unrelated field votes SELL.",
+     "improvement": "Parse the transaction-type column explicitly and treat an unrecognized schema as UNKNOWN. B5 measured only 67% agreement with FMP's insider statistics, so the current reading is not obviously trustworthy either way."},
+    {"severity": "medium", "path": "skills/short-contrarian-analyst/SKILL.md", "line": null,
+     "message": "burry_voice and veto_flag are required by the Phase 2 JSON contract but are produced by the PM, not this script. The split is documented in prose only; nothing fails if the PM omits them.",
+     "improvement": "Have validate_session_export assert both fields whenever burry_score is present, so the contract is machine-enforced rather than convention."},
+    {"severity": "medium", "path": "skills/short-contrarian-analyst/scripts/burry_score.py", "line": 93,
+     "message": "The `ev_ebit` key holds EV/EBITDA. This is documented and the key is frozen for history compatibility, but every downstream reader that trusts the name compares against EV/EBIT thresholds, which are systematically stricter.",
+     "improvement": "Add an `ev_metric: \"EV/EBITDA\"` sibling field so consumers can branch on the actual metric instead of inferring it from a name that lies."},
+    {"severity": "low", "path": "skills/short-contrarian-analyst/scripts/burry_score.py", "line": 87,
+     "message": "The FCF fallback substitutes OpCF x 0.85 when freeCashflow is missing or negative. The 15% capex assumption is hard-coded and unlabelled in the output, so a fabricated FCF is indistinguishable from a reported one.",
+     "improvement": "Flag the substitution in components (e.g. fcf_source: reported|estimated) — it drives the heaviest-weighted component at 35%."}
+  ]
+}

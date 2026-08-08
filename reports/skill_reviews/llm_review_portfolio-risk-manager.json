@@ -1,0 +1,18 @@
+{
+  "score": 70,
+  "summary": "Robustness and honesty both improved sharply: the sector check no longer shrinks its own denominator, failures now surface as a structured error the consumer can degrade on, and the 20% ceiling's dominance is documented with the 47-trade lattice evidence rather than asserted. But the headline feature still does not work. Step 2 is named vol-adjusted sizing while the ceiling binds for essentially every normal equity, so the correlation multiplier is doing all the differentiating. V4.112.0 made that observable via --max-cap without changing the default, which was the right call — it is not a fix, and the skill's core promise remains unmet.",
+  "findings": [
+    {"severity": "high", "path": "skills/portfolio-risk-manager/scripts/risk_manager.py", "line": 110,
+     "message": "vol-scaling is effectively inert. At the default 0.6%/day budget the 20% ceiling binds for any daily vol <= 3.0%, and back-solving 47 historical trades showed the implied base clustering on the ceiling lattice (0.140 appears 8 times) with only ~6-8 trades ever escaping it. A caller reading 'vol_adjusted_limit_pct' reasonably believes volatility sized the position; it did not.",
+     "improvement": "Either lower the default budget so the formula has range, or rename the output to reflect what it is (a correlation-adjusted cap). Leaving an accurate-sounding name on an inert computation is the more expensive of the two failure modes."},
+    {"severity": "medium", "path": "skills/portfolio-risk-manager/scripts/risk_manager.py", "line": 126,
+     "message": "One unpriceable holding disarms the sector check for the entire portfolio. That is the right direction (better to under-punish than mis-punish), but it is coarse: a 20-position portfolio loses concentration protection because a single ticker failed to fetch.",
+     "improvement": "Compute the ratio over the priced subset and only disarm when the unpriced weight could change the verdict — i.e. when best case and worst case for the missing holdings straddle the 30% threshold."},
+    {"severity": "medium", "path": "skills/portfolio-risk-manager/scripts/risk_manager.py", "line": 22,
+     "message": "load_positions() accepts anything shaped roughly like a position and coerces silently: a missing shares field becomes 0.0, so a malformed entry contributes zero exposure and quietly weakens the sector denominator instead of being reported.",
+     "improvement": "Count and report skipped/degenerate entries in warnings[] — the same failure-path-only convention the sector check already uses."},
+    {"severity": "low", "path": "skills/portfolio-risk-manager/scripts/risk_manager.py", "line": 132,
+     "message": "The sector loop is serial with no cache: one yf.Ticker per holding, .info plus .history each. For a 20-name portfolio that is 20 sequential round trips on every candidate evaluation.",
+     "improvement": "Route sector metadata through skills/_shared/company_context.py, which already provides the same data with a 24h cache."}
+  ]
+}

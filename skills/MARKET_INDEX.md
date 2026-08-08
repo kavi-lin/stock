@@ -1,7 +1,7 @@
 # Skills Market Index
 
 > Source of truth for `market` / `scope` classification + 接線狀態 of every skill in
-> `skills/`. 25 skills + `_shared`. Rewritten 2026-06-11 (V4.5 audit cleanup)；2026-07-03 補 quant-backtest；2026-07-16 補 valuation-modeler (V4.69.0)；2026-08-08 econ-calendar 修復移回 Protocol lane (V4.111.5)。
+> `skills/`. 26 skills + `_shared`. Rewritten 2026-06-11 (V4.5 audit cleanup)；2026-07-03 補 quant-backtest；2026-07-16 補 valuation-modeler (V4.69.0)；2026-08-08 econ-calendar 修復移回 Protocol lane (V4.111.5)。
 > 接線證據見 `reports/SKILLS_AUDIT_2026-06-11.md`。
 
 `market` values:
@@ -41,7 +41,8 @@
 | `short-contrarian-analyst` | us-equity | single-ticker | yfinance（V4.111.7 更正：從無 FMP 呼叫）| investment Phase 2 第 5 lane（Burry）；T4 仲裁刻度已修 V4.4 |
 | `technical-analyst` | market-agnostic | single-ticker | shared technical_core（FMP 主源）；chart 圖片為獨立模式 | investment Phase 2 Technical lane（`analyze.py --json-only`）|
 | `tail-risk-analyzer` | market-agnostic | single-ticker | yfinance | investment Phase 4 Step 3、sector Phase 4b |
-| `portfolio-risk-manager` | market-agnostic | portfolio-level | positions.json, yfinance | investment Phase 4 Step 2 |
+| `portfolio-risk-manager` | market-agnostic | portfolio-level | positions.json + shared technical_core（FMP 主源） | investment Phase 4 Step 2 |
+| `dual-axis-skill-reviewer` | market-agnostic | tooling | 無外部資料源（讀 `skills/*/SKILL.md` + 跑該 skill 測試）| **dev 工具，不接 protocol**。V4.113.4 自上游引入（`b814274`，程式碼未改）。auto 軸的結構檢查對應上游 SKILL.md 模板，與本 repo 風格不同——讀 breakdown 而非總分，見該 SKILL.md 頂部注意事項 |
 | `sector-analyst` | us-equity | sector-level | finvizfinance, yfinance | sector protocol core |
 | `market-news-analyst` | us-equity | news-scan | protocol lane 實跑 `fetch.py`（FMP per-ticker 48h）；SKILL.md 的 WebSearch 宏觀流程為獨立模式 | investment News lane + sector Phase 3 |
 | `quant-backtest` | market-agnostic | single-ticker | technical_core 價格資料 + 11 策略模板 registry | `回測 [TICKER]`（dashboard SCRIPT_PROTOCOLS subprocess，0 LLM）；探索層，不入 investment_protocol 決策 |

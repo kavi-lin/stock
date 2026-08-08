@@ -8,6 +8,42 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.113.4] — 2026-08-08 — 引入 dual-axis-skill-reviewer，並用它評自己這輪的三支
+
+2026-08-08 稽核把它評為「立即可用」，然後只寫進 SESSION_NOTES——**評估結論若不落到 repo
+或 TODO，就會靜默蒸發**。兩個版本後補上。
+
+### Added
+- `skills/dual-axis-skill-reviewer/`（上游 `b814274`，MIT，程式碼未改；SKILL.md 只移除
+  global-install 段因本 repo 為 vendored 副本）+ 23 個上游測試通過
+- `reports/skill_reviews/` — 三支風控 skill 的 auto + LLM 雙軸報告與 LLM 軸 JSON
+
+### 評估結果（auto 0.5 / llm 0.5）
+| skill | auto | llm | final |
+|---|---|---|---|
+| tail-risk-analyzer | 72 | 78 | **75** |
+| short-contrarian-analyst | 72 | 74 | **73** |
+| portfolio-risk-manager | 72 | 70 | **71** |
+
+**auto 軸三支同分 72 不是巧合**：它的 `metadata_use_case` / `workflow_coverage` /
+`supporting_artifacts` 檢查的是上游 SKILL.md 的章節模板（When to Use / Prerequisites /
+Workflow / Resources + `references/`），本 repo 的 SKILL.md 是另一套風格，於是三支被扣
+一模一樣的分。**那是格式差異不是品質差異**，已寫進該 SKILL.md 頂部與 MARKET_INDEX 條目。
+本輪真正改善的是 `test_health`：從 0 → 20（滿分），三支各 34 / 40 / 39 test。
+
+### LLM 軸點出的主要待辦（未修，入紀錄）
+- **rm（最低分）**：vol-scaling 仍失能——Step 2 名為 vol-adjusted 但天花板對 daily vol
+  ≤3% 恆綁。V4.112.0 的參數化讓它可觀測，不是修好。**「準確的名字掛在失效的計算上」
+  是兩種失敗模式裡比較貴的那個**
+- **burry**：insider 讀值仍是 string-sniffing（權重 10%，可能誤判而非只是失敗）；
+  `burry_voice`/`veto_flag` 的分工只有散文約束；FCF 的 OpCF×0.85 代打未在輸出標記
+- **tail-risk**：normalizer 的 2026-04 校準無漂移偵測機制；V4.113.3 遷移後帶邊餘裕
+  僅 0.6 分而實測 Δ 0.4；無 cache
+
+### 附帶
+- `skills/MARKET_INDEX.md` 補列（26 skills）；`portfolio-risk-manager` 資料源同步為
+  `positions.json + shared technical_core`
+
 ## [4.113.3] — 2026-08-08 — B4：風控三支遷 technical_core，閘門過真實 code path 重跑
 
 `docs/plan_risk_trio_B.md` B4。前置條件在 V4.113.0 解除（FMP dividend-adjusted 端點）、

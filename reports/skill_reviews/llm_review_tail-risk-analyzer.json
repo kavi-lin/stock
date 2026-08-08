@@ -1,0 +1,18 @@
+{
+  "score": 78,
+  "summary": "Numerically sound and now well covered (34 tests, zero network). The 30/60 bands, the .10/.10/.15/.30/.35 weights and the <30-bar degradation contract are all locked by tests, and V4.111.7 fixed the SKILL.md that had taught wrong weights and wrong thresholds. Remaining risk is not in the code but in the calibration and the operational envelope: the normalizers carry a 2026-04 calibration with no re-validation mechanism, the module refetches on every call with no cache, and the V4.113.3 migration to technical_core left only ~0.6 points of band-edge headroom against a measured 0.4-point drift. Nothing here is broken; the gaps are about knowing when it stops being right.",
+  "findings": [
+    {"severity": "medium", "path": "skills/tail-risk-analyzer/scripts/tail_risk.py", "line": 66,
+     "message": "The five normalizer constants are labelled 'Calibrated 2026-04' but nothing re-checks them. Four months on there is no drift alarm, and B7 concluded they still look healthy only because someone happened to sample 16 tickers by hand.",
+     "improvement": "Add a cheap distribution check that can be run periodically (e.g. score a fixed cohort and assert the ROBUST/MODERATE/FRAGILE split stays within expected bounds), or record the reference distribution in references/ so drift is detectable without re-deriving it."},
+    {"severity": "medium", "path": "skills/tail-risk-analyzer/scripts/tail_risk.py", "line": 37,
+     "message": "V4.113.3 measured |Δscore| up to 0.40 from the technical_core migration while the closest sample sat 0.60 from a band edge. The zero-flip gate passed, but any ticker within 0.4 of 30 or 60 will flip on a data-source change, and nothing surfaces that a result is band-marginal.",
+     "improvement": "Emit a `band_margin` field (distance to the nearest band edge) so consumers can tell a confident MODERATE from one that is 0.2 points from FRAGILE."},
+    {"severity": "low", "path": "skills/tail-risk-analyzer/scripts/tail_risk.py", "line": 36,
+     "message": "No caching. Every invocation refetches a full year of history, and the investment protocol calls this per candidate on top of the other lanes.",
+     "improvement": "Reuse the 24h cache pattern from skills/_shared/company_context.py; the input (ticker, lookback, trading day) is a natural cache key."},
+    {"severity": "low", "path": "skills/tail-risk-analyzer/SKILL.md", "line": null,
+     "message": "Does not follow the reviewer's expected template (no When to Use / Prerequisites / Workflow / Resources, no references/). This is a deliberate house-style difference, but it means the auto axis scores document structure rather than skill quality.",
+     "improvement": "Either adopt the four headings or record the deviation once in skills/MARKET_INDEX.md so future reviews do not re-report it as a defect."}
+  ]
+}

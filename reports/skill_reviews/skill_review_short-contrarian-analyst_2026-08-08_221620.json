@@ -1,0 +1,198 @@
+{
+  "generated_at": "2026-08-08 22:16:20",
+  "seed": null,
+  "selection_mode": "manual",
+  "skill_name": "short-contrarian-analyst",
+  "skill_file": "skills/short-contrarian-analyst/SKILL.md",
+  "auto_review": {
+    "skill_name": "short-contrarian-analyst",
+    "skill_file": "skills/short-contrarian-analyst/SKILL.md",
+    "skill_type": "execution_or_hybrid",
+    "score": 72,
+    "score_breakdown": {
+      "metadata_use_case": 20,
+      "workflow_coverage": 5,
+      "execution_safety_reproducibility": 21,
+      "supporting_artifacts": 6,
+      "test_health": 20
+    },
+    "findings": [
+      {
+        "severity": "medium",
+        "path": "skills/short-contrarian-analyst/SKILL.md",
+        "line": null,
+        "message": "Missing section: `## When to Use`.",
+        "improvement": "Add `## When to Use` to improve operator guidance."
+      },
+      {
+        "severity": "medium",
+        "path": "skills/short-contrarian-analyst/SKILL.md",
+        "line": null,
+        "message": "Missing section: `## Prerequisites`.",
+        "improvement": "Add `## Prerequisites` to improve operator guidance."
+      },
+      {
+        "severity": "medium",
+        "path": "skills/short-contrarian-analyst/SKILL.md",
+        "line": null,
+        "message": "Missing section: `## Workflow`.",
+        "improvement": "Add `## Workflow` to improve operator guidance."
+      },
+      {
+        "severity": "medium",
+        "path": "skills/short-contrarian-analyst/SKILL.md",
+        "line": null,
+        "message": "Missing section: `## Resources`.",
+        "improvement": "Add `## Resources` to improve operator guidance."
+      },
+      {
+        "severity": "medium",
+        "path": "skills/short-contrarian-analyst/SKILL.md",
+        "line": null,
+        "message": "No markdown reference files found in `references/`.",
+        "improvement": "Add methodology/reference docs to support consistent interpretation."
+      }
+    ],
+    "improvements_required": true,
+    "improvement_items": [
+      "Missing section: `## When to Use`. -> Add `## When to Use` to improve operator guidance.",
+      "Missing section: `## Prerequisites`. -> Add `## Prerequisites` to improve operator guidance.",
+      "Missing section: `## Workflow`. -> Add `## Workflow` to improve operator guidance.",
+      "Missing section: `## Resources`. -> Add `## Resources` to improve operator guidance.",
+      "No markdown reference files found in `references/`. -> Add methodology/reference docs to support consistent interpretation."
+    ],
+    "test_status": "passed",
+    "test_command": "uv run --extra dev pytest /Users/kavi/Developer/Claude/Projects/ai-investment-committee/skills/short-contrarian-analyst/scripts/tests -q",
+    "test_output": "\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m                                 [100%]\u001b[0m\n\u001b[32m\u001b[32m\u001b[1m40 passed\u001b[0m\u001b[32m in 0.40s\u001b[0m\u001b[0m\n\n\u001b[1m\u001b[33mwarning\u001b[39m\u001b[0m\u001b[1m:\u001b[0m \u001b[1m`--extra dev` has no effect when used outside of a project\u001b[0m"
+  },
+  "llm_review": {
+    "provided": true,
+    "source_file": "/private/tmp/dar/llm/short-contrarian-analyst.json",
+    "score": 74,
+    "summary": "The V4.111.7 fix removed a genuine hazard: a failed price fetch used to score 20 and vote as real data, letting a network blip manufacture a T4 veto from an agent that can force HOLD. That path is now renormalized out and pinned by a seeded regression, and the frontmatter no longer claims an FMP dependency that never existed. What remains is structural rather than arithmetical: one input is parsed by string-sniffing, one output key is knowingly misnamed, and the Phase 2 contract is split between this script and the PM in a way only prose enforces.",
+    "findings": [
+      {
+        "severity": "high",
+        "path": "skills/short-contrarian-analyst/scripts/burry_score.py",
+        "line": 62,
+        "message": "get_insider_net() flattens each yfinance row to a string and substring-matches 'buy'/'purchase'/'sale'/'sell'. It carries 10% of the score and will silently degrade to UNKNOWN on any upstream column change — fail-safe, but it can also mislabel: a row containing the word 'Sale' in an unrelated field votes SELL.",
+        "improvement": "Parse the transaction-type column explicitly and treat an unrecognized schema as UNKNOWN. B5 measured only 67% agreement with FMP's insider statistics, so the current reading is not obviously trustworthy either way."
+      },
+      {
+        "severity": "medium",
+        "path": "skills/short-contrarian-analyst/SKILL.md",
+        "line": null,
+        "message": "burry_voice and veto_flag are required by the Phase 2 JSON contract but are produced by the PM, not this script. The split is documented in prose only; nothing fails if the PM omits them.",
+        "improvement": "Have validate_session_export assert both fields whenever burry_score is present, so the contract is machine-enforced rather than convention."
+      },
+      {
+        "severity": "medium",
+        "path": "skills/short-contrarian-analyst/scripts/burry_score.py",
+        "line": 93,
+        "message": "The `ev_ebit` key holds EV/EBITDA. This is documented and the key is frozen for history compatibility, but every downstream reader that trusts the name compares against EV/EBIT thresholds, which are systematically stricter.",
+        "improvement": "Add an `ev_metric: \"EV/EBITDA\"` sibling field so consumers can branch on the actual metric instead of inferring it from a name that lies."
+      },
+      {
+        "severity": "low",
+        "path": "skills/short-contrarian-analyst/scripts/burry_score.py",
+        "line": 87,
+        "message": "The FCF fallback substitutes OpCF x 0.85 when freeCashflow is missing or negative. The 15% capex assumption is hard-coded and unlabelled in the output, so a fabricated FCF is indistinguishable from a reported one.",
+        "improvement": "Flag the substitution in components (e.g. fcf_source: reported|estimated) — it drives the heaviest-weighted component at 35%."
+      }
+    ]
+  },
+  "final_review": {
+    "score": 73,
+    "weights": {
+      "auto_weight": 0.5,
+      "llm_weight": 0.5
+    },
+    "improvements_required": true,
+    "improvement_items": [
+      "get_insider_net() flattens each yfinance row to a string and substring-matches 'buy'/'purchase'/'sale'/'sell'. It carries 10% of the score and will silently degrade to UNKNOWN on any upstream column change — fail-safe, but it can also mislabel: a row containing the word 'Sale' in an unrelated field votes SELL. -> Parse the transaction-type column explicitly and treat an unrecognized schema as UNKNOWN. B5 measured only 67% agreement with FMP's insider statistics, so the current reading is not obviously trustworthy either way.",
+      "Missing section: `## When to Use`. -> Add `## When to Use` to improve operator guidance.",
+      "Missing section: `## Prerequisites`. -> Add `## Prerequisites` to improve operator guidance.",
+      "Missing section: `## Workflow`. -> Add `## Workflow` to improve operator guidance.",
+      "Missing section: `## Resources`. -> Add `## Resources` to improve operator guidance.",
+      "No markdown reference files found in `references/`. -> Add methodology/reference docs to support consistent interpretation.",
+      "burry_voice and veto_flag are required by the Phase 2 JSON contract but are produced by the PM, not this script. The split is documented in prose only; nothing fails if the PM omits them. -> Have validate_session_export assert both fields whenever burry_score is present, so the contract is machine-enforced rather than convention.",
+      "The `ev_ebit` key holds EV/EBITDA. This is documented and the key is frozen for history compatibility, but every downstream reader that trusts the name compares against EV/EBIT thresholds, which are systematically stricter. -> Add an `ev_metric: \"EV/EBITDA\"` sibling field so consumers can branch on the actual metric instead of inferring it from a name that lies.",
+      "The FCF fallback substitutes OpCF x 0.85 when freeCashflow is missing or negative. The 15% capex assumption is hard-coded and unlabelled in the output, so a fabricated FCF is indistinguishable from a reported one. -> Flag the substitution in components (e.g. fcf_source: reported|estimated) — it drives the heaviest-weighted component at 35%."
+    ],
+    "findings": [
+      {
+        "severity": "high",
+        "path": "skills/short-contrarian-analyst/scripts/burry_score.py",
+        "line": 62,
+        "message": "get_insider_net() flattens each yfinance row to a string and substring-matches 'buy'/'purchase'/'sale'/'sell'. It carries 10% of the score and will silently degrade to UNKNOWN on any upstream column change — fail-safe, but it can also mislabel: a row containing the word 'Sale' in an unrelated field votes SELL.",
+        "improvement": "Parse the transaction-type column explicitly and treat an unrecognized schema as UNKNOWN. B5 measured only 67% agreement with FMP's insider statistics, so the current reading is not obviously trustworthy either way.",
+        "axis": "llm"
+      },
+      {
+        "severity": "medium",
+        "path": "skills/short-contrarian-analyst/SKILL.md",
+        "line": null,
+        "message": "Missing section: `## When to Use`.",
+        "improvement": "Add `## When to Use` to improve operator guidance.",
+        "axis": "auto"
+      },
+      {
+        "severity": "medium",
+        "path": "skills/short-contrarian-analyst/SKILL.md",
+        "line": null,
+        "message": "Missing section: `## Prerequisites`.",
+        "improvement": "Add `## Prerequisites` to improve operator guidance.",
+        "axis": "auto"
+      },
+      {
+        "severity": "medium",
+        "path": "skills/short-contrarian-analyst/SKILL.md",
+        "line": null,
+        "message": "Missing section: `## Workflow`.",
+        "improvement": "Add `## Workflow` to improve operator guidance.",
+        "axis": "auto"
+      },
+      {
+        "severity": "medium",
+        "path": "skills/short-contrarian-analyst/SKILL.md",
+        "line": null,
+        "message": "Missing section: `## Resources`.",
+        "improvement": "Add `## Resources` to improve operator guidance.",
+        "axis": "auto"
+      },
+      {
+        "severity": "medium",
+        "path": "skills/short-contrarian-analyst/SKILL.md",
+        "line": null,
+        "message": "No markdown reference files found in `references/`.",
+        "improvement": "Add methodology/reference docs to support consistent interpretation.",
+        "axis": "auto"
+      },
+      {
+        "severity": "medium",
+        "path": "skills/short-contrarian-analyst/SKILL.md",
+        "line": null,
+        "message": "burry_voice and veto_flag are required by the Phase 2 JSON contract but are produced by the PM, not this script. The split is documented in prose only; nothing fails if the PM omits them.",
+        "improvement": "Have validate_session_export assert both fields whenever burry_score is present, so the contract is machine-enforced rather than convention.",
+        "axis": "llm"
+      },
+      {
+        "severity": "medium",
+        "path": "skills/short-contrarian-analyst/scripts/burry_score.py",
+        "line": 93,
+        "message": "The `ev_ebit` key holds EV/EBITDA. This is documented and the key is frozen for history compatibility, but every downstream reader that trusts the name compares against EV/EBIT thresholds, which are systematically stricter.",
+        "improvement": "Add an `ev_metric: \"EV/EBITDA\"` sibling field so consumers can branch on the actual metric instead of inferring it from a name that lies.",
+        "axis": "llm"
+      },
+      {
+        "severity": "low",
+        "path": "skills/short-contrarian-analyst/scripts/burry_score.py",
+        "line": 87,
+        "message": "The FCF fallback substitutes OpCF x 0.85 when freeCashflow is missing or negative. The 15% capex assumption is hard-coded and unlabelled in the output, so a fabricated FCF is indistinguishable from a reported one.",
+        "improvement": "Flag the substitution in components (e.g. fcf_source: reported|estimated) — it drives the heaviest-weighted component at 35%.",
+        "axis": "llm"
+      }
+    ]
+  },
+  "llm_prompt_file": null
+}
