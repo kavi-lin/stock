@@ -1,7 +1,19 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-08-08 (v4.113.1)
+> **Last Updated**: 2026-08-08 (v4.113.4)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v4.113.2-4) — 綠燈的測試在打真網路;而「立即可用」的評估兩個月沒落地
+
+- **緣起**:使用者指定三項——stale test 修復批、B4 遷移、引入 dual-axis-skill-reviewer 並用它評估。
+- **52 紅有三種不同根因,不是同一個問題**:(a) ftd/market-top 的 mock 打在 fmp_pool 重構後已無人使用的 `session.get`,**每個測試都在打真網路**(套件 12-13 秒 → 修後 0.10 秒);(b) 同兩檔斷言 V4.111.6 已刪除的 v3 fallback;(c) theme-detector 的 V2.19.2 換掉全部四個 heat 公式而測試沒跟上。**「52 紅」聽起來像一批債,實際是三批**。
+- **重寫測試時挖出共用 `rsi_14` 的真 bug**:`avg_loss.replace(0, np.nan)` 讓「完全沒有下跌」變成 NaN,`rsi_state()` 因此回 `zone="unknown"`——**最極端的超買狀態產出「沒有資料」**,而 overbought 正是動能耗盡的判斷依據。鏡像案例(全跌 → 0 → oversold)是好的,所以不對稱從沒被發現。該函式餵 9 個消費者且零直接覆蓋。
+- **期望值不能抄 code 的現行輸出**:那等於無條件背書。全部由各函式**文件化的公式**推導——而這個做法當場抓到 `momentum_strength_score` 的 docstring 範例只有 midpoint 是對的(其餘四個對應更平緩的斜率)。
+- **B4 遷移暴露了同一個坑的第二次**:三支測試仍 mock `yf.Ticker`,遷移後變成 6 紅 + **74 個「通過」但在打真網路**(套件 71.9 秒)。通過而什麼都沒證明,比紅更糟。
+- **B4 閘門過了但要誠實講餘裕**:0 翻轉,|Δscore| 最大 0.400——而最接近帶邊的樣本距離 **0.60 分**。**閘門通過不等於這個遷移對所有標的都無感**,落在帶邊 0.4 分內的會翻。
+- **dual-axis 的分數要讀 breakdown**:三支 auto 軸同為 72 不是巧合——它三個子項量的是上游 SKILL.md 章節模板符合度,本 repo 風格不同故同扣。**工具量的是它自己的模板,不是品質**。真正改善的是 `test_health` 0 → 20 滿分。
+- **我自己又貢獻了一個「靜默綠」成員**:寫 alignment 註記時文字裡含 `## Resources`,後面 `s.index("## Resources")` 抓到的是我自己插入的那一行,切片把整份 SKILL.md 複製了一遍。**anchor 撞到自己剛寫的內容**——§2c 規則 2 的新變體:插入自訂文字後,再用字串定位原檔結構就不安全了。
+- **評估結論不落地就會蒸發**:dual-axis 在 2026-08-08 稽核被評「立即可用」,然後只寫進 SESSION_NOTES,兩個版本都沒人動。使用者這次點名才補。
 
 ## 🟢 Session Note (v4.113.0) — 分析結果取決於網路狀況:同一檔股票拿到哪種價格序列,看 FMP 當下有沒有失敗
 
