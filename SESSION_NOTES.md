@@ -1,7 +1,15 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-08-08 (v4.113.4)
+> **Last Updated**: 2026-08-08 (v4.113.5)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v4.113.5) — 格式歸一要在來源分岔處做,不是在顯示端補 regex
+
+- **緣起**:使用者截圖 LLM hover card——三個視窗的重置時間三種排版(`8/13 12pm`／`Aug 13 t 12pm`／`4:40am`),要求固定 `M/DD Hpm` + 額度改條狀圖。
+- **根因不是 regex 寫壞,是策略選錯**:舊 `resetHint()` 對 `reset_label` 用整串精確 regex,match 不到就原樣漏出——而 label 是各家 CLI 隨手印的,排版無契約。改成先解析成絕對時刻(`resets_at` epoch → 相對秒數 → 文字逐段抽取月/日/時間)再單點格式化,畸形輸入自然收斂。
+- **payload 裡一直有更好的來源沒人用**:`resets_at`(codex 唯一提供的形態)在 broker_gate.py 有傳、前端從沒讀——codex 列因此從來不顯示重置時間。**接新欄位前先 dump 一次真實 payload**(`lqb status --json`),三種形態五個實例全部到手,比對著舊 code 猜省得多。
+- **顯示端的無條件進位是安全方向**:分鐘 ceil 到下一小時,顯示永不早於實際重置——「幾點能再跑」寧可晚報不可早報。11:59am 與 12pm 兩列本是同一時刻,歸一後顯示一致,反而消掉一個「為什麼差一分鐘」的困惑源。
+- **§2c 照規則執行**:對照測試從實際檔案抽函式文字跑(不是複製貼上),SANITY=1 先證明會紅,再收 8 案全綠。
 
 ## 🟢 Session Note (v4.113.2-4) — 綠燈的測試在打真網路;而「立即可用」的評估兩個月沒落地
 

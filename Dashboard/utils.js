@@ -8,7 +8,7 @@
 
   // Semantic release tag shown in sidebar footer. Bump on meaningful releases.
   // Cache-busting is handled separately by dashboard_server.py (mtime injection).
-  const VERSION = 'V4.113.4';
+  const VERSION = 'V4.113.5';
 
   // V1.71.x — group field enables sectioned sidebar layout
   const NAV_ITEMS = [
@@ -816,23 +816,50 @@
         return `${(s / 86400).toFixed(1)}d`;
       };
 
-      // Providers report resets three different ways and never all three, and
-      // the string form arrives however that CLI happened to print it — the
-      // same broker payload carries both "Aug13at12pm" and "Aug 13 at 11:59am".
-      // Normalised to one short form so a column of them can be compared at a
-      // glance; the raw text stays in the row's title attribute.
+      // Providers report resets three different ways and never all three —
+      // `resets_at` (epoch), `refresh_in_seconds` (relative), or a free-text
+      // `reset_label` printed however that CLI felt like ("Aug13at12pm",
+      // "Aug 13 at 11:59am", bare "4:40am"). All of them resolve to one
+      // absolute moment and print fixed-form `M/DD Hpm`, so the column scans
+      // as a column. Minutes are ceiled into the next hour: the shown time is
+      // never earlier than the real reset, which is the safe direction for
+      // "when can I run this again".
       const MONTHS = { jan:1, feb:2, mar:3, apr:4, may:5, jun:6,
                        jul:7, aug:8, sep:9, oct:10, nov:11, dec:12 };
-      const resetHint = (b, zh) => {
-        const d = shortDuration(b.refresh_in_seconds, zh);
-        if (d) return zh ? `${d}後` : `in ${d}`;
-        const label = String(b.reset_label || '').replace(/\s*\([^)]*\)\s*/g, '').trim();
+      const hour24 = (h, ap) => (Number(h) % 12) + (/pm/i.test(ap) ? 12 : 0);
+      const fmtReset = (ms) => {
+        const d = new Date(ms);
+        if (d.getMinutes() || d.getSeconds()) { d.setMinutes(0, 0, 0); d.setTime(d.getTime() + 3600e3); }
+        const h = d.getHours();
+        return `${d.getMonth() + 1}/${String(d.getDate()).padStart(2, '0')} `
+          + `${h % 12 || 12}${h >= 12 ? 'pm' : 'am'}`;
+      };
+      const resetHint = (b) => {
+        const now = Date.now();
+        const epoch = Number(b.resets_at);
+        if (Number.isFinite(epoch) && epoch > 0) return fmtReset(epoch * 1000);
+        const rel = Number(b.refresh_in_seconds);
+        if (Number.isFinite(rel) && rel > 0) return fmtReset(now + rel * 1000);
+        // Timezone parens stripped, not trusted: the label's zone is the
+        // machine's own, and gluing "at(Asia/Taipei)12pm" back together is
+        // exactly the malformed input the old exact-shape regex died on.
+        // Piece-wise extraction survives every spacing the CLIs have shipped.
+        const label = String(b.reset_label || '').replace(/\s*\([^)]*\)\s*/g, ' ').trim();
         if (!label) return '';
-        const m = label.match(/^([a-z]{3})[a-z]*\s*(\d{1,2})\s*at\s*(.+)$/i);
-        if (m && MONTHS[m[1].toLowerCase()]) {
-          return `${MONTHS[m[1].toLowerCase()]}/${m[2]} ${m[3].replace(/\s+/g, '')}`;
+        const tm = label.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)\b/i);
+        if (!tm) return label.replace(/\s+/g, ' ');
+        const d = new Date(now);
+        d.setHours(hour24(tm[1], tm[3]), Number(tm[2] || 0), 0, 0);
+        let dated = false;
+        for (const md of label.matchAll(/([a-z]{3,9})\.?\s*(\d{1,2})(?![:\d])/gi)) {
+          const mon = MONTHS[md[1].slice(0, 3).toLowerCase()];
+          if (mon) { d.setMonth(mon - 1, Number(md[2])); dated = true; break; }
         }
-        return label.replace(/\s+/g, ' ');
+        // Bare times ("4:40am") mean the next occurrence; dated labels a day
+        // in the past mean the CLI printed last year's calendar page.
+        if (!dated && d.getTime() <= now) d.setTime(d.getTime() + 86400e3);
+        if (dated && d.getTime() < now - 86400e3) d.setFullYear(d.getFullYear() + 1);
+        return fmtReset(d.getTime());
       };
 
       const ageLabel = (sec, zh) => {
@@ -892,9 +919,15 @@
       // reports percentages and never money, so spend can only come from here.
       const llmTipHTML = (model, info, usage, reserveLine, routeTags, zh) => {
         const rows = (info.buckets || []).map(b => {
-          const hint = resetHint(b, zh);
-          return `<div class="llm-tip-bkt">
+          const hint = resetHint(b);
+          const has = b.remaining_percent !== null && b.remaining_percent !== undefined;
+          const width = has ? Math.max(0, Math.min(100, Number(b.remaining_percent))) : 0;
+          // Same threshold semantics as the sidebar bars: at or below the
+          // broker hard reserve, this window no longer gets work.
+          const low = has && reserveLine !== null && width <= reserveLine;
+          return `<div class="llm-tip-bkt${low ? ' llm-tip-bkt-low' : ''}">
             <span class="llm-tip-bkt-name">${esc(bucketLabel(b, zh))}</span>
+            <span class="llm-tip-bkt-bar"><span class="llm-tip-bkt-fill" style="width:${width}%"></span></span>
             <span class="llm-tip-bkt-pct">${pct(b.remaining_percent)}</span>
             <span class="llm-tip-bkt-reset">${esc(hint)}</span>
           </div>`;

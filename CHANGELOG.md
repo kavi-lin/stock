@@ -8,6 +8,27 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.113.5] — 2026-08-08 — LLM 額度 hover card：重置時間統一 M/DD Hpm、視窗列加迷你條狀圖
+
+### Changed
+- `Dashboard/utils.js` `resetHint()` 重寫：broker 的三種重置形態（`resets_at` epoch／
+  `refresh_in_seconds` 相對秒數／`reset_label` 自由文字）全部先解析成絕對時刻，再以固定
+  格式 `M/DD Hpm` 輸出（日補零、分鐘無條件進位到下一小時——顯示時間永不早於實際重置）。
+  改逐段抽取（月日＋時間分開 match）取代整串精確 regex，"Aug13at12pm"、
+  "Aug 13 at 11:59am"、畸形的 "Aug 13 t 12pm"、裸時間 "4:40am" 全部收斂到同一格式；
+  `resets_at`（codex 唯一提供的形態）從被忽略變成第一優先。
+- hover card 每個視窗列加迷你條狀圖（`.llm-tip-bkt-bar/-fill`），百分比保留數字；
+  低於 broker 硬保留線的視窗 fill 轉橘（`.llm-tip-bkt-low`），語意與 sidebar 主條一致。
+- `Dashboard/style.css`：`.llm-tip-bkt` grid 由三欄改四欄（name / bar 42px / pct 4ch /
+  reset），pct 與 reset 靠右對齊。
+
+### Fixed
+- 截圖回報的「8/13 12pm」「Aug 13 t 12pm」「4:40am」三種格式並存——舊 regex 只認
+  一種排版，其餘原樣漏出。對照測試（含 sanity-red）8 案全過後才收工。
+
+### Why
+- 使用者要求：重置欄改固定長度 `M/DD Hpm`，額度改條狀圖一目瞭然。
+
 ## [4.113.4] — 2026-08-08 — 引入 dual-axis-skill-reviewer，並用它評自己這輪的三支
 
 2026-08-08 稽核把它評為「立即可用」，然後只寫進 SESSION_NOTES——**評估結論若不落到 repo
