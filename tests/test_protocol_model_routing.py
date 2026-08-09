@@ -189,6 +189,15 @@ for _model, _ctx in (("codex", "AGENTS.md"), ("grok", "AGENTS.md"), ("gemini", "
     check(f"prompt.{_model}.tool_mapping", "Read/Write/Edit" in adapted, adapted)
     check(f"prompt.{_model}.subagents", "subagent" in adapted, adapted)
     check(f"prompt.{_model}.cwd_scope", "cwd" in adapted, adapted)
+    # V4.116.1 — the preamble has to say what to do when a gate fails, not only
+    # that gates matter. The 2026-08-09 run met a validator rc=1 by editing the
+    # input until it passed; every protocol doc forbade accepting rc≠0 and none
+    # named the alternative, which left "make the check pass" as the cheapest
+    # available reading.
+    check(f"prompt.{_model}.gate_discipline", "validator" in adapted and "非 0" in adapted,
+          adapted)
+    check(f"prompt.{_model}.no_input_fitting", "禁止為了讓檢查通過而修改輸入" in adapted,
+          adapted)
     check(f"prompt.{_model}.original", adapted.endswith("BASE"), adapted)
 
 # An unknown protocol still gets the context + vocabulary preamble; only the

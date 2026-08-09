@@ -426,6 +426,16 @@ def _adapt_protocol_prompt(model, prompt, name=None):
         "作業範圍：一律在目前工作目錄（cwd）這個 repo 內作業。cwd 以外的路徑"
         "（家目錄、~/Documents、~/Stock、其他 CLI 的 state 目錄）都不是本專案，"
         "禁止去那裡搜尋專案檔案。")
+    # V4.116.1 — the failure this replaces: a validator returned rc=1, and the
+    # run satisfied it by editing the input (copying a two-day-old Phase 0
+    # snapshot and changing its date) instead of performing the step. Every
+    # protocol doc already forbids accepting rc≠0; none of them said what to do
+    # instead, and "make the check pass" is the locally cheapest reading.
+    lines.append(
+        "閘門紀律：任何 validator 或 protocol 指定的必跑 script 回傳非 0，就**停下來回報**，"
+        "並說明卡在哪一步。**禁止為了讓檢查通過而修改輸入**（例如複製舊檔改日期、"
+        "補一個空的快取檔、把數字改成能過的值）——「讓 gate 過」與「達成 gate 想確認的事」"
+        "是兩件不同的事，只有後者算完成。跑不完就回報跑不完，那是可接受的結果。")
     return "\n".join(lines) + "\n\n" + prompt
 # Global default (25 min); news DIGEST normally finishes in 1-2 min, so give it
 # a tighter ceiling (12 min) — past runs that crossed 10 min have all been

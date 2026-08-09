@@ -538,16 +538,34 @@ def _calibration_block(meta: dict) -> dict | None:
 #: earnings-preview flow, so its presence would not prove *this* session ran the
 #: forecaster — the discriminator would be unsound. It also already reports a
 #: distinct reason when it does run and declines (`low_forecast_confidence`).
+#: `required_keys` is what makes this a content check rather than a presence
+#: check. V4.116.0 shipped presence only, and `echo '{}' > <T>_dcf_payload.json`
+#: walked straight through it — which matters because the behaviour this gate
+#: exists to catch is an agent that responded to a blocked gate by making the
+#: input fit (the 2026-08-09 Phase 0 copy). A gate that can be satisfied by
+#: `touch` just moves such an agent to a cheaper bypass.
 SCRIPT_SOURCED_ANCHORS = {
-    "dcf_self_built": (
-        "skills/valuation-modeler/cache/{t}_dcf_payload.json",
-        "python3 skills/valuation-modeler/scripts/dcf.py {t} --json-only",
-    ),
-    "comps_implied": (
-        "skills/valuation-modeler/cache/{t}_comps_payload.json",
-        "python3 skills/valuation-modeler/scripts/comps.py {t} --json-only",
-    ),
+    "dcf_self_built": {
+        "artifact": "skills/valuation-modeler/cache/{t}_dcf_payload.json",
+        "command": "python3 skills/valuation-modeler/scripts/dcf.py {t} --json-only",
+        "value_key": "fair_value_per_share",
+        "required_keys": ("ticker", "asof", "fair_value_per_share",
+                          "degraded", "assumptions"),
+    },
+    "comps_implied": {
+        "artifact": "skills/valuation-modeler/cache/{t}_comps_payload.json",
+        "command": "python3 skills/valuation-modeler/scripts/comps.py {t} --json-only",
+        "value_key": "comps_implied_value",
+        "required_keys": ("ticker", "asof", "comps_implied_value",
+                          "degraded", "table"),
+    },
 }
+
+#: The script ran and its artifact carries a usable number, but the anchor came
+#: through empty — the value was computed and then lost between the script and
+#: the pack. Distinct from `script_not_run` because the fix is different: this
+#: one is a wiring bug, not a skipped step.
+ANCHOR_DROPPED_VALUE = "anchor_dropped_script_value"
 
 #: How recent a script artifact must be to count as "this session's". Matches the
 #: Phase 0 gate's default for the same reason: a run that starts before midnight
@@ -586,7 +604,7 @@ def mark_unrun_anchor_scripts(ticker, anchors: dict | None, anchor_meta: dict,
     now = now if now is not None else dt.datetime.now().timestamp()
     cutoff = max_age_days * 86400
 
-    for name, (artifact_tpl, command_tpl) in SCRIPT_SOURCED_ANCHORS.items():
+    for name, spec in SCRIPT_SOURCED_ANCHORS.items():
         if _pos((anchors or {}).get(name)) is not None:
             continue                    # it produced a value; it ran
         meta = out.setdefault(name, {})
@@ -594,16 +612,34 @@ def mark_unrun_anchor_scripts(ticker, anchors: dict | None, anchor_meta: dict,
             continue
         if meta.get("reason"):
             continue                    # an upstream reason is more specific
-        artifact = os.path.join(root, artifact_tpl.format(t=ticker))
+
+        artifact = os.path.join(root, spec["artifact"].format(t=ticker))
+        payload = None
         try:
-            fresh = (now - os.path.getmtime(artifact)) <= cutoff
-        except OSError:
-            fresh = False
-        if not fresh:
+            if (now - os.path.getmtime(artifact)) <= cutoff:
+                with open(artifact, "r", encoding="utf-8") as fp:
+                    payload = json.load(fp)
+        except (OSError, json.JSONDecodeError):
+            payload = None
+
+        # Credible = this script's own output, for this ticker, with the shape it
+        # actually emits. Anything less is treated as not-run, because a file
+        # that merely exists proves nothing about whether the script ran.
+        credible = (
+            isinstance(payload, dict)
+            and str(payload.get("ticker") or "").strip().upper() == ticker
+            and all(k in payload for k in spec["required_keys"])
+        )
+        if not credible:
             meta["reason"] = SCRIPT_NOT_RUN
-            # Carried so the validator's message can name the fix rather than
-            # making the operator look it up.
-            meta["required_command"] = command_tpl.format(t=ticker)
+            continue
+
+        # Ran, and produced a number the anchor should have carried. Something
+        # between the script and the pack dropped it.
+        if _pos(payload.get(spec["value_key"])) is not None:
+            meta["reason"] = ANCHOR_DROPPED_VALUE
+        # else: ran and had nothing usable to say — a legitimate ineligibility,
+        # left to the existing `missing_or_nonpositive_value`.
     return out
 
 

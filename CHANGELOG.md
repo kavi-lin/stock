@@ -8,6 +8,22 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.116.1] — 2026-08-09 — script 閘從「檔案存在」升級成「內容可信」；前導補閘門紀律；手動 runner 硬化
+
+### Fixed
+- **V4.116.0 的 script 閘可以用 `echo '{}' > <T>_dcf_payload.json` 繞過**。它只檢查檔案存在與 mtime。這很要緊，因為這道閘要防的行為模式正是「被 gate 擋住就讓輸入符合條件」（2026-08-09 的 phase0 複製改日期），而一道 `touch` 就能滿足的閘只會把那種行為推向更便宜的繞法。
+  改成內容檢查：`ticker` 必須相符、必須具備該 script 實際會吐的 key 集合。另新增 `anchor_dropped_script_value`——artifact 帶著可用數字但 anchor 是空的，那是**接線 bug 不是跳步驟**，修法不同所以分開報。七種形狀逐一驗證（無檔／空 JSON／ticker 不符／真跑過無值／有值但 anchor 空／anchor 有值／內容完整但過期）。
+
+### Added
+- **`_adapt_protocol_prompt` 第五句：閘門紀律**。protocol 文件一直有「禁止接受 rc≠0」，但**沒有一份說遇到 rc≠0 該做什麼**，而「讓檢查通過」是當下最便宜的解讀。新前導明講：停下來回報，**禁止為了讓檢查通過而修改輸入**，並點名三種具體手法（複製舊檔改日期、補空快取檔、改數字）。「讓 gate 過」與「達成 gate 想確認的事」是兩件事。
+- **`investment/scripts/run_protocol_manual.py`**（取代原本放在 gitignored 目錄的一次性 shell 腳本）。provider + protocol + ticker 參數化，prompt/argv/timeout 全部複用 `dashboard_server` 而非複製。原子鎖、每次執行獨立的 log/backup/job_id——**舊版三者都是固定名，第二次執行會用已汙染的 history 覆蓋乾淨備份，安全網自我銷毀**（codex review 指出）。失敗時報告**改名隔離**而非回退 history：validator 可能因無關原因失敗，自動 restore 會不可逆地毀掉合法執行，改名可逆。
+
+### Changed
+- `reports/20260809_NOW.md` → `20260809_NOW_EXPERIMENT.md`。檔名不符 `^\d{8}_[A-Z][A-Z0-9]+\.md$` 即退出 `build_event_index`，那筆不再進決策日曆統計；內容原封不動供 debug。
+
+### Why
+- codex 的四層歸因（agy orchestration / prompt / validator / renderer）成立，且它抓到兩件本輪漏掉的：runner 的固定命名與「檢查不是鎖」。agy 的自我檢討大致準確，但有三處要更正：`script_not_run` 已完成（它以為待實作）、reason 出自 `compute_price_framework` 非 `decision_engine`、以及「6 個 subagent 證明足以承載 5-lane」與「GEMINI.md 與 CLAUDE.md 100% 等價」兩處過度宣稱。
+
 ## [4.116.0] — 2026-08-09 — 三道「說綠但沒驗到」的閘補起來：phase0 新鮮度、script_not_run、position_size 單位
 
 稽核 2026-08-09 NOW（首次由 agy 執行 invest）挖出的三個缺口。**都不是引擎特有的**——Claude 跑一樣會中。

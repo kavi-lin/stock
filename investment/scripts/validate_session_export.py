@@ -45,6 +45,7 @@ from decision_engine import (  # noqa: E402
 # The gate below and the marker that sets it must never drift apart, so the
 # reason string and the command table are imported rather than restated.
 from compute_price_framework import (  # noqa: E402
+    ANCHOR_DROPPED_VALUE,
     SCRIPT_NOT_RUN,
     SCRIPT_SOURCED_ANCHORS,
 )
@@ -1095,14 +1096,25 @@ def main(argv=None):
                     # weight of 0.275 against a raw 0.05 and produced the
                     # `extreme_overvalued` verdict single-handedly. The protocol
                     # already called these mandatory; until now nothing enforced it.
-                    if detail.get("reason") == SCRIPT_NOT_RUN:
-                        cmd = (SCRIPT_SOURCED_ANCHORS.get(name) or ("", ""))[1]
+                    if detail.get("reason") in (SCRIPT_NOT_RUN, ANCHOR_DROPPED_VALUE):
+                        spec = SCRIPT_SOURCED_ANCHORS.get(name) or {}
+                        cmd = spec.get("command") or ""
                         ticker = str(trade.get("ticker") or entry.get("ticker") or "<T>")
-                        errors.append(
-                            f"valuation_pack.anchors.{name}: mandatory Phase 1.5 script was "
-                            f"never run (no fresh artifact)"
-                            + (f" — run `{cmd.format(t=ticker.upper())}`" if cmd else "")
-                        )
+                        if detail.get("reason") == SCRIPT_NOT_RUN:
+                            errors.append(
+                                f"valuation_pack.anchors.{name}: mandatory Phase 1.5 script "
+                                f"produced no credible artifact — it was not run, or its "
+                                f"output is stale/malformed"
+                                + (f". Run `{cmd.format(t=ticker.upper())}`" if cmd else "")
+                            )
+                        else:
+                            # Wiring bug, not a skipped step: the artifact holds a
+                            # usable number the anchor never received.
+                            errors.append(
+                                f"valuation_pack.anchors.{name}: the script's artifact carries a "
+                                f"usable {spec.get('value_key')} but the anchor is empty — the "
+                                f"value was computed and then dropped before the pack"
+                            )
                     if detail.get("status") == "eligible" and (
                             not detail.get("provenance") or not detail.get("as_of")):
                         errors.append(

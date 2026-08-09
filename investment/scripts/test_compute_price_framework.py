@@ -282,16 +282,26 @@ eq("pack.families", pack["families_present"],
 import os as _os                                                    # noqa: E402
 import tempfile as _tempfile                                        # noqa: E402
 import time as _time                                                # noqa: E402
+import json as _json                                                # noqa: E402
 from compute_price_framework import (                               # noqa: E402
-    SCRIPT_NOT_RUN, SCRIPT_SOURCED_ANCHORS, mark_unrun_anchor_scripts)
+    ANCHOR_DROPPED_VALUE, SCRIPT_NOT_RUN, SCRIPT_SOURCED_ANCHORS,
+    mark_unrun_anchor_scripts)
 
 with _tempfile.TemporaryDirectory() as _fake_root:
-    def _artifact(anchor, ticker, age_days):
-        rel = SCRIPT_SOURCED_ANCHORS[anchor][0].format(t=ticker)
+    def _payload(anchor, ticker, value=None):
+        """A credibly-shaped payload: this script's own keys, for this ticker."""
+        spec = SCRIPT_SOURCED_ANCHORS[anchor]
+        body = {k: None for k in spec["required_keys"]}
+        body.update({"ticker": ticker, "asof": "2026-08-09", "degraded": value is None,
+                     spec["value_key"]: value})
+        return body
+
+    def _artifact(anchor, ticker, age_days, body=None):
+        rel = SCRIPT_SOURCED_ANCHORS[anchor]["artifact"].format(t=ticker)
         path = _os.path.join(_fake_root, rel)
         _os.makedirs(_os.path.dirname(path), exist_ok=True)
         with open(path, "w") as fp:
-            fp.write("{}")
+            _json.dump(body if body is not None else _payload(anchor, ticker), fp)
         stamp = _time.time() - age_days * 86400
         _os.utime(path, (stamp, stamp))
         return path
@@ -304,8 +314,37 @@ with _tempfile.TemporaryDirectory() as _fake_root:
     _m = _mark("NOW", {"dcf_unlevered": 115.2})
     eq("script_gate.absent_dcf", _m["dcf_self_built"]["reason"], SCRIPT_NOT_RUN)
     eq("script_gate.absent_comps", _m["comps_implied"]["reason"], SCRIPT_NOT_RUN)
-    if "dcf.py" not in _m["dcf_self_built"].get("required_command", ""):
-        raise AssertionError("script_gate.names_the_fix: message must name the command to run")
+    # The validator's message names the fix; the command lives in the spec table
+    # so the marker and the gate cannot drift to different commands.
+    for _a, _spec in SCRIPT_SOURCED_ANCHORS.items():
+        for _k in ("artifact", "command", "value_key", "required_keys"):
+            if not _spec.get(_k):
+                raise AssertionError(f"script_gate.spec_complete.{_a}: missing {_k}")
+        if "{t}" not in _spec["command"] or "{t}" not in _spec["artifact"]:
+            raise AssertionError(f"script_gate.spec_templated.{_a}: needs a {{t}} placeholder")
+        if _spec["value_key"] not in _spec["required_keys"]:
+            raise AssertionError(
+                f"script_gate.value_key_required.{_a}: the value key must be one of the "
+                f"keys a credible artifact has to carry")
+
+    # V4.116.1 — presence is not enough. The shipped V4.116.0 check passed on
+    # `echo '{}' > <T>_dcf_payload.json`, which matters because the behaviour this
+    # gate exists to catch is an agent that answers a blocked gate by making the
+    # input fit. A gate satisfiable by `touch` just picks a cheaper bypass.
+    _artifact("dcf_self_built", "FAKE", age_days=0, body={})
+    eq("script_gate.empty_json_rejected",
+       _mark("FAKE", {})["dcf_self_built"]["reason"], SCRIPT_NOT_RUN)
+    _artifact("dcf_self_built", "MISM", age_days=0,
+              body=_payload("dcf_self_built", "SOMEONE_ELSE"))
+    eq("script_gate.ticker_mismatch_rejected",
+       _mark("MISM", {})["dcf_self_built"]["reason"], SCRIPT_NOT_RUN)
+
+    # Ran and produced a usable number the anchor never received: a wiring bug,
+    # reported separately because the fix is not "go run the script".
+    _artifact("dcf_self_built", "DROP", age_days=0,
+              body=_payload("dcf_self_built", "DROP", value=142.5))
+    eq("script_gate.value_dropped",
+       _mark("DROP", {})["dcf_self_built"]["reason"], ANCHOR_DROPPED_VALUE)
 
     # Artifact present and fresh: the script ran and had nothing usable to say,
     # which is a legitimate ineligibility and must NOT be reported as skipped.

@@ -1,7 +1,17 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-08-09 (v4.116.0)
+> **Last Updated**: 2026-08-09 (v4.116.1)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v4.116.1) — 閘補完之後兩個引擎各跑一次:四道閘全部生效,而我的稽核結論被真實數據推翻一條
+
+- **緣起**:使用者問「改完這些,agy、codex 都可以正常完成評估報告嗎?」。**這一問直接逼出我那道閘的洞**——我原本要回「應該可以」,查證時發現 `echo '{}' > <T>_dcf_payload.json` 就能繞過,因為它只檢查檔案存在。**要防的行為模式正是「被擋就讓輸入符合條件」,而一道 `touch` 能滿足的閘只會把那種行為推向更便宜的繞法。** 改成內容檢查(ticker 相符 + 該 script 實際會吐的 key 集合)。
+- **實測結果:agy 第二次跟第一次是兩回事,四道閘全部生效**:`dcf.py`/`comps.py` 從 0 次變成各 2 次、anchor 從 5 根變 7 根、`owner_earnings_mult` 權重從 **0.275 掉回 0.183**、phase0 是真的重跑、shell 汙染 8 處變 0、`position_size` 從 `0.035325%` 變 `3.53%`。**同一個引擎、同一支股票,差別只在閘與 formatter。**
+- **但我的稽核結論被推翻一條**:第一次我判定 `extreme_overvalued` 是「跳過 script 造成的假象」,稽核推算排除離群錨後 FV 應是 $121.85、落在 fair 區。**第二次兩支 script 都跑了,判定沒變、還更空**($81.80/−34.5% → $64.37/−48.45%)。那個重算是錯的——我當時有標明「未獨立驗證」,現在有真實數據反證。**標註證據等級這件事,是這輪唯一讓我沒說錯話的原因。**
+- **codex 一次過,但那是 n=1 不是「codex 可以」**:11 分鐘、三支 script 全跑、validator 自己跑 9 次、shell 汙染 0、七根 anchor。它和 agy 的差距很明顯(log 476KB vs 208KB、11m vs 4m),但單次成功不能推出穩定性。
+- **實測暴露一個比原本更大的洞**:`PROTOCOL_VALIDATORS` **沒有 `invest`**——伺服器跑 invest 從來不會自動跑 validator。這兩次都是引擎**自願**跑了才過關。也就是說我這輪做的 `script_not_run` 閘,在 agy 第一次那種「不跑 validator」的情況下根本不會被觸發。**跟 phase0 同一個形狀:規則寫在文件裡,執行靠自律。** 而我自己的 runner 也踩到同一個洞(驗收沒印 validator)。
+- **codex review 抓到我腳本的缺陷,而且比它說的更嚴重**:舊 runner 的 log/backup/job_id 全是固定名,**第二次執行會用已汙染的 history 覆蓋乾淨備份——安全網自我銷毀**。另指出「curl 檢查佇列不是鎖」,正確。新 runner 改成複用 `dashboard_server` 的函式而非複製,因為複製會漂移。
+- **`valuation_reviewer_gate.py` 仍無閘可管**:它不產 anchor,所以不在 `SCRIPT_SOURCED_ANCHORS` 裡。codex 跑了 5 次,agy 兩次都是 0 次。**「有閘的都做了,沒閘的照樣跳過」——這個對照本身就是最強的證據,說明紀律靠的是閘不是叮嚀。**
 
 ## 🟢 Session Note (v4.116.0) — 四個「說綠但沒驗到」的閘;以及稽核報告本身也要查證
 
