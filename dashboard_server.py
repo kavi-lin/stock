@@ -197,6 +197,68 @@ PROTOCOL_MODEL = {
 PROTOCOL_MODEL_DEFAULT = "sonnet"  # unlisted claude protocols → sonnet floor
 
 
+# V4.115.0 — Subscription tier for the LLM quota panel.
+#
+# The broker reports a `plan` only for codex; claude comes back null and agy is
+# intermittent. `lqb probe claude` does know ("max"), but it scrapes a TUI and
+# takes 12.5s — far too slow for a panel that refreshes on a timer, and not
+# worth a background thread for a string that changes once a year.
+#
+# Claude Code already wrote it to disk at login. Two fields, read on demand.
+#
+# This couples the dashboard to Claude Code's own state file, whose shape can
+# change without notice, so every lookup is optional and a miss simply drops the
+# chip. Nothing else on the panel depends on it. Only these two keys are read —
+# the same file holds OAuth account identifiers that must never reach the API
+# response, so the whole object is never returned, logged, or merged.
+_CLAUDE_STATE = os.path.expanduser("~/.claude.json")
+
+_RATE_TIER_SUFFIX = {"5x": "5×", "20x": "20×"}
+
+
+def _claude_plan_label():
+    """`MAX 5×` / `PRO` / None, from Claude Code's own login state."""
+    try:
+        with open(_CLAUDE_STATE, "r", encoding="utf-8") as f:
+            acct = (json.load(f) or {}).get("oauthAccount") or {}
+    except (OSError, json.JSONDecodeError, AttributeError):
+        return None
+    org = str(acct.get("organizationType") or "").strip()
+    if not org:
+        return None
+    # "claude_max" → MAX, "claude_pro" → PRO. An unrecognised value is passed
+    # through rather than dropped: a new tier name should show up as itself
+    # instead of silently vanishing from the panel.
+    base = org.replace("claude_", "").replace("_", " ").upper() or None
+    if not base:
+        return None
+    # "default_claude_max_5x" → "5×". The multiplier is the part that actually
+    # differs between two accounts on the same named plan.
+    tier = str(acct.get("organizationRateLimitTier") or "")
+    for key, suffix in _RATE_TIER_SUFFIX.items():
+        if tier.endswith("_" + key):
+            return f"{base} {suffix}"
+    return base
+
+
+def _annotate_plans(status):
+    """Fill in provider plan labels the broker could not supply.
+
+    Never overwrites what the broker reported: where it knows the plan (codex →
+    "prolite") that is the provider's own word for it and outranks anything
+    inferred here.
+    """
+    try:
+        providers = ((status or {}).get("broker") or {}).get("providers") or {}
+        if isinstance(providers.get("claude"), dict) and not providers["claude"].get("plan"):
+            label = _claude_plan_label()
+            if label:
+                providers["claude"]["plan"] = label
+    except Exception as e:  # noqa: BLE001 — a cosmetic chip must never 500 the panel
+        sys.stderr.write(f"[llm-config] plan annotation skipped: {e}\n")
+    return status
+
+
 def _protocol_model_for(name):
     """Resolve the Claude model for a protocol. Env PROTOCOL_MODEL_<NAME> wins."""
     env = os.getenv("PROTOCOL_MODEL_" + name.upper())
@@ -205,10 +267,12 @@ def _protocol_model_for(name):
     return PROTOCOL_MODEL.get(name, PROTOCOL_MODEL_DEFAULT)
 
 
-def _protocol_command(model, prompt, claude_model=None):
+def _protocol_command(model, prompt, claude_model=None, timeout_sec=None):
     """Build the CLI argv for running an agentic protocol on `model`.
     The stdout reader just pipes to the log, so only the command differs.
-    `claude_model` (when truthy) pins `claude --model` for tier control."""
+    `claude_model` (when truthy) pins `claude --model` for tier control.
+    `timeout_sec` is this protocol's budget; a CLI with its own shorter default
+    must be told about it or that default silently wins."""
     if model == "gemini":
         # V4.109.1: `--output-format stream-json` added. This was the only one of
         # the four branches not asking for structured output, so the log was plain
@@ -216,9 +280,26 @@ def _protocol_command(model, prompt, claude_model=None):
         # settled with zero tokens. That never showed before the quota broker
         # started assigning providers, because the protocol had always taken the
         # configured chain default (claude).
-        return [AGY_BIN, "--print", prompt,
-                "--output-format", "stream-json",
-                "--dangerously-skip-permissions"]
+        cmd = [AGY_BIN, "--print", prompt,
+               "--output-format", "stream-json",
+               "--dangerously-skip-permissions"]
+        # V4.114.1 — `agy --print-timeout` defaults to 5m. Nothing here ever set
+        # it, so PROTOCOL_TIMEOUT_OVERRIDES governed only the parent's
+        # `proc.wait()` and every agy run was really capped at five minutes.
+        #
+        # That is what killed `invest_20260809_000447`: 308s wall — 5m08s — and
+        # the stream ends on a bare "Agent execution terminated due to error."
+        # The two agy `triage` runs that succeeded the day before took 1.7 and
+        # 2.4 minutes, which is why the cap had never shown itself. Every
+        # protocol except triage/flash budgets more than 5 minutes, so all of
+        # them were exposed.
+        #
+        # The child is given slightly less than the parent so it times out first
+        # and still emits a final result event to parse; the parent's hard kill
+        # stays as the backstop for a child that ignores its own deadline.
+        if timeout_sec:
+            cmd += ["--print-timeout", f"{max(60, int(timeout_sec) - 30)}s"]
+        return cmd
     if model == "codex":
         return [CODEX_BIN, "exec", "--json", "-C", ROOT,
                 "--dangerously-bypass-approvals-and-sandbox", "--color", "never",
@@ -265,18 +346,84 @@ def _select_protocol_model(name=None):
     return "claude", None
 
 
-def _adapt_protocol_prompt(model, prompt):
-    """Add provider vocabulary guidance without changing protocol semantics."""
-    if model != "codex":
+# V4.114.0 — Each CLI has exactly one project context file it treats as its own.
+# The preamble below names that file and no other, so a run never has to read a
+# different provider's rules. Auto-load behaviour verified by probe 2026-08-09,
+# each run from this repo's cwd with no tools allowed:
+#   claude → CLAUDE.md   auto-loaded.
+#   codex  → AGENTS.md   auto-loaded (answered validate_sector_intel.py →
+#                        sector/schema.md, a pairing only AGENTS.md carries).
+#   grok   → AGENTS.md   auto-loaded, same file as codex (quoted the AGENTS.md
+#                        `rg` line verbatim, even under --no-memory).
+#   gemini → GEMINI.md   **NOT auto-loaded** by `agy --print`. Two probes came
+#                        back NONE and UNKNOWN. The preamble is the only thing
+#                        that puts GEMINI.md in front of that model.
+PROVIDER_CONTEXT_FILE = {
+    "claude": "CLAUDE.md",
+    "gemini": "GEMINI.md",
+    "codex":  "AGENTS.md",
+    "grok":   "AGENTS.md",
+}
+
+# Protocol → its own spec document, named directly in the prompt so a run never
+# depends on the agent first locating a trigger table.
+#
+# The 2026-08-09 invest failure was exactly that dependency. `分析 NOW` carries
+# no meaning to a CLI that has not loaded a trigger table, and agy loads none:
+# the agent never once listed its own cwd, chased a stale mirror it found in
+# ~/.gemini/projects.json, and died mid-`grep -rn` across the home directory
+# after 208K tokens and zero artifacts.
+PROTOCOL_DOC = {
+    "invest":      "investment/investment_protocol_v5_0.md",
+    "sector":      "sector/sector_protocol_main.md",
+    "news":        "news/news_protocol_v2.md",
+    "triage":      "news/news_protocol_v2.md",
+    "flash":       "news/news_protocol_v2.md",
+    "flash_text":  "news/news_protocol_v2.md",
+    "review":      "news/news_protocol_v2.md",
+    "link_digest": "news/link_digest_protocol.md",
+    "earnings":    "skills/earnings-analyst/SKILL.md",
+    "playbook":    "skills/weekly-tech-playbook/SKILL.md",
+    "llm_review":  "reports/decision_review/REVIEW_PROMPT.md",
+}
+
+
+def _adapt_protocol_prompt(model, prompt, name=None):
+    """Prefix the provider's own bootstrap without changing protocol semantics.
+
+    Claude is returned untouched: it auto-loads CLAUDE.md, and every
+    PROTOCOL_PROMPTS entry was written against that assumption. Every other CLI
+    gets three things the Claude-shaped prompt silently assumed — its own
+    context file, this protocol's spec path, and the tool-vocabulary mapping
+    that used to be codex-only.
+
+    The cwd clause is not boilerplate. It is the direct lesson of the failed
+    run: given no protocol path, the agent searched `~/Documents`, `~/Stock` and
+    `~/.claude` for this project while sitting inside it.
+    """
+    if model == "claude":
         return prompt
-    return (
-        "Codex compatibility note: protocol docs use Claude tool names as abstract "
-        "operations. Map Read/Write/Edit/Grep/Bash/WebFetch/WebSearch to your "
-        "available filesystem, shell, and web tools. Map each Agent(...) requirement "
-        "to an isolated collaboration subagent; when the protocol requires parallel "
-        "fan-out, spawn all required agents together before waiting. Preserve every "
-        "validator and required-artifact gate exactly.\n\n" + prompt
-    )
+    ctx = PROVIDER_CONTEXT_FILE.get(model)
+    doc = PROTOCOL_DOC.get(name)
+    lines = []
+    if ctx:
+        lines.append(
+            f"專案 context：本 repo 給你這個 CLI 的規範入口是 `{ctx}`（你只需要讀這一個檔，"
+            f"不要去讀其他 provider 的 context 檔）。若你的 system prompt 裡沒有它的內容，"
+            f"第一件事就是 Read `{ctx}`。")
+    if doc:
+        lines.append(
+            f"本次要執行的 protocol 規範在 `{doc}` — 直接 Read 這個路徑，不要用搜尋去找它。")
+    lines.append(
+        "工具詞彙對照：protocol 文件用 Claude 的工具名當抽象操作。把 "
+        "Read/Write/Edit/Grep/Bash/WebFetch/WebSearch 對應到你自己的檔案、shell、網路工具；"
+        "把每個 Agent(...) 需求對應到一個隔離 subagent，protocol 要求平行 fan-out 時"
+        "先把全部 agent 開起來再等待。每一道 validator 與 required-artifact gate 原封不動保留。")
+    lines.append(
+        "作業範圍：一律在目前工作目錄（cwd）這個 repo 內作業。cwd 以外的路徑"
+        "（家目錄、~/Documents、~/Stock、其他 CLI 的 state 目錄）都不是本專案，"
+        "禁止去那裡搜尋專案檔案。")
+    return "\n".join(lines) + "\n\n" + prompt
 # Global default (25 min); news DIGEST normally finishes in 1-2 min, so give it
 # a tighter ceiling (12 min) — past runs that crossed 10 min have all been
 # pathological (e.g. Claude looping on a Bash-heredoc write that hits Stream
@@ -333,7 +480,11 @@ PROTOCOL_PROMPTS = {
 # Keep the runtime packet short: the detailed contract lives in the protocol
 # and schema, while this prompt pins the non-negotiable execution gates.
 PROTOCOL_PROMPTS["news"] = (
-    "非互動執行 News V2.3，一個 turn 完整收尾。先讀 CLAUDE.md trigger 對應的 "
+    # V4.114.0 — names the protocol doc directly. It used to route via "CLAUDE.md
+    # trigger 對應的 …", which is a Claude-only instruction: this protocol runs on
+    # agy and codex too, and sending them to another provider's context file is
+    # the indirection the per-provider preamble exists to remove.
+    "非互動執行 News V2.3，一個 turn 完整收尾。先讀 "
     "news/news_protocol_v2.md；依序跑 fetch_all_news.py、stage1_triage.py、"
     "build_digest_packet.py。之後只使用 compact packet：Stage 2 名單完全採用 "
     "stage2_items（可少於 5），直接 fetch packet URL，每篇交給四個隔離 lane 的 bundle "
@@ -455,6 +606,10 @@ _protocol_state = {
     "log_path":   None,
     "error":      None,
     "elapsed_sec": 0,
+    # V4.114.0 — which LLM the broker assigned to this run. None until the lease
+    # is acquired, which is after the run is already marked "running".
+    "model":      None,   # claude | gemini | codex | grok
+    "model_tier": None,   # opus | sonnet | … for claude; "cli-default" elsewhere
 }
 _protocol_lock = threading.Lock()
 _protocol_proc = {"p": None}  # mutable holder so cancel can reach it
@@ -947,6 +1102,10 @@ def run_protocol(name, params=None):
             "log_path":    log_path,
             "error":       None,
             "elapsed_sec": 0,
+            # Cleared here, not left over from the previous run: the provider is
+            # chosen per run, and a stale badge is worse than no badge.
+            "model":       None,
+            "model_tier":  None,
         })
 
     def _run():
@@ -976,8 +1135,20 @@ def run_protocol(name, params=None):
                 _protocol_state["elapsed_sec"] = int((datetime.now() - start).total_seconds())
             _protocol_proc["p"] = None
             return
-        prompt = _adapt_protocol_prompt(proto_model, prompt)
+        prompt = _adapt_protocol_prompt(proto_model, prompt, name)
         claude_model = (_protocol_model_for(name) if proto_model == "claude" else None)
+        # V4.114.0 — publish the winning provider so the run is attributable
+        # everywhere it surfaces: the queue pill, the recent-runs line, and the
+        # rendered report. The broker picks the provider at launch, so the only
+        # place this is knowable is here.
+        model_tier = claude_model or "cli-default"
+        with _protocol_lock:
+            _protocol_state["model"]      = proto_model
+            _protocol_state["model_tier"] = model_tier
+        # Resolved BEFORE the command is built, not after Popen as it used to be:
+        # a CLI with its own shorter default deadline has to be told this number
+        # or it silently overrides it (see the agy --print-timeout note above).
+        timeout_sec = PROTOCOL_TIMEOUT_OVERRIDES.get(name, PROTOCOL_TIMEOUT_SEC)
         rc = -1
         telemetry_usage = {}
         try:
@@ -990,7 +1161,8 @@ def run_protocol(name, params=None):
             # without providing info we actually parse. tool_use/tool_result/result events
             # arrive at block-level completion, which is plenty for event tracking.
             proc = subprocess.Popen(
-                _protocol_command(proto_model, prompt, claude_model=claude_model),
+                _protocol_command(proto_model, prompt, claude_model=claude_model,
+                                  timeout_sec=timeout_sec),
                 cwd=ROOT,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
@@ -1002,6 +1174,14 @@ def run_protocol(name, params=None):
                     # Strict-mode validator timestamp: digest.json mtime must be ≥ this
                     # to count as "written by this run". Catches Claude skipping Stage 1/2.
                     "NEWS_RUN_START_MS": str(int(start.timestamp() * 1000)),
+                    # V4.114.0 — attribution for anything the run writes. Renderers
+                    # invoked inside the protocol (render_investment_report.py and
+                    # friends) stamp these into the report, so a reader can tell
+                    # which engine produced it. Absent → the script was run by hand.
+                    "AIC_PROTOCOL_MODEL":      proto_model,
+                    "AIC_PROTOCOL_MODEL_TIER": model_tier,
+                    "AIC_PROTOCOL_NAME":       name,
+                    "AIC_PROTOCOL_JOB_ID":     job_id,
                 },
             )
             _protocol_proc["p"] = proc
@@ -1024,7 +1204,6 @@ def run_protocol(name, params=None):
             rt = threading.Thread(target=_reader, daemon=True)
             rt.start()
 
-            timeout_sec = PROTOCOL_TIMEOUT_OVERRIDES.get(name, PROTOCOL_TIMEOUT_SEC)
             try:
                 rc = proc.wait(timeout=timeout_sec)
             except subprocess.TimeoutExpired:
@@ -1452,6 +1631,10 @@ def get_queue_state():
                 "started_at":  started,
                 "elapsed_sec": elapsed,
                 "source":      _protocol_state.get("analyze_source", "direct"),
+                # None for the first seconds of a run — the broker has not
+                # answered yet. The UI omits the badge rather than guessing.
+                "model":       _protocol_state.get("model"),
+                "model_tier":  _protocol_state.get("model_tier"),
             }
     with _protocol_queue_lock:
         queue_snapshot = [dict(q) for q in _protocol_queue]
@@ -1500,6 +1683,10 @@ def _analyze_worker():
                         "status":   "error",
                         "error":    err,
                         "ended_at": _now_iso(),
+                        # Rejected before dispatch, so no provider was ever
+                        # chosen. Keys kept for a uniform shape in the UI.
+                        "model":      None,
+                        "model_tier": None,
                     })
                     del _protocol_history[_PROTOCOL_HISTORY_MAX:]
                 last_finished_name = None
@@ -1530,6 +1717,8 @@ def _analyze_worker():
             with _protocol_lock:
                 final_status = _protocol_state.get("status")
                 final_error  = _protocol_state.get("error")
+                final_model  = _protocol_state.get("model")
+                final_tier   = _protocol_state.get("model_tier")
             with _protocol_queue_lock:
                 _protocol_history.insert(0, {
                     "name":     name,
@@ -1538,6 +1727,11 @@ def _analyze_worker():
                     "status":   final_status,
                     "error":    final_error if final_status == "error" else None,
                     "ended_at": _now_iso(),
+                    # Which engine actually ran it. The 2026-08-09 invest failure
+                    # was only diagnosable by opening the log header; a run that
+                    # went to an unexpected provider should be visible in the UI.
+                    "model":      final_model,
+                    "model_tier": final_tier,
                 })
                 del _protocol_history[_PROTOCOL_HISTORY_MAX:]
 
@@ -4503,7 +4697,8 @@ class Handler(SimpleHTTPRequestHandler):
             if MODEL_ROUTER_AVAILABLE:
                 try:
                     cfg = _mrouter.load_llm_config()
-                    return self._json(200, {**cfg, "status": _mrouter.model_status()})
+                    return self._json(200, {**cfg,
+                                            "status": _annotate_plans(_mrouter.model_status())})
                 except Exception as e:
                     sys.stderr.write(f"[llm-config] status error: {e}\n")
             cfg_path = os.path.join(ROOT, "config", "llm_config.json")

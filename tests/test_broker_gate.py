@@ -496,6 +496,85 @@ check("debate.fallback_pair_matches_agents_md",
       and _LLM_DRIVERS_DEFAULT == ["claude", "gemini"],
       f"{_LLM_DRIVERS_DEFAULT} — AGENTS.md calls Claude×Gemini divergence an intended signal")
 
+
+# ─────────────────── V4.115.0 — window fields reach the UI ───────────────────
+# The bucket mapping is a hand-written whitelist, so a field it was not taught
+# about is dropped in silence and the panel just renders something slightly
+# wrong. `used_percent` is the case that matters: the quota bars draw
+# consumption, and without it every provider falls back to 100 − remaining.
+# That inference is right for claude and WRONG for agy, which reports remaining
+# with `used_percent: null` — the broker does not claim to know what was spent
+# there, and inverting the one figure it gives invents a reading.
+_BUCKET_FIELDS = {"name", "remaining_percent", "used_percent", "label",
+                  "resets_at", "reset_label", "refresh_in_seconds",
+                  "window_minutes", "reserve_only"}
+
+_STATUS_FIXTURE = {
+    "hard_reserve_percent": 20.0,
+    "providers": [
+        {"info": {"id": "claude"}, "authenticated": True,
+         "snapshot": {"plan": None, "buckets": {
+             "weekly.all_models": {"remaining_percent": 36.0, "used_percent": 64.0,
+                                   "label": "allmodels",
+                                   "reset_label": "Aug13at12pm(Asia/Taipei)"},
+             "session": {"remaining_percent": 94.0, "used_percent": 6.0,
+                         "label": "session", "reset_label": "9:40am(Asia/Taipei)"},
+         }}},
+        # agy's shape: what is left is known, what was spent is not.
+        {"info": {"id": "agy"}, "authenticated": True,
+         "snapshot": {"plan": "Google AI Pro", "buckets": {
+             "gemini.weekly": {"remaining_percent": 73.4, "used_percent": None,
+                               "refresh_in_seconds": 301680},
+         }}},
+    ],
+}
+
+
+class _StatusOnlyClient:
+    """Enough client to drive `quota_snapshot`, which only calls `status()`."""
+
+    def __init__(self, payload):
+        self._payload = payload
+
+    def status(self):
+        return self._payload
+
+
+_old_broker_client = broker_gate.broker_client
+try:
+    broker_gate.broker_client = lambda cfg=None: _StatusOnlyClient(_STATUS_FIXTURE)
+    _snap = broker_gate.quota_snapshot({})
+finally:
+    broker_gate.broker_client = _old_broker_client
+
+_provs = _snap.get("providers") or {}
+check("buckets.provider_ids_mapped", set(_provs) == {"claude", "gemini"},
+      f"{sorted(_provs)} — agy must surface under this repo's name")
+
+_claude = {b["name"]: b for b in (_provs.get("claude") or {}).get("buckets", [])}
+_gem = {b["name"]: b for b in (_provs.get("gemini") or {}).get("buckets", [])}
+
+for _name, _b in {**_claude, **_gem}.items():
+    _missing = _BUCKET_FIELDS - set(_b)
+    check(f"buckets.fields.{_name}", not _missing, f"dropped: {sorted(_missing)}")
+
+check("buckets.used_percent_verbatim",
+      _claude.get("weekly.all_models", {}).get("used_percent") == 64.0,
+      "the provider's own reading must survive the mapping")
+check("buckets.used_percent_null_preserved",
+      "used_percent" in _gem.get("gemini.weekly", {})
+      and _gem["gemini.weekly"]["used_percent"] is None,
+      "null must stay null — the UI marks a derived figure and cannot if this is filled in here")
+check("buckets.label_carried",
+      _claude.get("weekly.all_models", {}).get("label") == "allmodels",
+      "the provider's own window name beats the namespaced key the UI reverse-engineers")
+check("buckets.plan_carried",
+      (_provs.get("gemini") or {}).get("plan") == "Google AI Pro",
+      "plan drives the panel's tier chip")
+check("buckets.remaining_is_worst_bucket",
+      (_provs.get("claude") or {}).get("remaining_percent") == 36.0,
+      "headline stays the tightest window")
+
 if failures:
     print("✗ broker gate contract violated:")
     for failure in failures:

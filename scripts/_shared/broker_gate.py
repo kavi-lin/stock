@@ -425,6 +425,18 @@ def quota_snapshot(cfg: dict | None = None) -> dict:
                 buckets.append({
                     "name": str(name),
                     "remaining_percent": window.get("remaining_percent"),
+                    # V4.115.0 — `used_percent` and `label` were dropped here,
+                    # so a UI showing consumption had to derive it as
+                    # 100 - remaining. That is right for claude and wrong for
+                    # agy, whose windows report a remaining percent with
+                    # `used_percent: null` — the broker does not claim to know
+                    # what was consumed there, and inverting the one number it
+                    # does give invents a figure it never made.
+                    "used_percent": window.get("used_percent"),
+                    # The provider's own name for the window ("allmodels",
+                    # "Fable"), which is more specific than the namespaced key
+                    # this repo has to reverse-engineer in `bucketLabel`.
+                    "label": window.get("label"),
                     "resets_at": window.get("resets_at"),
                     "reset_label": window.get("reset_label"),
                     "refresh_in_seconds": window.get("refresh_in_seconds"),

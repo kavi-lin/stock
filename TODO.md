@@ -1,8 +1,35 @@
 # INTEL COMMAND — Backlog & Tasks
 
-> **Last Updated**: 2026-08-08 (v4.111.6)
+> **Last Updated**: 2026-08-09 (v4.115.0)
 
 ---
+
+## ✅ Done (v4.115.0) — LLM 額度面板改版 + agy 5 分鐘天花板
+
+- [x] bar 語意全面翻成「已用」（側邊欄常駐列 + hover card），hard reserve 在消費軸換算成 80%，齒輪說明文字同步改。
+- [x] hover card：標題列 `名稱 · 方案chip · 新鮮度` 一行（砍掉 `observed` 那行），每個窗口各一條 bar。
+- [x] 重置時間粗略單一單位（`4d` / `19h`），claude 的絕對字串 `Aug13at12pm(Asia/Taipei)` 解析成相對天數，失敗退回原字串。
+- [x] `broker_gate` bucket 補帶 `used_percent` + `label`；**null 維持 null**，UI 對推算值標虛線底線。
+- [x] claude 方案名改讀 `~/.claude.json`（`MAX 5×`），取代原訂的 12.5 秒 `lqb probe` + 背景執行緒方案。
+- [x] `tests/test_broker_gate.py` 新增 window 欄位契約，種回 bug 驗過會紅。
+- [x] **v4.114.1**：`_protocol_command` 補 `--print-timeout`，解掉 agy 所有長 protocol 被 5 分鐘靜默腰斬的問題。
+
+- [ ] **gemini 的方案名仍是空的**：broker 對 agy 的 `snapshot.plan` 時有時無（CLI `lqb status` 拿得到 `Google AI Pro`、`/v1/providers` 端是 null），`~/.gemini/` 底下也沒有。目前沒有 chip。要補的話得先搞清楚 broker 為什麼兩條路徑不一致。
+- [ ] **面板尚未在真實瀏覽器看過**：dashboard_server 需重啟才會載到新的 Python（靜態檔是每次請求重讀，JS/CSS 不用重啟）。helper 已用真實 payload 在 node 上跑過、輸出與設計稿一致，但版面密度（四家並排、每家 2-4 條 bar）只有實際開起來才知道。
+
+## ✅ Done (v4.114.0) — 各家 CLI 只讀自己的 context 檔 + protocol provider 白名單 + 執行引擎署名
+
+- [x] 診斷 `invest_20260809_000447` rc=1（208K token 零產出）：broker 首次把 invest 派給 gemini × 裸觸發詞 prompt × `agy --print` 不載入任何專案 context 檔，三層疊加。
+- [x] **A**：`_adapt_protocol_prompt` 從 codex 專用擴成全部非 claude provider，前導帶自己的 context 檔（`PROVIDER_CONTEXT_FILE`）+ 本次 protocol 規範路徑（`PROTOCOL_DOC`，11 支全覆蓋）+ 工具詞彙對照 + cwd 邊界。
+- [x] **各家 .md 自足**：`scripts/sync_agent_context.py` 從 CLAUDE.md 生成 `GEMINI.md` / `AGENTS.md` 的 generated 區塊（`--check` 進收尾 checklist）；CLAUDE.md 的「只引用不複製」改為「唯一手寫來源 + 生成」。
+- [x] **B**：`config/llm_config.json` 的 `protocol_providers`（invest/sector 限 claude+codex）；白名單落到 `forbidden_providers`（只放 preferred 不生效）+ 選型前也套一次（蓋 broker-off 與 grok 兩條 early-return）+ 空/壞掉 fail closed。
+- [x] **執行引擎署名**：env `AIC_PROTOCOL_MODEL/_TIER/_NAME/_JOB_ID` → 報告 H1 下一行 + `/api/analyze-queue` 的 `model`/`model_tier` → Dashboard 分析中與最近各一顆 provider badge。
+- [x] 驗收：codex/grok 探針從 `UNKNOWN` → 正確答出 `investment/investment_protocol_v5_0.md`；四支回歸測試 + `sync_agent_context --check` 全 rc=0；新斷言均種回 bug 驗過會紅。
+
+- [x] **gemini 端路由驗證**（2026-08-09 使用者手動執行，agy headless 需 `--dangerously-skip-permissions`）：前導 → Read `GEMINI.md` → 正確答出 `investment/investment_protocol_v5_0.md`。**四家 provider 的路由現在全部從自己那一個 context 檔就能完成。**
+
+- [ ] **gemini 跑 invest 的執行能力（仍未驗，這是加白名單的唯一剩餘條件）**：路由通了不等於跑得動。invest 要 5 lane 平行 subagent + Red Team，agy 的 `define_subagent` / `invoke_subagent` 撐不撐得住完全沒測過。驗法只有真跑一次（30-45 分鐘、量級 200K+ token），而且要挑一檔不重要的標的、跑完比對 `investment/scripts/validate_session_export.py` rc=0 + 報告六個決策區塊齊全。**沒過就別加進 `protocol_providers.invest`** —— 現況（claude+codex）是安全的預設，不動也不會壞。
+- [ ] **codex CLI 每次啟動噴 `failed to install system skills: Permission denied (os error 13)`**（2026-08-09 探針時發現，與本次故障無關）：`codex_skills_extension` 想刪既有 system skills 目錄但沒權限。目前不影響 protocol 執行，但它是個持續的壞狀態。
 
 ## ✅ Done (v4.111.6) — 上游對齊批:v3 legacy 清理 + 兩個偵測器 FMP 路徑修復
 

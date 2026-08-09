@@ -34,6 +34,12 @@ grep -q "'V$v'" Dashboard/utils.js && grep -q "^## \[$v\]" CHANGELOG.md && \
 echo "SYNC OK: $v" || echo "DESYNC — 三處版本不一致，回去補"
 ```
 
+**改了 `CLAUDE.md` 的 Protocol Triggers / 自動層 / Validator Gates / Workflow Rules 四節，還要多跑一道**（V4.114.0 起）：
+```bash
+python3 scripts/sync_agent_context.py --check   # rc=0；STALE 就跑不帶 --check 的版本重生成
+```
+這四節是 `GEMINI.md`（agy）與 `AGENTS.md`（Codex + Grok）generated 區塊的來源。各家 CLI 只自動載入自己那一個 context 檔（`agy` 連自己的都不載），所以「引用 CLAUDE.md」等於要它們去讀別人的檔——2026-08-09 的 invest 事故就是這個假設破了。
+
 **CHANGELOG 條目模板**（直接抄，不要去舊條目找格式；插入位置見 §3）：
 ```markdown
 ## [x.y.z] — YYYY-MM-DD — 一句話標題
@@ -74,12 +80,15 @@ grep -rn "EXTREMELY_FRAGILE\|×1\.1\|tail_risk < 40" --include=*.md --include=*.
 | 3 | shadow/對照工具猜錯被測介面 → 回空 dict | 空結果被讀成「零差異」 |
 | 4 | `str.replace(anchor, new)` 錨點打錯 | **找不到就原樣返回**，寫回去等於沒改，而回報說「已更新」 |
 | 5 | 驗證用的 `grep` pattern 本身打錯（漏了反引號） | 回 0 命中，看起來像「沒落地」或「已清乾淨」，取決於你想看到什麼 |
+| 6 | 種回 bug 驗完還原原始碼，測試**仍紅**（2026-08-09） | `.py` 與 `__pycache__/*.pyc` 的 mtime 同為一秒，Python 秒級比較判定快取有效 → 跑的是種了 bug 的舊 bytecode。`grep` 看原始碼是對的、runtime 是錯的，兩個觀測直接打架 |
 
 ### 兩條可執行的規則
 
 1. **任何對照／測試工具，先讓它在「已知有差異」的輸入上證明會報非零，才允許用它報零。**
    單元測試版 = 種回 bug 確認會紅；shadow 版 = 準備一組必定不同的輸入先跑一次。
    V4.113.0 那次是無配息對照組**恰好**扮演了這個角色——**下次未必有天然對照組**。
+   **種完要還原到綠再收工**，不能只確認檔案內容還原了（成員 #6）；快速改-測循環裡
+   先 `find . -name __pycache__ -maxdepth 3 -exec rm -rf {} +`。
 2. **就地字串替換必須斷言錨點存在。** 用會報錯的工具（Edit）而不是 `str.replace`；
    非用不可時先 `assert anchor in s`。**改完要用獨立命令驗證落地**，不要只憑回報——
    而且驗證命令自己也要先確認 pattern 抓得到已知存在的東西（成員 #5）。

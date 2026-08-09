@@ -581,7 +581,52 @@ def _blocked_reason(note: str) -> str:
         return ("the broker rejected the request itself. That is a bug in this "
                 "repo, not a quota state — the daemon's reason is on stderr above, "
                 "and no amount of waiting will clear it.")
+    if note.startswith("broker:not-allowed"):
+        return ("this protocol is restricted to providers listed under "
+                "`protocol_providers` in config/llm_config.json, and none of them "
+                "is enabled with capacity right now. This is a portability limit, "
+                "not a quota state — waiting only helps if the listed provider "
+                "refills.")
     return "see the note above."
+
+
+def protocol_provider_allowlist(cfg: dict | None = None,
+                                protocol: str | None = None) -> list[str] | None:
+    """Models this protocol may run on. `None` means unrestricted.
+
+    Protocols are not equally portable. `triage` and `news` name every script
+    path inline and ran clean on agy; `invest` and `sector` fan out to parallel
+    lane subagents and assume Claude-shaped semantics end to end. Treating those
+    as interchangeable is what happened on 2026-08-09: the broker sent an
+    `invest` run to agy — the first non-Claude invest run ever — and it spent
+    208K tokens searching the filesystem for a protocol it never found.
+
+    Config is `protocol_providers` in `config/llm_config.json`. A missing key
+    falls back to `_default`; a missing `_default` means unrestricted.
+
+    An empty list comes back for a present-but-unusable value (empty, malformed,
+    or naming only models this repo does not have). That is deliberately NOT
+    read as "unrestricted": a typo in the allowlist for `invest` must fail loudly
+    rather than silently reopen the door this function exists to close.
+    """
+    cfg = cfg if cfg is not None else load_llm_config()
+    table = cfg.get("protocol_providers")
+    if not isinstance(table, dict) or not protocol:
+        return None
+    if protocol in table:
+        allowed = table[protocol]
+    elif "_default" in table:
+        allowed = table["_default"]
+    else:
+        return None
+    if allowed is None:
+        return None
+    if not isinstance(allowed, list):
+        sys.stderr.write(
+            f"[model_router] protocol_providers[{protocol}] is not a list; "
+            f"blocking rather than assuming unrestricted\n")
+        return []
+    return [m for m in allowed if m in VALID_MODELS]
 
 
 def _acquire(role: str, model: str, cfg: dict, *, prompts: tuple[str, ...] = (),
@@ -622,10 +667,31 @@ def _acquire(role: str, model: str, cfg: dict, *, prompts: tuple[str, ...] = (),
         # role's model and forbid the rest, so there the UI is absolute.
         # Changing this back means listing only `chain[0]`, forbidding the rest,
         # and retrying down the chain on `BrokerRefused`.
-        acceptable = [broker_gate.provider_for(m) for m in model_chain(cfg)]
-        acceptable = [p for p in acceptable if p]
+        #
+        # V4.114.0 — that freedom is now bounded per protocol. Where an
+        # allowlist exists it REPLACES the chain rather than filtering it: the
+        # chain is a general preference order this path already ignores, while
+        # the allowlist is a statement about which CLIs can actually execute
+        # this protocol. Filtering would silently drop an allowed provider that
+        # simply is not in the chain.
+        allow = protocol_provider_allowlist(cfg, protocol_name)
+        if allow is None:
+            candidates = model_chain(cfg)
+        else:
+            candidates = [m for m in allow if cfg.get("enabled", {}).get(m, True)]
+        acceptable = [p for p in (broker_gate.provider_for(m) for m in candidates) if p]
+        if allow is not None and not acceptable:
+            return None, f"broker:not-allowed({protocol_name})", False
         preferred = acceptable or [provider]
-        forbidden: list[str] = []
+        if allow is None:
+            forbidden: list[str] = []
+        else:
+            # `preferred_providers` only scores — on its own the broker may still
+            # hand back a provider this protocol cannot execute on. The hard
+            # constraint is the forbidden list, so the allowlist is enforced
+            # there or not at all.
+            forbidden = [p for p in broker_gate.PROVIDER_FOR_MODEL.values()
+                         if p not in set(acceptable)]
     else:
         estimated_input, estimated_output = broker_gate.estimate_tokens(role, *prompts, cfg=cfg)
         ttl = broker_gate.SINGLE_CALL_TTL_SECONDS
@@ -838,16 +904,22 @@ def _run_chain(preferred: str | None, role: str, system_prompt: str,
     return last
 
 
-def pick_model(role: str = "protocol") -> str:
+def pick_model(role: str = "protocol", allow: list[str] | None = None) -> str:
     """First locally-available model in the chain. Takes NO broker reservation.
 
     Selection only — kept for callers that want to know which provider would be
     chosen without committing to spend. A long subprocess must use
     :func:`acquire_protocol_lease` instead, which reserves the quota it is about
     to spend and can refuse.
+
+    `allow` restricts the answer to a protocol's allowlist. When no chain member
+    is on that list the allowlist supplies the order itself, because it names
+    what can run and the chain only names what is preferred.
     """
     cfg = load_llm_config()
     chain = model_chain(cfg)
+    if allow is not None:
+        chain = [m for m in chain if m in allow] or list(allow)
     usage = _load_usage(cfg)
     for m in chain:
         avail, _ = model_available(m, cfg, usage)
@@ -891,7 +963,18 @@ def acquire_protocol_lease(role: str = "agentic_protocol",
     comes back to :func:`note_run` so the hold is settled with real tokens.
     """
     cfg = load_llm_config()
-    model = pick_model(role)
+    # The allowlist is applied before selection as well as inside `_acquire`,
+    # because two paths reach a provider without the broker ever ruling on it:
+    # the broker being switched off, and `grok`, which it does not govern. Both
+    # return early from `_acquire` with `allowed=True`, so an allowlist enforced
+    # only there would not bind them.
+    allow = protocol_provider_allowlist(cfg, protocol)
+    if allow is not None and not allow:
+        raise ProtocolBlocked(
+            f"protocol_providers[{protocol}] in config/llm_config.json lists no "
+            f"model this repo can run. Fix the allowlist — an empty one is read "
+            f"as a mistake, not as permission to use any provider.")
+    model = pick_model(role, allow=allow)
     lease, note, allowed = _acquire(role, model, cfg, protocol=True, protocol_name=protocol)
     if not allowed:
         raise ProtocolBlocked(

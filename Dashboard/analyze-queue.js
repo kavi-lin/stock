@@ -149,6 +149,25 @@
       return map[name] || { icon: '·', label: name || '' };
     };
 
+    // V4.114.0 — which LLM the quota broker assigned to a run. The broker picks
+    // per run and the providers are not interchangeable, so "who ran this" used
+    // to be knowable only by opening the scan-log header. `model` is null for
+    // the first seconds of a run (lease not yet acquired) and for runs rejected
+    // before dispatch — both render nothing rather than a guess.
+    const _modelMeta = (m) => ({
+      claude: { icon: '🟣', label: 'Claude' },
+      gemini: { icon: '🔵', label: 'Gemini (agy)' },
+      codex:  { icon: '🟢', label: 'Codex' },
+      grok:   { icon: '⚫', label: 'Grok' },
+    }[m] || { icon: '⬜', label: m });
+
+    const _modelBadge = (m, tier, cls = '') => {
+      if (!m) return '';
+      const mm = _modelMeta(m);
+      const title = tier && tier !== 'cli-default' ? `${mm.label} · ${tier}` : mm.label;
+      return `<span class="${cls}" title="${title}">${mm.icon}</span>`;
+    };
+
     // Active line (or a neutral pending-only line when no active)
     let activeLine = '';
     if (s.active && s.active.ticker) {
@@ -159,6 +178,7 @@
           <span class="font-black text-emerald-400">${tr.now_analyzing || '分析中'}</span>
           <span title="${am.label}">${am.icon}</span>
           <span class="font-black tracking-tight" style="color: var(--text-card-title)">${s.active.ticker}</span>
+          ${_modelBadge(s.active.model, s.active.model_tier)}
           <span class="ml-auto font-mono text-emerald-300">${_fmtElapsed(s.active.elapsed_sec)}</span>
         </div>`;
     }
@@ -190,7 +210,8 @@
         const color = r.status === 'done' ? '#22c55e' : r.status === 'error' ? '#ef4444' : '#71717a';
         const stIc  = r.status === 'done' ? '✓' : r.status === 'error' ? '✗' : '○';
         const pm = _protoMeta(r.name || 'invest');
-        return `<span class="font-mono" style="color:${color}" title="${pm.label} ${r.ticker}">${stIc}<span style="margin:0 1px">${pm.icon}</span>${r.ticker}</span>`;
+        const mb = _modelBadge(r.model, r.model_tier, 'ml-0.5');
+        return `<span class="font-mono" style="color:${color}" title="${pm.label} ${r.ticker}">${stIc}<span style="margin:0 1px">${pm.icon}</span>${r.ticker}</span>${mb}`;
       }).join(' · ');
       recentLine = `
         <div class="flex items-center gap-1.5 text-[10px] text-zinc-500">

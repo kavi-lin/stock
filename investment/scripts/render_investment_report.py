@@ -639,11 +639,35 @@ def sec_footer(entry, trade, polish_stamp):
             f"｜polish：{polish_stamp}*")
 
 
+def engine_stamp():
+    """One line naming the LLM that drove this run, for the report header.
+
+    `dashboard_server` exports AIC_PROTOCOL_MODEL/_TIER/_JOB_ID into every
+    protocol subprocess, so the report can state its own provenance instead of
+    the reader having to open the scan log to find out. Which engine ran a
+    report stopped being a detail on 2026-08-09, when the broker started
+    assigning providers and an `invest` run silently went somewhere that could
+    not execute it.
+
+    An absent env var means the renderer was invoked by hand. That is said
+    outright rather than left blank — a missing stamp would otherwise read as
+    "produced by whatever ran last".
+    """
+    model = (os.environ.get("AIC_PROTOCOL_MODEL") or "").strip()
+    if not model:
+        return "_執行引擎：manual（直接跑 renderer，未經 protocol 派工）_"
+    tier = (os.environ.get("AIC_PROTOCOL_MODEL_TIER") or "cli-default").strip()
+    job = (os.environ.get("AIC_PROTOCOL_JOB_ID") or "").strip()
+    return f"_執行引擎：**{model}** ({tier})" + (f" · job `{job}`_" if job else "_")
+
+
 def render(entry, trade, bundle, narrative, polish_stamp="none"):
     ticker = entry.get("ticker") or trade.get("ticker") or "N/A"
     date = entry.get("export_date") or entry.get("date") or "N/A"
     parts = [
         f"# {date} {ticker} — 投資委員會分析",
+        "",
+        engine_stamp(),
         "",
         "## 決議摘要",
         "",

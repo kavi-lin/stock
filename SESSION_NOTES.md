@@ -1,7 +1,29 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-08-08 (v4.113.4)
+> **Last Updated**: 2026-08-09 (v4.115.0)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v4.115.0) — 「12.5 秒的 API 呼叫」被使用者一句話問掉:資料早就在本機檔案裡
+
+- **緣起**:使用者想把 LLM 額度面板做成 Claude Code `/usage` 那個樣子(方案名 + 5h/週各自一條 bar + 粗略重置時間)。
+- **我第一版方案是錯的,而且錯得很典型**:查到 `lqb probe claude --json` 有方案名、要 12.5 秒(它爬 TUI),就直接規劃了「背景執行緒 + 日更 TTL + 落快取檔」約 55 行。使用者只問了一句「為什麼要花 12.5s,這個東西 provider 查不到嗎,你是 claude cli 你想辦法」——`~/.claude.json` 的 `oauthAccount.organizationType` = `claude_max`、`organizationRateLimitTier` = `default_claude_max_5x`,讀檔而已。**整個背景機制連同快取檔一起消失,那 25 行還比原本多給了「5×」這個 tier**。教訓不是「該多查一下」,是**我停在第一個能用的答案就開始設計了**;而我當時人就跑在 Claude Code 裡面,那份訂閱資訊必然在本機。
+- **`used_percent` 為 null 不等於 0,也不等於「用 100−remaining 補上」**:claude/codex 回報實際消費,agy 只回報剩餘。把 agy 的剩餘倒過來,是在編一個 provider 從沒給過的數字。做法是 null 就標記為推算值(虛線底線 + title 說明),而不是在資料層填掉——**填在資料層就再也分不出哪個是讀數哪個是推論**。
+- **語意翻轉要一次翻完,不能只翻一半**:bar 從「剩餘」改畫「已用」時,broker 的 hard reserve 是以「剩餘下限 20%」表述的,在消費軸上是「上限 80%」。我第一版只改了比較方向 `<=`→`>=` 卻沒換算 `reserveLine`,那會讓虛線畫在 20% 的位置、並把每個健康的 provider 標成低於保留線。修法是在 `render()` 一次換算完再往下傳。**還有齒輪說明那段文字也在描述舊方向**——收尾殘留掃描抓到的,不是我記得的。
+- **又一次「白名單不是 merge」**:`broker_gate` 的 bucket 映射是手寫欄位清單,`used_percent` 和 `label` 從來沒被帶過來。這是本輪第三次同款(V4.84.0 budget key、V4.114.0 `protocol_providers`),差別是**這次補了測試**:透過真實 `quota_snapshot` 路徑鎖住九個欄位不得掉、null 必須維持 null,種回 bug 確認四條斷言會紅。
+- **另修 agy 的 5 分鐘天花板(v4.114.1)**:`--print-timeout` 預設 5m0s 而我們從沒傳過,所以 invest 設 60 分、sector 45 分全都實際上限 5 分鐘。發現它靠的是使用者貼上來的 `agy --help` ——**不是我去查的**,我原本已經把那次終止歸因為「generic error 無法再判定」並寫進診斷。308s 對 5m0s 這個對照,在 help 訊息出現前我一次都沒想過要做。
+
+## 🟢 Session Note (v4.114.0) — 一個共用假設破在最貴的地方:protocol prompt 假設「agent 會自己載入 CLAUDE.md」
+
+- **緣起**:使用者問「invest 為什麼失敗」。表面看是單次 rc=1,實際是 V4.106.0 那個「broker 指派 provider」的決定與 protocol prompt 的隱含假設對撞,而**這一撞第一次發生就在最貴的那支**——invest 15 次歷史紀錄清一色 `claude:opus`,`invest_20260809_000447` 是頭一次跑到非 Claude。
+- **三層疊加,少任何一層都不會炸**:(1) broker 指派 gemini;(2) invest 的 prompt 是裸觸發詞 `分析 NOW`——語意全靠 CLAUDE.md 的觸發表;(3) `agy --print` **不載入任何專案 context 檔**。同一天同一個 provider 的 `triage` 兩跑 rc=0,因為那支 prompt 把每條 script 路徑寫死。**可攜性差異一直存在,只是之前沒人抽到那支籤**。
+- **診斷靠的是 agent 沒做什麼,不是做了什麼**:124 行事件流裡,它從頭到尾**沒 list_dir 過自己的 cwd 一次**。它讀 `~/.gemini/projects.json` 拿到一條過期路徑就跑去 `~/Documents/Claude/Projects/AI投資委員會`(一個只剩三個空殼目錄的舊鏡像)。「它去了哪裡」比「它報了什麼錯」資訊量大得多——最後那句 `Agent execution terminated due to error.` 什麼也沒說。
+- **探針比讀原始碼可靠**:agy 二進位裡明明有 directory-based rules 的說明文字(`GEMINI.md` / `AGENTS.md`、walks up from cwd),照著讀會得出「它會載入」的結論。實際跑兩題禁用工具的探針才知道是 `NONE` / `UNKNOWN`。**文件字串描述的是設計意圖,不是這個執行模式的行為**。修完同一組探針三家全數翻正(codex / grok 直接答、gemini 走前導 Read 後答),**同一個問題問前問後**是這次唯一有說服力的驗收——因為它量的正是故障當下 agent 缺的那一項資訊。
+- **驗收被工具權限擋住時,要把界線講清楚而不是含糊帶過**:agy headless 對任何工具都要 `--dangerously-skip-permissions`,那旗標在 dev session 裡跑不了,所以我只驗到 prompt 組裝。**把「驗到哪」跟「沒驗到哪」分開寫、附上使用者可直接貼的命令**,比宣稱「應該可以」有用——使用者跑完回填,缺口才真的補上。剩下的 `define_subagent` 撐不撐得住 5 lane 也照同樣方式標成未驗,不混進已驗的結論裡。
+- **「單一真相來源」在多 CLI 下會反轉成 bug**:CLAUDE.md 原本寫「觸發表是唯一 source of truth,AGENTS.md 只引用不複製」——這在單一 agent 下正確,在四個各自只載入自己那一個檔的 CLI 下,「引用」等於要求它們先去讀別人的 context 檔。改成「唯一**手寫**來源 + `sync_agent_context.py` 生成另兩檔」,避免的是複製本身的漂移,不是複製。
+- **順手驗出 codex/grok 也是壞的,只是壞得比較安靜**:兩者都會自動載入 `AGENTS.md`(grok 也讀這個檔,不是 GROK.md),但那個檔當時寫著 "The trigger table lives in CLAUDE.md — do NOT duplicate it here",所以問它們「`分析 TICKER` 讀哪個檔」一樣答 UNKNOWN。**只有 gemini 炸掉,是因為只有它連自己的檔都沒載入**;另外兩家的殘缺沒被觸發過。
+- **白名單放錯欄位等於沒放**:broker 的 `preferred_providers` 只是評分項(全列 = 各家都 1.0,等於沒表態),真正的約束是 `forbidden_providers`。所以 `protocol_providers` 必須落到 forbidden。另外 `acquire_protocol_lease` 選型前也要套一次——broker 關閉與 grok(broker 不治理)這兩條在 `_acquire` 裡是 early-return,只在 broker 分支過濾會漏掉。
+- **又一個「白名單不是 merge」**:`load_llm_config()` 是 key 白名單,新增的 `protocol_providers` 沒教它就會被靜默丟掉、白名單永遠不生效。**這個坑的註解就寫在我要改的那個函式裡**(V4.84.0 rolling-window budget 踩過),而我第一版仍然漏了——是單元測試印出 `invest -> None` 才抓到。**知道坑在哪跟不掉進去是兩件事,靠的是測試不是記憶**。
+- **靜默綠新成員 #6:同秒 mtime 的 .pyc**。種回 bug 驗測試會紅、還原原始碼後測試**仍然紅**——`dashboard_server.py` 與 `__pycache__/*.pyc` 的 mtime 同為 `00:53:15`,Python 用秒級比較判定快取有效,跑的是種了 bug 的舊 bytecode。`grep` 看原始碼是對的、runtime 是錯的。**還原後必須重跑到綠,不能只確認檔案內容還原了**;快速改-測循環裡要清 `__pycache__`。
 
 ## 🟢 Session Note (v4.113.2-4) — 綠燈的測試在打真網路;而「立即可用」的評估兩個月沒落地
 

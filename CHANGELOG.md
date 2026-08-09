@@ -8,6 +8,48 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.115.0] — 2026-08-09 — LLM 額度面板：每個窗口各一條 bar、方案 chip，全面改畫「已用」
+
+### Changed
+- **bar 語意翻轉為「已用」**（側邊欄常駐列 + hover card 兩處一起）。原本畫剩餘量，於是同一條長綠棒在這裡是「還很多」、在 Claude Code 的 usage 面板是「快用完」。broker 的 hard reserve 以「剩餘下限」表述（20%），在消費軸上換算成上限 80%，`reserveLine` 在 `render()` 一次轉換完再往下傳——留著 20 會讓標記畫在錯的那端、並把每個健康的 provider 標成低於保留線。
+- **hover card 改版**：標題列一行 `名稱 · 方案chip · 新鮮度`，砍掉原本的 `plan · confidence · age` 第二行（confidence 移進 title，因為它是對讀數的限定而不是讀數；headline 百分比移除，因為正下方每個窗口的數字才是被拿來行動的）。每個窗口從純文字列升級為「文字 + 一條 bar」。
+- **時間一律粗略單一單位**：`3.6d`→`4d`、`19.2h`→`19h`；23–24h 收斂成 `1d`，避免印出 `24h`。理由是這面板是拿來回答「大概什麼時候放出來」，而快照本身可能已經數分鐘舊，小數點是它沒有的精度。
+
+### Added
+- `scripts/_shared/broker_gate.py` 的 bucket 映射補帶 `used_percent` 與 `label`（原本被丟掉）。**`used_percent` 為 null 時必須維持 null**：claude/codex 有回報實際消費，agy 只回報剩餘，把它的剩餘量倒過來會編出一個 provider 從沒給過的數字。UI 對推算值標虛線底線區隔。
+- `dashboard_server._claude_plan_label()` — claude 的方案名從 `~/.claude.json` 的 `oauthAccount.organizationType` + `organizationRateLimitTier` 讀出 `MAX 5×`。broker 只對 codex 回報 plan、claude 是 null，而 `lqb probe claude` 雖然知道卻要 **12.5 秒**（爬 TUI），不值得為一個一年變一次的字串開背景執行緒。**只讀那兩個 key**——同一個檔案存有 OAuth 帳號識別資訊，整個物件絕不回傳、記錄或合併。讀不到就不顯示 chip。
+- `Dashboard/utils.js` 的 `parseResetLabel()` — 把 claude 的絕對字串（`Aug13at12pm(Asia/Taipei)`）解析成日期，好讓它跟其他窗口一樣顯示 `4d`。claude 是唯一只給絕對字串、不給秒數的 provider。標籤沒有年份、時區是 provider 的而非瀏覽器的，兩者在單一單位的解析度下都可接受，原字串留在 `title` 當作不一致時的依據。
+- `tests/test_broker_gate.py` 新增 window 欄位契約（透過真實 `quota_snapshot` 路徑）：欄位不得被丟、`used_percent` 逐字保留、null 必須維持 null、`label` 與 `plan` 要帶到、headline 仍是最緊的窗口。種回 bug（刪掉 `used_percent` 那行）確認四條斷言會紅。
+
+### Why
+- 這個映射是手寫白名單，沒教它的欄位會被靜默丟掉、面板只是「畫得有點不對」而不會報錯——跟 V4.84.0 rolling-window budget、V4.114.0 `protocol_providers` 同一個坑，這次補了測試把它釘住。
+
+## [4.114.1] — 2026-08-09 — agy 的 5 分鐘 print-timeout：所有長 protocol 一直被靜默腰斬
+
+### Fixed
+- `_protocol_command` 的 gemini 分支從未傳 `--print-timeout`，而 agy 的預設是 **5m0s**。於是 `PROTOCOL_TIMEOUT_OVERRIDES` 只管得到父行程的 `proc.wait()`，agy 自己 5 分鐘就先收工——invest 設 60 分、sector 45 分、news 20 分，全部實際上限 5 分鐘。`invest_20260809_000447` 的 308s（5m08s）與那句沒有內容的 `Agent execution terminated due to error.` 就是這樣來的；同 provider 前一天兩支 triage 跑 1.7 與 2.4 分鐘，所以這個上限從沒現形。
+- 修法：`timeout_sec` 移到組 argv **之前**解析並傳進子行程，且子行程比父行程早 30 秒到期（讓它自己收尾吐出 result event，父行程的 hard kill 退為後備）。`tests/test_protocol_model_routing.py` 鎖住「必須存在、必須大於 agy 自己的 5m 預設、必須小於父行程預算、短 protocol 有 60s 下限」，並逐一檢查每支 protocol 的預算真的傳到子行程。
+
+## [4.114.0] — 2026-08-09 — 各家 CLI 只讀自己的 context 檔；protocol 加 provider 白名單與執行引擎署名
+
+### Fixed
+- **invest 派給 gemini 必炸的根因**（`invest_20260809_000447` rc=1，208K token 零產出）。三層疊加：(1) V4.106.0 起 quota broker 為 protocol run 指派 provider，這是史上第一次 invest 跑到非 Claude；(2) invest 的 prompt 是裸觸發詞 `分析 {ticker}`，語意完全靠 agent 自動載入 CLAUDE.md 的觸發表；(3) `agy --print` **不載入任何專案 context 檔**（實測兩次探針回 `NONE` / `UNKNOWN`）。結果 agent 從頭到尾沒 list 過自己的 cwd，循 `~/.gemini/projects.json` 的過期路徑跑去 `~/Documents/Claude/Projects/AI投資委員會` 與 `~/Stock` 亂找，最後死在跨家目錄的 `grep -rn "Phase 0"`。同 provider 的 `triage` 兩跑 rc=0，因為那支 prompt 把每條 script 路徑寫死。
+
+### Added
+- `scripts/sync_agent_context.py` — 從 `CLAUDE.md` 的 Protocol Triggers / 自動層 / Validator Gates / Workflow Rules 四節生成 `GEMINI.md` 與 `AGENTS.md` 的 generated 區塊；`--check` 進收尾 checklist（`MAINTENANCE.md` §2、`OPS_COMMANDS.md` §7）。
+- `config/llm_config.json` 新增 `protocol_providers`：`invest` / `sector` 限 `["claude","codex"]`，其餘不限。`model_router.protocol_provider_allowlist()` 讀它，**在 `_acquire` 落到 `forbidden_providers`**（只放 `preferred_providers` 不會生效 —— broker 只把它當評分不當約束）；`acquire_protocol_lease` 另在選型前先套一次，蓋住 broker 關閉與 grok（broker 不治理）這兩條會 early-return 的路徑。空/壞掉的白名單一律 fail closed。
+- 報告與 UI 的執行引擎署名：subprocess env 帶 `AIC_PROTOCOL_MODEL` / `_TIER` / `_NAME` / `_JOB_ID`；`render_investment_report.engine_stamp()` 在報告 H1 下印一行（無 env → `manual`）；`_protocol_state` / `_protocol_history` / `/api/analyze-queue` 帶 `model` + `model_tier`，`Dashboard/analyze-queue.js` 在「分析中」與「最近」各上一顆 provider badge。
+
+### Changed
+- `dashboard_server._adapt_protocol_prompt(model, prompt, name)` 從 codex 專用擴成**全部非 claude provider**，前導四句：自己的 context 檔（`PROVIDER_CONTEXT_FILE`）、本次 protocol 規範路徑（`PROTOCOL_DOC`，涵蓋全部 11 支）、工具詞彙對照、cwd 作業範圍。claude 維持原封不動。
+- `CLAUDE.md` 的「唯一 source of truth，AGENTS.md 只引用不複製」改為「唯一**手寫**來源 + 生成另兩檔」。理由寫在檔頭：各家 CLI 只自動載入自己那一個檔，「引用」等於要它們讀別人的 context 檔。`AGENTS.md` 標題改為 Codex / Grok 共用（實測 grok 也自動載入它），刪掉與生成區塊重複的 workflow 條目。
+- `llm_drivers.load_llm_config()` 加 `protocol_providers` 透傳。**它是白名單不是 merge** —— 沒加這行的話 V4.114.0 整個白名單會被靜默丟掉、永遠不生效（與 V4.84.0 rolling-window budget 同一個坑，那個坑的註解就在上面兩行）。
+
+### Why
+- broker 把 provider 當可互換，但它們不是：`invest` 要 5 lane 平行 subagent + Red Team，`triage` 只要照著唸 script 路徑。可攜性差異必須顯式編碼，不能靠運氣。
+- 探針前後對照（同一題「`分析 TICKER` 先讀哪個 protocol 檔」）：**三家全部從 `UNKNOWN` / `NONE` 變成正確答出 `investment/investment_protocol_v5_0.md`**。codex 與 grok 禁用工具直接答（靠自動載入的 `AGENTS.md` generated 區塊）；gemini 走前導 → Read `GEMINI.md` → 答對（2026-08-09 使用者手動執行，agy headless 需 `--dangerously-skip-permissions` 才能動工具）。三條路徑都不必碰別人的 context 檔。
+- **仍未驗**：agy 的 `define_subagent` / `invoke_subagent` 撐不撐得住 invest 的 5 lane 平行 + Red Team。路由通了不等於能執行，所以 `protocol_providers.invest` 暫不加 gemini。
+
 ## [4.113.4] — 2026-08-08 — 引入 dual-axis-skill-reviewer，並用它評自己這輪的三支
 
 2026-08-08 稽核把它評為「立即可用」，然後只寫進 SESSION_NOTES——**評估結論若不落到 repo

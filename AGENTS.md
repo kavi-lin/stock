@@ -1,22 +1,14 @@
-# AI Investment Committee（AI 投資委員會） — Codex Agent Context
-Codex should treat `CLAUDE.md` as the canonical project context. This file is the Codex-facing entry point and mirrors the current operating rules without replacing the deeper protocol docs.
+# AI Investment Committee（AI 投資委員會） — Codex / Grok Agent Context
 
-## Protocol Triggers
-The trigger table lives in `CLAUDE.md` (single source of truth — do NOT duplicate it here). Read `CLAUDE.md` § Protocol Triggers for the trigger → file mapping, then load the referenced protocol file.
+**This file is self-sufficient.** Codex and Grok both auto-load it (probed
+2026-08-09), and the generated section at the bottom carries the trigger table,
+the exploration-layer boundaries, the validator gates, and the workflow rules
+verbatim from `CLAUDE.md`. You do not need to open `CLAUDE.md` or `GEMINI.md`
+to route or run a protocol — go straight from the trigger to the protocol doc
+it names.
 
-## Decision Boundaries
-- Tactical radar, Break News, and Nexus graph are exploration layers only. They must not change `investment_protocol` decisions, buy thresholds, or position sizing unless the protocol explicitly says so.
-- `skills/short-term-target/config/weights.yaml` is manually calibrated by the user. Do not auto-overwrite it.
-- Nexus Tier 3 LLM entities stay provisional until ≥3 independent reports corroborate them (rule in `CLAUDE.md` § 全域紀律).
-- Claude x Gemini Break News divergence is an intended signal.
-
-## Validation Gates
-Run the relevant validator and require `rc=0` before calling protocol output complete:
-| Mode | Script | Schema |
-|---|---|---|
-| News | `news/scripts/validate_digest_output.py` | `news/digest_output_schema.md` |
-| Sector | `sector/scripts/validate_sector_intel.py` | `sector/schema.md` |
-| Invest | `investment/scripts/validate_session_export.py` | `investment/phase5_export_schema.md` |
+`CLAUDE.md` remains the single *written* source for those sections; they are
+mirrored here by `scripts/sync_agent_context.py`, so edit them there.
 
 ## Useful Commands
 Full command reference: `docs/agent-ops/OPS_COMMANDS.md` (grouped by scenario, includes the engine-changed → test mapping).
@@ -24,17 +16,18 @@ Full command reference: `docs/agent-ops/OPS_COMMANDS.md` (grouped by scenario, i
 ./daily_update.sh   # daily routine
 ```
 
-## Codex Workflow Rules
+## Codex / Grok Specific Rules
+The shared workflow rules (confirmation table, session-close checklist, "a
+protocol run is not a dev session") are in the generated section below — these
+are the additions that only apply to these two CLIs.
+
 - Before edits, inspect local context and preserve unrelated dirty work. This repo often has many generated reports and caches.
-- For changes involving 2+ files or a single file of 50+ lines, first present a concise table: file, action, estimated lines, description, plus total token estimate; wait for user OK. Exception: skip the confirmation when the user has explicitly authorized autonomous work in the current request (same rule as `CLAUDE.md` § Workflow Rules).
 - Use `rg` / `rg --files` for searches. Prefer existing project scripts and shared modules over new ad hoc logic.
-- Treat `CLAUDE.md` as canonical until the protocol docs are made model-neutral.
 - Protocol runs must preserve validator gates and the existing report/cache output paths.
 - Never write API keys, environment values, or secrets into source, reports, logs, prompts, or generated artifacts.
 - Be careful around `.env` and local config files; do not print or persist secret values.
-- On human-requested dev/refactor/fix completion, follow `CLAUDE.md`: sync `VERSION`, `Dashboard/utils.js`, `CHANGELOG.md`, then update `SESSION_NOTES.md` / `TODO.md`.
-- Protocol runs such as `產業掃描`, `分析 [TICKER]`, and `新聞分析` are not sessions. Do not bump version or update todo/session notes merely because a protocol ran.
 - Keep reports in `reports/`; caches belong under the protocol or skill cache directories already used by the project.
+- Work only inside the current working directory. Paths outside it (the home directory, `~/Documents`, `~/Stock`, another CLI's state directory) are not this project.
 
 ## Codex LLM Budget and Cross-Model Review Rules
 Treat every LLM invocation as consuming a limited rolling five-hour quota and adding response latency. Correctness matters, but repeated model discussion is not a substitute for deterministic inspection, tests, or a clear owner decision.
@@ -65,3 +58,52 @@ Treat every LLM invocation as consuming a limited rolling five-hour quota and ad
 - A review is complete when critical/high findings are fixed or explicitly rejected with evidence and required validators pass. Cosmetic differences and model preference do not justify another inference turn.
 - If the same disagreement survives two model turns, Codex must make and document an evidence-based decision or ask the user; it must not keep debating automatically.
 - Keep a short call ledger in the active response when cross-model work is used: model/session, purpose, inference-turn count, and outcome. Waiting/polling must never increment the count because it must never invoke the model.
+
+<!-- BEGIN generated from CLAUDE.md — do not edit by hand -->
+
+> **本區塊由 `scripts/sync_agent_context.py` 從 `CLAUDE.md` 生成，不要手改。**
+> 本檔是 Codex 與 Grok 共用的 context 檔（兩者實測都會自動載入，2026-08-09）。
+> 你只需要這一個 context 檔 —— 不必去讀 `CLAUDE.md` 或 `GEMINI.md`。
+
+## Protocol Triggers（中期 / 委員會層）
+
+| 指令 | 先讀這個檔 | 一句話紀律 |
+|---|---|---|
+| `產業掃描` | `sector/sector_protocol_main.md` | 主檔載入 phase_0 / phase_1-2-3 / phase_4-5 子檔 |
+| `分析 [TICKER]` | `investment/investment_protocol_v5_0.md` | 5 lane subagent + Red Team；數字全走 script 禁手算；FMP bundle 規範見 `investment/protocol_appendix_fmp_bundles.md` |
+| `財報 [TICKER]` | `skills/earnings-analyst/SKILL.md` | Cache key = (TICKER, last_earnings_date)；MD 報告必附 EDGAR/IR/FMP clickable link（規則在 SKILL.md Citations） |
+| `新聞分析 DIGEST` | `news/news_protocol_v2.md` | RSS → deterministic triage → debate |
+| `新聞分析 FLASH [text]` | `news/news_protocol_v2.md` | Deep Debate only |
+| `動能 [TICKER]` / `動能選股` / `更新 journal` | `skills/momentum-monitor/scripts/` 的 momentum.py / screen.py / journal.py | 直接跑 script |
+| `ic-memo [TICKER]`（或 `分析 --memo`） | `skills/ic-memo-writer/SKILL.md` | Deterministic renderer（0 LLM）；不重評分、不改 history.json |
+| `首次覆蓋 [TICKER]`（或 `分析 --initiation`） | `skills/ic-memo-writer/SKILL.md`（`template_initiation.md`） | Deterministic renderer；前置 = history entry + valuation-modeler cache；validator `--initiation` rc=0/2 |
+| `估值模型 [TICKER]` / `同業比較 [TICKER]` | `skills/valuation-modeler/SKILL.md` | 直接跑 dcf.py / comps.py；數字全 script；餵 protocol 的 dcf_self_built / comps_implied anchor |
+| `財報前瞻 [TICKER]` | （UI 自動觸發，server subprocess，不走 Claude turn） | 手動版指令見 `docs/agent-ops/OPS_COMMANDS.md` §2 |
+| `回測 [TICKER]` | （UI 自動觸發，server subprocess，不走 Claude turn） | 探索層；手動版見 `docs/agent-ops/OPS_COMMANDS.md` §2；細節 `skills/quant-backtest/SKILL.md` |
+
+## 自動層（無需觸發，直接讀輸出檔）
+
+| 層 | 輸出在哪 | 細節文件 |
+|---|---|---|
+| 戰術雷達（1-15 天） | `skills/thematic-screener/data/recommendations/<DATE>.json` | `skills/MARKET_INDEX.md`、`docs/plan_short.md` |
+| Break News（daemon） | `news/break_news_logs/bn_*.json`、`/break-news.html` | 手動指令 `docs/agent-ops/OPS_COMMANDS.md` §6 |
+| Nexus 知識圖譜 | `Dashboard/nexus_graph.json`、`/graph.html` | `docs/agent-ops/OPS_COMMANDS.md` §5 |
+| Link Digest（News 頁貼 URL） | `reports/*_link_digest.md` + judgment.json | `news/link_digest_protocol.md` |
+
+**全域紀律（不可違反）**：以上自動層 + 回測全部是**探索層**——產出**永不**進入 investment_protocol 的決策（buy_threshold / position_size / verdict）。Break News 的 Claude × Gemini 分歧是刻意設計，divergence_note 是訊號不是 bug。Nexus Tier 3 LLM 找到的新實體先標 `provisional`，需 ≥3 份獨立報告才晉升一級節點。`skills/short-term-target/config/weights.yaml` 只由使用者手動校準，任何 agent 不得自動覆寫。
+
+## Validator Gates（protocol 收尾必 rc=0）
+
+| Mode | Script | Schema |
+|---|---|---|
+| News | `news/scripts/validate_digest_output.py` | `news/digest_output_schema.md` |
+| Sector | `sector/scripts/validate_sector_intel.py` | `sector/schema.md` |
+| Invest | `investment/scripts/validate_session_export.py` | `investment/phase5_export_schema.md` |
+
+## Workflow Rules（dev/refactor/fix session）
+
+1. **動工前確認**：改動 ≥2 檔或單檔 ≥50 行 → 先輸出摘要表（File / Action / Est. Lines / Description），等使用者「OK」。使用者已在本輪明確授權自主作業時免確認。
+2. **收尾 checklist**：(a) 三處版本同步並跑 MAINTENANCE.md 的驗證命令；(b) 按 MAINTENANCE.md 的讀寫規則更新 `SESSION_NOTES.md` / `TODO.md`（禁止整檔 Read）；(c) 改了引擎 → 跑 `OPS_COMMANDS.md` §7 對應測試 rc=0；(d) 收尾殘留掃描 + 靜默綠防線 —— `MAINTENANCE.md` §2b / §2c。
+3. **🚫 排除**：protocol 執行（`產業掃描`、`分析` 等）不是 dev session——不 bump 版本、不動 todolist。
+
+<!-- END generated from CLAUDE.md -->

@@ -472,6 +472,11 @@ _DEFAULT_CONFIG = {
     # holds the defaults, and an absent block means "on with defaults" so a config
     # file written before Phase 7 does not silently opt out of governance.
     "broker": {},
+    # V4.114.0 — per-protocol provider allowlist, read by
+    # `model_router.protocol_provider_allowlist`. Empty here means unrestricted,
+    # which is the pre-V4.114.0 behaviour: a config file that predates this key
+    # keeps routing exactly as it did.
+    "protocol_providers": {},
 }
 
 
@@ -553,6 +558,14 @@ def load_llm_config() -> dict:
     bk = raw.get("broker")
     if isinstance(bk, dict):
         cfg["broker"] = dict(bk)
+    # V4.114.0 — per-protocol provider allowlist. Carried through whole for the
+    # same reason as `broker`: its keys are protocol names, so there is no fixed
+    # set to whitelist against, and `model_router.protocol_provider_allowlist`
+    # owns the validation. Whitelisting here is what would silently drop it —
+    # the trap the window-budget comment above already records once.
+    pp = raw.get("protocol_providers")
+    if isinstance(pp, dict):
+        cfg["protocol_providers"] = dict(pp)
     return cfg
 
 

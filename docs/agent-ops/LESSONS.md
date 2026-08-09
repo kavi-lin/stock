@@ -1,5 +1,17 @@
 # 踩坑教訓（格式見 MAINTENANCE.md §4；>150 行時精簡）
 
+## 2026-08-09 ｜共用假設在「換執行者」時才會現形，而它挑最貴的那支現形
+- 情境：`invest_20260809_000447` rc=1，208K token 零產出。V4.106.0 起 quota broker 為 protocol run 指派 provider；這是 invest 15 次歷史裡**第一次**跑到非 Claude（前 14 次全是 `claude:opus`）。
+- 坑：invest 的 prompt 是裸觸發詞 `分析 {ticker}`，語意完全靠 agent 自動載入 CLAUDE.md 的觸發表——**這個假設從沒被寫下來，因為在單一 agent 時代它永遠成立**。`agy --print` 不載入任何專案 context 檔，於是 agent 從頭到尾沒 list 過自己的 cwd，循 `~/.gemini/projects.json` 的過期路徑跑去舊鏡像目錄亂找。同天同 provider 的 `triage` 兩跑 rc=0——那支 prompt 把每條 script 路徑寫死，**可攜性差異一直存在，只是之前沒抽到那支籤**。
+- 修法：(a) 診斷看「agent 沒做什麼」——沒進 cwd 比任何錯誤訊息資訊量大，最後那句 `Agent execution terminated due to error.` 什麼也沒說；(b) **CLI 行為用探針測，不要讀它二進位裡的說明文字**——agy 內含 directory-based rules 的完整描述，照讀會得出「它會載入」的錯誤結論，兩題禁用工具的探針才問出 `NONE`；(c) 把假設寫進 prompt：每個非 claude provider 的前導點名自己的 context 檔 + 本次 protocol 規範路徑 + cwd 邊界；(d) 可攜性用 `protocol_providers` 白名單顯式編碼，別讓 broker 靠運氣。
+- 已回寫規則？：是——`CLAUDE.md` 檔頭「唯一手寫來源 + 生成」、`MAINTENANCE.md` §2 加 `sync_agent_context.py --check`、`OPS_COMMANDS.md` §7 兩列、`tests/test_protocol_model_routing.py` 擴充。
+
+## 2026-08-09 ｜「單一真相來源」在多 CLI 下會反轉成 bug
+- 情境：同上。CLAUDE.md 原本明文「觸發表是唯一 source of truth，AGENTS.md 只引用不複製」。
+- 坑：這條規則在單一 agent 下正確，在四個**各自只自動載入自己那一個檔**的 CLI 下，「引用」等於要求它們先去讀別人的 context 檔。順手驗出 codex 與 grok 也是壞的——兩者都確實自動載入 `AGENTS.md`（grok 讀的也是這個檔，不是 GROK.md），但那個檔當時就寫著「表在 CLAUDE.md，不要複製」，所以問它們 `分析 TICKER` 讀哪個檔一樣答 UNKNOWN。**只有 gemini 炸掉，是因為只有它連自己的檔都沒載入**；另外兩家的殘缺沒被觸發過，也就沒人知道。
+- 修法：改成「唯一**手寫**來源 + `scripts/sync_agent_context.py` 生成另兩檔的 delimited 區塊」，`--check` 進收尾 checklist。要避免的是**複製造成的漂移**，不是複製本身——當消費者彼此隔離時，生成比引用正確。
+- 已回寫規則？：是（同上）。
+
 ## 2026-08-08 ｜結論對、但支撐結論的事實錯了——錯誤考據會被後人當事實引用
 - 情境：風控三支 Batch B 決策備忘（v4.112.0），三處被 review 抓到考據不實。
 - 坑：(a)「兩年來沒人依它決策」——專案只有幾個月歷史，修辭失控；(b)「33/47 **精確**落在格點」——±0.0005 其實只有 13/47，±0.005 才 33/47，而該容差的 8 個 bin 覆蓋了觀測區間 42%，所以 70% 是支持性不是決定性；(c)「fragility_downgrade 兩次都 ROBUST」——實際是三列 FRAGILE/FRAGILE/ROBUST。**三處的結論都成立**（該刪的還是該刪），但寫進 CHANGELOG 的理由段會被後人當事實引用，錯的考據比沒有考據更糟。

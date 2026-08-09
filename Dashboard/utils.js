@@ -8,7 +8,7 @@
 
   // Semantic release tag shown in sidebar footer. Bump on meaningful releases.
   // Cache-busting is handled separately by dashboard_server.py (mtime injection).
-  const VERSION = 'V4.113.4';
+  const VERSION = 'V4.115.0';
 
   // V1.71.x — group field enables sectioned sidebar layout
   const NAV_ITEMS = [
@@ -679,8 +679,8 @@
                 ? '額度由 quota broker 授權，它只派還有額度的一家，所以沒有「降級順序」可設。要改指派請編輯 <code>config/llm_config.json</code>。'
                 : 'Quota is authorised by the broker, which only ever assigns a provider that has quota — there is no fallback order to configure. Edit <code>config/llm_config.json</code> to change assignments.'}</div>
               <div>${isZh
-                ? '長條 = 該家最緊的窗口還剩多少；虛線是 broker 的硬保留線，低於它就不再派工。滑過任一家可看各窗口（5h / 週 / 本節）、重置時間與今日花費。'
-                : 'Each bar is the tightest window that provider has left; the dashed line is the broker hard reserve — below it nothing is dispatched. Hover a provider for its windows (5h / weekly / session), reset times and spend.'}</div>
+                ? '長條 = 該家最緊的窗口<strong>已用</strong>多少（越長越滿）；虛線是 broker 的硬保留線，越過它就不再派工。滑過任一家可看各窗口（5h / 週 / 本節）各自的長條、重置時間與今日花費。窗口百分比帶虛線底線的，代表該家只回報剩餘量、消費數字是推算的。'
+                : 'Each bar is how much of that provider\'s tightest window is <strong>used</strong> — longer means fuller; the dashed line is the broker hard reserve, past which nothing is dispatched. Hover a provider for a bar per window (5h / weekly / session), reset times and spend. A dotted-underlined percentage means that provider reports only what is left, so consumption was inferred.'}</div>
               <div>${isZh
                 ? '花費只有本地帳本有（broker 不報金額）。呼叫次數上限只有在 broker 關掉或連不上時才是真的限制，所以平常不顯示。'
                 : 'Spend comes from the local ledger only — the broker does not report cost. The per-day call caps bind only when the broker is off or unreachable, so they stay hidden until then.'}</div>
@@ -808,12 +808,34 @@
         return parts.join('·') || String(b.name || '?');
       };
 
-      const shortDuration = (sec, zh) => {
+      // One coarse unit, never two, never a decimal: "4d", "19h", "45m".
+      // A quota panel is read to answer "roughly when does this free up" — the
+      // ".6" in "3.6d" is precision the reading itself does not have, since the
+      // snapshot behind it can already be minutes old.
+      // 23h–24h collapses to "1d" so the hour branch never prints "24h".
+      const shortDuration = (sec) => {
         const s = Number(sec);
         if (!Number.isFinite(s) || s <= 0) return '';
-        if (s < 3600)  return `${Math.round(s / 60)}m`;
-        if (s < 86400) return `${(s / 3600).toFixed(1)}h`;
-        return `${(s / 86400).toFixed(1)}d`;
+        if (s < 3600)  return `${Math.max(1, Math.round(s / 60))}m`;
+        if (s < 82800) return `${Math.round(s / 3600)}h`;
+        return `${Math.max(1, Math.round(s / 86400))}d`;
+      };
+
+      // Consumption, which is what the bars now draw. `used_percent` is the
+      // provider's own reading and is used verbatim where it exists (claude,
+      // codex). agy reports only what is left, so 100 − remaining is an
+      // inference — flagged as `derived` so the hover card can say so instead
+      // of passing it off as the provider's number.
+      const usedOf = (b) => {
+        const u = b.used_percent;
+        if (u !== null && u !== undefined && Number.isFinite(Number(u))) {
+          return { pct: Number(u), derived: false };
+        }
+        const r = b.remaining_percent;
+        if (r === null || r === undefined || !Number.isFinite(Number(r))) {
+          return { pct: null, derived: false };
+        }
+        return { pct: 100 - Number(r), derived: true };
       };
 
       // Providers report resets three different ways and never all three, and
@@ -823,24 +845,60 @@
       // glance; the raw text stays in the row's title attribute.
       const MONTHS = { jan:1, feb:2, mar:3, apr:4, may:5, jun:6,
                        jul:7, aug:8, sep:9, oct:10, nov:11, dec:12 };
-      const resetHint = (b, zh) => {
-        const d = shortDuration(b.refresh_in_seconds, zh);
-        if (d) return zh ? `${d}後` : `in ${d}`;
-        const label = String(b.reset_label || '').replace(/\s*\([^)]*\)\s*/g, '').trim();
-        if (!label) return '';
-        const m = label.match(/^([a-z]{3})[a-z]*\s*(\d{1,2})\s*at\s*(.+)$/i);
-        if (m && MONTHS[m[1].toLowerCase()]) {
-          return `${MONTHS[m[1].toLowerCase()]}/${m[2]} ${m[3].replace(/\s+/g, '')}`;
+      // "Aug13at12pm(Asia/Taipei)" / "Aug 13 at 11:59am (Asia/Taipei)" /
+      // "9:40am(Asia/Taipei)" → a Date, so an absolute label can be shown as
+      // "4d" like every other window. Only claude reports this way and it gives
+      // no seconds, so without this its rows are the only ones that cannot say
+      // how far off the reset is.
+      //
+      // The label carries no year, and its timezone is the provider's rather
+      // than the browser's. Both are tolerable at one-unit resolution, and the
+      // raw string stays in the row's `title` as the thing to trust when they
+      // disagree.
+      const parseResetLabel = (raw) => {
+        const s = String(raw || '').replace(/\s*\([^)]*\)\s*/g, '').trim();
+        if (!s) return null;
+        const time = s.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)/i);
+        if (!time) return null;
+        let hh = Number(time[1]) % 12;
+        if (/pm/i.test(time[3])) hh += 12;
+        const md = s.match(/^([a-z]{3})[a-z]*\s*(\d{1,2})/i);
+        const now = new Date();
+        const at = new Date(now);
+        if (md && MONTHS[md[1].toLowerCase()]) {
+          at.setMonth(MONTHS[md[1].toLowerCase()] - 1, Number(md[2]));
         }
-        return label.replace(/\s+/g, ' ');
+        at.setHours(hh, Number(time[2] || 0), 0, 0);
+        // A reset is always ahead of now, so a time that lands in the past
+        // belongs to the next occurrence — tomorrow for a bare clock time, next
+        // year for a month/day that has already passed.
+        if (at.getTime() <= now.getTime()) {
+          if (md) at.setFullYear(at.getFullYear() + 1);
+          else    at.setDate(at.getDate() + 1);
+        }
+        return at;
+      };
+
+      const resetHint = (b) => {
+        const d = shortDuration(b.refresh_in_seconds);
+        if (d) return d;
+        const at = parseResetLabel(b.reset_label);
+        if (at) {
+          const rel = shortDuration((at.getTime() - Date.now()) / 1000);
+          if (rel) return rel;
+        }
+        // Unparseable but present: show it as-is rather than blank. A window
+        // whose reset is simply unknown and one whose label this code failed to
+        // read must not look the same.
+        return String(b.reset_label || '').replace(/\s*\([^)]*\)\s*/g, '').trim().replace(/\s+/g, ' ');
       };
 
       const ageLabel = (sec, zh) => {
         const s = Number(sec);
         if (!Number.isFinite(s)) return '';
         if (s < 90) return zh ? '剛更新' : 'just now';
-        const d = shortDuration(s, zh);
-        return zh ? `${d} 前` : `${d} ago`;
+        const d = shortDuration(s);
+        return zh ? `${d}前` : `${d} ago`;
       };
 
       // One bar per provider. `state` drives colour: cooled-down and
@@ -848,13 +906,18 @@
       // work, and a full-looking green bar on a provider nothing can use is the
       // single most misleading thing this panel could show.
       const providerRow = (model, info, routeTags, reserveLine, zh) => {
+        // V4.115.0 — bars draw CONSUMPTION, matching the hover card and the
+        // Claude Code usage panel this was modelled on. They used to draw what
+        // was left, so a long green bar meant "healthy" here and "nearly out"
+        // in every other quota UI the operator sees. One direction, everywhere.
         const remaining = info.remaining_percent;
         const has = remaining !== null && remaining !== undefined;
-        const width = has ? Math.max(0, Math.min(100, Number(remaining))) : 0;
+        const used = has ? 100 - Number(remaining) : null;
+        const width = has ? Math.max(0, Math.min(100, used)) : 0;
         let state = 'ok', flag = '';
         if (info.cooldown_until)   { state = 'cool'; flag = zh ? '冷卻中' : 'cooldown'; }
         else if (info.reserve_only) { state = 'cool'; flag = zh ? '保留區' : 'reserve'; }
-        else if (has && reserveLine !== null && width <= reserveLine) {
+        else if (has && reserveLine !== null && width >= reserveLine) {
           state = 'low'; flag = zh ? '低於保留線' : 'below reserve';
         } else if (info.authenticated === false) {
           state = 'off'; flag = zh ? '未登入' : 'no auth';
@@ -872,11 +935,13 @@
         // left. Window-by-window detail, freshness and spend all live in the
         // hover card (llmTipHTML) — kept out of the sidebar so the three bars
         // stay scannable, which is the whole point of the panel being pinned.
-        return `<div class="sidebar-llm-prov sidebar-llm-${state}" data-llm-prov="${esc(model)}">
+        return `<div class="sidebar-llm-prov sidebar-llm-${state}" data-llm-prov="${esc(model)}"
+                     title="${esc(zh ? `已用 ${pct(used)}／剩餘 ${pct(remaining)}`
+                                     : `${pct(used)} used / ${pct(remaining)} left`)}">
           <div class="sidebar-llm-prov-head">
             <span class="sidebar-llm-prov-name">${esc(model)}</span>
             ${flag ? `<span class="sidebar-llm-flag">${esc(flag)}</span>` : ''}
-            <span class="sidebar-llm-prov-pct">${pct(remaining)}</span>
+            <span class="sidebar-llm-prov-pct">${pct(used)}</span>
           </div>
           <div class="sidebar-llm-bar">
             <div class="sidebar-llm-bar-fill" style="width:${width}%"></div>
@@ -891,20 +956,34 @@
       // provider has cost today. `usage` is the local ledger row — the broker
       // reports percentages and never money, so spend can only come from here.
       const llmTipHTML = (model, info, usage, reserveLine, routeTags, zh) => {
+        // Each window gets its own bar. The windows were text-only rows, which
+        // made "63% weekly" and "6% session" scan as the same size of problem;
+        // the whole reason a provider's rows are worth opening is that they are
+        // not. Bars draw consumption, same direction as the pinned panel.
         const rows = (info.buckets || []).map(b => {
-          const hint = resetHint(b, zh);
-          return `<div class="llm-tip-bkt">
+          const u = usedOf(b);
+          const width = u.pct === null ? 0 : Math.max(0, Math.min(100, u.pct));
+          const hint = resetHint(b);
+          const raw = String(b.reset_label || '').trim();
+          const tip = [
+            u.derived ? (zh ? '由剩餘量推算' : 'derived from remaining') : '',
+            raw,
+          ].filter(Boolean).join(' · ');
+          return `<div class="llm-tip-bkt"${tip ? ` title="${esc(tip)}"` : ''}>
             <span class="llm-tip-bkt-name">${esc(bucketLabel(b, zh))}</span>
-            <span class="llm-tip-bkt-pct">${pct(b.remaining_percent)}</span>
+            <span class="llm-tip-bkt-pct${u.derived ? ' llm-tip-bkt-derived' : ''}">${pct(u.pct)}</span>
             <span class="llm-tip-bkt-reset">${esc(hint)}</span>
-          </div>`;
+          </div>
+          <div class="llm-tip-bkt-bar"><div class="llm-tip-bkt-fill" style="width:${width}%"></div></div>`;
         }).join('') || `<div class="llm-tip-dim">${zh ? '無窗口資料' : 'no window data'}</div>`;
 
-        const meta = [];
-        if (info.plan) meta.push(String(info.plan));
-        if (info.confidence) meta.push(String(info.confidence));
+        // Head is name + plan + freshness on one line. The separate meta row
+        // held `plan · confidence · age`; confidence moved into the title
+        // because it qualifies the reading rather than being one, and the
+        // headline percentage came out because the per-window numbers directly
+        // below are the ones acted on.
         const age = ageLabel(info.age_seconds, zh);
-        if (age) meta.push(age);
+        const headTip = info.confidence ? String(info.confidence) : '';
 
         const t = (usage && usage.tokens) || {};
         const tok = (t.input || 0) + (t.output || 0) + (t.cache_read || 0) + (t.cache_write || 0);
@@ -917,11 +996,11 @@
 
         // No hard-reserve line here: the user asked for that sentence gone, and
         // the gear help already explains what the dashed marker on the bar is.
-        return `<div class="llm-tip-head">
+        return `<div class="llm-tip-head"${headTip ? ` title="${esc(headTip)}"` : ''}>
             <span class="llm-tip-name">${esc(model)}</span>
-            <span class="llm-tip-pct">${pct(info.remaining_percent)}</span>
+            ${info.plan ? `<span class="llm-tip-plan">${esc(String(info.plan))}</span>` : ''}
+            <span class="llm-tip-age">${esc(age)}</span>
           </div>
-          ${meta.length ? `<div class="llm-tip-meta">${esc(meta.join(' · '))}</div>` : ''}
           <div class="llm-tip-bkts">${rows}</div>
           ${routeTags.length ? `<div class="llm-tip-routes">${esc(routeTags.join(' · '))}</div>` : ''}
           ${spend}`;
@@ -997,9 +1076,14 @@
         }
 
         const providers = broker.providers || {};
+        // The broker states its hard reserve as a floor on what must remain
+        // (20%). The bars now run on a consumption axis, so the same rule is the
+        // ceiling 100 − 20 = 80% used. Converted once, here, rather than at each
+        // use: leaving it as 20 while the bar fills the other way would put the
+        // marker at the wrong end and flag every healthy provider as depleted.
         const reserveRaw = broker.hard_reserve_percent;
         const reserveLine = (reserveRaw === null || reserveRaw === undefined)
-          ? null : Math.max(0, Math.min(100, Number(reserveRaw)));
+          ? null : Math.max(0, Math.min(100, 100 - Number(reserveRaw)));
 
         const names = Object.keys(providers);
 

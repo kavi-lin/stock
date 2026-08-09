@@ -2,7 +2,8 @@
 
 > 版本同步：`VERSION` + `Dashboard/utils.js` + `CHANGELOG.md` 三處一起（驗證命令見 `docs/agent-ops/MAINTENANCE.md`）。專案背景見 `README.md`。
 > 本檔只做路由：指令 → 讀哪個檔。歷史沿革一律查 `CHANGELOG.md`，不寫在這裡。
-> 本檔的 Protocol Triggers 表是唯一 source of truth；`AGENTS.md`（Codex）只引用不複製。
+> 本檔是 Protocol Triggers / 自動層 / Validator Gates / Workflow Rules 四節的唯一**手寫**來源。`GEMINI.md`（agy）與 `AGENTS.md`（Codex + Grok）的 generated 區塊由 `scripts/sync_agent_context.py` 從本檔生成 —— 改這四節後必跑它，收尾 checklist 有 `--check`。**不要手改那兩個檔的 generated 區塊。**
+> 為什麼不是「只引用不複製」：各家 CLI 只自動載入自己那一個檔（`agy` 連自己的都不載），引用等於要求它們先讀別人的 context 檔，而 2026-08-09 的 invest 事故就是這個假設破了。
 
 ## Protocol Triggers（中期 / 委員會層）
 

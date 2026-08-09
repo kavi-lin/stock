@@ -618,25 +618,31 @@ aside#sidebar { display: flex; flex-direction: column; }
   pointer-events: none;
 }
 .llm-tip.hidden { display: none; }
+/* Head is one line: who · which plan · how fresh. The old second row
+   (`plan · confidence · age`) is gone — confidence moved to the title, and the
+   headline percentage came out because the per-window bars below carry it. */
 .llm-tip-head {
-  display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
+  display: flex; align-items: baseline; gap: 7px;
   font-family: 'JetBrains Mono', monospace;
 }
 .llm-tip-name {
   font-size: 10px; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase;
   color: var(--text-main);
 }
-.llm-tip-pct {
-  font-size: 13px; font-weight: 900; font-variant-numeric: tabular-nums;
+.llm-tip-plan {
+  font-size: 8px; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 1px 5px; border-radius: 999px; white-space: nowrap;
   color: var(--llm-accent, #10b981);
+  background: color-mix(in srgb, var(--llm-accent, #10b981) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--llm-accent, #10b981) 32%, transparent);
 }
-.llm-tip-meta {
-  font-family: 'JetBrains Mono', monospace;
+.llm-tip-age {
+  margin-left: auto;
   font-size: 8.5px; font-weight: 600; color: var(--text-muted); opacity: 0.7;
-  margin-top: 2px;
+  white-space: nowrap;
 }
 .llm-tip-bkts {
-  display: flex; flex-direction: column; gap: 2px;
+  display: flex; flex-direction: column; gap: 1px;
   margin-top: 7px; padding-top: 6px;
   border-top: 1px solid color-mix(in srgb, var(--text-muted) 16%, transparent);
 }
@@ -649,6 +655,27 @@ aside#sidebar { display: flex; flex-direction: column; }
 .llm-tip-bkt-name  { opacity: 0.8; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .llm-tip-bkt-pct   { font-weight: 900; font-variant-numeric: tabular-nums; }
 .llm-tip-bkt-reset { color: var(--text-muted); opacity: 0.7; white-space: nowrap; }
+/* A percentage this repo inferred rather than read. agy reports only what is
+   left, so its consumption is 100 − remaining; dotted underline marks the
+   difference instead of letting it pass as the provider's own figure. */
+.llm-tip-bkt-derived {
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+  opacity: 0.85;
+}
+/* One bar per window, drawing consumption — same direction as the pinned
+   panel, so a bar never means opposite things on the two surfaces. */
+.llm-tip-bkt-bar {
+  height: 4px; border-radius: 2px; overflow: hidden;
+  margin: 1px 0 5px;
+  background: color-mix(in srgb, var(--text-muted) 18%, transparent);
+}
+.llm-tip-bkt-bar:last-child { margin-bottom: 0; }
+.llm-tip-bkt-fill {
+  height: 100%; border-radius: 2px;
+  background: var(--llm-accent, #10b981);
+  transition: width 0.35s ease;
+}
 .llm-tip-routes, .llm-tip-dim, .llm-tip-foot {
   font-family: 'JetBrains Mono', monospace;
   font-size: 8.5px; font-weight: 600; color: var(--text-muted);

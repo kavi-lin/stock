@@ -20,6 +20,12 @@
       "triage":  { "input": 240000, "output": 32000, "_source": "MEASURED 2026-08-08: 1 run on agy, 233139 in / 28702 out / 143s" }
     }
   },
+  "_protocol_providers_note": "V4.114.0: which CLIs each agentic protocol may run on. The broker picks freely among the listed providers; an unlisted protocol (no key, no _default) is unrestricted. This exists because the broker treats providers as interchangeable and they are not: on 2026-08-09 it sent `分析 NOW` to agy — the first non-Claude invest run in the repo's history — which burned 208K tokens searching the filesystem and produced nothing. invest and sector fan out to parallel lane subagents and assume Claude-shaped semantics throughout; triage/news name every script path inline and have run clean on agy and codex. Add gemini to invest only after a real run proves agy can drive the 5-lane + Red Team fan-out. Empty list = blocked (read as a typo, not as permission).",
+  "protocol_providers": {
+    "invest": ["claude", "codex"],
+    "sector": ["claude", "codex"],
+    "_default": null
+  },
   "_budgets_note": "daily_max_calls resets at UTC midnight. window_max_calls/window_hours is an independent rolling window that does NOT reset at midnight — it mirrors the provider's session window. Omit window_max_calls (or set 0) to leave a model uncapped on that axis; gemini/grok are rate-limited per-minute rather than per-session, so only the session-window CLIs carry one.",
   "budgets": {
     "claude": {
