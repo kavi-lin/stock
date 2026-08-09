@@ -97,6 +97,38 @@ for _p in ds.PROTOCOL_PROMPTS:
     check(f"gemini.budget_reaches_child.{_p}", _v >= min(_budget, 60) - 30,
           f"budget={_budget} child={_v}")
 
+# ── V4.116.2: every protocol with a documented gate must be registered ───────
+# `invest` was missing from PROTOCOL_VALIDATORS for its whole life while
+# CLAUDE.md § Validator Gates listed it, so the heaviest protocol was the one
+# whose validator ran only when the model chose to run it. A missing dict key
+# has no symptom — nothing errors, the run just completes ungated — which is
+# why it needs an assertion rather than a reading.
+_GATE_DOCUMENTED = {          # CLAUDE.md § Validator Gates
+    "news":   "news/scripts/validate_digest_output.py",
+    "sector": "sector/scripts/validate_sector_intel.py",
+    "invest": "investment/scripts/validate_session_export.py",
+}
+for _proto, _script in _GATE_DOCUMENTED.items():
+    _registered = ds.PROTOCOL_VALIDATORS.get(_proto) or []
+    check(f"validator_registered.{_proto}", _script in _registered,
+          f"CLAUDE.md documents {_script} for `{_proto}` but PROTOCOL_VALIDATORS has "
+          f"{_registered or 'nothing'} — the gate exists and never runs")
+
+for _proto, _paths in ds.PROTOCOL_VALIDATORS.items():
+    for _p in _paths:
+        check(f"validator_exists.{_proto}", os.path.exists(os.path.join(ds.ROOT, _p)), _p)
+
+# The validator reads the last history entry, which a run that died before
+# writing did not produce — so `invest` also needs an artifact that cannot be
+# inherited from the previous session.
+_inv_artifacts = ds.PROTOCOL_REQUIRED_ARTIFACTS.get("invest") or []
+check("required_artifact.invest_present", bool(_inv_artifacts),
+      "a run that writes nothing would validate the PREVIOUS session's entry and pass")
+for _a in _inv_artifacts:
+    check("required_artifact.invest_templated",
+          "{ticker}" in _a and "{today_compact}" in _a,
+          f"{_a} — a deep-dive report path needs both the ticker and the compact date")
+
 # V4.114.0 — per-protocol provider allowlist. The broker treats providers as
 # interchangeable for protocol runs (that is its documented job), and on
 # 2026-08-09 it sent `分析 NOW` to agy — the first non-Claude invest run ever,

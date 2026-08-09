@@ -1,6 +1,6 @@
 # INTEL COMMAND — Backlog & Tasks
 
-> **Last Updated**: 2026-08-09 (v4.116.1)
+> **Last Updated**: 2026-08-09 (v4.116.2)
 
 ---
 
@@ -12,7 +12,7 @@
 - [x] `reports/20260809_NOW.md` → `_EXPERIMENT.md`（第一次那份），退出決策日曆。
 - [x] **實測**：codex/PLTR rc=0 11m 全綠；agy/NOW rc=0 4m，四道閘全部生效（script 有跑、權重不再坍縮、phase0 真重跑、shell 汙染 0、position_size 3.53%）。
 
-- [ ] **`PROTOCOL_VALIDATORS` 沒有 `invest`（最高優先）**：伺服器跑 invest 不會自動跑 `validate_session_export.py`，兩次實測都是引擎自願跑才過。這讓 `script_not_run` 閘在「agent 不跑 validator」時完全失效——與 phase0 同一形狀。1 行 + 測試。
+- [x] **`PROTOCOL_VALIDATORS` 補上 `invest`**（v4.116.2）+ `PROTOCOL_REQUIRED_ARTIFACTS` 補 invest 報告（validator 讀最後一筆，run 沒寫入會驗到上一個 session）。測試對照 CLAUDE.md 記載的三道 gate 逐一斷言已註冊。
 - [ ] **`valuation_reviewer_gate.py` 無閘可管**：不產 anchor 所以不在 `SCRIPT_SOURCED_ANCHORS`。codex 跑 5 次、agy 兩次皆 0 次。要驗得靠它的輸出檔或 export 欄位。
 - [ ] **稽核推算 $121.85 已被推翻**：第二次兩支 script 都跑了，`extreme_overvalued` 沒變且更空（$64.37 / −48.45%）。NOW 的估值判定不是「跳過 script 造成的假象」。
 

@@ -599,6 +599,18 @@ PROTOCOL_VALIDATORS = {
     "flash":  ["news/scripts/validate_digest_output.py"],
     "flash_text": ["news/scripts/validate_digest_output.py"],
     "review": ["news/scripts/validate_digest_output.py"],
+    # V4.116.2 — invest was absent from this table for its whole life, even
+    # though CLAUDE.md § Validator Gates has always listed it. So the heaviest,
+    # highest-stakes protocol was the one whose validator only ran when the
+    # model chose to run it.
+    #
+    # That is not theoretical. On 2026-08-09 an agy run skipped both mandatory
+    # Phase 1.5 valuation scripts AND never invoked the validator, and the
+    # server marked it done. Every gate added in V4.116.0/.1 lives inside
+    # `validate_session_export.py`, so without this line they only bind an agent
+    # that was already going to check itself — which is exactly the agent that
+    # does not need them.
+    "invest": ["investment/scripts/validate_session_export.py"],
 }
 
 # Post-run required-artifact gate. Catches a model returning rc=0 while leaving
@@ -608,6 +620,11 @@ PROTOCOL_VALIDATORS = {
 # of being silently marked "done". `{today}` = run-start date (YYYY-MM-DD).
 PROTOCOL_REQUIRED_ARTIFACTS = {
     "llm_review": ["reports/decision_review/REVIEW_{today}.md"],
+    # V4.116.2 — the validator above reads the LAST entry in history.json, so a
+    # run that dies before writing anything leaves the previous session's entry
+    # in place and validates clean. The report is the artifact that cannot be
+    # inherited from an earlier run, which is what makes it the right check.
+    "invest": ["reports/{today_compact}_{ticker}.md"],
 }
 
 _protocol_state = {
@@ -1278,7 +1295,18 @@ def run_protocol(name, params=None):
             if rc == 0 and validator_err is None and name in PROTOCOL_REQUIRED_ARTIFACTS:
                 today = start.strftime("%Y-%m-%d")
                 start_ts = start.timestamp()
-                wanted = [a.replace("{today}", today) for a in PROTOCOL_REQUIRED_ARTIFACTS[name]]
+                # Two date shapes because the repo uses both: dashed for the
+                # review/news/sector families, compact for deep-dive reports.
+                subs = {
+                    "{today}": today,
+                    "{today_compact}": start.strftime("%Y%m%d"),
+                    "{ticker}": str((params or {}).get("ticker") or "").upper(),
+                }
+                wanted = []
+                for a in PROTOCOL_REQUIRED_ARTIFACTS[name]:
+                    for key, value in subs.items():
+                        a = a.replace(key, value)
+                    wanted.append(a)
                 fresh = False
                 for rel in wanted:
                     fp = os.path.join(ROOT, rel)

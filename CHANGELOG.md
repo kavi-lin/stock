@@ -8,6 +8,19 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.116.2] — 2026-08-09 — invest 終於進 PROTOCOL_VALIDATORS：讓 V4.116.0/.1 的閘真的有約束力
+
+### Fixed
+- **`invest` 從來不在 `PROTOCOL_VALIDATORS` 裡**，儘管 `CLAUDE.md` § Validator Gates 一直列著它。於是這個 repo 最重、風險最高的 protocol，是唯一一支「validator 只在模型自願跑時才跑」的。
+  這不是理論問題：2026-08-09 那次 agy run 同時跳過兩支 mandatory 估值 script **且從未呼叫 validator**，伺服器照樣標成 done。V4.116.0/.1 加的每一道閘都住在 `validate_session_export.py` 裡面——沒有這一行，它們只約束得到「本來就會自我檢查」的 agent，而那正是不需要它們的 agent。
+- **`invest` 加入 `PROTOCOL_REQUIRED_ARTIFACTS`**：validator 讀的是 `history.json` 的**最後一筆**，所以一次「還沒寫入就死掉」的 run 會去驗上一個 session 的 entry 然後乾淨通過。報告是唯一無法從前一次繼承的產物，所以用它當檢查點。artifact 模板新增 `{today_compact}` 與 `{ticker}` 兩個 placeholder（deep-dive 報告是 `YYYYMMDD_TICKER.md`，與既有的 dashed 日期格式不同）。
+
+### Added
+- `tests/test_protocol_model_routing.py`：對照 `CLAUDE.md` 記載的三道 validator gate（news / sector / invest），逐一斷言它們真的被註冊、且腳本檔案存在；invest 的 required artifact 必須同時帶 ticker 與 compact date。**字典少一個 key 沒有任何症狀**——不會報錯，run 只是沒被把關——所以只能用斷言鎖，不能靠讀。種回 bug（拿掉那行）確認會紅。
+
+### Why
+- 這是本輪第五次同一形狀：**一個被記載、被信任、但實際上沒有接線的檢查**。前四次是 V4.84.0 budget key、V4.114.0 `protocol_providers`、V4.115.0 bucket 欄位、V4.116.0 的三道。差別在這次是實測發現的——兩個引擎各跑一次 invest，才注意到 runner 的驗收區塊從頭到尾沒印出 validator。
+
 ## [4.116.1] — 2026-08-09 — script 閘從「檔案存在」升級成「內容可信」；前導補閘門紀律；手動 runner 硬化
 
 ### Fixed
