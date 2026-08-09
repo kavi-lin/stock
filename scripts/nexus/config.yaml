@@ -164,7 +164,7 @@ narrative_sector_scope:
 # Tier-2 weights
 tier2_weights:
   primary_ticker: 1.0     # MD filename ticker
-  peer_in_body:   0.35    # other tickers found in body text
+  context_ticker: 0.35    # ticker co-occurring with a scoped narrative in the same paragraph
 
 # V3.1.0 — ticker-centric output mode
 # When ticker_centric: true, the final write step collapses the rich internal
@@ -187,6 +187,11 @@ sources:
   thesis_dir: "investment/invest_logs/theses"
   news_logs_glob: "news/news_logs/*_digest.json"
   break_news_dir: "news/break_news_logs"
+  claim_ledger: "nexus/claim_ledger.jsonl"
+  claim_quality: "Dashboard/nexus_quality.json"
+  claim_window_days: 45
+  topic_candidates: "Dashboard/nexus_topics.json"
+  evidence_drafts: "Dashboard/nexus_evidence_drafts.json"
   dashboard_data: "Dashboard/data.json"
   reports_dir: "reports"
   output: "Dashboard/nexus_graph.json"

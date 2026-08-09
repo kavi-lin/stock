@@ -9,9 +9,9 @@ out into the two machine-consumed files that the news feed + Knowledge Graph
   1. Append a deep/reviewed LINK_DIGEST event to `news_events.jsonl`, then
      deterministically rebuild `YYYY-MM-DD_digest.json` for bridge/Nexus readers.
   2. Write `news/break_news_logs/bn_<YYYYMMDD>_<hash>.json` (state=closed) with
-     `summary.merged_entities` + `summary.merged_relations`. Nexus tier-1 turns
-     these into ticker/sector/theme nodes and — for ticker↔ticker relations
-     corroborated by >=2 sources (support_count) — provisional supply-chain edges.
+     `summary.merged_entities` + `summary.merged_relations`. Nexus claim ledger
+     canonicalizes relation URLs and only projects ticker relationships backed
+     by >=2 URLs across >=2 domains.
 
 Then (non-fatal): run the digest validator and a tier-1 graph refresh.
 
@@ -331,10 +331,10 @@ def write_break_news(j: dict, entities: dict, tr: dict) -> str:
         "origin": "link_digest",
     }
     _atomic_write(bn_path, bn)
-    n_edges = sum(1 for r in relations if r["support_count"] >= 2)
+    n_multi_source = sum(1 for r in relations if r["support_count"] >= 2)
     print(f"[link_digest] break-news {bn_id} → {os.path.relpath(bn_path, ROOT)} "
           f"({len(entities['tickers'])} tickers, {len(relations)} relations, "
-          f"{n_edges} edge-eligible)")
+          f"{n_multi_source} multi-source; claim-ledger gate runs on graph refresh)")
     return bn_path
 
 
@@ -362,7 +362,7 @@ def refresh_graph() -> int:
         return 2
     try:
         r = subprocess.run(
-            [sys.executable, GRAPH_BUILDER, "--tier", "1", "--enable-direct-edge"],
+            [sys.executable, GRAPH_BUILDER, "--tier", "1"],
             cwd=ROOT, capture_output=True, text=True, timeout=300)
     except subprocess.TimeoutExpired:
         warn("graph refresh timed out (300s); daily Step 8 will rebuild")
@@ -373,7 +373,7 @@ def refresh_graph() -> int:
     if r.returncode != 0:
         warn(f"graph refresh rc={r.returncode}: {r.stderr.strip()[:400]}")
         return 2
-    print("[link_digest] nexus graph refreshed (tier 1 + direct-edge)")
+    print("[link_digest] nexus graph refreshed (tier 1 + claim-ledger edges)")
     return 0
 
 

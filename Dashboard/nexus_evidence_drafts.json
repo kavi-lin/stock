@@ -1,0 +1,4366 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-08-09T07:14:23.907684Z",
+  "artifact_class": "exploration_only",
+  "decision_use": "forbidden",
+  "generation_rule": "highest-score uncovered Nexus candidates; deterministic ticker-only evidence projection",
+  "counts": {
+    "available_new_candidates": 65,
+    "drafts_generated": 12,
+    "drafts_with_corroborated_edges": 7
+  },
+  "drafts": [
+    {
+      "draft_id": "draft:ai_capex",
+      "status": "evidence_only",
+      "decision_eligible": false,
+      "source_topic": {
+        "topic_id": "topic:ai_capex",
+        "label": "AI capex",
+        "state": "validated",
+        "score": 84.7,
+        "first_seen": "2026-06-25",
+        "last_seen": "2026-08-08",
+        "source_count": 504,
+        "source_domain_count": 12,
+        "tickers": [
+          "AAL",
+          "AAOI",
+          "AAPL",
+          "ABB",
+          "ABBV",
+          "ABNB",
+          "ABT",
+          "ACLS",
+          "ACN",
+          "ADBE",
+          "AEE",
+          "AEHR",
+          "AEIS",
+          "AEP",
+          "AES",
+          "AIQ",
+          "AJINY",
+          "AJNMY",
+          "ALAB",
+          "ALB",
+          "AMAT",
+          "AMD",
+          "AMZN",
+          "ANET",
+          "AON",
+          "APH",
+          "APP",
+          "ARKK",
+          "ARM",
+          "ASML"
+        ],
+        "why_now": [
+          "182 structural ticker relations",
+          "88 directional supply relations",
+          "43 corroborated relation claims",
+          "bottleneck language: shortage, bottleneck, backlog",
+          "spans 317 tickers"
+        ]
+      },
+      "layers": [
+        "unresolved"
+      ],
+      "nodes": [
+        {
+          "id": "AAL",
+          "label": "AAL",
+          "ticker": "AAL",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AAOI",
+          "label": "AAOI",
+          "ticker": "AAOI",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AAPL",
+          "label": "AAPL",
+          "ticker": "AAPL",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ABB",
+          "label": "ABB",
+          "ticker": "ABB",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ABBV",
+          "label": "ABBV",
+          "ticker": "ABBV",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ABNB",
+          "label": "ABNB",
+          "ticker": "ABNB",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ABT",
+          "label": "ABT",
+          "ticker": "ABT",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ACLS",
+          "label": "ACLS",
+          "ticker": "ACLS",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ACN",
+          "label": "ACN",
+          "ticker": "ACN",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ADBE",
+          "label": "ADBE",
+          "ticker": "ADBE",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AEE",
+          "label": "AEE",
+          "ticker": "AEE",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AEHR",
+          "label": "AEHR",
+          "ticker": "AEHR",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AEIS",
+          "label": "AEIS",
+          "ticker": "AEIS",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AEP",
+          "label": "AEP",
+          "ticker": "AEP",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AES",
+          "label": "AES",
+          "ticker": "AES",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AIQ",
+          "label": "AIQ",
+          "ticker": "AIQ",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AJINY",
+          "label": "AJINY",
+          "ticker": "AJINY",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AJNMY",
+          "label": "AJNMY",
+          "ticker": "AJNMY",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ALAB",
+          "label": "ALAB",
+          "ticker": "ALAB",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ALB",
+          "label": "ALB",
+          "ticker": "ALB",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AMAT",
+          "label": "AMAT",
+          "ticker": "AMAT",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AMD",
+          "label": "AMD",
+          "ticker": "AMD",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AMZN",
+          "label": "AMZN",
+          "ticker": "AMZN",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ANET",
+          "label": "ANET",
+          "ticker": "ANET",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AON",
+          "label": "AON",
+          "ticker": "AON",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "APH",
+          "label": "APH",
+          "ticker": "APH",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "APP",
+          "label": "APP",
+          "ticker": "APP",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ARKK",
+          "label": "ARKK",
+          "ticker": "ARKK",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ARM",
+          "label": "ARM",
+          "ticker": "ARM",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ASML",
+          "label": "ASML",
+          "ticker": "ASML",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        }
+      ],
+      "edges": [],
+      "context_edges": [],
+      "evidence": [
+        {
+          "source_key": "url:ebf265fda9db0db9fc5626802c5fa60fe1d07486",
+          "url": "https://finance.yahoo.com/markets/commodities/articles/could-copper-tariff-driven-rally-133000938.html",
+          "domain": "finance.yahoo.com",
+          "published": "2026-08-08",
+          "headline": "Could Copper’s Tariff-Driven Rally Be Running Out of Steam?"
+        },
+        {
+          "source_key": "url:dd0d5dfac4c83a808ac8765b5353208c6945b417",
+          "url": "https://investors.com/news/nucor-asml-stocks-near-buy-points",
+          "domain": "investors.com",
+          "published": "2026-08-08",
+          "headline": "Nucor, ASML Lead Five Stocks Near Buy Points Without This Big Risk"
+        },
+        {
+          "source_key": "url:d849842bb7659caad58930eac3bb5f56113d0fff",
+          "url": "https://investors.com/research/best-stocks-seven-magnificent-stocks-earnings-growth",
+          "domain": "investors.com",
+          "published": "2026-08-08",
+          "headline": "These 7 Stocks Are Analyst Favorites For Magnificent Earnings Growth; Arista Beats Views"
+        },
+        {
+          "source_key": "url:bbceca2c070e08a017d0ed9c21533c7e92c83622",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/amd-stock-buy-dip-ai-145000422.html",
+          "domain": "finance.yahoo.com",
+          "published": "2026-08-08",
+          "headline": "Is AMD Stock a Buy on the Dip as AI Revenue Surges?"
+        },
+        {
+          "source_key": "url:acfecf472381210f07199bd92d19026e01dbf098",
+          "url": "https://finance.yahoo.com/technology/ai/articles/jeff-bezos-amazon-just-raised-143500710.html",
+          "domain": "finance.yahoo.com",
+          "published": "2026-08-08",
+          "headline": "Jeff Bezos' Amazon Just Raised Its AI Spending to $220 Billion for 2026. Here's What That Capex Hike Means for Investors."
+        },
+        {
+          "source_key": "url:8cf87704bd3c92d91e0c653ad6c1e079ec5dc42e",
+          "url": "https://nasdaq.com/articles/alphabet-ceo-sundar-pichai-just-made-decision-could-move-nvidia-and-broadcom-stock",
+          "domain": "nasdaq.com",
+          "published": "2026-08-08",
+          "headline": "Alphabet CEO Sundar Pichai Just Made a Decision That Could Move Nvidia and Broadcom Stock"
+        },
+        {
+          "source_key": "url:7fd1afb33f7e913faaf145b8303c0d790b3da935",
+          "url": "https://finance.yahoo.com/technology/ai/articles/ai-hollowing-tech-sector-jobs-153836165.html",
+          "domain": "finance.yahoo.com",
+          "published": "2026-08-08",
+          "headline": "AI is Hollowing Out Tech Sector Jobs: Oracle and Microsoft Help Push Layoff Rate to 20-Year High"
+        },
+        {
+          "source_key": "url:0dab82770a3de49d04f24f153ba44fa9dfc8e816",
+          "url": "https://investors.com/market-trend/stock-market-today/dow-jones-futures-warren-buffett-cisco-lumentum-earnings",
+          "domain": "investors.com",
+          "published": "2026-08-08",
+          "headline": "Dow Jones Futures: What To Do As Stock Market Revs Up; Warren Buffett's Berkshire Beats Views"
+        }
+      ],
+      "evidence_summary": {
+        "source_count": 8,
+        "source_domain_count": 3,
+        "directional_edge_count": 0,
+        "corroborated_edge_count": 0
+      },
+      "known_gaps": [
+        "private_and_foreign_company_coverage_not_available_in_ticker_only_evidence",
+        "materials_and_equipment_layers_require_additional_evidence",
+        "unresolved_ticker_roles: AAL, AAOI, AAPL, ABB, ABBV, ABNB, ABT, ACLS, ACN, ADBE, AEE, AEHR, AEIS, AEP, AES, AIQ, AJINY, AJNMY, ALAB, ALB, AMAT, AMD, AMZN, ANET, AON, APH, APP, ARKK, ARM, ASML"
+      ],
+      "next_action": "human_review_or_bounded_gap_fill"
+    },
+    {
+      "draft_id": "draft:hbm3e",
+      "status": "evidence_only",
+      "decision_eligible": false,
+      "source_topic": {
+        "topic_id": "topic:hbm3e",
+        "label": "HBM3e",
+        "state": "validated",
+        "score": 83.6,
+        "first_seen": "2026-06-25",
+        "last_seen": "2026-08-08",
+        "source_count": 154,
+        "source_domain_count": 11,
+        "tickers": [
+          "AAPL",
+          "AIQ",
+          "ALAB",
+          "AMAT",
+          "AMD",
+          "AMZN",
+          "APP",
+          "ARKK",
+          "ARM",
+          "ASML",
+          "AVGO",
+          "BABA",
+          "BAC",
+          "BE",
+          "BIDU",
+          "BKNG",
+          "BLK",
+          "CAT",
+          "CEG",
+          "CIEN",
+          "COHR",
+          "COIN",
+          "CRM",
+          "CVX",
+          "DDOG",
+          "DELL",
+          "DIS",
+          "DTCR",
+          "DVN",
+          "EEM"
+        ],
+        "why_now": [
+          "56 structural ticker relations",
+          "33 directional supply relations",
+          "21 corroborated relation claims",
+          "bottleneck language: shortage, bottleneck",
+          "spans 112 tickers"
+        ]
+      },
+      "layers": [
+        "unresolved"
+      ],
+      "nodes": [
+        {
+          "id": "AAPL",
+          "label": "AAPL",
+          "ticker": "AAPL",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AIQ",
+          "label": "AIQ",
+          "ticker": "AIQ",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ALAB",
+          "label": "ALAB",
+          "ticker": "ALAB",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AMAT",
+          "label": "AMAT",
+          "ticker": "AMAT",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AMD",
+          "label": "AMD",
+          "ticker": "AMD",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AMZN",
+          "label": "AMZN",
+          "ticker": "AMZN",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "APP",
+          "label": "APP",
+          "ticker": "APP",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ARKK",
+          "label": "ARKK",
+          "ticker": "ARKK",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ARM",
+          "label": "ARM",
+          "ticker": "ARM",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ASML",
+          "label": "ASML",
+          "ticker": "ASML",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AVGO",
+          "label": "AVGO",
+          "ticker": "AVGO",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "BABA",
+          "label": "BABA",
+          "ticker": "BABA",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "BAC",
+          "label": "BAC",
+          "ticker": "BAC",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "BE",
+          "label": "BE",
+          "ticker": "BE",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "BIDU",
+          "label": "BIDU",
+          "ticker": "BIDU",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "BKNG",
+          "label": "BKNG",
+          "ticker": "BKNG",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "BLK",
+          "label": "BLK",
+          "ticker": "BLK",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "CAT",
+          "label": "CAT",
+          "ticker": "CAT",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "CEG",
+          "label": "CEG",
+          "ticker": "CEG",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "CIEN",
+          "label": "CIEN",
+          "ticker": "CIEN",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "COHR",
+          "label": "COHR",
+          "ticker": "COHR",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "COIN",
+          "label": "COIN",
+          "ticker": "COIN",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "CRM",
+          "label": "CRM",
+          "ticker": "CRM",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "CVX",
+          "label": "CVX",
+          "ticker": "CVX",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "DDOG",
+          "label": "DDOG",
+          "ticker": "DDOG",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "DELL",
+          "label": "DELL",
+          "ticker": "DELL",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "DIS",
+          "label": "DIS",
+          "ticker": "DIS",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "DTCR",
+          "label": "DTCR",
+          "ticker": "DTCR",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "DVN",
+          "label": "DVN",
+          "ticker": "DVN",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "EEM",
+          "label": "EEM",
+          "ticker": "EEM",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        }
+      ],
+      "edges": [],
+      "context_edges": [],
+      "evidence": [
+        {
+          "source_key": "url:bbceca2c070e08a017d0ed9c21533c7e92c83622",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/amd-stock-buy-dip-ai-145000422.html",
+          "domain": "finance.yahoo.com",
+          "published": "2026-08-08",
+          "headline": "Is AMD Stock a Buy on the Dip as AI Revenue Surges?"
+        },
+        {
+          "source_key": "url:acfecf472381210f07199bd92d19026e01dbf098",
+          "url": "https://finance.yahoo.com/technology/ai/articles/jeff-bezos-amazon-just-raised-143500710.html",
+          "domain": "finance.yahoo.com",
+          "published": "2026-08-08",
+          "headline": "Jeff Bezos' Amazon Just Raised Its AI Spending to $220 Billion for 2026. Here's What That Capex Hike Means for Investors."
+        },
+        {
+          "source_key": "url:8cf87704bd3c92d91e0c653ad6c1e079ec5dc42e",
+          "url": "https://nasdaq.com/articles/alphabet-ceo-sundar-pichai-just-made-decision-could-move-nvidia-and-broadcom-stock",
+          "domain": "nasdaq.com",
+          "published": "2026-08-08",
+          "headline": "Alphabet CEO Sundar Pichai Just Made a Decision That Could Move Nvidia and Broadcom Stock"
+        },
+        {
+          "source_key": "url:cf7932a822eb110a7ca64864a252a66eed5e639d",
+          "url": "https://cnbc.com/2026/08/07/sk-hynix-memory-chips-ai-prices.html",
+          "domain": "cnbc.com",
+          "published": "2026-08-07",
+          "headline": "SK Hynix to invest $38 billion building new memory chip plants as demand soars"
+        },
+        {
+          "source_key": "url:bb701247c532ac23a6a519cbb645de8b1a7515fb",
+          "url": "https://cnbc.com/2026/08/07/the-situational-awareness-unwind-is-only-one-reason-the-ai-trade-is-back.html",
+          "domain": "cnbc.com",
+          "published": "2026-08-07",
+          "headline": "The unwind of Situational Awareness isn't the only reason the AI trade is back"
+        },
+        {
+          "source_key": "url:89a44a89a38d95e0da163c3c954e9b2a62eb9160",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/meet-low-cost-vanguard-etf-154700923.html",
+          "domain": "finance.yahoo.com",
+          "published": "2026-08-07",
+          "headline": "Meet the Low-Cost Vanguard ETF That Just Gained 11% Over 4 Days, Thanks to a Combined 33% Weighting in Nvidia, Microsoft, Micron, and Broadcom. Here's Why It's Still a Top Buy Now."
+        },
+        {
+          "source_key": "url:161d4b7c95f4c75b89cad26df350483971bdf15f",
+          "url": "https://marketwatch.com/story/how-s-p-500-options-action-may-help-explain-volatility-in-memory-stocks-58d95beb?mod=mw_rss_topstories",
+          "domain": "marketwatch.com",
+          "published": "2026-08-07",
+          "headline": "How S&P 500 options action may help explain volatility in memory stocks"
+        },
+        {
+          "source_key": "url:0673481afca0b70b33699a6084b0f4e28574ec1f",
+          "url": "https://seekingalpha.com/news/4628875-chinas-july-trade-surplus-widens-to-1125b-as-exports-surge-239-on-strong-ai-export-demand?feed_item_type=news",
+          "domain": "seekingalpha.com",
+          "published": "2026-08-07",
+          "headline": "China’s July trade surplus widens to $112.5B as exports surge 23.9% on strong AI export demand"
+        }
+      ],
+      "evidence_summary": {
+        "source_count": 8,
+        "source_domain_count": 5,
+        "directional_edge_count": 0,
+        "corroborated_edge_count": 0
+      },
+      "known_gaps": [
+        "private_and_foreign_company_coverage_not_available_in_ticker_only_evidence",
+        "materials_and_equipment_layers_require_additional_evidence",
+        "unresolved_ticker_roles: AAPL, AIQ, ALAB, AMAT, AMD, AMZN, APP, ARKK, ARM, ASML, AVGO, BABA, BAC, BE, BIDU, BKNG, BLK, CAT, CEG, CIEN, COHR, COIN, CRM, CVX, DDOG, DELL, DIS, DTCR, DVN, EEM"
+      ],
+      "next_action": "human_review_or_bounded_gap_fill"
+    },
+    {
+      "draft_id": "draft:nand",
+      "status": "evidence_only",
+      "decision_eligible": false,
+      "source_topic": {
+        "topic_id": "topic:nand",
+        "label": "NAND",
+        "state": "validated",
+        "score": 83.5,
+        "first_seen": "2026-06-25",
+        "last_seen": "2026-08-07",
+        "source_count": 58,
+        "source_domain_count": 10,
+        "tickers": [
+          "AAPL",
+          "ABBV",
+          "ALAB",
+          "AMAT",
+          "AMD",
+          "AMZN",
+          "APP",
+          "ARM",
+          "ASML",
+          "AVGO",
+          "CAT",
+          "COHR",
+          "CRDO",
+          "CRM",
+          "CVX",
+          "DDOG",
+          "F",
+          "HON",
+          "HXCNF",
+          "HXSCL",
+          "IBM",
+          "INTC",
+          "LITE",
+          "LLY",
+          "LRCX",
+          "META",
+          "MRVL",
+          "MSFT",
+          "MU",
+          "NVDA"
+        ],
+        "why_now": [
+          "24 structural ticker relations",
+          "14 directional supply relations",
+          "13 corroborated relation claims",
+          "bottleneck language: shortage",
+          "spans 48 tickers"
+        ]
+      },
+      "layers": [
+        "upstream",
+        "downstream",
+        "unresolved"
+      ],
+      "nodes": [
+        {
+          "id": "AAPL",
+          "label": "AAPL",
+          "ticker": "AAPL",
+          "layer": "downstream",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ABBV",
+          "label": "ABBV",
+          "ticker": "ABBV",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ALAB",
+          "label": "ALAB",
+          "ticker": "ALAB",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AMAT",
+          "label": "AMAT",
+          "ticker": "AMAT",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AMD",
+          "label": "AMD",
+          "ticker": "AMD",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AMZN",
+          "label": "AMZN",
+          "ticker": "AMZN",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "APP",
+          "label": "APP",
+          "ticker": "APP",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ARM",
+          "label": "ARM",
+          "ticker": "ARM",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ASML",
+          "label": "ASML",
+          "ticker": "ASML",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AVGO",
+          "label": "AVGO",
+          "ticker": "AVGO",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "CAT",
+          "label": "CAT",
+          "ticker": "CAT",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "COHR",
+          "label": "COHR",
+          "ticker": "COHR",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "CRDO",
+          "label": "CRDO",
+          "ticker": "CRDO",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "CRM",
+          "label": "CRM",
+          "ticker": "CRM",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "CVX",
+          "label": "CVX",
+          "ticker": "CVX",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "DDOG",
+          "label": "DDOG",
+          "ticker": "DDOG",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "F",
+          "label": "F",
+          "ticker": "F",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "HON",
+          "label": "HON",
+          "ticker": "HON",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "HXCNF",
+          "label": "HXCNF",
+          "ticker": "HXCNF",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "HXSCL",
+          "label": "HXSCL",
+          "ticker": "HXSCL",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "IBM",
+          "label": "IBM",
+          "ticker": "IBM",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "INTC",
+          "label": "INTC",
+          "ticker": "INTC",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "LITE",
+          "label": "LITE",
+          "ticker": "LITE",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "LLY",
+          "label": "LLY",
+          "ticker": "LLY",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "LRCX",
+          "label": "LRCX",
+          "ticker": "LRCX",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "META",
+          "label": "META",
+          "ticker": "META",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "MRVL",
+          "label": "MRVL",
+          "ticker": "MRVL",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "MSFT",
+          "label": "MSFT",
+          "ticker": "MSFT",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "MU",
+          "label": "MU",
+          "ticker": "MU",
+          "layer": "upstream",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "NVDA",
+          "label": "NVDA",
+          "ticker": "NVDA",
+          "layer": "downstream",
+          "evidence_basis": "topic_ticker_entity"
+        }
+      ],
+      "edges": [
+        {
+          "from": "MU",
+          "to": "NVDA",
+          "rel": "SUPPLIES_TO",
+          "mentions": 10,
+          "evidence_level": "corroborated",
+          "claim_ids": [
+            "claim:3b10813644839e61"
+          ],
+          "evidence_source_keys": []
+        },
+        {
+          "from": "MU",
+          "to": "AAPL",
+          "rel": "SUPPLIES_TO",
+          "mentions": 4,
+          "evidence_level": "corroborated",
+          "claim_ids": [
+            "claim:f75be1fbaf7d1ff5"
+          ],
+          "evidence_source_keys": [
+            "url:462a362fcad2cddd449ca85087359f977c275615"
+          ]
+        }
+      ],
+      "context_edges": [],
+      "evidence": [
+        {
+          "source_key": "url:cf7932a822eb110a7ca64864a252a66eed5e639d",
+          "url": "https://cnbc.com/2026/08/07/sk-hynix-memory-chips-ai-prices.html",
+          "domain": "cnbc.com",
+          "published": "2026-08-07",
+          "headline": "SK Hynix to invest $38 billion building new memory chip plants as demand soars"
+        },
+        {
+          "source_key": "url:79d846e318b0947ce444f84eae0d841211d322e1",
+          "url": "https://investors.com/news/stock-market-rally-powers-ahead-spacex-palantir-sandisk-are-key-earnings-movers-weekly-review",
+          "domain": "investors.com",
+          "published": "2026-08-07",
+          "headline": "Stock Market Rally Powers Ahead; SpaceX, Palantir, Sandisk Are Key Earnings Movers: Weekly Review"
+        },
+        {
+          "source_key": "url:161d4b7c95f4c75b89cad26df350483971bdf15f",
+          "url": "https://marketwatch.com/story/how-s-p-500-options-action-may-help-explain-volatility-in-memory-stocks-58d95beb?mod=mw_rss_topstories",
+          "domain": "marketwatch.com",
+          "published": "2026-08-07",
+          "headline": "How S&P 500 options action may help explain volatility in memory stocks"
+        },
+        {
+          "source_key": "url:5c23f7c14d16da040870a7483bb12feeda087566",
+          "url": "https://marketwatch.com/story/microns-stock-claws-back-to-buck-the-memory-chip-selloff-58af0155?mod=mw_rss_topstories",
+          "domain": "marketwatch.com",
+          "published": "2026-08-06",
+          "headline": "Micron’s stock claws back to buck the memory-chip selloff"
+        },
+        {
+          "source_key": "url:91dcd44d265b817d4e71acbfbd6222143318e84e",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/sandisk-jumps-8-micron-gains-145231594.html",
+          "domain": "finance.yahoo.com",
+          "published": "2026-08-04",
+          "headline": "Sandisk Jumps 8%, Micron Gains 6%, SK Hynix Climbs 4% as Wall Street Hikes Price Targets on AI Memory Boom"
+        },
+        {
+          "source_key": "url:462a362fcad2cddd449ca85087359f977c275615",
+          "url": "https://finance.yahoo.com/technology/articles/apple-ceo-sends-strong-warning-200700035.html",
+          "domain": "finance.yahoo.com",
+          "published": "2026-08-01",
+          "headline": "Apple CEO sends strong warning on AI and price of Apple products"
+        },
+        {
+          "source_key": "url:a20fde54a0f400054b8711f84cdf010d7f5befca",
+          "url": "https://cnbc.com/2026/07/30/samsung-q2-earnings-ai-chip-.html",
+          "domain": "cnbc.com",
+          "published": "2026-07-30",
+          "headline": "Samsung Electronics second-quarter operating profit beats estimates on soaring AI chip demand"
+        },
+        {
+          "source_key": "url:4afec7878ee1b621d94ee2e2d12f4111da4d8d6b",
+          "url": "https://investing.com/news/stock-market-news/asia-stocks-mixed-as-markets-digest-fed-decision-samsung-results-kospi-rebounds-4822296",
+          "domain": "investing.com",
+          "published": "2026-07-30",
+          "headline": "Asia stocks mixed as markets digest Fed decision, Samsung results; KOSPI rebounds"
+        }
+      ],
+      "evidence_summary": {
+        "source_count": 8,
+        "source_domain_count": 5,
+        "directional_edge_count": 2,
+        "corroborated_edge_count": 2
+      },
+      "known_gaps": [
+        "private_and_foreign_company_coverage_not_available_in_ticker_only_evidence",
+        "materials_and_equipment_layers_require_additional_evidence",
+        "unresolved_ticker_roles: ABBV, ALAB, AMAT, AMD, AMZN, APP, ARM, ASML, AVGO, CAT, COHR, CRDO, CRM, CVX, DDOG, F, HON, HXCNF, HXSCL, IBM, INTC, LITE, LLY, LRCX, META, MRVL, MSFT"
+      ],
+      "next_action": "human_review_or_bounded_gap_fill"
+    },
+    {
+      "draft_id": "draft:dram",
+      "status": "evidence_only",
+      "decision_eligible": false,
+      "source_topic": {
+        "topic_id": "topic:dram",
+        "label": "DRAM",
+        "state": "validated",
+        "score": 82.7,
+        "first_seen": "2026-06-25",
+        "last_seen": "2026-08-07",
+        "source_count": 77,
+        "source_domain_count": 10,
+        "tickers": [
+          "AAPL",
+          "ABBV",
+          "ACN",
+          "ADBE",
+          "ALAB",
+          "AMAT",
+          "AMD",
+          "AMZN",
+          "APP",
+          "ARM",
+          "ASML",
+          "AVGO",
+          "CAT",
+          "COHR",
+          "CRM",
+          "CVX",
+          "DDOG",
+          "DELL",
+          "EWY",
+          "F",
+          "GM",
+          "GOOGL",
+          "HON",
+          "HPQ",
+          "HXCNF",
+          "HXSCF",
+          "HXSCL",
+          "IBM",
+          "INTC",
+          "KLAC"
+        ],
+        "why_now": [
+          "33 structural ticker relations",
+          "21 directional supply relations",
+          "13 corroborated relation claims",
+          "bottleneck language: shortage, bottleneck",
+          "spans 64 tickers"
+        ]
+      },
+      "layers": [
+        "unresolved"
+      ],
+      "nodes": [
+        {
+          "id": "AAPL",
+          "label": "AAPL",
+          "ticker": "AAPL",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ABBV",
+          "label": "ABBV",
+          "ticker": "ABBV",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ACN",
+          "label": "ACN",
+          "ticker": "ACN",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ADBE",
+          "label": "ADBE",
+          "ticker": "ADBE",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ALAB",
+          "label": "ALAB",
+          "ticker": "ALAB",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AMAT",
+          "label": "AMAT",
+          "ticker": "AMAT",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AMD",
+          "label": "AMD",
+          "ticker": "AMD",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AMZN",
+          "label": "AMZN",
+          "ticker": "AMZN",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "APP",
+          "label": "APP",
+          "ticker": "APP",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ARM",
+          "label": "ARM",
+          "ticker": "ARM",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ASML",
+          "label": "ASML",
+          "ticker": "ASML",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AVGO",
+          "label": "AVGO",
+          "ticker": "AVGO",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "CAT",
+          "label": "CAT",
+          "ticker": "CAT",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "COHR",
+          "label": "COHR",
+          "ticker": "COHR",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "CRM",
+          "label": "CRM",
+          "ticker": "CRM",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "CVX",
+          "label": "CVX",
+          "ticker": "CVX",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "DDOG",
+          "label": "DDOG",
+          "ticker": "DDOG",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "DELL",
+          "label": "DELL",
+          "ticker": "DELL",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "EWY",
+          "label": "EWY",
+          "ticker": "EWY",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "F",
+          "label": "F",
+          "ticker": "F",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "GM",
+          "label": "GM",
+          "ticker": "GM",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "GOOGL",
+          "label": "GOOGL",
+          "ticker": "GOOGL",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "HON",
+          "label": "HON",
+          "ticker": "HON",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "HPQ",
+          "label": "HPQ",
+          "ticker": "HPQ",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "HXCNF",
+          "label": "HXCNF",
+          "ticker": "HXCNF",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "HXSCF",
+          "label": "HXSCF",
+          "ticker": "HXSCF",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "HXSCL",
+          "label": "HXSCL",
+          "ticker": "HXSCL",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "IBM",
+          "label": "IBM",
+          "ticker": "IBM",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "INTC",
+          "label": "INTC",
+          "ticker": "INTC",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "KLAC",
+          "label": "KLAC",
+          "ticker": "KLAC",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        }
+      ],
+      "edges": [],
+      "context_edges": [],
+      "evidence": [
+        {
+          "source_key": "url:cf7932a822eb110a7ca64864a252a66eed5e639d",
+          "url": "https://cnbc.com/2026/08/07/sk-hynix-memory-chips-ai-prices.html",
+          "domain": "cnbc.com",
+          "published": "2026-08-07",
+          "headline": "SK Hynix to invest $38 billion building new memory chip plants as demand soars"
+        },
+        {
+          "source_key": "url:161d4b7c95f4c75b89cad26df350483971bdf15f",
+          "url": "https://marketwatch.com/story/how-s-p-500-options-action-may-help-explain-volatility-in-memory-stocks-58d95beb?mod=mw_rss_topstories",
+          "domain": "marketwatch.com",
+          "published": "2026-08-07",
+          "headline": "How S&P 500 options action may help explain volatility in memory stocks"
+        },
+        {
+          "source_key": "url:5c23f7c14d16da040870a7483bb12feeda087566",
+          "url": "https://marketwatch.com/story/microns-stock-claws-back-to-buck-the-memory-chip-selloff-58af0155?mod=mw_rss_topstories",
+          "domain": "marketwatch.com",
+          "published": "2026-08-06",
+          "headline": "Micron’s stock claws back to buck the memory-chip selloff"
+        },
+        {
+          "source_key": "url:91dcd44d265b817d4e71acbfbd6222143318e84e",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/sandisk-jumps-8-micron-gains-145231594.html",
+          "domain": "finance.yahoo.com",
+          "published": "2026-08-04",
+          "headline": "Sandisk Jumps 8%, Micron Gains 6%, SK Hynix Climbs 4% as Wall Street Hikes Price Targets on AI Memory Boom"
+        },
+        {
+          "source_key": "url:4787e267ff54a6b6c73b8b84fc97dc228b894e5f",
+          "url": "https://finance.yahoo.com/technology/ai/articles/sk-hynix-rises-brokerages-launch-153134939.html",
+          "domain": "finance.yahoo.com",
+          "published": "2026-08-04",
+          "headline": "SK Hynix rises as brokerages launch coverage with bullish ratings"
+        },
+        {
+          "source_key": "url:462a362fcad2cddd449ca85087359f977c275615",
+          "url": "https://finance.yahoo.com/technology/articles/apple-ceo-sends-strong-warning-200700035.html",
+          "domain": "finance.yahoo.com",
+          "published": "2026-08-01",
+          "headline": "Apple CEO sends strong warning on AI and price of Apple products"
+        },
+        {
+          "source_key": "url:03f1b1a22e584ef28817e3165105468cb8565155",
+          "url": "https://cnbc.com/2026/07/31/tech-earnings-cash-memory-ai.html",
+          "domain": "cnbc.com",
+          "published": "2026-07-31",
+          "headline": "Dwindling cash and soaring memory costs: Tech's AI buildout has ballooning price tag"
+        },
+        {
+          "source_key": "url:a20fde54a0f400054b8711f84cdf010d7f5befca",
+          "url": "https://cnbc.com/2026/07/30/samsung-q2-earnings-ai-chip-.html",
+          "domain": "cnbc.com",
+          "published": "2026-07-30",
+          "headline": "Samsung Electronics second-quarter operating profit beats estimates on soaring AI chip demand"
+        }
+      ],
+      "evidence_summary": {
+        "source_count": 8,
+        "source_domain_count": 3,
+        "directional_edge_count": 0,
+        "corroborated_edge_count": 0
+      },
+      "known_gaps": [
+        "private_and_foreign_company_coverage_not_available_in_ticker_only_evidence",
+        "materials_and_equipment_layers_require_additional_evidence",
+        "unresolved_ticker_roles: AAPL, ABBV, ACN, ADBE, ALAB, AMAT, AMD, AMZN, APP, ARM, ASML, AVGO, CAT, COHR, CRM, CVX, DDOG, DELL, EWY, F, GM, GOOGL, HON, HPQ, HXCNF, HXSCF, HXSCL, IBM, INTC, KLAC"
+      ],
+      "next_action": "human_review_or_bounded_gap_fill"
+    },
+    {
+      "draft_id": "draft:data_center_infrastructure",
+      "status": "evidence_only",
+      "decision_eligible": false,
+      "source_topic": {
+        "topic_id": "topic:data_center_infrastructure",
+        "label": "data center infrastructure",
+        "state": "validated",
+        "score": 82.0,
+        "first_seen": "2026-06-29",
+        "last_seen": "2026-08-08",
+        "source_count": 24,
+        "source_domain_count": 8,
+        "tickers": [
+          "AAPL",
+          "AMAT",
+          "AMD",
+          "AMZN",
+          "ASML",
+          "ATKR",
+          "AVGO",
+          "BRK.B",
+          "CAT",
+          "CMI",
+          "COPX",
+          "CRDO",
+          "FCX",
+          "GOOGL",
+          "IBM",
+          "INTC",
+          "MATEF",
+          "META",
+          "MSFT",
+          "MTZ",
+          "MU",
+          "NVDA",
+          "ORCL",
+          "PLD",
+          "PRYMY",
+          "PYPL",
+          "QQQ",
+          "SCCO",
+          "SEGIY",
+          "SEGXF"
+        ],
+        "why_now": [
+          "7d source velocity 1.8× prior rate",
+          "6 structural ticker relations",
+          "4 directional supply relations",
+          "2 corroborated relation claims",
+          "bottleneck language: backlog",
+          "spans 38 tickers"
+        ]
+      },
+      "layers": [
+        "upstream",
+        "intermediate",
+        "downstream",
+        "unresolved"
+      ],
+      "nodes": [
+        {
+          "id": "AAPL",
+          "label": "AAPL",
+          "ticker": "AAPL",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AMAT",
+          "label": "AMAT",
+          "ticker": "AMAT",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AMD",
+          "label": "AMD",
+          "ticker": "AMD",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AMZN",
+          "label": "AMZN",
+          "ticker": "AMZN",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ASML",
+          "label": "ASML",
+          "ticker": "ASML",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ATKR",
+          "label": "ATKR",
+          "ticker": "ATKR",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AVGO",
+          "label": "AVGO",
+          "ticker": "AVGO",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "BRK.B",
+          "label": "BRK.B",
+          "ticker": "BRK.B",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "CAT",
+          "label": "CAT",
+          "ticker": "CAT",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "CMI",
+          "label": "CMI",
+          "ticker": "CMI",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "COPX",
+          "label": "COPX",
+          "ticker": "COPX",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "CRDO",
+          "label": "CRDO",
+          "ticker": "CRDO",
+          "layer": "upstream",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "FCX",
+          "label": "FCX",
+          "ticker": "FCX",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "GOOGL",
+          "label": "GOOGL",
+          "ticker": "GOOGL",
+          "layer": "downstream",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "IBM",
+          "label": "IBM",
+          "ticker": "IBM",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "INTC",
+          "label": "INTC",
+          "ticker": "INTC",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "MATEF",
+          "label": "MATEF",
+          "ticker": "MATEF",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "META",
+          "label": "META",
+          "ticker": "META",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "MSFT",
+          "label": "MSFT",
+          "ticker": "MSFT",
+          "layer": "downstream",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "MTZ",
+          "label": "MTZ",
+          "ticker": "MTZ",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "MU",
+          "label": "MU",
+          "ticker": "MU",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "NVDA",
+          "label": "NVDA",
+          "ticker": "NVDA",
+          "layer": "intermediate",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ORCL",
+          "label": "ORCL",
+          "ticker": "ORCL",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "PLD",
+          "label": "PLD",
+          "ticker": "PLD",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "PRYMY",
+          "label": "PRYMY",
+          "ticker": "PRYMY",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "PYPL",
+          "label": "PYPL",
+          "ticker": "PYPL",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "QQQ",
+          "label": "QQQ",
+          "ticker": "QQQ",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "SCCO",
+          "label": "SCCO",
+          "ticker": "SCCO",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "SEGIY",
+          "label": "SEGIY",
+          "ticker": "SEGIY",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "SEGXF",
+          "label": "SEGXF",
+          "ticker": "SEGXF",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        }
+      ],
+      "edges": [
+        {
+          "from": "NVDA",
+          "to": "MSFT",
+          "rel": "SUPPLIES_TO",
+          "mentions": 4,
+          "evidence_level": "corroborated",
+          "claim_ids": [
+            "claim:685ee09b57c7ddfa"
+          ],
+          "evidence_source_keys": [
+            "url:5dc6f63ba7f031c2a6d05ea520a78c90b7079d82"
+          ]
+        },
+        {
+          "from": "NVDA",
+          "to": "GOOGL",
+          "rel": "SUPPLIES_TO",
+          "mentions": 1,
+          "evidence_level": "topic_context",
+          "claim_ids": [
+            "claim:a42136edcc2ae5ca"
+          ],
+          "evidence_source_keys": []
+        },
+        {
+          "from": "CRDO",
+          "to": "NVDA",
+          "rel": "SUPPLIES_TO",
+          "mentions": 1,
+          "evidence_level": "topic_context",
+          "claim_ids": [
+            "claim:4d4683ea3e7e45af"
+          ],
+          "evidence_source_keys": []
+        }
+      ],
+      "context_edges": [
+        {
+          "from": "AVGO",
+          "to": "CRDO",
+          "rel": "COMPETES_WITH",
+          "mentions": 1,
+          "evidence_level": "topic_context",
+          "claim_ids": [
+            "claim:daa98003b700f74b"
+          ],
+          "evidence_source_keys": []
+        }
+      ],
+      "evidence": [
+        {
+          "source_key": "url:ebf265fda9db0db9fc5626802c5fa60fe1d07486",
+          "url": "https://finance.yahoo.com/markets/commodities/articles/could-copper-tariff-driven-rally-133000938.html",
+          "domain": "finance.yahoo.com",
+          "published": "2026-08-08",
+          "headline": "Could Copper’s Tariff-Driven Rally Be Running Out of Steam?"
+        },
+        {
+          "source_key": "url:a21906c1c13307a91251cae0a70e9e1de1fa9b8c",
+          "url": "https://wsj.com/business/earnings/cummins-raises-outlook-as-profit-sales-climb-a2a7de49?siteid=yhoof2",
+          "domain": "wsj.com",
+          "published": "2026-08-04",
+          "headline": "Cummins Raises Outlook as Profit, Sales Climb"
+        },
+        {
+          "source_key": "url:7bcc6caba9ab8596aaa78b9a1070d6449aae22cb",
+          "url": "https://marketwatch.com/story/caterpillar-is-killing-it-and-data-center-demand-is-driving-record-revenue-161b84d1?mod=mw_rss_topstories",
+          "domain": "marketwatch.com",
+          "published": "2026-08-04",
+          "headline": "Caterpillar’s stock gives the Dow a 500-point boost as data-center demand drives record revenue"
+        },
+        {
+          "source_key": "url:ff9ac235d042f06c9024a8862505076b61b1bdba",
+          "url": "https://investing.com/news/stock-market-news/italian-cable-maker-prysmian-to-buy-atkore-for-38-bln-4829809",
+          "domain": "investing.com",
+          "published": "2026-08-03",
+          "headline": "Atkore soars 26% premarket after Prysmian agrees $3.8 billion acquisition"
+        },
+        {
+          "source_key": "url:3302d0e5c2ad314cc5cbbbd220b3acc88c66bce6",
+          "url": "https://seekingalpha.com/news/4623174-prysmian-expands-north-american-footprint-with-38b-atkore-acquisition?feed_item_type=news",
+          "domain": "seekingalpha.com",
+          "published": "2026-08-03",
+          "headline": "Prysmian expands North American footprint with $3.8B Atkore acquisition"
+        },
+        {
+          "source_key": "url:0d6528cfd4b5a8990bce9619b6cbe0de7dfd12ef",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/atkore-jumps-earnings-beat-prysmian-102911450.html",
+          "domain": "finance.yahoo.com",
+          "published": "2026-08-03",
+          "headline": "Atkore Jumps After Earnings Beat and Prysmian Agrees $95-a-Share Acquisition"
+        },
+        {
+          "source_key": "url:af8c93fb1afa80a409ff6f0042e2cf1b9c093482",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/vertiv-ceo-makes-critical-stock-193736314.html",
+          "domain": "finance.yahoo.com",
+          "published": "2026-08-01",
+          "headline": "Vertiv CEO makes critical comment as stock crashes"
+        },
+        {
+          "source_key": "url:5dc6f63ba7f031c2a6d05ea520a78c90b7079d82",
+          "url": "https://cnbc.com/2026/07/29/microsofts-ai-spending-guide-is-music-to-our-ears-quieting-the-bears-for-now.html",
+          "domain": "cnbc.com",
+          "published": "2026-07-30",
+          "headline": "Microsoft's AI spending guide is music to our ears, quieting the bears — for now"
+        }
+      ],
+      "evidence_summary": {
+        "source_count": 8,
+        "source_domain_count": 6,
+        "directional_edge_count": 3,
+        "corroborated_edge_count": 1
+      },
+      "known_gaps": [
+        "private_and_foreign_company_coverage_not_available_in_ticker_only_evidence",
+        "materials_and_equipment_layers_require_additional_evidence",
+        "unresolved_ticker_roles: AAPL, AMAT, AMD, AMZN, ASML, ATKR, AVGO, BRK.B, CAT, CMI, COPX, FCX, IBM, INTC, MATEF, META, MTZ, MU, ORCL, PLD, PRYMY, PYPL, QQQ, SCCO, SEGIY, SEGXF",
+        "some_directional_relations_lack_claim_level_corroboration"
+      ],
+      "next_action": "human_review_or_bounded_gap_fill"
+    },
+    {
+      "draft_id": "draft:data_center_storage",
+      "status": "evidence_only",
+      "decision_eligible": false,
+      "source_topic": {
+        "topic_id": "topic:data_center_storage",
+        "label": "data center storage",
+        "state": "validated",
+        "score": 82.0,
+        "first_seen": "2026-06-26",
+        "last_seen": "2026-08-07",
+        "source_count": 12,
+        "source_domain_count": 5,
+        "tickers": [
+          "AMZN",
+          "GOOG",
+          "MU",
+          "NLST",
+          "NVDA",
+          "PLTR",
+          "SIMO",
+          "SKHY",
+          "SNDK",
+          "SPCX",
+          "STX",
+          "TSM",
+          "WDC"
+        ],
+        "why_now": [
+          "7d source velocity 1.8× prior rate",
+          "5 structural ticker relations",
+          "1 directional supply relations",
+          "4 corroborated relation claims",
+          "bottleneck language: shortage",
+          "spans 13 tickers"
+        ]
+      },
+      "layers": [
+        "upstream",
+        "downstream",
+        "unresolved"
+      ],
+      "nodes": [
+        {
+          "id": "AMZN",
+          "label": "AMZN",
+          "ticker": "AMZN",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "GOOG",
+          "label": "GOOG",
+          "ticker": "GOOG",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "MU",
+          "label": "MU",
+          "ticker": "MU",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "NLST",
+          "label": "NLST",
+          "ticker": "NLST",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "NVDA",
+          "label": "NVDA",
+          "ticker": "NVDA",
+          "layer": "downstream",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "PLTR",
+          "label": "PLTR",
+          "ticker": "PLTR",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "SIMO",
+          "label": "SIMO",
+          "ticker": "SIMO",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "SKHY",
+          "label": "SKHY",
+          "ticker": "SKHY",
+          "layer": "upstream",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "SNDK",
+          "label": "SNDK",
+          "ticker": "SNDK",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "SPCX",
+          "label": "SPCX",
+          "ticker": "SPCX",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "STX",
+          "label": "STX",
+          "ticker": "STX",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "TSM",
+          "label": "TSM",
+          "ticker": "TSM",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "WDC",
+          "label": "WDC",
+          "ticker": "WDC",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        }
+      ],
+      "edges": [
+        {
+          "from": "SKHY",
+          "to": "NVDA",
+          "rel": "SUPPLIES_TO",
+          "mentions": 1,
+          "evidence_level": "corroborated",
+          "claim_ids": [
+            "claim:1dc63c54bd56f790"
+          ],
+          "evidence_source_keys": [
+            "url:4468abd045d7000fdc21639e98f846efe3a63910"
+          ]
+        }
+      ],
+      "context_edges": [
+        {
+          "from": "STX",
+          "to": "WDC",
+          "rel": "COMPETES_WITH",
+          "mentions": 4,
+          "evidence_level": "corroborated",
+          "claim_ids": [
+            "claim:64d5337bc520ccd8"
+          ],
+          "evidence_source_keys": [
+            "url:33a67ec06a2cc93b585fd83d458a7f181bec7805",
+            "url:7f32f4763f7f51665ce388427dfe662d25cd6448"
+          ]
+        },
+        {
+          "from": "SNDK",
+          "to": "WDC",
+          "rel": "COMPETES_WITH",
+          "mentions": 1,
+          "evidence_level": "corroborated",
+          "claim_ids": [
+            "claim:a9971545176de170"
+          ],
+          "evidence_source_keys": []
+        },
+        {
+          "from": "MU",
+          "to": "SNDK",
+          "rel": "COMPETES_WITH",
+          "mentions": 1,
+          "evidence_level": "corroborated",
+          "claim_ids": [
+            "claim:3efeabb56a4ac98d"
+          ],
+          "evidence_source_keys": []
+        }
+      ],
+      "evidence": [
+        {
+          "source_key": "url:79d846e318b0947ce444f84eae0d841211d322e1",
+          "url": "https://investors.com/news/stock-market-rally-powers-ahead-spacex-palantir-sandisk-are-key-earnings-movers-weekly-review",
+          "domain": "investors.com",
+          "published": "2026-08-07",
+          "headline": "Stock Market Rally Powers Ahead; SpaceX, Palantir, Sandisk Are Key Earnings Movers: Weekly Review"
+        },
+        {
+          "source_key": "url:5c23f7c14d16da040870a7483bb12feeda087566",
+          "url": "https://marketwatch.com/story/microns-stock-claws-back-to-buck-the-memory-chip-selloff-58af0155?mod=mw_rss_topstories",
+          "domain": "marketwatch.com",
+          "published": "2026-08-06",
+          "headline": "Micron’s stock claws back to buck the memory-chip selloff"
+        },
+        {
+          "source_key": "url:4468abd045d7000fdc21639e98f846efe3a63910",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/3-stocks-buy-ai-infrastructure-095000532.html",
+          "domain": "finance.yahoo.com",
+          "published": "2026-08-04",
+          "headline": "3 Stocks to Buy as AI Infrastructure Continues to Surge"
+        },
+        {
+          "source_key": "url:a39a4fad6b539a56d677e73ad9d0024e440ca6f5",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/silicon-motion-crushed-earnings-surprised-195900756.html",
+          "domain": "finance.yahoo.com",
+          "published": "2026-08-01",
+          "headline": "Silicon Motion Crushed Earnings and Surprised Memory Chip Bears"
+        },
+        {
+          "source_key": "url:33a67ec06a2cc93b585fd83d458a7f181bec7805",
+          "url": "https://investors.com/news/technology/seagate-stock-stx-earnings-july-2026",
+          "domain": "investors.com",
+          "published": "2026-07-29",
+          "headline": "Seagate Stock Shakes Off AI Rally Fears With Big Earnings Beat"
+        },
+        {
+          "source_key": "url:3b4f4c4bc82414c9e31c4bdf650d59419fd12ea2",
+          "url": "https://investors.com/market-trend/stock-market-today/dow-jones-sp500-nasdaq-us-iran-nvidia-micron-sandisk-2",
+          "domain": "investors.com",
+          "published": "2026-07-20",
+          "headline": "Stock Market Today: Nasdaq Climbs On Peace Hopes; Sandisk Rebounds, Data Center Plays Rally (Live Coverage)"
+        },
+        {
+          "source_key": "url:88e6061d79d75deb4f5985c5c89077a39b2a8c69",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/sandisk-surged-more-3-000-164000385.html",
+          "domain": "finance.yahoo.com",
+          "published": "2026-07-17",
+          "headline": "Sandisk Has Surged More Than 3,000% in the Last 12 Months. Could a Stock Split Be Coming?"
+        },
+        {
+          "source_key": "url:7f32f4763f7f51665ce388427dfe662d25cd6448",
+          "url": "https://seekingalpha.com/news/4612914-seagate-gets-a-rating-upgrade-while-western-digital-also-sees-bullish-views-at-wells-fargo?feed_item_type=news",
+          "domain": "seekingalpha.com",
+          "published": "2026-07-10",
+          "headline": "Seagate gets a rating upgrade, while Western Digital also sees bullish views at Wells Fargo"
+        }
+      ],
+      "evidence_summary": {
+        "source_count": 8,
+        "source_domain_count": 4,
+        "directional_edge_count": 1,
+        "corroborated_edge_count": 1
+      },
+      "known_gaps": [
+        "private_and_foreign_company_coverage_not_available_in_ticker_only_evidence",
+        "materials_and_equipment_layers_require_additional_evidence",
+        "unresolved_ticker_roles: AMZN, GOOG, MU, NLST, PLTR, SIMO, SNDK, SPCX, STX, TSM, WDC"
+      ],
+      "next_action": "human_review_or_bounded_gap_fill"
+    },
+    {
+      "draft_id": "draft:silicon_photonics",
+      "status": "evidence_only",
+      "decision_eligible": false,
+      "source_topic": {
+        "topic_id": "topic:silicon_photonics",
+        "label": "Silicon Photonics",
+        "state": "validated",
+        "score": 81.6,
+        "first_seen": "2026-06-26",
+        "last_seen": "2026-08-08",
+        "source_count": 14,
+        "source_domain_count": 6,
+        "tickers": [
+          "AAOI",
+          "AMZN",
+          "ANET",
+          "ARM",
+          "ASTS",
+          "AVGO",
+          "AXTI",
+          "BE",
+          "BKNG",
+          "BRK",
+          "BRK.A",
+          "BRK.B",
+          "CIEN",
+          "COHR",
+          "CRDO",
+          "CSCO",
+          "DIS",
+          "FN",
+          "GLW",
+          "GOOGL",
+          "GSAT",
+          "HL",
+          "IONQ",
+          "IRDM",
+          "LITE",
+          "MRVL",
+          "MU",
+          "NVDA",
+          "RKLB",
+          "SKYT"
+        ],
+        "why_now": [
+          "7d source velocity 3.0× prior rate",
+          "11 structural ticker relations",
+          "4 directional supply relations",
+          "2 corroborated relation claims",
+          "spans 32 tickers"
+        ]
+      },
+      "layers": [
+        "upstream",
+        "downstream",
+        "unresolved"
+      ],
+      "nodes": [
+        {
+          "id": "AAOI",
+          "label": "AAOI",
+          "ticker": "AAOI",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AMZN",
+          "label": "AMZN",
+          "ticker": "AMZN",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ANET",
+          "label": "ANET",
+          "ticker": "ANET",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ARM",
+          "label": "ARM",
+          "ticker": "ARM",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ASTS",
+          "label": "ASTS",
+          "ticker": "ASTS",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AVGO",
+          "label": "AVGO",
+          "ticker": "AVGO",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AXTI",
+          "label": "AXTI",
+          "ticker": "AXTI",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "BE",
+          "label": "BE",
+          "ticker": "BE",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "BKNG",
+          "label": "BKNG",
+          "ticker": "BKNG",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "BRK",
+          "label": "BRK",
+          "ticker": "BRK",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "BRK.A",
+          "label": "BRK.A",
+          "ticker": "BRK.A",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "BRK.B",
+          "label": "BRK.B",
+          "ticker": "BRK.B",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "CIEN",
+          "label": "CIEN",
+          "ticker": "CIEN",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "COHR",
+          "label": "COHR",
+          "ticker": "COHR",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "CRDO",
+          "label": "CRDO",
+          "ticker": "CRDO",
+          "layer": "upstream",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "CSCO",
+          "label": "CSCO",
+          "ticker": "CSCO",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "DIS",
+          "label": "DIS",
+          "ticker": "DIS",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "FN",
+          "label": "FN",
+          "ticker": "FN",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "GLW",
+          "label": "GLW",
+          "ticker": "GLW",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "GOOGL",
+          "label": "GOOGL",
+          "ticker": "GOOGL",
+          "layer": "downstream",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "GSAT",
+          "label": "GSAT",
+          "ticker": "GSAT",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "HL",
+          "label": "HL",
+          "ticker": "HL",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "IONQ",
+          "label": "IONQ",
+          "ticker": "IONQ",
+          "layer": "downstream",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "IRDM",
+          "label": "IRDM",
+          "ticker": "IRDM",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "LITE",
+          "label": "LITE",
+          "ticker": "LITE",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "MRVL",
+          "label": "MRVL",
+          "ticker": "MRVL",
+          "layer": "upstream",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "MU",
+          "label": "MU",
+          "ticker": "MU",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "NVDA",
+          "label": "NVDA",
+          "ticker": "NVDA",
+          "layer": "downstream",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "RKLB",
+          "label": "RKLB",
+          "ticker": "RKLB",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "SKYT",
+          "label": "SKYT",
+          "ticker": "SKYT",
+          "layer": "upstream",
+          "evidence_basis": "topic_ticker_entity"
+        }
+      ],
+      "edges": [
+        {
+          "from": "SKYT",
+          "to": "IONQ",
+          "rel": "SUPPLIES_TO",
+          "mentions": 2,
+          "evidence_level": "corroborated",
+          "claim_ids": [
+            "claim:6e61704531d5344a"
+          ],
+          "evidence_source_keys": [
+            "url:8db26cc258ed7c52892b8a91d6e690fb3d1f8d32",
+            "url:a84a9c01d050cb4752bfb7d5ac5387cc7d582021"
+          ]
+        },
+        {
+          "from": "MRVL",
+          "to": "GOOGL",
+          "rel": "SUPPLIES_TO",
+          "mentions": 1,
+          "evidence_level": "topic_context",
+          "claim_ids": [
+            "claim:03e1062f0175edb9"
+          ],
+          "evidence_source_keys": []
+        },
+        {
+          "from": "CRDO",
+          "to": "NVDA",
+          "rel": "SUPPLIES_TO",
+          "mentions": 1,
+          "evidence_level": "topic_context",
+          "claim_ids": [
+            "claim:4d4683ea3e7e45af"
+          ],
+          "evidence_source_keys": [
+            "url:0a0347fbda1ab2b0eed3843d6454b63bf5fe8bf7"
+          ]
+        }
+      ],
+      "context_edges": [
+        {
+          "from": "AVGO",
+          "to": "MRVL",
+          "rel": "COMPETES_WITH",
+          "mentions": 2,
+          "evidence_level": "corroborated",
+          "claim_ids": [
+            "claim:3be3faae82c04fc4"
+          ],
+          "evidence_source_keys": []
+        },
+        {
+          "from": "IONQ",
+          "to": "SKYT",
+          "rel": "CO_DEVELOPS_WITH",
+          "mentions": 1,
+          "evidence_level": "topic_context",
+          "claim_ids": [
+            "claim:b49a120465cfc3e3"
+          ],
+          "evidence_source_keys": [
+            "url:a84a9c01d050cb4752bfb7d5ac5387cc7d582021"
+          ]
+        },
+        {
+          "from": "MRVL",
+          "to": "NVDA",
+          "rel": "CO_DEVELOPS_WITH",
+          "mentions": 1,
+          "evidence_level": "topic_context",
+          "claim_ids": [
+            "claim:632ae9b84bb813ba"
+          ],
+          "evidence_source_keys": []
+        },
+        {
+          "from": "AVGO",
+          "to": "CRDO",
+          "rel": "COMPETES_WITH",
+          "mentions": 1,
+          "evidence_level": "topic_context",
+          "claim_ids": [
+            "claim:daa98003b700f74b"
+          ],
+          "evidence_source_keys": [
+            "url:0a0347fbda1ab2b0eed3843d6454b63bf5fe8bf7"
+          ]
+        },
+        {
+          "from": "COHR",
+          "to": "LITE",
+          "rel": "COMPETES_WITH",
+          "mentions": 1,
+          "evidence_level": "topic_context",
+          "claim_ids": [
+            "claim:1deb54cfd158c4da"
+          ],
+          "evidence_source_keys": [
+            "url:76e1740fe0a4210983bcd31d9713528882c0e6dd"
+          ]
+        }
+      ],
+      "evidence": [
+        {
+          "source_key": "url:0dab82770a3de49d04f24f153ba44fa9dfc8e816",
+          "url": "https://investors.com/market-trend/stock-market-today/dow-jones-futures-warren-buffett-cisco-lumentum-earnings",
+          "domain": "investors.com",
+          "published": "2026-08-08",
+          "headline": "Dow Jones Futures: What To Do As Stock Market Revs Up; Warren Buffett's Berkshire Beats Views"
+        },
+        {
+          "source_key": "url:bd1837d9c3535b2a204adb08ab11172751e5cfe6",
+          "url": "https://marketwatch.com/story/optical-stocks-have-a-china-problem-that-most-investors-are-missing-45523981?mod=mw_rss_topstories",
+          "domain": "marketwatch.com",
+          "published": "2026-08-07",
+          "headline": "Optical stocks have a China problem that most investors are missing"
+        },
+        {
+          "source_key": "url:76e1740fe0a4210983bcd31d9713528882c0e6dd",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/applied-optoelectronics-rockets-17-coherent-134642674.html",
+          "domain": "finance.yahoo.com",
+          "published": "2026-08-04",
+          "headline": "Applied Optoelectronics Rockets 17%, Coherent Climbs 11%, Lumentum Gains 6% on Reported U.S. Ban of Chinese Optics"
+        },
+        {
+          "source_key": "url:a84a9c01d050cb4752bfb7d5ac5387cc7d582021",
+          "url": "https://finance.yahoo.com/technology/articles/ionq-closes-1-8bn-skywater-091528091.html",
+          "domain": "finance.yahoo.com",
+          "published": "2026-08-03",
+          "headline": "IonQ closes $1.8bn SkyWater acquisition after US FTC clearance"
+        },
+        {
+          "source_key": "url:26e555c78f19f50ab22be3f73838428829dbb94b",
+          "url": "https://finance.yahoo.com/technology/ai/articles/olix-raises-europes-largest-chip-112147572.html",
+          "domain": "finance.yahoo.com",
+          "published": "2026-08-03",
+          "headline": "Olix raises Europe's largest chip round at $3.3B valuation"
+        },
+        {
+          "source_key": "url:8db26cc258ed7c52892b8a91d6e690fb3d1f8d32",
+          "url": "https://investing.com/news/stock-market-news/ftc-approves-ionq-acquisition-of-skywater-semiconductor-foundry-4829334",
+          "domain": "investing.com",
+          "published": "2026-07-31",
+          "headline": "FTC approves IonQ acquisition of SkyWater semiconductor ‍foundry"
+        },
+        {
+          "source_key": "url:41060a286fc87ddc969bacd3d5b0f304334fcd6a",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/corning-glw-crashed-20-despite-151127643.html",
+          "domain": "finance.yahoo.com",
+          "published": "2026-07-29",
+          "headline": "Corning (GLW) Crashed 20% Despite 32% Optical Growth. Should Coherent (COHR) Investors Worry?"
+        },
+        {
+          "source_key": "url:0a0347fbda1ab2b0eed3843d6454b63bf5fe8bf7",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/credo-technology-gains-increasing-connectivity-140923637.html",
+          "domain": "finance.yahoo.com",
+          "published": "2026-07-21",
+          "headline": "Credo Technology Gains from Increasing Connectivity Challenge"
+        }
+      ],
+      "evidence_summary": {
+        "source_count": 8,
+        "source_domain_count": 4,
+        "directional_edge_count": 3,
+        "corroborated_edge_count": 1
+      },
+      "known_gaps": [
+        "private_and_foreign_company_coverage_not_available_in_ticker_only_evidence",
+        "materials_and_equipment_layers_require_additional_evidence",
+        "unresolved_ticker_roles: AAOI, AMZN, ANET, ARM, ASTS, AVGO, AXTI, BE, BKNG, BRK, BRK.A, BRK.B, CIEN, COHR, CSCO, DIS, FN, GLW, GSAT, HL, IRDM, LITE, MU, RKLB",
+        "some_directional_relations_lack_claim_level_corroboration"
+      ],
+      "next_action": "human_review_or_bounded_gap_fill"
+    },
+    {
+      "draft_id": "draft:advanced_packaging",
+      "status": "evidence_only",
+      "decision_eligible": false,
+      "source_topic": {
+        "topic_id": "topic:advanced_packaging",
+        "label": "Advanced Packaging",
+        "state": "validated",
+        "score": 81.2,
+        "first_seen": "2026-06-25",
+        "last_seen": "2026-08-08",
+        "source_count": 18,
+        "source_domain_count": 7,
+        "tickers": [
+          "AAPL",
+          "AJINY",
+          "AJNMY",
+          "AMAT",
+          "AMD",
+          "ARM",
+          "ASML",
+          "AVGO",
+          "COHR",
+          "ESI",
+          "GOOGL",
+          "HON",
+          "HXNDY",
+          "HXSCL",
+          "INTC",
+          "KLAC",
+          "LAC",
+          "LRCX",
+          "META",
+          "MP",
+          "MU",
+          "NBCLF",
+          "NVDA",
+          "Q",
+          "SKHY",
+          "SOLS",
+          "SSNLF",
+          "TOTDY",
+          "TSM"
+        ],
+        "why_now": [
+          "7d source velocity 1.6× prior rate",
+          "17 structural ticker relations",
+          "12 directional supply relations",
+          "10 corroborated relation claims",
+          "bottleneck language: bottleneck",
+          "spans 29 tickers"
+        ]
+      },
+      "layers": [
+        "upstream",
+        "intermediate",
+        "downstream",
+        "unresolved"
+      ],
+      "nodes": [
+        {
+          "id": "AAPL",
+          "label": "AAPL",
+          "ticker": "AAPL",
+          "layer": "downstream",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AJINY",
+          "label": "AJINY",
+          "ticker": "AJINY",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AJNMY",
+          "label": "AJNMY",
+          "ticker": "AJNMY",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AMAT",
+          "label": "AMAT",
+          "ticker": "AMAT",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AMD",
+          "label": "AMD",
+          "ticker": "AMD",
+          "layer": "downstream",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ARM",
+          "label": "ARM",
+          "ticker": "ARM",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ASML",
+          "label": "ASML",
+          "ticker": "ASML",
+          "layer": "upstream",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AVGO",
+          "label": "AVGO",
+          "ticker": "AVGO",
+          "layer": "intermediate",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "COHR",
+          "label": "COHR",
+          "ticker": "COHR",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ESI",
+          "label": "ESI",
+          "ticker": "ESI",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "GOOGL",
+          "label": "GOOGL",
+          "ticker": "GOOGL",
+          "layer": "downstream",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "HON",
+          "label": "HON",
+          "ticker": "HON",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "HXNDY",
+          "label": "HXNDY",
+          "ticker": "HXNDY",
+          "layer": "upstream",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "HXSCL",
+          "label": "HXSCL",
+          "ticker": "HXSCL",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "INTC",
+          "label": "INTC",
+          "ticker": "INTC",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "KLAC",
+          "label": "KLAC",
+          "ticker": "KLAC",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "LAC",
+          "label": "LAC",
+          "ticker": "LAC",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "LRCX",
+          "label": "LRCX",
+          "ticker": "LRCX",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "META",
+          "label": "META",
+          "ticker": "META",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "MP",
+          "label": "MP",
+          "ticker": "MP",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "MU",
+          "label": "MU",
+          "ticker": "MU",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "NBCLF",
+          "label": "NBCLF",
+          "ticker": "NBCLF",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "NVDA",
+          "label": "NVDA",
+          "ticker": "NVDA",
+          "layer": "downstream",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "Q",
+          "label": "Q",
+          "ticker": "Q",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "SKHY",
+          "label": "SKHY",
+          "ticker": "SKHY",
+          "layer": "intermediate",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "SOLS",
+          "label": "SOLS",
+          "ticker": "SOLS",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "SSNLF",
+          "label": "SSNLF",
+          "ticker": "SSNLF",
+          "layer": "downstream",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "TOTDY",
+          "label": "TOTDY",
+          "ticker": "TOTDY",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "TSM",
+          "label": "TSM",
+          "ticker": "TSM",
+          "layer": "upstream",
+          "evidence_basis": "topic_ticker_entity"
+        }
+      ],
+      "edges": [
+        {
+          "from": "TSM",
+          "to": "NVDA",
+          "rel": "SUPPLIES_TO",
+          "mentions": 6,
+          "evidence_level": "corroborated",
+          "claim_ids": [
+            "claim:72be523a60c26373"
+          ],
+          "evidence_source_keys": [
+            "url:ed7cb5620e1fef5f38eb7b0482caae755a6150ba"
+          ]
+        },
+        {
+          "from": "TSM",
+          "to": "AMD",
+          "rel": "SUPPLIES_TO",
+          "mentions": 3,
+          "evidence_level": "corroborated",
+          "claim_ids": [
+            "claim:e685a7d94ec58340"
+          ],
+          "evidence_source_keys": [
+            "url:ed7cb5620e1fef5f38eb7b0482caae755a6150ba"
+          ]
+        },
+        {
+          "from": "SKHY",
+          "to": "NVDA",
+          "rel": "SUPPLIES_TO",
+          "mentions": 2,
+          "evidence_level": "corroborated",
+          "claim_ids": [
+            "claim:1dc63c54bd56f790"
+          ],
+          "evidence_source_keys": []
+        },
+        {
+          "from": "TSM",
+          "to": "AVGO",
+          "rel": "SUPPLIES_TO",
+          "mentions": 1,
+          "evidence_level": "topic_context",
+          "claim_ids": [
+            "claim:85a5532b0141e3a8"
+          ],
+          "evidence_source_keys": []
+        },
+        {
+          "from": "TSM",
+          "to": "AAPL",
+          "rel": "SUPPLIES_TO",
+          "mentions": 1,
+          "evidence_level": "corroborated",
+          "claim_ids": [
+            "claim:9a6172106d188024"
+          ],
+          "evidence_source_keys": []
+        },
+        {
+          "from": "ASML",
+          "to": "SKHY",
+          "rel": "SUPPLIES_TO",
+          "mentions": 1,
+          "evidence_level": "topic_context",
+          "claim_ids": [
+            "claim:9482d31853fbf3f7"
+          ],
+          "evidence_source_keys": []
+        },
+        {
+          "from": "HXNDY",
+          "to": "NVDA",
+          "rel": "SUPPLIES_TO",
+          "mentions": 1,
+          "evidence_level": "corroborated",
+          "claim_ids": [
+            "claim:3a61073d69b21363"
+          ],
+          "evidence_source_keys": []
+        },
+        {
+          "from": "AVGO",
+          "to": "GOOGL",
+          "rel": "SUPPLIES_TO",
+          "mentions": 1,
+          "evidence_level": "corroborated",
+          "claim_ids": [
+            "claim:059161c9a70d6009"
+          ],
+          "evidence_source_keys": [
+            "url:8cf87704bd3c92d91e0c653ad6c1e079ec5dc42e"
+          ]
+        },
+        {
+          "from": "ASML",
+          "to": "SSNLF",
+          "rel": "SUPPLIES_TO",
+          "mentions": 1,
+          "evidence_level": "topic_context",
+          "claim_ids": [
+            "claim:ddbf9e470cb773be"
+          ],
+          "evidence_source_keys": []
+        }
+      ],
+      "context_edges": [],
+      "evidence": [
+        {
+          "source_key": "url:8cf87704bd3c92d91e0c653ad6c1e079ec5dc42e",
+          "url": "https://nasdaq.com/articles/alphabet-ceo-sundar-pichai-just-made-decision-could-move-nvidia-and-broadcom-stock",
+          "domain": "nasdaq.com",
+          "published": "2026-08-08",
+          "headline": "Alphabet CEO Sundar Pichai Just Made a Decision That Could Move Nvidia and Broadcom Stock"
+        },
+        {
+          "source_key": "url:cf7932a822eb110a7ca64864a252a66eed5e639d",
+          "url": "https://cnbc.com/2026/08/07/sk-hynix-memory-chips-ai-prices.html",
+          "domain": "cnbc.com",
+          "published": "2026-08-07",
+          "headline": "SK Hynix to invest $38 billion building new memory chip plants as demand soars"
+        },
+        {
+          "source_key": "url:ed7cb5620e1fef5f38eb7b0482caae755a6150ba",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/stanley-druckenmiller-holds-taiwan-semiconductor-100500337.html",
+          "domain": "finance.yahoo.com",
+          "published": "2026-08-04",
+          "headline": "Stanley Druckenmiller Holds Taiwan Semiconductor After Its Q2 Beat, Betting Chip Demand From Nvidia and AMD Keeps Growing"
+        },
+        {
+          "source_key": "url:6400d20a5d85b7f92d27bd2db7280018648d111a",
+          "url": "https://investors.com/news/technology/qnity-stock-q2-2026-earnings-npo-stock",
+          "domain": "investors.com",
+          "published": "2026-08-04",
+          "headline": "Qnity Electronics Tops Q2 Views, Raises Full-Year Guidance"
+        },
+        {
+          "source_key": "url:9ab8c5e5ae00ae5602996f2d42dcad753cd87884",
+          "url": "https://finance.yahoo.com/technology/ai/articles/eliyan-raises-145-million-1-130637741.html",
+          "domain": "finance.yahoo.com",
+          "published": "2026-07-29",
+          "headline": "Eliyan raises $145 million at $1 billion valuation to ease AI chip data bottlenecks"
+        },
+        {
+          "source_key": "url:7823a7804862a8051b1607ec32e912ece8e1d3cf",
+          "url": "https://seekingalpha.com/news/4616292-sk-hynix-dismisses-intel-ohio-fab-acquisition-report-intel-reassures-ohio-campus-commitment?feed_item_type=news",
+          "domain": "seekingalpha.com",
+          "published": "2026-07-22",
+          "headline": "SK Hynix dismisses Intel Ohio Fab acquisition report; Intel reassures Ohio campus commitment"
+        },
+        {
+          "source_key": "url:3b75cd2102f286a72a35e7943fee1968c03ac57e",
+          "url": "https://cnbc.com/2026/07/22/japanese-ai-winners-toilets-fiberglass-and-seasoning.html",
+          "domain": "cnbc.com",
+          "published": "2026-07-22",
+          "headline": "These Japanese AI winners don’t make chips. They make toilets, glass fiber and seasoning"
+        },
+        {
+          "source_key": "url:ac16aeb1297e9ae75d1e6630f6be65f0208b2812",
+          "url": "https://cnbc.com/2026/07/20/trump-government-company-ownership-americans-wary-cnbc-poll.html",
+          "domain": "cnbc.com",
+          "published": "2026-07-20",
+          "headline": "Voters wary of government ownership in companies as Trump administration takes equity stakes"
+        }
+      ],
+      "evidence_summary": {
+        "source_count": 8,
+        "source_domain_count": 5,
+        "directional_edge_count": 9,
+        "corroborated_edge_count": 6
+      },
+      "known_gaps": [
+        "private_and_foreign_company_coverage_not_available_in_ticker_only_evidence",
+        "materials_and_equipment_layers_require_additional_evidence",
+        "unresolved_ticker_roles: AJINY, AJNMY, AMAT, ARM, COHR, ESI, HON, HXSCL, INTC, KLAC, LAC, LRCX, META, MP, MU, NBCLF, Q, SOLS, TOTDY",
+        "some_directional_relations_lack_claim_level_corroboration"
+      ],
+      "next_action": "human_review_or_bounded_gap_fill"
+    },
+    {
+      "draft_id": "draft:memory_shortage",
+      "status": "evidence_only",
+      "decision_eligible": false,
+      "source_topic": {
+        "topic_id": "topic:memory_shortage",
+        "label": "memory shortage",
+        "state": "validated",
+        "score": 80.0,
+        "first_seen": "2026-06-25",
+        "last_seen": "2026-08-01",
+        "source_count": 15,
+        "source_domain_count": 6,
+        "tickers": [
+          "AAPL",
+          "ABBV",
+          "AMD",
+          "ARM",
+          "AVGO",
+          "CAT",
+          "CVX",
+          "HON",
+          "INTC",
+          "MSFT",
+          "MU",
+          "NVDA",
+          "PNC",
+          "QCOM",
+          "SNDK",
+          "SPY",
+          "STX",
+          "TSM",
+          "USB",
+          "WDC",
+          "XOM"
+        ],
+        "why_now": [
+          "7 structural ticker relations",
+          "4 directional supply relations",
+          "6 corroborated relation claims",
+          "bottleneck language: shortage",
+          "spans 21 tickers"
+        ]
+      },
+      "layers": [
+        "upstream",
+        "downstream",
+        "unresolved"
+      ],
+      "nodes": [
+        {
+          "id": "AAPL",
+          "label": "AAPL",
+          "ticker": "AAPL",
+          "layer": "downstream",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ABBV",
+          "label": "ABBV",
+          "ticker": "ABBV",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AMD",
+          "label": "AMD",
+          "ticker": "AMD",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ARM",
+          "label": "ARM",
+          "ticker": "ARM",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AVGO",
+          "label": "AVGO",
+          "ticker": "AVGO",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "CAT",
+          "label": "CAT",
+          "ticker": "CAT",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "CVX",
+          "label": "CVX",
+          "ticker": "CVX",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "HON",
+          "label": "HON",
+          "ticker": "HON",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "INTC",
+          "label": "INTC",
+          "ticker": "INTC",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "MSFT",
+          "label": "MSFT",
+          "ticker": "MSFT",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "MU",
+          "label": "MU",
+          "ticker": "MU",
+          "layer": "upstream",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "NVDA",
+          "label": "NVDA",
+          "ticker": "NVDA",
+          "layer": "downstream",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "PNC",
+          "label": "PNC",
+          "ticker": "PNC",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "QCOM",
+          "label": "QCOM",
+          "ticker": "QCOM",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "SNDK",
+          "label": "SNDK",
+          "ticker": "SNDK",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "SPY",
+          "label": "SPY",
+          "ticker": "SPY",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "STX",
+          "label": "STX",
+          "ticker": "STX",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "TSM",
+          "label": "TSM",
+          "ticker": "TSM",
+          "layer": "upstream",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "USB",
+          "label": "USB",
+          "ticker": "USB",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "WDC",
+          "label": "WDC",
+          "ticker": "WDC",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "XOM",
+          "label": "XOM",
+          "ticker": "XOM",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        }
+      ],
+      "edges": [
+        {
+          "from": "MU",
+          "to": "NVDA",
+          "rel": "SUPPLIES_TO",
+          "mentions": 4,
+          "evidence_level": "corroborated",
+          "claim_ids": [
+            "claim:3b10813644839e61"
+          ],
+          "evidence_source_keys": [
+            "url:ca6f3328e6921a0d779a86df7ed3c8f00e0c48f9"
+          ]
+        },
+        {
+          "from": "MU",
+          "to": "AAPL",
+          "rel": "SUPPLIES_TO",
+          "mentions": 3,
+          "evidence_level": "corroborated",
+          "claim_ids": [
+            "claim:f75be1fbaf7d1ff5"
+          ],
+          "evidence_source_keys": [
+            "url:462a362fcad2cddd449ca85087359f977c275615",
+            "url:a0e090d65facbd43e17ab1bf92eefabb893d9402",
+            "url:c8277c4843c3eb1709bf3ba7e7cfc8caf480d11b"
+          ]
+        },
+        {
+          "from": "TSM",
+          "to": "AAPL",
+          "rel": "SUPPLIES_TO",
+          "mentions": 1,
+          "evidence_level": "corroborated",
+          "claim_ids": [
+            "claim:9a6172106d188024"
+          ],
+          "evidence_source_keys": [
+            "url:a0e090d65facbd43e17ab1bf92eefabb893d9402"
+          ]
+        }
+      ],
+      "context_edges": [
+        {
+          "from": "STX",
+          "to": "WDC",
+          "rel": "COMPETES_WITH",
+          "mentions": 1,
+          "evidence_level": "corroborated",
+          "claim_ids": [
+            "claim:64d5337bc520ccd8"
+          ],
+          "evidence_source_keys": [
+            "url:c254a4cefff40f51aba2565bb9a808831a8dfbcc"
+          ]
+        },
+        {
+          "from": "SNDK",
+          "to": "WDC",
+          "rel": "COMPETES_WITH",
+          "mentions": 1,
+          "evidence_level": "corroborated",
+          "claim_ids": [
+            "claim:a9971545176de170"
+          ],
+          "evidence_source_keys": [
+            "url:c254a4cefff40f51aba2565bb9a808831a8dfbcc"
+          ]
+        },
+        {
+          "from": "MU",
+          "to": "SNDK",
+          "rel": "COMPETES_WITH",
+          "mentions": 1,
+          "evidence_level": "corroborated",
+          "claim_ids": [
+            "claim:3efeabb56a4ac98d"
+          ],
+          "evidence_source_keys": [
+            "url:1fddca517bb5f92e0bf6f95f1c61c3fb07440afc"
+          ]
+        }
+      ],
+      "evidence": [
+        {
+          "source_key": "url:462a362fcad2cddd449ca85087359f977c275615",
+          "url": "https://finance.yahoo.com/technology/articles/apple-ceo-sends-strong-warning-200700035.html",
+          "domain": "finance.yahoo.com",
+          "published": "2026-08-01",
+          "headline": "Apple CEO sends strong warning on AI and price of Apple products"
+        },
+        {
+          "source_key": "url:a0e090d65facbd43e17ab1bf92eefabb893d9402",
+          "url": "https://finance.yahoo.com/technology/article/apple-to-report-q3-earnings-following-price-hikes-on-macs-ipads-115246491.html",
+          "domain": "finance.yahoo.com",
+          "published": "2026-07-29",
+          "headline": "Apple to report Q3 earnings following price hikes on Macs, iPads"
+        },
+        {
+          "source_key": "url:c854a3cecc73718a6573947a03acb1c7bea2e5fb",
+          "url": "https://seekingalpha.com/news/4609728-midday-need-to-know-payrolls-miss-apples-new-hardware-release-more?feed_item_type=news",
+          "domain": "seekingalpha.com",
+          "published": "2026-07-02",
+          "headline": "Midday Need to Know: Payrolls miss, Apple's new hardware release & more"
+        },
+        {
+          "source_key": "url:ca6f3328e6921a0d779a86df7ed3c8f00e0c48f9",
+          "url": "https://cnbc.com/2026/06/27/the-ai-trade-cooled-and-oil-sank-a-closer-look-at-wall-streets-volatile-week.html",
+          "domain": "cnbc.com",
+          "published": "2026-06-27",
+          "headline": "The AI trade cooled and oil sank. A closer look at Wall Street's volatile week"
+        },
+        {
+          "source_key": "url:862e266d167bed37297627ba96caf886c28c3649",
+          "url": "https://cnbc.com/2026/06/27/memory-crunch-shaking-apple-and-microsoft-existential-for-small-guys.html",
+          "domain": "cnbc.com",
+          "published": "2026-06-27",
+          "headline": "The memory shortage shaking Apple and Microsoft is 'existential crisis' for smaller players"
+        },
+        {
+          "source_key": "url:c254a4cefff40f51aba2565bb9a808831a8dfbcc",
+          "url": "https://nasdaq.com/articles/memory-shortage-minting-winners-3-stocks-not-named-micron-could-cash",
+          "domain": "nasdaq.com",
+          "published": "2026-06-26",
+          "headline": "The Memory Shortage Is Minting Winners. 3 Stocks Not Named Micron That Could Cash In."
+        },
+        {
+          "source_key": "url:1fddca517bb5f92e0bf6f95f1c61c3fb07440afc",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/memory-shortage-minting-winners-3-162300739.html",
+          "domain": "finance.yahoo.com",
+          "published": "2026-06-26",
+          "headline": "The Memory Shortage Is Minting Winners. 3 Stocks Not Named Micron That Could Cash In."
+        },
+        {
+          "source_key": "url:c8277c4843c3eb1709bf3ba7e7cfc8caf480d11b",
+          "url": "https://nasdaq.com/articles/stock-market-today-june-25-micron-surges-apple-falls-and-inflation-data-weighs-stocks",
+          "domain": "nasdaq.com",
+          "published": "2026-06-25",
+          "headline": "Stock Market Today, June 25: Micron Surges, Apple Falls, and Inflation Data Weighs on Stocks"
+        }
+      ],
+      "evidence_summary": {
+        "source_count": 8,
+        "source_domain_count": 4,
+        "directional_edge_count": 3,
+        "corroborated_edge_count": 3
+      },
+      "known_gaps": [
+        "private_and_foreign_company_coverage_not_available_in_ticker_only_evidence",
+        "materials_and_equipment_layers_require_additional_evidence",
+        "unresolved_ticker_roles: ABBV, AMD, ARM, AVGO, CAT, CVX, HON, INTC, MSFT, PNC, QCOM, SNDK, SPY, STX, USB, WDC, XOM"
+      ],
+      "next_action": "human_review_or_bounded_gap_fill"
+    },
+    {
+      "draft_id": "draft:data_center_power",
+      "status": "evidence_only",
+      "decision_eligible": false,
+      "source_topic": {
+        "topic_id": "topic:data_center_power",
+        "label": "data center power",
+        "state": "validated",
+        "score": 79.8,
+        "first_seen": "2026-06-25",
+        "last_seen": "2026-08-07",
+        "source_count": 31,
+        "source_domain_count": 10,
+        "tickers": [
+          "AAPL",
+          "ABB",
+          "AEIS",
+          "AMD",
+          "AMZN",
+          "AVA",
+          "BAM",
+          "BE",
+          "BRK.B",
+          "CAT",
+          "CEG",
+          "CMI",
+          "D",
+          "DIA",
+          "DLR",
+          "DUK",
+          "EQIX",
+          "ETN",
+          "FRMI",
+          "GEV",
+          "GNRC",
+          "GOOGL",
+          "GRID",
+          "HUBB",
+          "JCI",
+          "META",
+          "MSFT",
+          "MSTR",
+          "NEE",
+          "NVDA"
+        ],
+        "why_now": [
+          "7d source velocity 2.2× prior rate",
+          "7 structural ticker relations",
+          "4 directional supply relations",
+          "spans 45 tickers"
+        ]
+      },
+      "layers": [
+        "upstream",
+        "downstream",
+        "unresolved"
+      ],
+      "nodes": [
+        {
+          "id": "AAPL",
+          "label": "AAPL",
+          "ticker": "AAPL",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ABB",
+          "label": "ABB",
+          "ticker": "ABB",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AEIS",
+          "label": "AEIS",
+          "ticker": "AEIS",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AMD",
+          "label": "AMD",
+          "ticker": "AMD",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AMZN",
+          "label": "AMZN",
+          "ticker": "AMZN",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AVA",
+          "label": "AVA",
+          "ticker": "AVA",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "BAM",
+          "label": "BAM",
+          "ticker": "BAM",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "BE",
+          "label": "BE",
+          "ticker": "BE",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "BRK.B",
+          "label": "BRK.B",
+          "ticker": "BRK.B",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "CAT",
+          "label": "CAT",
+          "ticker": "CAT",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "CEG",
+          "label": "CEG",
+          "ticker": "CEG",
+          "layer": "upstream",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "CMI",
+          "label": "CMI",
+          "ticker": "CMI",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "D",
+          "label": "D",
+          "ticker": "D",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "DIA",
+          "label": "DIA",
+          "ticker": "DIA",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "DLR",
+          "label": "DLR",
+          "ticker": "DLR",
+          "layer": "downstream",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "DUK",
+          "label": "DUK",
+          "ticker": "DUK",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "EQIX",
+          "label": "EQIX",
+          "ticker": "EQIX",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ETN",
+          "label": "ETN",
+          "ticker": "ETN",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "FRMI",
+          "label": "FRMI",
+          "ticker": "FRMI",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "GEV",
+          "label": "GEV",
+          "ticker": "GEV",
+          "layer": "upstream",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "GNRC",
+          "label": "GNRC",
+          "ticker": "GNRC",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "GOOGL",
+          "label": "GOOGL",
+          "ticker": "GOOGL",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "GRID",
+          "label": "GRID",
+          "ticker": "GRID",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "HUBB",
+          "label": "HUBB",
+          "ticker": "HUBB",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "JCI",
+          "label": "JCI",
+          "ticker": "JCI",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "META",
+          "label": "META",
+          "ticker": "META",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "MSFT",
+          "label": "MSFT",
+          "ticker": "MSFT",
+          "layer": "downstream",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "MSTR",
+          "label": "MSTR",
+          "ticker": "MSTR",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "NEE",
+          "label": "NEE",
+          "ticker": "NEE",
+          "layer": "upstream",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "NVDA",
+          "label": "NVDA",
+          "ticker": "NVDA",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        }
+      ],
+      "edges": [
+        {
+          "from": "NEE",
+          "to": "DLR",
+          "rel": "SUPPLIES_TO",
+          "mentions": 1,
+          "evidence_level": "topic_context",
+          "claim_ids": [
+            "claim:fe05773af3bd914a"
+          ],
+          "evidence_source_keys": []
+        },
+        {
+          "from": "GEV",
+          "to": "MSFT",
+          "rel": "SUPPLIES_TO",
+          "mentions": 1,
+          "evidence_level": "topic_context",
+          "claim_ids": [
+            "claim:c9b1853224ec19fe"
+          ],
+          "evidence_source_keys": []
+        },
+        {
+          "from": "CEG",
+          "to": "MSFT",
+          "rel": "SUPPLIES_TO",
+          "mentions": 1,
+          "evidence_level": "topic_context",
+          "claim_ids": [
+            "claim:9f789bc42d1fc58d"
+          ],
+          "evidence_source_keys": []
+        }
+      ],
+      "context_edges": [
+        {
+          "from": "BAM",
+          "to": "BE",
+          "rel": "CO_DEVELOPS_WITH",
+          "mentions": 1,
+          "evidence_level": "topic_context",
+          "claim_ids": [
+            "claim:66533fdd07d9e068"
+          ],
+          "evidence_source_keys": []
+        }
+      ],
+      "evidence": [
+        {
+          "source_key": "url:a3cc5ad3cf6793693b4b20a7f71290398dc95740",
+          "url": "https://marketwatch.com/story/kevin-oleary-aka-mr-wonderful-on-crypto-winning-in-ai-and-3-things-all-business-owners-must-know-5339ff6c?mod=mw_rss_topstories",
+          "domain": "marketwatch.com",
+          "published": "2026-08-07",
+          "headline": "Kevin O’Leary, aka ‘Mr. Wonderful,’ on crypto, winning in AI and 3 things all business owners must know"
+        },
+        {
+          "source_key": "url:bbe96389eec77c8edb0c7c6d1a1570ff5150b8c7",
+          "url": "https://investing.com/news/stock-market-news/virginia-governor-says-she-will-file-documentation-to-intervene-dominionnextera-merger-4843971",
+          "domain": "investing.com",
+          "published": "2026-08-06",
+          "headline": "Virginia governor says she will file documentation to intervene Dominion-NextEra merger"
+        },
+        {
+          "source_key": "url:6ef908a5abd98a47665e2accc6af4d16696484a1",
+          "url": "https://seekingalpha.com/news/4628215-solaris-targets-q4-adjusted-ebitda-of-100m-120m-while-integrating-gesa-acquisition?feed_item_type=news",
+          "domain": "seekingalpha.com",
+          "published": "2026-08-06",
+          "headline": "Solaris targets Q4 adjusted EBITDA of $100M-$120M while integrating GESA acquisition"
+        },
+        {
+          "source_key": "url:b5d8db567f4fe894ae07e21b3b3818e80c38e7b5",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/caterpillar-lifts-2026-sales-growth-115130477.html",
+          "domain": "finance.yahoo.com",
+          "published": "2026-08-04",
+          "headline": "Caterpillar lifts 2026 sales growth target after quarterly profit beat"
+        },
+        {
+          "source_key": "url:a21906c1c13307a91251cae0a70e9e1de1fa9b8c",
+          "url": "https://wsj.com/business/earnings/cummins-raises-outlook-as-profit-sales-climb-a2a7de49?siteid=yhoof2",
+          "domain": "wsj.com",
+          "published": "2026-08-04",
+          "headline": "Cummins Raises Outlook as Profit, Sales Climb"
+        },
+        {
+          "source_key": "url:7bcc6caba9ab8596aaa78b9a1070d6449aae22cb",
+          "url": "https://marketwatch.com/story/caterpillar-is-killing-it-and-data-center-demand-is-driving-record-revenue-161b84d1?mod=mw_rss_topstories",
+          "domain": "marketwatch.com",
+          "published": "2026-08-04",
+          "headline": "Caterpillar’s stock gives the Dow a 500-point boost as data-center demand drives record revenue"
+        },
+        {
+          "source_key": "url:7a8cbfb835428a8534bdb6f8c433a34fdec46469",
+          "url": "https://investors.com/news/cat-stock-dow-jones-caterpillar-q2-earnings",
+          "domain": "investors.com",
+          "published": "2026-08-04",
+          "headline": "CAT Stock Lifts Dow Jones With Massive Earnings Beat"
+        },
+        {
+          "source_key": "url:37b0d890910c026fd7c53164896f99109cbc1b63",
+          "url": "https://investing.com/news/stock-market-news/caterpillar-secondquarter-profit-jumps-on-strong-power-construction-equipment-demand-4833607",
+          "domain": "investing.com",
+          "published": "2026-08-04",
+          "headline": "Caterpillar raises 2026 revenue growth target after quarterly profit beat"
+        }
+      ],
+      "evidence_summary": {
+        "source_count": 8,
+        "source_domain_count": 6,
+        "directional_edge_count": 3,
+        "corroborated_edge_count": 0
+      },
+      "known_gaps": [
+        "private_and_foreign_company_coverage_not_available_in_ticker_only_evidence",
+        "materials_and_equipment_layers_require_additional_evidence",
+        "unresolved_ticker_roles: AAPL, ABB, AEIS, AMD, AMZN, AVA, BAM, BE, BRK.B, CAT, CMI, D, DIA, DUK, EQIX, ETN, FRMI, GNRC, GOOGL, GRID, HUBB, JCI, META, MSTR, NVDA",
+        "some_directional_relations_lack_claim_level_corroboration"
+      ],
+      "next_action": "human_review_or_bounded_gap_fill"
+    },
+    {
+      "draft_id": "draft:ssd",
+      "status": "evidence_only",
+      "decision_eligible": false,
+      "source_topic": {
+        "topic_id": "topic:ssd",
+        "label": "SSD",
+        "state": "validated",
+        "score": 79.6,
+        "first_seen": "2026-06-25",
+        "last_seen": "2026-08-07",
+        "source_count": 14,
+        "source_domain_count": 7,
+        "tickers": [
+          "ALAB",
+          "AMD",
+          "CRDO",
+          "META",
+          "MRVL",
+          "MU",
+          "NVDA",
+          "PLTR",
+          "SKHY",
+          "SNDK",
+          "SPCX",
+          "STX",
+          "TSM",
+          "WDC"
+        ],
+        "why_now": [
+          "10 structural ticker relations",
+          "4 directional supply relations",
+          "7 corroborated relation claims",
+          "bottleneck language: shortage",
+          "spans 14 tickers"
+        ]
+      },
+      "layers": [
+        "upstream",
+        "downstream",
+        "unresolved"
+      ],
+      "nodes": [
+        {
+          "id": "ALAB",
+          "label": "ALAB",
+          "ticker": "ALAB",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AMD",
+          "label": "AMD",
+          "ticker": "AMD",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "CRDO",
+          "label": "CRDO",
+          "ticker": "CRDO",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "META",
+          "label": "META",
+          "ticker": "META",
+          "layer": "downstream",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "MRVL",
+          "label": "MRVL",
+          "ticker": "MRVL",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "MU",
+          "label": "MU",
+          "ticker": "MU",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "NVDA",
+          "label": "NVDA",
+          "ticker": "NVDA",
+          "layer": "downstream",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "PLTR",
+          "label": "PLTR",
+          "ticker": "PLTR",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "SKHY",
+          "label": "SKHY",
+          "ticker": "SKHY",
+          "layer": "upstream",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "SNDK",
+          "label": "SNDK",
+          "ticker": "SNDK",
+          "layer": "upstream",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "SPCX",
+          "label": "SPCX",
+          "ticker": "SPCX",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "STX",
+          "label": "STX",
+          "ticker": "STX",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "TSM",
+          "label": "TSM",
+          "ticker": "TSM",
+          "layer": "upstream",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "WDC",
+          "label": "WDC",
+          "ticker": "WDC",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        }
+      ],
+      "edges": [
+        {
+          "from": "TSM",
+          "to": "NVDA",
+          "rel": "SUPPLIES_TO",
+          "mentions": 1,
+          "evidence_level": "corroborated",
+          "claim_ids": [
+            "claim:72be523a60c26373"
+          ],
+          "evidence_source_keys": [
+            "url:bf882f9d5cf1d1b666736692796821e2c2824d16"
+          ]
+        },
+        {
+          "from": "SNDK",
+          "to": "META",
+          "rel": "SUPPLIES_TO",
+          "mentions": 1,
+          "evidence_level": "topic_context",
+          "claim_ids": [
+            "claim:34b77c93b3fd33b7"
+          ],
+          "evidence_source_keys": [
+            "url:58bd59bc89fd02287dbc195b6f59f8fdc4adf7c1"
+          ]
+        },
+        {
+          "from": "SKHY",
+          "to": "NVDA",
+          "rel": "SUPPLIES_TO",
+          "mentions": 1,
+          "evidence_level": "corroborated",
+          "claim_ids": [
+            "claim:1dc63c54bd56f790"
+          ],
+          "evidence_source_keys": [
+            "url:bf882f9d5cf1d1b666736692796821e2c2824d16"
+          ]
+        }
+      ],
+      "context_edges": [
+        {
+          "from": "MU",
+          "to": "SNDK",
+          "rel": "COMPETES_WITH",
+          "mentions": 6,
+          "evidence_level": "corroborated",
+          "claim_ids": [
+            "claim:3efeabb56a4ac98d"
+          ],
+          "evidence_source_keys": [
+            "url:811bc5a8cfed4ec011dde61e4e50570f551103a5",
+            "url:bee8162fca6be3ea11e2a230964d76506acc5e81",
+            "url:bf882f9d5cf1d1b666736692796821e2c2824d16"
+          ]
+        },
+        {
+          "from": "STX",
+          "to": "WDC",
+          "rel": "COMPETES_WITH",
+          "mentions": 3,
+          "evidence_level": "corroborated",
+          "claim_ids": [
+            "claim:64d5337bc520ccd8"
+          ],
+          "evidence_source_keys": [
+            "url:33a67ec06a2cc93b585fd83d458a7f181bec7805",
+            "url:7f32f4763f7f51665ce388427dfe662d25cd6448"
+          ]
+        },
+        {
+          "from": "SNDK",
+          "to": "WDC",
+          "rel": "COMPETES_WITH",
+          "mentions": 2,
+          "evidence_level": "corroborated",
+          "claim_ids": [
+            "claim:a9971545176de170"
+          ],
+          "evidence_source_keys": [
+            "url:d65dc1199f0361539e7c1b51250a550854c789ff"
+          ]
+        },
+        {
+          "from": "MU",
+          "to": "WDC",
+          "rel": "COMPETES_WITH",
+          "mentions": 1,
+          "evidence_level": "corroborated",
+          "claim_ids": [
+            "claim:f900aa39e5712d81"
+          ],
+          "evidence_source_keys": []
+        },
+        {
+          "from": "MU",
+          "to": "SKHY",
+          "rel": "COMPETES_WITH",
+          "mentions": 1,
+          "evidence_level": "corroborated",
+          "claim_ids": [
+            "claim:61ab6a1ccc630218"
+          ],
+          "evidence_source_keys": [
+            "url:bf882f9d5cf1d1b666736692796821e2c2824d16"
+          ]
+        }
+      ],
+      "evidence": [
+        {
+          "source_key": "url:79d846e318b0947ce444f84eae0d841211d322e1",
+          "url": "https://investors.com/news/stock-market-rally-powers-ahead-spacex-palantir-sandisk-are-key-earnings-movers-weekly-review",
+          "domain": "investors.com",
+          "published": "2026-08-07",
+          "headline": "Stock Market Rally Powers Ahead; SpaceX, Palantir, Sandisk Are Key Earnings Movers: Weekly Review"
+        },
+        {
+          "source_key": "url:33a67ec06a2cc93b585fd83d458a7f181bec7805",
+          "url": "https://investors.com/news/technology/seagate-stock-stx-earnings-july-2026",
+          "domain": "investors.com",
+          "published": "2026-07-29",
+          "headline": "Seagate Stock Shakes Off AI Rally Fears With Big Earnings Beat"
+        },
+        {
+          "source_key": "url:bf882f9d5cf1d1b666736692796821e2c2824d16",
+          "url": "https://investors.com/market-trend/stock-market-today/dow-jones-sp500-nasdaq-sandisk-sk-khynix-tsmc-earnings",
+          "domain": "investors.com",
+          "published": "2026-07-16",
+          "headline": "Stock Market Today: Nasdaq Slides As Sandisk, SK Hynix Plunge; Nvidia Chipmaker TSMC Falls (Live Coverage)"
+        },
+        {
+          "source_key": "url:7f32f4763f7f51665ce388427dfe662d25cd6448",
+          "url": "https://seekingalpha.com/news/4612914-seagate-gets-a-rating-upgrade-while-western-digital-also-sees-bullish-views-at-wells-fargo?feed_item_type=news",
+          "domain": "seekingalpha.com",
+          "published": "2026-07-10",
+          "headline": "Seagate gets a rating upgrade, while Western Digital also sees bullish views at Wells Fargo"
+        },
+        {
+          "source_key": "url:58bd59bc89fd02287dbc195b6f59f8fdc4adf7c1",
+          "url": "https://finance.yahoo.com/markets/stocks/article/micron-sandisk-marvell-stocks-jump-leading-chip-sector-gains-135433074.html",
+          "domain": "finance.yahoo.com",
+          "published": "2026-07-09",
+          "headline": "Micron, Sandisk, Marvell stocks jump, leading chip sector gains"
+        },
+        {
+          "source_key": "url:bee8162fca6be3ea11e2a230964d76506acc5e81",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/sandisk-one-biggest-winners-microns-151200179.html",
+          "domain": "finance.yahoo.com",
+          "published": "2026-07-01",
+          "headline": "Sandisk Is One of the Biggest Winners After Micron's Blowout Earnings"
+        },
+        {
+          "source_key": "url:d65dc1199f0361539e7c1b51250a550854c789ff",
+          "url": "https://investors.com/news/technology/sandisk-stock-sky-high-price-target-chip-stock-rally",
+          "domain": "investors.com",
+          "published": "2026-06-30",
+          "headline": "Sandisk Stock Gets Sky-High Price Target Amid Chip Stock Rally"
+        },
+        {
+          "source_key": "url:811bc5a8cfed4ec011dde61e4e50570f551103a5",
+          "url": "https://marketwatch.com/story/sandisks-stock-could-follow-record-breaking-quarter-with-another-big-jump-analysts-say-433bbbef?mod=mw_rss_topstories",
+          "domain": "marketwatch.com",
+          "published": "2026-06-30",
+          "headline": "Sandisk’s stock could follow record-breaking quarter with another big jump, analysts say"
+        }
+      ],
+      "evidence_summary": {
+        "source_count": 8,
+        "source_domain_count": 4,
+        "directional_edge_count": 3,
+        "corroborated_edge_count": 2
+      },
+      "known_gaps": [
+        "private_and_foreign_company_coverage_not_available_in_ticker_only_evidence",
+        "materials_and_equipment_layers_require_additional_evidence",
+        "unresolved_ticker_roles: ALAB, AMD, CRDO, MRVL, MU, PLTR, SPCX, STX, WDC",
+        "some_directional_relations_lack_claim_level_corroboration"
+      ],
+      "next_action": "human_review_or_bounded_gap_fill"
+    },
+    {
+      "draft_id": "draft:geopolitical_risk",
+      "status": "evidence_only",
+      "decision_eligible": false,
+      "source_topic": {
+        "topic_id": "topic:geopolitical_risk",
+        "label": "Geopolitical risk",
+        "state": "validated",
+        "score": 79.2,
+        "first_seen": "2026-06-25",
+        "last_seen": "2026-08-08",
+        "source_count": 120,
+        "source_domain_count": 10,
+        "tickers": [
+          "AAL",
+          "AAOI",
+          "AAPL",
+          "AEM",
+          "AIG",
+          "ALAB",
+          "AMAT",
+          "AMD",
+          "AMKBY",
+          "AMZN",
+          "AON",
+          "AREC",
+          "ARM",
+          "ASHR",
+          "ASML",
+          "AU",
+          "AVGO",
+          "AXTI",
+          "B",
+          "BA",
+          "BABA",
+          "BAC",
+          "BCS",
+          "BEN",
+          "BIDU",
+          "BKR",
+          "BLK",
+          "BP",
+          "BRK.B",
+          "BTU"
+        ],
+        "why_now": [
+          "11 structural ticker relations",
+          "4 directional supply relations",
+          "6 corroborated relation claims",
+          "bottleneck language: shortage",
+          "spans 168 tickers"
+        ]
+      },
+      "layers": [
+        "upstream",
+        "downstream",
+        "unresolved"
+      ],
+      "nodes": [
+        {
+          "id": "AAL",
+          "label": "AAL",
+          "ticker": "AAL",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AAOI",
+          "label": "AAOI",
+          "ticker": "AAOI",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AAPL",
+          "label": "AAPL",
+          "ticker": "AAPL",
+          "layer": "downstream",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AEM",
+          "label": "AEM",
+          "ticker": "AEM",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AIG",
+          "label": "AIG",
+          "ticker": "AIG",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ALAB",
+          "label": "ALAB",
+          "ticker": "ALAB",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AMAT",
+          "label": "AMAT",
+          "ticker": "AMAT",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AMD",
+          "label": "AMD",
+          "ticker": "AMD",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AMKBY",
+          "label": "AMKBY",
+          "ticker": "AMKBY",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AMZN",
+          "label": "AMZN",
+          "ticker": "AMZN",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AON",
+          "label": "AON",
+          "ticker": "AON",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AREC",
+          "label": "AREC",
+          "ticker": "AREC",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ARM",
+          "label": "ARM",
+          "ticker": "ARM",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ASHR",
+          "label": "ASHR",
+          "ticker": "ASHR",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "ASML",
+          "label": "ASML",
+          "ticker": "ASML",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AU",
+          "label": "AU",
+          "ticker": "AU",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AVGO",
+          "label": "AVGO",
+          "ticker": "AVGO",
+          "layer": "upstream",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "AXTI",
+          "label": "AXTI",
+          "ticker": "AXTI",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "B",
+          "label": "B",
+          "ticker": "B",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "BA",
+          "label": "BA",
+          "ticker": "BA",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "BABA",
+          "label": "BABA",
+          "ticker": "BABA",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "BAC",
+          "label": "BAC",
+          "ticker": "BAC",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "BCS",
+          "label": "BCS",
+          "ticker": "BCS",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "BEN",
+          "label": "BEN",
+          "ticker": "BEN",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "BIDU",
+          "label": "BIDU",
+          "ticker": "BIDU",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "BKR",
+          "label": "BKR",
+          "ticker": "BKR",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "BLK",
+          "label": "BLK",
+          "ticker": "BLK",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "BP",
+          "label": "BP",
+          "ticker": "BP",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "BRK.B",
+          "label": "BRK.B",
+          "ticker": "BRK.B",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        },
+        {
+          "id": "BTU",
+          "label": "BTU",
+          "ticker": "BTU",
+          "layer": "unresolved",
+          "evidence_basis": "topic_ticker_entity"
+        }
+      ],
+      "edges": [
+        {
+          "from": "AVGO",
+          "to": "AAPL",
+          "rel": "SUPPLIES_TO",
+          "mentions": 1,
+          "evidence_level": "topic_context",
+          "claim_ids": [],
+          "evidence_source_keys": []
+        }
+      ],
+      "context_edges": [],
+      "evidence": [
+        {
+          "source_key": "url:9c81c102d700954bd51e698b7364858484e31e00",
+          "url": "https://seekingalpha.com/news/4629649-iran-says-hormuz-deal-close-attack-uae-tanker?feed_item_type=news",
+          "domain": "seekingalpha.com",
+          "published": "2026-08-08",
+          "headline": "Iran says Hormuz deal close amid attack on UAE tanker"
+        },
+        {
+          "source_key": "url:85ed958a6af6e194599d581108b0f066205e723e",
+          "url": "https://cnbc.com/2026/08/08/uae-ship-targeted-missile-us-iran-tensions-stay-high.html",
+          "domain": "cnbc.com",
+          "published": "2026-08-08",
+          "headline": "UAE says one of its ships was targeted by missile as U.S.-Iran tensions over Strait of Hormuz remain high"
+        },
+        {
+          "source_key": "url:f5426c28e97c8a25ffa32033e4ea3ee7233dd5bd",
+          "url": "https://cnbc.com/2026/08/07/oil-rises-supply-fears-iran-draft-plan-strait-hormuz.html",
+          "domain": "cnbc.com",
+          "published": "2026-08-07",
+          "headline": "Oil rises as Iran's draft plan sees U.S. and Israel banned from Strait of Hormuz"
+        },
+        {
+          "source_key": "url:bd1837d9c3535b2a204adb08ab11172751e5cfe6",
+          "url": "https://marketwatch.com/story/optical-stocks-have-a-china-problem-that-most-investors-are-missing-45523981?mod=mw_rss_topstories",
+          "domain": "marketwatch.com",
+          "published": "2026-08-07",
+          "headline": "Optical stocks have a China problem that most investors are missing"
+        },
+        {
+          "source_key": "url:9a920cae0ab7b5ab332397ca5a1b769f6fe65756",
+          "url": "https://cnbc.com/2026/08/07/meta-india-zuckerberg-apology-genz-protest.html",
+          "domain": "cnbc.com",
+          "published": "2026-08-07",
+          "headline": "The 72-hour crisis that could upend Meta’s business in India as firm risks losing legal protection"
+        },
+        {
+          "source_key": "url:6fa582213c3028a472e62b7ec88d6b60f822079c",
+          "url": "https://cnbc.com/2026/08/07/gulf-uncertainty-is-creating-win-win-strategy-with-chevron-and-other-oil-majors.html",
+          "domain": "cnbc.com",
+          "published": "2026-08-07",
+          "headline": "Gulf uncertainty is creating ‘win, win’ strategy with Chevron and other oil majors"
+        },
+        {
+          "source_key": "url:5435ae4fb0703e30c3e46f7fc912f075431da239",
+          "url": "https://cnbc.com/2026/08/07/trump-iran-hormuz-deal-stocks-oil.html",
+          "domain": "cnbc.com",
+          "published": "2026-08-07",
+          "headline": "Trump teased an Iran deal that didn't come, but markets soared. Here’s why it keeps happening"
+        },
+        {
+          "source_key": "url:0673481afca0b70b33699a6084b0f4e28574ec1f",
+          "url": "https://seekingalpha.com/news/4628875-chinas-july-trade-surplus-widens-to-1125b-as-exports-surge-239-on-strong-ai-export-demand?feed_item_type=news",
+          "domain": "seekingalpha.com",
+          "published": "2026-08-07",
+          "headline": "China’s July trade surplus widens to $112.5B as exports surge 23.9% on strong AI export demand"
+        }
+      ],
+      "evidence_summary": {
+        "source_count": 8,
+        "source_domain_count": 3,
+        "directional_edge_count": 1,
+        "corroborated_edge_count": 0
+      },
+      "known_gaps": [
+        "private_and_foreign_company_coverage_not_available_in_ticker_only_evidence",
+        "materials_and_equipment_layers_require_additional_evidence",
+        "unresolved_ticker_roles: AAL, AAOI, AEM, AIG, ALAB, AMAT, AMD, AMKBY, AMZN, AON, AREC, ARM, ASHR, ASML, AU, AXTI, B, BA, BABA, BAC, BCS, BEN, BIDU, BKR, BLK, BP, BRK.B, BTU",
+        "some_directional_relations_lack_claim_level_corroboration"
+      ],
+      "next_action": "human_review_or_bounded_gap_fill"
+    }
+  ]
+}

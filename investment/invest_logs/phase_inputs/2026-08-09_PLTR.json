@@ -1,0 +1,119 @@
+{
+  "bundle_version": "P5-INPUTS/1.0",
+  "ticker": "PLTR",
+  "date": "2026-08-09",
+  "phase0": {
+    "regime_confidence": 0.72,
+    "market_top_zone": "Yellow",
+    "ftd_state": "FTD_CONFIRMED",
+    "breadth_composite": 76,
+    "vix": 14.9,
+    "fred_verdict": "Soft Landing",
+    "real_rate_pct": 2.41,
+    "hot_sectors": ["Industrials", "Financials", "Energy"],
+    "cold_sectors": ["Technology", "Real Estate", "Utilities"]
+  },
+  "lanes": {
+    "fundamentals": {
+      "signal": "HOLD",
+      "score": 1.0,
+      "confidence": 0.86,
+      "phase0_alignment": "NEUTRAL",
+      "key_factors": [
+        "Revenue grew 92.8% year over year",
+        "FCF margin reached 62.1%",
+        "P/E exceeds peer median by 449%"
+      ],
+      "risk_flags": [
+        "Extreme valuation versus peers",
+        "High real rates pressure growth multiples"
+      ]
+    },
+    "sentiment": {
+      "signal": "HOLD",
+      "score": 0.33,
+      "confidence": 0.78,
+      "phase0_alignment": "NEUTRAL",
+      "key_factors": [
+        "Greed market backdrop lifts score",
+        "Insider selling and negative MSPR",
+        "Low short float supports sentiment"
+      ],
+      "risk_flags": [
+        "Insider distribution",
+        "CEO compensation rose 97.8% YoY"
+      ]
+    },
+    "news": {
+      "signal": "BUY",
+      "score": 2.75,
+      "confidence": 0.82,
+      "phase0_alignment": "NEUTRAL",
+      "key_factors": [
+        "Buy consensus supports sentiment",
+        "Positive post-earnings news momentum",
+        "PT revisions trend upward"
+      ],
+      "risk_flags": [
+        "No usable discrete rating changes",
+        "Technology remains a cold sector"
+      ],
+      "analyst_consensus": "Buy"
+    },
+    "technical": {
+      "signal": "HOLD",
+      "score": 1.0,
+      "confidence": 0.60,
+      "phase0_alignment": "ALIGNED",
+      "key_factors": [
+        "Price above all major moving averages",
+        "MACD histogram rising at 4.79",
+        "Volume 1.78 times twenty-day average"
+      ],
+      "risk_flags": [
+        "RSI 72.8 is overbought",
+        "Price 27.38% above 20-day MA"
+      ]
+    },
+    "valuation": {
+      "signal": "SELL",
+      "score": -3.0,
+      "confidence": 0.30,
+      "phase0_alignment": "ALIGNED",
+      "key_factors": [
+        "Fair value sits 64.14% below price",
+        "Anchor dispersion forces low confidence",
+        "High real rates pressure growth"
+      ],
+      "risk_flags": [
+        "No curated range peer cohort",
+        "Severe valuation anchor conflict"
+      ]
+    }
+  },
+  "burry": {
+    "score": 30.2,
+    "label": "WARNING",
+    "veto_flag": false,
+    "components": {
+      "fcf_yield_pct": 0.53,
+      "ev_ebit": 151.83,
+      "debt_to_equity": 0.02,
+      "pct_below_52w_high": 16.98,
+      "insider_net": "SELL"
+    },
+    "narrative": "低 FCF yield、高 EV/EBIT 與 insider SELL 構成估值警告。"
+  },
+  "phase3": {
+    "final_score": 0.5165,
+    "final_decision": "HOLD",
+    "final_action": "CANCEL"
+  },
+  "phase4": {
+    "position_size_pct": 0.0,
+    "analysis_price": 172.01
+  },
+  "red_team": {
+    "verdict": "STRONG_COUNTER"
+  }
+}

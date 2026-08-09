@@ -73,7 +73,7 @@ def test_summary_aggregation_confidence_snippets_and_final_take():
     assert len(summary["final_takes_by_round"]) == 3
 
 
-def _write_bn(path: Path, news_id: str, rel: dict, *, fetched="2026-05-21T00:00:00Z"):
+def _write_bn(path: Path, news_id: str, rel: dict, *, fetched="2026-08-08T00:00:00Z"):
     path.write_text(
         json.dumps({
             "news_id": news_id,

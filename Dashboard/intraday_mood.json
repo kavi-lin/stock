@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "generated_at": "2026-08-08T04:55:17.777606+00:00",
+  "generated_at": "2026-08-09T08:10:53.357225+00:00",
   "market_open": false,
   "session_fraction": 1.0,
   "aggregate": {
@@ -100,10 +100,10 @@
           "cross": null
         },
         "macd_1d": {
-          "dif": 5.082,
-          "dea": 2.036,
-          "hist": 3.046,
-          "hist_prev": 2.788,
+          "dif": 5.077,
+          "dea": 2.028,
+          "hist": 3.049,
+          "hist_prev": 2.79,
           "cross": null
         },
         "kdj_1d": {
@@ -135,8 +135,8 @@
       "intraday_return_open_pct": 0.39,
       "intraday_return_prevclose_pct": 1.17,
       "range_position": 0.916,
-      "vwap": 721.05,
-      "vwap_gap_pct": 0.27,
+      "vwap": 720.97,
+      "vwap_gap_pct": 0.29,
       "cum_volume": 29234852,
       "avg20_volume": 41624817,
       "rvol": 0.7,
@@ -156,7 +156,7 @@
       "components": {
         "dir": 58.6,
         "range_pos": 83.1,
-        "vwap": 27.5,
+        "vwap": 28.6,
         "vol_price": 28.1,
         "break_low": 0.0,
         "trend": 25.8
@@ -175,24 +175,24 @@
       ],
       "momentum": {
         "macd_5m": {
-          "dif": 0.488,
-          "dea": 0.294,
+          "dif": 0.49,
+          "dea": 0.297,
           "hist": 0.194,
-          "hist_prev": 0.177,
+          "hist_prev": 0.172,
           "cross": null
         },
         "kdj_5m": {
           "k": 73.8,
-          "d": 73.5,
-          "j": 74.4,
-          "k_prev": 76.6,
+          "d": 73.1,
+          "j": 75.2,
+          "k_prev": 74.9,
           "cross": null
         },
         "macd_1d": {
-          "dif": -1.69,
-          "dea": -5.417,
-          "hist": 3.727,
-          "hist_prev": 3.217,
+          "dif": -1.698,
+          "dea": -5.429,
+          "hist": 3.731,
+          "hist_prev": 3.222,
           "cross": null
         },
         "kdj_1d": {
@@ -278,9 +278,9 @@
           "cross": null
         },
         "macd_1d": {
-          "dif": 1.116,
-          "dea": 0.542,
-          "hist": 0.574,
+          "dif": 1.114,
+          "dea": 0.539,
+          "hist": 0.575,
           "hist_prev": 0.555,
           "cross": null
         },

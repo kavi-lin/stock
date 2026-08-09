@@ -8,6 +8,115 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.121.1] — 2026-08-09 — Nexus Claude gap-fill 改為單輪 text-only，移除 agentic timeout 根因
+
+### Fixed
+- `model_router.py` 為 `nexus_gap_fill` 加 Claude 專用 execution profile：固定 Sonnet、`max_turns=1`、`no_tools=True`、`strict_mcp=True`。呼叫仍完整通過 quota broker、usage settlement 與單 provider 路由，不繞治理。
+- gap-fill 的 hard deadline 由 240 秒調為 360 秒，prompt 將完整 JSON 限在 1,500 tokens。期限只是最後防線；根治點是 Claude 不再載入工具／MCP 或進入 agentic exploration。
+- 新增 role-aware dispatcher 與 governed-chain 接線測試，鎖定 profile 參數、broker 路徑及 no fallback。broker gate 與 rolling-window 契約皆通過。
+
+### Why
+- v4.120.0 的 NAND timeout 不是 source packet 過大，而是 text-only JSON 工作誤走通用 `run_llm()`，使 bare `claude -p` 繼承完整 Claude Code agentic runtime。供應商或網路 timeout 無法絕對消除，但這版排除了 repo 自己造成的主要延遲來源。
+
+## [4.121.0] — 2026-08-09 — Nexus source packet：模型只能引用已抓取且可驗 hash 的證據
+
+### Added
+- `scripts/nexus/source_packets.py` + `nexus/SOURCE_PACKET_SCHEMA.md`：把 evidence draft 與 claim ledger 投影成穩定 `source_id` / `excerpt_id` 封包。分析摘錄明標非逐字原文；選定 topic 可抓取短頁面段落、記 content/excerpt hash，永不保存全文。
+- `Dashboard/nexus_source_packets.json`：12 個探索層封包、150 個 canonical sources。真實抓取 `topic:data_center_infrastructure` 後，16 個候選來源中 7 個成功取得相關文字、共 19 段原頁摘錄；失敗與無相關段落均保留原狀態。
+- relation evidence 改為逐 edge 計算 `corroborated_claim / single_source_claim / unsupported`，來源上限套用後重算，不可用整包 domain 數替無關關係升級。
+
+### Changed
+- `scripts/nexus/gap_fill.py` 與 prompt/schema 改吃封閉 source packet；送給模型的內容不含 URL。每個 node/edge 只能引用既有 ID，且至少要有一段 `fetched_page`；未知 ID、excerpt/source 錯配、外加 URL、過期 draft/packet 全部 fail closed。
+- proposal ledger 另綁 `source_packet_digest`；Radar 顯示已抓頁數、原頁摘錄數與逐關係交叉佐證數。
+- 新增 source packet tamper、hash、來源歸屬、evidence tier、fetch provenance 與 gap-fill closed-packet 測試；本輪未新增模型 inference，也未重試已 timeout 的 NAND。
+
+### Why
+- URL 存在不代表頁面支持主張，整體來源多也不代表每條關係準確。將可引用範圍封閉到實際取得的短段落與穩定 ID，能讓每個提案回查到具體證據；它提高可稽核性與資料準確率，但仍不把模型提案當成已確認事實，正式 YAML promotion 仍需人工審查。
+
+## [4.120.0] — 2026-08-09 — Nexus bounded gap-fill：每主題最多一次模型推論
+
+### Added
+- `scripts/nexus/gap_fill.py` + `scripts/nexus/prompts/evidence_gap_fill_system.md` + `nexus/GAP_FILL_SCHEMA.md`：手動、單 topic、單 inference runner。輸入只含 immutable evidence draft 與 `known_gaps`；最多 8 nodes / 10 edges，每項必帶 public URL，整體至少兩個 source domains。
+- `Dashboard/nexus_gap_fills.json` 是原子寫入的 proposal ledger；base draft 以 sha256 綁定。topic 一旦 `inference_turns: 1`，不論 proposed 或 failed 均不得自動再跑；broker 在 call 前阻擋則記 `blocked / turns=0`。
+- Radar 顯示 gap proposal metric 與 proposed / failed / blocked 狀態；detail panel 揭露 provider、turn 數、proposal node/edge 數或失敗原因。新增一次性、base immutability、source diversity、caps 與 UI contract tests。
+
+### Changed
+- topic `top_relations` 改為 directional supply predicates 優先，避免競爭 pair 填滿前 10 而讓 evidence draft 遺失唯一 flow edge。
+- runner 預設略過空骨架，選最高分且已有 claim-level corroborated edge 的草稿。`--agent` 可明確 pin 單一 provider，不允許 fallback；`--timeout` 只改單程序期限，不增加 turn。
+
+### Trial
+- `topic:nand` 使用 Claude 做唯一一次受控試跑；CLI 存活至 240 秒後 timeout，ledger 正確記 `failed / inference_turns=1`，未重試、未切換 Gemini、未產生 proposal。失敗本身證明一次性閘與稽核路徑有生效。
+
+### Why
+- deterministic drafts 已指出 private / foreign / material / equipment 缺口，但直接批次呼叫模型會浪費 rolling quota，也可能覆寫可信骨架。bounded sidecar 把模型限制成「提出帶來源的候選」，而非成為供應鏈真相或投資決策來源。
+
+## [4.119.0] — 2026-08-09 — 高分主題自動生成 evidence-only 供應鏈草稿
+
+### Added
+- `scripts/nexus/evidence_drafts.py` + `nexus/DRAFT_SCHEMA.md`：從最高分的 12 個 uncovered topic deterministic 建立 ticker-only 分層草稿；只使用 topic queue 與 claim ledger 已有節點／關係，輸出 `Dashboard/nexus_evidence_drafts.json`，零 LLM。
+- 草稿依方向關係分成 upstream / intermediate / downstream / unresolved；claim triple 必須與 topic 共用 artifact 才能標 `corroborated`，否則維持 `topic_context`。私有公司、外股、材料與設備缺口明列於 `known_gaps`，不猜測填空。
+- Radar 顯示 evidence draft ready 數量與卡片 badge；點入候選可查看分層、方向關係佐證數與待補缺口。新增 atomic output、禁止 invented node、decision isolation 與 score-first selection tests。
+
+### Changed
+- 每次 Tier 1 Nexus build 在 topic discovery 後自動重建並驗證草稿；graph meta 帶入 draft counts。完整 65 筆候選先投影 score 前 20，再生成前 12；目前 7 份至少含一條跨來源 corroborated edge。
+
+### Why
+- 主題 discovery 已能找出 65 個未覆蓋候選，但使用者仍需從空白開始整理上下游。先做 deterministic evidence projection，可把 LLM 成本限制在真正缺少的 private / foreign / material / equipment 節點，並清楚隔離探索與決策。
+
+## [4.118.1] — 2026-08-09 — Nexus 全面跟隨淺色 Dashboard theme
+
+### Fixed
+- `Dashboard/graph.html`：移除 Nexus 畫布與 Radar 強制黑底；淺色模式改用暖白畫布、石色網格、白色卡片與 theme-aware 控制面板，深色模式維持原設計。
+- `Dashboard/page-graph.js`：Canvas 節點、連線、標籤陰影及 tooltip 依 theme 使用不同對比色；側邊欄切換 theme 後即時重繪圖譜，不必重新載入。
+- `tests/test_nexus_frontend_contract.py`：鎖定 light-theme selectors、雙 palette 與切換後重繪接線，避免 Nexus 回歸固定黑底。
+
+### Why
+- Nexus 原先刻意獨立於全站 theme 固定深色，與使用者選擇的淺色介面不一致，也讓頁面切換時產生突兀的黑色區塊。
+
+## [4.118.0] — 2026-08-09 — Nexus 從被動 hairball 升級為證據型供應鏈雷達
+
+### Added
+- `scripts/nexus/claim_ledger.py` + `nexus/CLAIM_SCHEMA.md`：closed Break News / Link Digest relation 依 canonical URL 去重成 claim ledger；只有 ≥2 URL、≥2 domain、confidence≥0.65 才標 `corroborated`。同一篇新聞裡兩個 agent 同意仍只算一個來源。產物為 `nexus/claim_ledger.jsonl` 與 `Dashboard/nexus_quality.json`，原子寫入並有 `--check` validator。
+- `scripts/nexus/topic_discovery.py` + `nexus/TOPIC_SCHEMA.md`：零 LLM 的每日 topic discovery，依來源多樣性、7d velocity、ticker breadth、directional relation、bottleneck 與 novelty 產生 state/score/why-now。`new_chain_candidates` 會排除已有 YAML chain，主動指出尚未覆蓋題目。
+- `Dashboard/graph.html` / `page-graph.js`：預設為 Nexus Intelligence Radar；topic 卡點入 ego graph，relation detail 可開 evidence URL。新增 claim/topic/frontend contract tests，Nexus 相關共 44 tests。
+
+### Changed
+- 每日 `build_graph.py --tier 1,2` 先重建並驗證 claim ledger + topic queue；不再需要 `--enable-direct-edge`。真實資料由 422 claims 得到 70 corroborated，graph 畫面含 10 `SUPPLIES_TO`、17 `COMPETES_WITH`、2 `CO_DEVELOPS_WITH`。
+- Tier 2 不再把任意 ticker 共現偽裝成 `PEER_OF`（曾產生 MU↔LOW / MU↔PEG）；共現只留 audit。供應鏈 quick-pick 改讀 proactive topic queue，API 實測回 140 個 evidence-ranked themes。
+- Link Digest 與 supply-chain graph refresh 改走常態 claim-ledger pipeline；legacy flag 只留相容訊息。
+
+### Why
+- 原圖 379 邊中 361 是共主題、18 是 regex peer、真正 supply edge 為 0；同時近 30 日新聞已有 6,200 relations。缺口是獨立來源、語義與顯示沒有串成可稽核管線，不是資料量不足。
+
+## [4.117.0] — 2026-08-09 — 三道閘把 export 從「模型打字出來的」變成「工具產出的」
+
+V4.116.3 讓「跑沒跑」有閘了，但**寫進 `history.json` 的那段字**仍然是執行者打出來的。同一天的 log 攤開三種後果，validator 全綠：閘紅了就就地改數字、engine 產出用手抄、沒閘的欄位直接留 null。
+
+### Added
+- **`export_provenance` — `history.json` 只由 `append_session_export.py` 寫**（`export_date >= 2026-08-09` 缺 stamp 或 digest 不符 → rc=1）。stamp 是涵蓋**決策內容**的 sha256，不是一個記號——記號誰打字誰就有，而實際事故是：一次 run 在乾淨 append 之後把 `final_score` 和整塊重打的 `calculation_steps` 就地寫進決策紀錄；另一次在閘變紅時用臨時 `json.dump` 把 entry `pop()` 掉。**手寫的 entry 和 script 寫的 entry 是同一份 JSON**，schema 分不出來。
+  digest 排除 append 之後由既定工具寫的欄位（`det_shadow` / `lane_contract` / `thesis_id` / `thesis_registered_at` / `_` 開頭鍵），否則核可路徑會自己打自己的章；合約用**真的 `apply_det_shadow.py`** 跑一次 round-trip 來鎖這件事。
+- **`news_lane.pt_revision_momentum` 變必填**（同日期閘）。protocol §PHASE 2 用它的 `direction` + `delta_1m` 給 ±0.5~1 分，validator 卻只在它出現時驗型別，於是 null 是免費的。實測：一份 export 在 risk flag 散文裡寫著 `-2.94% 1m`，結構化欄位是 null——**分數剛好沒受影響（−2.94% 在 ±3% 帶內），所以斷掉的稽核鏈沒人發現**。`UNKNOWN` 是合法答案，但要帶 `unavailable_reason`；`UP`/`DOWN` 要帶得出數值 `delta_1m`。把 `news_lane` 整個設 null 也繞不過去：lane 有評分就代表它跑過。
+- **`calculation_steps` 必須等於 engine 最後一次的輸出**。§13 驗的是這塊自己算得通，那證明不了它屬於**這一次**執行——實測有一份 export 帶著 valuation −1.5 那次的 steps，而 entry 自己的 valuation lane 寫著 −3.0，修法迴圈還把數字往兩個相反方向各改一次才終於重跑 engine。`decision_engine.py` 因此把 Phase 3 輸出落地到 `invest_logs/decision_engine/<T>_decision_engine.json`（**關鍵是這一步**，同 V4.116.3 的 technical payload：stdout 上的數字 validator 構不到），validator §5l 逐欄比對，不符 rc=1；artifact 缺席/過期/ticker 不符則靜默。
+
+- **`append_session_export.py --replace-last`** —— 修一筆已 append 的 session 的**唯一**合法路徑。沒有它的話，「重新 append」會讓同一 session 留下兩筆（history 已有 5 組這種重複，含 2026-08-09 的 NOW），而唯一的替代就是這版要擋的 `h.pop()` + `json.dump`。**閘擋掉一條路，就必須同時給出替代路徑**——否則被擋的行為只會找更便宜的繞法（V4.116.1 的教訓）。護欄：只認同 ticker + 同 export_date，取代別人的 session → rc=1。
+
+### Why
+- **測試第一版又是靜默綠，而且是新的一種。** parity 的案例全部直接呼叫檢查函式，所以把它從 `main()` 拆掉、閘完全不生效，測試照樣全綠——正是 V4.116.2「`invest` 從沒進 `PROTOCOL_VALIDATORS`」那個形狀：**沒接線的閘沒有症狀**。補了一個走真 validator subprocess 的接線斷言。七個種回的 bug（拆三道閘 / 不蓋章 / 不寫 artifact / digest 誤納 `det_shadow` / 只看有沒有 stamp 不比對）現在全部會紅。
+- **cutoff 一度定成次日，是錯的判斷，已改回當日（2026-08-09）。** 當時的理由是「已在磁碟上的 entry 拿不到 stamp，同日 cutoff 會讓最新那筆永久紅」——但那個紅**不是永久的**：validator 只讀最後一筆，下一次 run 一 append 就換掉了。而且它**不是誤判**：2026-08-09 的 BAC entry 確實是手寫的（7 次 `json.dump` + 6 次 `open(w)`）、`pt_revision_momentum` 確實是 null，閘說的是實話。為了一個一跑就好的紅去延後一天生效，是把防禦性看得比真話重。
+
+## [4.116.3] — 2026-08-09 — 最後兩個沒閘的缺口：valuation_reviewer_gate 必填、Technical 不得靜默超出 rubric
+
+兩者都是「protocol 寫了、validator 沒接線」。2026-08-09 兩個引擎各跑一次 invest 把後果攤開：**有閘的都做了，沒閘的照樣跳過**。
+
+### Added
+- **`valuation_reviewer_gate` 對 `export_date >= 2026-08-09` 的 session 變必填**（缺 → rc=1）。protocol §PHASE 2 一直寫著這個 block「寫進 session export」，但 validator 只在它出現時才驗。實測：codex 跑了並帶進 export，agy 一次都沒跑，兩者都 rc=0。這個 block 是 shadow 樣本的**唯一**來源——不跑它，「將來要不要讓 gate 生效」就永遠沒有資料可依據，而損失是靜默且累積的。之前的 entry 維持靜默（172 筆歷史 entry 都沒有它）。
+- **Technical lane 不得靜默超出自家 script 的 rubric**。`analyze.py` 現在把 payload 寫到 `skills/technical-analyst/cache/<T>_technical_payload.json`——**這一步是關鍵**：`rubric_hint` 原本只存在於 stdout，最後躺在 lane subagent 的 transcript 裡，validator 構不到，所以只能靠 lane 自陳（等於再開一個誠信欄位）。持久化之後 validator 直接讀 script 自己的輸出比對。落在帶外且未填 `technical_lane.rubric_override_reason` → rc=1。**偏離允許，靜默偏離不允許。**
+  實測數據：同一檔股票同一個 hint `0 to +1`，agy 兩次分別回 +2.5 / +2.0，codex 回 +1.0（剛好在上界）。任一者都足以翻轉最終決策，而 codex 證明這道閘不會誤殺守規矩的執行。
+- `investment/scripts/test_validate_session_export_gates.py`：走**真 validator subprocess** + schema doc 的 FULL EXAMPLE fixture，涵蓋帶上緣/下緣/負值帶/宣告覆寫/空白覆寫/artifact 缺失或過期或 ticker 不符/hint 無法解析。
+
+### Why
+- **測試第一版是靜默綠，種回 bug 兩次都沒紅。** 第一次它自己重寫了一遍判斷邏輯；第二次改用真 validator 了，但 fixture 的日期讀 `V.VALUATION_GATE_REQUIRED_FROM`——常數一移，輸入跟著移。**對照工具與被測物同源就報不出差異**（MAINTENANCE §2c 家族）。最終版把 cutoff 日期寫死在測試裡，並斷言它與 validator 的常數相等，改政策必須同時改兩處。
+
 ## [4.116.2] — 2026-08-09 — invest 終於進 PROTOCOL_VALIDATORS：讓 V4.116.0/.1 的閘真的有約束力
 
 ### Fixed

@@ -41,6 +41,28 @@ def _chain(nodes, edges=None):
     }
 
 
+def test_nexus_themes_prioritizes_uncovered_discovery_topics(tmp_path, monkeypatch):
+    topics_path = tmp_path / "nexus_topics.json"
+    graph_path = tmp_path / "nexus_graph.json"
+    topics_path.write_text(json.dumps({
+        "new_chain_candidates": [{"label": "Silicon Photonics"}],
+        "chain_candidates": [{"label": "Silicon Photonics"}, {"label": "HBM4"}],
+        "topics": [{"label": "CPO"}],
+    }), encoding="utf-8")
+    graph_path.write_text(json.dumps({"nodes": [{
+        "type": "ticker", "label": "NVDA",
+        "metadata": {"themes": ["AI Infrastructure"], "narratives": ["HBM4"]},
+    }]}), encoding="utf-8")
+    monkeypatch.setattr(sc, "NEXUS_TOPICS_FILE", topics_path)
+    monkeypatch.setattr(sc, "NEXUS_FILE", graph_path)
+
+    themes = sc.nexus_themes()
+
+    assert themes[:3] == ["Silicon Photonics", "HBM4", "CPO"]
+    assert themes.count("HBM4") == 1
+    assert "AI Infrastructure" in themes
+
+
 def test_no_fmp_key_marks_fmp_unavailable_without_llm_on_tracked_ticker(tmp_path, monkeypatch):
     monkeypatch.delenv("FMP_API_KEY", raising=False)
     _write_local_indexes(tmp_path, monkeypatch, universe=["NVDA"])

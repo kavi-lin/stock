@@ -50,8 +50,9 @@
 - `relations`: directed edges. **Only assert a relation you can back with ≥1
   source URL.** Tag each with `corroborating_sources` (the URLs — source article +
   any related source that affirms it). This list directly powers the graph: a
-  ticker↔ticker relation affirmed by **≥2 sources** becomes a real provisional
-  supply-chain edge (Nexus Phase-2 threshold `support_count>=2`).
+  ticker↔ticker relation affirmed by **≥2 distinct URLs across ≥2 domains** can
+  become a corroborated exploration edge. Nexus claim ledger canonicalizes the
+  URLs and enforces the domain gate; `support_count` alone is not promotion.
   - **ticker↔ticker predicates** (supply-chain): `SUPPLIES_TO`, `CUSTOMER_OF`,
     `CONTRACT_MFG_FOR`, `CO_DEVELOPS_WITH`, `COMPETES_WITH`.
     Format `subject:"ticker:NVDA"`, `object:"ticker:TSM"`. Direction matters:
@@ -160,6 +161,7 @@ End condition: the MD + judgment.json are written and `build_artifacts.py` exite
 - Relations whose `subject`/`object` are not both real listed tickers (for the
   supply-chain predicates) will surface as entity nodes but not as a directed edge —
   that's expected; assert them anyway when the article supports them.
-- A single article usually yields `support_count = len(corroborating_sources)`. To
-  get a **directed supply-chain edge** in the graph, make sure a genuine ticker↔ticker
-  relation is affirmed by ≥2 of the sources you fetched.
+- A single article usually yields `support_count = len(corroborating_sources)`.
+  To get a **directed supply-chain edge**, provide ≥2 genuine supporting URLs on
+  ≥2 domains. Repeated/tracking variants of one URL and same-domain-only support
+  remain provisional after claim-ledger canonicalization.

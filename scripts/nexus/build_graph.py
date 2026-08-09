@@ -18,7 +18,7 @@ import math
 import os
 import sys
 from collections import defaultdict
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 from pathlib import Path
 from typing import Any
 
@@ -38,6 +38,9 @@ from scripts.nexus.schema import (  # noqa: E402
     NodeType,
 )
 from scripts.nexus import tier1_loaders  # noqa: E402
+from scripts.nexus import claim_ledger  # noqa: E402
+from scripts.nexus import topic_discovery  # noqa: E402
+from scripts.nexus import evidence_drafts  # noqa: E402
 from scripts.nexus.pagerank_lite import pagerank_lite, degree_centrality  # noqa: E402
 
 
@@ -135,8 +138,10 @@ def apply_decay_and_confidence(
         hl = half_life_for_edge(e.type, cfg)
         decay = decay_factor(age_days(e.last_seen, anchor), hl)
         tier_conf = cfg["tier_confidence"].get(e.tier, 1.0)
-        e.confidence = tier_conf
-        base = max(e.weight, 0.0) * tier_conf
+        # Preserve source-level confidence carried by claim-ledger edges.  The
+        # old assignment erased it and made every Tier-1 relationship look 1.0.
+        e.confidence = min(max(float(e.confidence), 0.0), tier_conf)
+        base = max(e.weight, 0.0) * e.confidence
         e.weight = base * decay * max(math.log1p(e.raw_frequency), 1.0)
     return edges
 
@@ -393,7 +398,10 @@ def _to_ticker_centric(
     return survivors, ticker_only_edges, stats
 
 
-def collect_tier1(cfg: dict[str, Any], enable_direct_edge: bool = False) -> tuple[list[Node], list[Edge]]:
+def collect_tier1(
+    cfg: dict[str, Any],
+    claim_records: list[dict[str, Any]] | None = None,
+) -> tuple[list[Node], list[Edge]]:
     sources = cfg["sources"]
     universe = tier1_loaders.load_ticker_universe(
         str(PROJECT_ROOT / sources["heatmap_universe"])
@@ -441,9 +449,18 @@ def collect_tier1(cfg: dict[str, Any], enable_direct_edge: bool = False) -> tupl
         n, e = tier1_loaders.load_break_news(
             str(PROJECT_ROOT / bn_dir), universe,
             digest_url_hashes=digest_hashes,
-            enable_direct_edge=enable_direct_edge,
+            # Direct relations now come from the source-deduplicated claim
+            # ledger below.  Agent agreement inside one thread is not an
+            # independent-source gate.
+            enable_direct_edge=False,
         )
         _log(f"break_news: +{len(n)} nodes / +{len(e)} edges")
+        all_nodes += n
+        all_edges += e
+
+    if claim_records is not None:
+        n, e = claim_ledger.to_graph(claim_records, universe)
+        _log(f"claim_ledger: +{len(n)} nodes / +{len(e)} corroborated direct edges")
         all_nodes += n
         all_edges += e
 
@@ -485,7 +502,10 @@ def main() -> int:
     ap.add_argument("--tier", default="1", help="Comma-separated: 1, 2, 3 (e.g. '1,2,3')")
     ap.add_argument("--dry-run", action="store_true", help="Print stats, write nothing")
     ap.add_argument("--full", action="store_true", help="Tier 3: process full backfill")
-    ap.add_argument("--enable-direct-edge", action="store_true", help="Phase 2: Enable provisional ticker-to-ticker edge loading")
+    ap.add_argument(
+        "--enable-direct-edge", action="store_true",
+        help="deprecated compatibility flag; source-deduplicated claim edges are always loaded in Tier 1",
+    )
     args = ap.parse_args()
 
     cfg = load_config()
@@ -494,13 +514,77 @@ def main() -> int:
 
     nodes: list[Node] = []
     edges: list[Edge] = []
+    claim_records: list[dict[str, Any]] = []
+    claim_quality: dict[str, Any] = {}
+    topic_payload: dict[str, Any] = {}
+    draft_payload: dict[str, Any] = {}
+
+    if args.enable_direct_edge:
+        _log("--enable-direct-edge is deprecated; claim-ledger gating is always active")
+
+    # Rebuild the ledger before Tier 1 collection so daily graph generation and
+    # link-digest refreshes cannot silently serve an older relationship set.
+    if "1" in tiers and enabled.get("tier1", True):
+        sources = cfg["sources"]
+        claim_records, claim_quality = claim_ledger.build_records(
+            PROJECT_ROOT / sources["break_news_dir"],
+            since_days=int(sources.get("claim_window_days", 45)),
+            anchor_date=datetime.now(timezone.utc),
+        )
+        claim_errors = claim_ledger.validate_records(claim_records)
+        if claim_errors:
+            _log("claim ledger validation failed: " + "; ".join(claim_errors[:8]))
+            return 1
+        if not args.dry_run:
+            claim_ledger.write_artifacts(
+                claim_records,
+                claim_quality,
+                PROJECT_ROOT / sources["claim_ledger"],
+                PROJECT_ROOT / sources["claim_quality"],
+            )
+        _log(
+            f"claim ledger: {len(claim_records)} claims / "
+            f"{claim_quality.get('counts', {}).get('claims_corroborated', 0)} corroborated"
+        )
+        topic_payload = topic_discovery.build_topics(
+            PROJECT_ROOT / sources["break_news_dir"],
+            claim_records,
+            since_days=int(sources.get("claim_window_days", 45)),
+            anchor_date=datetime.now(timezone.utc),
+            supply_chain_dir=PROJECT_ROOT / "nexus" / "supply_chains",
+        )
+        topic_errors = topic_discovery.validate_payload(topic_payload)
+        if topic_errors:
+            _log("topic discovery validation failed: " + "; ".join(topic_errors[:8]))
+            return 1
+        if not args.dry_run:
+            topic_discovery.write_payload(
+                PROJECT_ROOT / sources["topic_candidates"], topic_payload
+            )
+        _log(
+            f"topic discovery: {topic_payload.get('counts', {}).get('topics_total', 0)} observed / "
+            f"{topic_payload.get('counts', {}).get('chain_candidates', 0)} chain candidates"
+        )
+        draft_payload = evidence_drafts.build_drafts(topic_payload, claim_records)
+        draft_errors = evidence_drafts.validate_payload(draft_payload)
+        if draft_errors:
+            _log("evidence draft validation failed: " + "; ".join(draft_errors[:8]))
+            return 1
+        if not args.dry_run:
+            evidence_drafts.write_payload(
+                PROJECT_ROOT / sources["evidence_drafts"], draft_payload
+            )
+        _log(
+            f"evidence drafts: {draft_payload.get('counts', {}).get('drafts_generated', 0)} generated / "
+            f"{draft_payload.get('counts', {}).get('drafts_with_corroborated_edges', 0)} with corroborated edges"
+        )
 
     # Tier 2 stashes a narrative-attribution audit on a sentinel node id;
     # harvest it here before merge_nodes so it never reaches the rendered graph.
     tier2_audit: dict[str, Any] = {}
 
     if "1" in tiers and enabled.get("tier1", True):
-        n, e = collect_tier1(cfg, enable_direct_edge=args.enable_direct_edge)
+        n, e = collect_tier1(cfg, claim_records=claim_records)
         nodes += n
         edges += e
     if "2" in tiers and enabled.get("tier2", True):
@@ -609,6 +693,19 @@ def main() -> int:
             "prune_stats": prune_stats,
             "decay_strategies": cfg["decay_strategies"],
             "tier_confidence": cfg["tier_confidence"],
+            "claim_ledger": {
+                "claims_total": claim_quality.get("counts", {}).get("claims_total", 0),
+                "claims_corroborated": claim_quality.get("counts", {}).get("claims_corroborated", 0),
+                "corroborated_by_predicate": claim_quality.get("corroborated_by_predicate", {}),
+                "window_days": claim_quality.get("window_days"),
+            },
+            "topic_discovery": {
+                "topics_total": topic_payload.get("counts", {}).get("topics_total", 0),
+                "topics_validated": topic_payload.get("counts", {}).get("topics_validated", 0),
+                "chain_candidates": topic_payload.get("counts", {}).get("chain_candidates", 0),
+                "new_chain_candidates": topic_payload.get("counts", {}).get("new_chain_candidates", 0),
+            },
+            "evidence_drafts": draft_payload.get("counts", {}),
         },
     }
 
@@ -645,6 +742,7 @@ def main() -> int:
                 "tier2_narrative_attribution_audit": tier2_audit,
                 "narrative_attribution_in_graph": narrative_attribution,
                 "quarantined_narratives": sorted(quarantined),
+                "claim_ledger": graph["meta"].get("claim_ledger", {}),
             },
             indent=2,
             ensure_ascii=False,

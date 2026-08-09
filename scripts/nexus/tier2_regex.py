@@ -212,7 +212,7 @@ def collect(cfg: dict[str, Any], project_root: Path) -> tuple[list[Node], list[E
     narrative_scope: dict[str, list[str]] = cfg.get("narrative_sector_scope") or {}
     weights = cfg.get("tier2_weights") or {}
     w_primary = float(weights.get("primary_ticker", 1.0))
-    w_peer    = float(weights.get("peer_in_body", 0.35))
+    w_context = float(weights.get("context_ticker", 0.35))
 
     reports_dir = project_root / sources["reports_dir"]
     files = _scan_reports(reports_dir, since_days=30)
@@ -316,7 +316,7 @@ def collect(cfg: dict[str, Any], project_root: Path) -> tuple[list[Node], list[E
                     tk_id = make_ticker_id(sym)
                     get_or_make(tk_id, NodeType.TICKER.value, sym, date)
 
-                    edge_weight = w_primary if sym == primary_ticker else w_peer
+                    edge_weight = w_primary if sym == primary_ticker else w_context
                     edges.append(
                         Edge(
                             source=tk_id,
@@ -388,32 +388,23 @@ def collect(cfg: dict[str, Any], project_root: Path) -> tuple[list[Node], list[E
                     )
                 )
 
-        # ── Peer-mention pairs (paragraph-scoped to reduce noise) ───────
+        # ── Ticker co-mentions are evidence, not peer relationships ─────
+        # A report paragraph can mention a customer, benchmark, ETF, macro
+        # example, or valuation comparator.  The previous implementation
+        # promoted every such token to PEER_OF (e.g. MU↔LOW / MU↔PEG), which
+        # polluted topology and centrality.  Count these for the build audit,
+        # but emit no semantic edge.  True PEER_OF / COMPETES_WITH edges must
+        # come from a structured relation claim.
         if primary_ticker and ticker_word_re:
-            tk_main = make_ticker_id(primary_ticker)
-            get_or_make(tk_main, NodeType.TICKER.value, primary_ticker, date)
-            # Collect peers from any paragraph that ALSO contains primary
             for para in paragraphs:
                 if primary_ticker not in para and not _extract_ticker_from_filename(path) == primary_ticker:
                     continue
-                peers = {p for p in ticker_word_re.findall(para)
-                         if p in safe_universe and p != primary_ticker}
-                for peer in peers:
-                    tk_peer = make_ticker_id(peer)
-                    get_or_make(tk_peer, NodeType.TICKER.value, peer, date)
-                    edges.append(
-                        Edge(
-                            source=tk_main,
-                            target=tk_peer,
-                            type=EdgeType.PEER_OF.value,
-                            raw_frequency=1.0,
-                            weight=0.35,
-                            tier="tier2",
-                            confidence=0.7,
-                            last_seen=date,
-                            sources={source_tag},
-                        )
-                    )
+                co_mentions = {
+                    p for p in ticker_word_re.findall(para)
+                    if p in safe_universe and p != primary_ticker
+                }
+                for _ in co_mentions:
+                    bump_audit("ticker_co_mention_suppressed", False)
 
     # Stash audit counters on the first node's metadata for build_graph to harvest
     # (clean piggyback — build_graph reads this via a known sentinel id)

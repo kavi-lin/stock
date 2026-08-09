@@ -1,6 +1,6 @@
 {
   "signature": "中性/區間|software_momentum/value_defensive_rotation/event_risk_guard",
-  "ts": "2026-08-08T04:28:26+00:00",
-  "briefing_zh": "regime 判定中性／區間：盤中分數 32 偏強、市寬 66.5% 上漲，但近 25 日仍有 6 個出貨日，曝險上限維持 40-60%，單日反彈不構成加碼理由。主旋律一是軟體／平台順勢，族群均漲 3.07%、17 漲 4 跌明顯領先，觀察 TEAM、PLTR、NOW、WDAY、EPAM，半導體 +2.13% 可作交叉驗證。二是資金向 Materials、Healthcare、Industrials 擴散，三者市寬皆逾 70%、5 日預測為正，屬輪動擴散而非防禦性撤退，Technology 與 Consumer Discretionary 同列 WARM。風險提醒：VIX 14.86 偏低但 SKEW 134.7 偏高、Fear & Greed 63.5 落在貪婪區，尾部風險定價不便宜，二元事件前先控部位。",
+  "ts": "2026-08-09T08:10:45+00:00",
+  "briefing_zh": "Regime 維持中性／區間，曝險上限 40-60%，不因盤中偏強而破格。市寬 66.5% 上漲、盤中分數 32，但近 25 日出貨日已累積 6 天，性質偏反彈而非趨勢確立。主旋律有二：一是軟體／平台順勢，族群均漲 3.07%、17 漲 4 跌，連三日站在 favor 側，觀察 TEAM、PLTR、NOW、WDAY、EPAM；二是資金輪動至 Materials、Healthcare、Industrials，三者 pulse 轉 mod_bull、五日預估 1.17-1.32、市寬皆逾 70%，接棒品質比半導體乾淨。風險提醒：VIX 14.86 偏低、skew 134.7 偏高、Fear & Greed 63.5 落在貪婪區，二元事件前先把部位控住，別在低波動環境下把曝險用滿。",
   "model_used": "claude"
 }

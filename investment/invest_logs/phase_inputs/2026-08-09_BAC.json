@@ -1,0 +1,59 @@
+{
+  "bundle_version": "P5-INPUTS/1.0",
+  "ticker": "BAC",
+  "date": "2026-08-09",
+  "phase0": {
+    "regime_confidence": 0.72,
+    "market_top_zone": "Yellow",
+    "ftd_state": "FTD_CONFIRMED",
+    "breadth_composite": 76,
+    "vix": 14.9,
+    "fred_verdict": "Soft Landing",
+    "real_rate_pct": 2.41,
+    "hot_sectors": ["Industrials", "Financials", "Energy"],
+    "cold_sectors": ["Technology", "Real Estate", "Consumer Staples", "Utilities"]
+  },
+  "lanes": {
+    "fundamentals": {
+      "signal": "BUY", "score": 2.0, "confidence": 0.72,
+      "phase0_alignment": "ALIGNED",
+      "key_factors": ["Forward EPS growth 34.1%", "Clean positive cash conversion", "Altman danger flag"],
+      "risk_flags": ["Altman Z-score 0.16 處於 danger 區", "FCF 與槓桿指標對銀行業可能失真"]
+    },
+    "sentiment": {
+      "signal": "HOLD", "score": 0.83, "confidence": 0.85,
+      "phase0_alignment": "ALIGNED",
+      "key_factors": ["Greed supports market sentiment", "Negative MSPR offsets optimism", "Low short interest supports"],
+      "risk_flags": ["Congressional trades net bearish", "Institutional signal unavailable"]
+    },
+    "news": {
+      "signal": "BUY", "score": 1.5, "confidence": 0.76,
+      "phase0_alignment": "ALIGNED",
+      "key_factors": ["Risk-on favors financials", "USAA technology deal reduces friction", "One-month revisions down 2.94%"],
+      "risk_flags": ["PT revisions fell 2.94% in one month", "Compliance and employee-health costs remain concerns"],
+      "analyst_consensus": "INSUFFICIENT_DATA"
+    },
+    "technical": {
+      "signal": "BUY", "score": 1.5, "confidence": 0.78,
+      "phase0_alignment": "ALIGNED",
+      "key_factors": ["Stage 2 above all averages", "Price nearing 52-week high", "Momentum lacks volume confirmation"],
+      "risk_flags": ["MACD histogram is falling", "Volume is only 0.69x average"]
+    },
+    "valuation": {
+      "signal": "HOLD", "score": 0.0, "confidence": 0.65,
+      "phase0_alignment": "NEUTRAL",
+      "key_factors": ["Pack fair value near market price", "Six anchors across three families", "Wide anchor dispersion caps confidence"],
+      "risk_flags": ["DCF anchors show severe dispersion", "No curated range peer cohort"]
+    }
+  },
+  "burry": {
+    "score": 60.8,
+    "label": "VALUE_BONUS",
+    "veto_flag": false,
+    "components": {"fcf_yield_pct": 20.78, "ev_ebit": null, "debt_to_equity": null, "pct_below_52w_high": 0.13, "insider_net": "SELL"},
+    "narrative": "FCF yield 20.8%，距 52 週高點約 0%，insider=SELL。"
+  },
+  "phase3": {"final_score": 0.7789, "final_decision": "HOLD", "final_action": "CANCEL"},
+  "phase4": {"position_size_pct": 0.0, "analysis_price": 63.17},
+  "red_team": {"verdict": "STRONG_COUNTER"}
+}

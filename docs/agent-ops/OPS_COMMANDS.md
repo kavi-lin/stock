@@ -36,11 +36,13 @@ python3 skills/valuation-modeler/scripts/comps.py <T> [--xlsx]                  
 
 ```bash
 python3 investment/scripts/compute_price_framework.py --from-file <inputs.json>  # Phase 2.4 價格框架引擎（0 LLM 算術；--self-assemble 自組輸入；--no-fetch 跳過 FMP vol）
-python3 investment/scripts/decision_engine.py --from-file /tmp/<T>_p3.json       # Phase 3 決策引擎（0 LLM 算術；輸出 calculation_steps 整塊 verbatim 抄寫）
+python3 investment/scripts/decision_engine.py --from-file /tmp/<T>_p3.json       # Phase 3 決策引擎（0 LLM 算術；calculation_steps 整塊 verbatim 抄寫，V4.117.0 起 validator §5l 拿 invest_logs/decision_engine/<T>_decision_engine.json 對答案）
 python3 investment/scripts/decision_engine.py --phase 4.6 --from-file /tmp/<T>_p46.json  # Phase 4.6 decision cap 套用（收 Phase 4 sizing 後）
 python3 investment/scripts/replay_decision_engine.py                             # engine × history 全量 replay + 排除清單 → reports/decision_review/DECISION_ENGINE_REPLAY_<date>.md
 python3 investment/scripts/inject_report_facts.py                                # Phase 5 Step 4.5：報告佔位符 → history.json verbatim 注入（0 LLM、idempotent）
+python3 investment/scripts/append_session_export.py --from-file /tmp/<T>_session.json [--replace-last]  # Phase 5 Step 1：寫入 history.json 的唯一合法路徑（蓋 export_provenance）；修已寫入的 session 用 --replace-last，不要再 append 一次
 python3 investment/scripts/register_thesis.py                                    # Phase 5.5 thesis register（idempotent、non-fatal）
+python3 investment/scripts/audit_gate_compliance.py <scan_logs/....log>          # 判讀一次 invest run 對 V4.116.x/V4.117.0 五道閘的實際行為（唯讀）。只掃引擎執行的指令、不掃它讀到的檔案內容；Gate 3 需在該 run 剛跑完時看（artifact 是單槽快取）
 python3 investment/scripts/backtest_postmortem.py                                # protocol 決策回測
 python3 investment/scripts/shadow_report.py                                      # shadow 讀出端 → reports/SHADOW_REPORT_<date>.md（唯讀）
 python3 investment/scripts/forward_expectations.py --ticker <T> --self-assemble  # 前瞻預期引擎（shadow；0 LLM）
@@ -74,6 +76,10 @@ python3 sector/scripts/sector_score_calculator.py --audit-decisions
                                                                  # 重放歷史 decision 檔（唯讀，不產 shadow 樣本）
 python3 scripts/nexus/build_graph.py --tier 1,2 --dry-run        # Nexus 圖譜 dry-run（無 LLM）
 python3 scripts/nexus/build_graph.py --tier 1,2,3 --full         # 全量重建（Tier 3 需 ANTHROPIC_API_KEY）
+python3 -m scripts.nexus.claim_ledger --check                    # relation source 去重／晉升閘 validator
+python3 -m scripts.nexus.topic_discovery --check                 # 主動 topic queue／chain candidate validator
+python3 -m scripts.nexus.source_packets --check                  # source/excerpt ID、hash、逐關係證據 validator
+python3 -m scripts.nexus.source_packets --fetch-topic topic:...  # 只抓指定 topic；零 LLM
 python3 scripts/link_digest/build_artifacts.py <judgment.json>   # Link Digest fan-out（rc 0/1/2）
 python3 news/scripts/news_event_store.py pending                 # 列出待審 event_id
 python3 news/scripts/news_event_store.py project --date YYYY-MM-DD
@@ -97,7 +103,10 @@ python3 scripts/_shared/model_router.py --status        # 多模型預算/cooldo
 
 | 你改了什麼 | 必跑 |
 |---|---|
+| Nexus claim ledger / topic discovery / evidence drafts / graph projection / Radar UI | `python3 -m pytest -q tests/test_nexus_claim_ledger.py tests/test_nexus_topic_discovery.py tests/test_nexus_evidence_drafts.py tests/test_nexus_frontend_contract.py tests/test_break_news_v4.py tests/test_supply_chain_enrichment.py` + `node --check Dashboard/page-graph.js` + `python3 scripts/nexus/build_graph.py --tier 1,2 --dry-run` + claim/topic/draft 三支 `python3 -m scripts.nexus.<module> --check` validator（全部 rc=0）。source_count 必須按 canonical URL；draft node 只能來自 source topic，且永遠 decision-ineligible。|
+| Nexus source packet / bounded gap-fill runner / proposal ledger | `python3 -m pytest -q tests/test_nexus_source_packets.py tests/test_nexus_gap_fill.py` + `python3 tests/test_broker_gate.py` + source packet / gap-fill 兩支 `python3 -m scripts.nexus.<module> --check` + `node --check Dashboard/page-graph.js`。測試必證明：source/excerpt hash 與 ownership 錯會紅、每項需 fetched-page text、外加 URL 會紅、一 topic 最多一個 spent turn、blocked turns=0 可再選、base + packet digest drift 會紅、proposal 不得改 immutable edge；Claude profile 必為 Sonnet / max-turns 1 / no-tools / strict-MCP，且仍走 governed chain、不 fallback。|
 | `compute_price_framework.py` / valuation projection validator | `python3 investment/scripts/test_compute_price_framework.py` + `python3 investment/scripts/test_valuation_pack_consistency.py`（兩者 rc=0；後者含故意 drift 的 rc=1 fixture）。前者含 V4.88.0 staged regression：`--stage quant` + `--stage mhp` 合併輸出必須與單發模式逐位元一致（只豁免 `valuation_pack.built_at`），改到分段/合併路徑必紅。另含 V4.116.0 `script_not_run` 判別（`mark_unrun_anchor_scripts`）：artifact 缺／過期 → `script_not_run`，artifact 新鮮 → 維持原 reason，anchor 有值 → 完全不碰 |
+| `validate_session_export.py` 的 `valuation_reviewer_gate` / technical rubric 兩道閘、`technical-analyst/analyze.py` 的 payload cache | `python3 investment/scripts/test_validate_session_export_gates.py`（rc=0）。走**真 validator subprocess** + schema doc 的 FULL EXAMPLE fixture。**cutoff 日期在測試裡寫死、不讀被測常數**——第一版讀了，於是把 cutoff 推到 2099 時測試照樣全綠（同源對照，MAINTENANCE §2c）|
 | `validate_phase0.py` 的新鮮度閘 | `python3 investment/scripts/test_validate_phase0.py`（rc=0）。鎖住「`scan_date` 過舊／未來 → rc=1」與「內容與**較舊**快照除 `scan_date` 外相同 → rc=1」。**週末案例是刻意留的**：週六與週日都讀週五收盤，快照可以合法相同，所以雙胞胎必須比新鮮度窗口更舊才算證據 |
 | `fwd_earnings_discounted` 的四個 clamp 常數（`FWD_PE_CLAMP` / `FWD_DISCOUNT_CLAMP` / `FWD_MIN_ANALYSTS` / `FWD_MAX_HORIZON_YEARS`）| `python3 investment/scripts/test_compute_price_framework.py` + `python3 investment/scripts/test_shadow_report.py`（兩者 rc=0）。**改 clamp 值之前先跑 `python3 investment/scripts/shadow_report.py` 看校準區塊**：判準是 live cohort 的市場隱含 PE P33–P66 有沒有包住現行上限。live cohort 不足 `FWD_PE_CALIB_MIN_N` 時判準會回 `accumulating`——那是「還不知道」，不是「沒問題」。**不可自動跟隨中位數**（泡沫期會讓上限一路上移），改值一律 user 核准 |
 | `valuation_reviewer_gate.py` / `peer_cohorts.py` 的 discovery cache | `python3 investment/scripts/test_valuation_reviewer_gate.py`（rc=0）+ `python3 skills/valuation-modeler/tests/test_comps.py`。鎖住「5 條 trigger 各自獨立命中、`transition_case_active` 是唯一 mandatory、TTL 30d 邊界、discovered 永不覆寫人工核准的 `config/peer_cohorts.json`、artifact 不可用 rc=1」 |
@@ -105,6 +114,7 @@ python3 scripts/_shared/model_router.py --status        # 多模型預算/cooldo
 | `forward_expectations.py` 核心 | `python3 investment/scripts/test_forward_expectations.py`（rc=0 為準） |
 | `inject_report_facts.py` | `python3 investment/scripts/test_inject_report_facts.py` |
 | `decision_engine.py` / Phase 3 決策數學 / `validate_session_export.py` §13 | `python3 investment/scripts/test_decision_engine.py` + `python3 investment/scripts/validate_session_export.py`（兩者 rc=0）；改到 cascade/threshold 再跑 `replay_decision_engine.py` 看 replay 是否仍 rc=0 |
+| export 五道紀律閘：`valuation_reviewer_gate` / technical rubric / `export_provenance` / `pt_revision_momentum` / `calculation_steps` parity | `python3 investment/scripts/test_validate_session_export_gates.py`（rc=0）。**動到 `append_session_export.py` 的蓋章或 digest 排除清單、`decision_engine.py` 的 artifact 落地、或任一 cutoff 常數時必跑**——這五道都是「規則寫了但沒接線」修回來的，而沒接線的閘沒有症狀。合約含**接線斷言**（把 check 從 `main()` 拆掉要會紅），因為只驗行為的版本擋不住 V4.116.2 那種「閘存在、從不被呼叫」|
 | `trade_plan_builder.py` / Phase 4 sizing 鏈 / `validate_session_export.py` §14 | `python3 investment/scripts/test_trade_plan_builder.py` + `python3 investment/scripts/validate_session_export.py`（兩者 rc=0）；改到 sizing 鏈段序或 FTD/fragility 表再跑 `replay_trade_plan.py` 看三個 cohort 是否仍 rc=0（`current_rule_mismatched` 必須為 0） |
 | `render_investment_report.py` / Phase 5 MD 渲染 / `inject_report_facts.py` 的 6 個 FACTS renderer | `python3 investment/scripts/test_render_investment_report.py`（rc=0）。鎖住「golden 逐位元穩定 + FACTS 區塊與 inject_report_facts 同源、decision-lock 數字全部到頁、bundle↔history 12 個重疊欄位逐一漂移偵測、Step 1.5 覆寫不誤判、`--polish` 三道守衛 fail-open、輸出過 `validate_markdown_export.py`」。改了 `inject_report_facts.py` 的 renderer 也要跑這支——報告與注入共用同一組函式 |
 | `session_export_version` / export schema 版本閘 / `phase5_export_schema.md` 的 FULL EXAMPLE | `python3 investment/scripts/test_session_export_schema.py`（rc=0；fixture 直接從 schema doc 的 FULL EXAMPLE 解析，doc 壞掉會紅）。升版號時同時檢查 `replay_decision_engine.py` / `replay_trade_plan.py` 覆蓋數沒歸零 |

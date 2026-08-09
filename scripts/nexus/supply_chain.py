@@ -45,6 +45,7 @@ _OVERRIDE_STATUS = {"confirmed", "flagged", "none"}
 PROMPT_FILE = _ROOT / "scripts" / "nexus" / "prompts" / "supply_chain_system.md"
 UNIVERSE_FILE = _ROOT / "Dashboard" / "heatmap_universe.json"
 NEXUS_FILE = _ROOT / "Dashboard" / "nexus_graph.json"
+NEXUS_TOPICS_FILE = _ROOT / "Dashboard" / "nexus_topics.json"
 REPORTS_DIR = _ROOT / "reports"
 NEWS_LOG_DIR = _ROOT / "news" / "news_logs"
 BREAK_NEWS_DIR = _ROOT / "news" / "break_news_logs"
@@ -625,21 +626,42 @@ def _nexus_index() -> tuple[set[str], dict[str, dict]]:
 
 
 def nexus_themes() -> list[str]:
-    """Theme / narrative node labels from the Nexus graph — quick-pick options."""
+    """Evidence-ranked discovery topics followed by graph theme quick-picks."""
+    seen, out = set(), []
+
+    # ticker_centric graph output contains no standalone theme nodes, so the old
+    # implementation returned an empty datalist.  The proactive topic queue is
+    # now the primary source and puts uncovered supply-chain candidates first.
+    try:
+        topics = json.loads(NEXUS_TOPICS_FILE.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        topics = {}
+    for bucket in ("new_chain_candidates", "chain_candidates", "topics"):
+        for topic in topics.get(bucket) or []:
+            lbl = str(topic.get("label", "")).strip()
+            key = lbl.casefold()
+            if lbl and key not in seen:
+                seen.add(key)
+                out.append(lbl)
+
     try:
         d = json.loads(NEXUS_FILE.read_text(encoding="utf-8"))
     except (json.JSONDecodeError, OSError):
-        return []
-    seen, out = set(), []
+        return out
     for n in d.get("nodes", []):
-        if n.get("type") not in ("theme", "narrative"):
-            continue
-        lbl = str(n.get("label", "")).strip()
-        key = lbl.lower()
-        if lbl and key not in seen:
-            seen.add(key)
-            out.append(lbl)
-    return sorted(out)
+        labels = []
+        if n.get("type") in ("theme", "narrative"):
+            labels.append(n.get("label"))
+        if n.get("type") == "ticker":
+            labels.extend((n.get("metadata") or {}).get("themes") or [])
+            labels.extend((n.get("metadata") or {}).get("narratives") or [])
+        for raw in labels:
+            lbl = str(raw or "").strip()
+            key = lbl.casefold()
+            if lbl and key not in seen:
+                seen.add(key)
+                out.append(lbl)
+    return out
 
 
 def _heat(mentions: int) -> str:
@@ -1623,7 +1645,7 @@ def _refresh_graph_tier1() -> bool:
         return False
     try:
         r = subprocess.run(
-            [sys.executable, str(builder), "--tier", "1", "--enable-direct-edge"],
+            [sys.executable, str(builder), "--tier", "1"],
             cwd=str(_ROOT), capture_output=True, text=True, timeout=300)
         return r.returncode == 0
     except (subprocess.SubprocessError, OSError):

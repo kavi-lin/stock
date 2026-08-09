@@ -73,6 +73,7 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts._shared import broker_gate  # noqa: E402
+from scripts.break_news import llm_drivers  # noqa: E402
 from scripts._shared.broker_gate import (  # noqa: E402
     BrokerError, BrokerRefused, BrokerUnavailable,
 )
@@ -88,6 +89,31 @@ _QUOTA_RE = re.compile(
     r"usage limit|rate.?limit|rate_limit|\b429\b|too many requests|"
     r"resource[ _]exhausted|quota|insufficient_quota|overloaded|"
     r"out of (?:credit|quota)", re.I)
+
+# Text-only roles must not inherit Claude Code's agentic runtime. A bare
+# `claude -p` loads tools/MCP and may start exploring even when the contract asks
+# for one JSON object; the Nexus trial hit its 240s hard wall on exactly that
+# path. Keep this policy next to the shared dispatcher so broker governance and
+# token settlement still wrap the call.
+_CLAUDE_TEXT_ONLY_PROFILES = {
+    "nexus_gap_fill": {
+        "model": "sonnet",
+        "max_turns": 1,
+        "strict_mcp": True,
+        "no_tools": True,
+    },
+}
+
+
+def _run_model_for_role(
+    model: str, role: str, system_prompt: str, user_prompt: str, timeout: int,
+) -> LLMResult:
+    profile = _CLAUDE_TEXT_ONLY_PROFILES.get(role) if model == "claude" else None
+    if profile:
+        return llm_drivers.run_claude(
+            system_prompt, user_prompt, timeout=timeout, **profile,
+        )
+    return run_llm(model, system_prompt, user_prompt, timeout=timeout)
 
 
 # ─────────────────────────── usage state ────────────────────────────────────
@@ -875,7 +901,9 @@ def _run_chain(preferred: str | None, role: str, system_prompt: str,
             model = broker_gate.MODEL_FOR_PROVIDER.get(lease.provider, model)
 
         try:
-            result = run_llm(model, system_prompt, user_prompt, timeout=timeout)
+            result = _run_model_for_role(
+                model, role, system_prompt, user_prompt, timeout,
+            )
         except BaseException:
             _release(lease, "the call raised before producing a result")
             raise

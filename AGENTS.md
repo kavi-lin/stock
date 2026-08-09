@@ -87,7 +87,7 @@ Treat every LLM invocation as consuming a limited rolling five-hour quota and ad
 |---|---|---|
 | 戰術雷達（1-15 天） | `skills/thematic-screener/data/recommendations/<DATE>.json` | `skills/MARKET_INDEX.md`、`docs/plan_short.md` |
 | Break News（daemon） | `news/break_news_logs/bn_*.json`、`/break-news.html` | 手動指令 `docs/agent-ops/OPS_COMMANDS.md` §6 |
-| Nexus 知識圖譜 | `Dashboard/nexus_graph.json`、`/graph.html` | `docs/agent-ops/OPS_COMMANDS.md` §5 |
+| Nexus 知識圖譜／主動供應鏈 Radar | `Dashboard/nexus_graph.json`、`nexus_topics.json`、`nexus_quality.json`、`nexus/claim_ledger.jsonl`、`/graph.html` | `docs/agent-ops/OPS_COMMANDS.md` §5 |
 | Link Digest（News 頁貼 URL） | `reports/*_link_digest.md` + judgment.json | `news/link_digest_protocol.md` |
 
 **全域紀律（不可違反）**：以上自動層 + 回測全部是**探索層**——產出**永不**進入 investment_protocol 的決策（buy_threshold / position_size / verdict）。Break News 的 Claude × Gemini 分歧是刻意設計，divergence_note 是訊號不是 bug。Nexus Tier 3 LLM 找到的新實體先標 `provisional`，需 ≥3 份獨立報告才晉升一級節點。`skills/short-term-target/config/weights.yaml` 只由使用者手動校準，任何 agent 不得自動覆寫。

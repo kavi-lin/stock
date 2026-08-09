@@ -18,6 +18,51 @@
         "event_risk_guard"
       ],
       "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-08-08T16:00:25+00:00",
+      "strategy_ids": [
+        "software_momentum",
+        "value_defensive_rotation",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-08-08T17:03:44+00:00",
+      "strategy_ids": [
+        "software_momentum",
+        "value_defensive_rotation",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-08-08T17:14:30+00:00",
+      "strategy_ids": [
+        "software_momentum",
+        "value_defensive_rotation",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-08-09T00:25:08+00:00",
+      "strategy_ids": [
+        "software_momentum",
+        "value_defensive_rotation",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-08-09T00:43:13+00:00",
+      "strategy_ids": [
+        "software_momentum",
+        "value_defensive_rotation",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
     }
   ]
 }

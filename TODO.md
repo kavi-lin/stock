@@ -1,8 +1,84 @@
 # INTEL COMMAND — Backlog & Tasks
 
-> **Last Updated**: 2026-08-09 (v4.116.2)
+> **Last Updated**: 2026-08-09 (v4.121.1)
 
 ---
+
+## ✅ Done (v4.121.1) — Claude text-only timeout hardening
+
+- [x] `nexus_gap_fill` 固定 Sonnet、單 turn、no tools、strict MCP，仍走 broker。
+- [x] hard deadline 360s、JSON output budget ≤1,500 tokens、單 provider 不 fallback。
+- [x] role profile kwargs + governed chain 接線測試；本版不花模型額度。
+- [ ] 若要 live smoke test，選 `data_center_infrastructure`；這會消耗該 topic 唯一 inference turn，需使用者另行執行。
+
+## ✅ Done (v4.121.0) — Source-ID evidence packet
+
+- [x] canonical source ID、excerpt ID/hash、claim extract 與 fetched page provenance 分流。
+- [x] 關係級 evidence tier；source cap 後重算；validator 鎖 source/excerpt ownership 與 aggregate quality counts。
+- [x] gap-fill closed packet：禁止新增 URL，每項需 fetched-page excerpt，draft + packet 雙 digest。
+- [x] `data_center_infrastructure` 真實抓頁：7/16 fetched、19 excerpts；Radar 顯示品質數據。
+- [ ] 下一次模型試跑前先確認目標 packet 有至少 2 個可用 fetched domains；仍不得重跑 NAND。
+- [ ] Valid proposal 出現後才設計 human-review → curated YAML promotion；目前 proposal 數為 0。
+
+## ✅ Done (v4.120.0) — Bounded gap-fill runner
+
+- [x] 單 topic / 單 inference / 無 fallback；base digest、原子 ledger、一次性 spend gate。
+- [x] Proposal caps、逐項 URL、跨 domain、不可覆寫 base、不可進 decision validators。
+- [x] Radar 顯示 proposed / failed / blocked 與 turn/provider 稽核資訊。
+- [x] `topic:nand` 真實一 turn 試跑：Claude 240s timeout，正確記 failed 並停止，未重試。
+- [x] 下一步已於 v4.121.0 改為 closed source packet；NAND 維持不得重跑。
+- [x] promotion 前置移至 v4.121.0 backlog；目前 proposal 數仍為 0。
+
+## ✅ Done (v4.119.0) — 高分候選 evidence-only 草稿
+
+- [x] 最高分 12 個 uncovered topics 自動轉為 upstream / intermediate / downstream / unresolved 草稿，零 LLM。
+- [x] claim artifact intersection、evidence-level、known gaps、decision isolation 與 validator。
+- [x] Tier 1 自動重建；Radar draft-ready 排序、metric、badge 與 detail layer view。
+- [x] **下一步**：bounded gap-fill runner 與一次性 ledger 已於 v4.120.0 完成；首輪 timeout 透明保留，不重試。
+- [ ] topic alias / merge / split 與 syndicated-source family 偵測，避免相近名稱重複占 queue。
+
+## ✅ Done (v4.118.1) — Nexus 淺色主題
+
+- [x] 圖譜畫布、控制面板、Radar 卡片與 metrics 跟隨全站 light/dark theme。
+- [x] Canvas 節點、連線、標籤及 tooltip 使用各自的淺色／深色 palette，theme 切換即時重繪。
+- [ ] **待 user 實看**：淺色模式的卡片密度與 ego graph 對比；目前 browser runtime 無可用 instance。
+
+## ✅ Done (v4.118.0) — Nexus 證據型供應鏈雷達第一輪
+
+- [x] Claim ledger：URL/domain 去重、canonical triple、promotion gate、direction-conflict audit、quality JSON、validator。
+- [x] 正式 direct relations 接回每日 Tier 1；移除 regex ticker 共現→`PEER_OF` 污染。
+- [x] 零 LLM topic discovery：state/score/why-now、chain candidate、existing-chain coverage gap。
+- [x] Knowledge Graph 預設 Radar + topic ego focus + relation evidence link；供應鏈 quick-pick 接 proactive queue。
+- [x] 44 tests、JS syntax、真 build、兩支 validator、三個真 server endpoint 全綠。
+- [ ] **待 user 實看**：`/graph.html` Radar 卡片密度、topic 點入後 ego graph 可讀性、右側 evidence link。
+- [x] **下一波第一步**：validated candidate 自動生成 evidence-only layered draft（v4.119.0）。後續 bounded gap-fill 與 alias/syndication 見上方新區塊。
+
+## ✅ Done (v4.117.0) — 三道閘：export 從「模型打字出來的」變成「工具產出的」
+
+- [x] **`export_provenance`**：`append_session_export.py` 蓋涵蓋決策內容的 sha256；`export_date >= 2026-08-09` 缺 stamp 或 digest 不符 → rc=1。digest 排除 `det_shadow` / `lane_contract` / `thesis_id` / `thesis_registered_at` / `_` 開頭鍵，核可鏈用**真的 `apply_det_shadow.py`** 跑 round-trip 鎖住。
+- [x] **`news_lane.pt_revision_momentum` 必填**（同日期閘）。`UNKNOWN` 要帶 `unavailable_reason`；`UP`/`DOWN` 要帶數值 `delta_1m`；把 `news_lane` 設 null 也繞不過（lane 有評分就代表跑過）。
+- [x] **`calculation_steps` 對 engine artifact**：`decision_engine.py --phase 3` 落地到 `invest_logs/decision_engine/<T>_decision_engine.json`，validator §5l 逐欄遞迴比對（浮點容差 1e-6），artifact 缺席/過期/ticker 不符則靜默。
+- [x] `test_validate_session_export_gates.py` 擴充：含**接線斷言**（把 check 從 `main()` 拆掉要會紅）。十個種回的 bug 全部驗過會紅。
+- [x] 殘留掃描抓到 artifact 路徑重複定義 → 改成從 `decision_engine` import（原本改一邊會讓閘永久靜音而非報錯）。
+
+- [x] **agy 的 invest 紀律軸結案（2026-08-09 閘後同日 BAC 三跑實測）**：agy 手寫 history.json 從 7+6 次 → **0**，`--replace-last` 用了 2 次，`pt_revision_momentum` 填真數字 `-2.94` 沒走 `UNKNOWN`；codex 一次過 0 輪 drift。兩家 Gate 1/2/3 全過。
+- [x] **Technical rubric 閘證明有決策價值**：agy 閘後與 codex 在同一 hint 下都給 1.5，證明閘前那個 2.5 是異常值；實跑 decision_engine 確認單那 1.0 分把 STAGED_ENTRY 翻成 BUY（1.2822 vs 門檻 1.2）。
+- [ ] **agy／codex 的穩定度軸未結案 —— 這是升正式候選唯一還缺的**。現況：agy 在 BAC 兩次 News 差 1.3、NOW 兩次差 1.5；agy vs codex 在 BAC 決策直接分歧（進場 4.25% vs HOLD 0%）。但 codex n=1，跨引擎分歧不等於某一家不穩。
+  **測試設計**：挑 **2 支 final_score 遠離 0.8/1.2 門檻**的股票（BAC 的 0.78–1.11 正好壓在邊界上，會放大雜訊），每家每支連跑 3 次 = 12 runs。同日跑可讓 phase0/technical 快取複用，輸入才真的固定。判準：decision 是否 3/3 一致 + lane score 全距。
+  **成本**：agy ~4-5 min／run、codex ~12 min／run → 純執行約 1.7 小時。
+- [ ] **News lane 是唯一「script 算得出計分成分、卻沒有任何東西接住」的 lane —— 這是 News 全距最寬的結構性原因**（2026-08-09 BAC 三跑診斷）。
+  **證據（不是輸入變了）**：三次引用同一組事實（USAA 和解、近新高、PT −2.94%），agy 兩次 reasoning 幾乎逐字相同（"despite modest analyst PT trim" / "despite minor 1M PT trims"）卻差 1.3 分。實跑 `fetch.py BAC`：`analyst_consensus.consensus = "Buy"` → protocol §News 表給 **+1**；`pt_revision_momentum = DOWN −2.94%` → **沒破 −3% 門檻 → 0**。所以 rubric 導得出的基準是 **+1**，三次分別是 +0.2 / **+1.5** / +0.5 的自由心證加權。**同一則 USAA 和解，一次值 0.2 分、一次值 1.5 分。**
+  **錨盤點**：Valuation 有硬閘（lane 必須等於 pack）、Technical 有 `rubric_hint` 硬閘（V4.116.3）、Sentiment 有 `sentiment_det` shadow + 明訂翻預設判準、**News 的兩個計分成分只活在 stdout，`fetch.py` 連 `rubric_hint` 欄位都沒有**。這正是 Technical 在 V4.116.3 之前的狀態。
+  **三跑全距**：fundamentals 0.50 / sentiment 0.67 / technical 1.00（那個 2.5 已被閘攔）/ **news 1.30**。⚠️ 但**不能推出「有錨就窄」**——Fundamentals 沒有 `rubric_hint` 卻最窄，因為它的輸入本來就是硬數字。準確的說法是：**News 天生詮釋空間最大，而它偏偏是唯一連可導出的那部分都沒被接住的**。n=3，是觀察不是證明。
+  **修法（V4.116.3 的翻版）**：`fetch.py` 落地 payload → 從 `analyst_consensus` + `pt_revision_momentum` 導出 `rubric_hint` → validator 對帶外未宣告的紅。
+  **未決：帶寬**。Technical 的帶由 stage 結構決定、很緊；News 的自由心證**是合理的**（USAA 和解確實該加分），帶要寬到容納真新聞、窄到擋住「同一則新聞這次 1.5 下次 0.2」。初步建議 `base ±1`（BAC 例：base +1 → 帶 [0,2]，agy 1.2 與 codex 1.5 在帶內、2.5 要寫理由），但**這是會影響決策的參數，不應由 agent 自定**。
+  **相依**：先跑 MU/AAOI 那 12 次拿到各 lane 的 σ，**帶寬用量出來的數字定，不要用挑的**。
+  另：同一個 lane 的 `decision_point_days` 三跑是 21 / **66** / 21，同樣的鬆散，同一道閘可以一起處理。
+
+- [ ] **`valuation_reviewer_gate` 的 `triggers_fired` 沒對照 `triggers` 表**：agy 15:03 那筆寫 `triggers_fired: []` 但 `triggers.no_peer_cohort: true`，且缺 `shadow_only`（validator 只 warning）。同一次 run 的 11:48 版本反而是對的。跑了 script 但抄錯 —— 若 `valuation_reviewer_gate.py` 有落地輸出，可用同 Gate 3 的 artifact 比對法補第四道閘。
+- [ ] **`audit_gate_compliance.py` 的 log 形狀支援**：目前認得 gemini（`step_update.tool_info.parameters.CommandLine`）與 codex（`item.command`）兩種；claude 的 log 形狀未驗，會落到「掃全文 + 印警告」的退路。
+- [ ] **`replay_decision_engine.py` 對 NOW EXPERIMENT 報 mismatch**：stored 1.0855 vs replay 0.977，stored final_score 用它自己的輸入重算不出來。該筆已隔離、不進決策日曆，待 triage。
+- [ ] **`decision_point_days` 無閘**：同檔同日 agy 兩次給 21 / 80。它決定 watch_conditions 的 review trigger，但沒有可比對的 script 產出物，補閘需要先有 deterministic 來源。
 
 ## ✅ Done (v4.116.1) — 閘硬化 + 前導閘門紀律 + runner 硬化，兩個引擎實測驗證
 
@@ -13,7 +89,7 @@
 - [x] **實測**：codex/PLTR rc=0 11m 全綠；agy/NOW rc=0 4m，四道閘全部生效（script 有跑、權重不再坍縮、phase0 真重跑、shell 汙染 0、position_size 3.53%）。
 
 - [x] **`PROTOCOL_VALIDATORS` 補上 `invest`**（v4.116.2）+ `PROTOCOL_REQUIRED_ARTIFACTS` 補 invest 報告（validator 讀最後一筆，run 沒寫入會驗到上一個 session）。測試對照 CLAUDE.md 記載的三道 gate 逐一斷言已註冊。
-- [ ] **`valuation_reviewer_gate.py` 無閘可管**：不產 anchor 所以不在 `SCRIPT_SOURCED_ANCHORS`。codex 跑 5 次、agy 兩次皆 0 次。要驗得靠它的輸出檔或 export 欄位。
+- [x] ~~**`valuation_reviewer_gate.py` 無閘可管**~~ → v4.116.3 解決：改驗 export 欄位（`export_date >= 2026-08-09` 缺 block → rc=1）。閘後 agy/BAC 確實跑了。
 - [ ] **稽核推算 $121.85 已被推翻**：第二次兩支 script 都跑了，`extreme_overvalued` 沒變且更空（$64.37 / −48.45%）。NOW 的估值判定不是「跳過 script 造成的假象」。
 
 ## ✅ Done (v4.116.0) — 三道「說綠但沒驗到」的閘（稽核 agy 首次 invest 挖出，非引擎特有）
@@ -26,7 +102,7 @@
 - [x] 全部新斷言種回 bug 驗過會紅；13 支測試 rc=0。
 
 - [ ] **既有已發布報告未回填 `position_size`**（使用者決定保留）。`inject_report_facts.py` 本來就有重刷用途，要批次修正隨時可以。
-- [ ] **Technical lane 的 `rubric_hint` 沒有被帶進 `phase_inputs`**：lane 只送 `signal`/`score`/`confidence`/`phase0_alignment`/`key_factors`/`risk_flags`，script 給的 `rubric_hint` 死在 subagent transcript 裡，所以「lane 給分超出 script rubric」目前**無法自動比對**。要補需動 lane 資料契約（protocol + schema + validator 三處）。2026-08-09 NOW 的 Technical 給 +2.5 而 script 說 `0 to +1`，單這一項就會把 STAGED_ENTRY 翻成 HOLD。
+- [x] ~~**Technical lane 的 `rubric_hint` 沒有被帶進 `phase_inputs`**~~ → v4.116.3 解決，但**走的是另一條路**：不動 lane 資料契約，改讓 `analyze.py` 把 payload 落地到 `skills/technical-analyst/cache/<T>_technical_payload.json`，validator 直接讀 script 自己的輸出。**「讓 producer 留下物證」比「擴充 lane 契約」便宜得多**，v4.117.0 的 `calculation_steps` parity 沿用同一招。
 - [ ] **shell quoting 汙染無閘可擋**：雙引號 `python3 -c "…"` 讓 zsh 吃掉 `$652M`，產出的是語法合法的 JSON、內容才錯。已在 agy 檢討文件列為紀律項；要自動偵測只能靠啟發式（`(M in`、` .45B` 簽名），會有偽陽性。
 
 ## ✅ Done (v4.115.0) — LLM 額度面板改版 + agy 5 分鐘天花板
