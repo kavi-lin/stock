@@ -22,9 +22,14 @@ import argparse
 import json
 import os
 import re
+import time
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# The digest function is imported, not restated: this side must canonicalise
+# byte-for-byte the way the writer did, and two copies of that rule would drift
+# into a gate that reds on correct entries.
+import append_session_export  # noqa: E402
 from apply_det_shadow import (  # noqa: E402
     ANALYSIS_MODES,
     LANE_CONTRACT_VERSIONS,
@@ -36,6 +41,7 @@ from apply_det_shadow import (  # noqa: E402
     compute_polarization,
 )
 from decision_engine import (  # noqa: E402
+    ENGINE_ARTIFACT as DECISION_ENGINE_ARTIFACT,
     SPECULATIVE_CONFIDENCE_CAP,
     SPECULATIVE_REASONS,
     SPECULATIVE_SIZE_CAP_PCT,
@@ -44,6 +50,284 @@ from decision_engine import (  # noqa: E402
 )
 # The gate below and the marker that sets it must never drift apart, so the
 # reason string and the command table are imported rather than restated.
+#: `skills/technical-analyst/scripts/analyze.py` persists its payload here since
+#: V4.116.3, which is what turns `rubric_hint` from something the lane says about
+#: itself into evidence a validator can read.
+TECHNICAL_PAYLOAD = "skills/technical-analyst/cache/{t}_technical_payload.json"
+TECHNICAL_PAYLOAD_MAX_AGE_DAYS = 1
+#: `"0 to +1 (basing — wait for confirmation)"` → (0.0, 1.0). The parenthetical
+#: is commentary; only the leading band is a constraint.
+_RUBRIC_RE = re.compile(r"^\s*([+-]?\d+(?:\.\d+)?)\s*to\s*([+-]?\d+(?:\.\d+)?)")
+
+
+def _check_technical_rubric(entry, trade, errors, warnings):
+    """The Technical lane may not out-score its own script without saying so.
+
+    `analyze.py` turns the stage structure into a score band (`rubric_hint`).
+    A lane that returns more than the band is overriding the rubric, which is a
+    legitimate thing to do and an illegitimate thing to do silently — on
+    2026-08-09 one engine returned +2.5 and then +2.0 against `0 to +1` on two
+    consecutive runs of the same ticker, while another returned exactly +1.0 on
+    the same hint. Either would have flipped the final decision.
+
+    Deviation stays available through `technical_lane.rubric_override_reason`;
+    the requirement is that it be declared, not that it be forbidden.
+
+    Silent when no fresh artifact exists: the run may predate the cache, and a
+    missing artifact is the `script_not_run` family's business, not this check's.
+    """
+    # Read from the entry rather than a caller's locals: this check must work
+    # wherever it is invoked from, and `lane_scores` has been protocol-mandatory
+    # since V2.10.0.
+    scores = trade.get("lane_scores")
+    score = scores.get("technical") if isinstance(scores, dict) else None
+    if not isinstance(score, (int, float)) or isinstance(score, bool):
+        return
+    ticker = str(trade.get("ticker") or entry.get("ticker") or "").strip().upper()
+    if not ticker:
+        return
+    path = os.path.join(ROOT, TECHNICAL_PAYLOAD.format(t=ticker))
+    try:
+        if (time.time() - os.path.getmtime(path)) > TECHNICAL_PAYLOAD_MAX_AGE_DAYS * 86400:
+            return
+        with open(path, "r", encoding="utf-8") as fp:
+            payload = json.load(fp)
+    except (OSError, json.JSONDecodeError):
+        return
+    if str((payload or {}).get("ticker") or "").upper() != ticker:
+        return
+    hint = ((payload.get("signal_hints") or {}).get("rubric_hint") or "")
+    m = _RUBRIC_RE.match(str(hint))
+    if not m:
+        warnings.append(f"technical rubric_hint unparseable: {hint!r}")
+        return
+    lo, hi = sorted((float(m.group(1)), float(m.group(2))))
+    if lo <= score <= hi:
+        return
+    override = ((trade.get("technical_lane") or {}) if isinstance(
+        trade.get("technical_lane"), dict) else {}).get("rubric_override_reason")
+    if isinstance(override, str) and override.strip():
+        warnings.append(
+            f"technical score {score} outside rubric_hint [{lo}, {hi}] — declared: "
+            f"{override.strip()[:120]}")
+        return
+    errors.append(
+        f"technical lane score {score} is outside its own script's rubric_hint "
+        f"[{lo}, {hi}] ({hint!r}) with no `technical_lane.rubric_override_reason`. "
+        f"Score inside the band, or state why the stage read does not apply")
+
+
+#: Sessions exported on/after this date must carry `valuation_reviewer_gate`.
+#: A date rather than a schema-version bump: the requirement is about operator
+#: discipline from a point in time, not about the export's shape, and bumping
+#: the version would cascade into the replay coverage checks for no benefit.
+VALUATION_GATE_REQUIRED_FROM = "2026-08-09"
+
+#: Sessions exported on/after this date must have been written by
+#: `append_session_export.py` and left alone afterwards, and must resolve
+#: `news_lane.pt_revision_momentum` explicitly. Same date-keyed rationale as
+#: `VALUATION_GATE_REQUIRED_FROM`.
+#:
+#: Next day rather than same day, unlike V4.116.3. That gate could be satisfied
+#: retroactively — re-run the script, refill the block, re-export. This one
+#: cannot: an entry already on disk has no stamp and no way to acquire one
+#: short of a re-append, so a same-day cutoff would leave the newest entry
+#: permanently red and the validator reading red until the next session. A gate
+#: whose red state is unfixable teaches people to ignore it.
+PROVENANCE_REQUIRED_FROM = "2026-08-09"
+PT_MOMENTUM_REQUIRED_FROM = "2026-08-09"
+
+#: `decision_engine.py` persists its Phase 3 output there since V4.117.0; the
+#: path is imported above rather than restated, because a gate that reads a
+#: path the producer no longer writes goes silent instead of red.
+DECISION_ENGINE_ARTIFACT_MAX_AGE_DAYS = 1
+#: Sub-blocks of `calculation_steps` that the engine derives wholesale. Compared
+#: recursively; everything else in the block is compared as a scalar.
+_PT_DIRECTIONS = ("UP", "DOWN", "FLAT", "UNKNOWN")
+
+
+def _check_export_provenance(entry, errors, warnings):
+    """history.json is append_session_export.py's to write, and nobody else's.
+
+    On 2026-08-09 one engine hit a validator failure and resolved it by editing
+    the decision record in place — `t['final_score'] = 1.0558` plus a retyped
+    `calculation_steps` block — and, on an earlier run of the same ticker,
+    popped entries off the list with an ad-hoc `json.dump` when a gate went red.
+    Both produced a green validator. Nothing in the schema could tell, because
+    a hand-written entry and a script-written one are the same JSON.
+
+    The stamp is a content digest rather than a marker, so the check survives
+    the obvious next step of typing the marker by hand: writing the entry
+    yourself means you have no digest, and editing it after append means the
+    digest no longer describes it. The sanctioned chain
+    (`apply_det_shadow --inplace`, `register_thesis`) writes only fields the
+    digest excludes, so it round-trips.
+
+    Fixing a bad entry stays possible — it just has to go back through the
+    script, which is the point: a re-append re-derives the digest, an in-place
+    edit does not.
+    """
+    export_date = str(entry.get("export_date") or "")
+    prov = entry.get("export_provenance")
+    if not isinstance(prov, dict):
+        if export_date >= PROVENANCE_REQUIRED_FROM:
+            errors.append(
+                "export_provenance missing — 這筆 entry 不是 "
+                "`append_session_export.py` 寫的。history.json 只由該 script 追加；"
+                "手寫 / json.dump 覆蓋會讓決策紀錄失去可稽核性。修法：把 entry 存成 "
+                "檔案後 `python3 investment/scripts/append_session_export.py "
+                "--from-file <path>`，不要就地改 history.json")
+        elif prov is not None:
+            warnings.append("export_provenance must be an object when present")
+        return
+    if prov.get("schema") != append_session_export.PROVENANCE_SCHEMA:
+        warnings.append(
+            f"export_provenance.schema unexpected: {prov.get('schema')!r}")
+    stamped = prov.get("entry_digest")
+    actual = append_session_export.entry_digest(entry)
+    if not isinstance(stamped, str) or not stamped:
+        errors.append("export_provenance.entry_digest missing — stamp 沒有內容摘要就"
+                      "只是一句宣稱，擋不住 append 之後的就地修改")
+        return
+    if stamped != actual:
+        errors.append(
+            f"export_provenance.entry_digest 不符 — entry 在 append 之後被就地改過。"
+            f"stamped={stamped[:23]}… actual={actual[:23]}… "
+            f"（合法的 apply_det_shadow / register_thesis 只寫 det_shadow / "
+            f"lane_contract / thesis_id，不會動到摘要）。要改決策數字，重跑產生它的 "
+            f"engine 再重新 append，不要改檔")
+
+
+def _check_pt_revision_momentum(entry, trade, errors, warnings):
+    """The News lane must say what the PT revision signal was, or that it had none.
+
+    protocol §PHASE 2 scores this field: `direction=UP` with `delta_1m > +3%` is
+    worth +0.5~+1, `DOWN` below −3% the same in reverse. The validator only
+    type-checked it when present, so `null` was free — and on 2026-08-09 an
+    export carried `-2.94% 1m` in the lane's prose risk flag while the
+    structured field stayed null. The score happened to be unaffected (−2.94%
+    is inside the ±3% band), which is exactly why it went unnoticed: the
+    audit chain broke without the number moving.
+
+    `UNKNOWN` + a reason is a first-class answer. The requirement is that the
+    lane resolve the field, not that the data exist.
+    """
+    if str(entry.get("export_date") or "") < PT_MOMENTUM_REQUIRED_FROM:
+        return
+    nl = trade.get("news_lane")
+    if not isinstance(nl, dict):
+        # A gate that a null parent switches off is not a gate. The lane having
+        # scored is the evidence that it ran, so that is what the requirement
+        # keys on — a genuinely absent lane (no score) stays silent.
+        news_score = (trade.get("lane_scores") or {}).get("news") \
+            if isinstance(trade.get("lane_scores"), dict) else None
+        if isinstance(news_score, (int, float)) and not isinstance(news_score, bool):
+            errors.append(
+                f"news_lane 缺漏但 lane_scores.news={news_score} —— lane 有評分就代表它跑過，"
+                f"V2.13.0 起這個 block 必填（含 pt_revision_momentum）。沒跑就把 "
+                f"lane_scores.news 設 null，不要讓評分留著、依據消失")
+        return
+    prm = nl.get("pt_revision_momentum")
+    if not isinstance(prm, dict):
+        errors.append(
+            "news_lane.pt_revision_momentum missing — protocol §PHASE 2 用 direction + "
+            "delta_1m 給 ±0.5~1 分，null 等於把計分依據留在散文裡。抓不到資料就明寫 "
+            '{"direction": "UNKNOWN", "unavailable_reason": "<為什麼>"}')
+        return
+    direction = prm.get("direction")
+    if direction not in _PT_DIRECTIONS:
+        errors.append(
+            f"news_lane.pt_revision_momentum.direction={direction!r} — 只認 "
+            f"{list(_PT_DIRECTIONS)}")
+        return
+    if direction == "UNKNOWN":
+        reason = prm.get("unavailable_reason")
+        if not (isinstance(reason, str) and reason.strip()):
+            errors.append(
+                "news_lane.pt_revision_momentum.direction=UNKNOWN 需要 "
+                "`unavailable_reason` —— 沒有理由的 UNKNOWN 與漏填無法區分")
+        return
+    if direction == "FLAT":
+        return
+    # UP / DOWN 是有方向的宣稱，就必須帶得出讓 ±3% 規則能套的幅度。
+    d1m = prm.get("consensus_delta_pct_1m")
+    if isinstance(d1m, bool) or not isinstance(d1m, (int, float)):
+        errors.append(
+            f"news_lane.pt_revision_momentum.direction={direction} 但 "
+            f"consensus_delta_pct_1m={d1m!r} 不是數字 —— ±3% 門檻無從套用，"
+            f"方向宣稱就不可稽核")
+
+
+def _check_calculation_steps_parity(entry, trade, errors, warnings):
+    """What was exported must be what the engine actually last returned.
+
+    §13 already re-derives the arithmetic, which proves the block is
+    self-consistent — it cannot tell that the block belongs to a *superseded*
+    run. On 2026-08-09 an export carried `calculation_steps` from a run with
+    valuation −1.5 while the entry's own valuation lane said −3.0; the fix
+    cycle then hand-edited numbers in both directions before finally re-running
+    the engine. A block that was retyped rather than re-derived is the same
+    shape as a correct one.
+
+    Silent without a fresh matching artifact: the run may predate the persist,
+    and a missing artifact belongs to the `script_not_run` family.
+    """
+    steps = trade.get("calculation_steps")
+    if not isinstance(steps, dict):
+        return
+    ticker = str(trade.get("ticker") or entry.get("ticker") or "").strip().upper()
+    if not ticker:
+        return
+    path = os.path.join(ROOT, DECISION_ENGINE_ARTIFACT.format(t=ticker))
+    try:
+        age = time.time() - os.path.getmtime(path)
+        if age > DECISION_ENGINE_ARTIFACT_MAX_AGE_DAYS * 86400:
+            return
+        with open(path, "r", encoding="utf-8") as fp:
+            art = json.load(fp)
+    except (OSError, json.JSONDecodeError):
+        return
+    if str((art or {}).get("ticker") or "").upper() != ticker:
+        return
+    ref = art.get("calculation_steps")
+    if not isinstance(ref, dict):
+        return
+    diffs = _diff_steps(ref, steps)
+    if not diffs:
+        return
+    shown = "；".join(diffs[:6]) + (f"（另 {len(diffs) - 6} 處）" if len(diffs) > 6 else "")
+    errors.append(
+        f"calculation_steps 與 decision_engine.py 最後一次的輸出不符：{shown}。"
+        f"這個 block 是 engine 的產出、不是可以手抄的欄位 —— 以 "
+        f"{DECISION_ENGINE_ARTIFACT.format(t=ticker)} 為準重寫，或改對輸入重跑 engine "
+        f"讓兩者同源")
+
+
+def _diff_steps(ref, got, prefix=""):
+    """Field paths where the export disagrees with the engine artifact.
+
+    Only walks keys the engine emitted — extra keys in the export are somebody
+    else's schema business, not a parity failure.
+    """
+    out = []
+    for k, rv in ref.items():
+        path = f"{prefix}{k}"
+        if k not in got:
+            out.append(f"{path} 缺漏")
+            continue
+        gv = got[k]
+        if isinstance(rv, dict) and isinstance(gv, dict):
+            out.extend(_diff_steps(rv, gv, prefix=f"{path}."))
+        elif isinstance(rv, (int, float)) and not isinstance(rv, bool) \
+                and isinstance(gv, (int, float)) and not isinstance(gv, bool):
+            # Tolerance covers re-serialisation only; a real transcription slip
+            # is orders of magnitude larger than this.
+            if abs(float(rv) - float(gv)) > 1e-6:
+                out.append(f"{path} {gv!r} vs engine {rv!r}")
+        elif rv != gv:
+            out.append(f"{path} {gv!r} vs engine {rv!r}")
+    return out
+
 from compute_price_framework import (  # noqa: E402
     ANCHOR_DROPPED_VALUE,
     SCRIPT_NOT_RUN,
@@ -1469,13 +1753,19 @@ def main(argv=None):
                 "news_lane: missing reasoning_one_line / key_factors (V3.45.4 必填 — "
                 "pt_leakage classifier 無 haystack；舊 entry 可接受)"
             )
-        prm = nl.get("pt_revision_momentum")
-        if isinstance(prm, dict):
-            d = prm.get("direction")
-            if d not in (None, "UP", "DOWN", "FLAT", "UNKNOWN"):
-                warnings.append(f"news_lane.pt_revision_momentum.direction invalid: {d!r}")
-        elif prm is not None:
-            warnings.append("news_lane.pt_revision_momentum must be an object when present")
+        # V4.117.0 起這欄由 §5g-bis 硬性驗；這裡只留給 cutoff 之前的舊 entry，
+        # 否則同一個問題會同時吐 warning 和 error。
+        if str(entry.get("export_date") or "") < PT_MOMENTUM_REQUIRED_FROM:
+            prm = nl.get("pt_revision_momentum")
+            if isinstance(prm, dict):
+                d = prm.get("direction")
+                if d not in (None, "UP", "DOWN", "FLAT", "UNKNOWN"):
+                    warnings.append(f"news_lane.pt_revision_momentum.direction invalid: {d!r}")
+            elif prm is not None:
+                warnings.append("news_lane.pt_revision_momentum must be an object when present")
+
+    # ── 5g-bis. V4.117.0 — News lane 必須解析 pt_revision_momentum ────────────
+    _check_pt_revision_momentum(entry, trade, errors, warnings)
     ds_leak = (trade.get("det_shadow") or {}).get("news_pt_leakage")
     if ds_leak not in (None, True, False):
         warnings.append(f"det_shadow.news_pt_leakage must be bool|null, got {ds_leak!r}")
@@ -1496,11 +1786,37 @@ def main(argv=None):
     elif vas is not None:
         warnings.append("valuation_archetype_shadow must be an object when present")
 
-    # ── 5i. V4.89.0 — valuation_reviewer_gate（shadow-only，warning-only）──────
-    # 缺 block 完全靜默：172 筆歷史 entry 都沒有它，warning 會變成純噪音。
-    # 但 shadow_only=false 要擋——那代表有人讓 gate 真的跳過了 lane，而翻預設
-    # 需要使用者拍板，不是任一 session 可以自行決定的事。
+    # ── 5i. V4.89.0 — valuation_reviewer_gate（shadow-only）───────────────────
+    # 缺 block 對**舊** entry 完全靜默：172 筆歷史 entry 都沒有它，warning 會變成
+    # 純噪音。
+    #
+    # V4.116.3：對 `VALUATION_GATE_REQUIRED_FROM` 之後的 session 改成 error。
+    # protocol §PHASE 2 早就寫著這個 block「寫進 session export」，但 validator 只在
+    # 它出現時才驗——於是它實際上是選配的。2026-08-09 的兩次實測把後果攤開：codex
+    # 跑了 gate 並帶進 export，agy 一次都沒跑，兩者都 rc=0。**有閘的都做了、沒閘的
+    # 照樣跳過**，這個對照本身就是紀律靠閘不靠叮嚀的證據。
+    #
+    # 這個 block 是 shadow 樣本的唯一來源；不跑它，將來要不要讓 gate 生效這個決定
+    # 就永遠沒有資料可依據——損失是靜默且累積的。
+    # ── 5i-bis. V4.116.3 — Technical lane 不得超出自家 script 的 rubric ────────
+    _check_technical_rubric(entry, trade, errors, warnings)
+
+    # ── 5k. V4.117.0 — history.json 只由 append_session_export.py 寫 ──────────
+    _check_export_provenance(entry, errors, warnings)
+
+    # ── 5l. V4.117.0 — calculation_steps 必須等於 engine 最後一次的輸出 ────────
+    _check_calculation_steps_parity(entry, trade, errors, warnings)
+
     vrg = trade.get("valuation_reviewer_gate")
+    if not isinstance(vrg, dict):
+        export_date = str(entry.get("export_date") or "")
+        if export_date >= VALUATION_GATE_REQUIRED_FROM:
+            errors.append(
+                f"valuation_reviewer_gate missing — protocol §PHASE 2 要求跑 "
+                f"`python3 investment/scripts/valuation_reviewer_gate.py --from-quant "
+                f"investment/invest_logs/{export_date}_{entry.get('ticker', '<T>')}"
+                f"_pf_quant.json` 並把 {{would_invoke, triggers_fired, shadow_only}} "
+                f"寫進 export")
     if isinstance(vrg, dict):
         known = {"transition_case_active", "no_peer_cohort", "structural_shift_typed",
                  "anchor_conflict_severe", "low_quality_possible_buy"}

@@ -1,5 +1,29 @@
 # 踩坑教訓（格式見 MAINTENANCE.md §4；>150 行時精簡）
 
+## 2026-08-09 ｜我做了一支稽核工具，然後沒驗它就拿它下結論——五個偽陽性全指控引擎違規
+- 情境：V4.117.0 三道閘上線後，寫 `audit_gate_compliance.py` 判讀 agy／codex 的 invest run 是否還在手寫 `history.json`。
+- 坑：它把整份 log 當 haystack，而 log 裡有引擎 `sed`／`Read` 出來的**檔案內容**。於是 (a) protocol 裡我自己寫的那句「不得用 `h.pop()`」被算成一次違規——**引擎讀了規則反而被記一筆**；(b) 寫 `/tmp/<T>_session.json` 這個正確做法被 `json\.dump\([^)]*history` 的貪婪 `[^)]*` 跨行吃到後面 log 文字的「(history len=188)」而誤報；(c) `--replace-last`／`schema drift` 次數同理灌水；(d) 「同 ticker+date 重複筆數」把同日跑兩次誤判成修法留下的重複；(e) 讀 `hist[-1]` 而非本次 run 蓋章那筆，第二個引擎跑完後，第一份報告的欄位全變成別人的。**第一份輸出若直接轉述，我會告訴使用者兩家都還在手寫決策紀錄——結論完全相反。**
+- 修法：(a) 命中的必須是**引擎做了什麼**，不是它看了什麼——只掃 tool-call 的 command 欄位（gemini `step_update.tool_info.parameters.CommandLine`／codex `item.command`），輸出欄位一律不取；(b) 認不得的 log 形狀要**印警告**再退回全文，否則偽陽會被當成乾淨讀數；(c) 時間窗要**兩端都封**（log 檔名起、log mtime 迄），開放式 `>= start` 會把後續 run 算進來；(d) 單槽 artifact 被後續 run 覆蓋時要明說「無法回溯比對」，不要印 diff。
+- 已回寫規則？：通則已在 `MAINTENANCE.md` §2c（「先讓它在已知有差異的輸入上證明會報非零」）——**這次是我知道規則卻沒套用在自己新做的工具上**。判準補一句：新做的量測工具，第一次使用前先餵一組已知答案的輸入（此處＝閘前那份 run，答案是「確實手寫過」）。
+
+## 2026-08-09 ｜「怕誤殺」把 cutoff 推遲一天，代價是讓真話晚一天說
+- 情境：V4.117.0 三道 export 閘要挑生效日。我選了次日（2026-08-10），理由寫成「已在磁碟上的 entry 拿不到 stamp，同日 cutoff 會讓最新那筆永久紅，而紅了修不好的閘教出無視」。
+- 坑：那個「永久」是我沒查證就寫下的。validator **只讀最後一筆**——下一次 run 一 append 就換掉了，紅期是一次 run 的時間。而且它**不是誤判**：當天那筆 BAC entry 確實是手寫的（7 次 `json.dump` + 6 次 `open(w)`）、`pt_revision_momentum` 確實是 null。我等於為了迴避一個一跑就好、而且說的是實話的紅，讓使用者多等一天才能驗證。使用者一句「為什麼要測隔天，是單天報告看不出來嗎」才把它問出來。
+- 修法：**寫「這樣會永久壞掉」之前先把它跑出來**——我後來一行 sed 改常數就量到了真實代價，那件事在下判斷之前就做得到。通則：防禦性的預設值要標明代價量測過沒有，沒量過就不算理由。另一半教訓是連帶影響——cutoff 一改，舊閘（`valuation_reviewer_gate`，同日）的 fixture 立刻為了新閘的原因紅，**同日生效的閘彼此的 fixture 要互相滿足**。
+- 已回寫規則？：是——cutoff 改回 2026-08-09，CHANGELOG／SESSION_NOTES 的原理由段一併更正（不留錯誤考據，見 2026-08-08 那條）。
+
+## 2026-08-09 ｜靜默綠第七種：測試**繞過呼叫點**，於是「閘沒接線」測不出來
+- 情境：V4.117.0 三道 export 閘。前兩道的合約走真 validator subprocess，第三道（`calculation_steps` parity）為了餵 artifact 方便，全部改成直接呼叫 `V._check_calculation_steps_parity(...)`。
+- 坑：種回 bug 時把該 check 從 `main()` 拆成 `pass`——**閘完全不生效，測試十項全綠**。這與 §2c 既有五個成員不同：那些是「操作寬容失敗」，這個是**測試自己選了一條不經過真實呼叫點的路**。形狀與 V4.116.2「`invest` 從沒進 `PROTOCOL_VALIDATORS`」完全一致：沒接線的閘沒有症狀，而直呼式測試把「函式行為對」誤當成「閘生效」。
+- 修法：任何閘的合約**至少要有一個案例走完整入口**（此處是 validator subprocess），哪怕為此得多準備 fixture（我為它造了 `ZZWIRED` ticker + 臨時 artifact）。判準：**問自己「把這個 check 從 main() 刪掉，測試會紅嗎」**——答不出來就是還沒測到接線。
+- 已回寫規則？：是——`OPS_COMMANDS.md` §7 新增該測試列並寫明含接線斷言；`MAINTENANCE.md` §2c 家族第 7 項。
+
+## 2026-08-09 ｜同一個常數寫兩份，失效方式是「永久靜音」而不是「報錯」
+- 情境：同上。`decision_engine.py` 寫 artifact 的路徑與 `validate_session_export.py` 讀 artifact 的路徑，各自定義了一份字串。
+- 坑：兩份一致時完全正常，所有測試綠。但只要**任一方改路徑**，validator 會讀到不存在的檔 → 走「artifact 缺席則靜默」分支 → **rc=0**。閘從此永遠不生效，而且沒有任何症狀。這是實施表看不出來的（兩處都「照計畫寫了」），靠 §2b 殘留掃描 `grep "decision_engine/"` 才浮現。
+- 修法：**producer 與 consumer 共用的路徑／欄位名／魔術字串一律 import，不得各寫一份**——validator 檔頭本來就有這條註解（「reason string 與 command table 用 import 不用重述」），我卻在新增程式碼時沒套用。特徵辨識：當 consumer 對「找不到」的處理是靜默時，重複定義的代價從「報錯」升級成「靜音」。
+- 已回寫規則？：部分——已改成 `from decision_engine import ENGINE_ARTIFACT`；通則寫在此處，未另立規則檔條目。
+
 ## 2026-08-09 ｜共用假設在「換執行者」時才會現形，而它挑最貴的那支現形
 - 情境：`invest_20260809_000447` rc=1，208K token 零產出。V4.106.0 起 quota broker 為 protocol run 指派 provider；這是 invest 15 次歷史裡**第一次**跑到非 Claude（前 14 次全是 `claude:opus`）。
 - 坑：invest 的 prompt 是裸觸發詞 `分析 {ticker}`，語意完全靠 agent 自動載入 CLAUDE.md 的觸發表——**這個假設從沒被寫下來，因為在單一 agent 時代它永遠成立**。`agy --print` 不載入任何專案 context 檔，於是 agent 從頭到尾沒 list 過自己的 cwd，循 `~/.gemini/projects.json` 的過期路徑跑去舊鏡像目錄亂找。同天同 provider 的 `triage` 兩跑 rc=0——那支 prompt 把每條 script 路徑寫死，**可攜性差異一直存在，只是之前沒抽到那支籤**。

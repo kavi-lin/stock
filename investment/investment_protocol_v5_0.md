@@ -459,6 +459,11 @@ shadow 樣本**（1 筆 = 一支個股的一次分析；多股 session 一場可
   - `pt_revision_momentum` (V3.45.4 — 取代舊「PT vs price 折溢價 ±1」項): 30d consensus PT
     **變動方向**。`direction=UP` 且 `delta_1m > +3%` → bullish sell-side flow（同 rating change 性質，+0.5~+1）；
     `DOWN` 且 `delta_1m < -3%` → bearish（-0.5~-1）；`FLAT/UNKNOWN` → 0
+    - **V4.117.0 起必須寫進 export 的結構化欄位，不能只寫在散文裡**（`export_date >= 2026-08-09`
+      缺欄 → validator rc=1）。`UP`/`DOWN` 要帶數值 `consensus_delta_pct_1m`（否則 ±3% 門檻無從套用）；
+      抓不到資料就明寫 `{"direction": "UNKNOWN", "unavailable_reason": "<為什麼>"}`。
+      由來：2026-08-09 一份 export 在 risk flag 散文寫了 `-2.94% 1m`，結構化欄位卻是 null——
+      分數剛好沒受影響，所以斷掉的稽核鏈沒人發現。
   - `analyst_news[]` (FMP `/grades-news`)
   - `headlines[]` (finviz + yfinance + Finnhub deduped)
   - `sec_filings_recent[]` + `sec_8k_filings[]` (30d)
@@ -507,6 +512,15 @@ shadow 樣本**（1 筆 = 一支個股的一次分析；多股 session 一場可
 
 #### Technical Subagent
 - **Rubric**: 20/50/200MA 結構、RSI(14)、MACD histogram、volume vs 20D avg、support/resistance。Stage 2 上升結構 → +3+；跌破 200MA + 量放大 → -3-
+
+> **V4.116.3 — Technical lane 不得靜默超出自家 script 的 rubric**：
+> `technical-analyst/scripts/analyze.py` 會把 stage 結構折算成 `signal_hints.rubric_hint`
+> 分數帶（例如 `"0 to +1 (basing — wait for confirmation)"`），並把整份 payload 寫到
+> `skills/technical-analyst/cache/<T>_technical_payload.json`。validator 直接讀**那個檔**
+> 與 `lane_scores.technical` 比對：落在帶外且未填 `technical_lane.rubric_override_reason`
+> → **rc=1**。
+> **偏離是允許的，靜默偏離不是。** 2026-08-09 同一檔股票，一個引擎對 `0 to +1` 回 +2.5、
+> 隔次回 +2.0，另一個引擎對同一個 hint 回 +1.0——任一者都足以翻轉最終決策。
 - **Skill**: `python3 skills/technical-analyst/scripts/analyze.py <TICKER> --json-only`
 - OHLCV-only lane，但 V2.13 起額外讀 FMP_SUPP_BUNDLE.insider_summary 做主力分析（見下）
 
@@ -613,6 +627,11 @@ python3 investment/scripts/valuation_reviewer_gate.py \
 零新計算——所有 quant 訊號直接讀 Phase 1.5 artifact。輸出 `{would_invoke, triggers_fired[],
 triggers[]}` 寫進 session export 的 `valuation_reviewer_gate`（schema 見
 `phase5_export_schema.md`）。**本版 `would_invoke` 只被記錄，PM 一律照跑 lane、決策數字一個都不動。**
+
+> **V4.116.3 起這是硬閘**：`export_date >= 2026-08-09` 的 session 缺 `valuation_reviewer_gate`
+> block → `validate_session_export.py` **rc=1**。此前 validator 只在 block 出現時才驗，等於
+> 選配——2026-08-09 兩次實測顯示 codex 跑了、agy 沒跑，兩者都 rc=0。這個 block 是 shadow
+> 樣本的**唯一**來源，不跑它，將來要不要讓 gate 生效就永遠沒有資料可依據。
 
 | Trigger | 命中條件 | Mandatory |
 |---|---|---|
@@ -961,6 +980,17 @@ Phase 3 的**全部算術**由 `investment/scripts/decision_engine.py` 執行。
 **禁止手算 / 重算 / 微調任何 Phase 3 數字。** V4.81.0 起這是 schema 硬閘：export 戳
 `session_export_version: "V5.1"` 以上（現行 `"V5.3"`），缺 `calculation_steps` 或 `decision_engine_version`
 → `validate_session_export.py` rc=1（省略整塊不再是繞道，是直接擋下）。
+
+> **V4.117.0 — 「抄寫」現在會被對答案。** engine 每次跑（`--phase 3`）都把輸出留在
+> `investment/invest_logs/decision_engine/<TICKER>_decision_engine.json`，validator §5l
+> 拿它逐欄比對 export 裡的 `calculation_steps`，不符 → rc=1。
+>
+> 實務含意：**改了任何 lane 分數就要重跑 engine**，不能只改 export 裡的數字。§13 只驗這塊
+> 自己算得通，驗不出它屬於哪一次執行——2026-08-09 就有一份 export 帶著 valuation −1.5 那次的
+> steps，而 entry 自己的 valuation lane 寫著 −3.0。
+>
+> 最後跑的必須是**這次要匯出的那組輸入**：拿 engine 做 what-if 之後別忘了用正式輸入再跑一次，
+> 否則 artifact 記的是 what-if。
 
 下方 Step 1–4 的公式自此為 **spec 參照**
 （engine 是唯一執行來源，`test_decision_engine.py` 是兩者的 parity 契約）——改公式必須
@@ -1637,7 +1667,37 @@ JSON
 ```
 
 腳本會：原子寫入（tmp + rename）、`fcntl.flock` 序列化、自動鏡射 top-level
-`ticker` / `final_action` / `date`、檢查最小 shape。失敗 → 修 entry 再重跑。
+`ticker` / `final_action` / `date`、檢查最小 shape、蓋 `export_provenance`。失敗 → 修 entry 再重跑。
+
+> **🚫 V4.117.0 — `history.json` 只由這支 script 寫，沒有例外。**
+>
+> 不得用 `json.dump` / `h.pop()` / 就地改欄位去動 `history.json`——包含「validator 紅了，
+> 把數字改成讓它變綠」。`append_session_export.py` 會蓋一枚涵蓋**決策內容**的 sha256
+> （`export_provenance.entry_digest`，排除的欄位見 `phase5_export_schema.md`），
+> `export_date >= 2026-08-09` 的 entry 缺 stamp 或 digest 對不上一律 **rc=1**。
+>
+> **閘紅了要修的是產生那個數字的東西，不是紀錄。** 正確順序永遠是：改對輸入 →
+> 重跑對應 engine → 重新組 entry → 重新寫入。這樣 digest 會跟著重新蓋；就地改則不會，
+> 那正是它要抓的事。
+>
+> **已經 append 過才發現要修 → 用 `--replace-last`，不要再 append 一次**：
+>
+> ```bash
+> python3 investment/scripts/append_session_export.py --from-file /tmp/<ticker>_session.json --replace-last
+> python3 investment/scripts/apply_det_shadow.py --inplace investment/invest_logs/history.json
+> python3 investment/scripts/validate_session_export.py
+> ```
+>
+> 直接再 append 會讓**同一個 session 留下兩筆**（history 已經有 5 組這種重複，包含
+> 2026-08-09 的 NOW）。`--replace-last` 在同一把鎖裡取代最後一筆，且只認**同 ticker +
+> 同 export_date**，取代別人的 session 會 rc=1。**取代後 Step 1.5 要重跑**——`det_shadow`
+> 與 `lane_contract` 不會自己跟著換。
+>
+> 要整份退回：用 `run_protocol_manual.py` 印出的 `.bak.json` 還原，不要手動 `pop()`。
+>
+> 由來：2026-08-09 有一次 run 在乾淨 append 之後把 `final_score` 和整塊重打的
+> `calculation_steps` 就地寫進決策紀錄，另一次在閘變紅時先把 valuation 從 −1.5 改成 −3.0、
+> 被另一個閘擋下後又改回 −1.5，第三次才真的重跑 engine。三次 validator 都綠。
 
 > **V2.10.0 補必填欄位**（trades_this_session[] 內）：
 > - `lane_scores: {fundamentals, sentiment, news, technical}` — Phase 2 四個非 valuation lane 的 raw score（−3..+3）

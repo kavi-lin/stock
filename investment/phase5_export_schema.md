@@ -64,6 +64,31 @@ Claude（或 Sonnet 格式化 subagent）在 Phase 5 末尾**必須**：
 | `active_weights_end_of_session` | object | Fundamentals/Sentiment/News/Technical 四權重 |
 | `bias_notes` | string | 1-3 句 session 自述：決策邏輯 + 自省偏誤 |
 | `last_outcome` | `"WIN" \| "LOSS" \| "UNKNOWN"` | 之前 session 結果（prior context）|
+| `export_provenance` | object | **V4.117.0；由 `append_session_export.py` 自己蓋，PM 不得手填**。見下 |
+
+### `export_provenance` (V4.117.0 — history.json 的唯一寫入者證明)
+
+`history.json` 只由 `append_session_export.py` 追加。這個 block 是它蓋的，`export_date >= 2026-08-09` 的 entry 缺它 → validator rc=1。
+
+| Field | Type | Note |
+|---|---|---|
+| `schema` | `"export_provenance.v1"` | 固定字串 |
+| `writer` | string | `append_session_export.py (V<repo VERSION>)` |
+| `appended_at` | ISO8601 UTC | 追加當下的時間 |
+| `entry_digest` | `"sha256:<hex>"` | 本 entry **決策內容**的摘要 |
+
+`entry_digest` 涵蓋整筆 entry，但排除 append 之後由既定工具寫入的欄位 —— 否則核可路徑會自己打自己的章：
+
+| 排除欄位 | 由誰寫 |
+|---|---|
+| `export_provenance`（entry 層） | 本 script |
+| `trades[].det_shadow` / `trades[].lane_contract` | `apply_det_shadow.py --inplace` |
+| `trades[].thesis_id` / `trades[].thesis_registered_at` | `register_thesis.py` |
+| `trades[]` 底下任何 `_` 開頭的鍵 | post-processor 暫存（如 `_as_of_date_inherited`）|
+
+**其餘全部是決策內容，append 當下凍結。** 要改 `final_score`、`calculation_steps`、lane 分數這類欄位，唯一合法途徑是**重跑產生它的 engine，然後重新 append**；直接 `json.dump` 回 history.json 會讓 digest 對不上（rc=1），手寫的新 entry 則根本沒有 stamp（rc=1）。
+
+> 為什麼是內容摘要而不是一個記號：記號誰打字誰就有。2026-08-09 的實際事故是一次 run 在乾淨 append 之後把 `final_score` 和整塊重打的 `calculation_steps` 就地寫進決策紀錄，另一次在閘變紅時用臨時 `json.dump` 把 entry `pop()` 掉 —— 兩者 validator 都綠，因為手寫的 entry 和 script 寫的 entry 是同一份 JSON。
 
 ### `phase0_macro_snapshot`
 ```json
@@ -123,7 +148,7 @@ Claude（或 Sonnet 格式化 subagent）在 Phase 5 末尾**必須**：
 | `valuation_explained_range` | object（見下） | **V4.76.0+ optional** | structural-shift DCF 為 primary FV；DCF sensitivity + without/with-peer + 其他 eligible anchor 的解釋帶。range-only peer 不進 primary FV |
 | `implied_expectations` | object（掛 `valuation_lane` 或 trade 頂層；見下） | **V3.45.1+ optional**；缺 → warning（rc 0）| reverse DCF 隱含預期。**V3.45.3 起由 `compute_price_framework.py` engine 計算**（V4.88.0 起在 Phase 1.5；非 LLM 手算）。**不**進加權 / lane score / decision_lock |
 | `valuation_archetype_shadow` | object（見下） | **V3.46.0+ optional**；缺 → warning（rc 0）| Phase 1.5 engine archetype 分類 + 9-anchor shadow blend。**shadow-only** — live `fair_value_summary` 不動、不進 decision_lock。≥20 session 翻轉率報告後才議切換（#3b）|
-| `valuation_reviewer_gate` | object（見下） | **V4.89.0+ optional**；缺 → 靜默（rc 0，舊 entry 相容）| L4b 條件式 Valuation Specialist 的 **shadow 紀錄**：`{schema, ticker, would_invoke, mandatory_fired, triggers_fired[], shadow_only}`。`shadow_only=false` → **rc=1**（翻預設需使用者拍板，session 不得自行讓 gate 生效）。`triggers_fired` 只認 5 個具名 trigger；`would_invoke` 必須等於 `bool(triggers_fired)` |
+| `valuation_reviewer_gate` | object（見下） | **V4.116.3 起：`export_date >= 2026-08-09` 的 session 缺此 block → rc=1**；之前的 entry 仍靜默（172 筆歷史 entry 都沒有它）。protocol §PHASE 2 一直要求把它寫進 export，但 validator 過去只在它出現時才驗，等於選配——2026-08-09 兩次實測顯示：codex 跑了、agy 沒跑，兩者都 rc=0 | L4b 條件式 Valuation Specialist 的 **shadow 紀錄**：`{schema, ticker, would_invoke, mandatory_fired, triggers_fired[], shadow_only}`。`shadow_only=false` → **rc=1**（翻預設需使用者拍板，session 不得自行讓 gate 生效）。`triggers_fired` 只認 5 個具名 trigger；`would_invoke` 必須等於 `bool(triggers_fired)` |
 | `lane_scores` | `{fundamentals: int, sentiment: int, news: int, technical: int}` | **V2.10.0+ 必填** | Phase 2 五 lane 中除 valuation 外的 4 個 raw score（−5..+5，V4.72.0 修正——原文件誤寫 −3..+3 與協議 Phase 2 量表矛盾，歷史 9 筆合法 ±4 分即超出舊註記）；用於 polarization detection。validator §12 強制值域 |
 | `det_inputs` | `{altman_z, debt_to_equity, fcf_yield, insider_ratio_q, short_interest_pct, fred_in_sector_avoid}` | **V2.10.0+ 必填** | Red Team kill triggers 的 6 個量化輸入；LLM 從 FMP_SUPP_BUNDLE / earnings-analyst 拿到的原始數值，**直接寫入**，不再 LLM 重新解讀 |
 | `det_shadow` | object（見下） | **V2.10.0+ 由 post-processor 寫入**，LLM 不寫 | `apply_det_shadow.py` 後處理填入；包含 polarization label + det shadow scores + agreement flags |
@@ -505,6 +530,18 @@ Phase 3 全部算術由 `investment/scripts/decision_engine.py` 產出，PM **ve
   戳 `V5.0` 卻帶 `decision_engine_version` → rc=1，提示改戳 `V5.1`。
 - 上述皆不適用且無 `decision_engine_version` 的 entry → **整段跳過，rc=0**（向後相容，不溯及既往）。
 
+**Validator §5l（V4.117.0）—— 抄寫必須抄到同一次的輸出**：
+
+§13 驗的是這塊**自己內部**算得通，那證明不了它屬於**這一次**的 engine run。2026-08-09 有一份 export 的 `calculation_steps` 來自 valuation = −1.5 的那次執行，而 entry 自己的 valuation lane 寫著 −3.0；後續的修法迴圈還把數字往兩個相反方向各改了一次才終於重跑 engine。**重打的 block 和正確的 block 形狀完全一樣。**
+
+`decision_engine.py` 因此把 Phase 3 輸出落地到 `investment/invest_logs/decision_engine/<TICKER>_decision_engine.json`（`--phase 4.6` 不寫，那是另一種 payload）。Validator 讀回來逐欄比對：
+
+- artifact 存在、ticker 相符、24h 內 → `calculation_steps` 每一個 engine 有的鍵都必須相等（巢狀遞迴；浮點容差 1e-6）。任一不符 **rc=1**，訊息直接列出 `欄位 export值 vs engine值`。
+- export 多出來的鍵不管（那是別節的 schema 業務）。
+- artifact 缺席 / 過期 / ticker 不符 → **靜默**（同 technical rubric 閘：沒有證據就不下判斷，缺 artifact 是 `script_not_run` 家族的事）。
+
+同 V4.116.3 的 technical payload：**關鍵那一步是把 stdout 落地**。engine 的數字原本只活在 stdout，最後躺在執行者的 transcript 裡，validator 構不到，於是「抄對了沒」永遠只能靠自陳。
+
 **band 可達集合**（`final_decision` 允許偏離 band 的四條路徑，其餘一律 rc=1）：
 
 | banded | 可另接受 | 依據 |
@@ -770,6 +807,10 @@ V5.3 起把形狀定死，**只對 V5.3+ 生效**：
 >
 > `det_shadow` 與 `lane_contract` **不在**範例裡：兩者都是 Step 1.5 post-processor 寫的，
 > PM 手寫等於偽造 provenance。`test_session_export_schema.py` 驗證時會實跑 producer 補上這兩塊。
+>
+> `export_provenance` 同理不在範例裡（V4.117.0）：它由 `append_session_export.py` 蓋，內含
+> 本 entry 的內容摘要。**照著抄一份 digest 進來只會讓 validator 紅**——摘要要對得上的是你自己
+> 那筆 entry，不是這份範例。
 
 ```json
 {
@@ -1194,7 +1235,8 @@ V2.13.0 為 invest protocol Phase 2 三個 lane（Technical / Fundamentals / New
     "direction": "UP | DOWN | FLAT | UNKNOWN — V3.45.4；30d consensus PT 變動方向（fetch.py 算，無絕對 level）",
     "consensus_delta_pct_1m": "float | null",
     "consensus_delta_pct_3m": "float | null",
-    "analysts_last_month": "int | null"
+    "analysts_last_month": "int | null",
+    "unavailable_reason": "string — direction=UNKNOWN 時必填（V4.117.0）"
   }
 }
 ```
@@ -1202,6 +1244,18 @@ V2.13.0 為 invest protocol Phase 2 三個 lane（Technical / Fundamentals / New
 > **V3.45.4**：`reasoning_one_line` / `key_factors` / `pt_revision_momentum` 為新增欄位。舊 entry 缺欄
 > → validator warning（非 fatal）。PT 注入層剝離詳見 protocol News subagent 章節。
 > **V4.71.0**：`medium_term_shift_20d` 落日移除（P1-6：無消費者 + default 模板輸出佔多數）。舊 entry 含此欄無害。
+
+#### V4.117.0 — `pt_revision_momentum` 對 `export_date >= 2026-08-09` 的 entry 變必填
+
+protocol §PHASE 2 用這欄計分（`direction=UP` 且 `delta_1m > +3%` → +0.5~+1；`DOWN` 且 `< -3%` → 反向同幅），但 validator 原本只在它**出現時**驗型別，於是 `null` 是免費的。2026-08-09 的實測：一份 export 在 News lane 的 risk flag 散文裡寫著 `-2.94% 1m`，結構化欄位卻是 `null` —— 分數剛好沒受影響（−2.94% 在 ±3% 帶內），所以沒人發現，**稽核鏈斷了而數字沒動**。
+
+| 情形 | 要求 |
+|---|---|
+| 有資料 | `direction` ∈ `UP`/`DOWN`/`FLAT`；`UP`/`DOWN` 必須帶 **數值** `consensus_delta_pct_1m`（否則 ±3% 規則無從套用，方向宣稱不可稽核）|
+| 無資料 | `{"direction": "UNKNOWN", "unavailable_reason": "<為什麼>"}` —— 沒有理由的 `UNKNOWN` 與漏填無法區分 |
+| 整個 `news_lane` 是 null | 只有在 `lane_scores.news` 也是 null 時才放行。**lane 有評分就代表它跑過**；否則 = 分數留著、依據消失 |
+
+**要求是「解析這個欄位」，不是「資料一定要存在」。**
 
 ### Phase 3 PM 整合層新欄位
 

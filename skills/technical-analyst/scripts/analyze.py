@@ -219,6 +219,32 @@ def main():
 
     print(json.dumps(payload, indent=2, default=str))
 
+    # V4.116.3 — persist, so `rubric_hint` becomes checkable evidence rather than
+    # something the lane reports about itself.
+    #
+    # The hint is this script's own translation of the stage structure into a
+    # score band, and a lane that overrides it is overriding the rubric. Until
+    # now that was invisible: the hint lived only in stdout, which ends up inside
+    # the lane subagent's transcript and nowhere a validator can reach. On
+    # 2026-08-09 a lane returned +2.5 and then +2.0 against `0 to +1` twice, and
+    # nothing could tell — while another engine on the same day returned exactly
+    # +1.0 on the same hint.
+    #
+    # Written unconditionally (including under --json-only): the artifact is the
+    # point, and a flag about stdout formatting must not decide whether evidence
+    # exists.
+    try:
+        cache_dir = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "cache")
+        os.makedirs(cache_dir, exist_ok=True)
+        with open(os.path.join(cache_dir, f"{payload['ticker']}_technical_payload.json"),
+                  "w", encoding="utf-8") as fp:
+            json.dump(payload, fp, ensure_ascii=False, indent=1, default=str)
+    except OSError as e:
+        # Never fail the analysis for a cache write; the caller's decision does
+        # not depend on it, and a read-only checkout is a legitimate state.
+        print(f"[technical-analyst] cache write skipped: {e}", file=sys.stderr)
+
     if args.json_only:
         return
 

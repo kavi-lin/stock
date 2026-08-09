@@ -77,6 +77,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 from typing import Any
 
@@ -881,6 +882,44 @@ def run_phase3(inp: dict) -> dict:
     }
 
 
+#: Where a Phase 3 run leaves its output for the validator to read back.
+#: Same move as `analyze.py`'s technical payload in V4.116.3, for the same
+#: reason: the engine's numbers only existed on stdout, so what reached
+#: history.json was whatever the executing model retyped, and a mistyped
+#: `calculation_steps` block is indistinguishable from a correct one at the far
+#: end. Persisting it gives §5l something to compare against.
+ENGINE_ARTIFACT_DIR = "investment/invest_logs/decision_engine"
+ENGINE_ARTIFACT = ENGINE_ARTIFACT_DIR + "/{t}_decision_engine.json"
+
+
+def _persist_artifact(inp: dict, out: dict, *, phase: str) -> None:
+    """Best-effort write of the run's output. Never fails the run.
+
+    Phase 4.6 shares this CLI but produces a decision-cap payload, not
+    `calculation_steps`; writing it would overwrite the Phase 3 evidence with
+    something the validator does not compare, so it is skipped.
+    """
+    if phase != "3":
+        return
+    ticker = str(inp.get("ticker") or out.get("ticker") or "").strip().upper()
+    if not ticker or not re.fullmatch(r"[A-Z0-9.\-]{1,12}", ticker):
+        return
+    root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+    path = os.path.join(root, ENGINE_ARTIFACT.format(t=ticker))
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w", encoding="utf-8") as fp:
+            json.dump({"ticker": ticker,
+                       "decision_engine_version": out.get("decision_engine_version"),
+                       "engine": out.get("engine"),
+                       "final_score": out.get("final_score"),
+                       "final_decision": out.get("final_decision"),
+                       "calculation_steps": out.get("calculation_steps")},
+                      fp, ensure_ascii=False, indent=1)
+    except OSError:
+        pass
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="Deterministic Phase 3 decision engine")
     ap.add_argument("--from-file", help="input JSON path (default: stdin)")
@@ -907,6 +946,8 @@ def main(argv=None) -> int:
     except ValueError as e:
         print(json.dumps({"error": str(e)}))
         return 1
+
+    _persist_artifact(inp, out, phase=args.phase)
 
     print(json.dumps(out, ensure_ascii=False, indent=2))
     for w in out.get("warnings") or []:

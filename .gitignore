@@ -24,6 +24,9 @@ investment/invest_logs/*.md
 # 不需要入版控（同 history.json 的處理）。
 investment/invest_logs/*_pf_quant.json
 investment/invest_logs/*.SELFASSEMBLED_RAW.json
+# Phase 3 engine artifact（V4.117.0）：validator §5l 拿它比對 export 抄得對不對。
+# 每次跑 engine 就重寫，同 skills/*/cache 的性質——是證據不是紀錄。
+investment/invest_logs/decision_engine/
 
 # Third-party reference repos (read-only, not part of protocol)
 reference/
