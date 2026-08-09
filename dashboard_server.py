@@ -242,18 +242,21 @@ def _claude_plan_label():
 
 
 def _annotate_plans(status):
-    """Fill in provider plan labels the broker could not supply.
+    """Fill in public plan labels the broker could not supply.
 
-    Never overwrites what the broker reported: where it knows the plan (codex →
-    "prolite") that is the provider's own word for it and outranks anything
-    inferred here.
+    ``plan`` stays provider-native diagnostic data. UI clients consume only
+    ``plan_label`` so an internal code such as Codex ``prolite`` never becomes
+    product copy.
     """
     try:
         providers = ((status or {}).get("broker") or {}).get("providers") or {}
-        if isinstance(providers.get("claude"), dict) and not providers["claude"].get("plan"):
+        if (
+            isinstance(providers.get("claude"), dict)
+            and not providers["claude"].get("plan_label")
+        ):
             label = _claude_plan_label()
             if label:
-                providers["claude"]["plan"] = label
+                providers["claude"]["plan_label"] = label
     except Exception as e:  # noqa: BLE001 — a cosmetic chip must never 500 the panel
         sys.stderr.write(f"[llm-config] plan annotation skipped: {e}\n")
     return status

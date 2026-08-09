@@ -526,6 +526,12 @@ _STATUS_FIXTURE = {
              "gemini.weekly": {"remaining_percent": 73.4, "used_percent": None,
                                "refresh_in_seconds": 301680},
          }}},
+        {"info": {"id": "codex"}, "authenticated": True,
+         "plan_label": "ChatGPT Pro 5x", "current_model": "gpt-5.6-sol",
+         "snapshot": {"plan": "prolite", "buckets": {
+             "primary": {"remaining_percent": 97.0, "used_percent": 3.0,
+                         "window_minutes": 10080, "label": "Weekly limit"},
+         }}},
     ],
 }
 
@@ -548,7 +554,7 @@ finally:
     broker_gate.broker_client = _old_broker_client
 
 _provs = _snap.get("providers") or {}
-check("buckets.provider_ids_mapped", set(_provs) == {"claude", "gemini"},
+check("buckets.provider_ids_mapped", set(_provs) == {"claude", "gemini", "codex"},
       f"{sorted(_provs)} — agy must surface under this repo's name")
 
 _claude = {b["name"]: b for b in (_provs.get("claude") or {}).get("buckets", [])}
@@ -570,7 +576,13 @@ check("buckets.label_carried",
       "the provider's own window name beats the namespaced key the UI reverse-engineers")
 check("buckets.plan_carried",
       (_provs.get("gemini") or {}).get("plan") == "Google AI Pro",
-      "plan drives the panel's tier chip")
+      "raw plan must survive for diagnostics")
+check("provider.plan_label_carried",
+      (_provs.get("codex") or {}).get("plan_label") == "ChatGPT Pro 5x",
+      "the panel must not expose the provider's internal prolite slug")
+check("provider.current_model_carried",
+      (_provs.get("codex") or {}).get("current_model") == "gpt-5.6-sol",
+      "the active model is part of the provider identity shown in the panel")
 check("buckets.remaining_is_worst_bucket",
       (_provs.get("claude") or {}).get("remaining_percent") == 36.0,
       "headline stays the tightest window")

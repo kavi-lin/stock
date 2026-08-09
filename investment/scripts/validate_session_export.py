@@ -42,6 +42,12 @@ from decision_engine import (  # noqa: E402
     compute_dynamic_threshold,
     decision_band,
 )
+# The gate below and the marker that sets it must never drift apart, so the
+# reason string and the command table are imported rather than restated.
+from compute_price_framework import (  # noqa: E402
+    SCRIPT_NOT_RUN,
+    SCRIPT_SOURCED_ANCHORS,
+)
 
 ROOT         = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 HISTORY_JSON = os.path.join(ROOT, "investment/invest_logs/history.json")
@@ -1074,6 +1080,29 @@ def main(argv=None):
                     if not isinstance(detail, dict):
                         errors.append(f"valuation_pack.anchors.{name} must be an object")
                         continue
+                    # V4.116.0 — Phase 1.5's script-sourced anchors are mandatory.
+                    # `script_not_run` is set by
+                    # `compute_price_framework.mark_unrun_anchor_scripts` when the
+                    # anchor has no value AND the script's artifact is absent or
+                    # stale, which is a different thing from the script running and
+                    # having nothing usable to say.
+                    #
+                    # This is fatal rather than a warning because of what skipping
+                    # costs: on 2026-08-09 NOW, `dcf_self_built` and `comps_implied`
+                    # were both never run, the fundamental family collapsed to two
+                    # correlation groups, and `owner_earnings_mult` — an anchor the
+                    # engine had itself flagged as an outlier — carried an effective
+                    # weight of 0.275 against a raw 0.05 and produced the
+                    # `extreme_overvalued` verdict single-handedly. The protocol
+                    # already called these mandatory; until now nothing enforced it.
+                    if detail.get("reason") == SCRIPT_NOT_RUN:
+                        cmd = (SCRIPT_SOURCED_ANCHORS.get(name) or ("", ""))[1]
+                        ticker = str(trade.get("ticker") or entry.get("ticker") or "<T>")
+                        errors.append(
+                            f"valuation_pack.anchors.{name}: mandatory Phase 1.5 script was "
+                            f"never run (no fresh artifact)"
+                            + (f" — run `{cmd.format(t=ticker.upper())}`" if cmd else "")
+                        )
                     if detail.get("status") == "eligible" and (
                             not detail.get("provenance") or not detail.get("as_of")):
                         errors.append(

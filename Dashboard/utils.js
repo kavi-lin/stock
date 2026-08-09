@@ -8,7 +8,7 @@
 
   // Semantic release tag shown in sidebar footer. Bump on meaningful releases.
   // Cache-busting is handled separately by dashboard_server.py (mtime injection).
-  const VERSION = 'V4.115.0';
+  const VERSION = 'V4.116.0';
 
   // V1.71.x — group field enables sectioned sidebar layout
   const NAV_ITEMS = [
@@ -984,6 +984,17 @@
         // below are the ones acted on.
         const age = ageLabel(info.age_seconds, zh);
         const headTip = info.confidence ? String(info.confidence) : '';
+        // Product identity is neutral metadata, not quota health. The raw
+        // provider plan code is intentionally ignored: only the broker's
+        // public label and its best-known current model belong in UI copy.
+        // A generic provider alias (`codex` under the CODEX heading) adds no
+        // information. Keep transporting it for diagnostics, but show the
+        // model only when the broker knows a more specific name.
+        const currentModel = info.current_model
+          && String(info.current_model).toLowerCase() !== String(model).toLowerCase()
+          ? info.current_model : null;
+        const identity = [info.plan_label, currentModel]
+          .filter(Boolean).map(v => esc(String(v))).join(' · ');
 
         const t = (usage && usage.tokens) || {};
         const tok = (t.input || 0) + (t.output || 0) + (t.cache_read || 0) + (t.cache_write || 0);
@@ -998,9 +1009,9 @@
         // the gear help already explains what the dashed marker on the bar is.
         return `<div class="llm-tip-head"${headTip ? ` title="${esc(headTip)}"` : ''}>
             <span class="llm-tip-name">${esc(model)}</span>
-            ${info.plan ? `<span class="llm-tip-plan">${esc(String(info.plan))}</span>` : ''}
             <span class="llm-tip-age">${esc(age)}</span>
           </div>
+          ${identity ? `<div class="llm-tip-identity">${identity}</div>` : ''}
           <div class="llm-tip-bkts">${rows}</div>
           ${routeTags.length ? `<div class="llm-tip-routes">${esc(routeTags.join(' · '))}</div>` : ''}
           ${spend}`;

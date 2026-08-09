@@ -198,6 +198,35 @@ _unknown = ds._adapt_protocol_prompt("gemini", "BASE", "not_a_protocol")
 check("prompt.unknown_protocol.context", "`GEMINI.md`" in _unknown, _unknown)
 check("prompt.unknown_protocol.original", _unknown.endswith("BASE"), _unknown)
 
+# Provider identity has two layers: the raw entitlement slug remains available
+# for diagnostics, while the UI gets a public plan label. Claude's optional
+# local annotation follows the same contract instead of overwriting `plan`.
+_old_plan_reader = ds._claude_plan_label
+try:
+    ds._claude_plan_label = lambda: "MAX 5×"
+    _plans = ds._annotate_plans({"broker": {"providers": {
+        "claude": {"plan": None, "plan_label": None},
+        "codex": {"plan": "prolite", "plan_label": "ChatGPT Pro 5x",
+                  "current_model": "gpt-5.6-sol"},
+    }}})["broker"]["providers"]
+finally:
+    ds._claude_plan_label = _old_plan_reader
+
+check("plans.claude_public_label", _plans["claude"].get("plan_label") == "MAX 5×",
+      repr(_plans["claude"]))
+check("plans.claude_raw_untouched", _plans["claude"].get("plan") is None,
+      repr(_plans["claude"]))
+check("plans.codex_public_label",
+      _plans["codex"].get("plan_label") == "ChatGPT Pro 5x", repr(_plans["codex"]))
+check("plans.codex_model", _plans["codex"].get("current_model") == "gpt-5.6-sol",
+      repr(_plans["codex"]))
+
+_utils_source = (ROOT / "Dashboard" / "utils.js").read_text(encoding="utf-8")
+check("plans.ui_uses_public_label", "info.plan_label" in _utils_source)
+check("plans.ui_shows_current_model", "info.current_model" in _utils_source)
+check("plans.ui_hides_raw_code", "String(info.plan)" not in _utils_source,
+      "provider-native plan codes must remain diagnostic-only")
+
 # Every protocol that runs through PROTOCOL_PROMPTS must name a spec document,
 # and that document must exist. A typo'd path reads as a working preamble.
 for _name in ds.PROTOCOL_PROMPTS:

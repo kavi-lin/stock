@@ -530,6 +530,83 @@ def _calibration_block(meta: dict) -> dict | None:
     return block if any(v is not None for v in block.values()) else None
 
 
+#: Anchors whose value can only come from running a script, mapped to the
+#: artifact that script writes and the command that writes it.
+#:
+#: `forecaster_blend` is deliberately NOT here. Its cache
+#: (`skills/earnings-valuation-forecaster/cache/<T>.json`) is also written by the
+#: earnings-preview flow, so its presence would not prove *this* session ran the
+#: forecaster — the discriminator would be unsound. It also already reports a
+#: distinct reason when it does run and declines (`low_forecast_confidence`).
+SCRIPT_SOURCED_ANCHORS = {
+    "dcf_self_built": (
+        "skills/valuation-modeler/cache/{t}_dcf_payload.json",
+        "python3 skills/valuation-modeler/scripts/dcf.py {t} --json-only",
+    ),
+    "comps_implied": (
+        "skills/valuation-modeler/cache/{t}_comps_payload.json",
+        "python3 skills/valuation-modeler/scripts/comps.py {t} --json-only",
+    ),
+}
+
+#: How recent a script artifact must be to count as "this session's". Matches the
+#: Phase 0 gate's default for the same reason: a run that starts before midnight
+#: and finishes after it is legitimate, and one day is the coarsest unit that
+#: still excludes a stale payload.
+SCRIPT_ARTIFACT_MAX_AGE_DAYS = 1
+
+SCRIPT_NOT_RUN = "script_not_run"
+
+
+def mark_unrun_anchor_scripts(ticker, anchors: dict | None, anchor_meta: dict,
+                              *, now: float | None = None,
+                              max_age_days: int = SCRIPT_ARTIFACT_MAX_AGE_DAYS,
+                              base_dir: str | None = None) -> dict:
+    """Separate "the script produced nothing usable" from "it was never run".
+
+    Both used to arrive as `missing_or_nonpositive_value`, and that conflation is
+    what let the 2026-08-09 NOW session skip Phase 1.5's two mandatory valuation
+    scripts without anything noticing. The engine then did exactly the right
+    thing for an ineligible anchor — redistribute its weight — and
+    `owner_earnings_mult` went from a raw 0.05 to an effective 0.275, producing
+    the `extreme_overvalued` verdict on its own. Nothing downstream could tell,
+    because nothing downstream knew the difference between the two cases.
+
+    This only fires when the anchor has NO value: a value present means the
+    script ran, whatever the artifact looks like. The artifact must also be
+    recent — a month-old payload says nothing about this session.
+
+    Returns a NEW metadata dict; the caller's is not mutated.
+    """
+    out = {k: dict(v) if isinstance(v, dict) else v for k, v in (anchor_meta or {}).items()}
+    ticker = str(ticker or "").strip().upper()
+    if not ticker:
+        return out                      # pure-function callers pass no ticker
+    root = base_dir or BASE_DIR
+    now = now if now is not None else dt.datetime.now().timestamp()
+    cutoff = max_age_days * 86400
+
+    for name, (artifact_tpl, command_tpl) in SCRIPT_SOURCED_ANCHORS.items():
+        if _pos((anchors or {}).get(name)) is not None:
+            continue                    # it produced a value; it ran
+        meta = out.setdefault(name, {})
+        if not isinstance(meta, dict):
+            continue
+        if meta.get("reason"):
+            continue                    # an upstream reason is more specific
+        artifact = os.path.join(root, artifact_tpl.format(t=ticker))
+        try:
+            fresh = (now - os.path.getmtime(artifact)) <= cutoff
+        except OSError:
+            fresh = False
+        if not fresh:
+            meta["reason"] = SCRIPT_NOT_RUN
+            # Carried so the validator's message can name the fix rather than
+            # making the operator look it up.
+            meta["required_command"] = command_tpl.format(t=ticker)
+    return out
+
+
 def _anchor_eligibility(name: str, value, meta: dict, structural_shift: dict,
                         strict_metadata: bool) -> tuple[bool, str | None]:
     if _pos(value) is None:
@@ -1832,9 +1909,13 @@ def build_quant_stage(inp: dict, *, assembled: list | None = None) -> dict:
     # Median outlier detection remains diagnostic only.  A correlated majority
     # must not be allowed to erase a legitimate dissenting valuation method.
     _, outlier_diagnostics = trim_anchor_outliers(anchors_raw)
+    # Stamped here rather than inside `build_valuation_pack`, which has no
+    # ticker and therefore cannot look for the artifacts. `_anchor_eligibility`
+    # already prefers `meta["reason"]`, so the marking flows through untouched.
     pack = build_valuation_pack(
         anchors_raw, cp,
-        anchor_meta=inp.get("anchor_meta") or {},
+        anchor_meta=mark_unrun_anchor_scripts(
+            inp.get("ticker"), anchors_raw, inp.get("anchor_meta") or {}),
         structural_shift=inp.get("structural_shift") or {},
         strict_metadata=True,
     )

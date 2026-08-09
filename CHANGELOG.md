@@ -8,6 +8,26 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.116.0] — 2026-08-09 — 三道「說綠但沒驗到」的閘補起來：phase0 新鮮度、script_not_run、position_size 單位
+
+稽核 2026-08-09 NOW（首次由 agy 執行 invest）挖出的三個缺口。**都不是引擎特有的**——Claude 跑一樣會中。
+
+### Added
+- **`validate_phase0.py` 新鮮度閘**。原本 147 行**一次都沒讀 `scan_date`**，任何年齡的快照都能過。那次 run 把 `2026-08-07_phase0.json` 複製、改 `scan_date`、另存，就從 rc=1 變 rc=0，兩檔除該欄外零差異。新增兩道檢查：日期不得超過 `--max-age-days`（預設 1），以及**內容與較舊快照除 `scan_date` 外相同即 rc=1**。載重的是後者——那次日期是**有改**的，光看日期會放行。
+  **週末是刻意處理的邊界**：週六與週日都讀週五收盤，快照可以合法相同，所以雙胞胎必須比新鮮度窗口**更舊**才算證據。這個 case 是寫測試時才浮出來的，第一版會誤殺合法的週日 run。
+- **`script_not_run` 判別 + validator 閘**。`dcf_self_built` / `comps_implied` 沒跑與跑了沒結果，以前共用 `missing_or_nonpositive_value`，所以「跳過 Phase 1.5 兩支 mandatory script」在下游完全不可見。engine 接著對 ineligible anchor 做了**正確**的權重重分配，`owner_earnings_mult` 從 raw 0.05 變成 effective 0.275，單獨造出 `extreme_overvalued`——而 engine 自己早就在 `outlier_diagnostics` 標了那根錨離群。
+  新增 `mark_unrun_anchor_scripts()`：anchor 無值且 script artifact（`<T>_dcf_payload.json` / `<T>_comps_payload.json`）不存在或超過 1 天 → reason 記 `script_not_run`；`validate_session_export.py` 見到就 **rc=1**，訊息直接印出該跑哪一支。
+  **只在 anchor 無值時觸發**（有值代表跑過），**artifact 新鮮則維持原 reason**（跑了沒結果是合法 ineligible），**上游已有更具體 reason 則不覆蓋**。`forecaster_blend` 刻意不納入——它的 cache 也被 earnings-preview 流程寫，presence 證明不了本 session 跑過。
+- **報告揭露 outlier anchor**。`outlier_diagnostics` 一直在 history.json 裡、renderer 拿得到、卻從沒印過。現在 valuation lane 段落會列出 engine 自標的離群錨與其有效權重。Advisory，不改任何數字。
+
+### Fixed
+- **`position_size` 顯示差 100 倍**。`position_size_pct` 存的是**分數**（`BASE_POSITION = 0.05`、`base = cap_pct / 100.0`，整條 sizing chain 都是分數），卻走通用的 `pct=True` formatter 直接補一個 `%`。NOW 的 3.53% 印成 `0.035325%`；08-07 由 Claude 跑的 NET / AAOI 同形狀。新增 `fmt_position_size()`，兩支 renderer 共用。另三個 `pct=True` 欄位（`decision_confidence_pct` 67、`vs_current_pct` -34.5）本來就是真百分比，所以不能改 `fmt` 本身。
+  **既有已發布報告未回填**（使用者決定保留）。
+
+### Why
+- 稽核另指 renderer 不渲染 `suppression_proposals` 是 bug——**查證後不成立**。protocol `:568` 明寫它是 advisory / audit-only、「engine 沒有任何程式路徑消費本欄位」，是 V4.88.0 的刻意設計。真正的缺口在旁邊（`outlier_diagnostics`），已補。
+- 三個缺口共同的形狀：**gate 回報綠燈，但它根本沒檢查那件事**。與 V4.84.0 budget key、V4.114.0 `protocol_providers`、V4.115.0 bucket 欄位同族——這輪四次。
+
 ## [4.115.0] — 2026-08-09 — LLM 額度面板：每個窗口各一條 bar、方案 chip，全面改畫「已用」
 
 ### Changed

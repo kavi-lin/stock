@@ -1,8 +1,21 @@
 # INTEL COMMAND — Backlog & Tasks
 
-> **Last Updated**: 2026-08-09 (v4.115.0)
+> **Last Updated**: 2026-08-09 (v4.116.0)
 
 ---
+
+## ✅ Done (v4.116.0) — 三道「說綠但沒驗到」的閘（稽核 agy 首次 invest 挖出，非引擎特有）
+
+- [x] `validate_phase0.py` 新鮮度閘：`scan_date` 過舊/未來 → rc=1；**內容與較舊快照除 `scan_date` 外相同 → rc=1**。週末邊界刻意處理（雙胞胎須比窗口更舊才算證據）。新增 `test_validate_phase0.py`。
+- [x] `script_not_run` 判別（`mark_unrun_anchor_scripts`）+ `validate_session_export.py` rc=1 閘。只在 anchor 無值時觸發、artifact 新鮮則維持原 reason、上游 reason 不覆蓋、`forecaster_blend` 不納入。
+- [x] 報告揭露 `outlier_diagnostics`（含有效權重），advisory 不改數字。
+- [x] `position_size` 單位修正：`fmt_position_size()`，`0.035325%` → `3.53%`。兩支 renderer 共用。
+- [x] 更正稽核誤判：`suppression_proposals` 不渲染**不是 bug**（protocol `:568` advisory/audit-only，V4.88.0 刻意設計）。
+- [x] 全部新斷言種回 bug 驗過會紅；13 支測試 rc=0。
+
+- [ ] **既有已發布報告未回填 `position_size`**（使用者決定保留）。`inject_report_facts.py` 本來就有重刷用途，要批次修正隨時可以。
+- [ ] **Technical lane 的 `rubric_hint` 沒有被帶進 `phase_inputs`**：lane 只送 `signal`/`score`/`confidence`/`phase0_alignment`/`key_factors`/`risk_flags`，script 給的 `rubric_hint` 死在 subagent transcript 裡，所以「lane 給分超出 script rubric」目前**無法自動比對**。要補需動 lane 資料契約（protocol + schema + validator 三處）。2026-08-09 NOW 的 Technical 給 +2.5 而 script 說 `0 to +1`，單這一項就會把 STAGED_ENTRY 翻成 HOLD。
+- [ ] **shell quoting 汙染無閘可擋**：雙引號 `python3 -c "…"` 讓 zsh 吃掉 `$652M`，產出的是語法合法的 JSON、內容才錯。已在 agy 檢討文件列為紀律項；要自動偵測只能靠啟發式（`(M in`、` .45B` 簽名），會有偽陽性。
 
 ## ✅ Done (v4.115.0) — LLM 額度面板改版 + agy 5 分鐘天花板
 

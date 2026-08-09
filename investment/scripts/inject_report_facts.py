@@ -50,6 +50,33 @@ def fmt(v, money=False, pct=False):
     return str(v)
 
 
+def fmt_position_size(v):
+    """`position_size_pct` is a FRACTION of the portfolio despite its name.
+
+    `trade_plan_builder` builds it from `BASE_POSITION = 0.05` and
+    `vol_adjusted_limit_pct / 100.0`, then multiplies fractions the whole way
+    down the sizing chain — so 0.035325 means **3.53%**, not 0.035%.
+
+    Every other `pct=True` field really is a percent (`decision_confidence_pct`
+    67, `vs_current_pct` -34.5), so this one cannot be fixed in `fmt`; it needs
+    its own formatter. Until V4.116.0 it went through the generic one, which
+    appends a bare '%' — publishing a hundredfold understatement of every sized
+    position. 2026-08-09 NOW printed "0.035325%" for a 3.53% position, and
+    2026-08-07 NET / AAOI carry the same shape.
+
+    Renaming the field is the real fix. It appears in history.json, the export
+    schema and the validator, so the conversion lives here until that is worth
+    doing — and the name is called out above so the next reader does not have to
+    re-derive which of the two units this is.
+    """
+    if v is None or v == "":
+        return "N/A"
+    try:
+        return f"{float(v) * 100:.2f}%"
+    except (TypeError, ValueError):
+        return str(v)
+
+
 def render_decision_summary(t):
     odds = t.get("scenario_odds") or {}
     odds_s = (f"bull {odds.get('bull', 'N/A')} / base {odds.get('base', 'N/A')} / "
@@ -62,7 +89,7 @@ def render_decision_summary(t):
         ("Final Decision", f"{fmt(t.get('final_decision'))}（action: {fmt(t.get('final_action'))}）"),
         ("Final Score", f"{fmt(t.get('final_score'))} / 3.0"),
         ("Decision Confidence", fmt(t.get("decision_confidence_pct"), pct=True)),
-        ("Position Size", fmt(t.get("position_size_pct"), pct=True)),
+        ("Position Size", fmt_position_size(t.get("position_size_pct"))),
         ("分析時價格", fmt(t.get("analysis_price"), money=True)),
         (fv_label,
          f"{fmt(fvs.get('weighted_fair_value'), money=True)}（vs 現價 {fmt(fvs.get('vs_current_pct'), pct=True)}，{fmt(fvs.get('verdict_band'))}）"),

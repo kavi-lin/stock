@@ -455,7 +455,12 @@ def quota_snapshot(cfg: dict | None = None) -> dict:
             "provider": provider_id,
             "remaining_percent": remaining,
             "buckets": buckets,
+            # Display identity is supplied by the broker. `plan` below remains
+            # the provider-native value for diagnostics and must not leak into
+            # UI copy (Codex currently reports the internal slug `prolite`).
             "plan": snapshot.get("plan") if isinstance(snapshot, dict) else None,
+            "plan_label": entry.get("plan_label"),
+            "current_model": entry.get("current_model"),
             "reserve_only": bool(entry.get("reserve_only")),
             "cooldown_until": entry.get("cooldown_until"),
             "authenticated": entry.get("authenticated"),

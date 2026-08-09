@@ -585,6 +585,15 @@ shadow 樣本**（1 筆 = 一支個股的一次分析；多股 session 一場可
   | `fwd_earnings_discounted` **(條件錨)** | analyst-estimates cache：覆蓋 ≥3 家的最遠獲利年度 EPS × justified P/E ÷ CAPM 折現。**僅在 cashflow_intrinsic 四根皆非 live 且 TTM EPS 非正時 live**，否則只進 shadow 池 | 0.15（在八根的 1.0 預算之外） |
 - **缺 anchor 處理**：engine 保留 value + ineligible reason；不得由其他 family 暗中承接權重。
   `<2` 個獨立 family 時 `|score| < 2` 且 confidence=low。
+- **script-based anchor 不跑會被擋（V4.116.0）**：`dcf_self_built` 與 `comps_implied`
+  的來源 script 各自會寫 `skills/valuation-modeler/cache/<T>_dcf_payload.json` /
+  `<T>_comps_payload.json`。anchor **無值且該檔不存在或超過 1 天**時，engine 記的
+  reason 是 `script_not_run`（而非 `missing_or_nonpositive_value`），
+  `validate_session_export.py` 見到它一律 **rc=1**，protocol 收不了尾。
+  **「跑了但沒有可用值」是合法的 ineligible，「沒跑」不是** —— 這兩者以前共用同一個
+  reason 字串，2026-08-09 的 NOW session 就是這樣在跳過兩支 mandatory script 的情況下
+  走完全程：fundamental family 塌成 2 個 correlation group，`owner_earnings_mult`
+  的有效權重從 raw 0.05 變成 0.275，單獨造出 `extreme_overvalued`。
 - **第 9 根 live 時**：`fair_value_summary` 會同時給出 `pre_profit_anchor_live` 與
   `sell_side_only` 兩個布林，**必須**原樣帶進 Phase 4.6 的 `speculative` 輸入——那是
   governor 的唯一觸發來源（見 PHASE 4.6）。lane 論述請一併說明「這個估值成立的前提是

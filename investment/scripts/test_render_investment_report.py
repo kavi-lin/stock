@@ -207,6 +207,51 @@ contains("A.renderer_stamp", MD, R.RENDERER_LABEL)
 contains("A.polish_none", MD, "｜polish：none")
 
 
+# ── V4.116.0: position_size is a FRACTION wearing a `_pct` name ──────────────
+# `trade_plan_builder` builds it from BASE_POSITION = 0.05 and
+# vol_adjusted_limit_pct / 100.0, multiplying fractions all the way down, so
+# 0.035325 is 3.53%. It used to go through the generic `pct=True` formatter,
+# which appends a bare '%' — every published report understated its own position
+# size by 100×. This is the kind of wrong that reads as perfectly normal, so it
+# gets an explicit unit assertion rather than a format one.
+from inject_report_facts import fmt_position_size as _fps  # noqa: E402
+
+eq("A.size.fraction_to_percent", _fps(0.035325), "3.53%")
+eq("A.size.five_percent",        _fps(0.05),     "5.00%")
+eq("A.size.zero",                _fps(0.0),      "0.00%")
+eq("A.size.none",                _fps(None),     "N/A")
+# The bug's signature: a bare append would print "0.035325%".
+if "0.035325%" in _fps(0.035325):
+    raise AssertionError("A.size.not_raw_append: the raw fraction reached the page")
+# Other pct=True fields really are percents and must NOT be scaled.
+eq("A.size.confidence_untouched", R._pct(67), "67%")
+eq("A.size.vs_current_untouched", R._pct(-34.5), "-34.5%")
+
+
+# ── V4.116.0: anchors the engine flagged as outliers are disclosed ───────────
+# `outlier_diagnostics` has always been in history.json and was never rendered,
+# so a fair value could be dominated by an anchor the engine itself distrusted
+# with the report saying nothing. Advisory only — it must not change a number.
+_outlier_trade = {
+    "fair_value_summary": {
+        "weights_used": {"owner_earnings_mult": 0.275},
+        "outlier_diagnostics": [
+            {"anchor": "owner_earnings_mult", "value": 9.45,
+             "reason": "outside [33.37, 300.35]"},
+        ],
+    },
+}
+_note = "\n".join(R._outlier_note(_outlier_trade))
+contains("A.outlier.anchor",  _note, "owner_earnings_mult")
+contains("A.outlier.value",   _note, "9.45")
+contains("A.outlier.weight",  _note, "0.275")
+contains("A.outlier.reason",  _note, "outside [33.37, 300.35]")
+eq("A.outlier.absent_is_silent", R._outlier_note({"fair_value_summary": {}}), [])
+eq("A.outlier.no_block_at_all", R._outlier_note({}), [])
+eq("A.outlier.malformed_is_silent",
+   R._outlier_note({"fair_value_summary": {"outlier_diagnostics": ["junk"]}}), [])
+
+
 # ── Fixture B: decision-locked numbers actually reach the page ───────────────
 for label, needle in [
     ("final_decision", "HOLD（action: CANCEL）"),

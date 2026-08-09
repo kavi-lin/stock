@@ -1,7 +1,17 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-08-09 (v4.115.0)
+> **Last Updated**: 2026-08-09 (v4.116.0)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v4.116.0) — 四個「說綠但沒驗到」的閘;以及稽核報告本身也要查證
+
+- **緣起**:稽核 agy 首次執行 invest 的產出,挖出三個 repo bug。使用者的指示是「引導 agy 下次不要犯一樣的錯,不是刪掉它的 report」——**方向從清理現場轉成補閘**,這個轉向是對的:那筆 entry 刪不刪都不影響下次會不會再犯。
+- **稽核報告不能照抄,它有一項是錯的**:它說「renderer 不渲染 `suppression_proposals`,最關鍵的反對意見被刪掉」。查證後 protocol `:568` 明寫該欄位是 **advisory / audit-only**、「engine 沒有任何程式路徑消費」,是 V4.88.0 的刻意設計。**但它指的方向是對的**——真正沒被揭露的是隔壁的 `outlier_diagnostics`,一直在 history.json 裡、renderer 拿得到、從沒印過。**二手結論要當線索不是當事實**,而查證的收穫是找到了真的那個。
+- **「跳過 script」其實有被記錄,問題是記錄分不出兩種情況**:engine 老實記了 `dcf_self_built / comps_implied = ineligible, reason=missing_or_nonpositive_value`。那個字串同時代表「跑了但沒有可用值」與「根本沒跑」。後續的權重坍縮(`owner_earnings_mult` raw 0.05 → effective 0.275)是 engine 對 ineligible anchor 的**正確設計行為**。**錯的不是 engine 也不是它的記錄,是那個 reason 的解析度不足以讓下游做出不同反應。**
+- **判別器要找「不可偽造的痕跡」**:`dcf.py` / `comps.py` 都會寫 payload cache——那是 script 跑過的物理證據,不是自我宣稱。加上新鮮度(artifact 過期不算數)才成立。這比在 prompt 裡寫「必須跑」強,因為前者不跑就收不了尾。
+- **寫測試時被自己的規則反咬:週末**。phase0 的複製偵測第一版是「內容相同即造假」,但週六與週日都讀週五收盤,快照可以合法相同——會誤殺合法的週日 run。修法是讓雙胞胎必須**比新鮮度窗口更舊**才算證據。**這個 case 不是想出來的,是測試 fixture 自己撞出來的**;我原本的 fixture 剛好就是「複製 GOOD 只改日期」。
+- **`position_size` 差 100 倍是最不起眼但最久的一個**:`position_size_pct` 存分數卻走通用 `pct=True` formatter,3.53% 印成 `0.035325%`。08-07 由 **Claude** 跑的 NET / AAOI 同形狀——**這不是引擎問題,是欄位命名騙了所有人**。修不能改 `fmt` 本身,因為另三個 `pct=True` 欄位是真百分比。
+- **這輪第四次「白名單/檢查說綠但沒驗到那件事」**:V4.84.0 budget key → V4.114.0 `protocol_providers` → V4.115.0 bucket 欄位 → 本輪三個。**四次都是同一個形狀**:一個回報成功的操作,實際上根本沒檢查它宣稱檢查的東西。判準已經很清楚了:**任何 gate 都要先證明它在「已知壞」的輸入上會紅**,再允許它報綠。
 
 ## 🟢 Session Note (v4.115.0) — 「12.5 秒的 API 呼叫」被使用者一句話問掉:資料早就在本機檔案裡
 

@@ -272,6 +272,76 @@ eq("pack.forecaster_reason", pack["anchors"]["forecaster_blend"]["reason"],
 eq("pack.families", pack["families_present"],
    ["external_expectations", "fundamental", "relative"])
 
+# ── V4.116.0: "the script never ran" vs "it ran and had nothing usable" ──────
+# Both used to arrive as `missing_or_nonpositive_value`. That conflation is what
+# let the 2026-08-09 NOW session skip Phase 1.5's two mandatory valuation scripts
+# unnoticed: the engine correctly redistributed the ineligible anchors' weight,
+# `owner_earnings_mult` went from a raw 0.05 to an effective 0.275, and it
+# produced the `extreme_overvalued` verdict on its own. Nothing downstream could
+# tell the two cases apart, so nothing could refuse the run.
+import os as _os                                                    # noqa: E402
+import tempfile as _tempfile                                        # noqa: E402
+import time as _time                                                # noqa: E402
+from compute_price_framework import (                               # noqa: E402
+    SCRIPT_NOT_RUN, SCRIPT_SOURCED_ANCHORS, mark_unrun_anchor_scripts)
+
+with _tempfile.TemporaryDirectory() as _fake_root:
+    def _artifact(anchor, ticker, age_days):
+        rel = SCRIPT_SOURCED_ANCHORS[anchor][0].format(t=ticker)
+        path = _os.path.join(_fake_root, rel)
+        _os.makedirs(_os.path.dirname(path), exist_ok=True)
+        with open(path, "w") as fp:
+            fp.write("{}")
+        stamp = _time.time() - age_days * 86400
+        _os.utime(path, (stamp, stamp))
+        return path
+
+    def _mark(ticker, anchors, meta=None):
+        return mark_unrun_anchor_scripts(ticker, anchors, meta or {},
+                                         base_dir=_fake_root)
+
+    # No artifact at all — the real NOW case.
+    _m = _mark("NOW", {"dcf_unlevered": 115.2})
+    eq("script_gate.absent_dcf", _m["dcf_self_built"]["reason"], SCRIPT_NOT_RUN)
+    eq("script_gate.absent_comps", _m["comps_implied"]["reason"], SCRIPT_NOT_RUN)
+    if "dcf.py" not in _m["dcf_self_built"].get("required_command", ""):
+        raise AssertionError("script_gate.names_the_fix: message must name the command to run")
+
+    # Artifact present and fresh: the script ran and had nothing usable to say,
+    # which is a legitimate ineligibility and must NOT be reported as skipped.
+    _artifact("dcf_self_built", "FRESH", age_days=0)
+    _m = _mark("FRESH", {})
+    eq("script_gate.fresh_artifact_not_flagged",
+       _m.get("dcf_self_built", {}).get("reason"), None)
+    eq("script_gate.other_anchor_still_flagged",
+       _m["comps_implied"]["reason"], SCRIPT_NOT_RUN)
+
+    # Stale artifact proves nothing about this session.
+    _artifact("dcf_self_built", "STALE", age_days=9)
+    eq("script_gate.stale_artifact_flagged",
+       _mark("STALE", {})["dcf_self_built"]["reason"], SCRIPT_NOT_RUN)
+
+    # A value present means it ran, whatever the artifact looks like.
+    eq("script_gate.value_present_untouched",
+       _mark("NOW", {"dcf_self_built": 120.0, "comps_implied": 88.0}), {})
+
+    # An upstream reason is more specific and must survive.
+    eq("script_gate.upstream_reason_wins",
+       _mark("NOW", {}, {"dcf_self_built": {"reason": "low_confidence"}})
+       ["dcf_self_built"]["reason"], "low_confidence")
+
+    # Pure-function callers pass no ticker and must be unaffected.
+    eq("script_gate.no_ticker_noop", _mark("", {}), {})
+
+    # End to end: the marking has to reach the pack's anchor detail, or the
+    # validator gate reads a reason that was never written.
+    _pack = build_valuation_pack(
+        {"dcf_unlevered": 100.0}, 100.0,
+        anchor_meta=_mark("NOW", {"dcf_unlevered": 100.0}))
+    eq("script_gate.reaches_pack",
+       _pack["anchors"]["dcf_self_built"]["reason"], SCRIPT_NOT_RUN)
+
+
 # Missing provenance/as_of cannot enter live.
 pack_missing = build_valuation_pack({"dcf_unlevered": 100.0}, 100.0)
 eq("pack.provenance_required", pack_missing["weighted_fair_value"], None)

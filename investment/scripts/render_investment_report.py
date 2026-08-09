@@ -66,7 +66,8 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 # The six decision-critical blocks keep exactly one implementation. `inject_report_facts`
 # stays the owner (it still refreshes already-published reports); this module imports it.
-from inject_report_facts import RENDERERS as FACT_RENDERERS, fmt  # noqa: E402
+from inject_report_facts import (  # noqa: E402
+    RENDERERS as FACT_RENDERERS, fmt, fmt_position_size)
 from decision_engine import c_eff  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -353,7 +354,7 @@ def formulaic_narrative(entry, trade, bundle):
         f"（action: {fmt(trade.get('final_action'))}），"
         f"final_score {fmt(trade.get('final_score'))} / 3.0、"
         f"decision_confidence {_pct(trade.get('decision_confidence_pct'))}、"
-        f"position_size {_pct(trade.get('position_size_pct'))}；"
+        f"position_size {fmt_position_size(trade.get('position_size_pct'))}；"
         f"Red Team {fmt(trade.get('red_team_verdict'))}。")
 
     consensus = "Lane 訊號分佈：" + "／".join(bits) + "。" if bits else "Lane 訊號分佈：N/A。"
@@ -548,7 +549,45 @@ def _lane_extras(lane, blk, trade):
         vl = trade.get("valuation_lane") or {}
         out += [f"Lane 自算 weighted_fair_value {_money(vl.get('weighted_fair_value'))}"
                 f"（vs 現價 {_pct(vl.get('vs_current_pct'))}）", ""]
+        out += _outlier_note(trade)
     return out
+
+
+def _outlier_note(trade):
+    """Surface anchors the engine itself flagged as outliers.
+
+    V4.116.0. `outlier_diagnostics` has always been in history.json and has never
+    been rendered, so a fair value could be dominated by an anchor the engine had
+    already marked as out of range without the report saying so anywhere.
+
+    2026-08-09 NOW is the case that forced this: `owner_earnings_mult` at 9.45,
+    flagged `outside [33.37, 300.35]`, carried an effective weight of 0.275 after
+    two mandatory anchors were skipped — and produced the `extreme_overvalued`
+    verdict the whole bear thesis rested on. The diagnostic was sitting in the
+    decision record the entire time.
+
+    Advisory, like the diagnostic itself: this changes no number. It exists so a
+    reader can see which anchors the engine distrusts before believing the fair
+    value built from them.
+    """
+    fvs = trade.get("fair_value_summary") or {}
+    diags = fvs.get("outlier_diagnostics")
+    if not isinstance(diags, list) or not diags:
+        return []
+    weights = fvs.get("weights_used") or {}
+    rows = []
+    for d in diags:
+        if not isinstance(d, dict):
+            continue
+        anchor = d.get("anchor")
+        w = weights.get(anchor)
+        rows.append(
+            f"- `{fmt(anchor)}` = {fmt(d.get('value'))}"
+            + (f"（有效權重 {fmt(w)}）" if w is not None else "")
+            + f" —— {fmt(d.get('reason'))}")
+    if not rows:
+        return []
+    return ["**⚠ Outlier anchors（engine 自標，未從加權中剔除）**", ""] + rows + [""]
 
 
 def _sec_contrarian(trade, bundle):
@@ -616,7 +655,7 @@ def sec_entry_plan(trade):
         ("Stop Loss", _money(trade.get("stop_loss"))),
         ("Risk / Reward", fmt(trade.get("risk_reward_ratio"))),
         ("Staged Split", fmt(trade.get("staged_split"))),
-        ("Position Size", _pct(trade.get("position_size_pct"))),
+        ("Position Size", fmt_position_size(trade.get("position_size_pct"))),
         ("Position Size Method", fmt(trade.get("position_size_method"))),
         ("Time Horizon", fmt(trade.get("time_horizon"))),
     ]
