@@ -898,6 +898,18 @@ def _persist_artifact(inp: dict, out: dict, *, phase: str) -> None:
     Phase 4.6 shares this CLI but produces a decision-cap payload, not
     `calculation_steps`; writing it would overwrite the Phase 3 evidence with
     something the validator does not compare, so it is skipped.
+
+    V4.125.0 — writes the WHOLE phase-3 output, not a hand-picked subset.
+    The subset was sized for validator §5l (which only diffs `calculation_steps`),
+    but the file is named `<T>_decision_engine.json` and protocol §PHASE 3 tells the
+    PM the engine "把輸出留在" this path — so a run whose stdout has scrolled out of
+    context reads it as the full result. On 2026-08-10 a META run did exactly that
+    and died on `KeyError: 'avg_confidence'`; 5 of the 9 fields it read were in the
+    dropped set (`avg_confidence`, `hot_zone_probe`, `hot_zone_probe_tier`,
+    `hot_zone_eval`, `transition_data_stale_or_inconsistent`). Persisting everything
+    costs ~2 KB and makes the file honest to its own name. §5l is unaffected: it
+    reads only `calculation_steps`, and extra keys are ignored by both consumers
+    (`validate_session_export.py`, `audit_gate_compliance.py`).
     """
     if phase != "3":
         return
@@ -908,14 +920,12 @@ def _persist_artifact(inp: dict, out: dict, *, phase: str) -> None:
     path = os.path.join(root, ENGINE_ARTIFACT.format(t=ticker))
     try:
         os.makedirs(os.path.dirname(path), exist_ok=True)
+        payload = dict(out)
+        # Normalise to the validated ticker so the §5l ownership check keys off the
+        # same value the filename does, whatever casing the input carried.
+        payload["ticker"] = ticker
         with open(path, "w", encoding="utf-8") as fp:
-            json.dump({"ticker": ticker,
-                       "decision_engine_version": out.get("decision_engine_version"),
-                       "engine": out.get("engine"),
-                       "final_score": out.get("final_score"),
-                       "final_decision": out.get("final_decision"),
-                       "calculation_steps": out.get("calculation_steps")},
-                      fp, ensure_ascii=False, indent=1)
+            json.dump(payload, fp, ensure_ascii=False, indent=1)
     except OSError:
         pass
 

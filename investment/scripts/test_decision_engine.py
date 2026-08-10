@@ -731,3 +731,58 @@ if FAILS:
         print("  -", f)
     sys.exit(1)
 print("✓ all decision-engine spec-parity fixtures pass (A–M + MU golden replay)")
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# V4.125.0 — the persisted artifact must BE the phase-3 output, not a subset.
+#
+# Seeded regression: on 2026-08-10 a META run whose stdout had scrolled out of
+# context re-read `invest_logs/decision_engine/META_decision_engine.json` as the
+# phase-3 result (protocol §PHASE 3 says the engine "把輸出留在" that path) and died
+# on `KeyError: 'avg_confidence'`. 5 of the 9 top-level fields it needed were being
+# dropped by _persist_artifact. Restore the old 6-key literal and this goes red.
+import json as _json  # noqa: E402
+from decision_engine import _persist_artifact, ENGINE_ARTIFACT  # noqa: E402
+
+_ART_T = "ZZARTIFACT"
+_art_out = run_phase3({**Z, "ticker": _ART_T})
+_persist_artifact({"ticker": _ART_T}, _art_out, phase="3")
+_art_path = os.path.join(
+    os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")),
+    ENGINE_ARTIFACT.format(t=_ART_T))
+try:
+    with open(_art_path, encoding="utf-8") as _fp:
+        _art = _json.load(_fp)
+
+    # The exact fields the failed META assembler reached for.
+    for _f in ("avg_confidence", "hot_zone_probe", "hot_zone_probe_tier",
+               "hot_zone_eval", "transition_data_stale_or_inconsistent"):
+        eq(f"artifact.has.{_f}", _f in _art, True)
+
+    # No silent narrowing again: the artifact carries every key the engine returned.
+    _dropped = sorted(k for k in _art_out if k not in _art)
+    eq("artifact.dropped_fields", _dropped, [])
+
+    # §5l's anchors must survive verbatim — that gate reads only these two.
+    eq("artifact.calculation_steps_parity", _art.get("calculation_steps"),
+       _art_out.get("calculation_steps"))
+    eq("artifact.ticker", _art.get("ticker"), _ART_T)
+
+    # Phase 4.6 must still not clobber phase-3 evidence.
+    _persist_artifact({"ticker": _ART_T}, {"ticker": _ART_T, "phase": 4.6}, phase="4.6")
+    with open(_art_path, encoding="utf-8") as _fp:
+        eq("artifact.phase46_does_not_overwrite",
+           "calculation_steps" in _json.load(_fp), True)
+finally:
+    try:
+        os.remove(_art_path)
+    except OSError:
+        pass
+
+
+if FAILS:
+    print(f"✗ {len(FAILS)} artifact-shape failure(s):")
+    for f in FAILS:
+        print("  -", f)
+    sys.exit(1)
+print("✓ engine artifact persists the full phase-3 output (V4.125.0)")

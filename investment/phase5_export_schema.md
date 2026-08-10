@@ -1389,3 +1389,59 @@ V2.13 新欄位 **皆為 informational**：
 - `validate_session_export.py` **不**將其列為 hard-required
 - 缺值不擋 rc=0；統計 `--coverage-report` 旗標可顯示新欄位非空率
 - LLM 應遵守 protocol 內 "必填" 規定（缺資料寫 `INSUFFICIENT_DATA` 而非 null），但 schema 層級不強制 — 累積 30+ run 後再評估是否提升至 hard-required
+
+---
+
+## Phase 5 質性檔（`p5-qualitative/1.0`，V4.126.0）
+
+PM 在 Phase 5 Step 1a 手寫的**唯一**檔案：
+`investment/invest_logs/qualitative/<DATE>_<TICKER>.json`。
+其餘欄位一律由 `build_session_export.py` 從 artifact 導出。
+
+**schema 是封閉的**——出現下列任一類欄位即 rc=1，不是合併：
+
+| 類別 | 例 | 為什麼不准手填 |
+|---|---|---|
+| engine 導出 | `final_score` / `final_decision` / `calculation_steps` / `avg_confidence` / `hot_zone_*` / `decision_cap_*` | 決策數學的產出物，§13/§5l 已鎖 |
+| lane 數字 | `lanes.<name>.score` / `.confidence` | **Phase 3 engine 輸入**才是「決策數學實際吃到的值」；手填會與 `calculation_steps` 分岔，renderer 的一致性閘會擋 |
+| 估值 | `valuation_pack` / `fair_value_*` / `implied_expectations` | `pf_quant` artifact 的內容 |
+| 交易計畫 | `entry_*` / `take_profit` / `stop_loss` / `position_size_pct` / `staged_split` / `risk_audit` | `trade_plan_builder.py` 的輸出 |
+| 宏觀 | `phase0_macro_snapshot` / `macro_multiplier` | phase0 artifact 的內容 |
+| provenance | `det_shadow` / `lane_contract` / `export_provenance` | Step 1.5 post-processor 與 append script 的 |
+
+**允許的欄位**（其他一律 rc=1「未知欄位」）：
+
+```jsonc
+{
+  "schema": "p5-qualitative/1.0",
+  "ticker": "META", "date": "2026-08-10",
+  "lanes": {                       // 五個 lane 都要，缺一不可
+    "fundamentals": { "signal": "HOLD", "key_factors": [...], "risk_flags": [...] },
+    "sentiment": {...}, "news": {...}, "technical": {...}, "valuation": {...}
+  },
+  "lane_detail": {                 // 選填：併進 <name>_lane 的額外欄位
+    "news": { "pt_revision_momentum": {"direction":"DOWN","consensus_delta_pct_1m":-2.94},
+              "immediate_catalyst_5d": null, "decision_point_days": 21,
+              "cross_asset_spillover": "..." }
+  },
+  "red_team": { "verdict": "...", "counter_thesis": "...", "kill_conditions": [...],
+                "counter_evidence_strength": 5, "thesis_break_probability": 0.68,
+                "execution_failed": false },
+  "burry_narrative": "...",
+  "conflict_bias": { "tentative_decision": "HOLD", "conflict_summary": "...",
+                     "triggers_fired": [...], "t4_detail": null, "t5_detail": null,
+                     "proceed_to_phase3": true },
+  "macro_context": "...",
+  "watch_conditions": { "key": "繁中描述", ... },   // object，最少 3 條
+  "key_risks": [...], "bias_notes": "...",
+  "phase2_fanout_mode": "PARALLEL_SUBAGENT", "degraded_analysts": [],
+  "decision_point_days": 21, "devils_advocate_filed": true,
+  "trade_metadata": {...},                          // 必填，不得 null
+  "last_outcome": "UNKNOWN"
+}
+```
+
+> **單一來源**：`lane_scores`、`conflict_bias.lane_signals`、`<name>_lane`、bundle 的
+> `lanes` 全部由 `lanes.<name>` + Phase 3 engine 輸入導出，所以它們不可能互相矛盾。
+> §16 的「signal 與同 lane score 反向」「`lane_signals.valuation` != `valuation_lane.signal`」
+> 這一類矛盾因此變成**表達不出來**，而不只是被驗出來。

@@ -8,6 +8,83 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.127.1] — 2026-08-10 — 首次真跑抓到組裝器漏兩欄：burry_score 與 MHP
+
+### Fixed
+- **`burry_score` 取錯來源**（原讀 `pf_quant.quant_blocks.burry`，該路徑不存在 → 恆 None）。
+  改讀 **phase-3 engine 輸入**的 `burry.score`，與 lane 數字同一條原則：取決策數學實際吃到的值，
+  而不是重跑 `burry_score.py`（價格會動，重跑可能與 `calculation_steps` 不一致）。
+  連帶讓 validator 的 §16 T4 從「無法重算」變成可重算。
+- **`multi_horizon_price_framework` 完全沒吐**（V4.127.0 的漏網）。它在 **phase-4 輸入**裡；
+  `compute_price_framework.py --stage mhp` 只印 stdout、不落地，這正是它過去被手打進 export 的原因。
+  改從 p4 輸入取，並加進 `DERIVED_KEYS`（禁止手填）。
+
+### Why
+- 2026-08-10 12:03 META 真跑（codex，9m40s，6.47M in / 24k out，rc=0）驗證新路徑可用：
+  **零自組腳本、質性檔一次寫對、validate rc=0、render 333 行報告**。但 validator 兩條
+  `⚠ degraded` 指出這兩欄缺席——**都是 V4.127.0 組裝器漏的，不是模型的問題**。
+- 用同一批 artifact 重建 entry 驗證：`final_score` / `final_decision` / `final_action` /
+  `avg_confidence` / `position_size_pct` **逐欄相同**，只有這兩欄補上，validator 由
+  2 warning 變全綠。
+
+## [4.127.0] — 2026-08-10 — Phase 5 組裝改由 script 做：PM 只寫導不出來的東西
+
+### Added
+- **`investment/scripts/build_session_export.py`**（0 LLM）：讀各 phase 已落地的 artifact
+  （phase0 / pf_quant / decision_engine / phase-3 engine 輸入）+ 跑 `trade_plan_builder.py`
+  與 `valuation_reviewer_gate.py`，加上 PM 手寫的**單一質性檔**，一次吐出兩個 Phase 5 產出物：
+  session export entry（stdout）**與** `phase_inputs/<DATE>_<TICKER>.json` bundle。
+  bundle 過去沒有任何 script 產生，是 renderer 的硬性前置——這是 META 那次就算修好 KeyError
+  仍然產不出報告的原因。
+- **`test_build_session_export.py`**：封閉 schema、單一來源、artifact 閘共 26 條斷言；
+  5 個 mutation（拿掉任一守衛）逐一驗過會紅。
+
+### Changed
+- **protocol §PHASE 5 Step 1 改寫**：`🚫 不得自寫組裝腳本，不得手寫整包 entry JSON`。
+  改成 Step 1a 寫質性檔 → Step 1b 跑組裝器。
+- **`phase5_export_schema.md` 新增「Phase 5 質性檔」節**（`p5-qualitative/1.0`）。
+
+### Why
+- V4.117.0 把 export 的**內容**變成工具產出的，**組裝**還是模型每跑一次現寫一支
+  ~130 行、~140 個欄位的拋棄式腳本。2026-08-10 META 那支死在 `KeyError: 'avg_confidence'`，
+  7.4M token 全損。V4.126.0 補好了那個特定的坑，但**能打錯的欄位還有一百多個**，
+  而且錯得「數字合理」時 validator 未必擋得住。
+- **封閉 schema 是唯一真正的護欄**：質性檔出現任何 script 導得出來的欄位一律 rc=1 而非合併，
+  否則它會慢慢長回原本那包手寫 literal。
+- **單一來源讓一整類矛盾變成表達不出來**：`lane_scores` / `conflict_bias.lane_signals` /
+  `<name>_lane` / bundle 的 `lanes` 全部由同一處導出；lane 的 `score`/`confidence` 一律取自
+  **Phase 3 engine 輸入**（決策數學實際吃到的值），不接受手填。
+- **實測**：用 2026-08-10 那次失敗的 META artifact 重跑完整 Phase 5 鏈——
+  build rc=0 → append rc=0 → det_shadow rc=0 → **validate rc=0（V5.3 schema compliant）**
+  → **render rc=0（276 行報告）**。bring-up 過程中 renderer 的一致性閘還抓到我自己寫的
+  單一來源違規（bundle 用 `entry_reference_price` 596.55、entry 用 `valuation_pack` 592.10），
+  已修並種成測試。
+
+## [4.126.0] — 2026-08-10 — 兩次 META 失敗查出來的不是模型問題：engine artifact 名不副實、comps 把答案當失敗
+
+### Fixed
+- **`decision_engine.py` `_persist_artifact` 改寫完整 phase-3 輸出**（原本只寫 6 個 key，engine 實際回 24 個）。
+  被丟掉的 18 欄裡有 `avg_confidence` / `hot_zone_probe` / `hot_zone_probe_tier` / `hot_zone_eval` /
+  `transition_data_stale_or_inconsistent` —— 正是 2026-08-10 META run 組 export 時要讀的 5 欄，於是
+  `KeyError: 'avg_confidence'` → `append_session_export` 收到空輸入 → 沒有 history、沒有報告。
+  §5l 不受影響（只讀 `calculation_steps`），兩個消費端都忽略多餘 key。順帶讓
+  `investment_protocol_v5_0.md` 那句「engine 把輸出留在這個檔」從錯的變成對的。
+- **`comps.py` 對「同業不足」改回 rc=0**（原 `sys.exit(0 if not degraded else 1)`）。
+  `comps_implied_value: null` + `fewer_than_3_business_similar_peers` 是**完整且正確的答案**，不是
+  執行失敗；映射成 rc=1 會撞上 V4.116.1 的閘門紀律，讓 PM 當場自行決定硬停或降級——2026-08-10
+  同一天就決定了四次、兩種結果（NVDA 08:36 停 / 08:43 續 / META 09:03 停 / 09:14 續）。
+  **V4.116.1 不放寬**：rc≠0 仍只代表工具失敗，照樣停。protocol 估值錨表補明文。
+- **artifact gate 訊息不再誣賴模型**（`dashboard_server.py`）。原文 `model may have finished without
+  writing output` 對「依紀律中止」的 run 是錯的——那是紀律生效不是缺陷。改為並列兩種可能並附 run log 路徑。
+
+### Why
+- META 兩次失敗查下來全是 repo 自己的坑：**當天五次 run 全是 codex，成功兩次**；成功的 NVDA 08:43
+  與失敗的 META 09:14 同樣 7.3M/7.4M context、同樣寫拋棄式組裝腳本，**唯一差別是後者去讀了 artifact**。
+  長 run 把 stdout 擠出 context 後，模型會回頭讀那個「看起來就是 phase-3 結果」的檔——檔名、路徑、
+  內容、protocol 文字四項都在這樣暗示，但它是為 §5l 裁剪過的子集。
+- 兩個修法都是同一條既有原則的延伸：**「沒資料」≠「壞值」≠「沒跑」**（PE_ABSENT V4.86.2、
+  script_not_run V4.116.0、V4.111.7 抓不到價格不等於最糟分數）。
+
 ## [4.125.0] — 2026-08-10 — 共通 subagent 模板對 C1 契約核一次（T2 收尾）
 
 `docs/plan_invest_stale_stages.md` T2 的最後一項。共通 subagent prompt 模板寫於 2026-05-04，

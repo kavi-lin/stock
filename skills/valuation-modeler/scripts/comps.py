@@ -382,7 +382,30 @@ def main():
         print(f"report → {out_md}")
         print(json.dumps({k: payload[k] for k in ("ticker", "comps_implied_value", "degraded")},
                          ensure_ascii=False))
-    sys.exit(0 if not payload["degraded"] else 1)
+    # V4.125.0 — exit 0 whenever a payload was produced, degraded or not.
+    #
+    # `degraded` means "no usable comps anchor" (e.g. <3 business-similar peers). That
+    # is a COMPLETE AND CORRECT ANSWER, not an execution failure: the run fetched, the
+    # cohort was screened, and the verdict is `comps_implied_value: null` with a reason
+    # in `model_eligibility.reason`. Mapping it to rc=1 collided with V4.116.1's gate
+    # discipline ("mandatory script rc≠0 → halt and report"), which is written for
+    # tools that FAILED. The PM was left to decide on the spot whether a null anchor
+    # was a halt or a degrade, and it decided differently run to run: on 2026-08-10
+    # alone, NVDA 08:36 halted / NVDA 08:43 continued / META 09:03 halted / META 09:14
+    # continued — same ticker, same day, same data gap, opposite treatment.
+    #
+    # Fixing the signal rather than the halt rule keeps V4.116.1 absolute: rc≠0 still
+    # means "the tool failed, stop". Genuine failures (fetch error, bad ticker, crash)
+    # still surface as a non-zero exit via the raised exception. A null anchor now flows
+    # into the machinery already built for it — eligibility-before-aggregation (V4.75.0)
+    # and the `no_peer_cohort` trigger in valuation_reviewer_gate.py — instead of
+    # aborting the analysis. This is the same "no data ≠ bad value ≠ didn't run"
+    # distinction already made by PE_ABSENT (V4.86.2) and script_not_run (V4.116.0).
+    #
+    # Consumers read `.comps_implied_value` / `.degraded` from the JSON, never the exit
+    # code (verified 2026-08-10: no script branches on it), so nothing silently starts
+    # accepting a degraded anchor as a good one.
+    sys.exit(0)
 
 
 if __name__ == "__main__":

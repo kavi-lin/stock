@@ -1317,10 +1317,20 @@ def run_protocol(name, params=None):
                     except OSError:
                         pass
                 if not fresh:
+                    # V4.125.0 — the old wording asserted a cause ("model may have
+                    # finished without writing output"). That is right for a run that
+                    # died mid-Phase-5, and actively wrong for one that stopped on
+                    # purpose: V4.116.1 requires the PM to halt when a mandatory
+                    # script returns rc≠0, and such a run legitimately produces no
+                    # report. Both rendered identically as 分析失敗, so the discipline
+                    # working looked the same as the engine breaking. State the fact,
+                    # name both branches, and point at the log that distinguishes them.
                     artifact_err = (
                         "rc=0 but required artifact missing/stale: "
                         + ", ".join(wanted)
-                        + " (model may have finished without writing output)"
+                        + " — 兩種可能：(a) 前置 script rc≠0，模型依閘門紀律中止（正確行為，"
+                        + "非缺陷）；(b) 模型跑完但沒寫檔。看 run log 末段的結案訊息可分辨"
+                        + (f"：{os.path.relpath(log_path, ROOT)}" if log_path else "")
                     )
                     try:
                         with open(log_path, "a") as _lf:

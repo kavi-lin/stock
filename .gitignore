@@ -121,3 +121,6 @@ config/x_kol_usage.json*
 news/x_kol_logs/
 config/x_kol_analysis_cursor.json
 config/x_kol_symbol_identity.json
+
+# 模型跑 protocol 時的暫存輸入（p3/p4 payload）。V4.127.0 起禁止在此放自組腳本。
+.codex_protocol_tmp/

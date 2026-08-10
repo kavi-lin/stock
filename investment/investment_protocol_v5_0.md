@@ -618,6 +618,13 @@ shadow 樣本**（1 筆 = 一支個股的一次分析；多股 session 一場可
   | `forecaster_blend` | `python3 skills/earnings-valuation-forecaster/scripts/forecast.py <T> --json-only` (3-method blend) | 0.05 |
   | `fwd_earnings_discounted` **(條件錨)** | analyst-estimates cache：覆蓋 ≥3 家的最遠獲利年度 EPS × justified P/E ÷ CAPM 折現。**僅在 cashflow_intrinsic 四根皆非 live 且 TTM EPS 非正時 live**，否則只進 shadow 池 | 0.15（在八根的 1.0 預算之外） |
 - **缺 anchor 處理**：engine 保留 value + ineligible reason；不得由其他 family 暗中承接權重。
+- **`comps.py` 回 `comps_implied_value: null` 不是失敗，不得中止（V4.125.0 定案）**：同業不足
+  （`model_eligibility.reason` 例如 `fewer_than_3_business_similar_peers`）是**完整且正確的答案**，
+  V4.125.0 起 script 對這種情況回 **rc=0**。照「缺 anchor 處理」把它當 ineligible anchor 排除、
+  在 `valuation_reviewer_gate` 記下 `no_peer_cohort`，**繼續走完**。
+  超大型股常常沒有真同業（NVDA / META 實例），硬停等於這類標的永遠分析不了。
+  V4.116.1 的閘門紀律（mandatory script `rc≠0` → 停下回報）**不變也不放寬**——rc≠0 仍然只代表
+  「工具失敗」（抓取錯誤、ticker 無效、crash），那時照樣停。
   `<2` 個獨立 family 時 `|score| < 2` 且 confidence=low。
 - **script-based anchor 不跑會被擋（V4.116.0）**：`dcf_self_built` 與 `comps_implied`
   的來源 script 各自會寫 `skills/valuation-modeler/cache/<T>_dcf_payload.json` /
@@ -1726,24 +1733,44 @@ Validator (`validate_session_export.py` § 10 / § 10b) 會檢查 cap 與 govern
 
 PM (inline)。
 
-### Step 1 — Append session export JSON 至 `./invest_logs/history.json`
-Shape **必須**符合 `phase5_export_schema.md` (FULL EXAMPLE)。
+### Step 1 — 組裝並寫入 session export（V4.126.0 起改為 script 組裝）
 
-**V5.0.x — 用 script 寫入，不再在 prompt 內手寫巨大 JSON 段**：
+**🚫 不得自寫組裝腳本，不得手寫整包 entry JSON。** PM 只寫「script 導不出來的東西」，
+其餘一律由 `build_session_export.py` 從各 phase 已落地的 artifact 取值。
 
-```bash
-# 把本次 session 完整 entry JSON 存到暫存檔（PM 在 Phase 5 末段用 Write 工具寫入）
-# 然後呼叫：
-python3 investment/scripts/append_session_export.py --from-file /tmp/<ticker>_session.json
+**Step 1a — 寫質性檔**（唯一要手寫的檔，schema 見 `phase5_export_schema.md`
+「Phase 5 質性檔」節）：
+
+```
+investment/invest_logs/qualitative/<DATE>_<TICKER>.json
 ```
 
-或直接 pipe：
+只放這些：五個 lane 的 `signal` / `key_factors` / `risk_flags`、`red_team`、
+`burry_narrative`、`conflict_bias` 質性欄、`macro_context`、`watch_conditions`（≥3 條）、
+`key_risks`、`bias_notes`、`phase2_fanout_mode`、`degraded_analysts`、
+`decision_point_days`、`devils_advocate_filed`、`trade_metadata`、`lane_detail`。
+
+**schema 是封閉的**：填進任何 script 導得出來的欄位（`final_score`、`calculation_steps`、
+`avg_confidence`、`valuation_pack`…）→ rc=1。**lane 的 `score` / `confidence` 也不准填**
+——那兩個由 Phase 3 engine 輸入決定，手填會與 `calculation_steps` 分岔。
+
+**Step 1b — 跑組裝器**（同時產出 export entry 與 Step 4 要用的 phase_inputs bundle）：
 
 ```bash
-cat <<'JSON' | python3 investment/scripts/append_session_export.py
-{ "session_export_version": "V5.3", ... }
-JSON
+python3 investment/scripts/build_session_export.py \
+  --ticker <T> --date <DATE> \
+  --qualitative investment/invest_logs/qualitative/<DATE>_<T>.json \
+  --p3-input /tmp/<T>_p3.json --p4-input /tmp/<T>_p4.json \
+  | python3 investment/scripts/append_session_export.py
 ```
+
+任何 artifact 缺席 → rc=1 並指名是哪一包。**不要手補那包**，回去把對應 phase 跑完。
+
+> **為什麼禁止自寫組裝腳本（2026-08-10 META 事故）**：PM 過去每跑一次就現寫一支
+> `build_<T>_session.py`（約 130 行、~140 個欄位）。那次它把 engine artifact 當成完整
+> Phase 3 輸出去讀，`KeyError: 'avg_confidence'` → export 空輸入 → 沒有 history、沒有報告，
+> 7.4M token 全損。artifact 已於 V4.126.0 補成完整，但**手寫組裝能打錯的欄位還有一百多個**，
+> 而且錯得「數字合理」時連 validator 都未必擋得住。組裝是機械工作，交給 script。
 
 腳本會：原子寫入（tmp + rename）、`fcntl.flock` 序列化、自動鏡射 top-level
 `ticker` / `final_action` / `date`、檢查最小 shape、蓋 `export_provenance`。失敗 → 修 entry 再重跑。

@@ -1,7 +1,36 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-08-10 (v4.125.0)
+> **Last Updated**: 2026-08-10 (v4.127.1)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v4.127.1) — META 真跑驗收：新路徑成立，但組裝器自己漏了兩欄
+
+- **驗收結果**：2026-08-10 12:03 codex 跑 META，9m40s、6.47M in / 24k out、rc=0。**零自組腳本**（禁令生效）、**質性檔一次寫對**（我原本預期會在 `watch_conditions` 要 object、`pt_revision_momentum` 要巢狀、`trade_metadata` 不得 null 這三處來回幾輪，實際沒發生）、validate rc=0、render 333 行。
+- **fix 3 在生產環境確認**：`comps.py` 對 META 回 **rc=0** + `comps_implied_value: null`（`<2 usable metrics`），模型繼續走完。09:03 那輪就是在這裡硬停的，同一個資料缺口現在不再是擲骰子。
+- **但 validator 兩條 `⚠ degraded` 指出組裝器漏欄——是我漏的不是模型漏的**：(a) `burry_score` 我猜在 `pf_quant.quant_blocks.burry`，那個路徑根本不存在，所以恆 None，連帶讓 §16 的 T4 無法重算；(b) `multi_horizon_price_framework` 我整個沒吐。
+- **兩個都在 phase 輸入裡，不需要新的 subprocess 或網路**：burry 在 **p3 輸入**（`{"score":44.4,"veto_flag":false}`）、MHP 在 **p4 輸入**。`--stage mhp` 只印 stdout 不落地，這正是它過去被手打進 export 的原因。改成從輸入取，並加進 `DERIVED_KEYS` 禁止手填。
+- **教訓**：`_burry_score()` 我是照著自己寫的測試 fixture 想當然耳，而那個 fixture 是我自己編的（`quant_blocks.burry`）。**測試 fixture 若不是從真實 artifact 取樣，它只會確認我的假設自洽，不會揭穿假設本身是錯的。**這次是 validator 的 degraded warning 補上了這個缺口。
+- **live entry 尚未補**：重建驗證過 `final_score`/`final_decision`/`final_action`/`avg_confidence`/`position_size_pct` **逐欄相同**，只差那兩欄。要不要用 `--replace-last` 補是使用者的決定（動的是決策帳本）。
+
+## 🟢 Session Note (v4.127.0) — Phase 5 組裝交給 script；封閉 schema 是唯一真護欄
+
+- **做的事**：`build_session_export.py` 取代模型每跑一次現寫的 `build_<T>_session.py`。關鍵是它**同時**吐 export entry 與 `phase_inputs` bundle——那包 bundle 過去**沒有任何 script 產生**，是 renderer 的硬性前置，也是 META 那次「就算修好 KeyError 仍然產不出報告」的真正原因。
+- **封閉 schema 才是護欄，不是便利**：質性檔出現任何 script 導得出來的欄位一律 rc=1 而**非合併**。沒有這條，那個檔會慢慢長回原本 130 行的手寫 literal，這支 script 就白做了。
+- **使用者原本核准的邊界被實測推翻，我改了**：原訂 lane 的 `score`/`confidence` 算質性（模型判斷）。實跑時 renderer 的一致性閘直接打臉——bundle 的 technical confidence 0.65 → c_eff 0.60 vs `calculation_steps` 的 0.72。**Phase 3 engine 輸入才是「決策數學實際吃到的值」的權威記錄**，手填等於製造二源漂移。改成從 `--p3-input` 導出，質性檔禁填這兩欄。
+- **單一來源讓一整類矛盾變成表達不出來**：`lane_scores` / `conflict_bias.lane_signals` / `<name>_lane` / bundle 的 `lanes` 全從同一處導出。§16 的「signal 與同 lane score 反向」這類矛盾不再是「驗得出來」而是「寫不出來」。
+- **bring-up 時我自己違反了自己的原則**：bundle 的 `analysis_price` 取 `entry_reference_price`（596.55）、entry 取 `valuation_pack.current_price`（592.10）。**renderer 的一致性閘抓到了**，已修並種成測試。這條閘的價值今天證明了兩次。
+- **驗收**：用 2026-08-10 那次失敗的 META artifact 重跑完整 Phase 5 鏈，build → append → det_shadow → **validate rc=0** → **render rc=0（276 行）**。26 條斷言 + 5 個 mutation 全紅。
+- **還沒驗的**：模型能不能一次把質性檔寫對。目前只跑過我手工填的版本，中間修了三輪欄位形狀（`watch_conditions` 要 object、`pt_revision_momentum` 要巢狀物件、`trade_metadata` 不得 null）。**下一次真跑 invest 才算數。**
+
+## 🟢 Session Note (v4.126.0) — 兩次 META 失敗，兩個根因都在 repo 不在 codex
+
+- **起點是一則 UI 錯誤**：`rc=0 but required artifact missing/stale: reports/20260810_META.md`。使用者的第一個假設是「codex 的硬傷」。**實測推翻**：當天五次 invest run **全部是 codex，成功兩次**（RKLB、NVDA 08:43）。成功的 NVDA 08:43 與失敗的 META 09:14 幾乎同構——7.3M vs 7.4M input tokens、兩支都寫了拋棄式組裝腳本——**唯一差別是後者去讀了 engine artifact**。
+- **根因一：artifact 名不副實。** `run_phase3()` 回 24 欄，`_persist_artifact()` 只寫 6 欄。檔名 `<T>_decision_engine.json`、路徑 `invest_logs/decision_engine/`、內容有 `final_score`/`final_decision`/`calculation_steps`、protocol 還寫「engine 把輸出留在」它——**四項都在暗示這是完整輸出**，實際是為 §5l 裁剪的子集。長 run 把 stdout 擠出 context 後，模型回頭讀它就中。META 那支腳本 9 個取值有 5 個落在被丟掉的欄位，修好第一個還會再炸四次。
+- **這類「子集偽裝成全集」的坑，成本不對稱**：多寫 18 欄約 2 KB，漏寫的代價是 7.4M token 的 run 全毀。裁剪的理由（§5l 只比對 `calculation_steps`）是**寫入端的方便**，不是讀取端的契約。
+- **根因二：`comps.py` 把答案當失敗。** `sys.exit(0 if not degraded else 1)`——但「同業不足 3 家」是**完整且正確的答案**，不是執行失敗。映射成 rc=1 會撞上 V4.116.1 的閘門紀律（rc≠0 → 停下回報），PM 只好當場自行決定，於是同一天決定了四次、兩種結果。**修法選擇很關鍵：修訊號不修規則。** V4.116.1 完全不放寬，rc≠0 仍只代表工具失敗；改的是「同業不足不該回 rc≠0」。
+- **殘留掃描的價值又一次驗證**：§2b 掃到 `dcf.py:918` 有**完全同型**的 exit code 缺陷。**刻意沒跟著改**——dcf 的 `degraded` 是 `fv is None`，比 comps 的明確 eligibility reason 模糊，成因沒分類前不該一起套。已進 TODO。
+- **UI 訊息也是缺陷**：`model may have finished without writing output` 對「依紀律中止」的 run 是誣賴。**紀律生效和引擎壞掉不該長一樣。**
+- **⚠️ 兩個 session 同時在 repo 上撞版號**：本輪 bump 時 `VERSION` 已被另一個 session 寫成 4.125.0（utils.js/CHANGELOG 也是），我原本要拿的號被佔走，改用 4.126.0。**沒有內容被覆蓋**（我的 printf 只多加了一個換行），但這是運氣不是機制。雙 session 併行時，收尾前先 `stat VERSION` 是必要動作。
 
 ## 🟢 Session Note (v4.125.0) — 共通模板對 C1 契約核一次，四條差異全是文件對齊
 

@@ -235,6 +235,54 @@ eq("fix12.range_body_suppressed", "not the primary FV" in md_ok, False)
 eq("fix12.range_suppression_noted", "略過渲染" in md_ok, True)
 
 # ──────────────────────────────────────────────────────────────────────────
+# V4.125.0 — "no usable peer anchor" is an ANSWER, not an execution failure.
+#
+# Seeded regression: `sys.exit(0 if not payload["degraded"] else 1)` mapped a
+# complete, correct verdict (comps_implied_value=null, reason=
+# fewer_than_3_business_similar_peers) onto rc=1, which collides with V4.116.1's
+# gate discipline ("mandatory script rc≠0 → halt"). The PM then decided halt-vs-
+# degrade on the spot and decided differently run to run: 2026-08-10 NVDA 08:36
+# halted / 08:43 continued / META 09:03 halted / 09:14 continued. Restore the
+# conditional exit and this goes red.
+import contextlib  # noqa: E402
+import io  # noqa: E402
+
+_CACHE_DIR = Path(comps.SCRIPT_DIR).parent / "cache"
+_orig_build = comps.build_payload
+_orig_argv = sys.argv[:]
+
+
+def _exit_code_for(degraded):
+    """Run comps.main() over a stubbed payload; return its exit code."""
+    tk = "ZZCOMPS"
+    comps.build_payload = lambda ticker, no_cache=False: {
+        "ticker": tk, "asof": "2026-08-10",
+        "comps_implied_value": None if degraded else 123.4,
+        "anchor_detail": {}, "universe": {}, "table": [],
+        "peer_pe_range_scenario": None,
+        "model_eligibility": {
+            "eligible": not degraded,
+            "reason": "fewer_than_3_business_similar_peers" if degraded else None},
+        "degraded": degraded,
+    }
+    sys.argv = ["comps.py", tk, "--json-only"]
+    try:
+        with contextlib.redirect_stdout(io.StringIO()):
+            comps.main()
+    except SystemExit as e:
+        return e.code if e.code is not None else 0
+    finally:
+        comps.build_payload = _orig_build
+        sys.argv = _orig_argv[:]
+        with contextlib.suppress(OSError):
+            os.remove(_CACHE_DIR / f"{tk}_comps_payload.json")
+    return None
+
+
+eq("exit.degraded_is_not_a_failure", _exit_code_for(True), 0)
+eq("exit.healthy", _exit_code_for(False), 0)
+
+# ──────────────────────────────────────────────────────────────────────────
 if FAILS:
     print(f"✗ {len(FAILS)} failure(s):")
     for f in FAILS:

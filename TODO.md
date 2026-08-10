@@ -1,6 +1,6 @@
 # INTEL COMMAND — Backlog & Tasks
 
-> **Last Updated**: 2026-08-10 (v4.125.0)
+> **Last Updated**: 2026-08-10 (v4.127.1)
 
 ---
 
@@ -14,6 +14,34 @@
 - [x] Fan-Out 段與 GLOBAL RULES #3 改成**先講行為契約再講 Claude 語法**，並指向 `_adapt_protocol_prompt()`（非 claude provider 的詞彙對照，已有 per-provider 測試）。
 - [x] 殘留掃描更正 `investment/README.md` 兩處**四 lane 時代**的數字（「4 全失敗 → FULL_FALLBACK」「2-3 失敗 → PARTIAL」），否則文件與 §17 直接打架。
 - [x] 6 個種回 bug 全紅；§17 對 188 筆歷史掃描 0 error / 12 warning。
+
+## ✅ Done (v4.127.0–.1) — Phase 5 組裝 script 化，並由首次真跑驗收
+
+- [x] `build_session_export.py`：吃各 phase artifact + 單一質性檔 → 吐 export entry **與** `phase_inputs` bundle（後者過去無人產生，是 renderer 硬性前置）。封閉 schema 擋「質性檔長回手寫 literal」。
+- [x] protocol §PHASE 5 Step 1 改寫：🚫 不得自寫組裝腳本。schema doc 補「Phase 5 質性檔」節。
+- [x] **2026-08-10 12:03 META 真跑驗收（codex，9m40s，6.47M in，rc=0）**：零自組腳本、**質性檔一次寫對**（原本預期會來回幾輪，沒發生）、validate rc=0、render 333 行報告。
+- [x] **fix 3 生產驗證**：`comps.py` 同一個 META 資料缺口回 **rc=0** + `comps_implied_value: null`，模型繼續走完 —— 09:03 那輪就是這裡硬停的。
+- [x] **v4.127.1 補兩個組裝器漏欄**：`burry_score`（改讀 p3 輸入）、`multi_horizon_price_framework`（改讀 p4 輸入）。重建 entry 與 live 決策數字逐欄相同，validator 由 2 warning 轉全綠。
+- [ ] **live 的 META entry 仍是 v4.127.0 版**（缺那兩欄，validator 只出 warning 不擋）。要補的話跑 `build_session_export.py … | append_session_export.py --replace-last` 再重跑 Step 1.5 + renderer。**決策數字不會變**（已驗證逐欄相同），純粹是紀錄完整度。**等使用者決定要不要動 live 決策帳本。**
+- [ ] **`thesis_registry` 這次回 `registry_unavailable`**（log: `⚠ concentration 輸入不可得 — F1 未評估，不當作 0 部位`）。行為正確（不把不可得當成 0），但 V20-F1 的 sector concentration 檢查等於這次沒生效。要查 registry 為什麼不可得。
+
+## ✅ Done (v4.126.0) — META 兩次失敗的兩個根因（都在 repo，不在 codex）
+
+- [x] **`_persist_artifact` 寫完整 phase-3 輸出**（6 → 24 欄）。被丟掉的 18 欄裡有 META run 要讀的 5 欄，
+  於是 `KeyError: 'avg_confidence'` → 空輸入 → 沒 history 沒報告。§5l 只讀 `calculation_steps` 不受影響。
+  種回 6 個斷言驗過會紅。
+- [x] **`comps.py` 同業不足改回 rc=0**（見上方拆解）。種回 1 個斷言驗過會紅。
+- [x] **artifact gate 訊息不再誣賴模型**：原文對「依紀律中止」的 run 是錯的，改為並列兩種可能 + 附 log 路徑。
+- [x] **證明不是 codex 硬傷**：當天五次 run 全是 codex、成功兩次；成功的 NVDA 08:43 與失敗的 META 09:14
+  同樣 ~7.3M context、同樣寫拋棄式組裝腳本，**唯一差別是後者去讀了 artifact**。
+- [x] ~~**Phase 5 組裝仍是模型每跑一次現寫一支拋棄式腳本**~~ → **v4.127.0 完成**：
+  `build_session_export.py` 同時吐 export entry 與 `phase_inputs` bundle（後者過去沒有任何
+  script 產生，是 renderer 的硬性前置）。封閉 schema 擋掉「質性檔長回手寫 literal」。
+  實測用那次失敗的 META artifact 重跑：validate rc=0 + render rc=0（276 行報告）。
+- [ ] **仍不是全自動，且這是設計上的**：質性檔裡 5 個 lane 的 `key_factors`/`risk_flags`、
+  Red Team 論述、`watch_conditions` 是質性內容，script 能組裝不能發明。要再往前推得讓 lane
+  交出結構化輸出（C2 factpack per-lane views 方向）。**下一次真跑 invest 才會知道模型能不能
+  一次把質性檔寫對**——目前只驗過我手工填的版本。
 
 ## ✅ Done (v4.124.0) — web-search 額度 shadow ledger（T2 第三項，走第三條路）
 
@@ -67,7 +95,9 @@
 - [x] 去重漏洞一併關上：cooldown 中的項目仍在 queue → 重排同一 ticker 被 `duplicate_pending` 擋。
 - [x] `tests/test_protocol_cooldown.py` 走真實 worker loop，mutation 驗過會紅（gap 2.0s / 倒數未發布 / 去重未擋）。
 - [x] ~~`/api/run-protocol/status` 回傳非法 JSON~~ —— **誤報，已撤銷**。是診斷用的 `curl -m 3` 在高負載下截斷 24 KB 回應，不是 server。`_json()` 的序列化與 Content-Length 都正確，前端無 timeout 不受影響。
-- [ ] **NVDA comps 回 0 peers**：`comps.py` 對 NVDA 兩輪都失敗（rc=1、`comps_implied: null`）。同一個資料缺口卻出現兩種處置：08:36 那輪 codex 判定為硬停，停在 Phase 1 不產報告；08:43 那輪繼續走完並改用 data-quality cap（報告 `comps_implied N/A`、HOLD/CANCEL）。要修的有兩件——peer cohort 篩選是不是把 NVDA 同業全排除了，以及「comps rc=1」到底該是硬停還是降級，protocol 現在沒定死，交給模型當場決定。
+- [x] ~~**「comps rc=1」該硬停還是降級**~~ → **V4.126.0 定案**：改成**不是 rc=1**。同業不足是完整且正確的答案（`comps_implied_value: null` + `fewer_than_3_business_similar_peers`），不是執行失敗，script 改回 rc=0；V4.116.1 閘門紀律不放寬（rc≠0 仍只代表工具失敗）。protocol 估值錨表補明文。四個同日樣本：NVDA 08:36 停 / 08:43 續 / META 09:03 停 / 09:14 續。
+- [ ] **peer cohort 篩選是不是把超大型股的同業全排除了**（上一條拆出來的另一半，仍未查）：NVDA 回 0 peers、META 只回 GOOGL 1 家。rc 的歧義已解，但「為什麼只剩 1 家」還沒查。可能是對的（真的沒有可比公司），也可能是 `select_valuation_peers` 的 exact-industry 篩選對 mega-cap 過嚴。
+- [ ] **`dcf.py:918` 有同型的 exit code 缺陷**（V4.126.0 §2b 殘留掃描抓到，本輪**刻意未動**）：同樣是 `sys.exit(0 if not payload["degraded"] else 1)`，同樣是 protocol 必跑的估值錨 script。**沒有跟著 comps 一起改的理由**：dcf 的 `degraded` 是 `fv is None`（`dcf.py:858`），語意比 comps 的「明確的 eligibility reason」模糊得多——`fv is None` 可能是「算不出來」也可能是「輸入缺失」，兩者該不該停不一樣。目前沒有證據它正在觸發（2026-08-10 META 的 dcf 成功回 $317.38）。要處理得先分類 `fv is None` 的成因。
 
 ## ✅ Done (v4.121.3) — proto pill engine attribution
 

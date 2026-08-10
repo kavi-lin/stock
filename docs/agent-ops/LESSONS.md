@@ -1,5 +1,27 @@
 # 踩坑教訓（格式見 MAINTENANCE.md §4；>150 行時精簡）
 
+## 2026-08-10｜落地的 artifact 是子集卻長得像全集，就是在等一個長 run 來踩
+
+- 情境：META invest run 兩次失敗，UI 報 `rc=0 but required artifact missing/stale`。使用者初判是 codex 的硬傷。
+- 坑：兩個。(a) `decision_engine.py:_persist_artifact` 只寫 6/24 欄，但檔名、路徑、內容、protocol 文字四項都在宣稱它是完整的 phase-3 輸出——長 run 的 stdout 一被擠出 context，模型就會去讀它，然後 `KeyError`。(b) `comps.py:918` 把「同業不足」（一個正確答案）映射成 rc=1，撞上 V4.116.1 的 rc≠0 停機規則，PM 只好自行裁量，同一天裁了四次兩種結果。
+- 修法：(a) 落地完整輸出——**裁剪的理由若來自寫入端的方便，就不該變成讀取端的契約**；(b) **修訊號不修規則**——V4.116.1 一個字不改，改的是「這件事不該回 rc≠0」。判斷句：**script 跑完了、答案是 null，那是答案；script 沒跑完，那才是失敗。**
+- 已回寫規則？：是（`investment_protocol_v5_0.md` 估值錨表補明文；`MAINTENANCE.md` §2b 殘留掃描再次證明有效——掃到 `dcf.py:918` 同型缺陷，因語意不同刻意未動並記 TODO）。
+
+## 2026-08-10｜先證明假設錯了再開修，不要照著使用者的歸因走
+
+- 情境：使用者問「這是 codex 的硬傷對嗎」，並要求照該前提修。
+- 坑：照著修會做出錯的東西。實測：當天五次 run 全是 codex，**成功兩次**；成功與失敗的兩支 context 大小幾乎相同、都寫了拋棄式腳本，唯一差別是有沒有讀那個 artifact。歸因到 provider 會讓真正的坑（repo 的檔案契約）留在原地。
+- 修法：用 run log 做對照表（provider × context × 行為 × 結果）再回答。**同一個 provider 有成功樣本，就不能歸因給 provider。**
+- 已回寫規則？：否——`JUDGMENT.md` 已有「決定性宣稱必獨立重現」，本條是它的實例不是新規則。
+
+## 2026-08-10｜雙 session 併行會撞版號，收尾前必 stat
+
+- 情境：本輪收尾 bump 版本時，`VERSION`/`utils.js`/`CHANGELOG` 已被另一個 session 寫成 4.125.0。
+- 坑：我的 `printf > VERSION` 蓋在別人剛寫的值上（所幸內容相同，只多一個換行，零損失）；CHANGELOG 的 anchor assert 擋下了錯誤插入。
+- 修法：dev session 收尾 bump 前先 `stat -f '%Sm' VERSION CHANGELOG.md Dashboard/utils.js` 看有沒有剛被動過；寫入一律用「先 assert anchor 存在」的方式，不要無條件覆寫。撞號就往後取一號。
+- 已回寫規則？：否（先觀察是否常態；若再發生就寫進 `MAINTENANCE.md` §2）。
+
+
 ## 2026-08-10 ｜zsh 把 `--include=*.md` 吃掉，殘留掃描整個沒跑卻看起來像「已清乾淨」
 - 情境：V4.122.0 收尾做 §2b 殘留掃描，一次跑四條 `grep -rn "..." --include=*.md --include=*.py .`。
 - 坑：zsh 對未加引號的 `*.md` 做 globbing，CWD 沒有 `.md` 檔就直接 `no matches found` 並**中止整條命令**——四條全部 0 命中。輸出長得跟「掃過了，沒有殘留」一模一樣。這是 §2c 成員 #5 的近親（pattern 自己壞掉），但機制不同：不是 pattern 比對失敗，是**命令根本沒執行**。加引號重跑後，同樣四條抓到 2 處實施表沒列到的規則鏡像（`investment/README.md` 的 OVERRIDE_BURRY 三項成本、OPS §7 的「五道紀律閘」）。
