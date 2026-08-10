@@ -1,0 +1,138 @@
+{
+  "schema": "p5-qualitative/1.0",
+  "ticker": "META",
+  "date": "2026-08-10",
+  "lanes": {
+    "fundamentals": {
+      "signal": "BUY",
+      "key_factors": ["Revenue grew 28% year over year", "Forward P/E attractive at 15.9", "Low leverage supports resilience"],
+      "risk_flags": ["Owner earnings fell 49.6% QoQ", "FCF margin compressed to 2.9%"]
+    },
+    "sentiment": {
+      "signal": "HOLD",
+      "key_factors": ["Low short interest supports sentiment", "MSPR shows insider selling", "Market remains in greed regime"],
+      "risk_flags": ["Insider distribution trend", "Institutional data unavailable"]
+    },
+    "news": {
+      "signal": "HOLD",
+      "key_factors": ["Recent rating downgrade", "AI security scrutiny", "Paying-user incentives added"],
+      "risk_flags": ["Regulatory monitoring pressure", "Smartglasses privacy backlash"]
+    },
+    "technical": {
+      "signal": "HOLD",
+      "key_factors": ["Stage one basing", "MACD histogram improving", "Volume below average"],
+      "risk_flags": ["Below 200-day moving average", "Resistance near 601"]
+    },
+    "valuation": {
+      "signal": "SELL",
+      "key_factors": ["Fair value implies downside", "Valuation anchors conflict severely", "Cash flow outlook remains uncertain"],
+      "risk_flags": ["No valid peer cohort", "Implied FCF CAGR out of range"]
+    }
+  },
+  "lane_detail": {
+    "fundamentals": {
+      "phase0_alignment": "ALIGNED",
+      "moat_assessment": {"level": "WIDE", "type": "network_effect", "evidence_one_line": "平台規模與使用者互動強化網路效應，營收年增 28%。"},
+      "near_term_catalysts": [
+        {"date": "2026-10-27", "type": "earnings", "description": "季度財報驗證成長延續與利潤率修復", "impact": "high"},
+        {"date": "2026-Q4", "type": "guidance", "description": "AI 基礎設施支出與全年指引更新", "impact": "high"},
+        {"date": "2026-Q4", "type": "product_launch", "description": "AI 推薦與廣告工具商業化進展", "impact": "medium"}
+      ],
+      "bull_thesis_one_line": "營收高成長、估值合理且網路效應護城河深",
+      "bear_thesis_one_line": "業主盈餘驟降與低現金流率恐削弱品質",
+      "reasoning_one_line": "成長、低槓桿與網路效應暫時勝過現金流轉弱。"
+    },
+    "sentiment": {
+      "phase0_alignment": "NEUTRAL",
+      "market_sentiment_composite": 71.6,
+      "vix_current": 14.9,
+      "insider_signal": "distributing",
+      "short_pct_float": 1.72,
+      "mspr_latest": -100,
+      "reasoning_one_line": "低空頭比例與偏多大盤，遭內部人賣出訊號抵銷。",
+      "sentiment_det": {"producer_version": "sentiment_score.py v1.1 (L5 / V4.95.3)", "shadow_only": true, "ticker": "META", "score": 0.58, "market_layer": 2.16, "market_composite": 71.6, "stock_specific": -1.0, "missing_inputs": ["institutional.accumulation_signal", "stock_based_compensation_pct_revenue"], "degraded_reason": null, "input_hash": "sha256:6a23b2a1dd553470ea3571dfbb0328c8"}
+    },
+    "news": {
+      "phase0_alignment": "NEUTRAL",
+      "pt_revision_momentum": {"direction": "UP", "consensus_delta_pct_1m": 1.11},
+      "immediate_catalyst_5d": null,
+      "decision_point_days": 21,
+      "cross_asset_spillover": [
+        {"asset": "sector_XLC", "direction": "BEARISH", "mechanism": "監管與隱私疑慮可能壓抑大型網路平台風險偏好。"},
+        {"asset": "sector_XLK", "direction": "NEUTRAL", "mechanism": "AI 安全審查提高合規成本，但不直接改變基礎設施需求。"}
+      ],
+      "reasoning_one_line": "PT 小幅上修未達門檻，仍不足抵銷降評與監管疑慮。"
+    },
+    "technical": {
+      "phase0_alignment": "MISALIGNED",
+      "smart_money_analysis": {"label": "neutral", "narrative": "低量築底尚未顯示明確吸籌或出貨。"},
+      "pattern_taxonomy": {"pattern": "consolidation", "confirmation_criteria": "放量收上 601 美元才確認向上延續。"},
+      "market_strength": "WEAK",
+      "key_levels": {"support": 577.07, "resistance": 601.0, "pivot": 592.15},
+      "high_prob_scenario": "短期在 577 至 601 美元整理；放量突破 601 才轉強。",
+      "volatility": {"atr_14": null, "hist_vol_20d_daily": null, "momentum_20d_pct": null},
+      "rubric_override_reason": null,
+      "distance_from_50ma_pct": -1.25
+    },
+    "valuation": {
+      "phase0_alignment": "ALIGNED",
+      "weighted_fair_value": 520.54,
+      "current_price": 592.1,
+      "vs_current_pct": -12.09,
+      "verdict_band": "overvalued",
+      "valuation_confidence": "medium",
+      "anchors_available": 5,
+      "suppression_proposals": [
+        {"anchor": "owner_earnings_mult", "reason": "再投資提高可能扭曲單季業主盈餘", "evidence": "每股業主盈餘 4.77，季減 49.58%，資本支出強度 49.53%。"},
+        {"anchor": "analyst_pt_consensus", "reason": "錨點高度分散時影響過大", "evidence": "該錨有效權重 0.5，而 dispersion ratio 為 10.11。"}
+      ],
+      "valuation_commentary": "凍結估值包顯示 12.09% 下行；同業與 forecaster 錨排除，遠期獲利錨僅留 shadow。",
+      "cited_transition_overlay": false,
+      "transition_dissent_basis": "valuation_anchor"
+    }
+  },
+  "red_team": {
+    "verdict": "STRONG_COUNTER",
+    "counter_thesis": "現價要求約 60% 的五年 FCF CAGR，但 FCF 利潤率僅 2.87%、資本支出強度 49.53%，且公允價 520.54 低於現價 592.1；即使營收續增，現金流若無法快速擴張，高實質利率仍會壓縮估值容忍度。",
+    "kill_conditions": [
+      "IF 未來 2 季 FCF 年化增速 <30% WITHIN 180 days THEN 現價估值論點破滅",
+      "IF FRED 實質利率維持在 2.41% 或更高 WITHIN 180 days THEN 低遠期本益比足以支持買進的論點破滅",
+      "IF 未來 2 季營收年化增速 <12% WITHIN 180 days THEN 現價內含營收路徑破裂"
+    ],
+    "counter_evidence_strength": 4,
+    "thesis_break_probability": 0.68,
+    "execution_failed": false
+  },
+  "burry_narrative": "Burry 44.4/100，屬中性；FCF yield 僅 1.41% 且內部人趨勢為 distributing，但 D/E 0.43。Vendor DCF FCFF/FCFE 差距逾 20%，需留意資本結構與假設敏感度；同業不足，未作相對估值加減分。",
+  "conflict_bias": {
+    "tentative_decision": "HOLD",
+    "conflict_summary": "T1–T5 均未觸發；正向基本面與負向新聞、估值互相抵銷。",
+    "triggers_fired": [],
+    "t4_detail": null,
+    "t5_detail": null,
+    "proceed_to_phase3": true
+  },
+  "macro_context": "大盤為 RISK_ON、Soft Landing 且廣度健康，但 FRED 實質利率 2.41% 使 Technology 長存續期估值承壓；信用與金融條件仍偏寬鬆。",
+  "watch_conditions": {
+    "breakout_confirmation": "放量收上 601 美元並維持兩個交易日，才重新評估趨勢轉強。",
+    "pullback_entry_zone": "回落 545 至 577 美元區間且止跌，重新檢查風險報酬與估值。",
+    "fcf_validation": "未來兩季 FCF 年化增速未達 30%，視為現價估值前提失效。",
+    "real_rate_pressure": "FRED 實質利率維持 2.41% 或更高，持續壓抑估值倍數。",
+    "earnings_review": "下一次財報發布後，重評營收成長、資本支出與 FCF 利潤率。"
+  },
+  "key_risks": [
+    "公允價低於現價且估值錨分散",
+    "資本支出強度高、自由現金流利潤率偏低",
+    "內部人交易與 MSPR 顯示賣出壓力",
+    "股價仍在 200 日均線下方且量能不足",
+    "高實質利率壓抑長存續期科技估值",
+    "監管、AI 安全與隱私審查風險"
+  ],
+  "bias_notes": "兩個 lane 因 schema 重試仍失敗而轉 inline fallback，Fundamentals 與 News confidence 均封頂 0.60；避免把 28% 營收成長直接等同現金流品質，也不以賣方目標價單獨支撐買進。",
+  "phase2_fanout_mode": "PARTIAL_FALLBACK",
+  "degraded_analysts": ["fundamentals (inline fallback after malformed retry)", "news (inline fallback after malformed retry)"],
+  "decision_point_days": 21,
+  "devils_advocate_filed": true,
+  "trade_metadata": {"trade_type": "mean_reversion", "event_tag": "earnings"},
+  "last_outcome": "UNKNOWN"
+}

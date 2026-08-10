@@ -1,7 +1,7 @@
 {
   "version": "1.0",
-  "as_of": "2026-08-09T08:10:17+00:00",
-  "as_of_et": "2026-08-09T04:10:17-04:00",
+  "as_of": "2026-08-10T04:04:06+00:00",
+  "as_of_et": "2026-08-10T00:04:06-04:00",
   "market_open": false,
   "session_fraction": 0.0,
   "regime": {
@@ -21,12 +21,12 @@
     "intraday_score": 32,
     "intraday_label": "偏強",
     "headline_zh": "盤面偏強（32）：近25日出貨日 6 天、日內自低點反彈，收復至區間 85%，止跌訊號",
-    "mood_score": 25,
-    "vix": 14.86,
+    "mood_score": 28,
+    "vix": 14.9,
     "vix_regime": "LOW",
-    "skew": 134.7,
+    "skew": 132.6,
     "skew_label": "elevated",
-    "fear_greed": 63.5,
+    "fear_greed": 63.7,
     "fear_greed_label": "Greed",
     "distribution_days": 6,
     "spy_chg": 0.61,
@@ -207,19 +207,9 @@
       "intraday_avg": 1.55,
       "breadth_pct": 66.3,
       "n": 92,
-      "pred5d": 0.94,
-      "pulse_direction": "neutral_mixed",
-      "rank_score": 2.02,
-      "verdict": "WARM"
-    },
-    {
-      "sector": "Consumer_Discretionary",
-      "intraday_avg": 1.24,
-      "breadth_pct": 74.5,
-      "n": 55,
-      "pred5d": 0.57,
-      "pulse_direction": "neutral_mixed",
-      "rank_score": 1.53,
+      "pred5d": 1.16,
+      "pulse_direction": "mod_bull",
+      "rank_score": 2.13,
       "verdict": "WARM"
     },
     {
@@ -227,19 +217,19 @@
       "intraday_avg": 0.87,
       "breadth_pct": 70.0,
       "n": 20,
-      "pred5d": 1.31,
+      "pred5d": 1.4,
       "pulse_direction": "mod_bull",
-      "rank_score": 1.52,
+      "rank_score": 1.57,
       "verdict": "WARM"
     },
     {
-      "sector": "Healthcare",
-      "intraday_avg": 0.7,
-      "breadth_pct": 71.7,
-      "n": 60,
-      "pred5d": 1.17,
-      "pulse_direction": "mod_bull",
-      "rank_score": 1.29,
+      "sector": "Consumer_Discretionary",
+      "intraday_avg": 1.24,
+      "breadth_pct": 74.5,
+      "n": 55,
+      "pred5d": 0.42,
+      "pulse_direction": "neutral_mixed",
+      "rank_score": 1.45,
       "verdict": "WARM"
     },
     {
@@ -247,9 +237,19 @@
       "intraday_avg": 0.63,
       "breadth_pct": 71.8,
       "n": 78,
-      "pred5d": 1.32,
+      "pred5d": 1.34,
       "pulse_direction": "mod_bull",
-      "rank_score": 1.29,
+      "rank_score": 1.3,
+      "verdict": "WARM"
+    },
+    {
+      "sector": "Healthcare",
+      "intraday_avg": 0.7,
+      "breadth_pct": 71.7,
+      "n": 60,
+      "pred5d": 1.12,
+      "pulse_direction": "mod_bull",
+      "rank_score": 1.26,
       "verdict": "WARM"
     },
     {
@@ -257,9 +257,9 @@
       "intraday_avg": -0.1,
       "breadth_pct": 48.6,
       "n": 70,
-      "pred5d": 1.59,
+      "pred5d": 1.71,
       "pulse_direction": "mod_bull",
-      "rank_score": 0.7,
+      "rank_score": 0.76,
       "verdict": "NEUTRAL"
     },
     {
@@ -267,9 +267,9 @@
       "intraday_avg": 0.59,
       "breadth_pct": 87.1,
       "n": 31,
-      "pred5d": 0.13,
+      "pred5d": 0.21,
       "pulse_direction": "neutral_mixed",
-      "rank_score": 0.66,
+      "rank_score": 0.7,
       "verdict": "WARM"
     },
     {
@@ -277,9 +277,9 @@
       "intraday_avg": 0.41,
       "breadth_pct": 61.1,
       "n": 36,
-      "pred5d": -0.04,
+      "pred5d": 0.1,
       "pulse_direction": "neutral_mixed",
-      "rank_score": 0.39,
+      "rank_score": 0.46,
       "verdict": "NEUTRAL"
     },
     {
@@ -287,9 +287,9 @@
       "intraday_avg": 0.24,
       "breadth_pct": 65.0,
       "n": 20,
-      "pred5d": 0.26,
+      "pred5d": 0.22,
       "pulse_direction": "neutral_mixed",
-      "rank_score": 0.37,
+      "rank_score": 0.35,
       "verdict": "NEUTRAL"
     },
     {
@@ -297,9 +297,9 @@
       "intraday_avg": 0.66,
       "breadth_pct": 81.2,
       "n": 32,
-      "pred5d": -0.89,
+      "pred5d": -0.67,
       "pulse_direction": "neutral_mixed",
-      "rank_score": 0.22,
+      "rank_score": 0.33,
       "verdict": "WARM"
     },
     {
@@ -307,20 +307,57 @@
       "intraday_avg": -0.35,
       "breadth_pct": 30.4,
       "n": 23,
-      "pred5d": 1.09,
-      "pulse_direction": "mod_bull",
-      "rank_score": 0.19,
+      "pred5d": 0.48,
+      "pulse_direction": "neutral_mixed",
+      "rank_score": -0.11,
       "verdict": "NEUTRAL"
     }
   ],
   "rotation": [
     {
       "from": "高估值成長",
-      "to": "Materials／Healthcare／Industrials",
+      "to": "Materials／Industrials／Healthcare",
       "note": "資金流向價值/防禦板塊"
     }
   ],
-  "themes": [],
+  "themes": [
+    {
+      "name": "AI & Semiconductors",
+      "direction": "bullish",
+      "lifecycle": "Trending",
+      "heat": null
+    },
+    {
+      "name": "Industrials Sector Concentration",
+      "direction": "bullish",
+      "lifecycle": "Trending",
+      "heat": null
+    },
+    {
+      "name": "Industrials Sector Concentration",
+      "direction": "bearish",
+      "lifecycle": "Accelerating",
+      "heat": null
+    },
+    {
+      "name": "Quantum Computing",
+      "direction": "bullish",
+      "lifecycle": "Trending",
+      "heat": null
+    },
+    {
+      "name": "Robotics & Automation",
+      "direction": "bullish",
+      "lifecycle": "Trending",
+      "heat": null
+    },
+    {
+      "name": "Space Economy",
+      "direction": "bullish",
+      "lifecycle": "Mature",
+      "heat": null
+    }
+  ],
   "ideas": [
     {
       "ticker": "TEAM",
@@ -414,27 +451,27 @@
         "領漲：PLTR +9.42%",
         "領漲：NOW +6.04%"
       ],
-      "streak": 3,
-      "day_count": 3,
-      "highlight": true,
-      "day_motif": true
+      "streak": 1,
+      "day_count": 1,
+      "highlight": false,
+      "day_motif": false
     },
     {
       "id": "value_defensive_rotation",
-      "title": "資金輪動至 Materials／Healthcare／Industrials",
+      "title": "資金輪動至 Materials／Industrials／Healthcare",
       "stance": "favor",
       "confidence": 0.55,
-      "rationale": "價值/防禦板塊今日領先且前瞻偏多（Materials／Healthcare／Industrials）；反彈確認後優先佈局。",
+      "rationale": "價值/防禦板塊今日領先且前瞻偏多（Materials／Industrials／Healthcare）；反彈確認後優先佈局。",
       "tickers": [
         "Materials",
-        "Healthcare",
-        "Industrials"
+        "Industrials",
+        "Healthcare"
       ],
       "evidence": [],
-      "streak": 3,
-      "day_count": 3,
-      "highlight": true,
-      "day_motif": true
+      "streak": 1,
+      "day_count": 1,
+      "highlight": false,
+      "day_motif": false
     },
     {
       "id": "event_risk_guard",
@@ -444,10 +481,10 @@
       "rationale": "出貨日堆疊 + 機構買尾部避險，重大數據/財報前先降槓桿、留現金彈性。",
       "tickers": [],
       "evidence": [],
-      "streak": 3,
-      "day_count": 3,
-      "highlight": true,
-      "day_motif": true
+      "streak": 1,
+      "day_count": 1,
+      "highlight": false,
+      "day_motif": false
     }
   ],
   "warnings": [],
@@ -458,22 +495,14 @@
     "intraday_spikes": true,
     "retail_sector_pulse": true,
     "kill_triggers": true,
-    "thematic": false,
+    "thematic": true,
     "sector_stance": false
   },
   "recurrence": {
-    "window_index": 3,
-    "windows_today": 3,
-    "highlighted": [
-      "software_momentum",
-      "value_defensive_rotation",
-      "event_risk_guard"
-    ],
-    "day_motifs": [
-      "software_momentum",
-      "value_defensive_rotation",
-      "event_risk_guard"
-    ],
+    "window_index": 1,
+    "windows_today": 1,
+    "highlighted": [],
+    "day_motifs": [],
     "streak_highlight_min": 2,
     "day_motif_min": 3
   },
@@ -481,5 +510,5 @@
     "cached": false,
     "model_used": "claude"
   },
-  "narrative_zh": "Regime 維持中性／區間，曝險上限 40-60%，不因盤中偏強而破格。市寬 66.5% 上漲、盤中分數 32，但近 25 日出貨日已累積 6 天，性質偏反彈而非趨勢確立。主旋律有二：一是軟體／平台順勢，族群均漲 3.07%、17 漲 4 跌，連三日站在 favor 側，觀察 TEAM、PLTR、NOW、WDAY、EPAM；二是資金輪動至 Materials、Healthcare、Industrials，三者 pulse 轉 mod_bull、五日預估 1.17-1.32、市寬皆逾 70%，接棒品質比半導體乾淨。風險提醒：VIX 14.86 偏低、skew 134.7 偏高、Fear & Greed 63.5 落在貪婪區，二元事件前先把部位控住，別在低波動環境下把曝險用滿。"
+  "narrative_zh": "Regime 中性／區間：盤中分數 32、市寬 66.5%，但近 25 日出貨日已有 6 天，曝險上限守在 40-60%，不因單日強勢外推。主旋律一為軟體／平台順勢，科技板塊日內均漲 1.55%、廣度 66.3% 居首，TEAM、PLTR、NOW、WDAY、EPAM 同屬一個動能群；二為資金外溢至原物料、工業、醫療保健，三者廣度皆逾 70%、五日預測為正，屬擴散型輪動而非單點噴出。風險提醒：VIX 14.9 偏低但 SKEW 132.6 偏高，尾部定價並不便宜，二元事件前先控部位，區間上緣不追價。"
 }

@@ -1,0 +1,230 @@
+{
+ "bundle_version": "P5-INPUTS/1.0",
+ "ticker": "META",
+ "date": "2026-08-10",
+ "phase0": {
+  "regime_confidence": 0.71,
+  "market_top_zone": "Yellow",
+  "ftd_state": "FTD_CONFIRMED",
+  "breadth_composite": 76,
+  "vix": 14.9,
+  "fred_verdict": "Soft Landing",
+  "real_rate_pct": 2.41,
+  "hot_sectors": [
+   "Industrials",
+   "Consumer Discretionary",
+   "Financials",
+   "Energy"
+  ],
+  "cold_sectors": [
+   "Consumer Staples",
+   "Utilities",
+   "Real Estate",
+   "Technology"
+  ]
+ },
+ "lanes": {
+  "fundamentals": {
+   "signal": "BUY",
+   "score": 2.0,
+   "confidence": 0.6,
+   "key_factors": [
+    "Revenue grew 28% year over year",
+    "Forward P/E attractive at 15.9",
+    "Low leverage supports resilience"
+   ],
+   "risk_flags": [
+    "Owner earnings fell 49.6% QoQ",
+    "FCF margin compressed to 2.9%"
+   ],
+   "phase0_alignment": "ALIGNED",
+   "moat_assessment": {
+    "level": "WIDE",
+    "type": "network_effect",
+    "evidence_one_line": "平台規模與使用者互動強化網路效應，營收年增 28%。"
+   },
+   "near_term_catalysts": [
+    {
+     "date": "2026-10-27",
+     "type": "earnings",
+     "description": "季度財報驗證成長延續與利潤率修復",
+     "impact": "high"
+    },
+    {
+     "date": "2026-Q4",
+     "type": "guidance",
+     "description": "AI 基礎設施支出與全年指引更新",
+     "impact": "high"
+    },
+    {
+     "date": "2026-Q4",
+     "type": "product_launch",
+     "description": "AI 推薦與廣告工具商業化進展",
+     "impact": "medium"
+    }
+   ],
+   "bull_thesis_one_line": "營收高成長、估值合理且網路效應護城河深",
+   "bear_thesis_one_line": "業主盈餘驟降與低現金流率恐削弱品質",
+   "reasoning_one_line": "成長、低槓桿與網路效應暫時勝過現金流轉弱。"
+  },
+  "sentiment": {
+   "signal": "HOLD",
+   "score": 0.58,
+   "confidence": 0.71,
+   "key_factors": [
+    "Low short interest supports sentiment",
+    "MSPR shows insider selling",
+    "Market remains in greed regime"
+   ],
+   "risk_flags": [
+    "Insider distribution trend",
+    "Institutional data unavailable"
+   ],
+   "phase0_alignment": "NEUTRAL",
+   "market_sentiment_composite": 71.6,
+   "vix_current": 14.9,
+   "insider_signal": "distributing",
+   "short_pct_float": 1.72,
+   "mspr_latest": -100,
+   "reasoning_one_line": "低空頭比例與偏多大盤，遭內部人賣出訊號抵銷。",
+   "sentiment_det": {
+    "producer_version": "sentiment_score.py v1.1 (L5 / V4.95.3)",
+    "shadow_only": true,
+    "ticker": "META",
+    "score": 0.58,
+    "market_layer": 2.16,
+    "market_composite": 71.6,
+    "stock_specific": -1.0,
+    "missing_inputs": [
+     "institutional.accumulation_signal",
+     "stock_based_compensation_pct_revenue"
+    ],
+    "degraded_reason": null,
+    "input_hash": "sha256:6a23b2a1dd553470ea3571dfbb0328c8"
+   }
+  },
+  "news": {
+   "signal": "HOLD",
+   "score": -1.0,
+   "confidence": 0.6,
+   "key_factors": [
+    "Recent rating downgrade",
+    "AI security scrutiny",
+    "Paying-user incentives added"
+   ],
+   "risk_flags": [
+    "Regulatory monitoring pressure",
+    "Smartglasses privacy backlash"
+   ],
+   "phase0_alignment": "NEUTRAL",
+   "pt_revision_momentum": {
+    "direction": "UP",
+    "consensus_delta_pct_1m": 1.11
+   },
+   "immediate_catalyst_5d": null,
+   "decision_point_days": 21,
+   "cross_asset_spillover": [
+    {
+     "asset": "sector_XLC",
+     "direction": "BEARISH",
+     "mechanism": "監管與隱私疑慮可能壓抑大型網路平台風險偏好。"
+    },
+    {
+     "asset": "sector_XLK",
+     "direction": "NEUTRAL",
+     "mechanism": "AI 安全審查提高合規成本，但不直接改變基礎設施需求。"
+    }
+   ],
+   "reasoning_one_line": "PT 小幅上修未達門檻，仍不足抵銷降評與監管疑慮。"
+  },
+  "technical": {
+   "signal": "HOLD",
+   "score": 0.0,
+   "confidence": 0.72,
+   "key_factors": [
+    "Stage one basing",
+    "MACD histogram improving",
+    "Volume below average"
+   ],
+   "risk_flags": [
+    "Below 200-day moving average",
+    "Resistance near 601"
+   ],
+   "phase0_alignment": "MISALIGNED",
+   "smart_money_analysis": {
+    "label": "neutral",
+    "narrative": "低量築底尚未顯示明確吸籌或出貨。"
+   },
+   "pattern_taxonomy": {
+    "pattern": "consolidation",
+    "confirmation_criteria": "放量收上 601 美元才確認向上延續。"
+   },
+   "market_strength": "WEAK",
+   "key_levels": {
+    "support": 577.07,
+    "resistance": 601.0,
+    "pivot": 592.15
+   },
+   "high_prob_scenario": "短期在 577 至 601 美元整理；放量突破 601 才轉強。",
+   "volatility": {
+    "atr_14": null,
+    "hist_vol_20d_daily": null,
+    "momentum_20d_pct": null
+   },
+   "rubric_override_reason": null,
+   "distance_from_50ma_pct": -1.25
+  },
+  "valuation": {
+   "signal": "SELL",
+   "score": -1.0,
+   "confidence": 0.55,
+   "key_factors": [
+    "Fair value implies downside",
+    "Valuation anchors conflict severely",
+    "Cash flow outlook remains uncertain"
+   ],
+   "risk_flags": [
+    "No valid peer cohort",
+    "Implied FCF CAGR out of range"
+   ],
+   "phase0_alignment": "ALIGNED",
+   "weighted_fair_value": 520.54,
+   "current_price": 592.1,
+   "vs_current_pct": -12.09,
+   "verdict_band": "overvalued",
+   "valuation_confidence": "medium",
+   "anchors_available": 5,
+   "suppression_proposals": [
+    {
+     "anchor": "owner_earnings_mult",
+     "reason": "再投資提高可能扭曲單季業主盈餘",
+     "evidence": "每股業主盈餘 4.77，季減 49.58%，資本支出強度 49.53%。"
+    },
+    {
+     "anchor": "analyst_pt_consensus",
+     "reason": "錨點高度分散時影響過大",
+     "evidence": "該錨有效權重 0.5，而 dispersion ratio 為 10.11。"
+    }
+   ],
+   "valuation_commentary": "凍結估值包顯示 12.09% 下行；同業與 forecaster 錨排除，遠期獲利錨僅留 shadow。",
+   "cited_transition_overlay": false,
+   "transition_dissent_basis": "valuation_anchor"
+  }
+ },
+ "burry": {
+  "score": null,
+  "narrative": "Burry 44.4/100，屬中性；FCF yield 僅 1.41% 且內部人趨勢為 distributing，但 D/E 0.43。Vendor DCF FCFF/FCFE 差距逾 20%，需留意資本結構與假設敏感度；同業不足，未作相對估值加減分。"
+ },
+ "phase3": {
+  "final_score": 0.1271,
+  "final_decision": "HOLD",
+  "final_action": "CANCEL"
+ },
+ "phase4": {
+  "position_size_pct": null,
+  "analysis_price": 592.1
+ },
+ "red_team": {
+  "verdict": "STRONG_COUNTER"
+ }
+}

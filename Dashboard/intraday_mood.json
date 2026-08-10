@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "generated_at": "2026-08-09T08:10:53.357225+00:00",
+  "generated_at": "2026-08-10T04:04:43.796139+00:00",
   "market_open": false,
   "session_fraction": 1.0,
   "aggregate": {
@@ -46,8 +46,8 @@
       "intraday_return_open_pct": 0.29,
       "intraday_return_prevclose_pct": 0.61,
       "range_position": 0.848,
-      "vwap": 772.38,
-      "vwap_gap_pct": 0.11,
+      "vwap": 772.29,
+      "vwap_gap_pct": 0.13,
       "cum_volume": 42664673,
       "avg20_volume": 49649102,
       "rvol": 0.86,
@@ -67,7 +67,7 @@
       "components": {
         "dir": 30.6,
         "range_pos": 69.6,
-        "vwap": 11.3,
+        "vwap": 12.5,
         "vol_price": 34.4,
         "break_low": 0.0,
         "trend": 25.6
@@ -86,24 +86,24 @@
       ],
       "momentum": {
         "macd_5m": {
-          "dif": 0.256,
-          "dea": 0.162,
+          "dif": 0.26,
+          "dea": 0.165,
           "hist": 0.094,
-          "hist_prev": 0.095,
+          "hist_prev": 0.092,
           "cross": null
         },
         "kdj_5m": {
-          "k": 52.8,
+          "k": 53.4,
           "d": 61.3,
-          "j": 35.7,
-          "k_prev": 56.6,
+          "j": 37.7,
+          "k_prev": 55.7,
           "cross": null
         },
         "macd_1d": {
-          "dif": 5.077,
-          "dea": 2.028,
+          "dif": 5.076,
+          "dea": 2.027,
           "hist": 3.049,
-          "hist_prev": 2.79,
+          "hist_prev": 2.791,
           "cross": null
         },
         "kdj_1d": {
@@ -137,9 +137,9 @@
       "range_position": 0.916,
       "vwap": 720.97,
       "vwap_gap_pct": 0.29,
-      "cum_volume": 29234852,
+      "cum_volume": 31070371,
       "avg20_volume": 41624817,
-      "rvol": 0.7,
+      "rvol": 0.75,
       "ma20": 700.46,
       "ma50": 714.7,
       "pct_above_ma20": 3.22,
@@ -157,7 +157,7 @@
         "dir": 58.6,
         "range_pos": 83.1,
         "vwap": 28.6,
-        "vol_price": 28.1,
+        "vol_price": 29.9,
         "break_low": 0.0,
         "trend": 25.8
       },
@@ -189,8 +189,8 @@
           "cross": null
         },
         "macd_1d": {
-          "dif": -1.698,
-          "dea": -5.429,
+          "dif": -1.699,
+          "dea": -5.43,
           "hist": 3.731,
           "hist_prev": 3.222,
           "cross": null
@@ -278,10 +278,10 @@
           "cross": null
         },
         "macd_1d": {
-          "dif": 1.114,
-          "dea": 0.539,
-          "hist": 0.575,
-          "hist_prev": 0.555,
+          "dif": 1.112,
+          "dea": 0.536,
+          "hist": 0.576,
+          "hist_prev": 0.557,
           "cross": null
         },
         "kdj_1d": {

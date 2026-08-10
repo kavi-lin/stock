@@ -1,6 +1,6 @@
 {
   "version": "3.0.0",
-  "generated_at": "2026-08-09T07:14:27.160084Z",
+  "generated_at": "2026-08-09T20:31:19.183695Z",
   "decay_anchor_date": "2026-08-09",
   "tiers_applied": [
     "1",
@@ -11,9 +11,9 @@
       "id": "ticker:NVDA",
       "type": "ticker",
       "label": "NVDA",
-      "weight": 0.3333333333333333,
-      "pagerank": 0.03534086010315982,
-      "mentions": 198,
+      "weight": 0.36619718309859156,
+      "pagerank": 0.037519339208218566,
+      "mentions": 200,
       "last_seen": "2026-08-09",
       "status": "promoted",
       "sources": [
@@ -157,6 +157,8 @@
         "break_news:bn_20260808_4bc7f1ae",
         "break_news:bn_20260808_9dc740d5",
         "break_news:bn_20260808_cfaa0e79",
+        "break_news:bn_20260809_31cf9b1a",
+        "break_news:bn_20260809_33c8aea1",
         "dashboard_data:earnings:NVDA",
         "event_index:deep-dive:2026-04-15",
         "event_index:deep-dive:2026-04-22",
@@ -191,6 +193,24 @@
       ],
       "metadata": {
         "recent_news": [
+          {
+            "id": "catalyst:news_bn_20260809_31cf9b1a_2026-08-09",
+            "headline": "Here are the 2 big things we're watching in the stock market in the week ahead",
+            "verdict": "BULLISH",
+            "net_impact": null,
+            "published": "2026-08-09",
+            "edge_type": "BULL_CASE_FOR",
+            "weight": 0.5
+          },
+          {
+            "id": "catalyst:news_bn_20260809_33c8aea1_2026-08-09",
+            "headline": "A $10,000 Investment in Taiwan Semiconductor Today Will Be Worth This Much by 20",
+            "verdict": "BULLISH",
+            "net_impact": null,
+            "published": "2026-08-09",
+            "edge_type": "BULL_CASE_FOR",
+            "weight": 0.5
+          },
           {
             "id": "catalyst:news_bn_20260808_381767d6_2026-08-08",
             "headline": "These 7 Stocks Are Analyst Favorites For Magnificent Earnings Growth; Arista Bea",
@@ -244,24 +264,6 @@
             "published": "2026-08-07",
             "edge_type": "MENTIONED_IN",
             "weight": 0.4529
-          },
-          {
-            "id": "catalyst:news_bn_20260807_17496a20_2026-08-07",
-            "headline": "Nintendo jumps 5% after earnings beat, raised outlook lifts Switch 2 optimism",
-            "verdict": "BULLISH",
-            "net_impact": null,
-            "published": "2026-08-07",
-            "edge_type": "BULL_CASE_FOR",
-            "weight": 0.4774
-          },
-          {
-            "id": "catalyst:news_bn_20260807_22770b13_2026-08-07",
-            "headline": "SK Hynix to invest $38 billion building new memory chip plants as demand soars",
-            "verdict": "BULLISH",
-            "net_impact": null,
-            "published": "2026-08-07",
-            "edge_type": "BULL_CASE_FOR",
-            "weight": 0.4774
           }
         ],
         "themes": [
@@ -282,8 +284,8 @@
       "id": "ticker:MU",
       "type": "ticker",
       "label": "MU",
-      "weight": 0.2692307692307692,
-      "pagerank": 0.02512946668695113,
+      "weight": 0.29577464788732394,
+      "pagerank": 0.027103605670068538,
       "mentions": 117,
       "last_seen": "2026-08-09",
       "status": "promoted",
@@ -493,8 +495,8 @@
       "id": "ticker:AMD",
       "type": "ticker",
       "label": "AMD",
-      "weight": 0.2692307692307692,
-      "pagerank": 0.030919427919990854,
+      "weight": 0.29577464788732394,
+      "pagerank": 0.033196186257879935,
       "mentions": 148,
       "last_seen": "2026-08-09",
       "status": "promoted",
@@ -685,8 +687,8 @@
       "id": "ticker:INTC",
       "type": "ticker",
       "label": "INTC",
-      "weight": 0.01282051282051282,
-      "pagerank": 0.002330991925646049,
+      "weight": 0.014084507042253521,
+      "pagerank": 0.0025474131477368233,
       "mentions": 11,
       "last_seen": "2026-08-09",
       "status": "promoted",
@@ -744,8 +746,8 @@
       "id": "ticker:AVGO",
       "type": "ticker",
       "label": "AVGO",
-      "weight": 0.3076923076923077,
-      "pagerank": 0.025659447904298496,
+      "weight": 0.3380281690140845,
+      "pagerank": 0.02734446603154619,
       "mentions": 41,
       "last_seen": "2026-08-09",
       "status": "promoted",
@@ -875,8 +877,8 @@
       "id": "ticker:AMAT",
       "type": "ticker",
       "label": "AMAT",
-      "weight": 0.23076923076923078,
-      "pagerank": 0.023643110591632217,
+      "weight": 0.2535211267605634,
+      "pagerank": 0.02535145870885824,
       "mentions": 26,
       "last_seen": "2026-08-07",
       "status": "promoted",
@@ -943,8 +945,8 @@
       "id": "ticker:KLAC",
       "type": "ticker",
       "label": "KLAC",
-      "weight": 0.20512820512820512,
-      "pagerank": 0.01913235842408846,
+      "weight": 0.22535211267605634,
+      "pagerank": 0.020532308491556874,
       "mentions": 12,
       "last_seen": "2026-08-06",
       "status": "promoted",
@@ -986,8 +988,8 @@
       "id": "ticker:LRCX",
       "type": "ticker",
       "label": "LRCX",
-      "weight": 0.20512820512820512,
-      "pagerank": 0.024432422082816783,
+      "weight": 0.22535211267605634,
+      "pagerank": 0.026201480940348094,
       "mentions": 38,
       "last_seen": "2026-08-07",
       "status": "promoted",
@@ -1052,8 +1054,8 @@
       "id": "ticker:ISRG",
       "type": "ticker",
       "label": "ISRG",
-      "weight": 0.2948717948717949,
-      "pagerank": 0.02075970155124508,
+      "weight": 0.323943661971831,
+      "pagerank": 0.022426237341834642,
       "mentions": 6,
       "last_seen": "2026-08-06",
       "status": "promoted",
@@ -1078,8 +1080,8 @@
       "id": "ticker:ASML",
       "type": "ticker",
       "label": "ASML",
-      "weight": 0.14102564102564102,
-      "pagerank": 0.016995217048618422,
+      "weight": 0.15492957746478872,
+      "pagerank": 0.01828200589538245,
       "mentions": 32,
       "last_seen": "2026-08-08",
       "status": "promoted",
@@ -1168,8 +1170,8 @@
       "id": "ticker:MRVL",
       "type": "ticker",
       "label": "MRVL",
-      "weight": 0.19230769230769232,
-      "pagerank": 0.010999958175019808,
+      "weight": 0.2112676056338028,
+      "pagerank": 0.011836954609699468,
       "mentions": 19,
       "last_seen": "2026-08-09",
       "status": "promoted",
@@ -1239,14 +1241,15 @@
       "id": "ticker:CSCO",
       "type": "ticker",
       "label": "CSCO",
-      "weight": 0.14102564102564102,
-      "pagerank": 0.017888321998520643,
-      "mentions": 49,
-      "last_seen": "2026-08-08",
+      "weight": 0.15492957746478872,
+      "pagerank": 0.01924163504143854,
+      "mentions": 50,
+      "last_seen": "2026-08-09",
       "status": "promoted",
       "sources": [
         "break_news:bn_20260808_381767d6",
         "break_news:bn_20260808_bd89d46d",
+        "break_news:bn_20260809_5a91ee12",
         "event_index:deep-dive:2026-04-26",
         "event_index:momentum-screen:2026-05-12",
         "event_index:momentum-screen:2026-05-13",
@@ -1298,6 +1301,15 @@
       "metadata": {
         "recent_news": [
           {
+            "id": "catalyst:news_bn_20260809_5a91ee12_2026-08-09",
+            "headline": "Dow Jones Futures Loom As Market Bulls Rule; Cisco, Lumentum Earnings Ahead",
+            "verdict": "BULLISH",
+            "net_impact": null,
+            "published": "2026-08-09",
+            "edge_type": "BULL_CASE_FOR",
+            "weight": 0.5
+          },
+          {
             "id": "catalyst:news_bn_20260808_381767d6_2026-08-08",
             "headline": "These 7 Stocks Are Analyst Favorites For Magnificent Earnings Growth; Arista Bea",
             "verdict": "BULLISH",
@@ -1328,9 +1340,9 @@
       "id": "ticker:AAPL",
       "type": "ticker",
       "label": "AAPL",
-      "weight": 0.21794871794871795,
-      "pagerank": 0.02193928374062979,
-      "mentions": 82,
+      "weight": 0.23943661971830985,
+      "pagerank": 0.02361488592754576,
+      "mentions": 84,
       "last_seen": "2026-08-09",
       "status": "promoted",
       "sources": [
@@ -1360,6 +1372,8 @@
         "break_news:bn_20260807_41884bc2",
         "break_news:bn_20260808_db5f3adf",
         "break_news:bn_20260808_fa795b5e",
+        "break_news:bn_20260809_31cf9b1a",
+        "break_news:bn_20260809_7f3b6430",
         "dashboard_data:earnings:AAPL",
         "event_index:deep-dive:2026-04-11",
         "event_index:deep-dive:2026-04-21",
@@ -1416,6 +1430,24 @@
       "metadata": {
         "recent_news": [
           {
+            "id": "catalyst:news_bn_20260809_31cf9b1a_2026-08-09",
+            "headline": "Here are the 2 big things we're watching in the stock market in the week ahead",
+            "verdict": "BULLISH",
+            "net_impact": null,
+            "published": "2026-08-09",
+            "edge_type": "BULL_CASE_FOR",
+            "weight": 0.5
+          },
+          {
+            "id": "catalyst:news_bn_20260809_7f3b6430_2026-08-09",
+            "headline": "If You Had Bought $10,000 of Apple Stock When Steve Jobs Handpicked Tim Cook as ",
+            "verdict": "BULLISH",
+            "net_impact": null,
+            "published": "2026-08-09",
+            "edge_type": "BULL_CASE_FOR",
+            "weight": 0.5
+          },
+          {
             "id": "catalyst:news_bn_20260808_db5f3adf_2026-08-08",
             "headline": "How Qorvo's $22 Billion Merger Changes What Its Insider Filings Mean",
             "verdict": "BULLISH",
@@ -1468,24 +1500,6 @@
             "published": "2026-08-04",
             "edge_type": "MENTIONED_IN",
             "weight": 0.3904
-          },
-          {
-            "id": "catalyst:news_bn_20260803_2817e6c8_2026-08-03",
-            "headline": "Senate appears ready to advance Todd Blanche for attorney general after Cornyn s",
-            "verdict": "BULLISH",
-            "net_impact": null,
-            "published": "2026-08-03",
-            "edge_type": "BULL_CASE_FOR",
-            "weight": 0.4353
-          },
-          {
-            "id": "catalyst:news_bn_20260803_5b480b36_2026-08-03",
-            "headline": "Skyworks Solutions says HSR waiting period for Qorvo merger has expired",
-            "verdict": "BULLISH",
-            "net_impact": null,
-            "published": "2026-08-03",
-            "edge_type": "BULL_CASE_FOR",
-            "weight": 0.4353
           }
         ],
         "themes": [
@@ -1502,8 +1516,8 @@
       "id": "ticker:CAT",
       "type": "ticker",
       "label": "CAT",
-      "weight": 0.038461538461538464,
-      "pagerank": 0.010385368460648017,
+      "weight": 0.04225352112676056,
+      "pagerank": 0.01236277761569693,
       "mentions": 40,
       "last_seen": "2026-08-07",
       "status": "promoted",
@@ -1634,8 +1648,8 @@
       "id": "ticker:UPS",
       "type": "ticker",
       "label": "UPS",
-      "weight": 0.038461538461538464,
-      "pagerank": 0.00998919930154116,
+      "weight": 0.04225352112676056,
+      "pagerank": 0.011881892929849931,
       "mentions": 12,
       "last_seen": "2026-08-07",
       "status": "promoted",
@@ -1685,8 +1699,8 @@
       "id": "ticker:GE",
       "type": "ticker",
       "label": "GE",
-      "weight": 0.07692307692307693,
-      "pagerank": 0.018626704463928875,
+      "weight": 0.07042253521126761,
+      "pagerank": 0.01974909069153227,
       "mentions": 33,
       "last_seen": "2026-08-07",
       "status": "promoted",
@@ -1735,8 +1749,8 @@
       "id": "ticker:RTX",
       "type": "ticker",
       "label": "RTX",
-      "weight": 0.07692307692307693,
-      "pagerank": 0.017009335051326548,
+      "weight": 0.07042253521126761,
+      "pagerank": 0.01805158883630174,
       "mentions": 26,
       "last_seen": "2026-08-08",
       "status": "promoted",
@@ -1842,8 +1856,8 @@
       "id": "ticker:CEG",
       "type": "ticker",
       "label": "CEG",
-      "weight": 0.05128205128205128,
-      "pagerank": 0.008897665268625763,
+      "weight": 0.028169014084507043,
+      "pagerank": 0.0069215683495601164,
       "mentions": 9,
       "last_seen": "2026-08-09",
       "status": "promoted",
@@ -1890,49 +1904,11 @@
       }
     },
     {
-      "id": "ticker:GEV",
-      "type": "ticker",
-      "label": "GEV",
-      "weight": 0.05128205128205128,
-      "pagerank": 0.011123446316682923,
-      "mentions": 5,
-      "last_seen": "2026-08-09",
-      "status": "promoted",
-      "sources": [
-        "break_news:bn_20260803_058e9ff5",
-        "event_index:deep-dive:2026-04-22",
-        "event_index:momentum-screen:2026-04-22",
-        "event_index:thematic-screener:2026-07-20",
-        "theme_detector:theme_detector_2026-08-06_203104.json"
-      ],
-      "metadata": {
-        "recent_news": [
-          {
-            "id": "catalyst:news_bn_20260803_058e9ff5_2026-08-03",
-            "headline": "World’s Largest Energy Lender Steers Federal Financing Toward Baseload, Transmis",
-            "verdict": "BULLISH",
-            "net_impact": null,
-            "published": "2026-08-03",
-            "edge_type": "BULL_CASE_FOR",
-            "weight": 0.4353
-          }
-        ],
-        "themes": [
-          "Nuclear Energy"
-        ],
-        "narratives": [
-          "SMR"
-        ],
-        "theses": [],
-        "sector": null
-      }
-    },
-    {
       "id": "ticker:VST",
       "type": "ticker",
       "label": "VST",
-      "weight": 0.05128205128205128,
-      "pagerank": 0.011123446316682923,
+      "weight": 0.028169014084507043,
+      "pagerank": 0.008088793725550497,
       "mentions": 6,
       "last_seen": "2026-08-09",
       "status": "promoted",
@@ -1979,8 +1955,8 @@
       "id": "ticker:TSLA",
       "type": "ticker",
       "label": "TSLA",
-      "weight": 0.21794871794871795,
-      "pagerank": 0.022400546809931646,
+      "weight": 0.22535211267605634,
+      "pagerank": 0.022023022674187813,
       "mentions": 52,
       "last_seen": "2026-08-07",
       "status": "promoted",
@@ -2120,8 +2096,8 @@
       "id": "ticker:TER",
       "type": "ticker",
       "label": "TER",
-      "weight": 0.20512820512820512,
-      "pagerank": 0.019709060966534044,
+      "weight": 0.22535211267605634,
+      "pagerank": 0.02109856015721897,
       "mentions": 22,
       "last_seen": "2026-08-06",
       "status": "promoted",
@@ -2160,8 +2136,8 @@
       "id": "ticker:PLTR",
       "type": "ticker",
       "label": "PLTR",
-      "weight": 0.24358974358974358,
-      "pagerank": 0.019751188166426147,
+      "weight": 0.2676056338028169,
+      "pagerank": 0.021150492090513395,
       "mentions": 48,
       "last_seen": "2026-08-09",
       "status": "promoted",
@@ -2294,13 +2270,14 @@
       "id": "ticker:ANET",
       "type": "ticker",
       "label": "ANET",
-      "weight": 0.20512820512820512,
-      "pagerank": 0.01549908703242478,
-      "mentions": 30,
-      "last_seen": "2026-08-08",
+      "weight": 0.22535211267605634,
+      "pagerank": 0.016600121968102868,
+      "mentions": 31,
+      "last_seen": "2026-08-09",
       "status": "promoted",
       "sources": [
         "break_news:bn_20260808_381767d6",
+        "break_news:bn_20260809_5f36ff49",
         "event_index:momentum-screen:2026-04-21",
         "event_index:thematic-screener:2026-04-28",
         "event_index:thematic-screener:2026-04-29",
@@ -2334,6 +2311,15 @@
       "metadata": {
         "recent_news": [
           {
+            "id": "catalyst:news_bn_20260809_5f36ff49_2026-08-09",
+            "headline": "Arista Networks vs. Arm: Comparing Revenue Growth Trajectories for These Artific",
+            "verdict": "BULLISH",
+            "net_impact": null,
+            "published": "2026-08-09",
+            "edge_type": "BULL_CASE_FOR",
+            "weight": 0.5
+          },
+          {
             "id": "catalyst:news_bn_20260808_381767d6_2026-08-08",
             "headline": "These 7 Stocks Are Analyst Favorites For Magnificent Earnings Growth; Arista Bea",
             "verdict": "BULLISH",
@@ -2357,8 +2343,8 @@
       "id": "ticker:VRT",
       "type": "ticker",
       "label": "VRT",
-      "weight": 0.14102564102564102,
-      "pagerank": 0.009442350288744667,
+      "weight": 0.15492957746478872,
+      "pagerank": 0.010135496386265338,
       "mentions": 17,
       "last_seen": "2026-08-08",
       "status": "promoted",
@@ -2419,15 +2405,6 @@
             "weight": 0.3266
           },
           {
-            "id": "catalyst:n0372_2026-07-30",
-            "headline": "Vertiv CEO addresses 17% stock plunge, disappointing quarter: 'This is a tempora",
-            "verdict": "BINARY",
-            "net_impact": -0.7,
-            "published": "2026-07-30",
-            "edge_type": "MENTIONED_IN",
-            "weight": 0.2865
-          },
-          {
             "id": "catalyst:news_bn_20260729_409b0166_2026-07-29",
             "headline": "Vertiv Holdings plunges on revenue miss, supply chain timing",
             "verdict": "BULLISH",
@@ -2458,8 +2435,8 @@
       "id": "ticker:GOOG",
       "type": "ticker",
       "label": "GOOG",
-      "weight": 0.20512820512820512,
-      "pagerank": 0.018585708078576815,
+      "weight": 0.22535211267605634,
+      "pagerank": 0.01989835007009325,
       "mentions": 44,
       "last_seen": "2026-08-06",
       "status": "promoted",
@@ -2540,8 +2517,8 @@
       "id": "ticker:DE",
       "type": "ticker",
       "label": "DE",
-      "weight": 0.20512820512820512,
-      "pagerank": 0.020912168014140513,
+      "weight": 0.22535211267605634,
+      "pagerank": 0.022388590744811587,
       "mentions": 50,
       "last_seen": "2026-08-07",
       "status": "promoted",
@@ -2594,8 +2571,8 @@
       "id": "ticker:ROK",
       "type": "ticker",
       "label": "ROK",
-      "weight": 0.14102564102564102,
-      "pagerank": 0.014262579908624793,
+      "weight": 0.15492957746478872,
+      "pagerank": 0.015280180490190616,
       "mentions": 29,
       "last_seen": "2026-08-06",
       "status": "promoted",
@@ -2654,8 +2631,8 @@
       "id": "ticker:LLY",
       "type": "ticker",
       "label": "LLY",
-      "weight": 0.05128205128205128,
-      "pagerank": 0.007098427554663231,
+      "weight": 0.056338028169014086,
+      "pagerank": 0.0077692997265666735,
       "mentions": 12,
       "last_seen": "2026-08-09",
       "status": "promoted",
@@ -2673,15 +2650,6 @@
       ],
       "metadata": {
         "recent_news": [
-          {
-            "id": "catalyst:n0416_2026-08-06",
-            "headline": "Eli Lilly easily tops quarterly estimates, raises outlook as Zepbound and Mounja",
-            "verdict": "BULLISH",
-            "net_impact": 2.9,
-            "published": "2026-08-06",
-            "edge_type": "BULL_CASE_FOR",
-            "weight": 0.6438
-          },
           {
             "id": "catalyst:news_bn_20260804_accc3911_2026-08-04",
             "headline": "Eli Lilly Is Up 7% in 2026 and Has Major Catalysts on the Way. Is the Rally Just",
@@ -2723,8 +2691,8 @@
       "id": "ticker:UNH",
       "type": "ticker",
       "label": "UNH",
-      "weight": 0.0641025641025641,
-      "pagerank": 0.010204353710645733,
+      "weight": 0.07042253521126761,
+      "pagerank": 0.011174075499297175,
       "mentions": 18,
       "last_seen": "2026-08-08",
       "status": "promoted",
@@ -2833,8 +2801,8 @@
       "id": "ticker:MRK",
       "type": "ticker",
       "label": "MRK",
-      "weight": 0.05128205128205128,
-      "pagerank": 0.007098427554663231,
+      "weight": 0.056338028169014086,
+      "pagerank": 0.0077692997265666735,
       "mentions": 4,
       "last_seen": "2026-08-06",
       "status": "promoted",
@@ -2877,8 +2845,8 @@
       "id": "ticker:GEHC",
       "type": "ticker",
       "label": "GEHC",
-      "weight": 0.05128205128205128,
-      "pagerank": 0.007098427554663231,
+      "weight": 0.056338028169014086,
+      "pagerank": 0.0077692997265666735,
       "mentions": 5,
       "last_seen": "2026-08-06",
       "status": "promoted",
@@ -2928,52 +2896,11 @@
       }
     },
     {
-      "id": "ticker:BA",
-      "type": "ticker",
-      "label": "BA",
-      "weight": 0.05128205128205128,
-      "pagerank": 0.010395677481896563,
-      "mentions": 10,
-      "last_seen": "2026-08-06",
-      "status": "promoted",
-      "sources": [
-        "break_news:bn_20260803_1b5d6252",
-        "event_index:earnings-analyzer:2026-04-26",
-        "event_index:thematic-screener:2026-04-25",
-        "event_index:thematic-screener:2026-04-26",
-        "event_index:thematic-screener:2026-04-27",
-        "event_index:thematic-screener:2026-04-28",
-        "event_index:thematic-screener:2026-04-29",
-        "event_index:thematic-screener:2026-04-30",
-        "event_index:thematic-screener:2026-05-07",
-        "theme_detector:theme_detector_2026-08-06_203104.json"
-      ],
-      "metadata": {
-        "recent_news": [
-          {
-            "id": "catalyst:news_bn_20260803_1b5d6252_2026-08-03",
-            "headline": "Boeing Stock Lifts Dow After Double Upgrade",
-            "verdict": "BULLISH",
-            "net_impact": null,
-            "published": "2026-08-03",
-            "edge_type": "BULL_CASE_FOR",
-            "weight": 0.4353
-          }
-        ],
-        "themes": [
-          "Defense & Aerospace"
-        ],
-        "narratives": [],
-        "theses": [],
-        "sector": null
-      }
-    },
-    {
       "id": "ticker:LMT",
       "type": "ticker",
       "label": "LMT",
-      "weight": 0.05128205128205128,
-      "pagerank": 0.010988286262476396,
+      "weight": 0.04225352112676056,
+      "pagerank": 0.01050392947475139,
       "mentions": 45,
       "last_seen": "2026-08-08",
       "status": "promoted",
@@ -3099,8 +3026,8 @@
       "id": "ticker:GD",
       "type": "ticker",
       "label": "GD",
-      "weight": 0.05128205128205128,
-      "pagerank": 0.011213023914891323,
+      "weight": 0.04225352112676056,
+      "pagerank": 0.010784053785201118,
       "mentions": 15,
       "last_seen": "2026-08-07",
       "status": "promoted",
@@ -3145,8 +3072,8 @@
       "id": "ticker:GRMN",
       "type": "ticker",
       "label": "GRMN",
-      "weight": 0.05128205128205128,
-      "pagerank": 0.0058272135779385715,
+      "weight": 0.056338028169014086,
+      "pagerank": 0.006265420705132785,
       "mentions": 9,
       "last_seen": "2026-08-06",
       "status": "promoted",
@@ -3194,8 +3121,8 @@
       "id": "ticker:AMZN",
       "type": "ticker",
       "label": "AMZN",
-      "weight": 0.14102564102564102,
-      "pagerank": 0.01577797871178518,
+      "weight": 0.15492957746478872,
+      "pagerank": 0.016640603008098602,
       "mentions": 72,
       "last_seen": "2026-08-09",
       "status": "promoted",
@@ -3405,8 +3332,8 @@
       "id": "ticker:SLB",
       "type": "ticker",
       "label": "SLB",
-      "weight": 0.11538461538461539,
-      "pagerank": 0.02320050703352885,
+      "weight": 0.09859154929577464,
+      "pagerank": 0.023157031517614432,
       "mentions": 23,
       "last_seen": "2026-08-09",
       "status": "promoted",
@@ -3470,10 +3397,10 @@
       "id": "ticker:XOM",
       "type": "ticker",
       "label": "XOM",
-      "weight": 0.0641025641025641,
-      "pagerank": 0.01063816587479409,
-      "mentions": 33,
-      "last_seen": "2026-08-08",
+      "weight": 0.07042253521126761,
+      "pagerank": 0.012289319724814552,
+      "mentions": 36,
+      "last_seen": "2026-08-09",
       "status": "promoted",
       "sources": [
         "break_news:bn_20260729_02c765cd",
@@ -3508,10 +3435,40 @@
         "break_news:bn_20260807_f92bb9bc",
         "break_news:bn_20260808_1db2c28a",
         "break_news:bn_20260808_3e2d1a16",
+        "break_news:bn_20260809_0b23866f",
+        "break_news:bn_20260809_c58ec46f",
+        "break_news:bn_20260809_e16751a7",
         "theme_detector:theme_detector_2026-08-06_203104.json"
       ],
       "metadata": {
         "recent_news": [
+          {
+            "id": "catalyst:news_bn_20260809_0b23866f_2026-08-09",
+            "headline": "S&P 500 sales growth is at a nearly 5-year high. Here’s what’s behind the surge.",
+            "verdict": "BULLISH",
+            "net_impact": null,
+            "published": "2026-08-09",
+            "edge_type": "BULL_CASE_FOR",
+            "weight": 0.5
+          },
+          {
+            "id": "catalyst:news_bn_20260809_c58ec46f_2026-08-09",
+            "headline": "Iran denies any direct talks with U.S. on opening Strait of Hormuz as Houthis cl",
+            "verdict": "BULLISH",
+            "net_impact": null,
+            "published": "2026-08-09",
+            "edge_type": "BULL_CASE_FOR",
+            "weight": 0.5
+          },
+          {
+            "id": "catalyst:news_bn_20260809_e16751a7_2026-08-09",
+            "headline": "Saudi Aramco extinguishes fire at refinery as Houthis claim responsibility",
+            "verdict": "BULLISH",
+            "net_impact": null,
+            "published": "2026-08-09",
+            "edge_type": "BULL_CASE_FOR",
+            "weight": 0.5
+          },
           {
             "id": "catalyst:news_bn_20260808_1db2c28a_2026-08-08",
             "headline": "UAE says one of its ships was targeted by missile as U.S.-Iran tensions over Str",
@@ -3556,33 +3513,6 @@
             "published": "2026-08-07",
             "edge_type": "BULL_CASE_FOR",
             "weight": 0.4774
-          },
-          {
-            "id": "catalyst:news_bn_20260807_f92bb9bc_2026-08-07",
-            "headline": "Trump teased an Iran deal that didn't come, but markets soared. Here’s why it ke",
-            "verdict": "BULLISH",
-            "net_impact": null,
-            "published": "2026-08-07",
-            "edge_type": "BULL_CASE_FOR",
-            "weight": 0.4774
-          },
-          {
-            "id": "catalyst:news_bn_20260804_0ecd6a9b_2026-08-04",
-            "headline": "Why Michigan Voters Are Hearing 'Communist' as They Vote Tuesday",
-            "verdict": "BEARISH",
-            "net_impact": null,
-            "published": "2026-08-04",
-            "edge_type": "BEAR_CASE_FOR",
-            "weight": 0.4454
-          },
-          {
-            "id": "catalyst:news_bn_20260804_10564132_2026-08-04",
-            "headline": "Oil pares gains after Qatar says US-Iran diplomatic efforts continue",
-            "verdict": "BEARISH",
-            "net_impact": null,
-            "published": "2026-08-04",
-            "edge_type": "BEAR_CASE_FOR",
-            "weight": 0.4454
           }
         ],
         "themes": [
@@ -3597,10 +3527,10 @@
       "id": "ticker:CVX",
       "type": "ticker",
       "label": "CVX",
-      "weight": 0.0641025641025641,
-      "pagerank": 0.01063816587479409,
-      "mentions": 32,
-      "last_seen": "2026-08-08",
+      "weight": 0.07042253521126761,
+      "pagerank": 0.012289319724814552,
+      "mentions": 35,
+      "last_seen": "2026-08-09",
       "status": "promoted",
       "sources": [
         "break_news:bn_20260729_02c765cd",
@@ -3634,10 +3564,40 @@
         "break_news:bn_20260807_f92bb9bc",
         "break_news:bn_20260808_1db2c28a",
         "break_news:bn_20260808_3e2d1a16",
+        "break_news:bn_20260809_0b23866f",
+        "break_news:bn_20260809_c58ec46f",
+        "break_news:bn_20260809_e16751a7",
         "theme_detector:theme_detector_2026-08-06_203104.json"
       ],
       "metadata": {
         "recent_news": [
+          {
+            "id": "catalyst:news_bn_20260809_0b23866f_2026-08-09",
+            "headline": "S&P 500 sales growth is at a nearly 5-year high. Here’s what’s behind the surge.",
+            "verdict": "BULLISH",
+            "net_impact": null,
+            "published": "2026-08-09",
+            "edge_type": "BULL_CASE_FOR",
+            "weight": 0.5
+          },
+          {
+            "id": "catalyst:news_bn_20260809_c58ec46f_2026-08-09",
+            "headline": "Iran denies any direct talks with U.S. on opening Strait of Hormuz as Houthis cl",
+            "verdict": "BULLISH",
+            "net_impact": null,
+            "published": "2026-08-09",
+            "edge_type": "BULL_CASE_FOR",
+            "weight": 0.5
+          },
+          {
+            "id": "catalyst:news_bn_20260809_e16751a7_2026-08-09",
+            "headline": "Saudi Aramco extinguishes fire at refinery as Houthis claim responsibility",
+            "verdict": "BULLISH",
+            "net_impact": null,
+            "published": "2026-08-09",
+            "edge_type": "BULL_CASE_FOR",
+            "weight": 0.5
+          },
           {
             "id": "catalyst:news_bn_20260808_1db2c28a_2026-08-08",
             "headline": "UAE says one of its ships was targeted by missile as U.S.-Iran tensions over Str",
@@ -3682,33 +3642,6 @@
             "published": "2026-08-07",
             "edge_type": "BULL_CASE_FOR",
             "weight": 0.4774
-          },
-          {
-            "id": "catalyst:news_bn_20260807_f92bb9bc_2026-08-07",
-            "headline": "Trump teased an Iran deal that didn't come, but markets soared. Here’s why it ke",
-            "verdict": "BULLISH",
-            "net_impact": null,
-            "published": "2026-08-07",
-            "edge_type": "BULL_CASE_FOR",
-            "weight": 0.4774
-          },
-          {
-            "id": "catalyst:news_bn_20260804_10564132_2026-08-04",
-            "headline": "Oil pares gains after Qatar says US-Iran diplomatic efforts continue",
-            "verdict": "BEARISH",
-            "net_impact": null,
-            "published": "2026-08-04",
-            "edge_type": "BEAR_CASE_FOR",
-            "weight": 0.4454
-          },
-          {
-            "id": "catalyst:news_bn_20260804_5f199e5a_2026-08-04",
-            "headline": "Oil prices slide as U.S.-Iran talks raise hopes for Strait of Hormuz reopening",
-            "verdict": "BEARISH",
-            "net_impact": null,
-            "published": "2026-08-04",
-            "edge_type": "BEAR_CASE_FOR",
-            "weight": 0.4454
           }
         ],
         "themes": [
@@ -3723,14 +3656,15 @@
       "id": "ticker:VLO",
       "type": "ticker",
       "label": "VLO",
-      "weight": 0.0641025641025641,
-      "pagerank": 0.015205681021725554,
-      "mentions": 15,
-      "last_seen": "2026-08-06",
+      "weight": 0.07042253521126761,
+      "pagerank": 0.017679667376565015,
+      "mentions": 16,
+      "last_seen": "2026-08-09",
       "status": "promoted",
       "sources": [
         "break_news:bn_20260803_551649ad",
         "break_news:bn_20260804_f31a57ef",
+        "break_news:bn_20260809_c58ec46f",
         "event_index:momentum-screen:2026-05-12",
         "event_index:momentum-screen:2026-05-16",
         "event_index:momentum-screen:2026-05-17",
@@ -3747,6 +3681,15 @@
       ],
       "metadata": {
         "recent_news": [
+          {
+            "id": "catalyst:news_bn_20260809_c58ec46f_2026-08-09",
+            "headline": "Iran denies any direct talks with U.S. on opening Strait of Hormuz as Houthis cl",
+            "verdict": "BULLISH",
+            "net_impact": null,
+            "published": "2026-08-09",
+            "edge_type": "BULL_CASE_FOR",
+            "weight": 0.5
+          },
           {
             "id": "catalyst:news_bn_20260804_f31a57ef_2026-08-04",
             "headline": "Marathon Petroleum Q2 2026 earnings beat on refining margin surge",
@@ -3778,8 +3721,8 @@
       "id": "ticker:COP",
       "type": "ticker",
       "label": "COP",
-      "weight": 0.0641025641025641,
-      "pagerank": 0.01063816587479409,
+      "weight": 0.07042253521126761,
+      "pagerank": 0.012289319724814552,
       "mentions": 4,
       "last_seen": "2026-08-08",
       "status": "promoted",
@@ -3831,13 +3774,14 @@
       "id": "ticker:MPC",
       "type": "ticker",
       "label": "MPC",
-      "weight": 0.0641025641025641,
-      "pagerank": 0.015805718000062457,
-      "mentions": 26,
-      "last_seen": "2026-08-06",
+      "weight": 0.07042253521126761,
+      "pagerank": 0.018396090967377453,
+      "mentions": 27,
+      "last_seen": "2026-08-09",
       "status": "promoted",
       "sources": [
         "break_news:bn_20260804_f31a57ef",
+        "break_news:bn_20260809_c58ec46f",
         "event_index:thematic-screener:2026-04-29",
         "event_index:thematic-screener:2026-04-30",
         "event_index:thematic-screener:2026-05-02",
@@ -3867,6 +3811,15 @@
       "metadata": {
         "recent_news": [
           {
+            "id": "catalyst:news_bn_20260809_c58ec46f_2026-08-09",
+            "headline": "Iran denies any direct talks with U.S. on opening Strait of Hormuz as Houthis cl",
+            "verdict": "BULLISH",
+            "net_impact": null,
+            "published": "2026-08-09",
+            "edge_type": "BULL_CASE_FOR",
+            "weight": 0.5
+          },
+          {
             "id": "catalyst:news_bn_20260804_f31a57ef_2026-08-04",
             "headline": "Marathon Petroleum Q2 2026 earnings beat on refining margin surge",
             "verdict": "BULLISH",
@@ -3888,8 +3841,8 @@
       "id": "ticker:COIN",
       "type": "ticker",
       "label": "COIN",
-      "weight": 0.02564102564102564,
-      "pagerank": 0.012658227848101267,
+      "weight": 0.028169014084507043,
+      "pagerank": 0.013888888888888892,
       "mentions": 11,
       "last_seen": "2026-08-07",
       "status": "promoted",
@@ -3945,15 +3898,6 @@
             "weight": 0.4353
           },
           {
-            "id": "catalyst:news_bn_20260802_1f52bb55_2026-08-02",
-            "headline": "Coinbase CEO Brian Armstrong Continues to Advocate for the Clarity Act. Here's t",
-            "verdict": "BULLISH",
-            "net_impact": null,
-            "published": "2026-08-02",
-            "edge_type": "BULL_CASE_FOR",
-            "weight": 0.4253
-          },
-          {
             "id": "catalyst:news_bn_20260801_af17478b_2026-08-01",
             "headline": "Coinbase CEO Brian Armstrong Says AI Agents Will Expand Crypto Adoption. Here's ",
             "verdict": "BULLISH",
@@ -3984,8 +3928,8 @@
       "id": "ticker:MSTR",
       "type": "ticker",
       "label": "MSTR",
-      "weight": 0.02564102564102564,
-      "pagerank": 0.012658227848101267,
+      "weight": 0.028169014084507043,
+      "pagerank": 0.013888888888888892,
       "mentions": 6,
       "last_seen": "2026-08-07",
       "status": "promoted",
@@ -4057,8 +4001,8 @@
       "id": "ticker:HOOD",
       "type": "ticker",
       "label": "HOOD",
-      "weight": 0.02564102564102564,
-      "pagerank": 0.012658227848101267,
+      "weight": 0.028169014084507043,
+      "pagerank": 0.013888888888888892,
       "mentions": 9,
       "last_seen": "2026-08-08",
       "status": "promoted",
@@ -4151,8 +4095,8 @@
       "id": "ticker:META",
       "type": "ticker",
       "label": "META",
-      "weight": 0.10256410256410256,
-      "pagerank": 0.01252689754705188,
+      "weight": 0.09859154929577464,
+      "pagerank": 0.011002462940425731,
       "mentions": 76,
       "last_seen": "2026-08-09",
       "status": "promoted",
@@ -4298,10 +4242,10 @@
       "id": "ticker:GOOGL",
       "type": "ticker",
       "label": "GOOGL",
-      "weight": 0.10256410256410256,
-      "pagerank": 0.010798312322588672,
-      "mentions": 60,
-      "last_seen": "2026-08-08",
+      "weight": 0.09859154929577464,
+      "pagerank": 0.009222382276712267,
+      "mentions": 61,
+      "last_seen": "2026-08-09",
       "status": "promoted",
       "sources": [
         "break_news:bn_20260625_f57cba1d",
@@ -4347,6 +4291,7 @@
         "break_news:bn_20260807_64534b8a",
         "break_news:bn_20260807_87b83db4",
         "break_news:bn_20260808_4bc7f1ae",
+        "break_news:bn_20260809_def77ab4",
         "event_index:deep-dive:2026-04-15",
         "event_index:deep-dive:2026-04-21",
         "event_index:deep-dive:2026-05-02",
@@ -4361,6 +4306,15 @@
       ],
       "metadata": {
         "recent_news": [
+          {
+            "id": "catalyst:news_bn_20260809_def77ab4_2026-08-09",
+            "headline": "Abel puts a big chunk of Berkshire's cash to work",
+            "verdict": "BULLISH",
+            "net_impact": null,
+            "published": "2026-08-09",
+            "edge_type": "BULL_CASE_FOR",
+            "weight": 0.5
+          },
           {
             "id": "catalyst:news_bn_20260808_4bc7f1ae_2026-08-08",
             "headline": "Alphabet CEO Sundar Pichai Just Made a Decision That Could Move Nvidia and Broad",
@@ -4423,53 +4377,6 @@
             "published": "2026-08-03",
             "edge_type": "BEAR_CASE_FOR",
             "weight": 0.4353
-          },
-          {
-            "id": "catalyst:news_bn_20260803_2817e6c8_2026-08-03",
-            "headline": "Senate appears ready to advance Todd Blanche for attorney general after Cornyn s",
-            "verdict": "BULLISH",
-            "net_impact": null,
-            "published": "2026-08-03",
-            "edge_type": "BULL_CASE_FOR",
-            "weight": 0.4353
-          }
-        ],
-        "themes": [
-          "Communication Services Sector Concentration"
-        ],
-        "narratives": [],
-        "theses": [],
-        "sector": null
-      }
-    },
-    {
-      "id": "ticker:NFLX",
-      "type": "ticker",
-      "label": "NFLX",
-      "weight": 0.05128205128205128,
-      "pagerank": 0.007994680944833273,
-      "mentions": 7,
-      "last_seen": "2026-08-06",
-      "status": "promoted",
-      "sources": [
-        "break_news:bn_20260627_aaba6e97",
-        "break_news:bn_20260629_494982ac",
-        "break_news:bn_20260701_5c8ab99a",
-        "break_news:bn_20260706_4709fee5",
-        "break_news:bn_20260707_911017a6",
-        "break_news:bn_20260806_500539b9",
-        "theme_detector:theme_detector_2026-08-06_203104.json"
-      ],
-      "metadata": {
-        "recent_news": [
-          {
-            "id": "catalyst:news_bn_20260806_500539b9_2026-08-06",
-            "headline": "Media consolidation: Can mega-mergers clear the regulatory gauntlet?",
-            "verdict": "BEARISH",
-            "net_impact": null,
-            "published": "2026-08-06",
-            "edge_type": "BEAR_CASE_FOR",
-            "weight": 0.4665
           }
         ],
         "themes": [
@@ -4484,8 +4391,8 @@
       "id": "ticker:DIS",
       "type": "ticker",
       "label": "DIS",
-      "weight": 0.038461538461538464,
-      "pagerank": 0.005469839236387823,
+      "weight": 0.028169014084507043,
+      "pagerank": 0.0037611121189362632,
       "mentions": 5,
       "last_seen": "2026-08-07",
       "status": "promoted",
@@ -4535,76 +4442,33 @@
       }
     },
     {
-      "id": "ticker:PG",
-      "type": "ticker",
-      "label": "PG",
-      "weight": 0.02564102564102564,
-      "pagerank": 0.012658227848101267,
-      "mentions": 4,
-      "last_seen": "2026-08-06",
-      "status": "promoted",
-      "sources": [
-        "break_news:bn_20260729_49a8afe7",
-        "break_news:bn_20260729_4e30259b",
-        "break_news:bn_20260729_c31e64d3",
-        "theme_detector:theme_detector_2026-08-06_203104.json"
-      ],
-      "metadata": {
-        "recent_news": [
-          {
-            "id": "catalyst:news_bn_20260729_49a8afe7_2026-07-29",
-            "headline": "Procter & Gamble revenue misses estimates as volume stays unchanged",
-            "verdict": "BEARISH",
-            "net_impact": null,
-            "published": "2026-07-29",
-            "edge_type": "BEAR_CASE_FOR",
-            "weight": 0.3878
-          },
-          {
-            "id": "catalyst:news_bn_20260729_4e30259b_2026-07-29",
-            "headline": "Here's a closer look at our decision to change course on P&G",
-            "verdict": "BEARISH",
-            "net_impact": null,
-            "published": "2026-07-29",
-            "edge_type": "BEAR_CASE_FOR",
-            "weight": 0.3878
-          },
-          {
-            "id": "catalyst:news_bn_20260729_c31e64d3_2026-07-29",
-            "headline": "Dow Falls 700 Points Ahead of Fed Decision, Earnings",
-            "verdict": "SPLIT",
-            "net_impact": null,
-            "published": "2026-07-29",
-            "edge_type": "MENTIONED_IN",
-            "weight": 0.29
-          }
-        ],
-        "themes": [
-          "Consumer Defensive Sector Concentration"
-        ],
-        "narratives": [],
-        "theses": [],
-        "sector": null
-      }
-    },
-    {
       "id": "ticker:PEP",
       "type": "ticker",
       "label": "PEP",
-      "weight": 0.02564102564102564,
-      "pagerank": 0.012658227848101267,
-      "mentions": 7,
-      "last_seen": "2026-08-06",
+      "weight": 0.014084507042253521,
+      "pagerank": 0.013888888888888892,
+      "mentions": 8,
+      "last_seen": "2026-08-09",
       "status": "promoted",
       "sources": [
         "break_news:bn_20260627_5bf71c61",
         "break_news:bn_20260708_1a5de90f",
         "break_news:bn_20260709_a2f9e98a",
         "break_news:bn_20260729_188fd75c",
+        "break_news:bn_20260809_441c7f21",
         "theme_detector:theme_detector_2026-08-06_203104.json"
       ],
       "metadata": {
         "recent_news": [
+          {
+            "id": "catalyst:news_bn_20260809_441c7f21_2026-08-09",
+            "headline": "Here's How Many Shares of PepsiCo You'd Need for $20,000 in Yearly Dividends",
+            "verdict": "SPLIT",
+            "net_impact": null,
+            "published": "2026-08-09",
+            "edge_type": "MENTIONED_IN",
+            "weight": 0.5
+          },
           {
             "id": "catalyst:news_bn_20260729_188fd75c_2026-07-29",
             "headline": "Keurig Dr Pepper (KDP) Pops on Strong Beverage Sales",
@@ -4627,8 +4491,8 @@
       "id": "ticker:WMT",
       "type": "ticker",
       "label": "WMT",
-      "weight": 0.02564102564102564,
-      "pagerank": 0.012658227848101267,
+      "weight": 0.014084507042253521,
+      "pagerank": 0.013888888888888892,
       "mentions": 5,
       "last_seen": "2026-08-07",
       "status": "promoted",
@@ -4690,8 +4554,8 @@
       "id": "ticker:JPM",
       "type": "ticker",
       "label": "JPM",
-      "weight": 0.08974358974358974,
-      "pagerank": 0.013835305780298023,
+      "weight": 0.09859154929577464,
+      "pagerank": 0.015180404953382555,
       "mentions": 31,
       "last_seen": "2026-08-08",
       "status": "promoted",
@@ -4815,8 +4679,8 @@
       "id": "ticker:V",
       "type": "ticker",
       "label": "V",
-      "weight": 0.08974358974358974,
-      "pagerank": 0.014083040418595556,
+      "weight": 0.09859154929577464,
+      "pagerank": 0.015452224903736794,
       "mentions": 9,
       "last_seen": "2026-08-06",
       "status": "promoted",
@@ -4872,8 +4736,8 @@
       "id": "ticker:MA",
       "type": "ticker",
       "label": "MA",
-      "weight": 0.08974358974358974,
-      "pagerank": 0.014083040418595556,
+      "weight": 0.09859154929577464,
+      "pagerank": 0.015452224903736794,
       "mentions": 8,
       "last_seen": "2026-08-06",
       "status": "promoted",
@@ -4919,8 +4783,8 @@
       "id": "ticker:BAC",
       "type": "ticker",
       "label": "BAC",
-      "weight": 0.08974358974358974,
-      "pagerank": 0.013835305780298023,
+      "weight": 0.09859154929577464,
+      "pagerank": 0.015180404953382558,
       "mentions": 12,
       "last_seen": "2026-08-09",
       "status": "promoted",
@@ -4998,8 +4862,8 @@
       "id": "ticker:GS",
       "type": "ticker",
       "label": "GS",
-      "weight": 0.08974358974358974,
-      "pagerank": 0.011357282596755738,
+      "weight": 0.09859154929577464,
+      "pagerank": 0.012461462849218105,
       "mentions": 10,
       "last_seen": "2026-08-06",
       "status": "promoted",
@@ -5102,8 +4966,8 @@
       "id": "ticker:WFC",
       "type": "ticker",
       "label": "WFC",
-      "weight": 0.08974358974358974,
-      "pagerank": 0.011357282596755738,
+      "weight": 0.09859154929577464,
+      "pagerank": 0.012461462849218109,
       "mentions": 5,
       "last_seen": "2026-08-06",
       "status": "promoted",
@@ -5156,19 +5020,29 @@
       "id": "ticker:MS",
       "type": "ticker",
       "label": "MS",
-      "weight": 0.08974358974358974,
-      "pagerank": 0.011357282596755738,
-      "mentions": 5,
-      "last_seen": "2026-08-06",
+      "weight": 0.09859154929577464,
+      "pagerank": 0.012461462849218109,
+      "mentions": 6,
+      "last_seen": "2026-08-09",
       "status": "promoted",
       "sources": [
         "break_news:bn_20260806_9cbbc2f6",
+        "break_news:bn_20260809_36349e96",
         "event_index:momentum-screen:2026-04-20",
         "news_digest:2026-08-03",
         "theme_detector:theme_detector_2026-08-06_203104.json"
       ],
       "metadata": {
         "recent_news": [
+          {
+            "id": "catalyst:news_bn_20260809_36349e96_2026-08-09",
+            "headline": "A Retired Couple Can Pull About $47,500 From Their IRAs This Year and Pay $0 Fed",
+            "verdict": "BULLISH",
+            "net_impact": null,
+            "published": "2026-08-09",
+            "edge_type": "BULL_CASE_FOR",
+            "weight": 0.5
+          },
           {
             "id": "catalyst:news_bn_20260806_9cbbc2f6_2026-08-06",
             "headline": "Nuveen's Acquisition Playbook Accelerates Growth of Direct Indexing Platform by ",
@@ -5201,8 +5075,8 @@
       "id": "ticker:AXP",
       "type": "ticker",
       "label": "AXP",
-      "weight": 0.08974358974358974,
-      "pagerank": 0.011357282596755738,
+      "weight": 0.09859154929577464,
+      "pagerank": 0.012461462849218105,
       "mentions": 4,
       "last_seen": "2026-08-06",
       "status": "promoted",
@@ -5245,8 +5119,8 @@
       "id": "ticker:FSLR",
       "type": "ticker",
       "label": "FSLR",
-      "weight": 0.038461538461538464,
-      "pagerank": 0.004968792774653583,
+      "weight": 0.028169014084507043,
+      "pagerank": 0.004408121444741987,
       "mentions": 14,
       "last_seen": "2026-08-06",
       "status": "promoted",
@@ -5287,50 +5161,11 @@
       }
     },
     {
-      "id": "ticker:MPWR",
-      "type": "ticker",
-      "label": "MPWR",
-      "weight": 0.038461538461538464,
-      "pagerank": 0.004915843273895973,
-      "mentions": 18,
-      "last_seen": "2026-08-06",
-      "status": "promoted",
-      "sources": [
-        "event_index:momentum-screen:2026-04-19",
-        "event_index:momentum-screen:2026-04-20",
-        "event_index:momentum-screen:2026-04-21",
-        "event_index:momentum-screen:2026-04-23",
-        "event_index:momentum-screen:2026-04-24",
-        "event_index:momentum-screen:2026-04-25",
-        "event_index:momentum-screen:2026-04-27",
-        "event_index:momentum-screen:2026-05-24",
-        "event_index:thematic-screener:2026-04-25",
-        "event_index:thematic-screener:2026-04-26",
-        "event_index:thematic-screener:2026-04-27",
-        "event_index:thematic-screener:2026-04-29",
-        "event_index:thematic-screener:2026-05-06",
-        "event_index:thematic-screener:2026-06-09",
-        "event_index:thematic-screener:2026-08-03",
-        "event_index:thematic-screener:2026-08-04",
-        "theme_detector:theme_detector_2026-08-06_203104.json"
-      ],
-      "metadata": {
-        "recent_news": [],
-        "themes": [
-          "Consumer Cyclical Sector Concentration",
-          "Clean Energy & EV"
-        ],
-        "narratives": [],
-        "theses": [],
-        "sector": null
-      }
-    },
-    {
       "id": "ticker:ON",
       "type": "ticker",
       "label": "ON",
-      "weight": 0.038461538461538464,
-      "pagerank": 0.004624003648751048,
+      "weight": 0.028169014084507043,
+      "pagerank": 0.004010709426581071,
       "mentions": 20,
       "last_seen": "2026-08-06",
       "status": "promoted",
@@ -5380,8 +5215,8 @@
       "id": "ticker:HD",
       "type": "ticker",
       "label": "HD",
-      "weight": 0.038461538461538464,
-      "pagerank": 0.006028537903370523,
+      "weight": 0.04225352112676056,
+      "pagerank": 0.0065449750561750565,
       "mentions": 6,
       "last_seen": "2026-08-08",
       "status": "promoted",
@@ -5444,8 +5279,8 @@
       "id": "ticker:MCD",
       "type": "ticker",
       "label": "MCD",
-      "weight": 0.038461538461538464,
-      "pagerank": 0.006028537903370523,
+      "weight": 0.04225352112676056,
+      "pagerank": 0.006544975056175057,
       "mentions": 5,
       "last_seen": "2026-08-07",
       "status": "promoted",
@@ -5498,8 +5333,8 @@
       "id": "ticker:SBUX",
       "type": "ticker",
       "label": "SBUX",
-      "weight": 0.038461538461538464,
-      "pagerank": 0.006028537903370523,
+      "weight": 0.04225352112676056,
+      "pagerank": 0.006544975056175057,
       "mentions": 6,
       "last_seen": "2026-08-08",
       "status": "promoted",
@@ -5571,8 +5406,8 @@
       "id": "ticker:MSFT",
       "type": "ticker",
       "label": "MSFT",
-      "weight": 0.15384615384615385,
-      "pagerank": 0.01157549593545726,
+      "weight": 0.16901408450704225,
+      "pagerank": 0.012081245603328801,
       "mentions": 91,
       "last_seen": "2026-08-09",
       "status": "promoted",
@@ -5748,18 +5583,28 @@
       "label": "APP",
       "weight": 0.0,
       "pagerank": 0.0,
-      "mentions": 5,
-      "last_seen": "2026-08-07",
+      "mentions": 6,
+      "last_seen": "2026-08-09",
       "status": "promoted",
       "sources": [
         "break_news:bn_20260801_efffe680",
         "break_news:bn_20260803_b3dc28c8",
         "break_news:bn_20260806_cf7d584f",
         "break_news:bn_20260807_4b47acf5",
+        "break_news:bn_20260809_224a7527",
         "event_index:deep-dive:2026-04-15"
       ],
       "metadata": {
         "recent_news": [
+          {
+            "id": "catalyst:news_bn_20260809_224a7527_2026-08-09",
+            "headline": "AppLovin Revenue Jumped 53%. So Why Did the Stock Just Plunge 20%?",
+            "verdict": "SPLIT",
+            "net_impact": null,
+            "published": "2026-08-09",
+            "edge_type": "MENTIONED_IN",
+            "weight": 0.5
+          },
           {
             "id": "catalyst:news_bn_20260807_4b47acf5_2026-08-07",
             "headline": "Unity Software surges on wave of analyst upgrades following blockbuster Q2",
@@ -5809,8 +5654,8 @@
       "label": "LITE",
       "weight": 0.0,
       "pagerank": 0.0,
-      "mentions": 9,
-      "last_seen": "2026-08-08",
+      "mentions": 10,
+      "last_seen": "2026-08-09",
       "status": "promoted",
       "sources": [
         "break_news:bn_20260804_48e4ca7f",
@@ -5820,11 +5665,21 @@
         "break_news:bn_20260807_7a661a76",
         "break_news:bn_20260807_80d8a714",
         "break_news:bn_20260808_bd89d46d",
+        "break_news:bn_20260809_5a91ee12",
         "event_index:deep-dive:2026-04-15",
         "event_index:deep-dive:2026-04-27"
       ],
       "metadata": {
         "recent_news": [
+          {
+            "id": "catalyst:news_bn_20260809_5a91ee12_2026-08-09",
+            "headline": "Dow Jones Futures Loom As Market Bulls Rule; Cisco, Lumentum Earnings Ahead",
+            "verdict": "BULLISH",
+            "net_impact": null,
+            "published": "2026-08-09",
+            "edge_type": "BULL_CASE_FOR",
+            "weight": 0.5
+          },
           {
             "id": "catalyst:news_bn_20260808_bd89d46d_2026-08-08",
             "headline": "Dow Jones Futures: What To Do As Stock Market Revs Up; Warren Buffett's Berkshir",
@@ -5951,56 +5806,11 @@
       }
     },
     {
-      "id": "ticker:NEE",
-      "type": "ticker",
-      "label": "NEE",
-      "weight": 0.05128205128205128,
-      "pagerank": 0.009311316899321928,
-      "mentions": 5,
-      "last_seen": "2026-08-09",
-      "status": "promoted",
-      "sources": [
-        "break_news:bn_20260804_0ecd6a9b",
-        "break_news:bn_20260806_98a4ed75",
-        "event_index:deep-dive:2026-04-24",
-        "event_index:deep-dive:2026-05-08",
-        "event_index:momentum-screen:2026-04-23"
-      ],
-      "metadata": {
-        "recent_news": [
-          {
-            "id": "catalyst:news_bn_20260806_98a4ed75_2026-08-06",
-            "headline": "Virginia governor says she will file documentation to intervene Dominion-NextEra",
-            "verdict": "BEARISH",
-            "net_impact": null,
-            "published": "2026-08-06",
-            "edge_type": "BEAR_CASE_FOR",
-            "weight": 0.4665
-          },
-          {
-            "id": "catalyst:news_bn_20260804_0ecd6a9b_2026-08-04",
-            "headline": "Why Michigan Voters Are Hearing 'Communist' as They Vote Tuesday",
-            "verdict": "BEARISH",
-            "net_impact": null,
-            "published": "2026-08-04",
-            "edge_type": "BEAR_CASE_FOR",
-            "weight": 0.4454
-          }
-        ],
-        "themes": [],
-        "narratives": [
-          "SMR"
-        ],
-        "theses": [],
-        "sector": null
-      }
-    },
-    {
       "id": "ticker:CRM",
       "type": "ticker",
       "label": "CRM",
-      "weight": 0.01282051282051282,
-      "pagerank": 0.0024439913079796873,
+      "weight": 0.014084507042253521,
+      "pagerank": 0.0026523714063231133,
       "mentions": 11,
       "last_seen": "2026-08-08",
       "status": "promoted",
@@ -6133,77 +5943,33 @@
       }
     },
     {
-      "id": "ticker:NOW",
-      "type": "ticker",
-      "label": "NOW",
-      "weight": 0.0,
-      "pagerank": 0.0,
-      "mentions": 7,
-      "last_seen": "2026-08-09",
-      "status": "promoted",
-      "sources": [
-        "break_news:bn_20260729_9fcf5c78",
-        "break_news:bn_20260803_b3dc28c8",
-        "break_news:bn_20260808_cfaa0e79",
-        "dashboard_data:earnings:NOW",
-        "event_index:deep-dive:2026-04-27",
-        "event_index:deep-dive:2026-08-09",
-        "news_digest:2026-07-20"
-      ],
-      "metadata": {
-        "recent_news": [
-          {
-            "id": "catalyst:news_bn_20260808_cfaa0e79_2026-08-08",
-            "headline": "AI is Hollowing Out Tech Sector Jobs: Oracle and Microsoft Help Push Layoff Rate",
-            "verdict": "BULLISH",
-            "net_impact": null,
-            "published": "2026-08-08",
-            "edge_type": "BULL_CASE_FOR",
-            "weight": 0.4886
-          },
-          {
-            "id": "catalyst:news_bn_20260803_b3dc28c8_2026-08-03",
-            "headline": "AI應用軟件股走高，Palantir漲超2%，Snap漲近4%，將於盤後發佈最新季度業績",
-            "verdict": "BULLISH",
-            "net_impact": null,
-            "published": "2026-08-03",
-            "edge_type": "BULL_CASE_FOR",
-            "weight": 0.4353
-          },
-          {
-            "id": "catalyst:news_bn_20260729_9fcf5c78_2026-07-29",
-            "headline": "AI應用軟件股延續漲勢，Adobe漲近6%，Workday、Snowflake漲超4%，賽富時、ServiceNow漲超3%，IGV連漲4日",
-            "verdict": "BULLISH",
-            "net_impact": null,
-            "published": "2026-07-29",
-            "edge_type": "BULL_CASE_FOR",
-            "weight": 0.3878
-          }
-        ],
-        "themes": [],
-        "narratives": [],
-        "theses": [],
-        "sector": null
-      }
-    },
-    {
       "id": "ticker:TEAM",
       "type": "ticker",
       "label": "TEAM",
       "weight": 0.0,
       "pagerank": 0.0,
-      "mentions": 5,
-      "last_seen": "2026-08-07",
+      "mentions": 6,
+      "last_seen": "2026-08-09",
       "status": "promoted",
       "sources": [
         "break_news:bn_20260807_05f30a6c",
         "break_news:bn_20260807_2a83d165",
         "break_news:bn_20260807_7e62709d",
         "break_news:bn_20260807_9b64234d",
+        "break_news:bn_20260809_29206b73",
         "event_index:deep-dive:2026-05-02"
       ],
       "metadata": {
         "recent_news": [
+          {
+            "id": "catalyst:news_bn_20260809_29206b73_2026-08-09",
+            "headline": "Atlassian Jumped More Than 30% After Guiding Next Year's Growth Down to 18%. The",
+            "verdict": "SPLIT",
+            "net_impact": null,
+            "published": "2026-08-09",
+            "edge_type": "MENTIONED_IN",
+            "weight": 0.5
+          },
           {
             "id": "catalyst:news_bn_20260807_05f30a6c_2026-08-07",
             "headline": "Five earnings winners lead Friday’s premarket surge",
@@ -6251,8 +6017,8 @@
       "id": "ticker:SNDK",
       "type": "ticker",
       "label": "SNDK",
-      "weight": 0.05128205128205128,
-      "pagerank": 0.0044267170134815095,
+      "weight": 0.056338028169014086,
+      "pagerank": 0.004833336341016966,
       "mentions": 17,
       "last_seen": "2026-08-09",
       "status": "promoted",
@@ -6444,8 +6210,8 @@
       "label": "UAL",
       "weight": 0.0,
       "pagerank": 0.0,
-      "mentions": 19,
-      "last_seen": "2026-08-08",
+      "mentions": 20,
+      "last_seen": "2026-08-09",
       "status": "promoted",
       "sources": [
         "break_news:bn_20260729_0db2ec53",
@@ -6464,12 +6230,22 @@
         "break_news:bn_20260807_1b3a2bc8",
         "break_news:bn_20260807_a0bcd0a4",
         "break_news:bn_20260808_1db2c28a",
+        "break_news:bn_20260809_c58ec46f",
         "event_index:earnings-analyzer:2026-04-26",
         "news_digest:2026-07-11",
         "news_digest:2026-07-16"
       ],
       "metadata": {
         "recent_news": [
+          {
+            "id": "catalyst:news_bn_20260809_c58ec46f_2026-08-09",
+            "headline": "Iran denies any direct talks with U.S. on opening Strait of Hormuz as Houthis cl",
+            "verdict": "BULLISH",
+            "net_impact": null,
+            "published": "2026-08-09",
+            "edge_type": "BULL_CASE_FOR",
+            "weight": 0.5
+          },
           {
             "id": "catalyst:news_bn_20260808_1db2c28a_2026-08-08",
             "headline": "UAE says one of its ships was targeted by missile as U.S.-Iran tensions over Str",
@@ -6532,15 +6308,6 @@
             "published": "2026-08-03",
             "edge_type": "BEAR_CASE_FOR",
             "weight": 0.4353
-          },
-          {
-            "id": "catalyst:news_bn_20260803_1795f334_2026-08-03",
-            "headline": "Global oil prices fall below $83 a barrel to hover at 3-week low after Trump cal",
-            "verdict": "SPLIT",
-            "net_impact": null,
-            "published": "2026-08-03",
-            "edge_type": "MENTIONED_IN",
-            "weight": 0.3715
           }
         ],
         "themes": [],
@@ -6630,8 +6397,8 @@
       "id": "ticker:STX",
       "type": "ticker",
       "label": "STX",
-      "weight": 0.01282051282051282,
-      "pagerank": 0.005491961559116933,
+      "weight": 0.014084507042253521,
+      "pagerank": 0.0060126093853619215,
       "mentions": 14,
       "last_seen": "2026-08-06",
       "status": "promoted",
@@ -6700,8 +6467,8 @@
       "label": "DAL",
       "weight": 0.0,
       "pagerank": 0.0,
-      "mentions": 26,
-      "last_seen": "2026-08-08",
+      "mentions": 27,
+      "last_seen": "2026-08-09",
       "status": "promoted",
       "sources": [
         "break_news:bn_20260729_0db2ec53",
@@ -6728,11 +6495,21 @@
         "break_news:bn_20260807_a0bcd0a4",
         "break_news:bn_20260807_f92bb9bc",
         "break_news:bn_20260808_1db2c28a",
+        "break_news:bn_20260809_c58ec46f",
         "event_index:momentum-screen:2026-04-20",
         "news_digest:2026-07-11"
       ],
       "metadata": {
         "recent_news": [
+          {
+            "id": "catalyst:news_bn_20260809_c58ec46f_2026-08-09",
+            "headline": "Iran denies any direct talks with U.S. on opening Strait of Hormuz as Houthis cl",
+            "verdict": "BULLISH",
+            "net_impact": null,
+            "published": "2026-08-09",
+            "edge_type": "BULL_CASE_FOR",
+            "weight": 0.5
+          },
           {
             "id": "catalyst:news_bn_20260808_1db2c28a_2026-08-08",
             "headline": "UAE says one of its ships was targeted by missile as U.S.-Iran tensions over Str",
@@ -6790,15 +6567,6 @@
           {
             "id": "catalyst:news_bn_20260804_10564132_2026-08-04",
             "headline": "Oil pares gains after Qatar says US-Iran diplomatic efforts continue",
-            "verdict": "BEARISH",
-            "net_impact": null,
-            "published": "2026-08-04",
-            "edge_type": "BEAR_CASE_FOR",
-            "weight": 0.4454
-          },
-          {
-            "id": "catalyst:news_bn_20260804_5f199e5a_2026-08-04",
-            "headline": "Oil prices slide as U.S.-Iran talks raise hopes for Strait of Hormuz reopening",
             "verdict": "BEARISH",
             "net_impact": null,
             "published": "2026-08-04",
@@ -6969,8 +6737,8 @@
       "id": "ticker:SWKS",
       "type": "ticker",
       "label": "SWKS",
-      "weight": 0.01282051282051282,
-      "pagerank": 0.002426313343947854,
+      "weight": 0.014084507042253521,
+      "pagerank": 0.0026511966136360554,
       "mentions": 19,
       "last_seen": "2026-08-08",
       "status": "promoted",
@@ -7105,8 +6873,8 @@
       "id": "ticker:F",
       "type": "ticker",
       "label": "F",
-      "weight": 0.01282051282051282,
-      "pagerank": 0.0021613605494885052,
+      "weight": 0.014084507042253521,
+      "pagerank": 0.00236661138888871,
       "mentions": 11,
       "last_seen": "2026-08-04",
       "status": "promoted",
@@ -7172,8 +6940,8 @@
       "id": "ticker:CMCSA",
       "type": "ticker",
       "label": "CMCSA",
-      "weight": 0.01282051282051282,
-      "pagerank": 0.003272886254189028,
+      "weight": 0.0,
+      "pagerank": 0.0,
       "mentions": 7,
       "last_seen": "2026-08-07",
       "status": "promoted",
@@ -7409,8 +7177,8 @@
       "id": "ticker:WDC",
       "type": "ticker",
       "label": "WDC",
-      "weight": 0.0641025641025641,
-      "pagerank": 0.008403151345268646,
+      "weight": 0.07042253521126761,
+      "pagerank": 0.009198923359060484,
       "mentions": 20,
       "last_seen": "2026-08-07",
       "status": "promoted",
@@ -7522,8 +7290,8 @@
       "label": "OXY",
       "weight": 0.0,
       "pagerank": 0.0,
-      "mentions": 6,
-      "last_seen": "2026-08-08",
+      "mentions": 8,
+      "last_seen": "2026-08-09",
       "status": "promoted",
       "sources": [
         "break_news:bn_20260729_0db2ec53",
@@ -7531,10 +7299,30 @@
         "break_news:bn_20260729_eb606677",
         "break_news:bn_20260730_9ed8151e",
         "break_news:bn_20260808_1db2c28a",
-        "break_news:bn_20260808_3e2d1a16"
+        "break_news:bn_20260808_3e2d1a16",
+        "break_news:bn_20260809_c58ec46f",
+        "break_news:bn_20260809_e16751a7"
       ],
       "metadata": {
         "recent_news": [
+          {
+            "id": "catalyst:news_bn_20260809_c58ec46f_2026-08-09",
+            "headline": "Iran denies any direct talks with U.S. on opening Strait of Hormuz as Houthis cl",
+            "verdict": "BULLISH",
+            "net_impact": null,
+            "published": "2026-08-09",
+            "edge_type": "BULL_CASE_FOR",
+            "weight": 0.5
+          },
+          {
+            "id": "catalyst:news_bn_20260809_e16751a7_2026-08-09",
+            "headline": "Saudi Aramco extinguishes fire at refinery as Houthis claim responsibility",
+            "verdict": "BULLISH",
+            "net_impact": null,
+            "published": "2026-08-09",
+            "edge_type": "BULL_CASE_FOR",
+            "weight": 0.5
+          },
           {
             "id": "catalyst:news_bn_20260808_1db2c28a_2026-08-08",
             "headline": "UAE says one of its ships was targeted by missile as U.S.-Iran tensions over Str",
@@ -7771,8 +7559,8 @@
       "id": "ticker:CI",
       "type": "ticker",
       "label": "CI",
-      "weight": 0.01282051282051282,
-      "pagerank": 0.0038545341630747505,
+      "weight": 0.014084507042253521,
+      "pagerank": 0.004225424502957177,
       "mentions": 7,
       "last_seen": "2026-08-04",
       "status": "promoted",
@@ -7957,18 +7745,28 @@
       "label": "SCHW",
       "weight": 0.0,
       "pagerank": 0.0,
-      "mentions": 5,
-      "last_seen": "2026-08-08",
+      "mentions": 6,
+      "last_seen": "2026-08-09",
       "status": "promoted",
       "sources": [
         "break_news:bn_20260801_05da582c",
         "break_news:bn_20260803_2b82e3da",
         "break_news:bn_20260803_34c61e3b",
         "break_news:bn_20260806_9cbbc2f6",
-        "break_news:bn_20260808_c8dc0d68"
+        "break_news:bn_20260808_c8dc0d68",
+        "break_news:bn_20260809_36349e96"
       ],
       "metadata": {
         "recent_news": [
+          {
+            "id": "catalyst:news_bn_20260809_36349e96_2026-08-09",
+            "headline": "A Retired Couple Can Pull About $47,500 From Their IRAs This Year and Pay $0 Fed",
+            "verdict": "BULLISH",
+            "net_impact": null,
+            "published": "2026-08-09",
+            "edge_type": "BULL_CASE_FOR",
+            "weight": 0.5
+          },
           {
             "id": "catalyst:news_bn_20260808_c8dc0d68_2026-08-08",
             "headline": "‘My wife and I are both retired’: Do we dip into our $2.3 million fund to pay of",
@@ -8025,8 +7823,8 @@
       "id": "ticker:BMY",
       "type": "ticker",
       "label": "BMY",
-      "weight": 0.01282051282051282,
-      "pagerank": 0.012658227848101266,
+      "weight": 0.014084507042253521,
+      "pagerank": 0.013888888888888892,
       "mentions": 13,
       "last_seen": "2026-08-07",
       "status": "promoted",
@@ -8128,8 +7926,8 @@
       "id": "ticker:PFE",
       "type": "ticker",
       "label": "PFE",
-      "weight": 0.01282051282051282,
-      "pagerank": 0.012658227848101266,
+      "weight": 0.014084507042253521,
+      "pagerank": 0.013888888888888892,
       "mentions": 8,
       "last_seen": "2026-08-07",
       "status": "promoted",
@@ -8569,37 +8367,6 @@
           "https://nasdaq.com/articles/cigna-group-lifts-fy26-outlook-again-after-higher-q2-results",
           "https://seekingalpha.com/news/4621370-cigna-beats-q2-street-estimates-raises-outlook?feed_item_type=news",
           "https://investing.com/news/stock-market-news/unitedhealth-raises-2026-forecast-as-it-controls-medical-costs-4795148"
-        ]
-      }
-    },
-    {
-      "source": "ticker:CMCSA",
-      "target": "ticker:NFLX",
-      "type": "COMPETES_WITH",
-      "weight": 0.344301,
-      "raw_frequency": 3.0,
-      "tier": "claim_ledger",
-      "confidence": 0.8183,
-      "last_seen": "2026-07-07",
-      "sources": [
-        "break_news:bn_20260629_494982ac",
-        "break_news:bn_20260701_5c8ab99a",
-        "break_news:bn_20260707_911017a6"
-      ],
-      "metadata": {
-        "claim_id": "claim:a003bbece5875393",
-        "evidence_status": "corroborated",
-        "source_count": 3,
-        "source_domain_count": 3,
-        "source_domains": [
-          "cnbc.com",
-          "investing.com",
-          "nasdaq.com"
-        ],
-        "evidence_urls": [
-          "https://nasdaq.com/articles/could-be-netflixs-next-acquisition-target",
-          "https://investing.com/news/stock-market-news/netflix-gains-over-3-as-report-refutes-nbcuniversal-acquisition-speculation-4771361",
-          "https://cnbc.com/2026/06/29/comcast-announces-it-will-spin-off-media-and-tech-wings-into-separate-public-companies.html"
         ]
       }
     },
@@ -10271,34 +10038,6 @@
       "metadata": {}
     },
     {
-      "source": "ticker:GEV",
-      "target": "ticker:VST",
-      "type": "CO_THEME",
-      "weight": 0.5658,
-      "raw_frequency": 1.0,
-      "tier": "synth",
-      "confidence": 0.6,
-      "last_seen": null,
-      "sources": [
-        "co_theme:theme:nuclear_energy"
-      ],
-      "metadata": {}
-    },
-    {
-      "source": "ticker:CEG",
-      "target": "ticker:GEV",
-      "type": "CO_THEME",
-      "weight": 0.515,
-      "raw_frequency": 1.0,
-      "tier": "synth",
-      "confidence": 0.6,
-      "last_seen": null,
-      "sources": [
-        "co_theme:theme:nuclear_energy"
-      ],
-      "metadata": {}
-    },
-    {
       "source": "ticker:CEG",
       "target": "ticker:VST",
       "type": "CO_THEME",
@@ -11531,20 +11270,6 @@
       "metadata": {}
     },
     {
-      "source": "ticker:BA",
-      "target": "ticker:GE",
-      "type": "CO_THEME",
-      "weight": 1.0181,
-      "raw_frequency": 1.0,
-      "tier": "synth",
-      "confidence": 0.6,
-      "last_seen": null,
-      "sources": [
-        "co_theme:theme:defense__aerospace"
-      ],
-      "metadata": {}
-    },
-    {
       "source": "ticker:GD",
       "target": "ticker:LMT",
       "type": "CO_THEME",
@@ -11559,20 +11284,6 @@
       "metadata": {}
     },
     {
-      "source": "ticker:BA",
-      "target": "ticker:GD",
-      "type": "CO_THEME",
-      "weight": 1.0181,
-      "raw_frequency": 1.0,
-      "tier": "synth",
-      "confidence": 0.6,
-      "last_seen": null,
-      "sources": [
-        "co_theme:theme:defense__aerospace"
-      ],
-      "metadata": {}
-    },
-    {
       "source": "ticker:GD",
       "target": "ticker:RTX",
       "type": "CO_THEME",
@@ -11587,35 +11298,7 @@
       "metadata": {}
     },
     {
-      "source": "ticker:BA",
-      "target": "ticker:LMT",
-      "type": "CO_THEME",
-      "weight": 1.0181,
-      "raw_frequency": 1.0,
-      "tier": "synth",
-      "confidence": 0.6,
-      "last_seen": null,
-      "sources": [
-        "co_theme:theme:defense__aerospace"
-      ],
-      "metadata": {}
-    },
-    {
       "source": "ticker:LMT",
-      "target": "ticker:RTX",
-      "type": "CO_THEME",
-      "weight": 0.9017,
-      "raw_frequency": 1.0,
-      "tier": "synth",
-      "confidence": 0.6,
-      "last_seen": null,
-      "sources": [
-        "co_theme:theme:defense__aerospace"
-      ],
-      "metadata": {}
-    },
-    {
-      "source": "ticker:BA",
       "target": "ticker:RTX",
       "type": "CO_THEME",
       "weight": 0.9017,
@@ -11993,36 +11676,8 @@
       "metadata": {}
     },
     {
-      "source": "ticker:META",
-      "target": "ticker:NFLX",
-      "type": "CO_THEME",
-      "weight": 0.4529,
-      "raw_frequency": 1.0,
-      "tier": "synth",
-      "confidence": 0.6,
-      "last_seen": null,
-      "sources": [
-        "co_theme:theme:communication_services_sector_concentration"
-      ],
-      "metadata": {}
-    },
-    {
       "source": "ticker:DIS",
       "target": "ticker:META",
-      "type": "CO_THEME",
-      "weight": 0.4529,
-      "raw_frequency": 1.0,
-      "tier": "synth",
-      "confidence": 0.6,
-      "last_seen": null,
-      "sources": [
-        "co_theme:theme:communication_services_sector_concentration"
-      ],
-      "metadata": {}
-    },
-    {
-      "source": "ticker:GOOGL",
-      "target": "ticker:NFLX",
       "type": "CO_THEME",
       "weight": 0.4529,
       "raw_frequency": 1.0,
@@ -12045,48 +11700,6 @@
       "last_seen": null,
       "sources": [
         "co_theme:theme:communication_services_sector_concentration"
-      ],
-      "metadata": {}
-    },
-    {
-      "source": "ticker:DIS",
-      "target": "ticker:NFLX",
-      "type": "CO_THEME",
-      "weight": 0.4529,
-      "raw_frequency": 1.0,
-      "tier": "synth",
-      "confidence": 0.6,
-      "last_seen": null,
-      "sources": [
-        "co_theme:theme:communication_services_sector_concentration"
-      ],
-      "metadata": {}
-    },
-    {
-      "source": "ticker:PEP",
-      "target": "ticker:PG",
-      "type": "CO_THEME",
-      "weight": 0.4529,
-      "raw_frequency": 1.0,
-      "tier": "synth",
-      "confidence": 0.6,
-      "last_seen": null,
-      "sources": [
-        "co_theme:theme:consumer_defensive_sector_concentration"
-      ],
-      "metadata": {}
-    },
-    {
-      "source": "ticker:PG",
-      "target": "ticker:WMT",
-      "type": "CO_THEME",
-      "weight": 0.4529,
-      "raw_frequency": 1.0,
-      "tier": "synth",
-      "confidence": 0.6,
-      "last_seen": null,
-      "sources": [
-        "co_theme:theme:consumer_defensive_sector_concentration"
       ],
       "metadata": {}
     },
@@ -12498,34 +12111,6 @@
     },
     {
       "source": "ticker:FSLR",
-      "target": "ticker:MPWR",
-      "type": "CO_THEME",
-      "weight": 0.4529,
-      "raw_frequency": 1.0,
-      "tier": "synth",
-      "confidence": 0.6,
-      "last_seen": null,
-      "sources": [
-        "co_theme:theme:consumer_cyclical_sector_concentration"
-      ],
-      "metadata": {}
-    },
-    {
-      "source": "ticker:FSLR",
-      "target": "ticker:ON",
-      "type": "CO_THEME",
-      "weight": 0.4529,
-      "raw_frequency": 1.0,
-      "tier": "synth",
-      "confidence": 0.6,
-      "last_seen": null,
-      "sources": [
-        "co_theme:theme:consumer_cyclical_sector_concentration"
-      ],
-      "metadata": {}
-    },
-    {
-      "source": "ticker:MPWR",
       "target": "ticker:ON",
       "type": "CO_THEME",
       "weight": 0.4529,
@@ -12543,20 +12128,6 @@
       "target": "ticker:TSLA",
       "type": "CO_THEME",
       "weight": 1.0859,
-      "raw_frequency": 1.0,
-      "tier": "synth",
-      "confidence": 0.6,
-      "last_seen": null,
-      "sources": [
-        "co_theme:theme:clean_energy__ev"
-      ],
-      "metadata": {}
-    },
-    {
-      "source": "ticker:MPWR",
-      "target": "ticker:TSLA",
-      "type": "CO_THEME",
-      "weight": 1.0428,
       "raw_frequency": 1.0,
       "tier": "synth",
       "confidence": 0.6,
@@ -12862,7 +12433,7 @@
     },
     {
       "source": "ticker:MU",
-      "target": "ticker:WDC",
+      "target": "ticker:SNDK",
       "type": "CO_THEME",
       "weight": 0.22,
       "raw_frequency": 1.0,
@@ -12876,7 +12447,7 @@
     },
     {
       "source": "ticker:MU",
-      "target": "ticker:SNDK",
+      "target": "ticker:WDC",
       "type": "CO_THEME",
       "weight": 0.22,
       "raw_frequency": 1.0,
@@ -12903,80 +12474,10 @@
       "metadata": {}
     },
     {
-      "source": "ticker:GEV",
-      "target": "ticker:NEE",
-      "type": "CO_THEME",
-      "weight": 0.4767,
-      "raw_frequency": 1.0,
-      "tier": "synth",
-      "confidence": 0.6,
-      "last_seen": null,
-      "sources": [
-        "co_theme:narrative:nuclear"
-      ],
-      "metadata": {}
-    },
-    {
-      "source": "ticker:GEV",
-      "target": "ticker:SLB",
-      "type": "CO_THEME",
-      "weight": 0.439,
-      "raw_frequency": 1.0,
-      "tier": "synth",
-      "confidence": 0.6,
-      "last_seen": null,
-      "sources": [
-        "co_theme:narrative:nuclear"
-      ],
-      "metadata": {}
-    },
-    {
-      "source": "ticker:NEE",
-      "target": "ticker:VST",
-      "type": "CO_THEME",
-      "weight": 0.4767,
-      "raw_frequency": 1.0,
-      "tier": "synth",
-      "confidence": 0.6,
-      "last_seen": null,
-      "sources": [
-        "co_theme:narrative:nuclear"
-      ],
-      "metadata": {}
-    },
-    {
       "source": "ticker:SLB",
       "target": "ticker:VST",
       "type": "CO_THEME",
       "weight": 0.439,
-      "raw_frequency": 1.0,
-      "tier": "synth",
-      "confidence": 0.6,
-      "last_seen": null,
-      "sources": [
-        "co_theme:narrative:nuclear"
-      ],
-      "metadata": {}
-    },
-    {
-      "source": "ticker:NEE",
-      "target": "ticker:SLB",
-      "type": "CO_THEME",
-      "weight": 0.439,
-      "raw_frequency": 1.0,
-      "tier": "synth",
-      "confidence": 0.6,
-      "last_seen": null,
-      "sources": [
-        "co_theme:narrative:nuclear"
-      ],
-      "metadata": {}
-    },
-    {
-      "source": "ticker:CEG",
-      "target": "ticker:NEE",
-      "type": "CO_THEME",
-      "weight": 0.245,
       "raw_frequency": 1.0,
       "tier": "synth",
       "confidence": 0.6,
@@ -13002,22 +12503,22 @@
     }
   ],
   "meta": {
-    "node_count": 102,
-    "edge_count": 296,
+    "node_count": 95,
+    "edge_count": 276,
     "nodes_by_type": {
-      "ticker": 102
+      "ticker": 95
     },
     "edges_by_type": {
-      "COMPETES_WITH": 17,
+      "COMPETES_WITH": 16,
       "SUPPLIES_TO": 10,
       "CO_DEVELOPS_WITH": 2,
-      "CO_THEME": 267
+      "CO_THEME": 248
     },
     "prune_stats": {
       "dropped_edges_low_weight": 808,
       "dropped_isolated_nodes": 166,
       "dropped_provisional_low_mentions": 0,
-      "dropped_for_cap": 2646
+      "dropped_for_cap": 2722
     },
     "decay_strategies": {
       "catalyst": 7,
@@ -13040,7 +12541,7 @@
       "tier3": 0.85
     },
     "claim_ledger": {
-      "claims_total": 422,
+      "claims_total": 424,
       "claims_corroborated": 70,
       "corroborated_by_predicate": {
         "COMPETES_WITH": 40,
@@ -13050,13 +12551,13 @@
       "window_days": 45
     },
     "topic_discovery": {
-      "topics_total": 5891,
-      "topics_validated": 611,
-      "chain_candidates": 67,
-      "new_chain_candidates": 65
+      "topics_total": 5920,
+      "topics_validated": 625,
+      "chain_candidates": 68,
+      "new_chain_candidates": 66
     },
     "evidence_drafts": {
-      "available_new_candidates": 65,
+      "available_new_candidates": 66,
       "drafts_generated": 12,
       "drafts_with_corroborated_edges": 7
     }

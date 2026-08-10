@@ -1,0 +1,69 @@
+{
+  "bundle_version": "P5-INPUTS/1.0",
+  "ticker": "NVDA",
+  "date": "2026-08-10",
+  "phase0": {
+    "regime_confidence": 0.71,
+    "market_top_zone": "Yellow",
+    "ftd_state": "FTD_CONFIRMED",
+    "breadth_composite": 76,
+    "vix": 14.9,
+    "fred_verdict": "Soft Landing",
+    "real_rate_pct": 2.41,
+    "hot_sectors": ["Industrials", "Consumer Discretionary", "Financials", "Energy"],
+    "cold_sectors": ["Technology", "Real Estate", "Consumer Staples", "Utilities"]
+  },
+  "lanes": {
+    "fundamentals": {
+      "signal": "BUY",
+      "score": 3.0,
+      "confidence": 0.91,
+      "phase0_alignment": "ALIGNED",
+      "key_factors": ["Revenue growth accelerating 85.2%", "FCF margin reaches 59.5%", "Strong balance sheet and quality"],
+      "risk_flags": ["Peer valuation benchmark unavailable", "Premium trailing valuation"]
+    },
+    "sentiment": {
+      "signal": "BUY",
+      "score": 0.58,
+      "confidence": 0.82,
+      "phase0_alignment": "ALIGNED",
+      "key_factors": ["Risk-on market backdrop", "Low short float supports", "Insider activity remains bearish"],
+      "risk_flags": ["Latest insider ratio is zero", "Latest MSPR is minus 100"]
+    },
+    "news": {
+      "signal": "BUY",
+      "score": 1.0,
+      "confidence": 0.72,
+      "phase0_alignment": "ALIGNED",
+      "key_factors": ["Buy consensus remains broad", "AI compute demand headlines supportive", "SpaceX deal reinforces platform demand"],
+      "risk_flags": ["One-month PT revisions turned down", "No substantive fresh analyst actions"],
+      "analyst_consensus": "Buy"
+    },
+    "technical": {
+      "signal": "BUY",
+      "score": 2.0,
+      "confidence": 0.76,
+      "phase0_alignment": "ALIGNED",
+      "key_factors": ["Stage 2 uptrend", "Rising MACD histogram", "Fresh golden cross"],
+      "risk_flags": ["Volume below 20-day average", "Resistance only 1.42% overhead"]
+    },
+    "valuation": {
+      "signal": "SELL",
+      "score": -1.0,
+      "confidence": 0.65,
+      "phase0_alignment": "MISALIGNED",
+      "key_factors": ["Price exceeds primary DCF by 40.77%", "Through-cycle DCF best fits transition", "Eligible anchors show extreme dispersion"],
+      "risk_flags": ["Transition weakens historical comparability", "Anchor dispersion ratio reaches 9.73"]
+    }
+  },
+  "burry": {
+    "score": 30.0,
+    "label": "WARNING",
+    "veto_flag": false,
+    "components": {"fcf_yield_pct": 0.86, "ev_ebit": 32.5, "debt_to_equity": 0.07, "pct_below_52w_high": 4.89, "insider_net": "NEUTRAL"},
+    "narrative": "FCF yield僅0.86%、EV/EBIT 32.5；Piotroski 7使原始29分調升1分。內部人趨勢為distributing。"
+  },
+  "phase3": {"final_score": 1.0166, "final_decision": "HOLD", "final_action": "CANCEL"},
+  "phase4": {"position_size_pct": 0.0, "analysis_price": 223.96},
+  "red_team": {"verdict": "MODERATE_COUNTER"}
+}

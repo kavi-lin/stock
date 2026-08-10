@@ -1,0 +1,135 @@
+{
+  "bundle_version": "P5-INPUTS/1.0",
+  "ticker": "RKLB",
+  "date": "2026-08-10",
+  "phase0": {
+    "regime_confidence": 0.71,
+    "market_top_zone": "Yellow",
+    "ftd_state": "FTD_CONFIRMED",
+    "breadth_composite": 76,
+    "vix": 14.9,
+    "fred_verdict": "Soft Landing",
+    "real_rate_pct": 2.41,
+    "hot_sectors": [
+      "Industrials",
+      "Financials",
+      "Energy"
+    ],
+    "cold_sectors": [
+      "Technology",
+      "Real Estate",
+      "Consumer Staples",
+      "Utilities"
+    ]
+  },
+  "lanes": {
+    "fundamentals": {
+      "signal": "HOLD",
+      "score": 1.5,
+      "confidence": 0.76,
+      "phase0_alignment": "ALIGNED",
+      "key_factors": [
+        "Revenue grew 63.5% year over year",
+        "Net cash supports balance sheet resilience",
+        "Free cash flow margin remains negative"
+      ],
+      "risk_flags": [
+        "Valuation lacks reliable peer earnings anchor",
+        "Canonical earnings date is stale"
+      ]
+    },
+    "sentiment": {
+      "signal": "HOLD",
+      "score": 0.08,
+      "confidence": 0.85,
+      "phase0_alignment": "NEUTRAL",
+      "key_factors": [
+        "Greed backdrop supports risk appetite",
+        "Insiders are distributing shares",
+        "Latest MSPR signals heavy selling"
+      ],
+      "risk_flags": [
+        "Zero latest insider acquisition ratio",
+        "Latest MSPR is minus one hundred"
+      ]
+    },
+    "news": {
+      "signal": "BUY",
+      "score": 2,
+      "confidence": 0.78,
+      "phase0_alignment": "ALIGNED",
+      "key_factors": [
+        "Earnings due after close",
+        "Monthly revisions trend upward",
+        "Space Force contract supports narrative"
+      ],
+      "risk_flags": [
+        "Earnings volatility is elevated",
+        "No recent SEC filing confirmation"
+      ],
+      "analyst_consensus": {
+        "consensus": "Buy",
+        "buy": 16,
+        "hold": 4,
+        "sell": 1,
+        "strong_buy": 0,
+        "strong_sell": 0
+      }
+    },
+    "technical": {
+      "signal": "HOLD",
+      "score": 1,
+      "confidence": 0.76,
+      "phase0_alignment": "ALIGNED",
+      "key_factors": [
+        "Price reclaimed MA20 and MA200",
+        "MACD histogram rising from negative territory",
+        "Stage one base lacks breakout confirmation"
+      ],
+      "risk_flags": [
+        "Price remains below MA50 after death cross",
+        "Persistent insider distribution"
+      ]
+    },
+    "valuation": {
+      "signal": "SELL",
+      "score": -1.0,
+      "confidence": 0.35,
+      "phase0_alignment": "MISALIGNED",
+      "key_factors": [
+        "Price exceeds blended fair value",
+        "Eligible anchors show severe dispersion",
+        "Only sell-side evidence remains eligible"
+      ],
+      "risk_flags": [
+        "No business-similar peer cohort",
+        "Pre-profit fundamentals weaken intrinsic anchors"
+      ]
+    }
+  },
+  "burry": {
+    "score": 43.3,
+    "label": "NEUTRAL",
+    "veto_flag": false,
+    "components": {
+      "fcf_yield_pct": -0.46,
+      "ev_ebit": null,
+      "debt_to_equity": 0.06,
+      "pct_below_52w_high": 44.86,
+      "insider_net": "SELL"
+    },
+    "narrative": "FCF yield -0.46%、D/E 0.06、距 52 週高點 44.86%、insider=SELL；Altman Z 51.86 屬 safe，Piotroski 4 為 moderate，owner earnings 仍為負且內部人持續出貨，未形成 T4 veto。"
+  },
+  "phase3": {
+    "final_score": 0.531,
+    "final_decision": "HOLD",
+    "final_action": "CANCEL"
+  },
+  "phase4": {
+    "position_size_pct": 0.0,
+    "analysis_price": 82.83
+  },
+  "red_team": {
+    "verdict": "STRONG_COUNTER"
+  }
+}

@@ -1,8 +1,8 @@
 {
   "version": "1.0",
-  "generated_at": "2026-08-07T14:34:15.203395+00:00",
+  "generated_at": "2026-08-09T20:30:58.567068+00:00",
   "mood": {
-    "score": 25,
+    "score": 28,
     "label": "Greed",
     "label_zh": "偏樂觀",
     "components_used": [
@@ -14,11 +14,11 @@
       "term_signed"
     ],
     "component_scores": {
-      "fg_signed": 27.0,
-      "fg_quality_signed": 12.7,
+      "fg_signed": 27.4,
+      "fg_quality_signed": 13.2,
       "pc_signed": 50,
-      "vix_signed": 51.4,
-      "skew_signed": -64.9,
+      "vix_signed": 51.0,
+      "skew_signed": -50.5,
       "term_signed": 100
     }
   },
@@ -32,37 +32,37 @@
     "fmp_megacap": []
   },
   "vix": {
-    "current": 14.86,
+    "current": 14.9,
     "percentile_1y": 7.9,
     "regime": "LOW",
-    "vix3m": 18.7,
+    "vix3m": 20.54,
     "term_structure": "contango",
-    "term_diff": 3.84,
+    "term_diff": 5.64,
     "interpretation_zh": "VIX 14.9 LOW，期限結構 contango（市場平靜）"
   },
   "skew": {
-    "current": 134.7,
-    "percentile_1y": 1.2,
+    "current": 132.6,
+    "percentile_1y": 0.8,
     "label": "elevated",
-    "interpretation_zh": "SKEW 135 elevated"
+    "interpretation_zh": "SKEW 133 elevated"
   },
   "fear_greed": {
-    "index": 63.5,
+    "index": 63.7,
     "label": "Greed",
     "sub_indices": {
-      "market_momentum_sp500": 76.8,
-      "stock_price_strength": 31.8,
+      "market_momentum_sp500": 79.8,
+      "stock_price_strength": 32.2,
       "stock_price_breadth": 40.2,
-      "put_call_options": 86.0,
+      "put_call_options": 81.6,
       "market_volatility_vix": 50.0,
-      "safe_haven_demand": 62.6,
-      "junk_bond_demand": 97.0
+      "safe_haven_demand": 64.6,
+      "junk_bond_demand": 97.4
     }
   },
   "spy_momentum": {
-    "rsi_14": 65.7,
-    "pct_above_ma50": 3.47,
-    "pct_above_ma200": 10.34
+    "rsi_14": 66.0,
+    "pct_above_ma50": 3.57,
+    "pct_above_ma200": 10.45
   },
   "_source_health": {
     "vix": "ok",
