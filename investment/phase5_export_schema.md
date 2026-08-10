@@ -115,8 +115,8 @@ Claude（或 Sonnet 格式化 subagent）在 Phase 5 末尾**必須**：
 | `red_team_execution_failed` | bool | 填 | |
 | `red_team_counter_evidence_strength` | int 1-5 or `null` | optional **(V4.70.0+, P0-2)** | Phase 2.8 subagent 的 strength 輸出。Phase 3 rule 4 用它分級懲罰（5→×0.85 / 4→×0.925）；export 供 ≥20 session 後 outcome 校準 |
 | `red_team_thesis_break_probability` | float 0-1 or `null` | optional **(V4.70.0+, P0-2)** | Red Team 估 counter_thesis 在最長 kill window 內成立的機率。**僅記錄不進決策數學**——校準檢驗（AUDIT_2026-07-16 檢驗 A 的後續）用 |
-| `phase2_fanout_mode` | `"PARALLEL_SUBAGENT" \| "PARTIAL_FALLBACK" \| "FULL_FALLBACK"` | 填 | V4.8 |
-| `degraded_analysts` | array[string] | 填（正常情況空陣列）| V4.8 |
+| `phase2_fanout_mode` | `"PARALLEL_SUBAGENT" \| "PARTIAL_FALLBACK" \| "FULL_FALLBACK"` | 填 | V4.8；**值域自 V4.122.0 由 §17 強制**（歷史出現過表外值 `FULL`）|
+| `degraded_analysts` | array[string] | 填（正常情況空陣列）| V4.8；**每個元素必須以 canonical lane 名開頭**（`fundamentals`/`sentiment`/`news`/`technical`/`valuation`，大小寫不拘，後面可接附註）。§17 據此對應 inline fallback 的 confidence cap |
 | `macro_alignment` | `"ALIGNED" \| "CONTRARIAN"` | **必填** | HOLD 也要 |
 | `avg_confidence` | float 0-1 | 填 | |
 | `burry_score` | float 0-100 | 填 | |
@@ -150,6 +150,7 @@ Claude（或 Sonnet 格式化 subagent）在 Phase 5 末尾**必須**：
 | `valuation_archetype_shadow` | object（見下） | **V3.46.0+ optional**；缺 → warning（rc 0）| Phase 1.5 engine archetype 分類 + 9-anchor shadow blend。**shadow-only** — live `fair_value_summary` 不動、不進 decision_lock。≥20 session 翻轉率報告後才議切換（#3b）|
 | `valuation_reviewer_gate` | object（見下） | **V4.116.3 起：`export_date >= 2026-08-09` 的 session 缺此 block → rc=1**；之前的 entry 仍靜默（172 筆歷史 entry 都沒有它）。protocol §PHASE 2 一直要求把它寫進 export，但 validator 過去只在它出現時才驗，等於選配——2026-08-09 兩次實測顯示：codex 跑了、agy 沒跑，兩者都 rc=0 | L4b 條件式 Valuation Specialist 的 **shadow 紀錄**：`{schema, ticker, would_invoke, mandatory_fired, triggers_fired[], shadow_only}`。`shadow_only=false` → **rc=1**（翻預設需使用者拍板，session 不得自行讓 gate 生效）。`triggers_fired` 只認 5 個具名 trigger；`would_invoke` 必須等於 `bool(triggers_fired)` |
 | `lane_scores` | `{fundamentals: int, sentiment: int, news: int, technical: int}` | **V2.10.0+ 必填** | Phase 2 五 lane 中除 valuation 外的 4 個 raw score（−5..+5，V4.72.0 修正——原文件誤寫 −3..+3 與協議 Phase 2 量表矛盾，歷史 9 筆合法 ±4 分即超出舊註記）；用於 polarization detection。validator §12 強制值域 |
+| `conflict_bias` | object（見下） | **V4.122.0 起：`export_date >= 2026-08-10` 的 session 缺此 block → rc=1**；之前的 entry 靜默（189 筆歷史 entry 一筆都沒有） | Phase 2.5 的輸出：`{schema, tentative_decision, lane_signals, triggers_fired[], t4_detail, t5_detail, proceed_to_phase3}`。Validator §16 **重算** T1–T5 應觸發集合再與宣稱比對，不符 rc=1 |
 | `det_inputs` | `{altman_z, debt_to_equity, fcf_yield, insider_ratio_q, short_interest_pct, fred_in_sector_avoid}` | **V2.10.0+ 必填** | Red Team kill triggers 的 6 個量化輸入；LLM 從 FMP_SUPP_BUNDLE / earnings-analyst 拿到的原始數值，**直接寫入**，不再 LLM 重新解讀 |
 | `det_shadow` | object（見下） | **V2.10.0+ 由 post-processor 寫入**，LLM 不寫 | `apply_det_shadow.py` 後處理填入；包含 polarization label + det shadow scores + agreement flags |
 | `technical_lane` | object（見 V2.13 章節） | **V2.13.0+ 必填** | smart_money / pattern / market_strength / key_levels / high_prob_scenario |
@@ -755,6 +756,102 @@ LLM 從 Phase 2 / Phase 4.5 bundle 取得的 6 個量化原始值（**直接抄�
 **值域與形狀的單一事實來源是 `apply_det_shadow.py`**（`LANE_NAMES` / `PROVENANCE_VALUES` /
 `ANALYSIS_MODES` / `LANE_FIELDS`）；validator **import** 不複製。
 
+### `conflict_bias` (V4.122.0 — Phase 2.5 輸出，PM inline 寫入)
+
+Phase 2.5 是 protocol 裡唯一「會改決策、卻從未留下任何紀錄」的一段。T4 可以 `CANCEL`、
+T5 宣稱自動降階，而 **189 筆歷史 entry 沒有一筆帶過它的輸出**，schema 也沒有它的欄位——
+有沒有觸發、觸發了怎麼裁，事後完全不可考，連「這條規則有沒有在動」都問不了。
+
+```json
+{
+  "schema": "conflict_bias.v1",
+  "tentative_decision": "BUY | STAGED_ENTRY | HOLD | STAGED_EXIT | SELL",
+  "lane_signals": {
+    "fundamentals | sentiment | news | technical | valuation": "BUY | HOLD | SELL | null"
+  },
+  "triggers_fired": ["T1", "T2", "T3", "T4", "T5", "ANTI_BIAS"],
+  "conflict_summary": "string — 每個觸發的 trigger 一句；有 trigger 卻空著只出 warning",
+  "t4_detail": {
+    "burry_score": "float",
+    "resolution": "CANCEL | DOWNGRADE_DECISION | OVERRIDE_BURRY",
+    "override_justification": "string ≥20 字 or null — OVERRIDE_BURRY 必填",
+    "override_recheck_date": "YYYY-MM-DD or null — OVERRIDE_BURRY 必填"
+  },
+  "t5_detail": {
+    "valuation_score": "float",
+    "weighted_fair_value": "float | null",
+    "vs_current_pct": "float | null",
+    "downgrade_applied": "bool"
+  },
+  "proceed_to_phase3": "bool"
+}
+```
+
+- **五個 lane 全列**，沒跑的填 `null`（不是省略）——省略與「跑了但沒記」事後無法區分，
+  同 C1 契約紀律。
+- `t4_detail` / `t5_detail` **僅在對應 trigger 觸發時為 object，否則必須是 `null`**。
+
+**Validator §16（V4.122.0）**：
+
+- `export_date >= 2026-08-10` 缺 block → **rc=1**；之前的 entry **整段跳過**。舊 entry 不回填：
+  補一塊「看起來很完整」的觸發紀錄上去，等於在稽核軌跡放假證據（同 §15）。
+- **重算應觸發集合**：T1–T5 在 protocol 裡是精確不等式，validator 直接依 export 自己的欄位
+  重算，與 `triggers_fired` 比對，少報／多報一律 **rc=1**。自陳「沒觸發」不再是免費的。
+- 重算吃的輸入盡量錨在**偽造者改不動的欄位**上：`lane_scores`（§13 算術鏈）、
+  `valuation_lane.score`（pack 一致性硬閘）、`macro_backdrop_score`（§14 macro_cap 重算）、
+  `burry_score`（schema 必填）。缺輸入的 trigger 退出比對並留 warning——「gate 讀不到權威
+  輸入時不得猜」（同 `valuation_reviewer_gate`）；灌 null 繞過不划算，那幾個欄位分別是
+  §13 / §14 / §15 的守備範圍。
+- 兩個新的自陳輸入各補一道對錨的檢查：`lane_signals.<lane>` 不得與同 lane 的 score 反向、
+  `lane_signals.valuation` 必須等於 `valuation_lane.signal`（五格裡唯一錨得死的一格）。
+- **後果錨（雙向鎖）**：`t4_detail.resolution == "OVERRIDE_BURRY"` ⟺
+  `burry_override_active == true`。那個布林餵 `trade_plan_builder` 的 ×0.5，鏈尾受 §14 重算——
+  這是本節唯一錨在「已經在改倉位的數字」上的檢查。倉位被 ×0.5 卻沒有裁決紀錄，
+  或有裁決卻沒有 ×0.5，都是 rc=1。
+- `proceed_to_phase3 = false` ⟹ `final_action == "CANCEL"`（protocol 明寫，且
+  `decision_engine.py` 也把它列為 Auto REJECT 的觸發理由）。
+
+**兩件刻意不驗的事**（規則本身還沒被拍板過，見 `docs/plan_invest_stale_stages.md` T7）：
+
+1. **T5 的「−3 自動 downgrade」今天是幽靈規則**。`decision_engine.py` 全檔沒有任何 T5 邏輯，
+   §13 的 band 可達集合也沒有 T5 的路徑。實據：2026-08-09 NOW，valuation −3、
+   final `STAGED_ENTRY`、無 BIPOLAR/cap/probe，validator rc=0 過關。補實作等於今天才開始
+   改變決策（同 V4.112 B2 的 ×0.7/×1.15）。§16 只在「該降而沒降」時留 warning。
+2. **Anti-Bias 的「5 lane 同向」**。protocol 沒定義同向是看 score 正負還是看 signal。
+   本版採 **score 正負一致**當定義，且**只出 warning**——把一句沒定義過的話變成 rc=1
+   是單方面收緊。`ANTI_BIAS` 觸發但 `devils_advocate_filed != true` 同樣只是 warning。
+
+### Phase 2 fan-in 紀律 — `degraded_analysts` / `phase2_fanout_mode`（V4.122.0 §17）
+
+protocol §PHASE 2「Fan-In 驗證 + Inline Fallback」自 V4.8 就寫著「subagent 失敗 → PM inline
+該 lane，**confidence cap 0.6**」。validator 過去只收這兩個欄位、**沒有任何一處驗算那個 cap**。
+
+沒接線的直接後果是欄位自己爛掉：188 筆 export 裡 `degraded_analysts` 用過 **10 種寫法指涉
+5 個 lane**（`News` / `News (skill fallback to web)` / `Valuation` / `Valuation_Specialist` /
+`Valuation_Specialist_low_anchor_count_3of6` …），`phase2_fanout_mode` 出現過表外值 `FULL`。
+**沒有任何消費端讀得動它**，所以 cap 想接也接不上——這是「欄位存在」與「欄位可用」的差別。
+
+**Validator §17**：
+
+- **confidence cap（V4.8 起的規則，只要輸入齊備就驗）**：`degraded_analysts` 裡每個 lane 的
+  `C_eff` 不得 > 0.60。`decision_engine.c_eff()` 把 raw confidence 量化成三檔
+  （`<0.45→0.35` / `<0.675→0.60` / `else 0.72`），所以「confidence ≤ 0.6」等價於
+  「C_eff 不得為 0.72」，零偽陽。C_eff 取自 `calculation_steps` 的 step 字串
+  （`W × score × C_eff`），受 §13 重算與 §5l engine parity 保護。
+- **名稱可解析性 + mode 值域**（V4.122.0 新增，`export_date >= 2026-08-10` 為 error，之前
+  warning）：每個 degraded 元素必須以 canonical lane 名開頭。**刻意用前綴而非完全相等**——
+  歷史那 10 種寫法全是「lane 名 + 附註」，附註帶著真資訊，不該為了機器可讀砍掉。
+- **mode ↔ degraded 數量**：≥2 個 degraded 必須是 `PARTIAL_FALLBACK` 或 `FULL_FALLBACK`
+  （protocol Fan-In 表明訂）。**恰好 1 個時只出 warning**——protocol 沒定義單一失敗的 mode，
+  把沒定義過的話變成 rc=1 是單方面收緊（同 §16 的 ANTI_BIAS）。
+- **`FULL_FALLBACK` ⟹ 5 個 degraded 且 `red_team_verdict == "STRONG_COUNTER"`**
+  （§PHASE 2.8 明訂：五 lane 全是 PM inline，沒有獨立證據可供反駁）。
+
+> **證據基礎很薄，要知道**：188 筆裡 `degraded_analysts` 非空**且**有 `calculation_steps`
+> 的只有 **1 筆**（2026-08-09 PLTR，Technical 降級 → C_eff 0.60，**合規**）。其餘 15 筆降級
+> 場次都早於 V4.80.0，那時 `calculation_steps` 還不存在。所以這道 cap 不是「歷史上都合規」，
+> 而是**從來沒有機會被檢查**。
+
 ### `sentiment_det` (V4.91.0 — L5 Sentiment det producer，shadow-only)
 
 由 `skills/market-sentiment-analyzer/scripts/sentiment_score.py` 產出，PM **整塊抄寫**。
@@ -848,6 +945,19 @@ V5.3 起把形狀定死，**只對 V5.3+ 生效**：
       "macro_alignment": "CONTRARIAN",
       "avg_confidence": 0.75,
       "lane_scores": {"fundamentals": 4, "sentiment": 3, "news": 3, "technical": 4},
+      "conflict_bias": {
+        "schema": "conflict_bias.v1",
+        "tentative_decision": "BUY",
+        "lane_signals": {
+          "fundamentals": "BUY", "sentiment": "BUY", "news": "BUY",
+          "technical": "BUY", "valuation": "BUY"
+        },
+        "triggers_fired": ["ANTI_BIAS"],
+        "conflict_summary": "五 lane 同向偏多，News 已補 devils_advocate 反面清單",
+        "t4_detail": null,
+        "t5_detail": null,
+        "proceed_to_phase3": true
+      },
       "decision_engine_version": "1.0.0",
       "calculation_steps": {
         "fund": "0.25 × 4 × 0.72 = 0.7200",
@@ -1000,7 +1110,7 @@ V5.3 起把形狀定死，**只對 V5.3+ 生效**：
         "伊朗/霍爾木茲 48-72h 二元風險",
         "尾部風險極高（脆弱分數 60）"
       ],
-      "devils_advocate_filed": false,
+      "devils_advocate_filed": true,
       "trade_metadata": {
         "trade_type": "trend",
         "event_tag": "earnings"

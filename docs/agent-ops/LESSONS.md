@@ -1,5 +1,11 @@
 # 踩坑教訓（格式見 MAINTENANCE.md §4；>150 行時精簡）
 
+## 2026-08-10 ｜zsh 把 `--include=*.md` 吃掉，殘留掃描整個沒跑卻看起來像「已清乾淨」
+- 情境：V4.122.0 收尾做 §2b 殘留掃描，一次跑四條 `grep -rn "..." --include=*.md --include=*.py .`。
+- 坑：zsh 對未加引號的 `*.md` 做 globbing，CWD 沒有 `.md` 檔就直接 `no matches found` 並**中止整條命令**——四條全部 0 命中。輸出長得跟「掃過了，沒有殘留」一模一樣。這是 §2c 成員 #5 的近親（pattern 自己壞掉），但機制不同：不是 pattern 比對失敗，是**命令根本沒執行**。加引號重跑後，同樣四條抓到 2 處實施表沒列到的規則鏡像（`investment/README.md` 的 OVERRIDE_BURRY 三項成本、OPS §7 的「五道紀律閘」）。
+- 修法：(1) `--include` 的值一律加引號 `--include="*.md"`；(2) **殘留掃描第一條永遠是 sanity check**——先 grep 一個「已知一定存在」的字串並確認命中數 > 0，再信任後面那幾條的 0 命中。MAINTENANCE §2b 的成員 #5 已寫「驗證命令自己也要先確認 pattern 抓得到已知存在的東西」，我這次是隔了一輪才想起來套用。
+- 已回寫規則？：是 —— 本條即為 §2c 成員 #5 補上 zsh 這個具體形態；掃描腳本的 sanity-check-first 慣例同時寫進 `MAINTENANCE.md` §2b。
+
 ## 2026-08-09 ｜我做了一支稽核工具，然後沒驗它就拿它下結論——五個偽陽性全指控引擎違規
 - 情境：V4.117.0 三道閘上線後，寫 `audit_gate_compliance.py` 判讀 agy／codex 的 invest run 是否還在手寫 `history.json`。
 - 坑：它把整份 log 當 haystack，而 log 裡有引擎 `sed`／`Read` 出來的**檔案內容**。於是 (a) protocol 裡我自己寫的那句「不得用 `h.pop()`」被算成一次違規——**引擎讀了規則反而被記一筆**；(b) 寫 `/tmp/<T>_session.json` 這個正確做法被 `json\.dump\([^)]*history` 的貪婪 `[^)]*` 跨行吃到後面 log 文字的「(history len=188)」而誤報；(c) `--replace-last`／`schema drift` 次數同理灌水；(d) 「同 ticker+date 重複筆數」把同日跑兩次誤判成修法留下的重複；(e) 讀 `hist[-1]` 而非本次 run 蓋章那筆，第二個引擎跑完後，第一份報告的欄位全變成別人的。**第一份輸出若直接轉述，我會告訴使用者兩家都還在手寫決策紀錄——結論完全相反。**
@@ -206,3 +212,10 @@
 - 坑：低估「水位」不等於扭曲「比值」——`vol_mult` 是同 feed 內本分鐘 vs 前 15 分均量的比值,低估在分子分母同時出現、大致抵消。子代理把一個正確事實(量被低估)外推成一個錯誤結論(確認失效),而事實部分的正確性讓結論看起來可信。
 - 修法：子代理回報裡「事實」(檔案:行號、實跑輸出)直接採用,「推論」(所以…因此…結構性…)一律自己重推導一遍再放進變更表;動工前確認表就是做這件事的最後閘門。
 - 已回寫規則？：否(單一案例,先記中繼站;重複發生再進 MODEL_DISPATCH §4 回報合約)
+
+## 2026-08-10 ｜量測工具自己的失敗，不是被測系統的 bug
+- 情境：診斷 protocol 佇列停滯，用 `curl -s -m 3 .../api/run-protocol/status | python3 -c "json.load"` 每 10 秒輪詢，連續 20 次 parse 失敗（`Invalid control character` / `Expecting ',' delimiter`，位置每次不同）。我判定 server 吐未轉義控制字元，寫進 SESSION_NOTES 與 TODO，並向使用者報告為「嚴重、會漏收報告」。
+- 坑：錯誤訊息的**內容**（control character / delimiter）指向被測系統，但錯誤位置每次不同這件事指向截斷。真因是 `-m 3` 在 codex 吃滿 CPU 時把 24 KB 回應砍半。`_json()`（`dashboard_server.py:4587`）本來就是 `json.dumps().encode("utf-8")` + bytes 長度 Content-Length，兩個常見坑都沒踩。
+- 修法：**回報外部系統有 bug 之前，先證明自己的觀測管道是完好的**——(a) 拿掉自己加的 timeout / size limit 重抓一次；(b) 比對 `size_download` 與 `Content-Length`；(c) 讀序列化那段原始碼，而不是從錯誤訊息反推。可重現才算成立：`curl --limit-rate 3000 -m 3` 重現了同一族錯誤，這才確定是自己的問題。
+- 這與 §2c「靜默綠」是同一枚硬幣的反面：靜默綠是「壞了但看起來像好的」，這次是「好的但看起來像壞的」。兩者都源自**觀測管道未經驗證**就拿它的輸出下結論。
+- 已回寫規則？：否（單一案例先記中繼站；若再犯就進 MAINTENANCE §2c 成為第 9 個成員）

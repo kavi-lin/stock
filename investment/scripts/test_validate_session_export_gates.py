@@ -587,10 +587,269 @@ parity_wired({"raw_total": 9.9999}, "parity.wired_into_main", 1,
              "decision_engine.py 最後一次的輸出不符")
 parity_wired({"raw_total": _live_total}, "parity.wired_agreeing_passes", 0)
 
+# ── 6. V4.122.0 §16 — Phase 2.5 `conflict_bias` ──────────────────────────────
+# 同一個形狀的洞，這次在 Phase 2.5：protocol 要求 PM 產一塊 JSON，沒有任何欄位接住它，
+# 於是 189 筆歷史 entry 一筆紀錄都沒有 —— T4 能 CANCEL、T5 宣稱降階，而「有沒有觸發」
+# 事後不可考。§16 改成由 validator **重算** T1–T5 應觸發集合再與宣稱比對。
+#
+# 兩層測試：先用字面輸入釘住重算函式的契約，再驅動真 validator 證明它接進了主流程。
+# 只有後者會被「忘了在 main() 裡呼叫」抓到，只有前者能在不牽動 §13/§14 的情況下
+# 覆蓋每一條不等式（lane score / macro 都被別節重算，動它們會為了別的理由變紅）。
+
+# 截止日寫死成字面值，不讀 V.CONFLICT_BIAS_REQUIRED_FROM —— 讀了就會跟著它一起移動，
+# 種回 bug 也照樣綠（MAINTENANCE §2c，本檔開頭那條前例）。
+CB_CUTOFF = "2026-08-10"
+check("cb.cutoff_matches_policy", V.CONFLICT_BIAS_REQUIRED_FROM == CB_CUTOFF,
+      f"validator says {V.CONFLICT_BIAS_REQUIRED_FROM!r}, contract says {CB_CUTOFF!r}")
+
+# 重算契約：輸入全是字面值，期望也是字面值。
+_S = {"fundamentals": 4.0, "sentiment": 3.0, "news": 3.0, "technical": 4.0,
+      "valuation": 1.0}
+_SIG = {l: "BUY" for l in V.CONFLICT_LANES}
+
+
+def cb_eval(label, want, *, scores=None, signals=None, macro=-1.0, burry=37.1,
+            tentative="BUY"):
+    sc = dict(_S, **(scores or {}))
+    sg = dict(_SIG, **(signals or {}))
+    got = V.evaluate_conflict_triggers(sc, sg, macro, burry, tentative)
+    for trig, expect in want.items():
+        check(f"cb.eval.{label}.{trig}", got[trig] is expect,
+              f"{trig}={got[trig]!r} want {expect!r}")
+
+
+cb_eval("baseline", {"T1": False, "T2": False, "T3": False, "T4": False,
+                     "T5": False, "ANTI_BIAS": True})
+# T1 — sentiment 過熱 vs fundamentals 轉負。>3 是嚴格不等式：3.0 不觸發、3.5 才觸發。
+cb_eval("t1_boundary", {"T1": False}, scores={"sentiment": 3.0, "fundamentals": -1.0})
+cb_eval("t1_fires", {"T1": True}, scores={"sentiment": 3.5, "fundamentals": -1.0})
+cb_eval("t1_needs_negative_fund", {"T1": False},
+        scores={"sentiment": 3.5, "fundamentals": 0.0})
+# T2 — news 重挫但 technical 仍喊進；signal 是條件的一半，HOLD 就不觸發。
+cb_eval("t2_fires", {"T2": True}, scores={"news": -4.0})
+cb_eval("t2_needs_buy_signal", {"T2": False}, scores={"news": -4.0},
+        signals={"technical": "HOLD"})
+# T3 — macro 逆風下仍有 lane 高分喊進。
+cb_eval("t3_fires", {"T3": True}, macro=-4.0)
+cb_eval("t3_needs_bad_macro", {"T3": False}, macro=-3.0)
+cb_eval("t3_needs_high_buy_lane", {"T3": False}, macro=-4.0,
+        scores={"fundamentals": 1.0, "sentiment": 1.0, "news": 1.0,
+                "technical": 1.0, "valuation": 1.0})
+# T4 — burry veto 撞上 tentative BUY。
+cb_eval("t4_fires", {"T4": True}, burry=15.0)
+cb_eval("t4_boundary", {"T4": False}, burry=20.0)
+cb_eval("t4_needs_buy_tentative", {"T4": False}, burry=15.0, tentative="HOLD")
+# T5 — 估值警告撞上 BUY 側 tentative（STAGED_ENTRY 也算 BUY 側）。
+cb_eval("t5_fires", {"T5": True}, scores={"valuation": -2.0})
+cb_eval("t5_staged_counts", {"T5": True}, scores={"valuation": -3.0},
+        tentative="STAGED_ENTRY")
+cb_eval("t5_hold_does_not", {"T5": False}, scores={"valuation": -3.0},
+        tentative="HOLD")
+# 缺輸入 → None（不得猜成 False）。判 False 等於替最需要證據的那一側背書。
+cb_eval("indeterminate_missing_score", {"T5": None}, scores={"valuation": None})
+cb_eval("indeterminate_missing_signal", {"T2": None}, scores={"news": -4.0},
+        signals={"technical": None})
+cb_eval("indeterminate_missing_macro", {"T3": None}, macro=None)
+cb_eval("indeterminate_missing_tentative", {"T4": None, "T5": None}, burry=15.0,
+        tentative=None)
+# 同向：五個 lane 有一個反向就不算。
+cb_eval("anti_bias_needs_all_five", {"ANTI_BIAS": False},
+        scores={"valuation": -1.0})
+
+
+def cb_case(label, want_rc, want_substr=None, *, date=CB_CUTOFF, mutate=None):
+    """真 validator，跑在 schema 文件自己的 FULL EXAMPLE 上。"""
+    e = compliant(date)
+    if mutate:
+        mutate(e["trades_this_session"][0], e)
+    run_validator(appended(e), label, want_rc, want_substr)
+
+
+# FULL EXAMPLE 帶著合法的 block，所以基準線必須綠 —— 否則以下每個紅都可能是它自己壞了。
+cb_case("cb.compliant_passes", 0)
+check("cb.fixture_has_block",
+      isinstance(BASE["trades_this_session"][0].get("conflict_bias"), dict),
+      "schema 文件的 FULL EXAMPLE 沒有 conflict_bias，以下 case 全部驗不到東西")
+
+cb_case("cb.missing_after_cutoff", 1, "conflict_bias missing",
+        mutate=lambda t, e: t.pop("conflict_bias"))
+# 189 筆歷史 entry 沒有這塊，截止日之前必須完全靜默。
+cb_case("cb.missing_before_cutoff_silent", 0, date="2026-08-09",
+        mutate=lambda t, e: t.pop("conflict_bias"))
+
+# 重算已接進主流程：多報一個條件不成立的 trigger。這條不動任何 lane 分數，
+# 所以紅一定來自 §16 而不是 §13。
+cb_case("cb.overclaim_is_red", 1, "多報了",
+        mutate=lambda t, e: t["conflict_bias"].update(
+            triggers_fired=["ANTI_BIAS", "T1"]))
+# 少報：burry_score 不被 §13/§14 重算，是唯一能單獨翻動的 trigger 輸入。
+cb_case("cb.underclaim_is_red", 1, "少了",
+        mutate=lambda t, e: t.update(burry_score=15.0))
+# 同一筆輸入、照實申報就過 —— 證明上一條紅的是「沒申報」而不是「burry 低」。
+cb_case("cb.underclaim_declared_passes", 0,
+        mutate=lambda t, e: (t.update(burry_score=15.0), t["conflict_bias"].update(
+            triggers_fired=["ANTI_BIAS", "T4"],
+            t4_detail={"burry_score": 15.0, "resolution": "DOWNGRADE_DECISION",
+                       "override_justification": None,
+                       "override_recheck_date": None})))
+
+# 新自陳欄位的兩道錨。
+cb_case("cb.signal_contradicts_score", 1, "反向",
+        mutate=lambda t, e: t["conflict_bias"]["lane_signals"].update(news="SELL"))
+cb_case("cb.valuation_signal_must_match_lane", 1, "valuation_lane.signal",
+        mutate=lambda t, e: t["conflict_bias"]["lane_signals"].update(valuation="HOLD"))
+cb_case("cb.lane_signals_must_list_all_five", 1, "missing lane(s)",
+        mutate=lambda t, e: t["conflict_bias"]["lane_signals"].pop("technical"))
+
+# 後果錨：OVERRIDE_BURRY ⟺ burry_override_active 雙向鎖。那個布林餵 ×0.5 進 §14 的
+# sizing chain —— 本節唯一錨在「已經在改倉位的數字」上的檢查。
+_OVERRIDE_T4 = {"burry_score": 15.0, "resolution": "OVERRIDE_BURRY",
+                "override_justification": "Fundamentals lane 指 HBM 合約已鎖定四季，"
+                                          "Burry 的 FCF 折價反映的是舊產品組合",
+                "override_recheck_date": "2026-08-17"}
+cb_case("cb.override_without_active_flag", 1, "burry_override_active",
+        mutate=lambda t, e: (t.update(burry_score=15.0), t["conflict_bias"].update(
+            triggers_fired=["ANTI_BIAS", "T4"], t4_detail=dict(_OVERRIDE_T4))))
+cb_case("cb.active_flag_without_override_record", 1,
+        "沒有記錄 T4 的 OVERRIDE_BURRY",
+        mutate=lambda t, e: t.update(burry_override_active=True))
+cb_case("cb.override_justification_too_short", 1, "override_justification",
+        mutate=lambda t, e: (t.update(burry_score=15.0, burry_override_active=True),
+                             t["conflict_bias"].update(
+                                 triggers_fired=["ANTI_BIAS", "T4"],
+                                 t4_detail=dict(_OVERRIDE_T4, override_justification="太短"))))
+cb_case("cb.t4_detail_must_be_null_when_not_fired", 1, "must be null",
+        mutate=lambda t, e: t["conflict_bias"].update(t4_detail=dict(_OVERRIDE_T4)))
+
+cb_case("cb.no_proceed_must_be_cancel", 1, "proceed_to_phase3=false",
+        mutate=lambda t, e: t["conflict_bias"].update(proceed_to_phase3=False))
+cb_case("cb.schema_tag_enforced", 1, "conflict_bias.schema",
+        mutate=lambda t, e: t["conflict_bias"].update(schema="conflict_bias.v2"))
+
+# T5 幽靈規則刻意**不**強制：valuation ≤ −3 而 final_decision 仍在 BUY 側，只留 warning。
+# 實據 2026-08-09 NOW。這條鎖住「沒有人偷偷把它變成 error」——補實作是改決策數學，需拍板。
+_t5_errors, _t5_warnings = [], []
+V.check_conflict_bias(
+    {"export_date": CB_CUTOFF, "phase0_macro_snapshot": {"macro_backdrop_score": -1.0}},
+    {"final_decision": "STAGED_ENTRY", "final_action": "STAGED", "burry_score": 37.1,
+     "lane_scores": {"fundamentals": 2.5, "sentiment": 2.0, "news": 2.0,
+                     "technical": 2.5, "valuation": -3.0},
+     "valuation_lane": {"signal": "SELL", "score": -3.0},
+     "conflict_bias": {"schema": "conflict_bias.v1", "tentative_decision": "STAGED_ENTRY",
+                       "lane_signals": {"fundamentals": "BUY", "sentiment": "BUY",
+                                        "news": "BUY", "technical": "BUY",
+                                        "valuation": "SELL"},
+                       "triggers_fired": ["T5"],
+                       "t4_detail": None,
+                       "t5_detail": {"valuation_score": -3.0, "downgrade_applied": False},
+                       "proceed_to_phase3": True}},
+    _t5_errors, _t5_warnings)
+check("cb.t5_phantom_is_not_enforced", not _t5_errors,
+      f"T5 的自動降階今天沒有產生器，validator 不得強制它：{_t5_errors}")
+check("cb.t5_phantom_is_recorded", any("T5" in w for w in _t5_warnings),
+      f"該降而沒降至少要留下 warning，否則幽靈規則連紀錄都沒有：{_t5_warnings}")
+
+# ── 7. V4.122.0 §17 — Phase 2 fan-in 紀律（inline fallback 的 confidence cap）─────
+# 「subagent 失敗 → PM inline，confidence cap 0.6」從 V4.8 寫到今天，沒有一處驗算過。
+# 沒接線的欄位會自己爛掉：188 筆 export 用了 10 種寫法指涉 5 個 lane，`phase2_fanout_mode`
+# 還出現過表外值 `FULL` —— cap 接不上去的原因就是它的鍵讀不動。
+
+FANIN_CUTOFF = "2026-08-10"          # 字面值，不讀被測常數（§2c）
+check("fanin.cutoff_matches_policy", V.FANIN_REQUIRED_FROM == FANIN_CUTOFF,
+      f"validator says {V.FANIN_REQUIRED_FROM!r}, contract says {FANIN_CUTOFF!r}")
+
+# 名稱正規化：歷史上真的出現過的 10 種寫法必須全部解析得回 lane，否則 cap 對不上。
+for _label, _want in (
+    ("News", "news"),
+    ("News (skill fallback to web)", "news"),
+    ("Technical (skill fallback to yfinance)", "technical"),
+    ("Fundamentals (skill_execution_failed: analyze.py missing)", "fundamentals"),
+    ("Valuation", "valuation"),
+    ("Valuation_Specialist", "valuation"),
+    ("Valuation_Specialist_low_anchor_count_3of6", "valuation"),
+    ("sentiment — inline", "sentiment"),
+    ("Red_Team", None),              # 不是五個分析 lane 之一
+    ("", None),
+):
+    check(f"fanin.resolve({_label[:28]!r})", V.resolve_degraded_lane(_label) == _want,
+          f"got {V.resolve_degraded_lane(_label)!r} want {_want!r}")
+
+# C_eff 取自 step 字串，且與 §13 共用同一組 `_STEP_RE` / `_STEP_LANES`。
+_ceffs = V._step_ceffs(BASE["trades_this_session"][0].get("calculation_steps"))
+check("fanin.ceff_parsed_from_steps", set(_ceffs) == set(V.CONFLICT_LANES),
+      f"從 FULL EXAMPLE 的 calculation_steps 只解析出 {sorted(_ceffs)}")
+
+
+def fanin_case(label, want_rc, want_substr=None, *, date=FANIN_CUTOFF, mutate=None):
+    e = compliant(date)
+    if mutate:
+        mutate(e["trades_this_session"][0], e)
+    run_validator(appended(e), label, want_rc, want_substr)
+
+
+fanin_case("fanin.compliant_passes", 0)
+
+# 真正的 cap：降級的 lane 帶著滿檔 C_eff=0.72 進加權。**FULL EXAMPLE 五個 lane 全是 0.72**
+# （乾淨場次本來就沒有降級 lane），所以把任一個列進 degraded 都會撞 cap，不必動任何數字。
+# 也因此以下每個 case 都會連帶噴 cap error —— `want_substr` 各自挑只有目標規則會產生的字串，
+# 否則測的就變成「有沒有紅」而不是「哪一條紅」。
+fanin_case("fanin.degraded_lane_keeps_full_confidence", 1, "confidence cap 0.6",
+           mutate=lambda t, e: t.update(degraded_analysts=["Fundamentals"],
+                                        phase2_fanout_mode="PARTIAL_FALLBACK"))
+# 正面案例走函式層：fixture 裡沒有 C_eff ≤ 0.60 的 lane，而改 step 字串會連鎖破壞 §13 的
+# 算術鏈（raw_total / final_score 全要跟著重算），紅的理由就不是本節了。接線已由上一條
+# subprocess 案例證明，這裡要證的只是「門檻是 0.60，不是『出現在 degraded 裡就紅』」。
+_cap_err, _cap_warn = [], []
+V.check_fanin_discipline(
+    {"export_date": FANIN_CUTOFF},
+    {"degraded_analysts": ["Technical (skill fallback to yfinance)"],
+     "phase2_fanout_mode": "PARTIAL_FALLBACK",
+     "calculation_steps": {"fund": "0.25 × 4 × 0.72 = 0.7200",
+                           "sent": "0.15 × 3 × 0.72 = 0.3240",
+                           "news": "0.20 × 3 × 0.72 = 0.4320",
+                           "tech": "0.25 × 4 × 0.60 = 0.6000",
+                           "val":  "0.15 × 1 × 0.72 = 0.1080"}},
+    _cap_err, _cap_warn)
+check("fanin.degraded_lane_within_cap_passes", not _cap_err,
+      f"C_eff 0.60 是 cap 的合法值（PLTR 2026-08-09 實際就是這樣跑的）：{_cap_err}")
+
+fanin_case("fanin.unresolvable_label_is_red", 1, "無法解析回 lane 名",
+           mutate=lambda t, e: t.update(degraded_analysts=["蘭恩壞了"],
+                                        phase2_fanout_mode="PARTIAL_FALLBACK"))
+fanin_case("fanin.bad_mode_enum", 1, "outside",
+           mutate=lambda t, e: t.update(phase2_fanout_mode="FULL"))
+fanin_case("fanin.two_degraded_needs_partial", 1, "PARTIAL_FALLBACK",
+           mutate=lambda t, e: t.update(
+               degraded_analysts=["Valuation_Specialist", "Sentiment"]))
+fanin_case("fanin.duplicate_lane", 1, "出現多次",
+           mutate=lambda t, e: t.update(
+               degraded_analysts=["Valuation", "Valuation_Specialist"],
+               phase2_fanout_mode="PARTIAL_FALLBACK"))
+fanin_case("fanin.full_fallback_needs_five", 1, "FULL_FALLBACK 的定義",
+           mutate=lambda t, e: t.update(degraded_analysts=["Valuation_Specialist"],
+                                        phase2_fanout_mode="FULL_FALLBACK"))
+fanin_case("fanin.full_fallback_needs_strong_counter", 1, "STRONG_COUNTER",
+           mutate=lambda t, e: t.update(
+               degraded_analysts=["Fundamentals", "Sentiment", "News", "Technical",
+                                  "Valuation"],
+               phase2_fanout_mode="FULL_FALLBACK",
+               red_team_verdict="MODERATE_COUNTER"))
+
+# 舊 entry 的 10 種寫法是既成事實：截止日之前只給 warning，不回頭紅它們。
+fanin_case("fanin.old_entries_only_warn", 0, date="2026-08-09",
+           mutate=lambda t, e: t.update(degraded_analysts=["蘭恩壞了"],
+                                        phase2_fanout_mode="FULL"))
+# 但 cap 本身是 V4.8 就有的規則，不隨截止日放行。
+fanin_case("fanin.cap_applies_before_cutoff_too", 1, "confidence cap 0.6",
+           date="2026-08-09",
+           mutate=lambda t, e: t.update(degraded_analysts=["Fundamentals"],
+                                        phase2_fanout_mode="PARTIAL_FALLBACK"))
+
 if failures:
     print("✗ export gate contract violated:")
     for f in failures:
         print(f"  - {f}")
     sys.exit(1)
 print("✓ export gate contract holds (valuation_reviewer_gate + technical rubric + "
-      "export_provenance + pt_revision_momentum + calculation_steps parity)")
+      "export_provenance + pt_revision_momentum + calculation_steps parity + "
+      "conflict_bias + fan-in discipline)")

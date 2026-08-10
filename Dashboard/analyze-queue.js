@@ -153,20 +153,11 @@
     // per run and the providers are not interchangeable, so "who ran this" used
     // to be knowable only by opening the scan-log header. `model` is null for
     // the first seconds of a run (lease not yet acquired) and for runs rejected
-    // before dispatch — both render nothing rather than a guess.
-    const _modelMeta = (m) => ({
-      claude: { icon: '🟣', label: 'Claude' },
-      gemini: { icon: '🔵', label: 'Gemini (agy)' },
-      codex:  { icon: '🟢', label: 'Codex' },
-      grok:   { icon: '⚫', label: 'Grok' },
-    }[m] || { icon: '⬜', label: m });
-
-    const _modelBadge = (m, tier, cls = '') => {
-      if (!m) return '';
-      const mm = _modelMeta(m);
-      const title = tier && tier !== 'cli-default' ? `${mm.label} · ${tier}` : mm.label;
-      return `<span class="${cls}" title="${title}">${mm.icon}</span>`;
-    };
+    // before dispatch — this strip renders nothing rather than a guess (the
+    // floating proto pill, which is the run's primary indicator, says 選派中).
+    // Glyphs/labels live in utils.js (UI.MODEL_META) so both surfaces agree;
+    // utils.js loads before this file on every page that mounts the widget.
+    const _modelBadge = (m, tier, cls = '') => (window.UI?.modelBadge?.(m, tier, cls) ?? '');
 
     // Active line (or a neutral pending-only line when no active)
     let activeLine = '';

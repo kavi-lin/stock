@@ -1186,6 +1186,450 @@ def check_lane_contract(entry, trade, errors, warnings):
                 "C1 統一命名，消費端不再各寫 fallback")
 
 
+# ---------------------------------------------------------------------------
+# V4.122.0 §16 — Phase 2.5 CONFLICT & BIAS (`conflict_bias`)
+# ---------------------------------------------------------------------------
+# Phase 2.5 是 protocol 裡唯一「會改決策、卻從未留下任何紀錄」的一段：T4 可以 CANCEL、
+# T5 宣稱自動降階，而 189 筆 history 沒有一筆帶過它的輸出，schema 也沒有它的欄位。
+# 有沒有觸發、觸發了怎麼裁，事後完全不可考 —— 連「這條規則到底有沒有在動」都問不了。
+#
+# 本節只做**紀錄與重算**，不改任何決策數學：
+#   - T1–T5 的條件在 protocol 裡是精確不等式，validator 直接**重算應觸發集合**再與
+#     export 宣稱的 `triggers_fired` 比對，不符 rc=1。自陳「沒觸發」不再是免費的。
+#   - 重算吃的輸入盡量錨在**偽造者改不動的欄位**上（§15 的紀律）：`lane_scores` 受 §13
+#     算術鏈保護、valuation 受 pack 一致性硬閘保護、`macro_backdrop_score` 進 §14 的
+#     macro_cap 重算、`burry_score` 是 schema 必填。
+#   - 兩個新的自陳輸入（`lane_signals` / `tentative_decision`）沒有現成錨，所以各自補一道
+#     對錨的一致性檢查：signal 不得與同 lane 的 score 反向；`OVERRIDE_BURRY` 必須對上
+#     `burry_override_active`，而那個布林餵 trade_plan_builder 的 ×0.5，受 §14 重算。
+#     少了這兩道，新欄位就只是「模型打字出來的」，重算會退化成自己跟自己比對。
+#
+# 刻意**不**驗的兩件事，理由都是「規則本身還沒有被拍板過」：
+#   1. T5 宣稱的「−3 自動 downgrade」。`decision_engine.py` 全檔沒有任何 T5 邏輯，§13 的
+#      band 可達集合也沒有 T5 的路徑 —— 它今天是一條 V4.112 B2 式的幽靈規則（實據：
+#      2026-08-09 NOW，valuation −3、final STAGED_ENTRY、無 BIPOLAR/cap/probe，rc=0
+#      過關）。補實作等於今天才開始改變決策。這裡只在「該降而沒降」時留 warning。
+#   2. Anti-Bias 的「5 lane 同向」。protocol 沒有定義同向是看 score 正負還是看 signal，
+#      把一句沒定義過的話變成 rc=1 是單方面收緊。這裡用 score 正負當定義、只出 warning，
+#      並把定義寫進 schema 文件等拍板。
+# 兩者都見 docs/plan_invest_stale_stages.md T7。
+
+CONFLICT_BIAS_REQUIRED_FROM = "2026-08-10"
+CONFLICT_BIAS_SCHEMA = "conflict_bias.v1"
+#: 精確不等式，進硬性重算比對。ANTI_BIAS 不在內（定義未拍板，見上）。
+CONFLICT_HARD_TRIGGERS = ("T1", "T2", "T3", "T4", "T5")
+CONFLICT_TRIGGERS = CONFLICT_HARD_TRIGGERS + ("ANTI_BIAS",)
+CONFLICT_LANES = ("fundamentals", "sentiment", "news", "technical", "valuation")
+LANE_SIGNAL_VALUES = ("BUY", "HOLD", "SELL")
+T4_RESOLUTIONS = ("CANCEL", "DOWNGRADE_DECISION", "OVERRIDE_BURRY")
+TENTATIVE_DECISIONS = ("BUY", "STAGED_ENTRY", "HOLD", "STAGED_EXIT", "SELL")
+BURRY_VETO_BELOW = 20.0          # protocol §PHASE 2 末段：burry_score < 20 → veto_flag
+T5_VALUATION_WARN = -2.0         # T5 觸發門檻
+T5_EXTREME_BAND = -3.0           # T5 宣稱自動降階的門檻（今天無產生器）
+
+
+def _conflict_lane_scores(trade):
+    """五個 lane 的 raw score。valuation 以 `lane_scores` 為先、`valuation_lane` 為後。
+
+    兩處都可能是權威：新 entry 的 `lane_scores` 已含 valuation（NOW 2026-08-09），
+    舊 entry 只有 `valuation_lane.score`。兩個都在而且不一致時取 `lane_scores` 並回報
+    —— 不一致本身就是別節（§13 lane 一致性）的業務，這裡不重複紅。
+    """
+    ls = trade.get("lane_scores")
+    ls = ls if isinstance(ls, dict) else {}
+    out = {lane: _numf(ls.get(lane)) for lane in CONFLICT_LANES}
+    if out["valuation"] is None:
+        vl = trade.get("valuation_lane")
+        if isinstance(vl, dict):
+            out["valuation"] = _numf(vl.get("score"))
+    return out
+
+
+def evaluate_conflict_triggers(scores, signals, macro, burry, tentative):
+    """重算 T1–T5 + ANTI_BIAS。值為 True / False / None（None = 輸入缺，無法判定）。
+
+    None 而不是 False：缺輸入時判 False 等於「猜它沒觸發」，而 T4/T5 沒觸發正是最需要
+    證據的那一側。缺輸入的 trigger 退出硬性比對並留 warning —— 與 valuation_reviewer_gate
+    的「gate 讀不到權威輸入時不得猜」同一條紀律。灌 null 繞過本節不划算：這幾個輸入
+    分別是 §13 / §14 / §15 與 schema 必填的守備範圍，拿掉會在別處紅。
+    """
+    def _some(*vals):
+        return None if any(v is None for v in vals) else True
+
+    out = {}
+
+    # T1 — Sentiment 過熱 vs Fundamentals 轉負
+    out["T1"] = (None if _some(scores["sentiment"], scores["fundamentals"]) is None
+                 else bool(scores["sentiment"] > 3 and scores["fundamentals"] < 0))
+
+    # T2 — News 重挫但 Technical 仍喊進
+    out["T2"] = (None if _some(scores["news"], signals.get("technical")) is None
+                 else bool(scores["news"] < -3 and signals.get("technical") == "BUY"))
+
+    # T3 — macro 逆風下仍有 lane 高分喊進
+    if macro is None:
+        out["T3"] = None
+    else:
+        pairs = [(signals.get(l), scores[l]) for l in CONFLICT_LANES]
+        if any(sig is None or sc is None for sig, sc in pairs):
+            out["T3"] = None
+        else:
+            out["T3"] = bool(macro < -3
+                             and any(sig == "BUY" and sc > 3 for sig, sc in pairs))
+
+    # T4 — Burry veto 撞上 tentative BUY
+    out["T4"] = (None if _some(burry, tentative) is None
+                 else bool(burry < BURRY_VETO_BELOW and tentative == "BUY"))
+
+    # T5 — 估值警告撞上 BUY 側 tentative
+    out["T5"] = (None if _some(scores["valuation"], tentative) is None
+                 else bool(scores["valuation"] <= T5_VALUATION_WARN
+                           and tentative in ("BUY", "STAGED_ENTRY")))
+
+    # Anti-Bias — 五 lane 同向（本版定義：score 正負一致；warning-only）
+    vals = [scores[l] for l in CONFLICT_LANES]
+    out["ANTI_BIAS"] = (None if any(v is None for v in vals)
+                        else bool(all(v > 0 for v in vals) or all(v < 0 for v in vals)))
+    return out
+
+
+def check_conflict_bias(entry, trade, errors, warnings):
+    """§16 — Phase 2.5 的 `conflict_bias` block：形狀、重算比對、後果錨。
+
+    `CONFLICT_BIAS_REQUIRED_FROM` 之前的 entry 整段跳過（189 筆歷史 entry 一筆都沒有它，
+    回填等於在稽核軌跡放假證據 —— 同 §15「為什麼舊 entry 不回填」）。
+    日期閘而非版本閘：沿用 V4.116.3 `valuation_reviewer_gate` 的前例，這是一塊純紀錄
+    區塊，不值得為它擴一版 session_export_version 並牽動 producer / renderer。
+    """
+    export_date = str(entry.get("export_date") or entry.get("date") or "")
+    cb = trade.get("conflict_bias")
+
+    if cb is None:
+        if export_date >= CONFLICT_BIAS_REQUIRED_FROM:
+            errors.append(
+                f"conflict_bias missing — {CONFLICT_BIAS_REQUIRED_FROM} 起的 entry 必須帶 "
+                "Phase 2.5 的輸出（T1–T5 觸發集合 + 裁決）。protocol §PHASE 2.5 一直要求 "
+                "PM 產這塊 JSON，過去沒有任何欄位接住它，189 筆歷史 entry 因此一筆紀錄都沒有")
+        return
+    if not isinstance(cb, dict):
+        errors.append(f"conflict_bias must be an object, got {type(cb).__name__}")
+        return
+
+    if cb.get("schema") != CONFLICT_BIAS_SCHEMA:
+        errors.append(f"conflict_bias.schema={cb.get('schema')!r} — 只認 "
+                      f"{CONFLICT_BIAS_SCHEMA!r}")
+
+    # ── 形狀 ───────────────────────────────────────────────────────────────
+    tentative = cb.get("tentative_decision")
+    if tentative not in TENTATIVE_DECISIONS:
+        errors.append(f"conflict_bias.tentative_decision={tentative!r} — "
+                      f"expected one of {list(TENTATIVE_DECISIONS)}")
+        tentative = None
+
+    signals = {}
+    raw_signals = cb.get("lane_signals")
+    if not isinstance(raw_signals, dict):
+        errors.append("conflict_bias.lane_signals must be an object keyed by lane name — "
+                      "T2/T3 的條件寫在 signal 上，沒有它就沒得重算")
+    else:
+        missing = [l for l in CONFLICT_LANES if l not in raw_signals]
+        if missing:
+            errors.append(
+                f"conflict_bias.lane_signals missing lane(s): {missing} — 五個 lane 一律列出，"
+                "沒跑的填 null（省略與『跑了但沒記』事後無法區分，同 C1 契約紀律）")
+        for lane in CONFLICT_LANES:
+            sig = raw_signals.get(lane)
+            if sig is None or lane not in raw_signals:
+                continue
+            if sig not in LANE_SIGNAL_VALUES:
+                errors.append(f"conflict_bias.lane_signals.{lane}={sig!r} — "
+                              f"expected one of {list(LANE_SIGNAL_VALUES)} or null")
+            else:
+                signals[lane] = sig
+
+    proceed = cb.get("proceed_to_phase3")
+    if not isinstance(proceed, bool):
+        errors.append(f"conflict_bias.proceed_to_phase3={proceed!r} must be a boolean")
+
+    summary = cb.get("conflict_summary")
+    if summary is not None and not isinstance(summary, str):
+        errors.append("conflict_bias.conflict_summary must be a string when present")
+
+    claimed = cb.get("triggers_fired")
+    if not isinstance(claimed, list) or any(not isinstance(t, str) for t in claimed):
+        errors.append("conflict_bias.triggers_fired must be an array of strings")
+        return
+    unknown = [t for t in claimed if t not in CONFLICT_TRIGGERS]
+    if unknown:
+        errors.append(f"conflict_bias.triggers_fired has unknown trigger(s): {unknown} — "
+                      f"只認 {list(CONFLICT_TRIGGERS)}")
+    claimed_set = {t for t in claimed if t in CONFLICT_TRIGGERS}
+    if len(claimed) != len(set(claimed)):
+        errors.append("conflict_bias.triggers_fired has duplicates")
+
+    # ── signal × score 反向矛盾（把新自陳欄位錨回 §13 保護的 lane_scores）────
+    scores = _conflict_lane_scores(trade)
+    for lane, sig in signals.items():
+        sc = scores.get(lane)
+        if sc is None:
+            continue
+        if (sig == "BUY" and sc < 0) or (sig == "SELL" and sc > 0):
+            errors.append(
+                f"conflict_bias.lane_signals.{lane}={sig!r} 與 lane score {sc} 反向 — "
+                "signal 是本節唯一沒有既有錨的輸入，與 score 矛盾時無法判斷哪個才是"
+                "這一輪真正的 lane 輸出（score 受 §13 算術鏈保護，signal 不受）")
+
+    # valuation 那一格有現成的權威副本（`valuation_lane.signal`，V5.0+ 必填且與
+    # `valuation_pack` 綁死）。五個 signal 裡唯一錨得死的一格，不用白不用。
+    _vl = trade.get("valuation_lane")
+    if isinstance(_vl, dict) and "valuation" in signals and _vl.get("signal") is not None:
+        if signals["valuation"] != _vl.get("signal"):
+            errors.append(
+                f"conflict_bias.lane_signals.valuation={signals['valuation']!r} != "
+                f"valuation_lane.signal={_vl.get('signal')!r} — 同一個 lane 的同一個欄位")
+
+    # ── 重算應觸發集合 ─────────────────────────────────────────────────────
+    macro = _numf((entry.get("phase0_macro_snapshot") or {}).get("macro_backdrop_score"))
+    burry = _numf(trade.get("burry_score"))
+    expected = evaluate_conflict_triggers(scores, signals, macro, burry, tentative)
+
+    undecidable = [t for t in CONFLICT_HARD_TRIGGERS if expected[t] is None]
+    if undecidable:
+        warnings.append(
+            f"conflict_bias: {undecidable} 無法重算（缺 lane score / signal / macro / "
+            "burry_score / tentative_decision 之一）—— 這幾個 trigger 這一筆只有自陳，"
+            "沒有獨立驗證")
+    should = {t for t in CONFLICT_HARD_TRIGGERS if expected[t] is True}
+    got = {t for t in claimed_set if t in CONFLICT_HARD_TRIGGERS}
+    decidable = {t for t in CONFLICT_HARD_TRIGGERS if expected[t] is not None}
+    miss = sorted(should - got)
+    extra = sorted((got - should) & decidable)
+    if miss:
+        errors.append(
+            f"conflict_bias.triggers_fired 少了 {miss} —— 依 export 自己的欄位重算，"
+            f"這些 trigger 的條件成立（lane_scores={ {k: v for k, v in scores.items()} }, "
+            f"macro_backdrop_score={macro}, burry_score={burry}, "
+            f"tentative_decision={tentative!r}）。protocol §PHASE 2.5 的 T1–T5 是精確"
+            "不等式，觸發與否不是判斷題")
+    if extra:
+        errors.append(
+            f"conflict_bias.triggers_fired 多報了 {extra} —— 依 export 自己的欄位重算，"
+            "這些 trigger 的條件不成立")
+
+    if claimed_set and not (isinstance(summary, str) and summary.strip()):
+        warnings.append(
+            "conflict_bias: 有 trigger 觸發但 conflict_summary 是空的 — 觸發集合說得出"
+            "「哪一條」，說不出「當下看到什麼」，而後者正是 ≥20 場後要拿來校準的東西")
+
+    # Anti-Bias：定義未拍板，只出 warning（見本節開頭）。
+    if expected["ANTI_BIAS"] is True and "ANTI_BIAS" not in claimed_set:
+        warnings.append(
+            "conflict_bias: 五個 lane score 同向但 triggers_fired 沒有 ANTI_BIAS — "
+            "protocol 要求 News 追加 devils_advocate[]（同向的定義未拍板，本節只提醒）")
+    if "ANTI_BIAS" in claimed_set and trade.get("devils_advocate_filed") is not True:
+        warnings.append(
+            "conflict_bias: ANTI_BIAS 觸發但 devils_advocate_filed 不是 true — "
+            "Anti-Bias 的唯一產物就是那份 devils_advocate[]")
+
+    # ── 後果錨：只驗有真實產生器、且錨得住的那幾條 ─────────────────────────
+    t4 = cb.get("t4_detail")
+    if "T4" in claimed_set:
+        if not isinstance(t4, dict):
+            errors.append("conflict_bias.t4_detail required when T4 fired — "
+                          "T4 是唯一能 CANCEL 的仲裁，裁決過程必須留下")
+        else:
+            resolution = t4.get("resolution")
+            if resolution not in T4_RESOLUTIONS:
+                errors.append(f"conflict_bias.t4_detail.resolution={resolution!r} — "
+                              f"expected one of {list(T4_RESOLUTIONS)}")
+            if resolution == "OVERRIDE_BURRY":
+                just = t4.get("override_justification")
+                if not isinstance(just, str) or len(just.strip()) < 20:
+                    errors.append(
+                        "conflict_bias.t4_detail.override_justification 需 ≥20 字並具體引用 "
+                        "Phase 2 某 analyst 的證據 — protocol 給 OVERRIDE_BURRY 開的三項"
+                        "自動成本之一")
+                if not t4.get("override_recheck_date"):
+                    errors.append("conflict_bias.t4_detail.override_recheck_date 必填 "
+                                  "(交易日 + 5 個交易日) — OVERRIDE_BURRY 的三項成本之一")
+    elif t4 is not None:
+        errors.append("conflict_bias.t4_detail must be null when T4 did not fire")
+
+    # OVERRIDE_BURRY ⟺ burry_override_active，雙向鎖。
+    # 這個布林餵 trade_plan_builder 的 ×0.5，鏈尾受 §14 重算 —— 是本節唯一一條錨在
+    # 「已經在改倉位的數字」上的後果檢查，也是 T4 這條軌真正硬的地方。
+    override_claimed = isinstance(t4, dict) and t4.get("resolution") == "OVERRIDE_BURRY"
+    override_active = trade.get("burry_override_active") is True
+    if override_claimed and not override_active:
+        errors.append(
+            "conflict_bias.t4_detail.resolution=OVERRIDE_BURRY 但 burry_override_active "
+            "不是 true — override 的第一項成本是 Phase 4 倉位 ×0.5，那條乘數讀的是這個布林")
+    if override_active and not override_claimed:
+        errors.append(
+            "burry_override_active=true 但 conflict_bias 沒有記錄 T4 的 OVERRIDE_BURRY 裁決 — "
+            "倉位已經被 ×0.5，決定這麼做的那一步卻沒有留下裁決紀錄")
+
+    t5 = cb.get("t5_detail")
+    if "T5" in claimed_set:
+        if not isinstance(t5, dict):
+            errors.append("conflict_bias.t5_detail required when T5 fired")
+        elif not isinstance(t5.get("downgrade_applied"), bool):
+            errors.append("conflict_bias.t5_detail.downgrade_applied must be a boolean")
+    elif t5 is not None:
+        errors.append("conflict_bias.t5_detail must be null when T5 did not fire")
+
+    # T5 幽靈：該降而沒降只留 warning（rc 不動）。見本節開頭第 1 點。
+    val_score = scores.get("valuation")
+    if (val_score is not None and val_score <= T5_EXTREME_BAND
+            and trade.get("final_decision") in ("BUY", "STAGED_ENTRY")):
+        warnings.append(
+            f"conflict_bias: valuation score {val_score} ≤ {T5_EXTREME_BAND} 而 final_decision="
+            f"{trade.get('final_decision')!r} — protocol T5 宣稱此時自動降階，但 "
+            "decision_engine.py 沒有任何 T5 邏輯、§13 的 band 可達集合也沒有 T5 的路徑。"
+            "本節刻意不強制（補實作＝改決策數學，需拍板；見 "
+            "docs/plan_invest_stale_stages.md T7）")
+
+    # proceed_to_phase3=false → protocol 明寫「跳 Phase 5 輸出 CANCEL」，而
+    # decision_engine.py 也把它當 Auto REJECT 的一條理由，兩邊都錨得住。
+    if proceed is False and trade.get("final_action") != "CANCEL":
+        errors.append(
+            f"conflict_bias.proceed_to_phase3=false 但 final_action="
+            f"{trade.get('final_action')!r} — protocol §PHASE 2.5：不進 Phase 3 就是 CANCEL"
+            "（decision_engine.py 也把它列為 Auto REJECT 的觸發理由）")
+
+
+# ---------------------------------------------------------------------------
+# V4.122.0 §17 — Phase 2 FAN-IN 紀律（inline fallback 的 confidence cap）
+# ---------------------------------------------------------------------------
+# protocol §PHASE 2「Fan-In 驗證 + Inline Fallback」自 V4.8 就寫著「單一 subagent 失敗 →
+# PM inline 該 lane；confidence cap 0.6」。validator 過去只收 `phase2_fanout_mode` 與
+# `degraded_analysts` 兩個欄位、沒有任何一處驗算那個 cap —— 又一條「規則寫了但沒接線」。
+#
+# 沒接線的直接後果是欄位自己爛掉：188 筆 export 裡，`degraded_analysts` 用過 **10 種寫法
+# 指涉 5 個 lane**（`News` / `News (skill fallback to web)` / `Valuation` /
+# `Valuation_Specialist` / `Valuation_Specialist_low_anchor_count_3of6` …），`phase2_fanout_mode`
+# 出現過表外值 `FULL`。**沒有任何消費端讀得動它**，所以 cap 想接也接不上去——這正是
+# 「欄位存在」與「欄位可用」的差別。
+#
+# cap 怎麼驗：`c_eff()` 把 raw confidence 量化成三檔（<0.45→0.35 / <0.675→0.60 / else 0.72），
+# 所以「confidence ≤ 0.6」等價於「C_eff 不得為 0.72」——0.6 落在 0.60 那一檔，合規的 lane
+# 不可能顯示 0.72，零偽陽。C_eff 取自 `calculation_steps` 的 step 字串（`W × score × C_eff`），
+# 那塊受 §13 重算與 §5l 的 engine artifact parity 保護，是偽造者改不動的錨。
+
+FANIN_REQUIRED_FROM = "2026-08-10"
+FANOUT_MODES = ("PARALLEL_SUBAGENT", "PARTIAL_FALLBACK", "FULL_FALLBACK")
+#: 「inline fallback confidence cap 0.6」→ 量化後的上限檔位。
+DEGRADED_MAX_CEFF = 0.60
+
+
+def resolve_degraded_lane(label):
+    """free-form 的 degraded 標籤 → canonical lane 名；解析不出回 None。
+
+    刻意用**前綴**比對而不是完全相等：歷史上那 10 種寫法全部是「canonical 名 + 附註」
+    （`News (skill fallback to web)`、`Valuation_Specialist_low_anchor_count_3of6`），
+    附註帶著真資訊，不該為了機器可讀把它砍掉。要求的只是**開頭必須是 lane 名**，
+    這樣既保留註記又讓每個元素解析得回唯一一個 lane。
+    """
+    s = str(label).strip().lower()
+    hits = [lane for lane in CONFLICT_LANES if s.startswith(lane)]
+    return hits[0] if len(hits) == 1 else None
+
+
+def _step_ceffs(cs):
+    """從 `calculation_steps` 的 step 字串取每個 lane 的 C_eff。
+
+    重用 §13 的 `_STEP_RE` / `_STEP_LANES`，不另寫一份 parser —— 同一個字串格式兩處各
+    解析一次，任一方改動後另一方會走「解析不出就靜默」分支（§2c 成員 #8）。
+    """
+    out = {}
+    if not isinstance(cs, dict):
+        return out
+    for key, lane in _STEP_LANES.items():
+        raw = cs.get(key)
+        if not isinstance(raw, str):
+            continue
+        m = _STEP_RE.match(raw)
+        if m:
+            out[lane] = _dash(m.group(3))
+    return out
+
+
+def check_fanin_discipline(entry, trade, errors, warnings):
+    """§17 — fan-out mode 值域、degraded lane 可解析性、inline fallback 的 confidence cap。
+
+    分兩層時效：**cap 與 FULL_FALLBACK 一致性是 V4.8 就存在的規則**，只要輸入齊備就驗
+    （degraded 為空時自然完全靜默，那是絕大多數場次）；**「名稱必須可解析」與 mode 值域是
+    V4.122.0 新增的要求**，只對 `FANIN_REQUIRED_FROM` 之後的 entry 為 error，之前留 warning
+    —— 舊 entry 的 10 種寫法是既成事實，回頭紅它們沒有意義。
+    """
+    export_date = str(entry.get("export_date") or entry.get("date") or "")
+    strict = export_date >= FANIN_REQUIRED_FROM
+    emit = errors if strict else warnings
+
+    mode = trade.get("phase2_fanout_mode")
+    if mode is not None and mode not in FANOUT_MODES:
+        emit.append(f"phase2_fanout_mode={mode!r} outside {list(FANOUT_MODES)} — "
+                    "歷史上出現過表外值 `FULL`，值域從未被驗過")
+
+    raw_degraded = trade.get("degraded_analysts")
+    if raw_degraded is None:
+        return
+    if not isinstance(raw_degraded, list):
+        errors.append(f"degraded_analysts must be an array, got "
+                      f"{type(raw_degraded).__name__}")
+        return
+
+    resolved, unresolved = [], []
+    for item in raw_degraded:
+        lane = resolve_degraded_lane(item) if isinstance(item, str) else None
+        (resolved.append((lane, item)) if lane else unresolved.append(item))
+    if unresolved:
+        emit.append(
+            f"degraded_analysts 有無法解析回 lane 名的元素: {unresolved} — 每個元素必須"
+            f"以 {list(CONFLICT_LANES)} 之一開頭（後面可接附註，如 "
+            "'News (skill fallback to web)'）。解析不回 lane 的標籤讓 confidence cap "
+            "無從對應，這正是 cap 從 V4.8 起沒被驗過的原因")
+
+    lanes = [lane for lane, _ in resolved]
+    dupes = sorted({x for x in lanes if lanes.count(x) > 1})
+    if dupes:
+        errors.append(f"degraded_analysts 同一個 lane 出現多次: {dupes}")
+
+    # ── 真正的 cap：inline fallback 的 lane 不得帶滿檔信心 ────────────────
+    ceffs = _step_ceffs(trade.get("calculation_steps"))
+    for lane, label in resolved:
+        ce = ceffs.get(lane)
+        if ce is None:
+            continue
+        if ce > DEGRADED_MAX_CEFF + 1e-9:
+            errors.append(
+                f"degraded lane {label!r} 的 C_eff={ce} 超過 inline fallback 的 "
+                f"confidence cap 0.6（量化後上限 {DEGRADED_MAX_CEFF}）— protocol "
+                "§PHASE 2 Fan-In：subagent 失敗改由 PM inline 的 lane，confidence 一律 "
+                "cap 在 0.6。降級的 lane 帶滿檔信心進加權，等於失敗反而加重它的話語權")
+
+    n = len(raw_degraded)
+    if n >= 2 and mode not in ("PARTIAL_FALLBACK", "FULL_FALLBACK"):
+        emit.append(
+            f"degraded_analysts 有 {n} 個 lane 但 phase2_fanout_mode={mode!r} — "
+            "protocol Fan-In 表：2-4 個失敗 = PARTIAL_FALLBACK、5 個 = FULL_FALLBACK")
+    if n == 1 and mode == "PARALLEL_SUBAGENT":
+        warnings.append(
+            "degraded_analysts 只有 1 個 lane 而 mode 仍是 PARALLEL_SUBAGENT — "
+            "protocol Fan-In 表沒有定義單一失敗時的 mode，本節不當錯處理（定義待拍板）")
+
+    if mode == "FULL_FALLBACK":
+        if n != 5:
+            errors.append(f"phase2_fanout_mode=FULL_FALLBACK 但 degraded_analysts 有 {n} "
+                          "個 lane — FULL_FALLBACK 的定義就是 5 個 subagent 全失敗")
+        rtv = trade.get("red_team_verdict")
+        if rtv != "STRONG_COUNTER":
+            errors.append(
+                f"phase2_fanout_mode=FULL_FALLBACK 但 red_team_verdict={rtv!r} — "
+                "protocol §PHASE 2.8：FULL_FALLBACK 時 Red Team 強制 STRONG_COUNTER"
+                "（五個 lane 全是 PM inline，沒有獨立證據可供反駁）")
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Validate latest investment session export")
     ap.add_argument("--history", default=HISTORY_JSON,
@@ -1894,6 +2338,15 @@ def main(argv=None):
     # ── 15. V4.90.0 — C1 統一 lane 資料契約 + lane 區塊形狀鎖 ──
     # 版號不在 LANE_CONTRACT_REQUIRED_VERSIONS 的 entry 整段跳過 → 向後相容。
     check_lane_contract(entry, trade, errors, warnings)
+
+    # ── 16. V4.122.0 — Phase 2.5 conflict & bias（重算應觸發集合）──
+    # CONFLICT_BIAS_REQUIRED_FROM 之前的 entry 整段跳過 → 舊 entry 不回填。
+    check_conflict_bias(entry, trade, errors, warnings)
+
+    # ── 17. V4.122.0 — Phase 2 fan-in 紀律（inline fallback 的 confidence cap）──
+    # cap 與 FULL_FALLBACK 一致性只要輸入齊備就驗；名稱可解析性與 mode 值域
+    # 對 FANIN_REQUIRED_FROM 之前的 entry 只給 warning。
+    check_fanin_discipline(entry, trade, errors, warnings)
 
     # ── 14b. V4.82.0 — fragility_label enum ──────────────────────────────
     # replay_trade_plan.py 的 sizing cohort 發現歷史上有 6 筆用了 protocol 表外的標籤

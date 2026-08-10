@@ -8,7 +8,7 @@
 
   // Semantic release tag shown in sidebar footer. Bump on meaningful releases.
   // Cache-busting is handled separately by dashboard_server.py (mtime injection).
-  const VERSION = 'V4.121.1';
+  const VERSION = 'V4.125.0';
 
   // V1.71.x — group field enables sectioned sidebar layout
   const NAV_ITEMS = [
@@ -229,6 +229,49 @@
     exposureStages(lang) {
       const l = lang === 'en' ? 'en' : 'zh';
       return EXPOSURE_TIERS.map(t => ({ key: t.key, range: [t.min, t.max], ...t[l] }));
+    },
+
+    // ── Quota-broker attribution ─────────────────────────────────────────
+    // Every protocol run publishes `model` / `model_tier` (V4.114.0); the
+    // broker picks per run from the primary → secondary → tertiary chain and
+    // the providers are NOT interchangeable, so "who ran this" belongs next to
+    // every place a run is shown. This is the single source for how a provider
+    // is drawn — the queue strip and the floating pill render from here so they
+    // cannot drift apart.
+    //
+    // `model` is null for the first seconds of a run (lease not yet acquired)
+    // and for runs rejected before dispatch. Callers choose between a
+    // placeholder and nothing; neither may guess a provider.
+    MODEL_META: {
+      claude: { icon: '🟣', label: 'Claude' },
+      gemini: { icon: '🔵', label: 'Gemini (agy)' },
+      codex:  { icon: '🟢', label: 'Codex' },
+      grok:   { icon: '⚫', label: 'Grok' },
+    },
+
+    modelMeta(m) {
+      return UI.MODEL_META[m] || { icon: '⬜', label: String(m ?? '') };
+    },
+
+    // Emoji-only badge for tight rows; name + tier live in the tooltip.
+    // 'cli-default' means the CLI had no tier to report — dropped rather than
+    // shown as if it were a deliberate model choice.
+    modelBadge(m, tier, cls = '') {
+      if (!m) return '';
+      const mm = UI.modelMeta(m);
+      const title = tier && tier !== 'cli-default' ? `${mm.label} · ${tier}` : mm.label;
+      return `<span class="${cls}" title="${UI.escapeHTML(title)}">${mm.icon}</span>`;
+    },
+
+    // Plain text form ("🟣 Claude", or "🟣 Claude (opus)" with a real tier) for
+    // surfaces with room for the name. Returns '' for an unknown provider so
+    // callers can fall back to their own placeholder.
+    modelText(m, tier = null) {
+      if (!m) return '';
+      const mm = UI.modelMeta(m);
+      return tier && tier !== 'cli-default'
+        ? `${mm.icon} ${mm.label} (${tier})`
+        : `${mm.icon} ${mm.label}`;
     },
 
     // ── Theme ────────────────────────────────────────────────────────────
@@ -905,7 +948,7 @@
       // reserve-only providers are dimmed because the broker will not send them
       // work, and a full-looking green bar on a provider nothing can use is the
       // single most misleading thing this panel could show.
-      const providerRow = (model, info, routeTags, reserveLine, zh) => {
+      const providerRow = (model, info, reserveLine, zh) => {
         // V4.115.0 — bars draw CONSUMPTION, matching the hover card and the
         // Claude Code usage panel this was modelled on. They used to draw what
         // was left, so a long green bar meant "healthy" here and "nearly out"
@@ -923,22 +966,23 @@
           state = 'off'; flag = zh ? '未登入' : 'no auth';
         }
 
-        // Only route tags this provider does NOT share with every other one —
-        // a chip that appears on every row cannot tell the rows apart. See the
-        // universal-route filter in render().
-        const tags = routeTags.length
-          ? `<div class="sidebar-llm-tags">${routeTags
-              .map(t => `<span class="sidebar-llm-tag">${esc(t)}</span>`).join('')}</div>`
-          : '';
-
         // The always-on row is deliberately just: who, what state, how much
-        // left. Window-by-window detail, freshness and spend all live in the
-        // hover card (llmTipHTML) — kept out of the sidebar so the three bars
-        // stay scannable, which is the whole point of the panel being pinned.
+        // left. Window-by-window detail, freshness, spend and the full route
+        // list all live in the hover card (llmTipHTML) — kept out of the
+        // sidebar so the three bars stay scannable, which is the whole point of
+        // the panel being pinned. V4.122.1 dropped the route chips from here
+        // for the same reason: eligibility is a standing fact you look up once,
+        // while the live dot below answers the question the panel is actually
+        // read for — is anything spending this provider right now.
+        //
+        // The dot is rendered empty and painted by _paintLlmActive(); this
+        // markup is rewritten every 30s from the quota poll, which is far too
+        // slow to be a liveness indicator on its own.
         return `<div class="sidebar-llm-prov sidebar-llm-${state}" data-llm-prov="${esc(model)}"
                      title="${esc(zh ? `已用 ${pct(used)}／剩餘 ${pct(remaining)}`
                                      : `${pct(used)} used / ${pct(remaining)} left`)}">
           <div class="sidebar-llm-prov-head">
+            <span class="sidebar-llm-live" hidden></span>
             <span class="sidebar-llm-prov-name">${esc(model)}</span>
             ${flag ? `<span class="sidebar-llm-flag">${esc(flag)}</span>` : ''}
             <span class="sidebar-llm-prov-pct">${pct(used)}</span>
@@ -947,7 +991,6 @@
             <div class="sidebar-llm-bar-fill" style="width:${width}%"></div>
             ${reserveLine !== null ? `<div class="sidebar-llm-bar-reserve" style="left:${reserveLine}%"></div>` : ''}
           </div>
-          ${tags}
         </div>`;
       };
 
@@ -1100,32 +1143,24 @@
 
         // Which dispatch paths each provider serves. Broker-decided routes list
         // candidates, not a winner — model_router.routes() explains why the UI
-        // must not predict one — so those render as eligibility, not a promise.
+        // must not predict one — so these read as eligibility, not a promise.
         //
-        // A route every provider is eligible for is dropped from the always-on
-        // rows entirely: `debate` accepts all three, so it printed "辯手 候選·2"
-        // on claude, gemini and codex alike — three chips that could not tell
-        // the rows apart. What distinguishes them is the narrower routes
-        // (general is pinned to claude, protocol excludes codex), and only
-        // those stay on the row. The full list, universal routes included,
-        // still shows in each provider's hover card.
-        const tagsFor = {};      // row chips — distinguishing routes only
+        // V4.122.1: hover card only. On the pinned rows these chips were a
+        // standing fact ("could be picked for protocol") dressed as news, and
+        // they sat exactly where the live indicator belongs. Eligibility is
+        // looked up once; who is spending quota right now is looked at often.
         const allTagsFor = {};   // hover card — every route this provider serves
         (broker.routes || []).forEach(route => {
           const label = (ROUTE_LABELS[route.key] || {})[zh ? 'zh' : 'en'] || route.key;
           if (route.decided_by === 'broker') {
             // "候選" not "will run": the broker picks at dispatch time from
             // whoever still has quota, and this list is the eligible set.
-            const eligible = (route.eligible || []).filter(m => names.includes(m));
             const cand = zh ? '候選' : 'cand';
             const chip = route.picks > 1 ? `${label} ${cand}·${route.picks}` : `${label} ${cand}`;
-            const isUniversal = names.length && eligible.length === names.length;
-            eligible.forEach(m => {
+            (route.eligible || []).filter(m => names.includes(m)).forEach(m => {
               (allTagsFor[m] = allTagsFor[m] || []).push(chip);
-              if (!isUniversal) (tagsFor[m] = tagsFor[m] || []).push(chip);
             });
           } else if (route.model) {
-            (tagsFor[route.model] = tagsFor[route.model] || []).push(label);
             (allTagsFor[route.model] = allTagsFor[route.model] || []).push(label);
           }
         });
@@ -1140,8 +1175,13 @@
             return (pa === null || pa === undefined ? 101 : pa) - (pb === null || pb === undefined ? 101 : pb);
           });
           hostEl.innerHTML = names
-            .map(m => providerRow(m, providers[m], tagsFor[m] || [], reserveLine, zh))
+            .map(m => providerRow(m, providers[m], reserveLine, zh))
             .join('');
+          // innerHTML just replaced every row, taking the live dot with it.
+          // Repaint from the last known protocol poll instead of waiting up to
+          // 5s for the next one — otherwise a running job goes dark for a beat
+          // every time quota refreshes.
+          UI._paintLlmActive();
           // Hover content is built now, while the payload is in hand, and
           // stashed per model — the mouseover handler must not re-derive it
           // from the DOM it just wrote.
@@ -1218,6 +1258,34 @@
       if (UI._llmPanelTimer) clearInterval(UI._llmPanelTimer);
       UI._llmPanelTimer = setInterval(() => { if (!document.hidden) refresh(); }, 30000);
       document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
+    },
+
+    // ── Live "this provider is spending right now" dot ───────────────────
+    // Set by the protocol-queue poll (every 5s) and repainted after every
+    // quota render. `_llmActiveRun` is {model, label} or null.
+    //
+    // Scope, deliberately narrow and stated in the tooltip: this lights only
+    // for protocol runs dispatched by this server (invest / news / sector /
+    // earnings), because `/api/protocol-queue` is the only place a provider is
+    // attributed to work in flight — the broker reports quota, not leases. The
+    // Break News daemon, Nexus gap-fill and the intraday narrator all spend
+    // quota without passing through here, so a dark dot means "no protocol run
+    // holds this provider", NOT "nothing is using it". Widening it would need
+    // an in-flight registry that does not exist yet; claiming the wider meaning
+    // with the narrower data is how a panel starts lying.
+    _llmActiveRun: null,
+
+    _paintLlmActive() {
+      const run = UI._llmActiveRun;
+      const want = run && run.model ? String(run.model).toLowerCase() : null;
+      document.querySelectorAll('[data-llm-prov]').forEach(row => {
+        const isRun = !!want && String(row.dataset.llmProv || '').toLowerCase() === want;
+        row.classList.toggle('sidebar-llm-inuse', isRun);
+        const dot = row.querySelector('.sidebar-llm-live');
+        if (!dot) return;
+        dot.hidden = !isRun;
+        dot.title = isRun ? (run.label || '') : '';
+      });
     },
 
     // ── Risk Tolerance (sent with every invest protocol invocation) ──────
@@ -1420,16 +1488,39 @@
       const pill = ensureProtoPill();
       const active = state.active;
       const queue = state.queue || [];
+      // V4.121.4 — the invest→invest wait, published by the worker. Server-side
+      // this used to be an invisible sleep; a pill that hides during it teaches
+      // the user the queue is dead and to re-queue (which is how a duplicate
+      // NVDA run happened on 2026-08-10).
+      const cooldown = state.cooldown || null;
       const lbl = pill.querySelector('#proto-pill-label');
       const meta = pill.querySelector('#proto-pill-meta');
       const det = pill.querySelector('#proto-pill-detail');
 
-      if (!active && queue.length === 0) {
+      // The quota panel's live dot rides on this poll — it is the only one that
+      // knows which provider a run holds, and 5s is fast enough to read as
+      // "now". Set before the idle early-return so finishing a run clears it.
+      UI._llmActiveRun = (active && active.model)
+        ? { model: active.model,
+            label: [active.name, active.ticker, fmtElapsed(active.elapsed_sec)]
+                     .filter(Boolean).join(' · ') }
+        : null;
+      UI._paintLlmActive();
+
+      if (!active && queue.length === 0 && !cooldown) {
         pill.classList.add('hidden');
         pill.classList.remove('proto-pill-running');
         return;
       }
       pill.classList.remove('hidden');
+
+      const isZh = (window.UI && UI.currentLang === 'zh') || (document.documentElement.lang || '').startsWith('zh');
+      // Which engine the quota broker leased for THIS run. Without it the pill
+      // said what was running but not who was running it, and that was only
+      // recoverable by opening the scan-log header (2026-08-09 invest failure).
+      // Null in the first seconds — say "still choosing" rather than nothing,
+      // which would read as a broken badge.
+      const assigning = `⏳ ${isZh ? '選派中' : 'assigning'}`;
 
       if (active) {
         const name = active.name || '?';
@@ -1437,9 +1528,19 @@
         lbl.innerHTML = ticker
           ? `<strong>${name}</strong> · <span class="proto-pill-ticker">${ticker}</span>`
           : `<strong>${name}</strong>`;
+        // textContent, not innerHTML — the provider string reaches the DOM as
+        // text and never as markup.
         meta.textContent = `running · ${fmtElapsed(active.elapsed_sec)}` +
+                           ` · ${UI.modelText(active.model) || assigning}` +
                            (queue.length ? ` · queue +${queue.length}` : '');
         pill.classList.add('proto-pill-running');
+      } else if (cooldown) {
+        const nextLabel = cooldown.label || queue[0]?.label || cooldown.name || '';
+        lbl.innerHTML = `<strong>cooldown</strong>` +
+          (nextLabel ? ` · <span class="proto-pill-ticker">${UI.escapeHTML(nextLabel)}</span>` : '');
+        meta.textContent = `⏸ ${isZh ? '冷卻中' : 'cooling down'} · ${fmtElapsed(cooldown.remaining_sec)}` +
+                           ` · ${queue.length} pending`;
+        pill.classList.remove('proto-pill-running');
       } else {
         lbl.innerHTML = `<strong>queue</strong>`;
         meta.textContent = `${queue.length} pending`;
@@ -1451,6 +1552,12 @@
       if (active) {
         const activeLabel = active.label || active.ticker || active.name || '?';
         lines.push(`<div class="proto-pill-row"><span class="proto-pill-row-icon">▶</span><span><strong>${activeLabel}</strong> · ${fmtElapsed(active.elapsed_sec)}</span></div>`);
+        // Expanded view has room for the tier (opus / sonnet / …), which the
+        // collapsed meta line drops. 'cli-default' tiers render as bare names.
+        lines.push(`<div class="proto-pill-row proto-pill-row-engine"><span class="proto-pill-row-icon">⚙</span><span>engine · ${UI.escapeHTML(UI.modelText(active.model, active.model_tier) || assigning)}</span></div>`);
+      }
+      if (!active && cooldown) {
+        lines.push(`<div class="proto-pill-row proto-pill-row-engine"><span class="proto-pill-row-icon">⏸</span><span>${isZh ? '兩輪 invest 之間的冷卻' : 'inter-invest cooldown'} · ${fmtElapsed(cooldown.remaining_sec)}</span></div>`);
       }
       for (const q of queue.slice(0, 5)) {
         const qLabel = q.label || q.params?.ticker || q.name || '?';

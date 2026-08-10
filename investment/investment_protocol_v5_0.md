@@ -22,7 +22,7 @@ Ticker 由 user 指定。**非互動模式**（Dashboard reverse-call via `claud
 2. **Skill execution (NO SIMULATION)**: 凡標 **MUST run** 的 skill 指令必須實際執行 Bash 呼叫並解析 JSON 輸出，**禁止** LLM 估算 / 模擬數值。受規則約束的 skill：
    - `market-sentiment-analyzer`, `us-stock-analysis`, `market-news-analyst`, `technical-analyst`, `short-contrarian-analyst`, `portfolio-risk-manager`, `tail-risk-analyzer`, `fred-macro`
    - 失敗時必須在 final report 標 `skill_execution_failed: true` + stderr，禁止靜默用估算值補上。
-3. **Parallel subagent (Phase 2)**: 5 lane 必須在**單一訊息內**以 5 個 Agent tool_use blocks 平行呼叫（subagent_type: "general-purpose"）。每個 subagent JSON 必須含 `subagent_isolated: true`；缺則 confidence cap 0.6 + `subagent_validation_failed: true`。
+3. **Parallel subagent (Phase 2)**: 5 lane 必須各自在**獨立 context** 執行，且**五個全部開起來之後才等待任何一個**（序列執行會讓後面的 lane 被前面的結論汙染）。Claude 的實現是單一訊息內 5 個 Agent tool_use blocks（`subagent_type: "general-purpose"`）；其他 CLI 對應到自己的隔離 subagent 機制——**契約是上面那兩句，語法不是**（詳見 §PHASE 2 Fan-Out 執行）。每個 subagent JSON 必須含 `subagent_isolated: true`；缺則 confidence cap 0.6 + `subagent_validation_failed: true`。
 4. **Red Team (Phase 2.8)**: 必須以 Agent tool 呼叫 subagent 執行，**禁止 inline 推理代替**。
 5. **MD Report (Phase 5)**: 存 `reports/YYYYMMDD_TICKER.md`。**不得省略**。
 6. **Phase 0 cache**: 三層優先（FRESH = mtime < 3h）— L1 sector_intel → L2 invest_logs phase0 → L3 skill chain。
@@ -336,6 +336,10 @@ DATA SOURCE DISCIPLINE (STRICT):
   ❌ FORBIDDEN web search for: Quote/Valuation scalar (price/peRatio/forwardPE/peg/eps/mktCap/divYield/PB/D-E/FCF/ROE), Market signals (VIX/F&G/RSI/breadth/FTD/top score), Insider/short, Analyst rating/PT, Filings, OHLCV, news headlines (skill 已抓三來源)
   ✅ ALLOWED web search (≤ 1 call, narrative tone only): Reddit/X tone, transcript quotes, supply chain rumors, competitive narrative
   違規處理：subagent 引用 web search 的數字 → PM 自動扣 confidence 0.2；連 3 次 → 該 lane 視為 degraded
+  ⚠️ V4.124.0 現況：上面這條扣分**沒有產生器**（「連 3 次」是跨 session 狀態，從沒有東西保存過）。
+     本版只做 shadow —— `investment/scripts/websearch_shadow.py` 從 run log 讀每個 lane 的實際
+     web call 數（走 `parent_tool_use_id` 歸屬），寫進 ledger，**不扣分、不進決策**。
+     補實作或刪宣稱都會改變行為，需使用者拍板；證據見 docs/plan_invest_stale_stages.md T2。
 
 YOUR LANE RUBRIC:
 <RUBRIC_LANE>
@@ -359,6 +363,22 @@ OUTPUT (strict JSON):
   "skill_execution_failed": "true | false"
 }
 ```
+
+> **V4.125.0 — 本 shape 對 C1 lane_contract（V4.90）與各道閘核對過的結果**（模板寫於 2026-05-04，
+> 契約與閘是 8 月的；以下是核完的四條，不是新規則）：
+>
+> - **`signal` 自 V4.122.0 起是決策軌的輸入，不再只是敘述**：PM 必須把五個 lane 的 `signal`
+>   原樣填進 export 的 `conflict_bias.lane_signals`（validator §16 用它重算 T2/T3，且會擋
+>   「signal 與同 lane score 反向」）。lane 漏填 `signal` = PM 填不出那一格。
+> - **`score` 的 −5..+5 只適用四個 LLM lane**（fundamentals / sentiment / news / technical）。
+>   **Valuation lane 不自填分數**——它 verbatim 抄 `valuation_pack.score`（Phase 1.5 engine
+>   產出，validator 強制兩者相等）。歷史上唯一一筆 −4.0（2026-06-14 RGTI）正是在 pack
+>   成為必填之前自由填出來的，之後不可能再發生。
+> - **`skill_execution_failed` 是 skill script 真的會吐的欄位**（`momentum.py` /
+>   `technical-analyst/analyze.py` 失敗時輸出），不是模板自創；照填。
+> - **不要產 lane_contract 的欄位**（`provenance` / `producer_version` / `input_hash` /
+>   `shadow_score`）：那四個由 Phase 5 Step 1.5 的 `apply_det_shadow.py` 寫入，**LLM 手寫
+>   等於偽造 provenance**（§15 會擋）。subagent 只出上面這個 shape。
 
 ### Lane Rubrics
 
@@ -692,6 +712,19 @@ Red Team subagent 收 `red_team_kill_seed` 當 kill condition 起點。shape 見
 
 ### Fan-Out 執行（PM 層）
 
+**行為契約（不論執行者是哪一家 CLI，這五條都必須成立）**：
+
+1. 五個 lane 各自在**獨立 context** 執行，彼此看不到對方的 score / signal / reasoning。
+2. **先把五個全部開起來，再等待任何一個**——序列執行會讓後面的 lane 有機會被前面的結論
+   汙染，那正是 isolation contract 要防的事。
+3. 每個 lane 只收到自己那一份注入（見 Physical isolation），不得貼整包 factpack。
+4. 失敗處理照下方 Fan-In 表：retry 1 次 → 仍失敗改 PM inline、記進 `degraded_analysts`、
+   **confidence cap 0.6**（V4.122.0 起由 validator §17 強制）。
+5. `phase2_fanout_summary` 如實記錄 mode 與 degraded 名單。
+
+**語法只是契約的一種實現**。以下是 Claude 的寫法；protocol 全文用 Claude 的工具名
+（`Read`/`Write`/`Bash`/`Agent(...)`…）當**抽象操作詞彙**，不是要求執行者必須是 Claude：
+
 ```
 [single assistant turn, 5 tool_use blocks in parallel]
   Agent(description="Fundamentals analyst",  subagent_type="general-purpose", prompt="<fund prompt>")
@@ -701,11 +734,20 @@ Red Team subagent 收 `red_team_kill_seed` 當 kill condition 起點。shape 見
   Agent(description="Valuation specialist",  subagent_type="general-purpose", prompt="<val prompt>")
 ```
 
+> **非 claude provider 的詞彙對照由 runner 注入，不必在這裡各寫一份**：
+> `dashboard_server._adapt_protocol_prompt()`（`run_protocol_manual.py` 也呼叫同一支）
+> 會在 prompt 前面加上「把 Read/Write/Edit/Grep/Bash/WebFetch/WebSearch 對應到你自己的
+> 工具；把每個 `Agent(...)` 需求對應到一個隔離 subagent，要求平行 fan-out 時先把全部
+> agent 開起來再等待」。claude 不加前導（它自動載入 `CLAUDE.md`）。
+> 覆蓋範圍由 `tests/test_protocol_model_routing.py` 逐 provider 斷言。
+> **今天 `protocol_providers.invest` 只開 claude + codex**；gemini 的路由已驗、
+> 5-lane subagent 執行能力**未驗**，沒過不得加進白名單（判準見 `TODO.md`）。
+
 ### Fan-In 驗證 + Inline Fallback
 
 | 情境 | 處理 |
 |---|---|
-| 單一 subagent 失敗 / malformed JSON | retry 1 次；仍失敗 → PM inline 該 lane；`subagent_execution_failed: true`，confidence cap 0.6 |
+| 單一 subagent 失敗 / malformed JSON | retry 1 次；仍失敗 → PM inline 該 lane；**把該 lane 記進 `degraded_analysts`**，confidence cap 0.6 |
 | 2-4 subagent 失敗 | 失敗者 inline；`mode = PARTIAL_FALLBACK` |
 | 5 個全失敗 | `mode = FULL_FALLBACK` + `degraded_mode: true`；Red Team 強制 `STRONG_COUNTER` |
 
@@ -718,6 +760,18 @@ Red Team subagent 收 `red_team_kill_seed` 當 kill condition 起點。shape 見
   "fanout_started_at": "ISO", "fanout_completed_at": "ISO"
 }
 ```
+
+> **V4.122.0 — 上面那個 cap 0.6 現在由 validator §17 強制**（此前從 V4.8 起只是散文，
+> 沒有任何一處驗算）。實作上：`degraded_analysts` 裡每個 lane 在 `calculation_steps` 的
+> `C_eff` 不得 > 0.60（量化三檔 `<0.45→0.35` / `<0.675→0.60` / `else 0.72`，所以
+> 「confidence ≤ 0.6」等價於「不得為 0.72」）。
+>
+> **`degraded_analysts` 每個元素必須以 canonical lane 名開頭**（`fundamentals` / `sentiment` /
+> `news` / `technical` / `valuation`，大小寫不拘，後面可接附註，如
+> `"News (skill fallback to web)"`）。歷史上這個欄位用過 **10 種寫法指涉 5 個 lane**，
+> 沒有任何消費端讀得動它——cap 接不上去的原因就在這裡。`mode` 值域同時收緊（曾出現表外值
+> `FULL`）；≥2 個 degraded 必須是 `PARTIAL_FALLBACK`/`FULL_FALLBACK`，
+> `FULL_FALLBACK` 必須是 5 個且 Red Team 為 `STRONG_COUNTER`。
 
 ---
 
@@ -835,27 +889,52 @@ PM (inline)。**Triggers**:
 ### T5 仲裁 (V5.0)
 - `Valuation.score = -2`: reasoning 加注「估值警告 (溢價 {pct}%)」，不強制 downgrade
 - `Valuation.score = -3` (extreme overvalued): **自動 downgrade BUY → STAGED_ENTRY**；STAGED_ENTRY → HOLD
+
+> ⚠️ **V4.122.0 現況揭露 — 上面這條降階今天沒有產生器**。`decision_engine.py` 全檔沒有任何
+> T5 邏輯（valuation 只以 lane score 進 Step 1 加權），§13 的 band 可達集合也沒有 T5 的路徑
+> ——照這條手動降階反而可能被 validator 判成偏離 band。實據：2026-08-09 NOW，valuation −3、
+> final `STAGED_ENTRY`、無 BIPOLAR/cap/probe，rc=0 過關。形狀與 V4.112 B2 刪掉的 Burry
+> ×0.7/×1.15 完全相同（有文件、無實作、歷史上沒有一筆倉位反映過它）。
+> **補實作 = 今天才開始改變決策數學，需使用者拍板**；在那之前 §16 只記錄不強制，
+> 「該降而沒降」留 warning。選項與證據見 `docs/plan_invest_stale_stages.md` T7。
 - **V5.1 MHP 強化（reasoning-only，不改決策數學；V3.45.3 起 `mhp_signal` 由 Phase 2.4 engine 產出，T5 當下直接可用）**：
   - `wait_for_pullback`（短期帶下界 > 長期合理價）→ T5 reasoning 追加「短期超漲 vs 長期偏貴 (band_lower ${bl} > FV ${fv})，建議等回檔」
   - `momentum_not_value`（mid_target > 現價 > 長期合理價）→ 對齊既有 `hot_zone_probe` 語意（動能交易非價值持有）
 
+### 輸出（V4.122.0 起**必須**進 export 的 `trades_this_session[0].conflict_bias`）
+
 ```json
 {
-  "phase": "2.5",
+  "schema": "conflict_bias.v1",
+  "tentative_decision": "BUY | STAGED_ENTRY | HOLD | STAGED_EXIT | SELL",
+  "lane_signals": {
+    "fundamentals": "BUY | HOLD | SELL | null", "sentiment": "…", "news": "…",
+    "technical": "…", "valuation": "…"
+  },
   "triggers_fired": ["T1", "T4", "T5"],
   "conflict_summary": "one sentence per trigger",
-  "t4_detail": { /* burry_score, resolution, justification, recheck_date */ },
-  "t5_detail": {
-    "valuation_score": "float",
-    "weighted_fair_value": "float",
-    "vs_current_pct": "float",
-    "downgrade_applied": "bool"
-  },
+  "t4_detail": { /* burry_score, resolution, override_justification, override_recheck_date */ },
+  "t5_detail": { /* valuation_score, weighted_fair_value, vs_current_pct, downgrade_applied */ },
   "proceed_to_phase3": "bool"
 }
 ```
 
 `proceed_to_phase3 = false` → 跳 Phase 5 輸出 `CANCEL`。
+
+**這塊過去只活在 turn 裡**：protocol 從 V5.0 就要求產它，但 export schema 沒有欄位接住，
+189 筆歷史 entry 一筆紀錄都沒有——T1–T5 有沒有觸發、觸發了怎麼裁，事後完全不可考。
+V4.122.0 起由 **validator §16 重算**應觸發集合再與 `triggers_fired` 比對，**少報／多報一律 rc=1**：
+
+- **五個 lane 全列**在 `lane_signals`，沒跑的填 `null`（省略與「跑了但沒記」事後無法區分）。
+  `lane_signals.valuation` 必須等於 `valuation_lane.signal`；任一 signal 不得與同 lane 的
+  score 反向。
+- `t4_detail` / `t5_detail` **僅在對應 trigger 觸發時為 object，否則必須 `null`**。
+- `t4_detail.resolution = "OVERRIDE_BURRY"` ⟺ export 的 `burry_override_active = true`
+  （雙向鎖；那個布林餵 Phase 4 的 ×0.5，鏈尾受 §14 重算）。
+- 重算所吃的輸入來自 export 自己已受保護的欄位（`lane_scores` / `valuation_lane.score` /
+  `macro_backdrop_score` / `burry_score`），**PM 自陳「沒觸發」不再是免費的**。
+
+完整欄位與驗證規則見 `phase5_export_schema.md` §`conflict_bias`。
 
 ---
 

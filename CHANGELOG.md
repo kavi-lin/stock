@@ -8,6 +8,212 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.125.0] — 2026-08-10 — 共通 subagent 模板對 C1 契約核一次（T2 收尾）
+
+`docs/plan_invest_stale_stages.md` T2 的最後一項。共通 subagent prompt 模板寫於 2026-05-04，
+lane_contract（C1/V4.90）與 §16/§17 是 8 月的——核完四條差異，**全部是文件對齊，零行為變更**。
+
+### Changed
+- **`signal` 自 V4.122.0 起是決策軌輸入，模板沒說**。§16 用五個 lane 的 signal 重算 T2/T3，
+  且會擋「signal 與同 lane score 反向」。模板補上：PM 必須把它原樣填進
+  `conflict_bias.lane_signals`；lane 漏填 = PM 填不出那一格。
+- **`score` 的 −5..+5 只適用四個 LLM lane**。Valuation 不自填，verbatim 抄
+  `valuation_pack.score`。歷史唯一超界的 −4.0（2026-06-14 RGTI）**沒有 `valuation_pack`**，
+  是 pack 成為必填前的自由填寫；validator 現在強制兩者相等，不可能再發生。
+- **Fan-In 表改指向真實欄位**：表上寫的 `subagent_execution_failed` **沒有產生器也沒有消費端**
+  ——189 筆 export 零出現，全 repo 只有它自己與一份 4 月報告提過。實際被持久化、且 V4.123.0
+  §17 開始驗的是 `degraded_analysts`。純事實更正，不改行為。
+  （對照：`skill_execution_failed` **是真的**——`momentum.py:792` 與
+  `technical-analyst/analyze.py:216` 失敗時真的會吐它。兩者是不同概念，不合併。）
+- 模板新增一條負向規範：subagent **不得**產 `provenance` / `producer_version` / `input_hash` /
+  `shadow_score`——那四個是 Phase 5 Step 1.5 `apply_det_shadow.py` 的，LLM 手寫等於偽造
+  provenance（§15 會擋）。
+
+## [4.124.0] — 2026-08-10 — web-search 額度改走 shadow ledger；203 支歷史 log 直接給出拍板答案
+
+`docs/plan_invest_stale_stages.md` T2 的最後一項。protocol 共通 subagent 模板寫著
+「✅ ALLOWED web search（≤ 1 call）；違規 → 扣 confidence 0.2，連 3 次 → lane degraded」。
+**這條零實作**——「連 3 次」是跨 session 狀態，從沒有東西保存過。補實作與刪宣稱都會改變行為、
+都需拍板，所以走第三條路：**只記錄，不扣分**（同 V4.122.0 `conflict_bias` 的套路）。
+
+### Added
+- **`investment/scripts/websearch_shadow.py`** — 從 **run log** 讀每個 lane 的實際 web call 數，
+  寫 `investment/invest_logs/websearch_shadow.jsonl`。**探索層**：validator 不讀它，
+  不進 buy_threshold / position_size / verdict。
+  - 證據取自 log 而非 PM 自陳：**違規的 session 正是最不會自我回報的那個**。
+  - Claude 的 stream-json 用 `parent_tool_use_id` 把工具呼叫掛回 spawn 它的 `Agent`，
+    所以 web call **精確歸屬到 lane**（Red Team 之類的非 lane subagent 另計）。
+  - **codex 的 JSONL 沒有任何 web 工具事件型別** → 記 `observable: false` 而不是
+    `web_calls: 0`。看不到 ≠ 沒發生，混為一談就是一個新的靜默綠。
+  - 只掃 `tool_use` **呼叫** block，不掃輸出（LESSONS 2026-08-09 的五個偽陽就是掃了輸出）。
+  - `--backfill` / `--report` / `--log <path>` 三種模式。
+- 測試 `test_websearch_shadow.py`，4 個種回 bug 全紅（額度放寬／歸屬改成猜第一個 Agent／
+  codex 標成可觀測／自己複製一份 lane 前綴表）。**最重要的案例用真實 log**
+  （2026-04-18 MSFT，Agent×6 + WebSearch×6 + WebFetch×2）——合成 fixture 只能證明
+  「照我寫的邏輯跑得通」，證明不了它對得上真實世界。
+
+### 這條規則的實際狀況（回填 203 支 log 的結果）
+
+| 月份 | 可觀測 run | 超額 run | 超額率 | 總 web call |
+|---|---|---|---|---|
+| 2026-04 | 83 | 55 | **66%** | 281 |
+| 2026-05 | 54 | 0 | 0% | 11 |
+| 2026-06 | 35 | 2 | 6% | 13 |
+| 2026-07 | 5 | 0 | 0% | 0 |
+| 2026-08 | 6 | 0 | 0% | 2 |
+
+lane 分布：Sentiment 52 次超額 / News 35 / Fundamentals 6 / Technical 與 Valuation 幾乎零。
+**超額全部集中在 4 月；5 月起連續 100 場、三個多月維持合規，而且從來沒有任何機制在執行它。**
+
+**不宣稱因果**：v4_8（4 月當時）與 v5.0 都有「≤ 1 次」額度，所以不是拿新規則量舊行為；
+但 V5.0 上線同日改了很多東西（5 lane 改制、bundle/factpack 成熟），ledger 說不出是哪一項。
+
+### 因此建議改變（原本傾向刪宣稱）
+原判斷是「傾向照 V4.112 B2 先例刪宣稱」。看到資料後改為**三者皆不做**：補產生器等於為一個
+近 100 場沒發生過的情況去建跨 session 計數器；刪宣稱有風險，因為不知道現在的合規靠什麼維持，
+而 prompt 裡那段文字是候選之一。**保留文字、讓 shadow ledger 繼續看。** 待使用者拍板。
+
+## [4.123.0] — 2026-08-10 — Phase 2 fan-in 的 confidence cap 從散文變成閘；fan-out 契約與語法分離
+
+延續 V4.122.0 的冷區盤點（`docs/plan_invest_stale_stages.md`）。Phase 2 協作層那三段裡，
+共通 prompt 模板與 Fan-Out/Fan-In **自 2026-05-04 V5.0 上線後 0% 改動**。
+
+### Added
+- **Validator §17 — Phase 2 fan-in 紀律**（`validate_session_export.py`）。protocol 自 V4.8
+  就寫著「subagent 失敗 → PM inline 該 lane，**confidence cap 0.6**」，validator 從來沒有
+  任何一處驗算它。現在：
+  - `degraded_analysts` 裡每個 lane 在 `calculation_steps` 的 `C_eff` 不得 > 0.60。
+    `c_eff()` 量化成三檔（`<0.45→0.35` / `<0.675→0.60` / `else 0.72`），所以
+    「confidence ≤ 0.6」等價於「不得為 0.72」，**零偽陽**。C_eff 取自 step 字串，
+    受 §13 重算與 §5l engine parity 保護 —— 錨在偽造者改不動的東西上。
+  - `FULL_FALLBACK` ⟹ 5 個 degraded 且 `red_team_verdict == "STRONG_COUNTER"`；
+    ≥2 個 degraded ⟹ mode 必須是 `PARTIAL_FALLBACK`/`FULL_FALLBACK`。
+  - **恰好 1 個 degraded 只出 warning**：protocol Fan-In 表沒有定義單一失敗時的 mode，
+    把沒定義過的話變成 rc=1 是單方面收緊（同 §16 對 ANTI_BIAS 的處理）。
+- 測試 6 個種回 bug 全紅（拆 main() 呼叫／cap 門檻放寬到 0.80／名稱比對改成完全相等／
+  拿掉 FULL_FALLBACK⟹STRONG_COUNTER／拿掉 mode 值域／截止日失效回頭紅舊 entry）。
+
+### Fixed
+- **`degraded_analysts` 過去不可機器讀**：188 筆 export 用過 **10 種寫法指涉 5 個 lane**
+  （`News` / `News (skill fallback to web)` / `Valuation` / `Valuation_Specialist` /
+  `Valuation_Specialist_low_anchor_count_3of6` …），`phase2_fanout_mode` 還出現過表外值
+  `FULL`。**cap 接不上去的原因就在這裡** —— 欄位存在不等於欄位可用。現在要求每個元素以
+  canonical lane 名開頭（前綴比對，附註照留，因為附註帶著真資訊）；值域同時收緊。
+  名稱與 mode 值域對 `export_date >= 2026-08-10` 為 error，之前只 warning（舊寫法是既成事實）。
+
+### Changed
+- **protocol §PHASE 2 Fan-Out 把行為契約與 Claude 語法分開**：先列五條「不論執行者是哪一家
+  CLI 都必須成立」的契約（獨立 context、先全開再等待、只注入自己那份、失敗處理、如實記錄），
+  再說明 Claude 語法只是其中一種實現、全文的工具名是**抽象操作詞彙**。
+  並指出非 claude provider 的詞彙對照由 `_adapt_protocol_prompt()` 注入（`run_protocol_manual.py`
+  呼叫同一支，無第二份定義），覆蓋由 `tests/test_protocol_model_routing.py` 逐 provider 斷言。
+
+### 更正一項先前的盤點結論
+`plan_invest_stale_stages.md` 原本把 T3 寫成「protocol 是 Claude-only 語法、需要補各 CLI 對照表」。
+實際查證後：**翻譯層早就存在且有測試**（V4.114.0 的 preamble），缺的只是 protocol 文件自己
+沒說那些工具名是抽象的。缺口比原本記載的窄，plan 檔已改。
+
+### 證據基礎（要知道它很薄）
+188 筆裡 `degraded_analysts` 非空**且**有 `calculation_steps` 的只有 **1 筆**
+（2026-08-09 PLTR，Technical 降級 → C_eff 0.60，**合規**，codex 跑的）。其餘 15 筆降級場次
+都早於 V4.80.0，那時 `calculation_steps` 還不存在。這道 cap 不是「歷史上都合規」，
+而是**從來沒有機會被檢查**。
+
+## [4.122.1] — 2026-08-10 — LLM 額度卡：route 候選 chip 換成「正在用」燈號
+
+### Changed
+- `Dashboard/utils.js` 的 provider row 移除 route chips（`一般` / `protocol 候選`）。那是 standing fact，看一次就夠，卻常駐佔著每一列。完整 route 清單仍在 hover card。
+- 同一位置改放 live dot：protocol run 進行中時，`active.model` 對應的那一列亮脈動綠點，hover 顯示 `invest · META · 5m 22s`。由 proto pill 既有的 5 秒 `/api/protocol-queue` 輪詢驅動（`UI._llmActiveRun` + `UI._paintLlmActive()`），quota render 後也重畫一次，避免 30 秒刷新時燈短暫熄掉。
+
+### Why
+- 額度卡被讀的時機是「我現在能不能派工」，而 route 候選回答不了這題；「誰正在花這家的額度」才可以。broker 只報 quota 不報 lease，所以 in-flight 歸屬唯一來源是 protocol 層。
+
+### 已知範圍限制（寫在 tooltip 與註解裡）
+- 燈只涵蓋本 server 派出的 protocol run（invest / news / sector / earnings）。Break News daemon、Nexus gap-fill、intraday narration 各自呼叫模型，不經 `/api/protocol-queue`。**燈是暗的 = 沒有 protocol run 佔用這家，不等於沒有任何 model 在被使用。** 要擴大涵蓋需要一個目前不存在的 in-flight registry；用窄資料宣稱寬語意就是面板開始說謊的起點。
+
+## [4.122.0] — 2026-08-10 — Phase 2.5 從「只活在 turn 裡」變成可稽核：validator 重算 T1–T5 應觸發集合
+
+**背景**：對 invest protocol 逐段做 blame 新鮮度盤點（`docs/plan_invest_stale_stages.md`），
+最冷的一段是 Phase 2.5 Conflict & Bias——V5.0 上線至今只改過 1 行，而它會改決策
+（T4 能 CANCEL、T5 宣稱自動降階）。**189 筆歷史 entry 沒有一筆帶過它的輸出**，
+schema 也沒有它的欄位：有沒有觸發、觸發了怎麼裁，事後完全不可考。同一個形狀的洞，
+與 V4.116/117 那五道「規則寫了但沒接線」是同一族。
+
+### Added
+- **`conflict_bias` export block**（`phase5_export_schema.md` 新章節 + protocol §PHASE 2.5 輸出規格）：
+  `schema` / `tentative_decision` / `lane_signals`（五 lane 全列，沒跑填 null）/ `triggers_fired[]` /
+  `conflict_summary` / `t4_detail` / `t5_detail` / `proceed_to_phase3`。
+- **Validator §16**（`validate_session_export.py`）：`evaluate_conflict_triggers()` 依 export
+  自己的欄位**重算** T1–T5 應觸發集合，與宣稱的 `triggers_fired` 比對，**少報／多報一律 rc=1**。
+  PM 自陳「沒觸發」不再是免費的。
+  - 重算的輸入錨在**偽造者改不動的欄位**上：`lane_scores`（§13 算術鏈）、`valuation_lane.score`
+    （pack 一致性硬閘）、`macro_backdrop_score`（§14 macro_cap 重算）、`burry_score`（schema 必填）。
+  - 缺輸入的 trigger 回 `None` 而非 `False`——判 False 等於替「沒觸發」那一側背書，而那正是最需要
+    證據的一側。退出比對並留 warning（同 `valuation_reviewer_gate` 的「讀不到權威輸入時不得猜」）。
+  - 兩個新自陳輸入各補一道錨：`lane_signals.<lane>` 不得與同 lane score 反向；
+    `lane_signals.valuation` 必須等於 `valuation_lane.signal`。沒有錨的重算會退化成自己跟自己比對。
+  - **後果雙向鎖**：`t4_detail.resolution == "OVERRIDE_BURRY"` ⟺ `burry_override_active == true`
+    （該布林餵 Phase 4 的 ×0.5，鏈尾受 §14 重算——本節唯一錨在「已經在改倉位的數字」上的檢查）；
+    `proceed_to_phase3 = false` ⟹ `final_action == "CANCEL"`。
+  - 日期閘 `export_date >= 2026-08-10`（沿用 V4.116.3 前例，不為純紀錄區塊擴 `session_export_version`）。
+    舊 entry 整段跳過、**不回填**：補一塊看起來很完整的觸發紀錄＝在稽核軌跡放假證據（同 §15）。
+- **測試兩層**（`test_validate_session_export_gates.py`）：字面輸入的重算契約（含每條不等式的
+  邊界案例與 5 個 indeterminate 案例）+ 真 validator subprocess 接線案例。**8 個種回 bug 全部驗紅**
+  （拆 main() 呼叫／T1 嚴格不等式放寬／T4 門檻翻向／indeterminate 改猜 False／T5 偷偷變 error／
+  拿掉反向 override 鎖／拿掉 valuation signal 錨／拿掉 CANCEL 檢查）。cutoff 在測試裡寫死、
+  不讀被測常數（MAINTENANCE §2c）。
+
+### Fixed
+- schema doc 的 FULL EXAMPLE 五個 lane 全正（4/3/3/4 + valuation 1.0）卻 `devils_advocate_filed: false`
+  ——「5 lane 同向 → News 追加 devils_advocate」這條在範例自己身上也沒被接住。改為 `true` +
+  `triggers_fired: ["ANTI_BIAS"]`。
+
+### Documented（**兩條規則現況揭露，本版刻意不動，待使用者拍板**）
+- **T5 的「valuation −3 → 自動 downgrade」今天沒有產生器**：`decision_engine.py` 全檔沒有 T5 邏輯
+  （valuation 只以 0.15 權重進 Step 1），§13 的 band 可達集合也沒有 T5 的路徑——照 protocol 手動降階
+  反而可能被判成偏離 band。實據：2026-08-09 NOW，valuation −3、final `STAGED_ENTRY`、
+  無 BIPOLAR/cap/probe、rc=0 過關。歷史上 valuation −3 收在 BUY 側的有 4 筆。**形狀與 V4.112 B2
+  刪掉的 Burry ×0.7/×1.15 完全相同**。§16 只在「該降而沒降」時留 warning，且測試鎖住
+  「不得偷偷變成 error」。選項與前置見 `docs/plan_invest_stale_stages.md` T7a。
+- **Anti-Bias 的「5 lane 同向」沒有定義**（score 正負 vs signal 全等）。本版採 score 正負一致、
+  **只出 warning**——把一句沒定義過的話變成 rc=1 是單方面收緊。見 T7b。
+
+### 多模型
+六道閘全部落在 script/validator 而非 prompt 散文，claude / codex / 未來 gemini 走同一條判準；
+§16 不新增任何跨 session 狀態，因此不需要 provider-keyed ledger。
+
+## [4.121.4] — 2026-08-10 — invest→invest cooldown 從「靜默 sleep」變成「看得見的倒數」
+
+### Fixed
+- `dashboard_server.py` 的 `_analyze_worker` 不再「先 pop 再 sleep 180 秒」。改為 peek 隊首 + `_cooldown_remaining_sec()` 算 deadline + 每 1.5 秒重評，等待期間**項目留在佇列裡**：UI 看得到、使用者可以移除、`enqueue_protocol` 的 `duplicate_pending` 也看得到它。
+- 新增 `_publish_cooldown()` 與 `get_queue_state()` 的 `cooldown` 欄位（`until` / `remaining_sec` / `label` / `name`，倒數每次請求重算）。`Dashboard/utils.js` 的 proto pill 多一種狀態：`⏸ 冷卻中 · 2m 41s · 1 pending`，展開有「兩輪 invest 之間的冷卻」列。舊 server（無此欄位）行為不變。
+- 新增 `tests/test_protocol_cooldown.py`：純函式 6 案 + **走真實 worker loop** 的端到端案（兩筆 invest 進佇列，驗等待期間項目仍在佇列、倒數有發布、重複 enqueue 被 `duplicate_pending` 擋、兩次 dispatch 間距 ≥ cooldown）。拆掉 worker 的 cooldown 分支後三項紅，還原後綠。
+
+### Why
+- 2026-08-10 實例：RKLB 08:31:59 結束 → 08:33:44 排 NVDA → worker 立刻 pop 後睡 180 秒。那三分鐘 `active=null` 且 `queue=[]`，UI 上「已排定」與「閒置」完全同形，使用者判定卡住而重排一次 → 08:36:46 第一筆開跑（gate 因 comps 0 peers 失敗）、08:43:12 重複那筆又跑一次完整分析。去重閘擋不到，因為 cooldown 中的項目**既不在 active 也不在 queue**。屬 MAINTENANCE §2c「靜默 = 通過」家族：沉默的等待與沉默的閒置產生相同觀測。
+
+## [4.121.3] — 2026-08-10 — 全域 protocol pill 顯示 broker 選派的 engine
+
+### Added
+- `Dashboard/utils.js` 的 proto-status-pill（跨頁浮動指示器）meta 行加上 broker 本輪租到的 provider：`running · 8m 07s · 🟢 Codex`；展開的 detail 面板多一列 `engine · 🟣 Claude (opus)`，把 `cli-default` 以外的 tier 一併帶出。`model` 尚未回來的頭幾秒顯示 `⏳ 選派中 / assigning`，而不是留白。
+- `UI.MODEL_META` / `UI.modelMeta()` / `UI.modelBadge()` / `UI.modelText()` 成為 provider 字形與名稱的唯一來源；`Dashboard/style.css` 加 `.proto-pill-row-engine` 縮排樣式。
+
+### Changed
+- `Dashboard/analyze-queue.js` 移除自己那份 provider→emoji 表，改呼叫 `UI.modelBadge()`（utils.js 在三個掛載此 widget 的頁面都先載入；用 optional call 讓舊快取 JS 退化成不顯示而非丟例外）。行為不變。
+
+### Why
+- Server 端 V4.114.0 起就在 `/api/protocol-queue` 的 `active` 回 `model` / `model_tier`，但只有 index/momentum/radar 的 queue strip 讀它。使用者最常盯的那顆浮動 pill 只說「invest · RKLB running」，不說是誰在跑——而 provider 是 broker 每輪重選的、彼此不可互換（2026-08-09 invest 事故正是走到非預期 provider，當時只能開 scan log header 才看得出來）。純前端接線，沒動 server。
+
+## [4.121.2] — 2026-08-09 — Break News 恢復 materiality gate 與安靜輪補位
+
+### Fixed
+- `scripts/break_news/poller.py` 不再用漲跌字眼的 `shallow_score` 判斷一般 RSS 是否值得辯論，改接既有 `materiality_score`、有效可信度、內容類型與精確 binary event；中性措辭的重要事件可入場，listicle 不再靠 HIGH provider 升級。
+- 保留每小時 slot pacing 與 30 分鐘 fresh-first 防線；當一輪沒有 fresh 合格新聞且仍有額度時，從最近六小時 raw pool 重評，僅允許 materiality ≥3.5 且有效可信度 HIGH 的最高分一則補位。
+- 新增完整 `run_once()` 入口測試，鎖定 materiality 入場、listicle 拒絕、fresh 優先、補位最多一則、最高分排序與 hourly capacity 仍為硬上限。
+
+### Why
+- v3.21.0 的 freshness guard 防止重啟後爆量是正確的，但同時截斷安靜輪的候選池；舊 gate 又把 Apple/CXMT、國防擴產等中性標題判成 0 分，造成 daemon 活著卻長時間沒有辯論。
+
 ## [4.121.1] — 2026-08-09 — Nexus Claude gap-fill 改為單輪 text-only，移除 agentic timeout 根因
 
 ### Fixed

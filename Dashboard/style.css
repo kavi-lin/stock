@@ -685,18 +685,26 @@ aside#sidebar { display: flex; flex-direction: column; }
   border-top: 1px solid color-mix(in srgb, var(--text-muted) 16%, transparent);
   opacity: 0.85;
 }
-.sidebar-llm-tags { display: flex; flex-wrap: wrap; gap: 3px; }
-.sidebar-llm-tag {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 7px; font-weight: 800; letter-spacing: 0.03em;
-  padding: 1px 4px; border-radius: 3px;
-  color: var(--llm-accent, #10b981);
-  background: color-mix(in srgb, var(--llm-accent, #10b981) 14%, transparent);
-  border: 1px solid color-mix(in srgb, var(--llm-accent, #10b981) 30%, transparent);
+/* Live-run dot (V4.122.1) — replaces the route chips that used to sit under
+   each bar. Pulses only while a protocol run holds this provider; hidden
+   otherwise, so the row is visually identical to before when nothing runs.
+   Green regardless of the row's quota accent: this reports work in flight, not
+   quota health, and a yellow "cooldown" row can still be the one running. */
+.sidebar-llm-live {
+  flex-shrink: 0;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 0 0 color-mix(in srgb, #10b981 60%, transparent);
+  animation: sidebar-llm-live-pulse 1.8s ease-in-out infinite;
+  align-self: center;
 }
-.sidebar-llm-tag-idle {
-  color: var(--text-muted); background: transparent;
-  border-color: color-mix(in srgb, var(--text-muted) 25%, transparent);
+.sidebar-llm-live[hidden] { display: none; }
+@keyframes sidebar-llm-live-pulse {
+  0%, 100% { box-shadow: 0 0 0 0   color-mix(in srgb, #10b981 55%, transparent); opacity: 1; }
+  50%      { box-shadow: 0 0 0 3px color-mix(in srgb, #10b981 0%,  transparent); opacity: 0.55; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-llm-live { animation: none; }
 }
 
 /* Provider states — a green bar on a provider the broker will not use is the
@@ -2683,6 +2691,13 @@ body.cal-detail-locked {
     letter-spacing: 0.02em;
 }
 .proto-pill-row-icon { font-size: 11px; flex-shrink: 0; }
+/* Engine attribution reads as a sub-line of the active row above it, not as a
+   second queue item — indented and muted so the ▶/⏳ column stays scannable. */
+.proto-pill-row-engine {
+    margin-left: 14px;
+    font-size: 9.5px;
+    color: var(--text-muted);
+}
 .proto-pill-row-more {
     font-size: 9.5px;
     color: var(--text-muted);

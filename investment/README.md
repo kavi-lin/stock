@@ -48,7 +48,7 @@ Phase 0 → Phase 1 → Phase 2 FAN-OUT → Phase 2.5 → Phase 2.8 → Phase 3 
 - 禁止傳入：其他 analyst 輸出、historical_bias、active_weights。
 - 每個輸出必須含 `subagent_isolated: true` sentinel，PM 驗證後才進入 Phase 2.5。
 - Burry 仍是 inline skill call（deterministic output 不受 anchoring 影響）。
-- Fallback：單一 subagent 失敗 → retry 1 次 → inline fallback（confidence cap 0.6）；4 全失敗 → `FULL_FALLBACK` + 強制 STRONG_COUNTER + 禁止 BUY/STAGED_ENTRY。
+- Fallback：單一 subagent 失敗 → retry 1 次 → inline fallback（confidence cap 0.6）；**2-4 失敗 → `PARTIAL_FALLBACK`；5 個全失敗 → `FULL_FALLBACK`** + 強制 STRONG_COUNTER + 禁止 BUY/STAGED_ENTRY。（V4.122.0 殘留掃描更正：此處原寫「4 全失敗」，是 V4.6 四 lane 時代的數字；V5.0 起是 5 lane，validator §17 依 5 強制。）
 
 ### 決策公式（V4.8 沿用 V4.7）
 
@@ -149,6 +149,10 @@ Contrarian Analyst 不納入 FinalScore 加權，只透過 Phase 2.5 T4 觸發 v
   1. Phase 4 倉位 × 0.5
   2. 必填 `override_justification`（≥ 20 字具體凌駕理由，不可泛泛而談）
   3. `override_recheck_date` = 交易日 + 5 個交易日，到期強制複審
+- **V4.122.0 起三項成本由 validator §16 強制**：整個 T4 裁決寫進 export 的
+  `conflict_bias.t4_detail`，且 `resolution == "OVERRIDE_BURRY"` ⟺ `burry_override_active == true`
+  雙向鎖（倉位被 ×0.5 卻沒有裁決紀錄，或有裁決卻沒有 ×0.5，都是 rc=1）。
+  在那之前這三項只是散文，沒有任何東西驗算。
 
 ---
 
@@ -267,7 +271,7 @@ reports/
 - **V4.8-D** Phase 2 四個 analyst（Fundamentals / Sentiment / News / Technical）改為 **4 個 Agent subagent 平行呼叫**（同一訊息內的 4 個 tool_use block）；Burry 保留 inline（skill 已 deterministic）
 - **+ Isolation contract**：每個 subagent 禁看其他 analyst 輸出、PM historical_bias、active_weights
 - **+ Sentinel 驗證**：`subagent_isolated: true` 必填，PM 驗證後才進 Phase 2.5
-- **+ Fallback 階梯**：單一失敗 retry → inline（cap 0.6）；2-3 失敗 → PARTIAL_FALLBACK；全失敗 → FULL_FALLBACK + 強制 STRONG_COUNTER + 禁 BUY/STAGED_ENTRY
+- **+ Fallback 階梯**：單一失敗 retry → inline（cap 0.6）；2-4 失敗 → PARTIAL_FALLBACK；5 個全失敗 → FULL_FALLBACK + 強制 STRONG_COUNTER + 禁 BUY/STAGED_ENTRY（原寫「2-3 / 全失敗」是四 lane 時代，V4.122.0 更正）
 - **+ Phase 5 Schema**：`session_export_version` 升至 `V4.8`，新增 `phase2_fanout_summary` + `phase2_fanout_mode` + `degraded_analysts`
 - **+ Phase 5 Step 3 成本優化（2026-04-18）**：MD 報告撰寫委派 Sonnet 4.6 subagent（純格式化，禁改任何決策數值），每次分析節省約 $0.4-0.7。fallback：subagent 偏離 constraints 或失敗 → PM inline 寫
 

@@ -26,7 +26,9 @@ sys.path.insert(0, str(ROOT))
 from news.fetch_news_rss import FEEDS, fetch_feed, headline_fingerprint  # noqa: E402
 from news.source_policy import infer_source_kind, source_priority  # noqa: E402
 from news.scripts.stage1_triage import (  # noqa: E402
-    classify_news_type, calc_shallow_score, gen_4view_snaps, BINARY_KEYS,
+    classify_news_type, calc_shallow_score, gen_4view_snaps,
+    calc_materiality_score, classify_content_genre, detect_binary_event,
+    effective_credibility,
 )
 from scripts.break_news import store, cluster  # noqa: E402
 from scripts.break_news.llm_drivers import break_news_pair  # noqa: E402
@@ -66,6 +68,8 @@ SENTIMENT_DEBATE_MIN_SCORE = float(os.environ.get("BREAK_NEWS_SENTIMENT_MIN_SCOR
 HOURLY_CAP = max(1, int(os.environ.get("BREAK_NEWS_HOURLY_CAP", "25")))
 SLOT_MINUTES = 60.0 / HOURLY_CAP
 BACKFILL_MINUTES = max(1, int(os.environ.get("BREAK_NEWS_BACKFILL_MINUTES", "30")))
+MATERIALITY_MIN = float(os.environ.get("BREAK_NEWS_MATERIALITY_MIN", "2.5"))
+POOL_MATERIALITY_MIN = float(os.environ.get("BREAK_NEWS_POOL_MATERIALITY_MIN", "3.5"))
 SESSION_TZ = ZoneInfo("America/New_York")
 # Mirrors debater.PENDING_MAX_AGE_HOURS (same env var) so the backlog count
 # below only reflects items debater.scan_pending() will actually pick up.
@@ -314,13 +318,11 @@ def _auto_budget_limit(now_utc: datetime | None = None, today_count: int = 0) ->
     }
 
 
-def gate(score: float, credibility: str, binary: bool) -> tuple[bool, str | None]:
+def gate(materiality: float, binary: bool) -> tuple[bool, str | None]:
     if binary:
         return True, "binary"
-    if abs(score) >= GATE_MIN_SCORE:
-        return True, "score"
-    if credibility == "HIGH" and abs(score) >= 1.0:
-        return True, "hi_cred"
+    if materiality >= MATERIALITY_MIN:
+        return True, "materiality"
     return False, None
 
 
@@ -336,12 +338,14 @@ def social_gate(score: float, binary: bool) -> tuple[bool, str | None]:
 
 def _candidate_priority(c: dict) -> tuple:
     """Higher tuple wins. Spend LLM budget on high-impact fresh items first."""
+    materiality = float(c.get("materiality_score") or 0.0)
     score = abs(float(c.get("score") or 0.0))
     cred_rank = {"HIGH": 2, "MEDIUM": 1, "LOW": 0}.get(
         str(c.get("credibility") or "").upper(), 0)
     dt = c.get("published_dt")
     ts = dt.astimezone(timezone.utc).timestamp() if dt else 0.0
     return (
+        materiality,
         score,
         1 if c.get("binary") else 0,
         cred_rank,
@@ -349,6 +353,102 @@ def _candidate_priority(c: dict) -> tuple:
         1 if c.get("is_futu") else 0,
         ts,
     )
+
+
+def _score_materiality(raw: dict, headline: str, summary: str,
+                       news_type: str, shallow_score: float) -> tuple[float, str, str]:
+    """Return materiality plus the credibility/genre inputs used to derive it."""
+    item = {
+        "source": raw.get("source"),
+        "source_credibility": raw.get("source_credibility") or raw.get("credibility") or "MEDIUM",
+        "source_kind": raw.get("source_kind") or infer_source_kind(raw.get("source", "")),
+    }
+    cred_eff = effective_credibility(item, headline, summary)
+    genre = classify_content_genre(item, headline, summary)
+    materiality = calc_materiality_score(
+        item, headline, summary, news_type, shallow_score, cred_eff, genre,
+    )
+    return materiality, cred_eff, genre
+
+
+def _pool_candidate(entry: dict, seen: dict, started: datetime,
+                    window_hours: int) -> dict | None:
+    """Re-score one raw-stream entry for the quiet-cycle fallback pool."""
+    key = entry.get("key")
+    if not key or key in seen or entry.get("news_id"):
+        return None
+    published_dt = _parse_iso_utc(entry.get("published")) or _parse_iso_utc(entry.get("fetched_at"))
+    if published_dt is None:
+        return None
+    age = started - published_dt.astimezone(timezone.utc)
+    if age < timedelta(minutes=BACKFILL_MINUTES) or age > timedelta(hours=window_hours):
+        return None
+
+    headline = entry.get("headline") or ""
+    summary = entry.get("raw_summary") or ""
+    if not headline:
+        return None
+    news_type = classify_news_type(headline, summary)
+    score = float(calc_shallow_score(headline, summary, news_type))
+    materiality, cred_eff, genre = _score_materiality(
+        entry, headline, summary, news_type, score,
+    )
+    binary = detect_binary_event(headline, summary)
+    # Pool items are no longer breaking news, so require both a stronger score
+    # and effective HIGH credibility. This prevents idle quota from promoting
+    # evergreen advice/listicles that happen to mention the Fed or earnings.
+    if materiality < POOL_MATERIALITY_MIN or cred_eff != "HIGH":
+        return None
+    if entry.get("is_social"):
+        passed, _ = social_gate(score, binary)
+        if not passed:
+            return None
+
+    reason = "pool_binary" if binary else "pool_materiality"
+    bull_case, bear_case, sector_view, macro_view = gen_4view_snaps(headline, news_type)
+    triage = {
+        "news_type": news_type,
+        "shallow_score": score,
+        "materiality_score": materiality,
+        "effective_credibility": cred_eff,
+        "content_genre": genre,
+        "bull_case": entry.get("bull_case") or bull_case,
+        "bear_case": entry.get("bear_case") or bear_case,
+        "sector_view": entry.get("sector_view") or sector_view,
+        "macro_view": entry.get("macro_view") or macro_view,
+        "binary_flag": binary,
+        "advance_reason": reason,
+    }
+    source_kind = entry.get("source_kind") or infer_source_kind(entry.get("source", ""))
+    source = {
+        "name": entry.get("source"),
+        "credibility": entry.get("credibility") or "MEDIUM",
+        "kind": source_kind,
+        "url": entry.get("url"),
+        "feed_fingerprint": entry.get("feed_fingerprint"),
+        "published": entry.get("published"),
+    }
+    raw_entry = {**entry, "gate_passed": True, "gate_reason": reason,
+                 "materiality_score": materiality, "effective_credibility": cred_eff,
+                 "content_genre": genre}
+    return {
+        "key": key,
+        "headline": headline[:200],
+        "raw_summary": summary[:400],
+        "source": source,
+        "triage": triage,
+        "cluster": {"cluster_id": entry.get("cluster_id"), "echo_count": entry.get("echo_count"),
+                    "sources": None, "escalated": False, "prior_summary": None},
+        "raw_entry": raw_entry,
+        "score": score,
+        "materiality_score": materiality,
+        "binary": binary,
+        "credibility": source["credibility"],
+        "published_dt": published_dt,
+        "is_futu": bool(entry.get("is_futu")),
+        "is_social": bool(entry.get("is_social")),
+        "from_pool": True,
+    }
 
 
 def fetch_fresh_items(window_hours: int) -> list[dict]:
@@ -455,6 +555,8 @@ def run_once(window_hours: int = WINDOW_HOURS, dry_run: bool = False) -> dict:
     gated_cost = 0
     gated_echo = 0
     gated_sentiment = 0
+    pool_candidates = 0
+    pool_selected = 0
     escalations = 0
     duplicates = 0
     advanced_ids: list[str] = []
@@ -474,7 +576,10 @@ def run_once(window_hours: int = WINDOW_HOURS, dry_run: bool = False) -> dict:
         news_type = classify_news_type(headline, summary)
         score = float(calc_shallow_score(headline, summary, news_type))
         bull_case, bear_case, sector_view, macro_view = gen_4view_snaps(headline, news_type)
-        binary = any(kw in headline.lower() for kw in BINARY_KEYS)
+        materiality, cred_eff, genre = _score_materiality(
+            raw, headline, summary, news_type, score,
+        )
+        binary = detect_binary_event(headline, summary)
         is_futu = raw.get("source") == "Futu Push"
         is_social = bool(raw.get("_social_source"))
 
@@ -485,6 +590,9 @@ def run_once(window_hours: int = WINDOW_HOURS, dry_run: bool = False) -> dict:
             zh_s = raw.get("_zh_score")
             if zh_s is not None:
                 score = float(zh_s)
+                materiality, cred_eff, genre = _score_materiality(
+                    raw, headline, summary, news_type, score,
+                )
             binary = binary or bool(raw.get("_zh_binary"))
             # Futu pre-filter already enforced US ticker / no ads / no HK-CN.
             # Trust the upstream filter for gate decision; score is informational.
@@ -492,7 +600,7 @@ def run_once(window_hours: int = WINDOW_HOURS, dry_run: bool = False) -> dict:
         elif is_social:
             passed, reason = social_gate(score, binary)
         else:
-            passed, reason = gate(score, raw.get("source_credibility", "MEDIUM"), binary)
+            passed, reason = gate(materiality, binary)
 
         # ── V6 event clustering (0 LLM) ──────────────────────────────────
         # Every non-dup item joins a rolling event cluster. Echoes of an
@@ -508,7 +616,6 @@ def run_once(window_hours: int = WINDOW_HOURS, dry_run: bool = False) -> dict:
             except Exception as _cl_e:  # clustering must never break the poll
                 sys.stderr.write(f"[poller] cluster assign failed: {_cl_e}\n")
 
-        cred_eff = raw.get("source_credibility", "MEDIUM")
         if (passed and news_type == "sentiment" and not binary
                 and cred_eff != "HIGH"
                 and abs(score) < SENTIMENT_DEBATE_MIN_SCORE):
@@ -529,6 +636,9 @@ def run_once(window_hours: int = WINDOW_HOURS, dry_run: bool = False) -> dict:
         triage = {
             "news_type": news_type,
             "shallow_score": score,
+            "materiality_score": materiality,
+            "effective_credibility": cred_eff,
+            "content_genre": genre,
             "bull_case": bull_case,
             "bear_case": bear_case,
             "sector_view": sector_view,
@@ -560,6 +670,9 @@ def run_once(window_hours: int = WINDOW_HOURS, dry_run: bool = False) -> dict:
             "fetched_at": store._utc_iso(),
             "news_type": news_type,
             "shallow_score": score,
+            "materiality_score": materiality,
+            "effective_credibility": cred_eff,
+            "content_genre": genre,
             "binary_flag": binary,
             "bull_case": bull_case,
             "bear_case": bear_case,
@@ -607,6 +720,7 @@ def run_once(window_hours: int = WINDOW_HOURS, dry_run: bool = False) -> dict:
             "cluster": cluster_block,
             "raw_entry": raw_entry,
             "score": score,
+            "materiality_score": materiality,
             "binary": binary,
             "credibility": raw.get("source_credibility", "MEDIUM"),
             "published_dt": raw.get("_dt"),
@@ -614,21 +728,42 @@ def run_once(window_hours: int = WINDOW_HOURS, dry_run: bool = False) -> dict:
             "is_social": is_social,
         })
 
-    # Backfill freshness gate: only items published within the last
-    # BACKFILL_MINUTES are eligible for auto-debate admission. Older items
-    # remain in the raw stream for manual triggering. Items lacking a
-    # published timestamp pass through (Futu/social without _dt — already
-    # filtered by upstream cutoff).
+    # Fresh items always win. If there is no fresh qualifying event, admit at
+    # most one stronger item from the rolling raw-stream pool. This spends an
+    # otherwise-idle hourly slot without replaying a large stale backlog.
     backfill_cutoff = started - timedelta(minutes=BACKFILL_MINUTES)
     backfill_dropped = 0
     fresh_candidates: list[dict] = []
+    old_candidates: list[dict] = []
     for c in debate_candidates:
         dt = c.get("published_dt")
         if dt is not None and dt.astimezone(timezone.utc) < backfill_cutoff:
             backfill_dropped += 1
+            if (float(c.get("materiality_score") or 0) >= POOL_MATERIALITY_MIN
+                    and c.get("triage", {}).get("effective_credibility") == "HIGH"):
+                c["from_pool"] = True
+                c["triage"]["advance_reason"] = (
+                    "pool_binary" if c.get("binary") else "pool_materiality"
+                )
+                c["raw_entry"]["gate_reason"] = c["triage"]["advance_reason"]
+                old_candidates.append(c)
             continue
         fresh_candidates.append(c)
-    debate_candidates = fresh_candidates
+
+    if fresh_candidates:
+        debate_candidates = fresh_candidates
+    elif cost_guard_remaining > 0:
+        pooled_by_key = {c["key"]: c for c in old_candidates}
+        for entry in store.load_raw_stream():
+            c = _pool_candidate(entry, seen, started, window_hours)
+            if c is not None:
+                pooled_by_key[c["key"]] = c
+        pool_candidates = len(pooled_by_key)
+        ranked_pool = sorted(pooled_by_key.values(), key=_candidate_priority, reverse=True)
+        debate_candidates = ranked_pool[:1]
+        pool_selected = len(debate_candidates)
+    else:
+        debate_candidates = []
 
     debate_candidates.sort(key=_candidate_priority, reverse=True)
 
@@ -659,6 +794,8 @@ def run_once(window_hours: int = WINDOW_HOURS, dry_run: bool = False) -> dict:
             except Exception as _md_e:
                 sys.stderr.write(f"[poller] cluster mark_debated failed: {_md_e}\n")
         c["raw_entry"]["news_id"] = nid
+        if c.get("from_pool"):
+            store.mark_raw_promoted(c["key"], nid)
         advanced_ids.append(nid)
         new_items += 1
         if c["is_futu"]:
@@ -686,6 +823,8 @@ def run_once(window_hours: int = WINDOW_HOURS, dry_run: bool = False) -> dict:
         "items_gated_out": gated_out,
         "items_gated_cost": gated_cost,
         "items_gated_backfill": backfill_dropped,
+        "pool_candidates": pool_candidates,
+        "pool_selected": pool_selected,
         "items_echo_merged": gated_echo,
         "items_sentiment_clustered": gated_sentiment,
         "items_escalated": escalations,

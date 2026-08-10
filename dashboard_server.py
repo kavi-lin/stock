@@ -1438,6 +1438,44 @@ _protocol_queue_lock = threading.Lock()
 _protocol_history = []  # last 10 completions
 _PROTOCOL_HISTORY_MAX = 10
 
+# V4.121.4 — the invest→invest cooldown is now published instead of slept
+# through. The worker used to pop the entry and *then* sleep 180s, so for three
+# minutes the queue was empty and nothing was active: "scheduled" and "idle"
+# rendered identically. On 2026-08-10 that made a user re-queue NVDA, and the
+# duplicate ran a second full analysis after the first one failed. The entry now
+# stays in the queue until dispatch (so enqueue dedup still sees it) and the
+# deadline is exported for the UI.
+_protocol_cooldown = {"until": None, "label": None, "name": None}
+_protocol_cooldown_lock = threading.Lock()
+
+
+def _cooldown_remaining_sec(last_name, last_finished_at, next_name, now=None):
+    """Seconds still owed before dispatching `next_name`; 0 = dispatch now.
+    Only two consecutive invest runs cool down (token rate-limit pressure)."""
+    if last_name != "invest" or next_name != "invest" or last_finished_at is None:
+        return 0
+    try:
+        cooldown = int(os.getenv("INTER_ANALYSIS_COOLDOWN_SEC", "180"))
+    except (TypeError, ValueError):
+        cooldown = 180
+    if cooldown <= 0:
+        return 0
+    elapsed = ((now or datetime.now()) - last_finished_at).total_seconds()
+    return max(0, int(cooldown - elapsed))
+
+
+def _publish_cooldown(remaining_sec=0, entry=None):
+    """Make the wait visible to the UI. remaining_sec<=0 clears it."""
+    with _protocol_cooldown_lock:
+        if remaining_sec <= 0 or not entry:
+            _protocol_cooldown.update({"until": None, "label": None, "name": None})
+        else:
+            _protocol_cooldown.update({
+                "until": (datetime.now() + timedelta(seconds=remaining_sec)).isoformat(timespec="seconds"),
+                "label": entry.get("label"),
+                "name":  entry.get("name"),
+            })
+
 # Backward-compat aliases (existing analyze-queue endpoints + worker name keep working)
 _analyze_queue        = _protocol_queue
 _analyze_queue_lock   = _protocol_queue_lock
@@ -1680,13 +1718,30 @@ def get_queue_state():
     with _protocol_queue_lock:
         queue_snapshot = [dict(q) for q in _protocol_queue]
         history_snapshot = list(_protocol_history)
-    return {"active": active, "queue": queue_snapshot, "recent": history_snapshot}
+    # Recomputed per request rather than served as a stored countdown: a client
+    # polling every 5s would otherwise show a number that only moves when the
+    # worker happens to touch it.
+    with _protocol_cooldown_lock:
+        cd = dict(_protocol_cooldown)
+    cooldown = None
+    if cd.get("until"):
+        try:
+            remaining = int((datetime.fromisoformat(cd["until"]) - datetime.now()).total_seconds())
+        except (TypeError, ValueError):
+            remaining = 0
+        if remaining > 0:
+            cooldown = {"until": cd["until"], "remaining_sec": remaining,
+                        "label": cd.get("label"), "name": cd.get("name")}
+    return {"active": active, "queue": queue_snapshot, "recent": history_snapshot,
+            "cooldown": cooldown}
 
 
 def _analyze_worker():
     """Background loop: pull next entry off _protocol_queue, dispatch via run_protocol().
     3-min cooldown only between two consecutive invest items (token rate-limit pressure)."""
     last_finished_name = None
+    last_finished_at = None
+    cooldown_logged = None
     while True:
         try:
             # Wait until queue has work AND no protocol is running
@@ -1694,9 +1749,29 @@ def _analyze_worker():
                 proto_busy = _protocol_state.get("status") == "running"
             with _protocol_queue_lock:
                 queue_empty = not _protocol_queue
+                next_entry = None if queue_empty else dict(_protocol_queue[0])
             if proto_busy or queue_empty:
+                _publish_cooldown(0)
+                cooldown_logged = None
                 time.sleep(1.5)
                 continue
+
+            # Cooldown only between two consecutive invest runs. Evaluated as a
+            # deadline against a short sleep instead of one long blocking sleep,
+            # so the entry stays in the queue for the whole wait: visible in the
+            # UI, still removable, and still seen by the enqueue dedup check.
+            remaining = _cooldown_remaining_sec(last_finished_name, last_finished_at,
+                                                next_entry.get("name"))
+            if remaining > 0:
+                _publish_cooldown(remaining, next_entry)
+                if cooldown_logged != next_entry.get("id"):
+                    sys.stderr.write(f"[protocol_worker] cooldown {remaining}s before next invest "
+                                     f"({next_entry.get('label')})\n")
+                    cooldown_logged = next_entry.get("id")
+                time.sleep(1.5)
+                continue
+            _publish_cooldown(0)
+            cooldown_logged = None
 
             with _protocol_queue_lock:
                 if not _protocol_queue:
@@ -1706,13 +1781,6 @@ def _analyze_worker():
             name   = entry["name"]
             params = entry.get("params") or {}
             label  = entry.get("label", name)
-
-            # Cooldown only if BOTH last and current are invest
-            if last_finished_name == "invest" and name == "invest":
-                cooldown = int(os.getenv("INTER_ANALYSIS_COOLDOWN_SEC", "180"))
-                if cooldown > 0:
-                    sys.stderr.write(f"[protocol_worker] cooldown {cooldown}s before next invest\n")
-                    time.sleep(cooldown)
 
             job_id, err = run_protocol(name, params)
             if err:
@@ -1730,7 +1798,10 @@ def _analyze_worker():
                         "model_tier": None,
                     })
                     del _protocol_history[_PROTOCOL_HISTORY_MAX:]
+                # Rejected before dispatch — nothing was spent, so nothing to
+                # cool down from.
                 last_finished_name = None
+                last_finished_at   = None
                 continue
             with _protocol_lock:
                 # Always overwrite analyze_ticker — None for ticker-less protocols
@@ -1777,6 +1848,7 @@ def _analyze_worker():
                 del _protocol_history[_PROTOCOL_HISTORY_MAX:]
 
             last_finished_name = name
+            last_finished_at   = datetime.now()
         except Exception as e:
             sys.stderr.write(f"[protocol_worker error] {e}\n")
             time.sleep(3)

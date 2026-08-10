@@ -56,9 +56,15 @@ python3 scripts/sync_agent_context.py --check   # rc=0；STALE 就跑不帶 --ch
 **對本輪改動的關鍵字串／數值／規則名做一次全 repo grep，不得只走實施表清單。**
 
 ```bash
+# 第一條永遠是 sanity check：先證明 pattern 抓得到已知存在的東西，再信任後面的 0 命中
+grep -rn "<本輪一定改到的字串>" --include="*.py" . | wc -l      # 必須 > 0
 # 例：本輪刪了一個 enum 值、改了一個門檻、修了一張乘數表
-grep -rn "EXTREMELY_FRAGILE\|×1\.1\|tail_risk < 40" --include=*.md --include=*.py . | grep -v archive
+grep -rn "EXTREMELY_FRAGILE\|×1\.1\|tail_risk < 40" --include="*.md" --include="*.py" . | grep -v archive
 ```
+
+> `--include` 的值**一定要加引號**。zsh 會把裸的 `*.md` 當 glob 展開，CWD 沒有 `.md` 檔就
+> `no matches found` 並中止整條命令 —— 0 命中，長得跟「已清乾淨」一模一樣（2026-08-10 實錘，
+> 見 LESSONS）。這是 §2c 成員 #5 的變形：不是 pattern 比對失敗，是命令根本沒跑。
 
 理由：實施表是「盤點的人 → 列表的人 → 執行的人」，而這三個角色通常是同一個 session，
 **三道關卡實際上只有一道**。殘留掃描有效正是因為它問的問題不同——不是「我要改哪些檔」
@@ -106,7 +112,7 @@ grep -rn "EXTREMELY_FRAGILE\|×1\.1\|tail_risk < 40" --include=*.md --include=*.
 |---|---|---|
 | `CHANGELOG.md`（>9000 行） | `Read(limit=40)` 看最近 2-3 條即可 | 新條目插在 header 與「目前最新條目」之間：Edit 以現任最新的 `## [x.y.z]` 標題行為錨點，在其前插入 |
 | `SESSION_NOTES.md`（常態 ~100-200 行） | `Read(limit=60)` 看 header + 最近 2 個 Session Note；查舊版本 → Grep 版號於 `archive/session_notes_v*.md`（批次檔以版號範圍命名） | 新 `## 🟢 Session Note (vx.y.z) — 標題` 區塊插在現任最新區塊之前；同時更新 header 的 `Last Updated`；尾部兩個常駐狀態區塊（Momentum Context、Bridge 資料流對照）不是 Session Note，永遠留在原檔 |
-| `TODO.md`（~780 行） | `Read(limit=60)` + 需要找特定項時用 Grep | 勾銷用 Edit 精準替換該行；新項加在對應版本區塊 |
+| `TODO.md`（~900 行；更早的 Done 區塊在 `archive/todo_done.md`） | `Read(limit=60)` + 需要找特定項時用 Grep | 勾銷用 Edit 精準替換該行；新項加在對應版本區塊 |
 
 **輪替門檻**（超過就在收尾時順手做）：
 - `SESSION_NOTES.md`：**批次制（2026-07-03 使用者定案 v2）** — 收尾新增 note 後跑 `python3 scripts/rotate_session_notes.py`：主檔 ≤20 個 no-op；>20 個自動把最舊 10 個切成 `archive/session_notes_v<最舊>_to_v<最新>.md`（批內新在上）。**不要手動搬**，一律走 script
