@@ -44,6 +44,66 @@
       }
       .mood-empty { text-align: center; color: var(--text-muted); font-size: 11px; padding: 18px 10px; }
       .mood-verdict-badge { font-size: 9px; font-weight: 800; padding: 1px 6px; border-radius: 4px; letter-spacing: .05em; }
+      .atmo-panel { padding: 18px; }
+      .atmo-head, .atmo-head-copy, .atmo-risk-head, .atmo-horizon-head, .atmo-detail-summary { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+      .atmo-head-copy { justify-content: flex-start; align-items: flex-start; }
+      .atmo-kicker { color: var(--text-muted); font-size: 9px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+      .atmo-title { color: var(--text-main); font-size: 17px; font-weight: 800; margin-top: 2px; }
+      .atmo-quality { color: var(--text-muted); font: 10px 'JetBrains Mono', monospace; text-align: right; }
+      .atmo-overview { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(240px, .75fr); gap: 12px; margin-top: 16px; }
+      .atmo-distribution, .atmo-top-risk, .atmo-horizon, .atmo-guidance-card { border: 1px solid var(--border); border-radius: 10px; background: color-mix(in srgb, var(--bg-card) 72%, transparent); }
+      .atmo-distribution { padding: 14px; }
+      .atmo-eyebrow { color: var(--text-muted); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; }
+      .atmo-counts { color: var(--text-main); font-size: 13px; font-weight: 700; margin-top: 7px; }
+      .atmo-counts span { margin-right: 10px; white-space: nowrap; }
+      .atmo-counts b { font-family: 'JetBrains Mono', monospace; font-size: 17px; margin-right: 2px; }
+      .atmo-bar { display: flex; height: 10px; gap: 2px; margin-top: 13px; overflow: hidden; border-radius: 999px; background: var(--border); }
+      .atmo-bar-segment { min-width: 4px; transition: width .25s ease; }
+      .atmo-legend { display: flex; flex-wrap: wrap; gap: 8px 13px; margin-top: 9px; color: var(--text-muted); font-size: 10px; }
+      .atmo-legend span, .atmo-dot-label { display: inline-flex; align-items: center; gap: 5px; }
+      .atmo-dot { display: inline-block; width: 8px; height: 8px; flex: 0 0 8px; border-radius: 50%; background: var(--text-muted); }
+      .atmo-top-risk { border-left: 3px solid #ef4444; padding: 13px 14px; }
+      .atmo-risk-head { justify-content: flex-start; color: #ef4444; font-size: 10px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+      .atmo-risk-name { color: var(--text-main); font-size: 14px; font-weight: 800; margin-top: 8px; }
+      .atmo-risk-reason { color: var(--text-muted); font-size: 11px; line-height: 1.5; margin-top: 4px; }
+      .atmo-horizon-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+      .atmo-horizon { padding: 12px; }
+      .atmo-horizon-title { color: var(--text-main); font-size: 12px; font-weight: 800; }
+      .atmo-horizon-sub { color: var(--text-muted); font-size: 10px; }
+      .atmo-horizon-count { color: var(--text-main); font: 700 18px 'JetBrains Mono', monospace; }
+      .atmo-horizon-count small { color: var(--text-muted); font: 400 10px inherit; }
+      .atmo-dots { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+      .atmo-dot-label { color: var(--text-muted); font-size: 10px; }
+      .atmo-dot-label strong { color: var(--text-main); font-weight: 600; }
+      .atmo-section-label { color: var(--text-muted); font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; margin: 17px 0 8px; }
+      .atmo-attention-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+      .atmo-attention-item { border-left: 3px solid var(--text-muted); padding: 9px 11px; background: color-mix(in srgb, var(--bg-card) 70%, transparent); }
+      .atmo-attention-item strong { color: var(--text-main); font-size: 11px; }
+      .atmo-attention-item p { color: var(--text-muted); font-size: 10px; line-height: 1.45; margin: 3px 0 0; }
+      .atmo-attention-value { color: var(--text-main); float: right; font: 700 11px 'JetBrains Mono', monospace; }
+      .atmo-details { border-top: 1px solid var(--border); margin-top: 14px; padding-top: 12px; }
+      .atmo-details summary { cursor: pointer; list-style: none; }
+      .atmo-details summary::-webkit-details-marker { display: none; }
+      .atmo-detail-summary { justify-content: flex-start; color: var(--text-main); font-size: 11px; font-weight: 700; }
+      .atmo-detail-summary::before { content: '＋'; color: var(--text-muted); font-size: 14px; }
+      .atmo-details[open] .atmo-detail-summary::before { content: '−'; }
+      .atmo-indicator-groups { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
+      .atmo-group-title { color: var(--text-muted); font-size: 10px; font-weight: 800; letter-spacing: .06em; margin-bottom: 4px; text-transform: uppercase; }
+      .atmo-indicator-item { display: grid; grid-template-columns: 9px minmax(0, 1fr) auto; gap: 7px; align-items: center; border-bottom: 1px solid var(--border); padding: 7px 0; }
+      .atmo-indicator-name { color: var(--text-main); font-size: 10px; line-height: 1.25; }
+      .atmo-indicator-meta { color: var(--text-muted); font-size: 9px; margin-top: 2px; }
+      .atmo-indicator-value { color: var(--text-main); font: 700 10px 'JetBrains Mono', monospace; text-align: right; white-space: nowrap; }
+      .atmo-guidance-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+      .atmo-guidance-card { display: flex; flex-direction: column; gap: 4px; padding: 10px; font-size: 10px; line-height: 1.45; }
+      .atmo-guidance-card strong { color: var(--text-main); font-size: 10px; }
+      .atmo-guidance-card span { color: var(--text-muted); }
+      .atmo-trigger-strip { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; margin-top: 10px; }
+      .atmo-trigger-item { min-width: 0; border: 1px solid var(--border); border-top: 3px solid var(--text-muted); border-radius: 7px; padding: 8px 7px; }
+      .atmo-trigger-item strong { display: block; color: var(--text-main); font-size: 10px; line-height: 1.25; }
+      .atmo-trigger-state { display: block; color: var(--text-muted); font-size: 9px; line-height: 1.35; margin-top: 5px; }
+      .atmo-trigger-summary { color: var(--text-muted); font-size: 10px; line-height: 1.5; margin-top: 9px; }
+      @media (max-width: 900px) { .atmo-overview { grid-template-columns: 1fr; } .atmo-indicator-groups { grid-template-columns: 1fr 1fr; } .atmo-trigger-strip { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+      @media (max-width: 700px) { .atmo-panel { padding: 14px; } .atmo-head { align-items: flex-start; flex-direction: column; } .atmo-quality { text-align: left; } .atmo-horizon-grid, .atmo-attention-list, .atmo-guidance-grid, .atmo-indicator-groups { grid-template-columns: 1fr; } .atmo-trigger-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
     </style>
 </head>
 <body class="flex min-h-screen transition-all" data-page="mood">
@@ -94,6 +154,40 @@
                         <div id="mood-brief-body"></div>
                     </div>
                 </div>
+            </section>
+
+            <!-- MARKET ATMOSPHERE: conclusion first, details on demand -->
+            <section id="mood-atmosphere" class="glass-card atmo-panel hidden">
+                <div class="atmo-head">
+                    <div class="atmo-head-copy">
+                        <i data-lucide="gauge" class="w-4 h-4 text-amber-500"></i>
+                        <div><div class="atmo-kicker">Market Atmosphere · deterministic</div><div class="atmo-title">市場情緒 · 先看結論</div></div>
+                    </div>
+                    <div id="atmo-quality" class="atmo-quality"></div>
+                </div>
+                <div class="atmo-overview">
+                    <div class="atmo-distribution">
+                        <div class="atmo-eyebrow">目前訊號分布</div>
+                        <div id="atmo-counts" class="atmo-counts"></div>
+                        <div id="atmo-status-bar" class="atmo-bar" role="img" aria-label="市場情緒訊號分布"></div>
+                        <div class="atmo-legend"><span><i class="atmo-dot" style="background:#ef4444"></i>警報</span><span><i class="atmo-dot" style="background:#f59e0b"></i>注意</span><span><i class="atmo-dot" style="background:#22c55e"></i>正常</span><span><i class="atmo-dot" style="background:#71717a"></i>缺資料</span></div>
+                    </div>
+                    <div id="atmo-top-risk" class="atmo-top-risk"></div>
+                </div>
+                <div id="atmo-horizons" class="atmo-horizon-grid"></div>
+                <div class="atmo-section-label">現在真正需要看</div>
+                <div id="atmo-attention-list" class="atmo-attention-list"></div>
+                <details class="atmo-details">
+                    <summary class="atmo-detail-summary">完整指標明細（17 項）</summary>
+                    <div id="atmo-indicator-groups" class="atmo-indicator-groups"></div>
+                </details>
+                <details class="atmo-details">
+                    <summary class="atmo-detail-summary">硬觸發追蹤（7 項）<span id="atmo-trigger-summary-short"></span></summary>
+                    <div id="atmo-trigger-strip" class="atmo-trigger-strip"></div>
+                    <div id="atmo-trigger-summary" class="atmo-trigger-summary"></div>
+                </details>
+                <div class="atmo-section-label">按時間框架的使用方式</div>
+                <div id="atmo-guidance" class="atmo-guidance-grid"></div>
             </section>
 
             <!-- 2. 3-DAY TREND + ANCHORS -->

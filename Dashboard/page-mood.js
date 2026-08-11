@@ -93,6 +93,7 @@ function verdictBadge(v) {
 // ── Page state ───────────────────────────────────────────────────────────────
 const S = {
     data: null,        // data.json (DataStore)
+    marketMood: null,   // direct fetch keeps Step 9.3 newer than the bridge cache
     brief: null,       // /api/break-news/brief?history=1
     trends: null,      // /api/break-news/trends
     feed: null,        // /api/break-news/feed (closed + partial_closed)
@@ -158,7 +159,7 @@ function computeVerdict() {
         comps.brief = Math.max(-1, Math.min(1, ((tally.BULLISH || 0) - (tally.BEARISH || 0)) / n));
     }
     // daily options/vol mood gauge
-    const moodScore = S.data?.market_mood?.mood?.score;
+    const moodScore = (S.marketMood || S.data?.market_mood)?.mood?.score;
     if (moodScore != null) comps.mood = Math.max(-1, Math.min(1, moodScore / 100));
 
     const weights = open ? VERDICT_WEIGHTS_OPEN : VERDICT_WEIGHTS_CLOSED;
@@ -221,7 +222,7 @@ function renderVerdict() {
             <strong style="color:${c};">${val == null ? '—' : signed(val)}</strong>
             <span style="color:var(--text-muted);">×${w.toFixed(2)}</span></span>`);
     }
-    const ms = S.data?.market_mood?.mood;
+    const ms = (S.marketMood || S.data?.market_mood)?.mood;
     if (ms?.score != null) {
         chips.push(`<span class="mood-chip">${esc(t.mood_chip || '情緒分數')}
             <strong style="color:${ms.score >= 20 ? C_BULL : ms.score <= -20 ? C_BEAR : C_NEU};">${ms.score}</strong>
@@ -260,6 +261,118 @@ function renderVerdict() {
 }
 
 // ═════════════════════════ 2. TREND + ANCHORS ═══════════════════════════════
+
+function atmosphereColor(status) {
+    return status === 'red' ? C_BEAR : status === 'yellow' ? '#f59e0b'
+        : status === 'green' ? C_BULL : C_NEU;
+}
+
+function atmosphereStatusLabel(status) {
+    return status === 'red' ? '警報' : status === 'yellow' ? '注意'
+        : status === 'green' ? '正常' : '缺資料';
+}
+
+function atmosphereValue(item) {
+    if (item.display_value && item.display_value !== '—') return item.display_value;
+    if (item.value == null) return '—';
+    return typeof item.value === 'number' ? String(Math.round(item.value * 100) / 100) : String(item.value);
+}
+
+function renderAtmosphere() {
+    const sec = $('mood-atmosphere');
+    const mm = S.marketMood || S.data?.market_mood;
+    const a = mm?.atmosphere;
+    if (!sec || !a?.indicators?.length) { sec?.classList.add('hidden'); return; }
+    sec.classList.remove('hidden');
+
+    const indicators = a.indicators;
+    const quality = a.data_quality || {};
+    const counts = indicators.reduce((acc, item) => {
+        const status = item.status === 'red' || item.status === 'yellow' || item.status === 'green' ? item.status : 'gray';
+        acc[status] += 1;
+        return acc;
+    }, { red: 0, yellow: 0, green: 0, gray: 0 });
+    const total = indicators.length || quality.total || 0;
+
+    $('atmo-counts').innerHTML = [
+        ['red', '警報'], ['yellow', '注意'], ['green', '正常'], ['gray', '缺資料'],
+    ].map(([status, label]) => `<span style="color:${atmosphereColor(status)}"><b>${counts[status]}</b>${label}</span>`).join('');
+    $('atmo-status-bar').innerHTML = ['red', 'yellow', 'green', 'gray'].filter(status => counts[status] > 0).map(status =>
+        `<span class="atmo-bar-segment" style="width:${total ? (counts[status] / total) * 100 : 0}%;background:${atmosphereColor(status)}" title="${counts[status]} 項${atmosphereStatusLabel(status)}"></span>`).join('');
+
+    const top = a.top_attention || {};
+    const topItem = indicators.find(item => item.key === top.key || item.id === top.key || item.name === top.name);
+    const topValue = topItem ? atmosphereValue(topItem) : '';
+    const topColor = atmosphereColor(top.status);
+    $('atmo-top-risk').style.borderLeftColor = topColor;
+    $('atmo-top-risk').innerHTML = `
+        <div class="atmo-risk-head" style="color:${topColor}"><i class="atmo-dot" style="background:${topColor}"></i>優先關注 <span style="margin-left:auto;color:${topColor}">${atmosphereStatusLabel(top.status)}</span></div>
+        <div class="atmo-risk-name">${esc(top.name || '目前沒有優先警報')}${topValue && topValue !== '—' ? `<span class="atmo-attention-value">${esc(topValue)}</span>` : ''}</div>
+        <div class="atmo-risk-reason">${esc(top.reason_zh || '目前沒有紅黃訊號；先觀察訊號是否持續。')}</div>`;
+
+    const byGroup = { short: [], mid: [], long: [] };
+    for (const item of indicators) (byGroup[item.group] || byGroup.mid).push(item);
+    const horizonMeta = {
+        short: ['短期', '天～週'], mid: ['中期', '週～月'], long: ['長期', '月～年'],
+    };
+    $('atmo-horizons').innerHTML = Object.entries(horizonMeta).map(([group, [title, subtitle]]) => {
+        const items = byGroup[group];
+        const warnings = items.filter(x => x.status === 'yellow' || x.status === 'red').length;
+        const missing = items.filter(x => x.status === 'gray' || x.value == null).length;
+        const label = warnings ? `${warnings} 項需注意` : '目前無警報';
+        return `<div class="atmo-horizon">
+            <div class="atmo-horizon-head"><div><div class="atmo-horizon-title">${title}</div><div class="atmo-horizon-sub">${subtitle}</div></div><div class="atmo-horizon-count">${warnings}<small> / ${items.length} 需注意</small></div></div>
+            <div class="atmo-dots">${items.map(item => `<span class="atmo-dot-label" title="${esc(`${atmosphereStatusLabel(item.status)} · ${atmosphereValue(item)} · ${item.threshold || '無閾值'}`)}"><i class="atmo-dot" style="background:${atmosphereColor(item.status)}"></i><strong>${esc(item.name)}</strong></span>`).join('')}</div>
+            <div class="atmo-horizon-sub" style="margin-top:9px;color:${warnings ? '#f59e0b' : 'var(--text-muted)'}">${label}${missing ? ` · ${missing} 項缺資料` : ''}</div>
+        </div>`;
+    }).join('');
+
+    const focus = indicators.filter(item => item.status === 'red' || item.status === 'yellow')
+        .sort((a, b) => (a.status === 'red' ? -1 : 1) - (b.status === 'red' ? -1 : 1));
+    const missingItems = indicators.filter(item => item.status === 'gray' || item.value == null);
+    const attention = focus.slice(0, 4).map(item => {
+        const color = atmosphereColor(item.status);
+        return `<div class="atmo-attention-item" style="border-left-color:${color}">
+            <strong style="color:${color}">${esc(item.name)}</strong><span class="atmo-attention-value">${esc(atmosphereValue(item))}</span>
+            <p>${esc(item.interpretation_zh || item.note_zh || `${atmosphereStatusLabel(item.status)} · 閾值 ${item.threshold || '—'}`)}</p>
+        </div>`;
+    });
+    if (missingItems.length) {
+        attention.push(`<div class="atmo-attention-item" style="border-left-color:${C_NEU}">
+            <strong>資料缺口</strong><span class="atmo-attention-value">${missingItems.length} 項</span>
+            <p>${esc(missingItems.map(item => item.name).join('、'))}；不納入硬觸發計數。</p>
+        </div>`);
+    }
+    $('atmo-attention-list').innerHTML = attention.length ? attention.join('') : `<div class="atmo-attention-item" style="border-left-color:${C_BULL}"><strong style="color:${C_BULL}">目前沒有紅黃訊號</strong><p>所有已取得的指標都在正常區間。</p></div>`;
+
+    $('atmo-indicator-groups').innerHTML = Object.entries(horizonMeta).map(([group, [title, subtitle]]) => `<div>
+        <div class="atmo-group-title">${title} · ${subtitle}</div>
+        ${byGroup[group].map(item => {
+            const color = atmosphereColor(item.status);
+            return `<div class="atmo-indicator-item" title="${esc(item.interpretation_zh || item.note_zh || '')}">
+                <i class="atmo-dot" style="background:${color}"></i>
+                <div><div class="atmo-indicator-name">${esc(item.name)}</div><div class="atmo-indicator-meta">${esc(item.data_date || '—')} · ${esc(item.threshold || '—')} · ${atmosphereStatusLabel(item.status)}</div></div>
+                <div class="atmo-indicator-value">${esc(atmosphereValue(item))}</div>
+            </div>`;
+        }).join('')}
+    </div>`).join('');
+
+    const guidance = a.guidance || {};
+    $('atmo-guidance').innerHTML = [['短期（1–3 個月）', guidance.short], ['中期（3–12 個月）', guidance.mid], ['長期（1–3 年+）', guidance.long]].map(([title, text]) => `<div class="atmo-guidance-card"><strong>${title}</strong><span>${esc(text || '—')}</span></div>`).join('');
+
+    const triggers = a.hard_triggers?.items || [];
+    $('atmo-trigger-strip').innerHTML = triggers.map(item => {
+        const color = atmosphereColor(item.status);
+        return `<div class="atmo-trigger-item" style="border-top-color:${color}" title="${esc(item.threshold || '')}">
+            <strong>${esc(item.label)}</strong><span class="atmo-trigger-state" style="color:${color}">${esc(item.state_zh || atmosphereStatusLabel(item.status))}</span>
+        </div>`;
+    }).join('');
+    const triggerCount = a.hard_triggers?.triggered_count || 0;
+    const triggerTotal = a.hard_triggers?.total || triggers.length || 7;
+    $('atmo-trigger-summary-short').textContent = ` · ${triggerCount}/${triggerTotal} 已觸發`;
+    $('atmo-trigger-summary').textContent = `${triggerCount}/${triggerTotal} 項已觸發；${triggerCount >= 3 ? '達到同時 3+ 項的觀察門檻，仍需人工確認資料品質。' : '尚未達到同時 3+ 項的觀察門檻。'}`;
+    $('atmo-quality').textContent = `${quality.available ?? (total - counts.gray)}/${quality.total ?? total} 已有數值 · ${counts.gray} 項待補`;
+}
 
 function renderTrendExtras() {
     const t = _t();
@@ -615,7 +728,7 @@ function renderSectorRanking() {
 
 function renderTiles() {
     const t = _t();
-    const mm = S.data?.market_mood;
+    const mm = S.marketMood || S.data?.market_mood;
     const sec = $('mood-tiles');
     if (!mm || mm.status !== 'success') { sec.classList.add('hidden'); return; }
     sec.classList.remove('hidden');
@@ -665,6 +778,7 @@ function renderTiles() {
 function renderAll() {
     const t = _t();
     const hasVerdict = renderVerdict();
+    renderAtmosphere();
     renderTrendExtras();
     renderIntraday();
     renderSocial();
@@ -673,7 +787,7 @@ function renderAll() {
     renderSectorRanking();
     renderTiles();
     const noData = $('mood-no-data');
-    if (noData) noData.classList.toggle('hidden', hasVerdict || !!S.data?.market_mood);
+    if (noData) noData.classList.toggle('hidden', hasVerdict || !!(S.marketMood || S.data?.market_mood));
     const disclaimer = $('mood-disclaimer');
     if (disclaimer) disclaimer.textContent = t.disclaimer || '';
     const asof = $('mood-as-of');
@@ -708,6 +822,11 @@ async function loadHeatmap() {
     catch (e) { /* keep last good copy */ }
 }
 
+async function loadMarketMood() {
+    try { S.marketMood = await fetchJson('market_mood.json?t=' + Date.now()); }
+    catch (e) { /* keep bridge copy when the static artifact is unavailable */ }
+}
+
 // heatmap timer runs only while the market is open and the tab is visible
 function scheduleHeatmapPoll() {
     if (_heatmapTimer) { clearInterval(_heatmapTimer); _heatmapTimer = null; }
@@ -726,6 +845,7 @@ async function boot() {
     const dataP = window.DataStore ? DataStore.get() : fetchJson('data.json?t=' + Date.now());
     await Promise.allSettled([
         dataP.then(d => { S.data = d; }),
+        loadMarketMood(),
         loadBnBatch(),
         loadHeatmap(),
     ]);
@@ -760,6 +880,7 @@ function translate() {
 
 function reload() {
     if (window.DataStore) DataStore.refresh?.();
+    loadMarketMood().then(renderAll);
     loadBnBatch().then(renderAll);
     loadHeatmap().then(() => { renderIntraday(); scheduleHeatmapPoll(); });
     if (_trendInst) _trendInst.reload();

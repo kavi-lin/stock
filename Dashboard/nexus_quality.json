@@ -1,31 +1,31 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-09T20:30:50.967871Z",
+  "generated_at": "2026-08-10T20:30:50.106976Z",
   "window_days": 45,
-  "window_start": "2026-06-25",
+  "window_start": "2026-06-26",
   "counts": {
-    "artifacts_eligible": 2003,
-    "artifacts_not_closed": 78,
-    "artifacts_outside_window": 2457,
-    "artifacts_scanned": 4538,
-    "claims_corroborated": 70,
+    "artifacts_eligible": 1967,
+    "artifacts_not_closed": 146,
+    "artifacts_outside_window": 2558,
+    "artifacts_scanned": 4671,
+    "claims_corroborated": 66,
     "claims_provisional": 354,
-    "claims_total": 424,
+    "claims_total": 420,
     "direction_conflicts": 1,
-    "relations_normalized": 780,
-    "relations_not_ticker_structural": 10818,
-    "relations_seen": 11638,
+    "relations_normalized": 758,
+    "relations_not_ticker_structural": 10633,
+    "relations_seen": 11431,
     "relations_without_source_url": 40
   },
   "claims_by_predicate": {
-    "COMPETES_WITH": 275,
-    "CO_DEVELOPS_WITH": 44,
-    "SUPPLIES_TO": 105
+    "COMPETES_WITH": 276,
+    "CO_DEVELOPS_WITH": 41,
+    "SUPPLIES_TO": 103
   },
   "corroborated_by_predicate": {
-    "COMPETES_WITH": 40,
-    "CO_DEVELOPS_WITH": 8,
-    "SUPPLIES_TO": 22
+    "COMPETES_WITH": 39,
+    "CO_DEVELOPS_WITH": 7,
+    "SUPPLIES_TO": 20
   },
   "top_corroborated_claims": [
     {
@@ -37,7 +37,7 @@
       "confidence": 0.8188,
       "source_count": 37,
       "source_domain_count": 8,
-      "last_seen": "2026-08-09"
+      "last_seen": "2026-08-10"
     },
     {
       "claim_id": "claim:3b10813644839e61",
@@ -45,9 +45,9 @@
       "predicate": "SUPPLIES_TO",
       "object": "ticker:NVDA",
       "status": "corroborated",
-      "confidence": 0.8369,
-      "source_count": 35,
-      "source_domain_count": 8,
+      "confidence": 0.8329,
+      "source_count": 29,
+      "source_domain_count": 7,
       "last_seen": "2026-08-07"
     },
     {
@@ -78,8 +78,8 @@
       "predicate": "SUPPLIES_TO",
       "object": "ticker:MSFT",
       "status": "corroborated",
-      "confidence": 0.8576,
-      "source_count": 21,
+      "confidence": 0.8555,
+      "source_count": 20,
       "source_domain_count": 6,
       "last_seen": "2026-08-07"
     },
@@ -205,26 +205,15 @@
       "last_seen": "2026-08-04"
     },
     {
-      "claim_id": "claim:f75be1fbaf7d1ff5",
-      "subject": "ticker:MU",
-      "predicate": "SUPPLIES_TO",
-      "object": "ticker:AAPL",
-      "status": "corroborated",
-      "confidence": 0.875,
-      "source_count": 6,
-      "source_domain_count": 3,
-      "last_seen": "2026-08-01"
-    },
-    {
       "claim_id": "claim:5706a16148f33dde",
       "subject": "ticker:RKLB",
       "predicate": "COMPETES_WITH",
       "object": "ticker:SPCX",
       "status": "corroborated",
-      "confidence": 0.84,
-      "source_count": 6,
+      "confidence": 0.8314,
+      "source_count": 7,
       "source_domain_count": 3,
-      "last_seen": "2026-08-07"
+      "last_seen": "2026-08-10"
     },
     {
       "claim_id": "claim:7f8bb3937bfaaec6",
@@ -238,17 +227,6 @@
       "last_seen": "2026-08-04"
     },
     {
-      "claim_id": "claim:d786d391b1e73b4e",
-      "subject": "ticker:GOOGL",
-      "predicate": "COMPETES_WITH",
-      "object": "ticker:MSFT",
-      "status": "corroborated",
-      "confidence": 0.831,
-      "source_count": 5,
-      "source_domain_count": 3,
-      "last_seen": "2026-07-16"
-    },
-    {
       "claim_id": "claim:a96db1d66df46ec7",
       "subject": "ticker:AMZN",
       "predicate": "COMPETES_WITH",
@@ -260,15 +238,15 @@
       "last_seen": "2026-08-03"
     },
     {
-      "claim_id": "claim:4c6dfef97af41a10",
-      "subject": "ticker:SPCX",
-      "predicate": "CO_DEVELOPS_WITH",
-      "object": "ticker:TSLA",
+      "claim_id": "claim:773d495062a47859",
+      "subject": "ticker:CRWD",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:PANW",
       "status": "corroborated",
-      "confidence": 0.8075,
+      "confidence": 0.8162,
       "source_count": 4,
       "source_domain_count": 3,
-      "last_seen": "2026-08-07"
+      "last_seen": "2026-08-10"
     },
     {
       "claim_id": "claim:18742de98cf7b8d4",
@@ -326,6 +304,17 @@
       "last_seen": "2026-07-07"
     },
     {
+      "claim_id": "claim:4c6dfef97af41a10",
+      "subject": "ticker:SPCX",
+      "predicate": "CO_DEVELOPS_WITH",
+      "object": "ticker:TSLA",
+      "status": "corroborated",
+      "confidence": 0.81,
+      "source_count": 3,
+      "source_domain_count": 3,
+      "last_seen": "2026-08-07"
+    },
+    {
       "claim_id": "claim:9c3d1f6028eb15f6",
       "subject": "ticker:RIVN",
       "predicate": "COMPETES_WITH",
@@ -342,10 +331,21 @@
       "predicate": "SUPPLIES_TO",
       "object": "ticker:AMD",
       "status": "corroborated",
-      "confidence": 0.8425,
+      "confidence": 0.88,
       "source_count": 4,
       "source_domain_count": 2,
-      "last_seen": "2026-08-04"
+      "last_seen": "2026-08-10"
+    },
+    {
+      "claim_id": "claim:d786d391b1e73b4e",
+      "subject": "ticker:GOOGL",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:MSFT",
+      "status": "corroborated",
+      "confidence": 0.8263,
+      "source_count": 4,
+      "source_domain_count": 2,
+      "last_seen": "2026-07-16"
     },
     {
       "claim_id": "claim:010b013ed1dd99e1",
@@ -379,17 +379,6 @@
       "source_count": 3,
       "source_domain_count": 2,
       "last_seen": "2026-07-30"
-    },
-    {
-      "claim_id": "claim:f900aa39e5712d81",
-      "subject": "ticker:MU",
-      "predicate": "COMPETES_WITH",
-      "object": "ticker:WDC",
-      "status": "corroborated",
-      "confidence": 0.8667,
-      "source_count": 3,
-      "source_domain_count": 2,
-      "last_seen": "2026-07-09"
     },
     {
       "claim_id": "claim:5f578e46563c3674",
@@ -467,9 +456,31 @@
       "source_count": 3,
       "source_domain_count": 2,
       "last_seen": "2026-07-09"
+    },
+    {
+      "claim_id": "claim:3aa828acd1ebc63d",
+      "subject": "ticker:AVGO",
+      "predicate": "SUPPLIES_TO",
+      "object": "ticker:META",
+      "status": "corroborated",
+      "confidence": 0.765,
+      "source_count": 3,
+      "source_domain_count": 2,
+      "last_seen": "2026-07-29"
     }
   ],
   "review_queue": [
+    {
+      "claim_id": "claim:f75be1fbaf7d1ff5",
+      "subject": "ticker:MU",
+      "predicate": "SUPPLIES_TO",
+      "object": "ticker:AAPL",
+      "status": "provisional",
+      "confidence": 0.8667,
+      "source_count": 3,
+      "source_domain_count": 1,
+      "last_seen": "2026-08-01"
+    },
     {
       "claim_id": "claim:c8a1dc83817d93c6",
       "subject": "ticker:BULL",
@@ -515,15 +526,15 @@
       "last_seen": "2026-07-11"
     },
     {
-      "claim_id": "claim:60e37c232585147d",
-      "subject": "ticker:RIG",
+      "claim_id": "claim:f900aa39e5712d81",
+      "subject": "ticker:MU",
       "predicate": "COMPETES_WITH",
-      "object": "ticker:VAL",
+      "object": "ticker:WDC",
       "status": "provisional",
       "confidence": 0.875,
       "source_count": 2,
       "source_domain_count": 1,
-      "last_seen": "2026-08-07"
+      "last_seen": "2026-07-09"
     },
     {
       "claim_id": "claim:3dd2a911be89f984",
@@ -535,6 +546,17 @@
       "source_count": 2,
       "source_domain_count": 1,
       "last_seen": "2026-08-04"
+    },
+    {
+      "claim_id": "claim:5bba2c51b93f6f7b",
+      "subject": "ticker:NVDA",
+      "predicate": "SUPPLIES_TO",
+      "object": "ticker:SMCI",
+      "status": "provisional",
+      "confidence": 0.86,
+      "source_count": 2,
+      "source_domain_count": 1,
+      "last_seen": "2026-08-10"
     },
     {
       "claim_id": "claim:b5b15319015cfd48",
@@ -612,6 +634,17 @@
       "source_count": 2,
       "source_domain_count": 1,
       "last_seen": "2026-07-20"
+    },
+    {
+      "claim_id": "claim:d7f2031c983a66ba",
+      "subject": "ticker:ASTS",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:SPCX",
+      "status": "provisional",
+      "confidence": 0.84,
+      "source_count": 2,
+      "source_domain_count": 1,
+      "last_seen": "2026-08-10"
     },
     {
       "claim_id": "claim:eea71a1960ba5303",
@@ -700,39 +733,6 @@
       "source_count": 2,
       "source_domain_count": 1,
       "last_seen": "2026-08-08"
-    },
-    {
-      "claim_id": "claim:95d9500a5bf18fdf",
-      "subject": "ticker:KEYS",
-      "predicate": "SUPPLIES_TO",
-      "object": "ticker:INTC",
-      "status": "provisional",
-      "confidence": 0.735,
-      "source_count": 2,
-      "source_domain_count": 1,
-      "last_seen": "2026-06-25"
-    },
-    {
-      "claim_id": "claim:433641cb232a8a9e",
-      "subject": "ticker:KEYS",
-      "predicate": "SUPPLIES_TO",
-      "object": "ticker:NVDA",
-      "status": "provisional",
-      "confidence": 0.735,
-      "source_count": 2,
-      "source_domain_count": 1,
-      "last_seen": "2026-06-25"
-    },
-    {
-      "claim_id": "claim:26d53c0d5de28b7f",
-      "subject": "ticker:KEYS",
-      "predicate": "SUPPLIES_TO",
-      "object": "ticker:TSM",
-      "status": "provisional",
-      "confidence": 0.735,
-      "source_count": 2,
-      "source_domain_count": 1,
-      "last_seen": "2026-06-25"
     }
   ],
   "direction_conflicts": [

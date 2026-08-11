@@ -8,7 +8,7 @@
 
   // Semantic release tag shown in sidebar footer. Bump on meaningful releases.
   // Cache-busting is handled separately by dashboard_server.py (mtime injection).
-  const VERSION = 'V4.127.1';
+  const VERSION = 'V4.129.0';
 
   // V1.71.x — group field enables sectioned sidebar layout
   const NAV_ITEMS = [
@@ -978,9 +978,17 @@
         // The dot is rendered empty and painted by _paintLlmActive(); this
         // markup is rewritten every 30s from the quota poll, which is far too
         // slow to be a liveness indicator on its own.
+        // V4.129.0 — say which pool the number came from when there is more
+        // than one. agy meters Gemini and Claude/GPT models separately, and the
+        // headline is the pool the broker would actually route to; without this
+        // the bar reads as the provider's total and the four windows in the
+        // hover card look like they should average to it.
+        const poolNote = info.routable_pool
+          ? (zh ? `（依 ${info.routable_pool} 池）` : ` (from the ${info.routable_pool} pool)`)
+          : '';
         return `<div class="sidebar-llm-prov sidebar-llm-${state}" data-llm-prov="${esc(model)}"
-                     title="${esc(zh ? `已用 ${pct(used)}／剩餘 ${pct(remaining)}`
-                                     : `${pct(used)} used / ${pct(remaining)} left`)}">
+                     title="${esc((zh ? `已用 ${pct(used)}／剩餘 ${pct(remaining)}`
+                                      : `${pct(used)} used / ${pct(remaining)} left`) + poolNote)}">
           <div class="sidebar-llm-prov-head">
             <span class="sidebar-llm-live" hidden></span>
             <span class="sidebar-llm-prov-name">${esc(model)}</span>
@@ -1003,17 +1011,29 @@
         // made "63% weekly" and "6% session" scan as the same size of problem;
         // the whole reason a provider's rows are worth opening is that they are
         // not. Bars draw consumption, same direction as the pinned panel.
+        // V4.129.0 — which windows the headline percentage was read from. A
+        // provider with independent pools (agy) has windows the broker will not
+        // route against at all, and they sit in this list looking exactly like
+        // the ones that bind. `▸` marks the pool the broker would use.
+        const pool = info.routable_pool ? String(info.routable_pool) : '';
+        const inPool = (b) => {
+          if (!pool) return false;
+          const n = String(b.name || '');
+          return n === pool || n.startsWith(pool + '.');
+        };
         const rows = (info.buckets || []).map(b => {
           const u = usedOf(b);
           const width = u.pct === null ? 0 : Math.max(0, Math.min(100, u.pct));
           const hint = resetHint(b);
           const raw = String(b.reset_label || '').trim();
+          const routable = inPool(b);
           const tip = [
+            routable ? (zh ? '目前路由的池' : 'the pool being routed to') : '',
             u.derived ? (zh ? '由剩餘量推算' : 'derived from remaining') : '',
             raw,
           ].filter(Boolean).join(' · ');
           return `<div class="llm-tip-bkt"${tip ? ` title="${esc(tip)}"` : ''}>
-            <span class="llm-tip-bkt-name">${esc(bucketLabel(b, zh))}</span>
+            <span class="llm-tip-bkt-name">${routable ? '▸ ' : ''}${esc(bucketLabel(b, zh))}</span>
             <span class="llm-tip-bkt-pct${u.derived ? ' llm-tip-bkt-derived' : ''}">${pct(u.pct)}</span>
             <span class="llm-tip-bkt-reset">${esc(hint)}</span>
           </div>

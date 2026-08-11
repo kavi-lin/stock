@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "generated_at": "2026-08-09T20:30:58.567068+00:00",
+  "generated_at": "2026-08-10T20:30:56.330371+00:00",
   "mood": {
     "score": 28,
     "label": "Greed",
@@ -14,10 +14,10 @@
       "term_signed"
     ],
     "component_scores": {
-      "fg_signed": 27.4,
-      "fg_quality_signed": 13.2,
+      "fg_signed": 28.9,
+      "fg_quality_signed": 16.5,
       "pc_signed": 50,
-      "vix_signed": 51.0,
+      "vix_signed": 45.4,
       "skew_signed": -50.5,
       "term_signed": 100
     }
@@ -32,13 +32,13 @@
     "fmp_megacap": []
   },
   "vix": {
-    "current": 14.9,
-    "percentile_1y": 7.9,
-    "regime": "LOW",
-    "vix3m": 20.54,
+    "current": 15.46,
+    "percentile_1y": 16.7,
+    "regime": "NORMAL",
+    "vix3m": 18.98,
     "term_structure": "contango",
-    "term_diff": 5.64,
-    "interpretation_zh": "VIX 14.9 LOW，期限結構 contango（市場平靜）"
+    "term_diff": 3.52,
+    "interpretation_zh": "VIX 15.5 NORMAL，期限結構 contango（市場平靜）"
   },
   "skew": {
     "current": 132.6,
@@ -47,22 +47,22 @@
     "interpretation_zh": "SKEW 133 elevated"
   },
   "fear_greed": {
-    "index": 63.7,
+    "index": 64.4,
     "label": "Greed",
     "sub_indices": {
-      "market_momentum_sp500": 79.8,
-      "stock_price_strength": 32.2,
-      "stock_price_breadth": 40.2,
-      "put_call_options": 81.6,
+      "market_momentum_sp500": 76.8,
+      "stock_price_strength": 31.8,
+      "stock_price_breadth": 44.2,
+      "put_call_options": 77.6,
       "market_volatility_vix": 50.0,
-      "safe_haven_demand": 64.6,
-      "junk_bond_demand": 97.4
+      "safe_haven_demand": 71.8,
+      "junk_bond_demand": 98.8
     }
   },
   "spy_momentum": {
-    "rsi_14": 66.0,
-    "pct_above_ma50": 3.57,
-    "pct_above_ma200": 10.45
+    "rsi_14": 65.8,
+    "pct_above_ma50": 3.48,
+    "pct_above_ma200": 10.33
   },
   "_source_health": {
     "vix": "ok",
@@ -71,5 +71,402 @@
     "fg": "ok",
     "pcr": "CNN put_call_options sub-index"
   },
-  "_partial": false
+  "_partial": false,
+  "atmosphere": {
+    "version": "1.0",
+    "method": "deterministic_thresholds_v1",
+    "generated_at": "2026-08-10T20:31:05.163541+00:00",
+    "indicator_count": 17,
+    "available_count": 12,
+    "status_counts": {
+      "green": 10,
+      "yellow": 0,
+      "red": 2,
+      "gray": 5
+    },
+    "groups": {
+      "short": 5,
+      "mid": 7,
+      "long": 5
+    },
+    "indicators": [
+      {
+        "key": "vix",
+        "group": "short",
+        "name": "VIX",
+        "value": 15.46,
+        "display_value": "15.46",
+        "data_date": "2026-08-10",
+        "threshold": "> 25",
+        "status": "green",
+        "signal": "🟢",
+        "interpretation_zh": "波動率仍在平靜區，短線沒有恐慌性去槓桿訊號。",
+        "note_zh": "VIX 仍低於壓力區；單獨看不代表風險消失。",
+        "source": "CBOE/FRED via market_mood.json",
+        "source_status": "ok",
+        "history_value": 15.46
+      },
+      {
+        "key": "fear_greed",
+        "group": "short",
+        "name": "CNN Fear & Greed",
+        "value": 64.4,
+        "display_value": "64.4",
+        "data_date": "2026-08-10",
+        "threshold": ">75 → <50",
+        "status": "green",
+        "signal": "🟢",
+        "interpretation_zh": "情緒不是單向極端恐慌；若由高位快速跌破 50，才會升級為短線警報。",
+        "note_zh": "恐懼與貪婪需搭配歷史方向；目前讀值未形成高位急跌觸發。",
+        "source": "CNN via market_mood.json",
+        "source_status": "ok",
+        "history_value": 64.4
+      },
+      {
+        "key": "aaii_sentiment",
+        "group": "short",
+        "name": "AAII 投資人情緒",
+        "value": 0.0,
+        "display_value": "B 37.0% / N 37.0% / B 37.0% (差 +0.0)",
+        "data_date": "2026-08-10",
+        "threshold": "Bull − Bear < −20",
+        "status": "green",
+        "signal": "🟢",
+        "interpretation_zh": "散戶多空差是情緒溫度計；負值代表悲觀擴大，但不等同市場必然下跌。",
+        "note_zh": "Bull/Bear 原始值或頁面尚未穩定取得。",
+        "source": "AAII",
+        "source_status": "ok",
+        "history_value": 0.0
+      },
+      {
+        "key": "put_call",
+        "group": "short",
+        "name": "CBOE Equity Put/Call",
+        "value": null,
+        "display_value": "—",
+        "data_date": "2026-08-10",
+        "threshold": "> 1.00",
+        "status": "gray",
+        "signal": "⚪",
+        "interpretation_zh": "期權避險需求尚未到極端區，短線尚未出現明顯防守擁擠。",
+        "note_zh": "Put/Call 越高代表避險需求越重；目前沿用 Market Mood 的原始值或可用代理。",
+        "source": "CBOE/CNN via market_mood.json",
+        "source_status": "unavailable",
+        "history_value": null
+      },
+      {
+        "key": "naaim_exposure",
+        "group": "short",
+        "name": "NAAIM Exposure",
+        "value": 20.0,
+        "display_value": "20.0",
+        "data_date": "2026-08-10",
+        "threshold": "> 90",
+        "status": "green",
+        "signal": "🟢",
+        "interpretation_zh": "主動管理人曝險若很高，代表市場對上行延續的共識偏擁擠；目前需先補齊公開讀值。",
+        "note_zh": "NAAIM 公開頁可能延遲或受訂閱限制；沒有可靠讀值時保持空白。",
+        "source": "NAAIM",
+        "source_status": "ok",
+        "history_value": 20.0
+      },
+      {
+        "key": "margin_debt",
+        "group": "mid",
+        "name": "FINRA Margin Debt",
+        "value": 1502072,
+        "display_value": "$1,502,072M",
+        "data_date": "2026-06-30",
+        "threshold": "月減連續 3 個月",
+        "status": "green",
+        "signal": "🟢",
+        "interpretation_zh": "保證金負債上升代表槓桿擴張；連續下降則代表去槓桿，需搭配價格與信用市場判讀。",
+        "note_zh": "FINRA 月度 debit balance；連續下降才形成硬觸發。",
+        "source": "FINRA",
+        "source_status": "ok",
+        "history_value": 1502072
+      },
+      {
+        "key": "margin_gdp",
+        "group": "mid",
+        "name": "Margin Debt / GDP",
+        "value": null,
+        "display_value": "—",
+        "data_date": "2026-08-10",
+        "threshold": "> 5%",
+        "status": "gray",
+        "signal": "⚪",
+        "interpretation_zh": "保證金負債相對 GDP 越高，市場越容易因價格下跌被動減倉；這是結構性脆弱度，不是即時賣點。",
+        "note_zh": "高槓桿提高回撤敏感度，但它是慢變指標。",
+        "source": "GuruFocus",
+        "source_status": "unavailable",
+        "history_value": null
+      },
+      {
+        "key": "ipo_proceeds",
+        "group": "mid",
+        "name": "Renaissance IPO 發行量",
+        "value": 99,
+        "display_value": "99 家 / $145.3B YTD",
+        "data_date": "2026-08-10",
+        "threshold": "數量／募資額異常上升",
+        "status": "red",
+        "signal": "🔴",
+        "interpretation_zh": "IPO 數量或募資額快速擴張，代表資本市場風險胃納上升；需與估值和上市後表現合看。",
+        "note_zh": "Renaissance 年初至今 IPO 統計；數量與募資額的同比變化用於判斷異常擴張。",
+        "source": "Renaissance Capital",
+        "source_status": "ok",
+        "history_value": 99
+      },
+      {
+        "key": "insider_ratio",
+        "group": "mid",
+        "name": "Insider Buy/Sell Ratio",
+        "value": null,
+        "display_value": "—",
+        "data_date": "2026-08-10",
+        "threshold": "< 0.17",
+        "status": "gray",
+        "signal": "⚪",
+        "interpretation_zh": "內部人偏賣出是估值與信心的反向驗證；需觀察是否持續而非單月雜訊。",
+        "note_zh": "內部人買賣比低於 0.17 才列為硬警報。",
+        "source": "GuruFocus",
+        "source_status": "unavailable",
+        "history_value": null
+      },
+      {
+        "key": "bofa_bull_bear",
+        "group": "mid",
+        "name": "BofA Bull & Bear",
+        "value": null,
+        "display_value": "—",
+        "data_date": "2026-08-10",
+        "threshold": "> 8.0",
+        "status": "gray",
+        "signal": "⚪",
+        "interpretation_zh": "BofA Bull & Bear 高於 8 通常代表全球股市多頭擁擠，屬反向風險訊號；需注意報告日期。",
+        "note_zh": "BofA 最新公開 CIO Viewpoint 尚未取得。",
+        "source": "BofA/Merrill CIO Viewpoint",
+        "source_status": "unavailable",
+        "history_value": null
+      },
+      {
+        "key": "hy_spread",
+        "group": "mid",
+        "name": "ICE BofA US HY OAS",
+        "value": 2.7,
+        "display_value": "2.70%",
+        "data_date": "2026-08-07",
+        "threshold": "> 4.5%",
+        "status": "green",
+        "signal": "🟢",
+        "interpretation_zh": "高收益債利差仍低於壓力門檻時，表示信用市場尚未確認股市風險；一旦快速擴張，訊號權重會上升。",
+        "note_zh": "信用利差仍是判斷風險是否擴散的核心中期訊號。",
+        "source": "FRED BAMLH0A0HYM2",
+        "source_status": "ok",
+        "history_value": 2.7
+      },
+      {
+        "key": "ad_line",
+        "group": "mid",
+        "name": "NYSE Advance/Decline Line",
+        "value": null,
+        "display_value": "—",
+        "data_date": "2026-08-07",
+        "threshold": "S&P 新高但 A/D 不創新高",
+        "status": "gray",
+        "signal": "⚪",
+        "interpretation_zh": "廣度資料目前只能作 proxy；沒有直接 NYSE 累積線，就不把『頂背離』判成已觸發。",
+        "note_zh": "目前只有市場 breadth proxy，未直接取得 NYSE 累積 A/D 線；硬觸發維持待確認。",
+        "source": "NYSE A/D + breadth proxy",
+        "source_status": "unavailable",
+        "history_value": null,
+        "available": false,
+        "hard_trigger": false
+      },
+      {
+        "key": "buffett_indicator",
+        "group": "long",
+        "name": "Buffett Indicator",
+        "value": 30.0,
+        "display_value": "30.0%",
+        "data_date": "2026-08-10",
+        "threshold": "> 200%",
+        "status": "green",
+        "signal": "🟢",
+        "interpretation_zh": "總市值相對 GDP 越高，長期預期報酬通常越受壓；它提醒再平衡，不負責抓頂。",
+        "note_zh": "總市值／GDP 的方法差異很大；讀值只作估值溫度，不作短線賣點。",
+        "source": "CurrentMarketValuation",
+        "source_status": "ok",
+        "history_value": 30.0
+      },
+      {
+        "key": "cape",
+        "group": "long",
+        "name": "Shiller CAPE / PE10",
+        "value": 42.39,
+        "display_value": "42.39",
+        "data_date": "2026-08-10",
+        "threshold": "> 30",
+        "status": "red",
+        "signal": "🔴",
+        "interpretation_zh": "CAPE 是長期估值錨；高位意味著未來 1–3 年的安全邊際較薄，但不代表立即反轉。",
+        "note_zh": "CAPE 位於高估值區時，應降低對未來報酬的樂觀假設。",
+        "source": "Multpl",
+        "source_status": "ok",
+        "history_value": 42.39
+      },
+      {
+        "key": "yield_curve",
+        "group": "long",
+        "name": "10Y−2Y Treasury Curve",
+        "value": 0.46,
+        "display_value": "+0.46%",
+        "data_date": "2026-08-07",
+        "threshold": "< 0%",
+        "status": "green",
+        "signal": "🟢",
+        "interpretation_zh": "正斜率解除倒掛警報，但重新陡峭不必然代表景氣強勁；要與 LEI、信用利差合看。",
+        "note_zh": "曲線已重新正斜率；仍需觀察是否伴隨成長與信用惡化。",
+        "source": "FRED T10Y2Y",
+        "source_status": "ok",
+        "history_value": 0.46
+      },
+      {
+        "key": "lei",
+        "group": "long",
+        "name": "Conference Board US LEI",
+        "value": 0.1,
+        "display_value": "0.1",
+        "data_date": "2026-08-10",
+        "threshold": "6 個月 < −2%",
+        "status": "green",
+        "signal": "🟢",
+        "interpretation_zh": "LEI 的連續下滑是景氣轉折的慢速確認；單月變化不應獨立驅動股市交易。",
+        "note_zh": "LEI 頁面若無法解析，保持空白；不以新聞敘述代替月度值。",
+        "source": "Conference Board",
+        "source_status": "ok",
+        "history_value": 0.1
+      },
+      {
+        "key": "aaii_allocation",
+        "group": "long",
+        "name": "AAII 家庭股票配置",
+        "value": 39.78,
+        "display_value": "39.8%",
+        "data_date": "2026-08-10",
+        "threshold": "> 70%",
+        "status": "green",
+        "signal": "🟢",
+        "interpretation_zh": "家庭股票配置過高代表未來新增買盤可能有限；適合用於再平衡，不適合拿來預測本週行情。",
+        "note_zh": "家庭股票配置是長期擁擠度指標；頁面定義若改變，需以來源欄核對。",
+        "source": "AAII",
+        "source_status": "ok",
+        "history_value": 39.78
+      }
+    ],
+    "hard_triggers": {
+      "items": [
+        {
+          "key": "vix",
+          "label": "VIX 突破並站穩",
+          "threshold": "> 25 且連續紀錄仍在 25 以上",
+          "status": "green",
+          "triggered": false,
+          "state_zh": "未觸發"
+        },
+        {
+          "key": "margin_debt",
+          "label": "Margin Debt 月減",
+          "threshold": "連續 3 個月",
+          "status": "green",
+          "triggered": false,
+          "state_zh": "未觸發"
+        },
+        {
+          "key": "hy_spread",
+          "label": "HY Spread 擴張",
+          "threshold": "> 4.5%",
+          "status": "green",
+          "triggered": false,
+          "state_zh": "未觸發"
+        },
+        {
+          "key": "fear_greed",
+          "label": "Fear & Greed 從高位回落",
+          "threshold": ">75 跌回 <50",
+          "status": "green",
+          "triggered": false,
+          "state_zh": "未觸發"
+        },
+        {
+          "key": "ad_line",
+          "label": "A/D Line 頂背離",
+          "threshold": "S&P 新高但 A/D 不創新高",
+          "status": "yellow",
+          "triggered": false,
+          "state_zh": "接近／待確認"
+        },
+        {
+          "key": "bofa_bull_bear",
+          "label": "BofA Bull & Bear",
+          "threshold": "> 8.0",
+          "status": "gray",
+          "triggered": false,
+          "state_zh": "資料不足"
+        },
+        {
+          "key": "insider_ratio",
+          "label": "Insider Buy/Sell",
+          "threshold": "< 0.17",
+          "status": "gray",
+          "triggered": false,
+          "state_zh": "資料不足"
+        }
+      ],
+      "triggered_count": 0,
+      "total": 7,
+      "sell_staging_threshold": "3+ simultaneously"
+    },
+    "guidance": {
+      "short": "維持核心倉位，先不因單一情緒讀值追價；若短期警報累積，再考慮保險。",
+      "mid": "信用尚未確認壓力擴散；維持分散，觀察槓桿、內部人與廣度是否同時惡化。",
+      "long": "估值指標只提示降低預期報酬，採再平衡而非一次性離場。"
+    },
+    "top_attention": {
+      "key": "ipo_proceeds",
+      "name": "Renaissance IPO 發行量",
+      "status": "red",
+      "reason_zh": "IPO 數量或募資額快速擴張，代表資本市場風險胃納上升；需與估值和上市後表現合看。"
+    },
+    "data_quality": {
+      "available": 12,
+      "total": 17,
+      "unavailable_keys": [
+        "put_call",
+        "margin_gdp",
+        "insider_ratio",
+        "bofa_bull_bear",
+        "ad_line"
+      ],
+      "fetch_errors": {
+        "margin_gdp": "empty_response",
+        "insider": "empty_response",
+        "bofa_viewpoint_july": "empty_response",
+        "bofa_viewpoint_june": "empty_response"
+      },
+      "note_zh": "未取得的原始來源維持 ⚪/資料不足，不納入已觸發計數。"
+    },
+    "history": [
+      {
+        "date": "2026-08-10",
+        "vix": 15.46,
+        "fear_greed": 64.4,
+        "margin_debt": 1502072,
+        "hy_spread": 2.7,
+        "insider_ratio": null,
+        "bofa_bull_bear": null
+      }
+    ]
+  }
 }

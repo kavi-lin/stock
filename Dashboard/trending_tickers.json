@@ -1,62 +1,114 @@
 {
   "version": "1.0",
-  "as_of": "2026-08-09T20:31:04.336773+00:00",
+  "as_of": "2026-08-10T20:31:01.314909+00:00",
   "lookback_hours": 24,
   "lexicon_version": "v1.3",
-  "post_count": 32,
-  "truth_social_dropped": 5,
+  "post_count": 42,
+  "truth_social_dropped": 7,
   "source_stats": {
-    "truth_social": 4,
+    "truth_social": 3,
     "reddit": 8,
-    "hacker_news": 20
+    "hacker_news": 29,
+    "google_trends": 2
   },
-  "tickers": [
-    {
-      "ticker": "SRE",
-      "sector": "Utilities",
-      "mention_count": 1,
-      "bull_hits_sum": 0,
-      "bear_hits_sum": 0,
-      "matched_terms": [],
-      "sample_posts": [
-        {
-          "headline": "Show HN: Argonix – One AI-powered platform for SRE and cloud operations",
-          "url": "https://argonix.io/",
-          "source": "Hacker News",
-          "engagement": 1.099,
-          "polarity": 0.0,
-          "matched_terms": []
-        }
-      ],
-      "polarity_score": 0.0,
-      "engagement_score": 1.099,
-      "_gate": "known"
-    }
-  ],
+  "tickers": [],
   "low_confidence": [
     {
-      "ticker": "MCP",
+      "ticker": "GPT",
       "sector": null,
-      "mention_count": 1,
+      "mention_count": 2,
       "bull_hits_sum": 0,
       "bear_hits_sum": 0,
       "matched_terms": [],
       "sample_posts": [
         {
-          "headline": "Show HN: Qwen3.8-Max – Use Qwen Studio and MCP to Code Locally for Free",
-          "url": "https://github.com/tohid4n/qwen3.8-max-local-coding",
+          "headline": "GPT 5.6 Cyber",
+          "url": "https://openai.com/index/expanding-daybreak-as-the-cyber-defense-window-narrows/",
           "source": "Hacker News",
-          "engagement": 1.099,
+          "engagement": 2.639,
+          "polarity": 0.0,
+          "matched_terms": []
+        },
+        {
+          "headline": "OpenAI launches GPT-5.6-Cyber with fewer refusals for exploit research",
+          "url": "https://runtimewire.com/article/openai-gpt-5-6-cyber-daybreak-red",
+          "source": "Hacker News",
+          "engagement": 1.946,
           "polarity": 0.0,
           "matched_terms": []
         }
       ],
       "polarity_score": 0.0,
-      "engagement_score": 1.099,
+      "engagement_score": 4.585,
       "_gate": "unknown"
     },
     {
-      "ticker": "TPS",
+      "ticker": "TSMC",
+      "sector": null,
+      "mention_count": 2,
+      "bull_hits_sum": 1,
+      "bear_hits_sum": 0,
+      "matched_terms": [
+        {
+          "term": "surge",
+          "side": "bull"
+        }
+      ],
+      "sample_posts": [
+        {
+          "headline": "World’s biggest chipmaker TSMC’s sales surge 45% amid buoyant AI demand",
+          "url": "https://www.reddit.com/r/stocks/comments/1vku78k/worlds_biggest_chipmaker_tsmcs_sales_surge_45/",
+          "source": "Reddit:r/stocks",
+          "engagement": 1.0,
+          "polarity": 0.5,
+          "matched_terms": [
+            "surge"
+          ]
+        },
+        {
+          "headline": "Sony, TSMC to Invest $6.4 Billion in Japanese Sensor Plant",
+          "url": "https://www.reddit.com/r/stocks/comments/1vkgzor/sony_tsmc_to_invest_64_billion_in_japanese_sensor/",
+          "source": "Reddit:r/stocks",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.25,
+      "engagement_score": 2.0,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "LLM",
+      "sector": null,
+      "mention_count": 2,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "Show HN: Needle2: 14MB agentic LLM for phones, wearables, smart home and robots",
+          "url": "https://cactuscompute.com/needle",
+          "source": "Hacker News",
+          "engagement": 0.693,
+          "polarity": 0.0,
+          "matched_terms": []
+        },
+        {
+          "headline": "Show HN: Needle2: 14MB agentic LLM for phones, wearables, smart home and robots",
+          "url": "https://cactuscompute.com/needle",
+          "source": "Hacker News",
+          "engagement": 0.693,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 1.386,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "THEY",
       "sector": null,
       "mention_count": 1,
       "bull_hits_sum": 0,
@@ -64,8 +116,8 @@
       "matched_terms": [],
       "sample_posts": [
         {
-          "headline": "Trump gets immigration victory as federal judge clears path to end Haiti TPS following Supreme Court ruling: https:// nypost.com/2026/08/05/us-news/ trump-gets-immigration-victory-",
-          "url": "https://truthsocial.com/@realDonaldTrump/117063155226329500",
+          "headline": "I see that Representatives of the Islamic Republic of Iran are asking for compensation for the damage done to them during the last five month Military Conflict (started because, TH",
+          "url": "https://truthsocial.com/@realDonaldTrump/117072168149236615",
           "source": "Truth Social:@realDonaldTrump",
           "engagement": 1.0,
           "polarity": 0.0,
@@ -77,7 +129,7 @@
       "_gate": "unknown"
     },
     {
-      "ticker": "COKE",
+      "ticker": "WILL",
       "sector": null,
       "mention_count": 1,
       "bull_hits_sum": 0,
@@ -85,9 +137,9 @@
       "matched_terms": [],
       "sample_posts": [
         {
-          "headline": "KO (Coca-Cola) vs COKE (Coca-Cola Cosolidated) which is the “better” stock to invest in?",
-          "url": "https://www.reddit.com/r/stocks/comments/1vjxp1t/ko_cocacola_vs_coke_cocacola_cosolidated_which_is/",
-          "source": "Reddit:r/stocks",
+          "headline": "I see that Representatives of the Islamic Republic of Iran are asking for compensation for the damage done to them during the last five month Military Conflict (started because, TH",
+          "url": "https://truthsocial.com/@realDonaldTrump/117072168149236615",
+          "source": "Truth Social:@realDonaldTrump",
           "engagement": 1.0,
           "polarity": 0.0,
           "matched_terms": []
@@ -98,7 +150,7 @@
       "_gate": "unknown"
     },
     {
-      "ticker": "DRAM",
+      "ticker": "NOT",
       "sector": null,
       "mention_count": 1,
       "bull_hits_sum": 0,
@@ -106,9 +158,9 @@
       "matched_terms": [],
       "sample_posts": [
         {
-          "headline": "After DRAM ETF …. Round Hill Investment released two new ETFS this month (NCLD & LYTE). How likely are you to buy them ?",
-          "url": "https://www.reddit.com/r/stocks/comments/1vjnlyb/after_dram_etf_round_hill_investment_released_two/",
-          "source": "Reddit:r/stocks",
+          "headline": "I see that Representatives of the Islamic Republic of Iran are asking for compensation for the damage done to them during the last five month Military Conflict (started because, TH",
+          "url": "https://truthsocial.com/@realDonaldTrump/117072168149236615",
+          "source": "Truth Social:@realDonaldTrump",
           "engagement": 1.0,
           "polarity": 0.0,
           "matched_terms": []
@@ -119,7 +171,7 @@
       "_gate": "unknown"
     },
     {
-      "ticker": "ETFS",
+      "ticker": "HAVE",
       "sector": null,
       "mention_count": 1,
       "bull_hits_sum": 0,
@@ -127,9 +179,9 @@
       "matched_terms": [],
       "sample_posts": [
         {
-          "headline": "After DRAM ETF …. Round Hill Investment released two new ETFS this month (NCLD & LYTE). How likely are you to buy them ?",
-          "url": "https://www.reddit.com/r/stocks/comments/1vjnlyb/after_dram_etf_round_hill_investment_released_two/",
-          "source": "Reddit:r/stocks",
+          "headline": "I see that Representatives of the Islamic Republic of Iran are asking for compensation for the damage done to them during the last five month Military Conflict (started because, TH",
+          "url": "https://truthsocial.com/@realDonaldTrump/117072168149236615",
+          "source": "Truth Social:@realDonaldTrump",
           "engagement": 1.0,
           "polarity": 0.0,
           "matched_terms": []
@@ -140,68 +192,26 @@
       "_gate": "unknown"
     },
     {
-      "ticker": "NCLD",
-      "sector": null,
-      "mention_count": 1,
-      "bull_hits_sum": 0,
-      "bear_hits_sum": 0,
-      "matched_terms": [],
-      "sample_posts": [
-        {
-          "headline": "After DRAM ETF …. Round Hill Investment released two new ETFS this month (NCLD & LYTE). How likely are you to buy them ?",
-          "url": "https://www.reddit.com/r/stocks/comments/1vjnlyb/after_dram_etf_round_hill_investment_released_two/",
-          "source": "Reddit:r/stocks",
-          "engagement": 1.0,
-          "polarity": 0.0,
-          "matched_terms": []
-        }
-      ],
-      "polarity_score": 0.0,
-      "engagement_score": 1.0,
-      "_gate": "unknown"
-    },
-    {
-      "ticker": "LYTE",
-      "sector": null,
-      "mention_count": 1,
-      "bull_hits_sum": 0,
-      "bear_hits_sum": 0,
-      "matched_terms": [],
-      "sample_posts": [
-        {
-          "headline": "After DRAM ETF …. Round Hill Investment released two new ETFS this month (NCLD & LYTE). How likely are you to buy them ?",
-          "url": "https://www.reddit.com/r/stocks/comments/1vjnlyb/after_dram_etf_round_hill_investment_released_two/",
-          "source": "Reddit:r/stocks",
-          "engagement": 1.0,
-          "polarity": 0.0,
-          "matched_terms": []
-        }
-      ],
-      "polarity_score": 0.0,
-      "engagement_score": 1.0,
-      "_gate": "unknown"
-    },
-    {
-      "ticker": "TTD",
+      "ticker": "ALERT",
       "sector": null,
       "mention_count": 1,
       "bull_hits_sum": 1,
       "bear_hits_sum": 0,
       "matched_terms": [
         {
-          "term": "long",
+          "term": "ripping",
           "side": "bull"
         }
       ],
       "sample_posts": [
         {
-          "headline": "The Trade Desk / TTD is undervalued. LONg",
-          "url": "https://www.reddit.com/r/stocks/comments/1vjmdzx/the_trade_desk_ttd_is_undervalued_long/",
-          "source": "Reddit:r/stocks",
+          "headline": "ALERT: A National Park Service career employee, a highly credible witness, saw David Hearn (ActBlue) in broad daylight vandalize the Reflecting Pool by “violently” ripping and tugg",
+          "url": "https://truthsocial.com/@realDonaldTrump/117067837821298859",
+          "source": "Truth Social:@realDonaldTrump",
           "engagement": 1.0,
           "polarity": 0.5,
           "matched_terms": [
-            "long"
+            "ripping"
           ]
         }
       ],
@@ -210,7 +220,7 @@
       "_gate": "unknown"
     },
     {
-      "ticker": "ABS",
+      "ticker": "AIUC",
       "sector": null,
       "mention_count": 1,
       "bull_hits_sum": 0,
@@ -218,36 +228,20 @@
       "matched_terms": [],
       "sample_posts": [
         {
-          "headline": "I've spent 3 months working through Carvana's ABS",
-          "url": "https://www.reddit.com/r/stocks/comments/1vjia4h/ive_spent_3_months_working_through_carvanas_abs/",
-          "source": "Reddit:r/stocks",
-          "engagement": 1.0,
+          "headline": "AIUC-1: The standard for AI agent security, safety and reliability",
+          "url": "https://www.aiuc-1.com/",
+          "source": "Hacker News",
+          "engagement": 0.693,
           "polarity": 0.0,
           "matched_terms": []
         }
       ],
       "polarity_score": 0.0,
-      "engagement_score": 1.0,
+      "engagement_score": 0.693,
       "_gate": "unknown"
     }
   ],
   "sectors": [
-    {
-      "sector": "Utilities",
-      "ticker_count": 1,
-      "engagement_score": 1.099,
-      "bull_hits_sum": 0,
-      "bear_hits_sum": 0,
-      "top_tickers": [
-        {
-          "ticker": "SRE",
-          "engagement_score": 1.099,
-          "polarity_score": 0.0,
-          "mention_count": 1
-        }
-      ],
-      "polarity_score": 0.0
-    },
     {
       "sector": "Technology",
       "ticker_count": 0,
@@ -321,6 +315,15 @@
       "top_tickers": []
     },
     {
+      "sector": "Utilities",
+      "ticker_count": 0,
+      "engagement_score": 0.0,
+      "polarity_score": 0.0,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "top_tickers": []
+    },
+    {
       "sector": "Real_Estate",
       "ticker_count": 0,
       "engagement_score": 0.0,
@@ -342,57 +345,57 @@
   "market_wide_buzz": [
     {
       "topic": "ai_capex",
-      "post_count": 4,
-      "engagement_score": 13.04,
+      "post_count": 5,
+      "engagement_score": 22.229,
       "sample_posts": [
         {
-          "headline": "Amazon circumvents Gilroy community vote for AI data center",
-          "url": "https://www.tomshardware.com/tech-industry/data-centers/amazon-secretly-circumvents-community-vote-for-massive-ai-data-center-45-year-old-rules-lock-gilroy-residents-out-of-public-comment-window",
+          "headline": "Letter to Governor Abbott on responsible AI infrastructure in Texas",
+          "url": "https://openai.com/index/responsible-ai-infrastructure-texas/",
           "source": "Hacker News",
-          "engagement": 8.253,
+          "engagement": 8.847,
           "polarity": 0.0
         },
         {
-          "headline": "Runware Squeezes A 1MW AI Data Center Into A 20-Foot Shipping Container",
-          "url": "https://www.forbes.com/sites/gabrielalinzainescu/2026/08/08/runware-squeezes-a-1mw-ai-data-center-into-a-20-foot-shipping-container/",
+          "headline": "Launch HN: Stoa Markets (YC S26) – A Marketplace for GPUs and AI Servers",
+          "url": "https://www.stoaexchange.com",
           "source": "Hacker News",
-          "engagement": 2.485,
+          "engagement": 7.208,
           "polarity": 0.0
         },
         {
-          "headline": "The Systemic Collapse of the AI Industry: Ideology, Hardware, and CapEx Crisis",
-          "url": "https://news.ycombinator.com/item?id=49232136",
+          "headline": "Amazon plans gigantic gas power plant for new AI data center",
+          "url": "https://www.heise.de/en/news/Amazon-plans-gigantic-gas-power-plant-for-new-AI-data-center-11404051.html",
           "source": "Hacker News",
-          "engagement": 1.609,
+          "engagement": 2.303,
           "polarity": 0.0
         }
       ],
       "polarity_score": 0.0
     },
     {
-      "topic": "geopolitics",
-      "post_count": 4,
-      "engagement_score": 10.391,
+      "topic": "market_direction",
+      "post_count": 3,
+      "engagement_score": 5.663,
       "sample_posts": [
         {
-          "headline": "Israeli startup was linked to rogue AI hacks at OpenAI, Anthropic and Meta",
-          "url": "https://www.cnbc.com/2026/08/09/israeli-startup-irregular-linked-to-ai-hacks-openai-anthropic-meta.html",
+          "headline": "Nvidia to Team with Wall Street on $500 AI Infrastructure Billion Package – FT",
+          "url": "https://www.bloomberg.com/news/articles/2026-08-10/nvidia-to-team-with-wall-street-on-500-billion-package-ft-says",
           "source": "Hacker News",
-          "engagement": 6.782,
+          "engagement": 2.079,
           "polarity": 0.0
         },
         {
-          "headline": "South Korea, Taiwan top Japan in exports for first time on AI boom",
-          "url": "https://asia.nikkei.com/business/tech/semiconductors/south-korea-taiwan-top-japan-in-exports-for-first-time-on-ai-boom",
+          "headline": "Nvidia is pulling Wall Street into the AI buildout",
+          "url": "https://thenextweb.com/news/nvidia-500-billion-wall-street-ai-infrastructure-funding-package",
           "source": "Hacker News",
-          "engagement": 1.609,
+          "engagement": 1.792,
           "polarity": 0.0
         },
         {
-          "headline": "Hillary Clinton: “The world may not like Trump’s Gaza plan — but there is no alternative: If even I, an implacable opponent of the president, can accept this as the best option, th",
-          "url": "https://truthsocial.com/@realDonaldTrump/117066584024874286",
-          "source": "Truth Social:@realDonaldTrump",
-          "engagement": 1.0,
+          "headline": "Nvidia, Wall Street Firms Strike AI Financing Deal Targeting $500B",
+          "url": "https://www.wsj.com/business/deals/nvidia-wall-street-firms-strike-ai-financing-deal-targeting-500-billion-c50377db",
+          "source": "Hacker News",
+          "engagement": 1.792,
           "polarity": 0.0
         }
       ],
