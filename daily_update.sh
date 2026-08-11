@@ -425,6 +425,18 @@ step93_market_mood() {
   else
     echo "         ⚠️  Market Mood 失敗 (rc=${MOOD_RC})，非致命,繼續..."
   fi
+  local ATMOSPHERE_RC
+  set +e
+  python3 skills/market-sentiment-analyzer/scripts/market_atmosphere.py \
+    --output Dashboard/market_mood.json --json-only \
+    > /dev/null 2> >(sed 's/^/         │ /' >&2)
+  ATMOSPHERE_RC=$?
+  set -e
+  if [ "$ATMOSPHERE_RC" -eq 0 ]; then
+    echo "         ✅ Market Atmosphere（17 deterministic indicators）→ Dashboard/market_mood.json"
+  else
+    echo "         ⚠️  Market Atmosphere 失敗 (rc=${ATMOSPHERE_RC})，保留既有 Market Mood，非致命,繼續..."
+  fi
   return "$MOOD_RC"
 }
 
