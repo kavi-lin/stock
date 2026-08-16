@@ -12,7 +12,9 @@ Selects representative stocks for market themes using a fallback chain:
 import csv
 import io
 import logging
+import sys
 import time
+from pathlib import Path
 from typing import Optional
 
 try:
@@ -24,6 +26,14 @@ try:
     from finvizfinance.screener.overview import Overview
 except ImportError:
     Overview = None  # type: ignore[assignment,misc]
+
+# Repo root: this file is skills/theme-detector/scripts/<me>.py. Needed because
+# the tests' conftest only puts the scripts dir on sys.path.
+_ROOT = Path(__file__).resolve().parents[3]
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
+
+from skills._shared.finviz_screener import normalize_screener_tickers  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
@@ -414,8 +424,9 @@ class RepresentativeStockSelector:
                 return []
 
             stocks: list[dict] = []
-            for _, row in df.iterrows():
-                ticker = str(row.get("Ticker", "")).strip()
+            # finvizfinance folds the logo-fallback letter into the ticker text.
+            tickers = normalize_screener_tickers(df.get("Ticker", []))
+            for ticker, (_, row) in zip(tickers, df.iterrows()):
                 if not ticker:
                     continue
                 stocks.append(

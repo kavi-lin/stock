@@ -4343,6 +4343,9 @@ def _fetch_industry_constituents(name):
         from finvizfinance.screener.overview import Overview
     except Exception as e:  # noqa: BLE001
         return {"error": f"finvizfinance unavailable: {e}"}
+    if ROOT not in sys.path:
+        sys.path.insert(0, ROOT)
+    from skills._shared.finviz_screener import normalize_screener_tickers
     try:
         ov = Overview()
         ov.set_filter(filters_dict={"Industry": name})
@@ -4351,8 +4354,9 @@ def _fetch_industry_constituents(name):
         return {"error": f"finviz fetch failed: {str(e)[:200]}"}
     rows = []
     if df is not None and len(df):
-        for _, r in df.iterrows():
-            tk = str(r.get("Ticker") or "").strip()
+        # finvizfinance folds the logo-fallback letter into the ticker text.
+        tickers = normalize_screener_tickers(df.get("Ticker", []))
+        for tk, (_, r) in zip(tickers, df.iterrows()):
             if not tk:
                 continue
             rows.append({
