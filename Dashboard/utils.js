@@ -8,7 +8,7 @@
 
   // Semantic release tag shown in sidebar footer. Bump on meaningful releases.
   // Cache-busting is handled separately by dashboard_server.py (mtime injection).
-  const VERSION = 'V4.129.0';
+  const VERSION = 'V4.131.12';
 
   // V1.71.x — group field enables sectioned sidebar layout
   const NAV_ITEMS = [
@@ -18,7 +18,7 @@
     { id: 'break-news',href: 'break-news.html',icon: 'radio',            i18n: 'nav_break_news',zh: '突發辯論',   group: 'market' },
     { id: 'mood',      href: 'mood.html',      icon: 'gauge',            i18n: 'nav_mood',      zh: '市場氛圍',   group: 'market' },
     { id: 'intraday-eval', href: 'intraday-eval.html', icon: 'crosshair', i18n: 'nav_intraday_eval', zh: '盤中', group: 'market' },
-    { id: 'x-kol',     href: 'x-kol.html',     icon: 'megaphone',        i18n: 'nav_x_kol',     zh: 'X KOL',      group: 'market' },
+    { id: 'x-kol',     href: 'x-kol.html',     icon: 'wind',             i18n: 'nav_x_kol',     zh: '風向',       group: 'market' },
 
     { id: 'momentum',  href: 'momentum.html',  icon: 'trending-up',      i18n: 'nav_momentum',  zh: '動能選股',   group: 'stock' },
     { id: 'radar',     href: 'radar.html',     icon: 'radar',            i18n: 'nav_radar',     zh: '短期雷達',   group: 'stock' },
@@ -722,8 +722,8 @@
                 ? '額度由 quota broker 授權，它只派還有額度的一家，所以沒有「降級順序」可設。要改指派請編輯 <code>config/llm_config.json</code>。'
                 : 'Quota is authorised by the broker, which only ever assigns a provider that has quota — there is no fallback order to configure. Edit <code>config/llm_config.json</code> to change assignments.'}</div>
               <div>${isZh
-                ? '長條 = 該家最緊的窗口<strong>已用</strong>多少（越長越滿）；虛線是 broker 的硬保留線，越過它就不再派工。滑過任一家可看各窗口（5h / 週 / 本節）各自的長條、重置時間與今日花費。窗口百分比帶虛線底線的，代表該家只回報剩餘量、消費數字是推算的。'
-                : 'Each bar is how much of that provider\'s tightest window is <strong>used</strong> — longer means fuller; the dashed line is the broker hard reserve, past which nothing is dispatched. Hover a provider for a bar per window (5h / weekly / session), reset times and spend. A dotted-underlined percentage means that provider reports only what is left, so consumption was inferred.'}</div>
+                ? '長條 = 該家 <strong>5 小時窗口</strong>已用多少（越長越滿；沒有 5h 窗口的那家會標明退回哪個讀數）；虛線是 broker 的硬保留線，越過它就不再派工——派工看的是全部窗口的最緊值，不是這條長條。滑過任一家可看各窗口（5h / 週）各自的長條、重置時間與今日花費，`▸` 是長條讀的那個窗口。窗口百分比帶虛線底線的，代表該家只回報剩餘量、消費數字是推算的。'
+                : 'Each bar is how much of that provider\'s <strong>five-hour window</strong> is used — longer means fuller; a provider reporting no such window says which reading it fell back to. The dashed line is the broker hard reserve, past which nothing is dispatched — dispatch reads the tightest of all windows, not this bar. Hover a provider for a bar per window (5h / weekly), reset times and spend; `▸` is the window the bar reads. A dotted-underlined percentage means that provider reports only what is left, so consumption was inferred.'}</div>
               <div>${isZh
                 ? '花費只有本地帳本有（broker 不報金額）。呼叫次數上限只有在 broker 關掉或連不上時才是真的限制，所以平常不顯示。'
                 : 'Spend comes from the local ledger only — the broker does not report cost. The per-day call caps bind only when the broker is off or unreachable, so they stay hidden until then.'}</div>
@@ -806,10 +806,14 @@
     // not after opening a panel. So it is always on, and the gear now holds
     // only the explanation.
     //
-    // What each provider gets is a bar of its **tightest** window plus the
-    // individual windows underneath, because the headline min hides the thing
-    // you act on: claude at 54% is a weekly pool that will not move until
-    // Aug 13, while gemini at 78% sits beside a 5h window that refills tonight.
+    // What each provider gets is a bar of its **five-hour** window plus the
+    // individual windows underneath. It used to be the tightest window, which
+    // meant the bars silently changed meaning between providers and between
+    // days: on 2026-08-14 claude drew 45% from `weekly.fable`, one model's
+    // weekly pool, while the five-hour window it was actually spending sat at
+    // 8%. One window, the same one everywhere, and the rest in the hover card.
+    // Dispatch still reads the tightest of everything — that is the broker's
+    // call and `reserve_only` / `cooldown_until` still dim the row.
     //
     // Assignments still live in config/llm_config.json (Python scripts read it,
     // so it was never localStorage) and POST /api/llm-config still works; only
@@ -837,7 +841,14 @@
         const parts = String(b.name || '').split('.').map(seg => {
           if (seg === 'five_hour')  return '5h';
           if (seg === 'weekly')     return zh ? '週' : 'wk';
-          if (seg === 'session')    return zh ? '本節' : 'session';
+          // V4.130.0 — claude's five-hour window, which Claude Code's /usage
+          // calls "Current session" and the broker keys as `session`. Labelling
+          // it "本節" put the same measurement under two different words: agy's
+          // rows read `5h` and claude's did not, so the panel looked as though
+          // claude had no five-hour reading at all. Verified against the
+          // broker's snapshot history — the resets step 9:40am → 2:40pm →
+          // 7:40pm → 12:40am, exactly five hours apart.
+          if (seg === 'session')    return '5h';
           if (seg === 'all_models') return '';
           if (seg === 'claude_gpt') return 'gpt';
           if (seg === 'primary') {
@@ -958,7 +969,15 @@
         const used = has ? 100 - Number(remaining) : null;
         const width = has ? Math.max(0, Math.min(100, used)) : 0;
         let state = 'ok', flag = '';
-        if (info.cooldown_until)   { state = 'cool'; flag = zh ? '冷卻中' : 'cooldown'; }
+        // Only while the deadline is still ahead. The broker's `providers` row
+        // keeps the last cooldown after it lapses, so a bare truthiness test
+        // benched claude for six hours past its own reset on 2026-08-15 — through
+        // four runs the router had already dispatched to it. An unparseable value
+        // also reads as "not cooling": drawing a working provider as unusable is
+        // the worst mistake this panel can make, so the doubt goes that way.
+        const coolUntil = Date.parse(info.cooldown_until || '');
+        const cooling = Number.isFinite(coolUntil) && coolUntil > Date.now();
+        if (cooling)                { state = 'cool'; flag = zh ? '冷卻中' : 'cooldown'; }
         else if (info.reserve_only) { state = 'cool'; flag = zh ? '保留區' : 'reserve'; }
         else if (has && reserveLine !== null && width >= reserveLine) {
           state = 'low'; flag = zh ? '低於保留線' : 'below reserve';
@@ -978,17 +997,9 @@
         // The dot is rendered empty and painted by _paintLlmActive(); this
         // markup is rewritten every 30s from the quota poll, which is far too
         // slow to be a liveness indicator on its own.
-        // V4.129.0 — say which pool the number came from when there is more
-        // than one. agy meters Gemini and Claude/GPT models separately, and the
-        // headline is the pool the broker would actually route to; without this
-        // the bar reads as the provider's total and the four windows in the
-        // hover card look like they should average to it.
-        const poolNote = info.routable_pool
-          ? (zh ? `（依 ${info.routable_pool} 池）` : ` (from the ${info.routable_pool} pool)`)
-          : '';
-        return `<div class="sidebar-llm-prov sidebar-llm-${state}" data-llm-prov="${esc(model)}"
-                     title="${esc((zh ? `已用 ${pct(used)}／剩餘 ${pct(remaining)}`
-                                      : `${pct(used)} used / ${pct(remaining)} left`) + poolNote)}">
+        // V4.131.3 — remove native title tooltip so it doesn't conflict with
+        // the custom white hover card on the right (llmTipHTML).
+        return `<div class="sidebar-llm-prov sidebar-llm-${state}" data-llm-prov="${esc(model)}">
           <div class="sidebar-llm-prov-head">
             <span class="sidebar-llm-live" hidden></span>
             <span class="sidebar-llm-prov-name">${esc(model)}</span>
@@ -1014,8 +1025,12 @@
         // V4.129.0 — which windows the headline percentage was read from. A
         // provider with independent pools (agy) has windows the broker will not
         // route against at all, and they sit in this list looking exactly like
-        // the ones that bind. `▸` marks the pool the broker would use.
-        const pool = info.routable_pool ? String(info.routable_pool) : '';
+        // the ones that bind.
+        // V4.130.0 — `▸` marks the window the sidebar bar is drawing (the
+        // five-hour one), falling back to the routing pool for a provider that
+        // reports no such window. This list is where that number is checked, so
+        // the mark belongs on the row it came from.
+        const pool = String(info.headline_bucket || info.routable_pool || '');
         const inPool = (b) => {
           if (!pool) return false;
           const n = String(b.name || '');
@@ -1028,7 +1043,9 @@
           const raw = String(b.reset_label || '').trim();
           const routable = inPool(b);
           const tip = [
-            routable ? (zh ? '目前路由的池' : 'the pool being routed to') : '',
+            routable ? (info.headline_bucket
+                         ? (zh ? '側欄長條讀的就是這個窗口' : 'the window the sidebar bar draws')
+                         : (zh ? '目前路由的池' : 'the pool being routed to')) : '',
             u.derived ? (zh ? '由剩餘量推算' : 'derived from remaining') : '',
             raw,
           ].filter(Boolean).join(' · ');

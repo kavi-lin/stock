@@ -270,10 +270,15 @@ def _protocol_model_for(name):
     return PROTOCOL_MODEL.get(name, PROTOCOL_MODEL_DEFAULT)
 
 
-def _protocol_command(model, prompt, claude_model=None, timeout_sec=None):
+def _protocol_command(model, prompt, claude_model=None, timeout_sec=None, agy_model=None):
     """Build the CLI argv for running an agentic protocol on `model`.
     The stdout reader just pipes to the log, so only the command differs.
     `claude_model` (when truthy) pins `claude --model` for tier control.
+    `agy_model` (when truthy) pins `agy --model`, and unlike `claude_model` it
+    is not about tier: agy meters its Gemini models and its Claude/GPT models in
+    two pools that refill independently, so the broker reserves against one pool
+    and this is what keeps the run inside it. Without it agy uses whatever model
+    is selected in its own TUI, which no reservation covers.
     `timeout_sec` is this protocol's budget; a CLI with its own shorter default
     must be told about it or that default silently wins."""
     if model == "gemini":
@@ -302,6 +307,8 @@ def _protocol_command(model, prompt, claude_model=None, timeout_sec=None):
         # stays as the backstop for a child that ignores its own deadline.
         if timeout_sec:
             cmd += ["--print-timeout", f"{max(60, int(timeout_sec) - 30)}s"]
+        if agy_model:
+            cmd += ["--model", agy_model]
         return cmd
     if model == "codex":
         return [CODEX_BIN, "exec", "--json", "-C", ROOT,
@@ -324,6 +331,11 @@ def _protocol_command(model, prompt, claude_model=None, timeout_sec=None):
 
 def _select_protocol_model(name=None):
     """Resolve the launch-time provider AND reserve its quota. Returns (model, lease).
+
+    Which model to run is on the lease, not in this tuple — read it with
+    `_mrouter.broker_gate.assigned_model(lease)`. It is empty for every provider
+    whose quota is a single pool, and filled in for agy, where the reservation
+    is against one of two pools and only the model decides which one is spent.
 
     `name` is the protocol being launched. It sizes the reservation and keys the
     ledger, because a `triage` run and an `invest` run are not the same order of
@@ -436,6 +448,11 @@ def _adapt_protocol_prompt(model, prompt, name=None):
         "並說明卡在哪一步。**禁止為了讓檢查通過而修改輸入**（例如複製舊檔改日期、"
         "補一個空的快取檔、把數字改成能過的值）——「讓 gate 過」與「達成 gate 想確認的事」"
         "是兩件不同的事，只有後者算完成。跑不完就回報跑不完，那是可接受的結果。")
+    lines.append(
+        "不可變機器：本任務是 Protocol 執行（不是 Dev Session）。專案程式碼（包括 "
+        "`investment/scripts/`、`skills/`、`scripts/` 等路徑下的所有 `.py` 腳本）皆為只讀基礎建設，"
+        "**嚴禁使用檔案編輯/寫入工具修改任何專案程式碼**。若腳本執行報錯或格式不合，"
+        "代表你傳入的 JSON 格式或參數有誤，請檢查並修正你的輸入資料，絕對不可修改腳本本體。")
     return "\n".join(lines) + "\n\n" + prompt
 # Global default (25 min); news DIGEST normally finishes in 1-2 min, so give it
 # a tighter ceiling (12 min) — past runs that crossed 10 min have all been
@@ -1167,11 +1184,17 @@ def run_protocol(name, params=None):
             return
         prompt = _adapt_protocol_prompt(proto_model, prompt, name)
         claude_model = (_protocol_model_for(name) if proto_model == "claude" else None)
+        # V4.129.0 — the broker's assigned model for agy. Not a tier choice like
+        # `claude_model`: agy's two quota pools refill independently, the hold is
+        # against one of them, and only `--model` decides which one the run
+        # actually spends.
+        agy_model = (_mrouter.broker_gate.assigned_model(proto_lease)
+                     if (MODEL_ROUTER_AVAILABLE and proto_model == "gemini") else None)
         # V4.114.0 — publish the winning provider so the run is attributable
         # everywhere it surfaces: the queue pill, the recent-runs line, and the
         # rendered report. The broker picks the provider at launch, so the only
         # place this is knowable is here.
-        model_tier = claude_model or "cli-default"
+        model_tier = claude_model or agy_model or "cli-default"
         with _protocol_lock:
             _protocol_state["model"]      = proto_model
             _protocol_state["model_tier"] = model_tier
@@ -1183,7 +1206,7 @@ def run_protocol(name, params=None):
         telemetry_usage = {}
         try:
             lf = open(log_path, "w", buffering=1)
-            lf.write(f"=== protocol={name} model={proto_model}:{claude_model or 'cli-default'} prompt={prompt!r} started={_now_iso()} ===\n")
+            lf.write(f"=== protocol={name} model={proto_model}:{model_tier} prompt={prompt!r} started={_now_iso()} ===\n")
             lf.flush()
             # stream-json: every event is one line of JSON → naturally line-buffered.
             # Intentionally NOT passing --include-partial-messages: those emit char-by-char
@@ -1192,7 +1215,7 @@ def run_protocol(name, params=None):
             # arrive at block-level completion, which is plenty for event tracking.
             proc = subprocess.Popen(
                 _protocol_command(proto_model, prompt, claude_model=claude_model,
-                                  timeout_sec=timeout_sec),
+                                  timeout_sec=timeout_sec, agy_model=agy_model),
                 cwd=ROOT,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
@@ -2144,6 +2167,148 @@ _X_KOL_CACHE = {"at": 0.0, "prices": {}, "identity": {}, "unanalyzable": {},
 _X_KOL_PRICE_TTL_SEC = 600
 _X_KOL_REFRESH_LOCK = threading.Lock()
 _X_KOL_REFRESHING = {"active": False}
+_X_KOL_COLLECT_LOCK = threading.Lock()
+
+# ── 風向 (Wind) keyword heat ────────────────────────────────────────────
+# A scan is a subprocess that fans out across several paid APIs, so the manual
+# button gets the same single-flight lock the X KOL sweep has.
+_WIND_SCAN_LOCK = threading.Lock()
+
+
+def _wind_daemon_status(config):
+    """Heartbeat of the resident dispatcher, plus whether it is still alive.
+
+    `os.kill(pid, 0)` alone is not enough: PIDs are recycled, and a heartbeat
+    left behind by a daemon that died days ago would otherwise resurrect as
+    whatever process inherited its number — the page would show a countdown for
+    someone else's `ps`. So confirm the command line still belongs to us.
+    """
+    from scripts.wind import dispatch as _wdispatch
+
+    hb = _wdispatch.read_heartbeat(config)
+    if not hb:
+        # No heartbeat is NOT the same as no daemon: a dispatcher started before
+        # V4.131.8, or one whose heartbeat was deleted, is still out there
+        # spending the daily budget. Say "running, blind" rather than "stopped" —
+        # the wrong one of those two makes the user start a second daemon.
+        try:
+            out = subprocess.run(["pgrep", "-f", "scripts/wind/dispatch.py"],
+                                 capture_output=True, text=True, timeout=5)
+            pids = [int(x) for x in (out.stdout or "").split() if x.isdigit()]
+        except (OSError, subprocess.SubprocessError, ValueError):
+            pids = []
+        if not pids:
+            return None
+        return {"alive": True, "state": "unknown", "pid": pids[0], "no_heartbeat": True}
+
+    pid, alive = hb.get("pid"), False
+    if isinstance(pid, int) and pid > 0 and hb.get("state") != "stopped":
+        try:
+            os.kill(pid, 0)
+        except (ProcessLookupError, PermissionError, OSError):
+            alive = False
+        else:
+            try:
+                out = subprocess.run(["ps", "-p", str(pid), "-o", "command="],
+                                     capture_output=True, text=True, timeout=5)
+                alive = "wind/dispatch.py" in (out.stdout or "")
+            except (OSError, subprocess.SubprocessError):
+                alive = False   # cannot confirm → do not claim it is running
+    return {**hb, "alive": alive}
+
+
+def _wind_terms_payload(top=60):
+    """Queue head + latest scans. Pure read — never dispatches a scan."""
+    from pathlib import Path
+
+    from scripts.wind import budget as _wbudget
+    from scripts.wind import terms as _wterms
+
+    config = _wbudget.load_config()
+    root = Path(ROOT)
+    data = _wterms.load_terms(root / config["heat"]["terms_path"])
+    ranked = _wterms.eligible(data, config, ignore_cooldown=True)
+
+    rows = []
+    for key, entry in ranked[:top]:
+        rows.append({
+            "key": key,
+            "term": entry.get("term"),
+            "display": entry.get("display"),
+            "kind": entry.get("kind"),
+            "related_tickers": entry.get("related_tickers") or [],
+            "score": entry.get("score"),
+            "surprise": entry.get("surprise"),
+            "mentions": entry.get("mentions"),
+            "scan_state": entry.get("scan_state"),
+            "cooldown_until": entry.get("cooldown_until"),
+            "last_scan_path": entry.get("last_scan_path"),
+            "first_surfaced_at": entry.get("first_surfaced_at"),
+            "sources": (entry.get("sources") or [])[:4],
+        })
+
+    scans_dir = root / config["heat"]["scans_dir"]
+    scans = []
+    for scan_path in sorted(scans_dir.glob("wind_scan_*.json"),
+                            key=lambda p: p.stat().st_mtime, reverse=True)[:12]:
+        try:
+            with open(scan_path, encoding="utf-8") as fp:
+                doc = json.load(fp)
+        except (OSError, json.JSONDecodeError):
+            continue
+        scans.append({
+            "id": scan_path.stem,
+            "key": doc.get("key"),
+            "display": doc.get("display"),
+            "kind": doc.get("kind"),
+            "scanned_at": doc.get("scanned_at"),
+            "kept": (doc.get("filter") or {}).get("kept"),
+            "dropped": (doc.get("filter") or {}).get("dropped"),
+            "degraded": (doc.get("engine") or {}).get("degraded"),
+            "crowding": doc.get("crowding"),
+            "clusters": (doc.get("clusters") or [])[:3],
+        })
+
+    return {
+        "updated_at": data.get("updated_at"),
+        "surface_min_score": data.get("surface_min_score"),
+        "tracked": len(data.get("terms") or {}),
+        "queue": rows,
+        "scans": scans,
+        "budget": _wbudget.status_line(config),
+        "scans_left_today": _wbudget.scans_left_today(config),
+        "daemon": _wind_daemon_status(config),
+    }
+
+
+def _wind_scan_once(term_key=None):
+    """Run one dispatcher tick. `term_key` forces a specific container key."""
+    from scripts.wind import budget as _wbudget
+    from scripts.wind import dispatch as _wdispatch
+
+    config = _wbudget.load_config()
+    return _wdispatch.tick(config, force_key=term_key)
+
+
+def _x_kol_collect_once():
+    """Run one real incremental X KOL sweep and invalidate derived caches."""
+    from scripts.x_kol import budget as _xbudget
+    from scripts.x_kol import collect as _xcollect
+
+    config = _xbudget.load_config()
+    result = _xcollect.sweep(config, dry_run=False)
+    with _X_KOL_REFRESH_LOCK:
+        _X_KOL_CACHE["at"] = 0.0
+        _X_KOL_CACHE["attempted"] = set()
+    return {
+        "started_at": result.get("started_at"),
+        "ended_at": result.get("ended_at"),
+        "new_posts": result.get("new_posts", 0),
+        "roster_size": result.get("roster_size", 0),
+        "per_handle": result.get("per_handle", []),
+        "errors": result.get("errors", []),
+        "budget_stopped": bool(result.get("budget_stopped")),
+    }
 
 
 def _x_kol_refresh_prices(symbols):
@@ -5003,6 +5168,12 @@ class Handler(SimpleHTTPRequestHandler):
             except Exception as e:
                 return self._json(500, {"error": f"x-kol heat failed: {e}"})
 
+        if path == "/api/wind/terms":
+            try:
+                return self._json(200, _wind_terms_payload())
+            except Exception as e:
+                return self._json(500, {"error": f"wind terms failed: {e}"})
+
         if path == "/api/break-news/feed":
             if not BREAK_NEWS_AVAILABLE:
                 return self._json(503, {"error": "break_news module not loaded"})
@@ -5492,6 +5663,51 @@ class Handler(SimpleHTTPRequestHandler):
 
     def do_POST(self):
         path = urlparse(self.path).path
+
+        # ── X KOL collection ────────────────────────────────────────────
+        # The page's refresh button is an explicit user action. Keep the
+        # collector out of GET /api/x-kol/heat so ordinary page loads remain
+        # pure reads, and reject a second click while the sweep is in flight.
+        if path == "/api/x-kol/collect":
+            if not _X_KOL_COLLECT_LOCK.acquire(blocking=False):
+                return self._json(409, {"error": "an X KOL sweep is already running"})
+            try:
+                try:
+                    return self._json(200, _x_kol_collect_once())
+                except Exception as e:
+                    # Do not echo exception text: an upstream error could
+                    # contain request details. The server log has the type,
+                    # while the UI gets a stable, non-secret error message.
+                    sys.stderr.write(f"[x-kol] collect failed: {type(e).__name__}\n")
+                    return self._json(500, {
+                        "error": f"x-kol collect failed ({type(e).__name__})"
+                    })
+            finally:
+                _X_KOL_COLLECT_LOCK.release()
+
+        # ── 風向 manual scan ─────────────────────────────────────────────
+        # Runs ONE dispatcher tick. Same discipline as the X KOL collector: an
+        # explicit user action, single-flight, and it never triggers 分析 — the
+        # only thing it launches is a read-only social scan.
+        if path == "/api/wind/scan":
+            length = int(self.headers.get("Content-Length", 0))
+            try:
+                body = json.loads(self.rfile.read(length).decode("utf-8")) if length else {}
+            except Exception as e:
+                return self._json(400, {"error": f"invalid JSON: {e}"})
+            term_key = str(body.get("key") or "").strip() or None
+            if term_key and not re.fullmatch(r"[a-z_]+:[^\s/\\]{1,80}", term_key):
+                return self._json(400, {"error": "bad term key"})
+            if not _WIND_SCAN_LOCK.acquire(blocking=False):
+                return self._json(409, {"error": "a wind scan is already running"})
+            try:
+                try:
+                    return self._json(200, _wind_scan_once(term_key))
+                except Exception as e:
+                    sys.stderr.write(f"[wind] scan failed: {type(e).__name__}\n")
+                    return self._json(500, {"error": f"wind scan failed ({type(e).__name__})"})
+            finally:
+                _WIND_SCAN_LOCK.release()
 
         # ── X KOL promotion gate ────────────────────────────────────────
         # Records a human decision. Deliberately does NOT launch 分析 — the

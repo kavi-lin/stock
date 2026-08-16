@@ -30,6 +30,8 @@ def _command_outputs(log: str, cmd_pattern: str) -> str:
         except ValueError:
             continue
         su = (d.get("step_update") or {})
+        if su and su.get("state") == "ACTIVE":
+            continue
         ti = (su.get("tool_info") or {})
         params = ti.get("parameters") or {}
         item = d.get("item") or {}
@@ -60,19 +62,9 @@ def _run_window(log_path):
     return start, end + datetime.timedelta(minutes=2)
 
 
-def _executed_commands(log: str) -> str:
-    """只回傳引擎實際下的指令，不含它讀進 context 的檔案內容。
-
-    掃全文會把 protocol 裡「不得用 `h.pop()`」那句禁令本身算成一次手寫痕跡——
-    引擎 `sed` 出 protocol 全文，輸出進了 log，於是讀了規則反而被記一筆違規。
-    命中的必須是它做了什麼，不是它看了什麼，所以 command 欄位要取、輸出欄位
-    (`aggregated_output`) 一律不取。
-
-    兩種 log 形狀：
-      gemini  {"step_update": {"tool_info": {"parameters": {"CommandLine": ...}}}}
-      codex   {"item": {"type": "command_execution", "command": ...}}
-    """
-    out = []
+def _subagent_invocations(log: str):
+    """Audit subagent fan-out from invoke_subagent calls."""
+    subagents = []
     for line in log.splitlines():
         line = line.strip()
         if not line.startswith("{"):
@@ -81,16 +73,70 @@ def _executed_commands(log: str) -> str:
             d = json.loads(line)
         except ValueError:
             continue
-        params = (((d.get("step_update") or {}).get("tool_info") or {}).get("parameters") or {})
-        for cmd in (params.get("CommandLine"), params.get("command"),
-                    (d.get("item") or {}).get("command")):
+        su = d.get("step_update") or {}
+        if su and su.get("state") == "ACTIVE":
+            continue
+        si = su.get("subagent_info") or {}
+        subs = si.get("subagents") or []
+        for s in subs:
+            subagents.append(s)
+    return subagents
+
+
+def _executed_commands(log: str) -> tuple[str, int]:
+    """只回傳引擎實際下的指令，不含它讀進 context 的檔案內容。
+
+    掃全文會把 protocol 裡「不得用 `h.pop()`」那句禁令本身算成一次手寫痕跡——
+    引擎 `sed` 出 protocol 全文，輸出進了 log，於是讀了規則反而被記一筆違規。
+    命中的必須是它做了什麼，不是它看了什麼，所以 command 欄位要取、輸出欄位
+    (`aggregated_output`) 一律不取。
+
+    三種 log 形狀：
+      gemini  {"step_update": {"tool_info": {"parameters": {"CommandLine": ...}}}}
+      codex   {"item": {"type": "command_execution", "command": ...}}
+      claude  {"type": "assistant", "message": {"content": [
+                  {"type": "tool_use", "name": "Bash", "input": {"command": ...}}]}}
+
+    claude 那支到 V4.131.12 才補上，補之前它一路落進下面的全文 fallback：
+    `invest_20260807_163616.log` 因此報出「decision_engine 呼叫 44 次」——數到的是
+    引擎讀進 context 的程式碼內容，不是它下的指令。fallback 有印警語所以不算靜默，
+    但一個永遠走 fallback 的形狀等於這支 auditor 對 claude 從來沒生效過。
+    """
+    out, truncated = [], 0
+    for line in log.splitlines():
+        line = line.strip()
+        if not line.startswith("{"):
+            continue
+        try:
+            d = json.loads(line)
+        except ValueError:
+            continue
+        su = d.get("step_update") or {}
+        # Gemini / agy logs emit both ACTIVE and DONE states for each tool execution.
+        # Only count DONE to avoid 2x overcounting.
+        if su and su.get("state") == "ACTIVE":
+            continue
+        params = (su.get("tool_info") or {}).get("parameters") or {}
+        cands = [params.get("CommandLine"), params.get("command"),
+                 (d.get("item") or {}).get("command")]
+        # claude：一則 assistant 訊息可含多個 tool_use block，只取 Bash 的 command。
+        # 取 Read/Write 的 file_path 或 content 會把「它看了什麼」混進來，正是本函式
+        # docstring 要排除的東西。
+        if d.get("type") == "assistant":
+            for block in ((d.get("message") or {}).get("content") or []):
+                if isinstance(block, dict) and block.get("type") == "tool_use" \
+                        and block.get("name") == "Bash":
+                    cands.append((block.get("input") or {}).get("command"))
+        for cmd in cands:
             if isinstance(cmd, str):
                 out.append(cmd)
+                if cmd.endswith("…") or cmd.endswith("..."):
+                    truncated += 1
     if not out:
         # 未知 log 形狀：寧可偽陽也不要漏，但要說出來，否則讀數會被當成乾淨的。
         out.append(log)
         print("    (⚠ 認不得的 log 形狀，以下手寫計數掃了全文，可能含引擎讀到的檔案內容)")
-    return "\n".join(out)
+    return "\n".join(out), truncated
 
 
 def main():
@@ -100,7 +146,7 @@ def main():
     if not os.path.isabs(log_path):
         log_path = os.path.join(ROOT, log_path)
     log = open(log_path, encoding="utf-8", errors="replace").read()
-    cmds = _executed_commands(log)
+    cmds, truncated_cmds = _executed_commands(log)
 
     hist = json.load(open(HIST, encoding="utf-8"))
     # 挑「本次 run 蓋章的那筆」，不是 hist[-1]。之後又跑了別的 run 的話，hist[-1]
@@ -167,6 +213,12 @@ def main():
     }
     for k, v in hand.items():
         print(f"    {k:22s}: {v} {'✓' if v == 0 else '← 手寫痕跡'}")
+    # 截斷警語掛在這裡而不是只掛 Gate 3：上面這三個計數是「零 = 乾淨」，而被
+    # 截掉結尾的指令正是能把違規藏進省略號裡的那種。只在 decision_engine 數到 0
+    # 時才示警，等於只在偏低到見底時才說話——偏低但非零一樣是偏低。
+    if truncated_cmds:
+        print(f"    ⚠ {truncated_cmds} 條指令被串流日誌截斷結尾（agy 會截長指令）——"
+              f"以上四項計數皆可能偏低，0 不等於乾淨")
     rl = len(re.findall(r"--replace-last", cmds))
     print(f"    {'--replace-last 使用':22s}: {rl} "
           f"{'（用了受控修法路徑）' if rl else ''}")
@@ -233,8 +285,13 @@ def main():
         print(f"    artifact final_score: {a.get('final_score')}  "
               f"export: {trade.get('final_score')}")
         print(f"    逐欄差異: {diffs if diffs else '無 ✓'}")
-    de_calls = len(re.findall(r"decision_engine\.py", cmds))
-    print(f"    decision_engine 呼叫次數(log): {de_calls}")
+    # 錨在「被 python 叫起來」而不是「字串有出現」：裸的 `decision_engine.py` 會把
+    # `sed -n 1,120p investment/scripts/decision_engine.py` 這種**讀**引擎的動作算成
+    # 一次呼叫（invest_20260807_163616 實測 4 → 3，掉的正是那條 sed）。同一個
+    # 「做了什麼 ≠ 看了什麼」的分界，本函式 docstring 已為指令欄位立過一次。
+    de_calls = len(re.findall(r"python3?\s+\S*decision_engine\.py", cmds))
+    trunc_note = f"（⚠ {truncated_cmds} 條指令被截斷，計數可能偏低）" if truncated_cmds else ""
+    print(f"    decision_engine 呼叫次數(log): {de_calls}{trunc_note}")
 
     # ── 5. 既有閘 ────────────────────────────────────────────────────────
     print("\n[5] V4.116.x 既有閘")
@@ -249,6 +306,16 @@ def main():
               f"{'有' if ovr else '無'}")
     drift = len(re.findall(r"\[validate_session_export\] ✗ schema drift", log))
     print(f"\n    schema drift 輪數: {drift}")
+
+    # ── 6. Subagent Fan-out ──────────────────────────────────────────────
+    print("\n[6] Subagent Fan-out (5-Lane + Red Team)")
+    subagents = _subagent_invocations(log)
+    if subagents:
+        print(f"    subagent 啟動總數: {len(subagents)}")
+        for i, s in enumerate(subagents, 1):
+            print(f"      {i}. role: {s.get('role')} (type: {s.get('type_name')})")
+    else:
+        print("    (log 中未解析到 invoke_subagent subagents 列表)")
 
 
 if __name__ == "__main__":

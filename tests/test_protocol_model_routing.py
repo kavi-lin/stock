@@ -2,6 +2,7 @@
 """Regression contract for Dashboard agentic protocol model routing."""
 from __future__ import annotations
 
+import inspect
 import json
 import os
 import sys
@@ -96,6 +97,51 @@ for _p in ds.PROTOCOL_PROMPTS:
     _v = int(_c[_c.index("--print-timeout") + 1][:-1])
     check(f"gemini.budget_reaches_child.{_p}", _v >= min(_budget, 60) - 30,
           f"budget={_budget} child={_v}")
+
+# ── V4.129.0: agy's assigned model has to reach the CLI ─────────────────────
+# agy meters its Gemini models and its Claude/GPT models in two pools that
+# refill independently. The broker reserves against ONE of them and hands back
+# the model that lands there; without `--model` the CLI runs whatever is
+# selected in its own TUI, so the hold and the spend can be in different pools.
+# Before V4.129.0 nothing here passed a model at all, which is also why one
+# exhausted pool used to take the whole provider out of routing.
+_amcmd = ds._protocol_command("gemini", "RUN", agy_model="gemini-3.6-flash-medium",
+                              timeout_sec=3600)
+check("gemini.model_flag_present", "--model" in _amcmd, repr(_amcmd))
+check("gemini.model_flag_value",
+      _amcmd[_amcmd.index("--model") + 1] == "gemini-3.6-flash-medium", repr(_amcmd))
+check("gemini.model_absent_when_unassigned", "--model" not in ds._protocol_command(
+    "gemini", "RUN", timeout_sec=3600),
+      "no assignment must leave the CLI's own selection alone")
+# The flag is agy's; the other providers must not grow one by accident.
+check("codex.no_agy_model",
+      "--model" not in ds._protocol_command("codex", "RUN", agy_model="gemini-3.6-flash-medium"),
+      "agy_model is agy's; it must not leak into another CLI's argv")
+
+# Wiring, not just behaviour (MAINTENANCE 2c member #7): the assertions above
+# call `_protocol_command` directly, so deleting `agy_model=` from the launcher
+# would leave every one of them green while no run ever pinned a model again.
+# `run_protocol` spawns a thread and a subprocess, so its source is what can be
+# checked here — a static read, but it is anchored on the real call site.
+_launcher_src = inspect.getsource(ds.run_protocol)
+check("gemini.model_wired_into_launcher", "agy_model=agy_model" in _launcher_src,
+      "run_protocol must pass the assigned model to _protocol_command")
+check("gemini.model_read_from_lease_in_launcher",
+      "assigned_model(proto_lease)" in _launcher_src,
+      "the model has to come off the lease that reserved the pool, not from config")
+
+# The value itself comes off the lease, and `assigned_model` is the only reader.
+# An empty lease (broker off, or a single-pool provider) must produce no flag
+# rather than an empty one, which agy would reject.
+check("gemini.assigned_model_empty_is_none",
+      ds._mrouter.broker_gate.assigned_model(None) == "",
+      "no lease means no assignment")
+check("gemini.assigned_model_reads_lease",
+      ds._mrouter.broker_gate.assigned_model(
+          type("L", (), {"model": "gemini-3.6-flash-medium"})()) == "gemini-3.6-flash-medium")
+check("gemini.assigned_model_tolerates_old_client",
+      ds._mrouter.broker_gate.assigned_model(type("L", (), {})()) == "",
+      "a vendored client predating the field is a stale sync, not a crash")
 
 # ── V4.116.2: every protocol with a documented gate must be registered ───────
 # `invest` was missing from PROTOCOL_VALIDATORS for its whole life while
@@ -196,8 +242,16 @@ check("allowlist.explicit_null_unrestricted",
 # The loader is a whitelist, not a merge — a key it was not taught about is
 # dropped silently and the allowlist never takes effect. Same trap the rolling
 # window budget hit in V4.84.0, so it is pinned end-to-end against the real file.
+# Compared against the file itself, not a literal copy of today's roster: which
+# CLIs may run invest is a policy decision that legitimately changes (V4.131.12
+# added gemini after the SNDK trial), and a second hardcoded copy here would only
+# prove the two literals were typed alike. Reading the raw JSON still catches the
+# trap this guards — a dropped key makes the loader return None (unrestricted)
+# while the file says a list, and that mismatch fails.
+with open(ROOT / "config/llm_config.json", encoding="utf-8") as _f:
+    _raw_invest = json.load(_f)["protocol_providers"]["invest"]
 check("allowlist.survives_loader",
-      _mr.protocol_provider_allowlist(_mr.load_llm_config(), "invest") == ["claude", "codex"],
+      _mr.protocol_provider_allowlist(_mr.load_llm_config(), "invest") == _raw_invest,
       repr(_mr.protocol_provider_allowlist(_mr.load_llm_config(), "invest")))
 
 # V4.114.0 — the preamble is no longer codex-only, and it now carries the two

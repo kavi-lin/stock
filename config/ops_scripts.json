@@ -121,6 +121,26 @@
       "artifact_globs": []
     },
     {
+      "id": "wind_scan",
+      "name": "風向 關鍵字掃描",
+      "cmd": "python3 scripts/wind/dispatch.py --once",
+      "desc": "一次派工：重算關鍵字熱度 → 取 surprise 最高者跑 last30days 社群掃描 → 冷卻 24h。--dry-run 先看會掃誰與花費；--interval 3600 常駐。探索層，產出不進任何評分",
+      "cadence": "on_demand",
+      "artifact_globs": [
+        "news/wind_logs/wind_terms.json",
+        "news/wind_logs/wind_scan_*.json"
+      ],
+      "auto": false
+    },
+    {
+      "id": "wind_test",
+      "name": "風向 回歸測試",
+      "cmd": "python3 scripts/wind/test_wind.py",
+      "desc": "容器衰減/surprise、三道佇列閘、冷卻、預算雙上限、後濾與語言桶、daemon 心跳（15 cases；改 scripts/wind/ 後必跑）",
+      "cadence": "on_demand",
+      "artifact_globs": []
+    },
+    {
       "id": "llm_review",
       "name": "決策日曆 LLM Review",
       "cmd": "(Claude protocol — POST /api/protocol-queue {\"name\":\"llm_review\"})",

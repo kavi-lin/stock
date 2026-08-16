@@ -1,0 +1,62 @@
+{
+  "_doc": "風向（Wind）keyword-heat container + last30days dispatcher. Exploration layer — output NEVER enters investment_protocol decisions (buy_threshold / position_size / verdict) and NEVER writes Dashboard/market_mood.json atmosphere indicators or nexus/claim_ledger.jsonl. Lead-lag criteria are pre-registered in docs/wind_evaluation_criteria.md and must not be tuned after seeing data.",
+
+  "budget": {
+    "_doc": "Hard USD ceiling for social scans. Unlike the X KOL collector (billed per resource returned), a last30days scan bills per SCAN across several data providers, so cost IS knowable before the call — check() therefore pre-authorizes one scan at price_per_scan_usd. Cumulative, never auto-resets; raise total_usd deliberately or run `budget.py --reset`. price_per_scan_usd covers paid retrieval sources only; planner/rerank/fun judge use broker-selected logged-in CLI subscriptions and consume broker quota, not an external reasoning API key. Recalibrate retrieval cost after the first 10 real scans against provider dashboards.",
+    "total_usd": 10.0,
+    "price_per_scan_usd": 0.05,
+    "reserve_usd": 0.25
+  },
+
+  "heat": {
+    "_doc": "Decay weights, hand-calibrated like the rest of the exploration layer — no agent may auto-tune them. half_life_days is deliberately SHORTER than x_kol.json's 3.0: a break-news keyword's relevance decays faster than a KOL's thematic conviction. kind_weight lets a resolved ticker outrank a vague theme at equal mention count. materiality_scale maps bn triage.materiality_score (observed range ~2.5-2.75 on straight news) onto a multiplier.",
+    "half_life_days": 2.0,
+    "surface_min_score": 1.0,
+
+    "_ranking_doc": "RAW SCORE IS NOT THE RANKING KEY. Measured 2026-08-16 on 14 days of real bn_*.json, ranking by raw score returns NVDA / AI capex / SPY / AMZN / MSFT / QQQ — i.e. it measures coverage VOLUME, and the permanently-covered mega-caps win every tick forever. 風向 is about CHANGE, so terms are ranked by `surprise` = (recent mention rate) / (baseline mention rate), computed as the ratio of a fast-decayed score to a slow-decayed one, both normalized to a per-day rate. A constantly-covered name scores ~1.0; a term that just accelerated scores well above it. surface_min_score still gates on the RAW score, so a single mention of an obscure term cannot win on ratio alone.",
+    "baseline_half_life_days": 10.0,
+    "surprise_epsilon": 0.05,
+
+    "_min_mentions_doc": "Corroboration gate. `mentions` is counted AFTER url_hash dedupe, so it is the number of DISTINCT articles/posts carrying the term. Without this, ranking by surprise inverts the raw-score problem: a single listicle naming IYR / JEPI / QYLD / XYLD once each hands all four a top slot, because one mention against a near-zero baseline is maximal acceleration. Three independent carriers is the same bar the Nexus layer already applies before promoting a claim.",
+    "min_mentions": 3,
+
+    "_stop_terms_doc": "Broad-market proxies are never the SUBJECT of a story — they are the backdrop every macro article names. Excluded from the queue only; they still accumulate and remain visible in the table. Sector ETFs are deliberately NOT here: XLE can genuinely be what a story is about.",
+    "stop_terms": ["SPY", "QQQ", "DIA", "IWM", "VOO", "VTI", "VIX", "SPX", "NDX"],
+    "kind_weight": {
+      "ticker": 1.0,
+      "cashtag": 1.0,
+      "tech_keyword": 0.7,
+      "theme": 0.5
+    },
+    "credibility_weight": {
+      "HIGH": 1.0,
+      "MEDIUM": 0.7,
+      "LOW": 0.4
+    },
+    "materiality_scale": 0.4,
+    "min_term_chars": 3,
+    "lookback_days": 14,
+    "terms_path": "news/wind_logs/wind_terms.json",
+    "scans_dir": "news/wind_logs"
+  },
+
+  "dispatch": {
+    "_doc": "One scan per tick at most. A quiet hour costs $0 — the same 'no work, no spend' property the X KOL collector already proved. cooldown_hours starts when a scan completes; rescan_score_jump is the fraction by which a term's score must exceed its score_at_scan to break cooldown early (0.5 = +50%). max_scans_per_day is a second ceiling independent of the USD cap. reasoning_agents is an allowlist; the quota broker selects the currently available logged-in CLI for the whole scan. Broker unavailable/refused and malformed CLI JSON fail closed instead of degrading to local-score.",
+    "interval_sec": 3600,
+    "max_scans_per_day": 8,
+    "cooldown_hours": 24,
+    "rescan_score_jump": 0.5,
+    "scan_timeout_sec": 600,
+    "lookback_days": 14,
+    "sources": "x,reddit,grounding,youtube,github",
+    "relevance_floor": 0.15,
+    "engine_path": "~/.agents/skills/last30days/scripts/last30days.py",
+    "reasoning_agents": ["claude", "gemini", "codex"],
+    "reasoning_call_timeout_sec": 180,
+    "reasoning_estimated_input_tokens": 40000,
+    "reasoning_estimated_output_tokens": 8000,
+    "reasoning_reservation_ttl_sec": 900
+  },
+
+  "_excluded_sources_note": "tiktok and instagram are deliberately absent from dispatch.sources. Verified 2026-08-16 in the engine source: lib/tiktok.py:430 _profile_videos and lib/instagram.py:478 _user_reels fetch a creator's ENTIRE recent timeline and append it with only a video-id dedupe — there is no topic post-filter on either lane. In the AAOI sample run they contributed 7 of 9 Instagram items and 5 of 18 TikTok items that were wholly unrelated to the topic."
+}

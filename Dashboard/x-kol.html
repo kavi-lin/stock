@@ -58,6 +58,17 @@
       .xk-chip { font-family:'JetBrains Mono',monospace; font-size:9px; font-weight:700;
         padding:1px 5px; border-radius:4px; background:rgba(59,130,246,0.12); color:#60a5fa; }
       .xk-note { font-size:10px; color:var(--text-muted); line-height:1.6; }
+      .wd-grid { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:14px; }
+      @media (max-width:1100px) { .wd-grid { grid-template-columns:1fr; } }
+      .wd-surprise { font-family:'JetBrains Mono',monospace; font-weight:800; color:#f59e0b; }
+      .st-scanning { background:rgba(234,179,8,0.16);  color:#eab308; }
+      .st-scanned  { background:rgba(59,130,246,0.14); color:#60a5fa; }
+      .st-skipped  { background:rgba(161,161,170,0.10); color:var(--text-muted); }
+      .wd-scan { border-top:1px solid rgba(161,161,170,0.10); padding:10px 2px; font-size:11px; }
+      .wd-scan-head { display:flex; gap:8px; align-items:baseline; flex-wrap:wrap; margin-bottom:4px; }
+      .wd-scan-term { font-family:'JetBrains Mono',monospace; font-weight:800; color:#60a5fa; }
+      .wd-scan-sum { color:var(--text-main); line-height:1.55; }
+      .wd-kv { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-muted); }
     </style>
 </head>
 <body class="flex min-h-screen transition-all" data-page="x-kol">
@@ -66,9 +77,41 @@
 
     <main class="flex-1 ml-64 p-6 max-w-[1400px]">
       <div class="flex items-baseline gap-3 mb-1 flex-wrap">
-        <h1 class="text-xl font-black tracking-tight">X KOL 族群熱度</h1>
+        <h1 class="text-xl font-black tracking-tight">風向 — 關鍵字熱度 × KOL 族群</h1>
+        <span class="text-[10px] text-zinc-500" id="wd-updated">載入中…</span>
+        <span class="wd-kv" id="wd-daemon"></span>
+        <button id="wd-scan" class="xk-btn ml-auto" onclick="WIND.scan()">
+          <i data-lucide="radar" class="w-3 h-3 inline"></i> 掃描下一個
+        </button>
+      </div>
+      <p class="xk-note mb-4" style="max-width:80ch">
+        探索層。<strong>排序看的是 surprise(相對自身基線的加速度),不是絕對聲量</strong> —
+        用絕對聲量排,NVDA / SPY / QQQ 會永遠排第一,那量到的是覆蓋量不是風向。
+        關鍵字來自 Break News 已抽好的 <code>merged_entities</code> 與 X KOL cashtags。
+        領先性<strong>尚未驗證</strong>,判準已預先寫死在 <code>docs/wind_evaluation_criteria.md</code>,
+        過不了就砍。本頁不觸發任何 <code>分析</code>,產出也不進任何評分。
+      </p>
+
+      <div class="xk-bar" id="wd-bar"></div>
+
+      <div class="wd-grid mb-8">
+        <div class="xk-cluster" style="margin-bottom:0">
+          <div class="xk-cluster-head"><span class="xk-lead">關鍵字佇列</span>
+            <span class="xk-score" id="wd-queue-note"></span></div>
+          <div id="wd-queue"></div>
+        </div>
+        <div class="xk-cluster" style="margin-bottom:0">
+          <div class="xk-cluster-head"><span class="xk-lead">最近掃描</span>
+            <span class="xk-score" id="wd-scan-note"></span></div>
+          <div id="wd-scans"></div>
+        </div>
+      </div>
+
+      <div class="flex items-baseline gap-3 mb-1 flex-wrap border-t pt-6"
+           style="border-color:rgba(161,161,170,0.18)">
+        <h2 class="text-base font-black tracking-tight">X KOL 族群熱度</h2>
         <span class="text-[10px] text-zinc-500" id="xk-updated">載入中…</span>
-        <button class="xk-btn ml-auto" onclick="XK.load(true)">
+        <button id="xk-refresh" class="xk-btn ml-auto" onclick="XK.refresh()">
           <i data-lucide="refresh-cw" class="w-3 h-3 inline"></i> 重新整理
         </button>
       </div>
@@ -93,6 +136,7 @@
     const XK = {
       data: null,
       filter: null,
+      collecting: false,
 
       async load(force) {
         try {
@@ -111,6 +155,41 @@
           if (UI.isFetchCancellation(e)) return;
           document.getElementById('xk-clusters').innerHTML =
             `<div class="xk-block"><h4>讀取失敗</h4>${UI.escapeHTML(e.message)}</div>`;
+        }
+      },
+
+      async refresh() {
+        if (XK.collecting) return;
+        const button = document.getElementById('xk-refresh');
+        XK.collecting = true;
+        if (button) {
+          button.disabled = true;
+          button.innerHTML = '<i data-lucide="loader-circle" class="w-3 h-3 inline animate-spin"></i> 抓取中…';
+          UI.icons();
+        }
+        try {
+          const r = await fetch('/api/x-kol/collect', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            cache: 'no-store',
+          });
+          const j = await r.json();
+          if (!r.ok) throw new Error(j.error || ('HTTP ' + r.status));
+          const errors = j.errors || [];
+          UI.showToast(
+            errors.length
+              ? `抓取完成：新增 ${j.new_posts || 0} 則，${errors.length} 個警告`
+              : `抓取完成：新增 ${j.new_posts || 0} 則`,
+            errors.length ? 'warn' : 'info', 5000);
+          await XK.load(true);
+        } catch (e) {
+          if (!UI.isFetchCancellation(e)) UI.showToast(`抓取失敗: ${e.message}`, 'error', 6000);
+        } finally {
+          XK.collecting = false;
+          if (button) {
+            button.disabled = false;
+            button.innerHTML = '<i data-lucide="refresh-cw" class="w-3 h-3 inline"></i> 重新整理';
+            UI.icons();
+          }
         }
       },
 
@@ -236,12 +315,212 @@
       },
     };
 
+    const WIND = {
+      data: null,
+      scanning: false,
+
+      async load() {
+        try {
+          const r = await fetch('/api/wind/terms', { cache: 'no-store' });
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          WIND.data = await r.json();
+          WIND.render();
+        } catch (e) {
+          if (UI.isFetchCancellation(e)) return;
+          document.getElementById('wd-queue').innerHTML =
+            `<div class="xk-block"><h4>讀取失敗</h4>${UI.escapeHTML(e.message)}</div>`;
+        }
+      },
+
+      async scan(key) {
+        if (WIND.scanning) return;
+        const button = document.getElementById('wd-scan');
+        WIND.scanning = true;
+        if (button) {
+          button.disabled = true;
+          button.innerHTML = '<i data-lucide="loader-circle" class="w-3 h-3 inline animate-spin"></i> 掃描中…';
+          UI.icons();
+        }
+        try {
+          const r = await fetch('/api/wind/scan', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(key ? { key } : {}), cache: 'no-store',
+          });
+          const j = await r.json();
+          if (!r.ok) throw new Error(j.error || ('HTTP ' + r.status));
+          const msg = {
+            scanned: () => `${j.display || j.key}：留 ${j.kept} / 丟 ${j.dropped}`
+                           + (j.degraded ? '（部分來源降級）' : ''),
+            quiet: () => '沒有符合門檻的關鍵字 — 未消耗額度',
+            refused: () => j.reason,
+            engine_failed: () => `引擎失敗：${(j.meta || {}).error || '未知'}`,
+            unknown_term: () => `找不到 ${j.key}`,
+          }[j.status];
+          UI.showToast(msg ? msg() : j.status,
+                       j.status === 'scanned' ? 'info' : 'warn', 6000);
+          await WIND.load();
+        } catch (e) {
+          if (!UI.isFetchCancellation(e)) UI.showToast(`掃描失敗: ${e.message}`, 'error', 6000);
+        } finally {
+          WIND.scanning = false;
+          if (button) {
+            button.disabled = false;
+            button.innerHTML = '<i data-lucide="radar" class="w-3 h-3 inline"></i> 掃描下一個';
+            UI.icons();
+          }
+        }
+      },
+
+      scanIndex(i) {
+        const row = ((WIND.data || {}).queue || [])[i];
+        if (row) WIND.scan(row.key);
+      },
+
+      cooldownLeft(iso) {
+        if (!iso) return null;
+        const ms = new Date(iso).getTime() - Date.now();
+        if (!(ms > 0)) return null;
+        const h = Math.floor(ms / 3600000), m = Math.round((ms % 3600000) / 60000);
+        return h > 0 ? `${h}h${m}m` : `${m}m`;
+      },
+
+      // 派工器狀態列。跑在自己的 1s timer 上而不是等 load()：倒數要每秒動,
+      // 但 /api/wind/terms 讀的是 3MB 的容器檔,每秒打一次是拿頻寬換秒針。
+      renderDaemon() {
+        const el = document.getElementById('wd-daemon');
+        if (!el) return;
+        const d = (WIND.data || {}).daemon;
+        if (!d) { el.textContent = '· 派工器未啟動'; el.title =
+          '常駐派工器由 open_dashboard.sh 帶起;現在只有手動「掃描下一個」會動。'; return; }
+
+        if (d.no_heartbeat) {
+          el.innerHTML = `· <span style="color:#eab308">派工器運行中(無心跳)</span>`;
+          el.title = `PID ${d.pid} 在跑,但沒有心跳檔 —— 這隻是 V4.131.8 之前起的。`
+                   + '重開 open_dashboard.sh 之後才會有下一輪倒數。';
+          return;
+        }
+
+        if (!d.alive) {
+          const when = (d.last_tick_at || d.written_at || '').replace('T', ' ').slice(0, 16);
+          el.innerHTML = `· <span style="color:var(--text-muted)">派工器已停止</span>`
+                       + (when ? ` · 最後一輪 ${when}` : '');
+          el.title = d.state === 'stopped' ? '正常收工(Ctrl+C)。' :
+            '心跳檔還在但程序不見了 — 可能被 kill -9 或關掉了終端機。';
+          return;
+        }
+
+        const bits = [];
+        if (d.state === 'ticking') {
+          bits.push('<span style="color:#eab308">掃描中…</span>');
+        } else if (d.next_tick_at) {
+          const ms = new Date(d.next_tick_at).getTime() - Date.now();
+          if (ms > 0) {
+            const t = Math.floor(ms / 1000);
+            const pad = (n) => String(n).padStart(2, '0');
+            bits.push(`下一輪 ${d.next_tick_at.slice(11, 16)}`
+                      + ` <span style="color:var(--text-main)">(${pad(Math.floor(t / 60))}:${pad(t % 60)})</span>`);
+          } else {
+            // 排定時間已過但心跳還沒翻頁:上一輪跑超過一個 interval(引擎最長 600s)
+            // 或機器睡著了。說「即將」而不是顯示負數倒數。
+            bits.push('<span style="color:#eab308">即將開始…</span>');
+          }
+        }
+        if (d.last_display || d.last_key) {
+          bits.push(`上一輪 ${UI.escapeHTML(String(d.last_display || d.last_key))}`
+                    + (d.last_detail ? ` — ${UI.escapeHTML(String(d.last_detail))}` : ''));
+        }
+        el.innerHTML = '· ' + bits.join(' · ');
+        el.title = `派工器 PID ${d.pid} · 每 ${d.interval_sec}s 一輪 · 已跑 ${d.tick_count} 輪`
+                 + (d.started_at ? ` · 自 ${d.started_at.replace('T', ' ').slice(0, 16)}` : '');
+      },
+
+      render() {
+        const d = WIND.data;
+        document.getElementById('wd-updated').textContent =
+          `更新 ${(d.updated_at || '').replace('T', ' ').slice(0, 16)}`;
+        WIND.renderDaemon();
+
+        document.getElementById('wd-bar').innerHTML = `
+          <span class="xk-metric">追蹤詞 <strong>${d.tracked}</strong></span>
+          <span class="xk-metric">佇列 <strong>${(d.queue || []).length}</strong></span>
+          <span class="xk-metric">門檻 <strong>${d.surface_min_score}</strong></span>
+          <span class="xk-metric">今日剩餘 <strong>${d.scans_left_today}</strong> 次</span>
+          <span class="xk-metric ml-auto dim">${UI.escapeHTML(d.budget || '')}</span>`;
+
+        const queue = d.queue || [];
+        document.getElementById('wd-queue-note').textContent =
+          queue.length ? `依 surprise 排序` : '';
+        document.getElementById('wd-queue').innerHTML = queue.length ? `
+          <table class="xk-tbl">
+            <thead><tr><th>關鍵字</th><th>類別</th><th>SURPRISE</th><th>聲量</th>
+              <th>篇數</th><th>狀態</th><th></th></tr></thead>
+            <tbody>${queue.slice(0, 25).map((t, i) => {
+              const cd = WIND.cooldownLeft(t.cooldown_until);
+              const state = cd ? `冷卻 ${cd}` : (t.scan_state || 'pending');
+              // Pass the row index, not the key: a theme key is free text and
+              // an apostrophe in it would break out of the onclick attribute.
+              return `<tr>
+                <td class="xk-tkr" title="${UI.escapeHTML(t.key)}">${UI.escapeHTML(t.display || t.term || '')}</td>
+                <td class="dim">${UI.escapeHTML(t.kind || '')}<br>
+                  <span class="wd-kv">${UI.escapeHTML((t.related_tickers || []).slice(0, 4).join(' '))}</span></td>
+                <td class="wd-surprise">${(t.surprise ?? 0).toFixed(2)}</td>
+                <td>${(t.score ?? 0).toFixed(2)}</td>
+                <td>${t.mentions ?? 0}</td>
+                <td><span class="xk-state st-${cd ? 'scanned' : (t.scan_state || 'pending')}">${UI.escapeHTML(state)}</span></td>
+                <td><button class="xk-btn go" ${cd ? 'disabled' : ''}
+                     onclick="WIND.scanIndex(${i})">掃</button></td>
+              </tr>`;
+            }).join('')}</tbody>
+          </table>`
+          : `<div class="xk-note">目前沒有關鍵字達到門檻。Break News 收到新聞後會自動累積。</div>`;
+
+        const scans = d.scans || [];
+        document.getElementById('wd-scan-note').textContent =
+          scans.length ? `最近 ${scans.length} 次` : '';
+        document.getElementById('wd-scans').innerHTML = scans.length ? scans.map(s => {
+          const c = s.crowding || {};
+          const langs = Object.keys(c.language_counts || {});
+          const plats = Object.entries(c.platform_counts || {})
+            .map(([k, v]) => `${k}:${v}`).join(' ');
+          const lead = (s.clusters || [])[0];
+          return `<div class="wd-scan">
+            <div class="wd-scan-head">
+              <span class="wd-scan-term">${UI.escapeHTML(s.display || s.key || '')}</span>
+              <span class="wd-kv">${(s.scanned_at || '').replace('T', ' ').slice(5, 16)}</span>
+              <span class="wd-kv">留 ${s.kept} / 丟 ${s.dropped}</span>
+              ${s.degraded ? '<span class="xk-state st-skipped">來源降級</span>' : ''}
+            </div>
+            <div class="wd-kv" style="margin-bottom:4px">
+              ${UI.escapeHTML(plats)}
+              ${langs.length > 1
+                ? ` · <span style="color:#f59e0b">${langs.length} 種語言：${UI.escapeHTML(langs.join('/'))}</span>`
+                : (langs.length ? ` · ${UI.escapeHTML(langs[0])}` : '')}
+            </div>
+            ${lead ? `<div class="wd-scan-sum">${UI.escapeHTML(String(lead.summary || '').slice(0, 260))}</div>` : ''}
+          </div>`;
+        }).join('') : `<div class="xk-note">尚未有掃描結果。</div>`;
+
+        UI.icons();
+      },
+    };
+
     document.addEventListener('DOMContentLoaded', () => {
       UI.initTheme();
       try { UI.renderSidebar('x-kol'); } catch (e) { console.warn('sidebar', e); }
       UI.applyNavTranslations();
       UI.icons();
+      WIND.load();
       XK.load();
+
+      // 秒針只重畫那一行文字;真正的重新取數是 30s 一次。
+      setInterval(() => WIND.renderDaemon(), 1000);
+      setInterval(() => {
+        // 掃描中不要重載 — load() 會把使用者正在看的表整個換掉。
+        // 分頁在背景時也跳過:這支 API 每次都要讀 3MB 的容器檔並重排佇列,
+        // 沒人看的時候每 30s 做一次是白燒。
+        if (WIND.scanning || document.hidden) return;
+        WIND.load();
+      }, 30000);
     });
     </script>
 </body>

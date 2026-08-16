@@ -39,6 +39,7 @@ from __future__ import annotations
 
 import argparse
 import errno
+import hashlib
 import json
 import os
 import re
@@ -63,6 +64,52 @@ LOCK_DIR = os.path.join(ROOT, "investment/invest_logs/.manual_protocol.lock")
 RUN_DIR = os.path.join(ROOT, "investment/scan_logs")
 #: Same pattern `scripts/build_event_index.py` uses to pick up deep-dive reports.
 DEEP_DIVE_RE = re.compile(r"^\d{8}_[A-Z][A-Z0-9]+\.md$")
+#: Trees whose .py files a protocol run must never write to. Not a security
+#: boundary — it is the control that makes a passing validator mean something.
+WATCH = ("investment/scripts", "skills", "scripts")
+
+
+def _py_snapshot() -> dict[str, str]:
+    """sha256 of every .py under WATCH, so a run can be asked what it edited.
+
+    This is the check the 2026-08-16 agy trials turned on. The first run passed
+    `validate_session_export.py` cleanly — but only after the agent had edited
+    `build_session_export.py` to accept its own malformed p3 shape, which makes
+    that green worth nothing. Content hashes rather than mtimes: an edit that is
+    written back byte-identical is not an edit, and a `touch` is not either.
+    """
+    snap = {}
+    for tree in WATCH:
+        for dirpath, _, filenames in os.walk(os.path.join(ROOT, tree)):
+            if "__pycache__" in dirpath:
+                continue
+            for name in filenames:
+                if not name.endswith(".py"):
+                    continue
+                path = os.path.join(dirpath, name)
+                try:
+                    with open(path, "rb") as fp:
+                        snap[os.path.relpath(path, ROOT)] = hashlib.sha256(fp.read()).hexdigest()
+                except OSError:
+                    continue
+    return snap
+
+
+def _context_ids(log_path: str) -> set[str]:
+    """Distinct conversation ids in the log = how many contexts really ran.
+
+    Count these, NOT `invoke_subagent` calls: agy batch-dispatches, so one call
+    can carry five subagents. Counting calls on 2026-08-16 gave 2 and the wrong
+    conclusion that the 5-lane fan-out had collapsed; the log held 7 ids.
+    """
+    ids, pat = set(), re.compile(r'"conversation_id"\s*:\s*"([0-9a-f-]{36})"')
+    try:
+        with open(log_path, encoding="utf-8", errors="replace") as fp:
+            for line in fp:
+                ids.update(pat.findall(line))
+    except OSError:
+        pass
+    return ids
 
 
 def acquire_lock():
@@ -158,6 +205,8 @@ def main(argv=None):
 
     acquire_lock()
     rc = -1
+    before = _py_snapshot()
+    print(f"  baseline: {len(before)} .py hashed under {', '.join(WATCH)}")
     started = datetime.now()
     try:
         if os.path.exists(HISTORY):
@@ -202,6 +251,23 @@ def main(argv=None):
 
     elapsed = int((datetime.now() - started).total_seconds())
     print(f"\n■ rc={rc}  elapsed={elapsed}s ({elapsed // 60}m)")
+
+    # ── evidence the validator cannot give you ───────────────────────────────
+    # Both of these outrank rc and the validator when judging "can provider X
+    # drive protocol Y". A run that edited the machinery to get green proves
+    # nothing, and a run that collapsed the fan-out is not the protocol.
+    after = _py_snapshot()
+    touched = sorted(set(before) ^ set(after)) + sorted(
+        p for p in before.keys() & after.keys() if before[p] != after[p])
+    if touched:
+        print(f"  ✗ protocol code touched: {len(touched)} file(s) — this run proves nothing")
+        for p in touched:
+            print(f"      {p}")
+    else:
+        print(f"  ✓ protocol code untouched ({len(before)} .py byte-identical)")
+    ids = _context_ids(log_path)
+    if ids:
+        print(f"  contexts: {len(ids)} (1 coordinator + subagents; count ids, not invoke calls)")
 
     # ── post-run gate ────────────────────────────────────────────────────────
     validator = ds.PROTOCOL_VALIDATORS.get(args.protocol)

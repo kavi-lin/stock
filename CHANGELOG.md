@@ -8,6 +8,318 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.131.12] — 2026-08-16 — agy 拿到 invest 的執照：三年來第一份未修改機器就通得過閘門的非 Claude 產物
+
+### Changed
+- `config/llm_config.json` → `protocol_providers.invest` 由 `["claude", "codex"]` 改為 `["claude", "codex", "gemini"]`。**`sector` 刻意不動** —— 那條完全沒跑過。
+- `_protocol_providers_note` 補上放行的證據與撤照條件，取代原本「Add gemini only after a real run proves…」那句待辦。
+- `tests/test_protocol_model_routing.py` 的 `allowlist.survives_loader` 從硬寫 `== ["claude", "codex"]` 改成對照 `config/llm_config.json` 實際內容。該檢查要守的是「loader 不會把 `protocol_providers` 這個 key 靜靜丟掉」，roster 內容是會變的政策決定；再抄一份字面值只證明兩處字打得一樣。丟 key 時 loader 回 `None`（unrestricted）而檔案是 list，比對仍然會紅，守備範圍沒縮。
+
+### Fixed
+- `audit_gate_compliance.py` 補上 **claude 的 log 形狀**（`{"type":"assistant","message":{"content":[{"type":"tool_use","name":"Bash",…}]}}`）。補之前 claude 的 log 一路落進「認不得的形狀」全文 fallback，`invest_20260807_163616.log` 因此報「decision_engine 呼叫 44 次」—— 數到的是引擎讀進 context 的程式碼內容。修後 4 次，再把計數錨從裸字串 `decision_engine.py` 改成 `python3?\s+\S*decision_engine\.py` 後為 3 次（掉的那條是 `sed -n 1,120p …decision_engine.py`，**讀**引擎不是**跑**引擎）。fallback 有印警語不算靜默，但一個永遠走 fallback 的形狀等於這支 auditor 對 claude 從來沒生效過。
+- 截斷警語從「只在 `de_calls == 0` 時印」改為**只要有截斷就印**，並移到 Gate 1 那四個手寫痕跡計數底下。那四項是「0 = 乾淨」，而被截掉結尾的指令正是能把違規藏進省略號裡的那種；只在見底時才示警等於偏低但非零就不說話。
+
+### Removed
+- `investment/scripts/run_invest_trial.py`（未進版控的重複實作）。repo 早有 `run_protocol_manual.py`（V4.114.x，2026-08-09 那次失敗的隔天寫的），docstring 第一句就是「Run one agentic protocol on a chosen provider, **outside the allowlist**」，連「不經 broker 預約」的 caveat 都已寫明。試跑 harness 獨有的兩項已併回該檔：`_py_snapshot()`（sha256 完整性）與 `_context_ids()`（context 計數），跑完印在 rc 後面。
+
+### Why
+- 證據是 `investment/scan_logs/invest_agy_SNDK_20260816_192524.log`：**7 個 conversation_id**（1 PM + 5 lane + Red Team，角色名在 `subagent_info` 裡）、`decision_engine.py` 跑了 phase 3 與 4.6、`validate_session_export.py` rc=0（SNDK / STAGED_ENTRY）、Red Team 回 `STRONG_COUNTER` 而非附和。
+- **真正承重的那道是「零檔案被改」**：`investment/scripts` + `skills` + `scripts` 底下 364 支 `.py` 的 sha256 前後逐支比對，全數 byte-identical；再用 mtime 掃全檔型確認 run 期間只動到資料與快取。前一輪（`invest_20260816_185320`）validator 也是 rc=0，但那是 agy 先把 `build_session_export.py` 改成接受自己的 p3 shape 之後才綠的 —— **一個改過機器才通過的閘門，它的綠燈什麼都沒說**。這是兩輪之間唯一有意義的差別。
+- 副作用講明白：broker 對 protocol role 的排序是 `gemini > codex > claude`（98.67% / 61% / 58%），所以放行後 **agy 直接成為 invest 的首選**，不是備援。
+- 撤照條件寫進 note：run 改了 repo 程式碼、或 fan-out 塌掉。**數 fan-out 要數 `conversation_id`，不是數 `invoke_subagent` 呼叫次數** —— agy 是批次派工，一次 call 塞 5 個 subagent，照呼叫次數數會得到 2，我第一輪就是這樣誤判成「委員會沒開成」。
+
+## [4.131.11] — 2026-08-16 — Break News agent 輸出改為 hard schema
+
+### Added
+- `scripts/break_news/schema.py` 成為開場輪與反駁輪 payload 的 runtime authority：必要／額外欄位、型別、字數、ticker、canonical node ID、predicate、confidence 與 round-specific `done`/`stance` 全部 deterministic 驗證。
+- `tests/test_break_news_schema.py` 覆蓋 schema 正反例、CLI 錯誤 envelope、開場／反駁完整入口接線與 validator CLI 紅綠案例。
+
+### Changed
+- `debater.py` 只讓 `exit_code=0 + parse_status=ok + schema valid` 的 voice 進摘要；invalid opener 轉 `partial_closed`/`failed`，invalid rebuttal 轉 `partial_closed: invalid_rebuttal`，raw response 與 `schema_errors` 保留供稽核但不消耗額外 LLM retry。
+- `validate.py` 對帶 `summary.agent_payload_schema_version=1` 的新辯論強制驗證 `.thread[].parsed`，舊紀錄不回溯重判；無 agent thread 的 Link Digest projection 改走自己的 deterministic schema，prompt 同步明示禁止額外欄位與 relation canonical ID 格式。
+
+### Why
+- 舊流程只要 stdout 能解析成任意 JSON object 就標成 `ok`，連 429 provider error envelope 都可能被當成分析；外層 validator 也完全不檢查 agent payload，導致「有固定樣板、沒有執行閘」。
+
+## [4.131.10] — 2026-08-16 — DCF 模型不適用不再誤報成工具失敗
+
+### Fixed
+- `dcf.py` 成功產出結構化 payload 時固定回 rc=0；`fair_value_per_share: null` 搭配 `model_eligibility.reason` 現在代表合法的 ineligible anchor，由 investment protocol 排除後繼續。override 錯誤、抓取失敗與 crash 仍為非零退出。
+- 新增完整 CLI 入口回歸：AAOI 型的 `negative_terminal_fcff` 必須 rc=0，錯誤 override 必須 rc=1；並把 valuation skill 與 investment protocol 的 exit-code 契約對齊既有 `comps.py` 行為。
+
+### Why
+- 2026-08-16 AAOI 的 DCF 已成功算完，但因五年 FCFF 皆為負而正確判定模型不適用；舊入口把 `degraded` 一律映射成 rc=1，Codex 依 mandatory-script 閘門中止，Dashboard 才接著報告缺少 artifact。這是工具狀態與模型資格混用，不是 agent 或 quota 失敗。
+
+## [4.131.9] — 2026-08-16 — 風向 reasoning 改走 quota broker 與登入 CLI，不再依賴外部模型 API key
+
+### Added
+- `scripts/wind/reasoning_adapter.py`：每輪先向 quota broker reserve，由 broker 在 Claude／Agy／Codex allowlist 中選目前可用 provider；把該 CLI 注入 global last30days 的 planner、rerank、fun judge，三段共用同一 lease 與模型。聚合 token / model-call 使用量回報 broker，並把 route、agent、model、calls、usage 寫進 Wind artifact 的 `engine.reasoning`。
+- Wind deterministic tests 增至 19 cases，覆蓋 broker allowlist、selected CLI client、非 JSON fail-closed、broker-down 完整入口、subprocess adapter 接線與 reasoning key 隔離；broker gate test 補鎖 aggregate adapter 必須保留實際 `model_calls`。
+
+### Changed
+- `scripts/wind/dispatch.py` 不再直接執行 last30days：child process 先移除 Gemini／OpenAI／Anthropic／OpenRouter reasoning credentials，再強制 `LAST30DAYS_REASONING_PROVIDER=broker` 後啟動 adapter。ScrapeCreators、X 等 retrieval credentials 不受影響。
+- `config/wind.json` 新增 reasoning agent allowlist、單 call timeout、broker token estimate 與 reservation TTL。Wind USD ledger 的 `price_per_scan_usd` 現在只估 paid retrieval；CLI 訂閱配額由 broker ledger 管。
+
+### Fixed
+- broker 不可達／拒絕、CLI 未登入／逾時、模型輸出非 JSON 時整輪 fail-closed，term 回 pending 且不記 scan 花費；不再靜默退回 last30days 的 deterministic planner / local-score reranker。
+
+### Why
+- 背景 subprocess 仍需要一個推理執行者，但不需要另一把模型 API key。已登入的 agent CLI 是執行面，quota broker 是路由與配額 authority；資料來源 API 與 reasoning auth 維持清楚分層。
+
+## [4.131.8] — 2026-08-16 — 風向派工器心跳：頁面終於知道下一輪何時，以及 daemon 還在不在
+
+### Fixed
+- `open_dashboard.sh` 的 daemon 改用 `python3 -u`。stdout 導到檔案時 Python 是 block buffering（4-8KB 才落盤），一輪只印三四行 —— V4.131.7 剛加的 `/tmp/wind_dispatch.log` 實測掃完一輪後仍是 **0 bytes**。已用兩個並行程序獨立重現（無 `-u` 2 秒後 0 bytes、有 `-u` 7 bytes）。
+- `dispatch.py` resident loop 的 `time.sleep()` 移進 `try`。迴圈每 3600 秒有 3599 秒待在 sleep 裡，Ctrl-C 幾乎必然落在那裡，而 `except KeyboardInterrupt` 只包著 `tick()` —— 「[wind] stopped」這條路徑實務上**從來走不到**，daemon 一律死在 traceback。
+
+### Added
+- `scripts/wind/dispatch.py`：心跳檔 `news/wind_logs/wind_daemon.json`（`write_heartbeat` / `read_heartbeat` / `heartbeat_path`）。欄位 `pid` / `started_at` / `interval_sec` / `tick_count` / `state`(`ticking`|`sleeping`|`stopped`) / `tick_started_at` / `last_tick_at` / `next_tick_at` / `last_status` / `last_key` / `last_display` / `last_detail` / `scans_left_today`。寫入採 merge 而非覆蓋：每輪寫兩次（進 tick、進 sleep），只帶變動欄位。**只有常駐迴圈寫** —— `--once` / `--term` / Dashboard 按鈕是一次性 tick，蓋出 `next_tick_at` 等於在頁面上掛一個「量測對象已不存在」的碼錶。
+- `dashboard_server.py` `_wind_daemon_status()`：`/api/wind/terms` 新增 `daemon` 欄位。存活判定不只 `os.kill(pid, 0)` —— PID 會被回收，死掉的心跳會借屍還魂成繼承該號碼的無關程序，故再比對 `ps -p PID -o command=` 是否含 `wind/dispatch.py`。沒有心跳檔時再 `pgrep` 一次：**「沒心跳」不等於「沒 daemon」**，V4.131.8 之前起的那隻仍在花每日額度，報成「已停止」會誘使使用者再開第二隻（兩隻各自吃 8 次上限）。
+- `Dashboard/x-kol.html`：標題列狀態條 —— 掃描中／下一輪時間 + `mm:ss` 倒數／上一輪結果／已停止／運行中(無心跳)。倒數走自己的 1s timer，資料 30s 才重取（該 API 要讀 3.2MB 容器檔並重排佇列，每秒打一次是拿頻寬換秒針）；掃描中與分頁隱藏時跳過重取。
+- 測試 +5：`scripts/wind/test_wind.py` 15 cases（心跳 merge 語意、一次性 tick 不留心跳）、`tests/test_x_kol_api.py` 26 passed（PID 回收拒判、clean shutdown 免探測、無心跳 fallback）。
+
+### Why
+- 使用者問「我要怎麼知道他正在掃下一輪了，有時間跟通知嗎」。答案當時是沒有：`/api/wind/terms` 完全不含 daemon 狀態，`x-kol.html` 也沒有任何 `setInterval`（唯一的 `setTimeout` 是 KOL collect 按完那次 6 秒 repoll），開著頁面盯一天它不會自己變。唯一的心跳是 `wind_terms.json` 的 `updated_at`（tick 第一件事就是 rebuild 寫檔，quiet tick 也更新）——但那要開檔案看。
+- 通知（macOS `osascript`）使用者明確選擇不加。
+- 順帶確認：風向與 X KOL **都沒有接 broker**。`scripts/x_kol/` 與 `scripts/wind/` 對 `model_router` / `broker_gate` 零命中 —— X KOL 直接打 X API v2（自己的 ledger），風向 `subprocess` 叫 last30days 引擎（引擎用自己那把 `GEMINI_API_KEY`）。兩者花費都不會出現在 Dashboard 的 LLM quota 面板，只能看 `budget.py --status`。（此為 v4.131.8 當時狀態；Wind reasoning 已於 v4.131.9 改走 broker。）
+
+## [4.131.7] — 2026-08-16 — 風向派工器排程定案：綁 open_dashboard.sh，不掛 launchd
+
+### Added
+- `open_dashboard.sh`：開瀏覽器之後起 `python3 scripts/wind/dispatch.py --interval 3600` 背景 daemon，log 落 `${WIND_LOG:-/tmp/wind_dispatch.log}`。`trap` 從只收 `$SERVER_PID` 改成 `$SERVER_PID $WIND_PID`（單引號延後展開，`WIND_PID` 為空也安全），Ctrl+C 兩個一起收。
+- 防重複：啟動前 `pgrep -f scripts/wind/dispatch.py`，命中就印 PID 不再疊一隻 —— 兩隻同時跑會各自吃 `budget.py` 的每日 8 次上限。上一輪關終端機/kill -9 留下的孤兒 daemon 就是這個情境。
+- 逃生口：`WIND_DISPATCH=0 ./open_dashboard.sh` 單次跳過，不必改檔。
+
+### Changed
+- `TODO.md:432` 排程項從「等使用者定」結案；`docs/agent-ops/OPS_COMMANDS.md` §5 風向節註明常駐已由 `open_dashboard.sh` 帶起，手打 `--interval` 只在 dashboard 沒開時用。
+
+### Why
+- 使用者在 launchd / open_dashboard.sh / 維持手動三選一裡選了 `open_dashboard.sh`。取捨是明知的：daemon **啟動即跑第一輪**，所以「開 dashboard」= 「花一次額度」；關終端機 = 停止掃描。花費把關不放在 shell，仍由 `scripts/wind/budget.py` 的雙上限（$10 累計 + 每日 8 次）負責，用完自己拒絕並記 refusal。
+- 同輪順手驗證 2026-08-15 那條 in-process FMP 壞掉的路徑：server 重開後 `/api/x-kol/heat` 由 `prices_pending: true / prices=0` 收斂成 `false / 25 檔有價`，確認新 process 吃到了 3.14 user-site 補裝的套件（V4.131.5-6 的環境事故尾巴）。
+
+## [4.131.6] — 2026-08-16 — 兩個字元讓整條 daily_update 掛掉：Python 3.14 的 argparse 提早驗證 help 字串
+
+### Fixed
+- `sector/market_top_yfinance.py`：兩處 `help=` 的裸 `%` 改成 `%%`（argparse 仍渲染成單一 `%`，`--help` 顯示不變）。Python 3.14 把 help 字串驗證從**渲染時**移到 **`add_argument()` 時**（`argparse._check_help`），所以裸 `%` 從「跑 `--help` 才炸」變成「建 parser 就炸」——對 CLI 腳本而言就是一啟動即死。
+- 這是 daily_update.sh `exited rc=1` 的直接原因：step 3 拋 `ValueError: badly formed help string`，而 **Phase 1 是 fatal**，整支中止。盤前 chain 只顯示 `exited rc=1`，成因埋在 `$TMPDIR/daily_update_<date>_<pid>_3_market_top.log` 裡。
+- `tests/test_argparse_help_strings.py`（新增）：AST 掃全 repo 的 `add_argument(help=...)` 常數（目前 367 個），任何跳脫後仍殘留 `%` 的就紅。第二條測試**直接把 3.14 的實際行為釘住**——若未來 Python 不再拒絕裸 `%`，它會失敗並告訴讀的人「這道掃描現在比 runtime 還嚴」，而不是留一道沒人知道為何存在的規則。
+
+### Why
+- 這個 bug 藏在**沒人跑的 `--help` 路徑**裡，所以升級前後都不會有任何測試變色；它要等 argparse 換語意才現形。跟本輪其他兩個（`Claude` 查詢、preflight 間距）同一族：**改動當下無症狀，特定條件才暴露。**
+- 掃描刻意走 AST 常數而非 import 每支 CLI：後者會執行 module 層程式碼、需要所有第三方相依到齊，比它要守的那一類 bug 重得多也脆得多。
+- 測試自身的壞字串 fixture 改用執行期組字串（`"%" + " of ..."`）而非字面值，這樣掃描**不需要排除自己所在的檔案**——路徑排除正是一道 guard 悄悄停止覆蓋鄰近檔案的方式。
+
+## [4.131.5] — 2026-08-16 — 盤前 modal 的清單列黏在一起：間距 class 留在舊的父層
+
+### Fixed
+- `Dashboard/index.html`：`#preflight-checklist` 補上 `space-y-3`。`script.js:1482` 的註解自己記著 V2.7.17 把 render 目標從 `#preflight-body` 改成 `#preflight-checklist`「so the new chain UI can coexist」，但間距 class 留在 `#preflight-body` 沒跟著搬。Tailwind 的 `space-y-*` 只作用在**直接子元素**（`> :not([hidden]) ~ :not([hidden])`），列變成孫層後就吃不到，相鄰兩列的框線因此貼在一起。
+- 沒有任何 CSS 在補這個洞：`style.css:2865` 的 `.preflight-row` / `.preflight-row + .preflight-row` 是給 chain UI 用的，checklist 列走 Tailwind utility class，選擇器對不上。
+
+### Why
+- 這是「搬了 render 目標、沒搬版面責任」的典型殘留，改動當下不會壞——`#preflight-checklist` 初始只有一個 loading placeholder，單一子元素看不出缺間距，要等真的有多列資料進來才現形。和 v4.131.1 的 `Claude` 查詢是同一類：**只有特定形狀的真實資料流過去才會暴露。**
+
+## [4.131.4] — 2026-08-16 — 儀表板：移除側欄 LLM 長條原生 hover tooltip，統一使用右側 hover card
+
+### Fixed
+- `Dashboard/utils.js` `providerRow()`：移除 `.sidebar-llm-prov` 上的 `title="..."` 屬性。滑鼠 hover 側欄模型配額長條時，不再觸發瀏覽器原生黑色 popup（避免與右側自訂的白色詳細 hover card 相互遮蔽重疊），統一由右側白色 hover card 提供完整配額與視窗資訊。
+
+### Why
+- 原先 hover 側欄模型時會同時跳出原生瀏覽器黑色 tooltip 與右側白色 hover card，兩者內容重複且黑色 tooltip 會遮住側欄與 hover card。
+
+## [4.131.3] — 2026-08-16 — 頁面說 FMP 沒有 NVDA 的價格；FMP 好得很，是這台機器沒裝 requests
+
+### Fixed
+- **執行環境（系統層，非 repo）**：`pip3 install --user --break-system-packages requests pytest yfinance pandas PyYAML numpy lxml beautifulsoup4 openpyxl anthropic` 裝進 Homebrew python 3.14 的 user-site。repo 的第三方套件原本只存在於 `~/Library/Python/3.9/`（系統 python 3.9.6 的 user-site），但 PATH 上的 `python3` 是 `/opt/homebrew/bin/python3` = 3.14.7，其 site-packages 幾乎全空（3.12/3.13/3.14 三個 Homebrew 版本皆然）。**dashboard server、`daily_update.sh`、`premarket_cron.sh` 全部用裸 `python3`，所以全部在 import 層就斷了。** 佐證：`Dashboard/nexus_graph.json` 與 `market_mood.json` 的 mtime 停在 2026-08-14 20:33。
+- `scripts/x_kol/heat.py`：新增 `price_backend_status()`，`mark_unanalyzable()` 改用它區分兩件長得一樣、意思相反的事——「FMP 被問了、它沒有這支的序列」是關於**代號**的事實；「FMP 根本沒被問到」是關於**這台機器**的事實。修前 `fetch_price_context()` 的 `except Exception: return {}` 把 ImportError 吞掉，於是頁面對 NVDA / AMZN / GOOGL / TSM 全都印「no price series in FMP」——**一句指向錯誤子系統的錯誤訊息，會把人送去 debug 錯的東西**（使用者的第一個猜測是「你是搜成 $AAOI 嗎」，合理，但方向被訊息帶偏了）。
+
+### Why
+- 修完實測：`AAOI last=150.28 d5=+10.8% d21=+49.9% ytd=+331.1%`、`NVDA last=225.16`，`unanalyzable` 從「全部 27 支」縮回只剩 `SIVE` —— 那才是這個機制原本要抓的真案例（OTC 空殼，docstring 有記）。
+- 這次 bug 之所以能藏住，是因為 identity 解析看起來還在運作（頁面照樣印得出 `NVDA.NE (NEO)`、`AMZN.L (LSE)`），讓人以為 FMP 通。實際上那是 `config/x_kol_symbol_identity.json` 的永久快取，是 8/14 22:59 環境還沒斷時寫的。**一個子系統「部分還會動」比全滅更難診斷。**
+- 順帶說明本輪風向模組為何一路綠燈：`scripts/wind/` 是純 stdlib（`urllib`/`json`/`subprocess`），是這段期間少數不受影響的東西。它的測試全綠並不代表環境健康。
+
+### Ops
+- **dashboard server 需重啟才會生效**（它在啟動時 import 一次）：`scripts/restart_dashboard.sh`。沿用 V4.130.2 的做法，使用者自己重啟，本輪未動其 process。
+
+## [4.131.1] — 2026-08-16 — 風向：主題類關鍵字問了一個沒有答案的問題
+
+### Fixed
+- `scripts/wind/dispatch.py` `_query_for()`：非 ticker 的詞不再套 `"{term} stocks investor discussion"` 樣板。使用者看到佇列第三名是 `Claude` 時直接問「這個關鍵字你要怎麼打」——實跑出來是 `Claude stocks investor discussion`，在搜尋一支不存在的股票（Anthropic 未上市），會撈回一堆 AI 開發者閒聊。那正是 2026-08-16 AAOI 報告裡那支 55 萬觀看、講 prompting 技巧的 TikTok 混進來的同一個失敗模式。
+- 改成用同框代號錨定：`terms.py` 累加主題時一併記下該篇 `merged_entities.tickers`（同一條衰減加權，取前 5），`_query_for()` 取前 3 當 cashtag。`Claude` → `Claude $AMZN $GOOGL $MSFT investor discussion`（那三篇本來就是 Anthropic 營收 $11.5B + IPO 準備的 read-through）。`FPV Drones` → `FPV Drones $RCAT $UMAC $AVAV investor discussion`。無同框代號時退成 `"{term} stock market impact"`，不替主題發明一支證券。
+- `related_tickers` 同時上頁面與 `/api/wind/terms`——它本身就是主題→代號對照，正好是這個工具三個用途裡「上下游供應鏈線索」要的東西。
+
+### Why
+- 這個洞光看程式碼看不出來，要等真實關鍵字進佇列才會現形：前兩次掃的 RCAT / UMAC 都是 ticker，自我錨定，樣板剛好沒問題。第三名換成 tech_keyword 才暴露「ticker 自我錨定、主題不會」這個沒被處理的差別。
+- 測試補兩條（13 cases）：錨定必須出現且上限 3 個、ticker 不得累積自己的 co-mention（否則代號會在自己的查詢裡重複）、無錨定時不得出現 `stocks`。co-mention 走同一支 `normalize(_, "ticker")`，所以 entities 清單裡的散文（`Generative AI`）不會變成 `$` 開頭的錨。
+
+## [4.131.0] — 2026-08-16 — 風向：Break News 已抽好的關鍵字接上 last30days 社群掃描
+
+### Added
+- `scripts/wind/`（新模組）：關鍵字熱度容器 + last30days 派工器。`terms.py` 累加 `news/break_news_logs/bn_*.json` 的 `summary.merged_entities.{tickers,themes,tech_keywords}` 與 `news/x_kol_logs/x_kol_events.jsonl` 的 cashtags；`dispatch.py` 每輪取 surprise 最高者 headless 呼叫 last30days（`--emit=json --json-profile=agent`），過完後濾寫 `news/wind_logs/wind_scan_*.json` 並冷卻 24h；`budget.py` 是雙上限硬閘（累計 USD + 每日次數）。
+- `Dashboard/x-kol.html` 升級為「風向」頁：關鍵字佇列 + 最近掃描卡片放在既有 KOL 族群熱度之上，KOL 那段原樣保留。新端點 `GET /api/wind/terms`、`POST /api/wind/scan`（single-flight，與 `/api/x-kol/collect` 同紀律）。
+- `docs/wind_evaluation_criteria.md`：領先性判準**預先登記**，在任何資料累積之前寫成。三項及格線（5 日超額報酬中位數 > +1.0%、命中率 ≥ 55%、`median(fwd) ≥ 0.4 × median(pre)`），不及格的處置也一併寫死。第三項是最可能砍掉這件事的一關，它直接測 `scripts/x_kol/heat.py` docstring 已記載的疑慮：社群訊號對個股多半同步或落後。
+- `scripts/wind/test_wind.py`（11 cases）、`config/wind.json`、ops 註冊（`daily_health.py` 以 `kind: "manual"` 監控、`config/ops_scripts.json` 兩筆、`OPS_COMMANDS.md` §5 + §7）。
+
+### Why
+- 起因是 review last30days 產的 AAOI 報告：67 items 裡 40% 與 AAOI 無關。根因不在工具而在設定，且已獨立驗證 —— `~/.config/last30days/last-report.json` 的 `provider_runtime` 是 `{"reasoning_provider":"local","planner_model":"deterministic","rerank_model":"local-score"}`。**沒有任何 reasoning key，整個 LLM 層沒開**，planner 退化成 deterministic 並把財經查詢分類成 `intent=opinion` / `cluster_mode=debate`，rerank 全走 `lib/rerank.py:638` 的 `_fallback_tuple()`（獎勵第一手作者身分），於是 KOL 的健身閒聊排進前 25 名。`.env` 另有 `INCLUDE_SOURCES=tiktok,instagram,...` 主動塞進兩條**完全沒有主題後濾**的來源（`lib/tiktok.py:430` / `lib/instagram.py:478` 抓整條 creator timeline，只 dedupe video id）。**這兩把 key 仍待補，補之前掃出來的東西品質等同這次的樣本。**
+- 沒有另做關鍵字抽取，因為它已經存在：Break News 的辯論本來就產出 `merged_entities`，是 LLM 整理過的結構化實體。也沒有另做容器，`scripts/x_kol/heat.py` 已有衰減計分 + `DECISIONS` 佇列 + 原子寫入 + 代號身分閘；新模組沿用它的數學與形狀，不改它的行為。
+- **排序不用絕對聲量**。第一版用了，拿 14 天真資料一跑回的是 NVDA / AI capex / SPY / AMZN / MSFT / QQQ —— 量到的是覆蓋量，永遠是同一批 mega-cap，派工器會每小時去掃 NVDA。改成 `surprise`（快慢兩條衰減各自還原成每日速率後相除）之後，隊列頂端變成 RCAT / UMAC / AVAV / KTOS / ONDS + FPV Drones / NDAA Compliance / counter-UAS 這個連貫的無人機族群，而實跑的第一次掃描撈出了它的成因：Trump 對進口無人機課最高 100% 關稅。
+- 但 surprise 單獨用會反向壞掉：單篇 listicle 提一次 IYR / JEPI / QYLD / XYLD，這四個就因為「相對近乎零的基線最大加速」佔滿榜首。所以 `min_mentions=3` 是必需的佐證閘，`mentions` 已按 `source.url_hash` 去重，數的是不同載體。
+- 「掃完移除」也不對：熱門詞會在下一小時重新累積並再次被選中、重複付費。改成 `scan_state` + `cooldown_until`，且冷卻只能被 `rescan_score_jump`（分數較掃描當時 +50%）打破 —— 重新越過 surface 門檻不算，那是上次付錢時就已經在的狀態。
+- 紀律：探索層。`grep -rn "wind_logs\|wind_terms" investment/` 為 0。**不寫** `nexus/claim_ledger.jsonl`（它每日由 `claim_ledger.write_artifacts()` 整檔覆蓋，且 `Dashboard/nexus_graph.json` 是唯一被 `investment/scripts/forward_expectations_evidence.py:13` 讀到的探索層產物），**不碰** `Dashboard/market_mood.json` 的 atmosphere indicators —— `TODO.md:440` 明訂社群訊號未過領先性驗證不得接進 mood 面板。派工器自動跑的只有唯讀社群掃描；`分析 [TICKER]` 的人工晉升閘完全不動。
+
+## [4.130.3] — 2026-08-16 — 根目錄清倉：32 個孤兒檔歸檔，2 個過期檔刪除
+
+### Changed
+- 根目錄 32 個無程式引用的孤兒檔搬到 `archive/root_stray/`：舊版 flat-script 年代的 daemon debug capture（`breadth/burry/df/dual/fc/fred/ftd/mtop/peer/risk/rm/sentiment/supp/tail/tr` 的 `.err/.out/.json` + `fetch_stderr*.log`，功能已全部搬進 `skills/*/cache/`）、`PLAN_NEXUS`（Nexus V3 plan-mode 逐字稿，已實作完成）、`plan_support_codex.md`（僅存在 `daily_update.sh` 一句註解提及）、`daily_update.sh.bak`、空檔 `UI`、`scratch/analyze_index.py`（一次性分析 script）
+- 刪除 `FMP_MCP_TOOLS_中文參考_v5_03.md`（根目錄）與 `logs/server.log`（`scripts/restart_dashboard.sh` 改寫 `/tmp/dashboard_server.log` 後，這份就沒再更新過）
+- `git rm -r --cached .cache_bridge`：47 個舊快照檔在 `.gitignore` 排除規則加入前就已 commit，未同步清 tracking；檔案仍留在硬碟，只是 git 不再追蹤
+
+- `skills/valuation-modeler/scripts/fmp_client.py`：`FRED_CACHE_CANDIDATES` 移除指向已歸檔 `fred.json` 的 root fallback path，只留 `skills/fred-macro/cache/fred_latest.json` 這個現役快取
+
+### Why
+- 根目錄積了三個多月的除錯殘留，跟 README.md §專案結構記載的佈局對不上。動手前逐檔 grep 過 code/cron/launchd 引用，確認全部無主才歸檔或刪除；唯一有引用的 `fred.json`（`skills/valuation-modeler/scripts/fmp_client.py:101` 的 risk-free rate fallback）search 過主要路徑（`skills/fred-macro/cache/fred_latest.json`）目前存在且新鮮，fallback 不會被走到，歸檔後順手把這個死路徑從程式碼拿掉，不留一個指向不存在檔案的候選路徑。
+
+## [4.130.2] — 2026-08-15 — 方案從 Max 5× 降到 Pro：broker 空燒八小時，面板又把過期的冷卻畫成生效中
+
+### Fixed
+- `Dashboard/utils.js`：額度面板的 `冷卻中` 旗標從 `if (info.cooldown_until)` 改成**跟現在時間比**。broker 的 `providers` 資料列在冷卻到期後仍保留最後那個 deadline，沒有任何東西會抹掉它，所以只測 truthy 等於「一旦冷卻過就永遠冷卻」。claude 的 deadline 是 `00:14:02Z`，到 `06:25Z` 面板還在把它畫暗、標冷卻中，而這段期間路由層（走 `in_cooldown(now)`）早已在 00:19 / 02:19 / 04:20 / 06:21 派了四次工並全部跑完。解析不出來的值一律當作**不在冷卻**：把一家還能用的 provider 畫成不能用，是這個面板能犯的最嚴重的錯。
+- `scripts/restart_dashboard.sh`（新增）：重啟 Dashboard server 並**驗證它真的載到現在這份 `broker_gate.py`**。`dashboard_server.py` 在啟動時 import 一次 broker_gate，長命 process 因此會一直沿用啟動當天那份程式碼——這次的 process 從 8/12 19:43 起就沒重啟，比 V4.129.0 / V4.130.0 加進 `_headline_bucket()` 還早，於是 API 三家都回 `headline_bucket: null`，新的 utils.js 對每一家都印「該家未回報 5h 窗口」、hover card 全都沒有 `▸`。那是一句關於 provider 的宣稱，實際上只是關於 process 的事實。script 最後會逐家印出 `headline_bucket`，只有 codex 允許是 null（它真的只送一個週窗口），其餘為 null 就 rc=1 並明說原因。與既有 `open_dashboard.sh` 分開：那支會開瀏覽器並用 `wait` 卡在前景。
+- `docs/agent-ops/OPS_COMMANDS.md` §7：補上額度面板這一列。`broker_gate` + `utils.js` 這個面向從來沒進過回歸表。
+
+### Added
+- `tests/test_broker_gate.py`：新增兩條直接斷言 `Dashboard/utils.js` 原始碼的檢查（沿用 `test_protocol_model_routing.py` 既有的做法）——必須出現 `Date.parse(info.cooldown_until` 與 `Date.now()`，且不得出現 `if (info.cooldown_until)`。放在這支而不是別處，是因為本檔已經明文記載「`reserve_only` / `cooldown_until` 原封轉送」是刻意行為；轉送與「誰負責判斷過期」是同一件事的兩半，分開看都不成立。已用注入回歸的方式驗證這兩條會紅。
+
+### Why
+- 2026-08-14 16:42（UTC）方案從 Max 5× 切成 Pro。最後一張 Max 形狀的 snapshot 在 16:37，帶著 `session 27%used` / `weekly.all_models 28%` / **`weekly.fable 45%`**（Pro 沒有這個 per-model 週池）。切換後 `weekly.fable` 消失，剩下的兩個 bucket **全部讀成 `0.0% used / 100% remaining`**。
+- 接下來 16:43:52 → 23:58:57，claude **每一次** execution 都以 `error_class=quota` 失敗（debate / intraday_eval / brief 都中招），而同一段時間 **140 張連續 snapshot 一路用 `confidence: observed` 回報 100% 空著**。也就是說：面板畫一條全綠的長條、broker 對外宣稱滿手額度，而底下每一通呼叫都被擋。這是 20% hard reserve 想防的事情的**完全相反面**。
+- 使用者看到的是「broker 把 claude 變成保留區」，推測是 broker 還死守舊方案的 model 結構。方向對、機制不同：沒有任何「保留 N 家 provider」的邏輯（兩個 repo grep `quorum` / `min_providers` 皆零命中，失敗列的 `model` 欄位全是 `claude`）。真正發生的是 broker 對 claude 的**額度讀數**沒跟上方案變更，而過期的冷卻徽章讓這個狀態在事後看起來還在持續。
+- 本 repo 只負責顯示；權威端的四項修正在 `llm-quota-broker`（editable install，改完 `launchctl kickstart -k gui/$UID/com.llm-quota-broker.daemon` 即生效）：(a) `server/service.py` 只在 `in_cooldown(now)` 為真時回報 `cooldown_until`，`lqb status` / `lqb cooldown show` / web UI 三個消費端因此一起對上；(b) 成功的 execution 會自動退休它剛剛推翻的 quota 冷卻（在此之前只有 `lqb cooldown clear` 能清）；(c) cooldown deadline 新增 `reset_label` 這一階——claude 不給 `resets_at` 也不給 `refresh_in_seconds`，只給 `"3:40pm(Asia/Taipei)"` 這種字串，所以它每次都掉到 900 秒的預設值，這正是八小時裡重試 24 次的直接原因；(d) 當 snapshot 宣稱額度充裕、卻與生效中的 quota 冷卻矛盾時，該讀數以 `estimated` 而非 `observed` 入庫（`quota_snapshots` 是 append-only，所以是入庫前決定、不事後改列）。判準刻意不是數值本身——一個真的剛重置的窗口長得一模一樣——而是**矛盾**。
+
+## [4.130.1] — 2026-08-15 — 短期雷達熱力圖的個股 tooltip 在淺色模式是黑卡
+
+### Fixed
+- `Dashboard/radar.html` / `style.css` / `page-radar.js`：`#radar-heatmap-tooltip` 的 `background:rgba(24,24,27,0.96)` 與 `border-color` 寫死在 markup 裡，內容也全是 `text-zinc-*` / `text-white` / `border-zinc-700`，淺色模式下就是白頁中央一張黑卡。改用與同頁 `#radar-term-tooltip` 相同的 token（`--bg-card` / `--text-main` / `--border-hover`），內容改走 `.rht-label` / `.rht-value` / `.rht-divider`；漲跌與估值色改用 `--status-bullish` / `--status-bearish` / `--text-main` / `--text-muted`。琥珀色另開**元件範圍**的 `--rht-warn`（淺色 `#b45309`）—— amber-400 在白卡上對比僅約 1.7:1，但這個值在全站 JS 33 處、CSS 十餘處都是寫死的，發明全站 token 會多出第二種互相打架的琥珀。
+- `Dashboard/page-radar.js`：同頁另外 3 處同型缺陷（`text-zinc-200` 值、`hover:text-zinc-300`）改為 `var(--text-main)` / `hover:opacity-80`。
+- `Dashboard/style.css`：修回 `[data-theme="light"] #history-drill-rail .glass-card` 遺失的 `border` —— 該宣告不知何時被切離規則、以孤兒形式留在檔案第 285 行的頂層（parser 直接丟棄，連同一個裸 `}`），淺色模式因此繼承深色規則的白邊等於無邊框。原始形態見 `b955a5c`。修完全檔大括號首次配平（1134/1134）。
+
+## [4.130.0] — 2026-08-14 — 一則廢新聞不再炸掉整份 digest；額度面板改看 5 小時窗口
+
+### Changed
+- `news/scripts/finalize_digest.py`：Bull/Bear 同為 `|impact| ≤ 1` 從整批 `DebateInputError` 改為**該則降級 shallow**（digest 新增 `demoted_stage2`、該筆 verdict 標 `demoted_from`，MD 加註）。降級項取代 shallow 尾端名額而非追加，避免被 projection 的 10 列上限反過來砍掉。**超過半數**晉級項落在該區間仍整批 rc≠0；`interpretation` 空字串一律 rc≠0，不得走降級。
+- `news/scripts/stage1_triage.py`：`_GENRE_RULES` 新增「針對**個人**的 enforcement action / consent order / prohibition order / civil money penalty」→ `routine_regulatory`。此類通知的 materiality 全部來自 source_kind + news_type 的地板分（official_macro 3.0 + monetary_policy 2.0 + HIGH 0.5 = 5.5 > 門檻 4.5），內容零貢獻。機構級處分不受影響。
+- `news/scripts/validate_digest_output.py`：`fail()` 可帶 header；今天完全沒有 digest 時改報「今日無 digest（日期）：Phase 4 未產出」，不再套用 schema drift 標題（UI 只截得到第一行）。
+- `scripts/_shared/broker_gate.py`：`quota_snapshot()` 的 headline 改讀**5 小時窗口**（claude 的 `session`、agy 的 `<pool>.five_hour`），不再用 broker 的「全窗口最小值」。新增 `headline_bucket` 說明數字來自哪個窗口；`routable_pool` 保持 broker 原值不動（那是路由事實，與「面板讀哪個窗口」是兩件事）。沒有 5h 窗口的 provider（codex 只送一個 `primary`/週）維持 broker 原數字並回報 `headline_bucket: null`，不把週數字當 5h 用；routable pool 內找不到 5h 窗口時也回 null，不借別的池的窗口（那正是 V4.129.0 修掉的 agy 0% 事故）。
+- `Dashboard/utils.js`：長條改標示 5h 窗口，tooltip 標出來源窗口（`bucketLabel`，如 `5h` / `gemini·5h`），沒有 5h 的那家明寫「該家未回報 5h 窗口」；hover card 的 `▸` 改標「側欄長條讀的那個窗口」；說明文字同步改寫，並註明**派工仍看全窗口最緊值**，與這條長條不是同一個數字。
+- `Dashboard/utils.js`：`bucketLabel` 的 `session` 由「本節」改標 `5h`。claude 的 5 小時窗口在 Claude Code `/usage` 叫 "Current session"、broker 鍵名 `session`，與 agy 的 `*.five_hour` 是同一種測量，兩個詞讓面板看起來像 claude 沒有 5h 讀數。已在 broker snapshot 歷史核對：重置時間 9:40am → 2:40pm → 7:40pm → 12:40am，恰好 5 小時一跳。
+- `news/news_protocol_v2.md` / `news/digest_output_schema.md`：同步降級語意與新欄位。
+
+### Why
+- 2026-08-14 的 news run：Stage 1 把「Fed 對某銀行前員工的例行處分」排在當日第 1，四個 lane 正確判它沒料（Bull +1 / Bear −1），finalizer 於是拒絕組裝，一份跑完的四 lane 辯論全部作廢。protocol 原文寫的是「退回**該則**」，實作卻是整批致命。
+- 分數區間 bull 1~5 / bear −5~−1 讓「這則沒料」只能寫成 ±1，撞上該閘；不放寬區間（會動到 arbiter 加權與 verdict 門檻），改走降級。
+- 使用者回報側欄 CLAUDE 顯示 45%，那是 `weekly.fable` —— 單一 model 的**週**池。額度條要回答的是「我最近幾小時燒掉多少」，使用者拍板讀 5 小時窗口；同一時刻 claude 的 5h 窗口只用了 8%。取最小值的舊做法還有第二個問題：長條的**意義會隨當天哪個窗口比較緊而改變**，三家之間也不可比。
+- broker 端派工繼續用全窗口最小值（使用者確認那是對的），所以面板與派工現在是兩個不同的問題、各自有正確答案；`reserve_only` / `cooldown_until` 仍原樣傳遞，broker 不派的 provider 在面板上照樣是暗的。
+
+## [4.129.1] — 2026-08-12 — X KOL 重新整理按鈕執行增量抓取
+
+### Changed
+- `Dashboard/x-kol.html` 的右上角「重新整理」改為呼叫 `POST /api/x-kol/collect`，完成一輪增量 sweep 後再重算熱度。
+- `dashboard_server.py` 新增 collector endpoint 與並行鎖；執行中的第二次點擊會回 409，不會重複消耗 X API 預算。
+- 價格/身分快取在 sweep 完成後失效，確保新貼文的代號能重新取得 enrichment。
+
+### Why
+- 原按鈕只讀既有 shadow log，頁面更新不會抓到 8/6 之後的新 KOL 文章。
+
+## [4.129.0] — 2026-08-10 — agy 一個池滿了不該卡掉整個 provider（修在 llm-quota-broker，本 repo 補上落地）
+
+使用者發現側欄畫 `GEMINI 保留區 100%／剩餘 0%`，但 agy 其實提供六個 model、只有 GPT-OSS 那個池滿了。
+實跑 `/v1/recommend` 對照確認：**不帶 `model` 的 task 被記到 agy 的兩個池上，取全域最小值 → 0% →
+`reserve_only` → agy 整個被排除**；同一時刻帶 `model=gemini-3.6-flash-medium` 則 `eligible=true`、
+`before=56.84`、rank 1。而本 repo 三個 agy 呼叫點都沒有 `--model`，所以就算 broker 選了池也管不住
+實際落在哪池——兩件事必須一起修。
+
+### Fixed — llm-quota-broker（主修，另一個 repo）
+- `routing/estimator.py` 新增 `select_pool()` / `choose_pool()` / `rank_pools()`：task 沒帶 model 時
+  由 broker 依固定偏好序 `gemini → claude_gpt`（`adapters/agy.py` 的 `POOL_PREFERENCE`）選第一個
+  過得了 20% 線的池，並指名具體 model。**不是比剩餘量**——兩個池裝不同廠商的 model，挑「比較滿的」
+  等於悄悄換掉回答的人。無法歸類的 model（未知家族）維持舊行為記到全部池。
+- `adapters/agy.py` 新增 `pool_for_model()` / `model_for_pool()` / `POOL_DEFAULT_MODELS`。**預設 tier
+  寫死在常數不跟隨 catalogue 順序**：`agy models` 每個家族是 high 排在 medium 前面，跟著它等於讓
+  這次修正順手把所有未指定的 run 升級到最貴的變體。
+- 選定的 model 經 `ProviderCandidate.model` → `Lease.model` 交回呼叫端，`/v1/run` 派工時填進 task。
+- `/v1/status` 的 `remaining_percent` / `reserve_only` 改用「router 真的會用的池」，新增 `routable_pool`
+  說明數字來自哪個池。單池 provider（claude／codex）行為不變。
+- 測試 +9（pool 選擇、一池滿不擋另一池、兩池都滿仍拒、pinned model 不被替換、tier 不跟隨 catalogue、
+  派工帶 model、status headline）。broker 全套 1036 passed / ruff / mypy 全綠。
+
+### Changed — 本 repo（讓實際執行落在預約的池）
+- `scripts/break_news/llm_drivers.py`：`run_gemini(..., model="")` 帶 `--model`；`run_llm(...,
+  provider_model="")` 只把它傳給 agy runner。
+- `scripts/_shared/broker_gate.py`：新增 `assigned_model(lease)`；`quota_snapshot()` 改讀 broker 的
+  `remaining_percent` 與 `routable_pool`，不再自己取 buckets 最小值（欄位缺席才退回舊算法）。
+- `scripts/_shared/model_router.py`：`_run_model_for_role` 串 `provider_model`；`lease.start()` 記
+  broker 指派的真 model id 而非 `gemini` 別名（別名不是池，餵不了 burn 校準）；`_Hold.provider_model`。
+- `dashboard_server.py`：`_protocol_command(..., agy_model=)` 對稱既有的 `claude_model`；`model_tier`
+  改為 `claude_model or agy_model or 'cli-default'`，protocol log 表頭同步。
+- `Dashboard/utils.js`：側欄 hover 說明數字來自哪個池，四個 window 裡 router 會用的那兩個標 `▸`。
+- `scripts/_shared/broker_client.py` 由 `lqb client sync` 重新 vendored（tw-stock-wonwon 同步收到）。
+
+### Why
+- 一個池的額度歸零，跟「這個 provider 不能用」是兩件事。舊行為對「不知道會打到哪個池」是正確的保守
+  讀法，但那是錯的問題：呼叫端不指定 model 不是資訊不足，是把選擇權交出來，而 broker 是唯一同時看得到
+  兩個池的元件。
+- 側欄跟著改是因為 broker 修好之後，畫面若還寫「剩餘 0%」就會跟 router 的行為互相打臉——面板與 router
+  對「這家能不能用」意見不合，比沒有面板更糟。
+- 實測（2026-08-10 15:3x）：不帶 model 的 preview → `recommended=agy`、`model=gemini-3.6-flash-medium`、
+  `before=56.84`；側欄 gemini 由 `0.0/保留區` 變成 `56.84/gemini 池`；`agy --print --model
+  gemini-3.6-flash-medium` 實跑 rc=0。
+
+## [4.128.0] — 2026-08-10 — T4／T5 收尾：Fundamentals 補上物證，回饋迴路四支查完（兩支我原本判斷錯）
+
+`docs/plan_invest_stale_stages.md` 的最後兩項。**兩支腳本的狀態與我在盤點時的預測相反**，
+所以這條的重點與其說是修好什麼，不如說是「盤點的猜測必須實跑驗證」。
+
+### Added — T4 Fundamentals 錨盤點
+- **盤點**：rubric 的計分成分裡 **六條是純門檻運算**（peer PE 差距、altman/piotroski、
+  owner_earnings qoq、employee CAGR、FCF+rev 強訊號、quality_flags），**四項是真判斷**
+  （base score 加權、moat、catalysts、bull/bear thesis）。明細見 plan 檔 T4 表。
+- **缺口與 Technical 在 V4.116.3 之前完全同形**：`us-stock-analysis/analyze.py` 算得出全部六個
+  rubric scalar，卻**只印到 stdout**——數字躺在 lane subagent 的 transcript 裡，validator 構不到。
+- **走已驗證的便宜路線**：收尾無條件寫 `skills/us-stock-analysis/cache/<T>_fundamentals_payload.json`
+  （六個區塊齊全），與 Technical 同 pattern，不擴 lane 契約。`test_bundle_merge.py` 加**接線**
+  （落地段從 `main()` 拿掉要紅，已種回驗過）與**形狀**兩類斷言。
+- **刻意不做 `rubric_hint`**：Technical 的 hint 是既有的「stage → 分數帶」翻譯；Fundamentals
+  **沒有議定過的 base-score 公式**，發明一個等於寫進新的計分規則。證據先落地，公式待拍板。
+
+### Fixed — T5 回饋迴路
+- **`backtest_postmortem.py` 對 V4.87.0 renderer 靜默半殘**：renderer 把 action 摺進決策格
+  （`| Final Decision | HOLD（action: CANCEL） |`），舊 regex 要求決策字後直接接 `|`，於是
+  **145 份報告裡 decision 漏 33 份、action 漏 126 份**，工具 rc=0 照吐一張 None 表。
+  修 regex（decision 112→131、action 19→35；其餘是報告真的沒那一列）**並加解析缺口彙總警告**
+  ——下次 renderer 再變格式會先出聲，不必等人發現整欄都是 None。
+
+### Documented — 兩個我原本判斷錯的
+- **`validate_v219.py` 不是 legacy**（我在盤點時猜它該刪）。16 fixture 全過，import 的是真
+  producer（`apply_det_shadow.compute_polarization` / `classify_red_team_basis`），驗的規則今天
+  仍是 §13 的活規則。真正的問題是**它不在 OPS §7 對照表裡**，改 polarization 的人不會知道要跑它。已補列。
+- **`backtest_watchlist.py` 完全正常**，`--dry-run` rc=0 產出完整報告——順帶發現 TODO 的
+  `[V20-D2] 加 --dry-run flag` **早就做完沒勾銷**。⚠️ 但 `watchlist_lifecycle.jsonl` 的 881 筆事件
+  停在 **2026-07-20**，三週無新事件，輸入停止累積（已記 TODO）。
+
+### Fixed — 一支測試被 live 資料弄紅（順手，非本輪主題）
+`test_valuation_pack_consistency.py` 的 fixture 取自 **history.json 最後一筆真實 entry**，
+而 2026-08-10 的 META entry 缺 `multi_horizon_price_framework`（reviewer session 已回報），
+於是整支以 `KeyError` 崩掉——**測試比它所驗的 schema 更嚴格**：MHP 在 schema 裡明訂 optional
+（缺 → validator 只印 warning，非 fatal）。改成缺就跳過該段對齊並印一行說明，warning 仍由
+validator 自己出。守衛已種回驗過會紅。**未動那筆 META entry**（補要動決策帳本，等使用者點頭）。
+
+### ⚠️ 未修，需拍板 — `register_thesis.py` 從上線起就沒運作過
+`~/.claude/skills/` 底下只有 `grill-me`，**trader-memory-core 從來沒安裝過**。實跑得
+`No module named 'thesis_store'`、**rc=0**（non-fatal hook 照設計不紅）。後果實測：
+**183 筆 trade 的 `thesis_id` 全部是 null**；連帶 **V20-F1 sector concentration 從未生效**
+——11 筆帶該 block 的 entry 中 7 筆 `registry_unavailable`、4 筆 `explicit_count`，
+**`applied=true` 是 0 筆**。這正是 reviewer session 這次在 live run 觀察到的現象。
+三條出路（裝 TMC／改用 history.json 自算同 sector 部位／承認 F1 為 inert 並改文件）都改變風控行為。
+
 ## [4.127.1] — 2026-08-10 — 首次真跑抓到組裝器漏兩欄：burry_score 與 MHP
 
 ### Fixed

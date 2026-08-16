@@ -8,6 +8,7 @@ a button that quietly spent a 5-lane protocol run would break that rule silently
 from __future__ import annotations
 
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -19,6 +20,7 @@ sys.argv = ["dashboard_server.py"]
 
 import dashboard_server as ds  # noqa: E402
 from scripts.x_kol import heat as heat_mod  # noqa: E402
+from scripts.x_kol import collect as collect_mod  # noqa: E402
 
 
 def test_payload_has_everything_the_page_needs():
@@ -26,6 +28,32 @@ def test_payload_has_everything_the_page_needs():
     assert set(p) >= {"heat", "candidates", "budget", "posts", "roster"}
     assert set(p["heat"]) >= {"tickers", "themes", "posts_scanned"}
     assert set(p["budget"]) >= {"spent_usd", "total_usd", "post_reads"}
+
+
+def test_collect_once_runs_one_sweep_and_invalidates_price_cache(monkeypatch):
+    ds._X_KOL_CACHE.update({"at": 123.0, "attempted": {"AAOI"}})
+    calls = []
+
+    def fake_sweep(config, *, dry_run=False):
+        calls.append((config, dry_run))
+        return {
+            "started_at": "start",
+            "ended_at": "end",
+            "new_posts": 2,
+            "roster_size": 1,
+            "per_handle": [{"handle": "serenity", "new": 2}],
+            "errors": [],
+            "budget_stopped": False,
+        }
+
+    monkeypatch.setattr(collect_mod, "sweep", fake_sweep)
+    payload = ds._x_kol_collect_once()
+
+    assert len(calls) == 1
+    assert calls[0][1] is False
+    assert payload["new_posts"] == 2
+    assert ds._X_KOL_CACHE["at"] == 0.0
+    assert ds._X_KOL_CACHE["attempted"] == set()
 
 
 def test_no_price_request_means_no_fmp_calls(monkeypatch):
@@ -115,6 +143,15 @@ def test_api_never_triggers_an_analysis():
         assert forbidden not in body, f"decide route must not call {forbidden}"
 
 
+def test_collect_route_is_separate_from_analysis_boundary():
+    src = (ROOT / "dashboard_server.py").read_text(encoding="utf-8")
+    start = src.index('if path == "/api/x-kol/collect":')
+    body = src[start:start + 1600]
+    assert "_x_kol_collect_once" in body
+    for forbidden in ("run_protocol", "enqueue_protocol", "run_daily_update"):
+        assert forbidden not in body
+
+
 def test_a_ticker_with_no_price_does_not_loop_the_refresh_forever(monkeypatch):
     """$SIVE has no price series, so it never lands in `prices`. Keying the
     refresh check off `prices` would re-fan-out on every request forever and
@@ -155,3 +192,70 @@ def test_a_ticker_with_no_price_does_not_loop_the_refresh_forever(monkeypatch):
     assert len(spawned) == 1, "an unpriceable ticker must not retrigger a refresh"
     assert p2["prices_pending"] is False
     assert "SIVE" not in p2["heat"]["prices"]
+
+
+# ── 風向 daemon status ───────────────────────────────────────────────────
+# Same page, different backend. These guard the one claim the status row makes
+# that can be wrong in a way the user cannot see: "the dispatcher is running".
+def _wind_config(tmp_path):
+    from scripts.wind import budget as wbudget
+    config = json.loads(json.dumps(wbudget.load_config()))
+    config["heat"]["scans_dir"] = str(tmp_path)
+    return config
+
+
+class _FakeProc:
+    def __init__(self, stdout=""):
+        self.stdout = stdout
+
+
+def test_daemon_status_is_none_only_when_no_process_is_running_either(tmp_path, monkeypatch):
+    """No heartbeat is not proof of no daemon.
+
+    The pgrep fallback must be stubbed here or this test would depend on
+    whether the developer happens to have a dispatcher running — it failed
+    exactly that way on first run, which is the point of pinning it.
+    """
+    monkeypatch.setattr(ds.subprocess, "run", lambda *a, **k: _FakeProc(""))
+    assert ds._wind_daemon_status(_wind_config(tmp_path)) is None
+
+
+def test_daemon_status_reports_a_heartbeatless_daemon_as_running(tmp_path, monkeypatch):
+    """A dispatcher started before the heartbeat existed is still spending the
+    daily budget. Reporting it as stopped would invite a second one."""
+    monkeypatch.setattr(ds.subprocess, "run", lambda *a, **k: _FakeProc("77046\n"))
+    status = ds._wind_daemon_status(_wind_config(tmp_path))
+    assert status["alive"] is True
+    assert status["no_heartbeat"] is True
+    assert status["pid"] == 77046
+    assert status.get("next_tick_at") is None, "no heartbeat means no countdown to show"
+
+
+def test_daemon_status_rejects_a_recycled_pid(tmp_path):
+    """A heartbeat from a daemon that died can point at a PID the OS has since
+    handed to something else. `os.kill(pid, 0)` succeeds for that stranger, so
+    liveness must also confirm the command line — otherwise the page shows a
+    countdown driven by whatever process inherited the number.
+
+    This test's own PID is guaranteed alive and guaranteed not to be the
+    dispatcher, which is exactly the confusion being guarded against.
+    """
+    from scripts.wind import dispatch as wdispatch
+    config = _wind_config(tmp_path)
+    wdispatch.write_heartbeat(config, pid=os.getpid(), state="sleeping",
+                              next_tick_at="2099-01-01T00:00:00+00:00")
+
+    status = ds._wind_daemon_status(config)
+    assert status is not None
+    assert status["alive"] is False, "a live PID that is not the dispatcher is not the dispatcher"
+    assert status["next_tick_at"] == "2099-01-01T00:00:00+00:00", "heartbeat fields still pass through"
+
+
+def test_daemon_status_trusts_a_clean_shutdown_without_probing(tmp_path):
+    """state=stopped is the daemon's own word that it exited on Ctrl-C. Believe
+    it and skip the probe — the PID is free to be recycled the moment it dies."""
+    from scripts.wind import dispatch as wdispatch
+    config = _wind_config(tmp_path)
+    wdispatch.write_heartbeat(config, pid=os.getpid(), state="stopped",
+                              stopped_at="2026-08-16T11:00:00+00:00")
+    assert ds._wind_daemon_status(config)["alive"] is False
