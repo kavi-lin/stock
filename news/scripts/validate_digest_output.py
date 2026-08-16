@@ -162,6 +162,68 @@ def _arbiter_semantic_errors(
     return errors
 
 
+def _earlier_run_event_ids(date, triage, digest_path):
+    """event_ids already in the store before this run's Stage 1 snapshot.
+
+    A date can hold more than one DIGEST run (news_event_store._cap_shallow
+    documents 2026-08-06's three). The event store is append-only, but Stage 1
+    is not: a second run refetches, `news_id` is renumbered by position, and
+    the earlier run's ids disappear from triage.stage2_items — on 2026-08-16
+    n0087 was Natera at 14:36 and "Why Is Everyone Talking About AMD Stock?"
+    at 22:10. finalize writes the union projection of the day's events, so
+    those earlier deeps are legitimately in the digest with ids the current
+    triage no longer knows.
+
+    Matching is by `event_id` (URL/headline-derived, stable across runs), never
+    by `news_id`, precisely because news_id is the thing that moved.
+
+    Only events recorded *before* the current triage qualify. A verdict
+    hand-added to the digest has no store record at all, so the laziness
+    pattern this cross-check exists for still fires.
+
+    Returns None when the answer cannot be established — no store file, no
+    parseable timestamp on either side. The caller must then stay strict:
+    "cannot tell" is not "allowed".
+    """
+    stamp = str(triage.get("timestamp") or "").strip()
+    if not stamp:
+        return None
+    try:
+        cutoff = datetime.fromisoformat(stamp)
+    except ValueError:
+        return None
+
+    store_path = Path(os.path.dirname(digest_path)) / "news_events.jsonl"
+    if not store_path.exists():
+        return None
+    try:
+        events = load_events(store_path)
+    except Exception:  # noqa: BLE001 — an unreadable store means "cannot tell"
+        return None
+
+    earlier = set()
+    for event in events:
+        if event.get("effective_date") != date:
+            continue
+        recorded = str(event.get("recorded_at") or "").strip()
+        if not recorded:
+            continue
+        for fmt in ("%Y-%m-%d %H:%M", "%Y-%m-%d %H:%M:%S"):
+            try:
+                when = datetime.strptime(recorded, fmt)
+                break
+            except ValueError:
+                when = None
+        if when is None:
+            try:
+                when = datetime.fromisoformat(recorded)
+            except ValueError:
+                continue
+        if when < cutoff and event.get("event_id"):
+            earlier.add(event["event_id"])
+    return earlier
+
+
 def _cross_check_files(digest, digest_path):
     """Cross-check today's digest against its sibling triage.json.
 
@@ -218,18 +280,34 @@ def _cross_check_files(digest, digest_path):
         for x in (triage.get("stage2_items") or [])
         if isinstance(x, dict)
     }
-    deep_ids = {
-        v.get("news_id")
+    deep_verdicts = [
+        v
         for v in (digest.get("verdicts") or [])
         if isinstance(v, dict) and v.get("depth") == "deep"
         and v.get("event_type", "DIGEST") == "DIGEST"
-    }
-    missing = sorted(d for d in deep_ids if d and d not in triage_stage2_ids)
-    if missing:
-        errors.append(
-            f"deep verdicts not in triage.stage2_items: {missing} — "
-            "digest cites news_ids that Stage 1 did not advance"
-        )
+    ]
+    unmatched = [
+        v for v in deep_verdicts
+        if v.get("news_id") and v["news_id"] not in triage_stage2_ids
+    ]
+    if unmatched:
+        # Not every unmatched id is drift: an earlier DIGEST run on the same
+        # date leaves deeps whose news_id this run's Stage 1 renumbered away.
+        earlier = _earlier_run_event_ids(date, triage, digest_path)
+        if earlier is None:
+            orphans = sorted({v["news_id"] for v in unmatched})
+            tail = "and the event store cannot confirm an earlier run for this date"
+        else:
+            orphans = sorted({
+                v["news_id"] for v in unmatched
+                if v.get("event_id") not in earlier
+            })
+            tail = "and no event recorded before this run's Stage 1 backs them"
+        if orphans:
+            errors.append(
+                f"deep verdicts not in triage.stage2_items: {orphans} — "
+                f"digest cites news_ids that Stage 1 did not advance, {tail}"
+            )
 
     # Telemetry sanity (P0a/P0b): triage should carry blocked_counts /
     # template_dedup_dropped fields once v3.14.3 stage1 runs in production.
