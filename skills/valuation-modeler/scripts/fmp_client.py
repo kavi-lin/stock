@@ -98,7 +98,6 @@ def quote(ticker: str, *, no_cache: bool = False) -> dict | None:
 # ── FRED risk-free (read-only, no HTTP — reuses fred-macro's cache) ──────
 FRED_CACHE_CANDIDATES = [
     BASE_DIR / "skills" / "fred-macro" / "cache" / "fred_latest.json",
-    BASE_DIR / "fred.json",
 ]
 RF_DEFAULT = 0.042
 

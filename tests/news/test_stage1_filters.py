@@ -21,8 +21,10 @@ from news.scripts.stage1_triage import (   # noqa: E402
     effective_credibility,
     classify_news_type,
     classify_content_genre,
+    calc_materiality_score,
     detect_binary_event,
     select_stage2_items,
+    STAGE2_MATERIALITY_MIN,
     _build_verdict,
 )
 
@@ -429,3 +431,52 @@ class TestBinaryDetection:
         assert classify_content_genre(
             {"source": "24/7 Wall Street"}, "GLP-1 drove record earnings", "",
         ) == "research_commentary"
+
+
+class TestPersonnelEnforcementNotices:
+    """Regulator notices about one individual carry no market content, but
+    source_kind=official_macro + monetary_policy alone clears
+    STAGE2_MATERIALITY_MIN — so only the genre penalty keeps them out of
+    Stage 2 (2026-08-14: n0376 ranked #1 of the day and stalled the digest)."""
+
+    OFFICIAL = {"source_kind": "official_macro", "source": "Fed Press"}
+
+    def test_fed_enforcement_against_former_employee_is_routine(self):
+        assert classify_content_genre(
+            self.OFFICIAL,
+            "Federal Reserve Board issues enforcement action with former employee of Regions Bank",
+            "",
+        ) == "routine_regulatory"
+
+    def test_verbless_enforcement_headline_is_routine(self):
+        """Covers the second alternation: no `issues/announces` verb to anchor on.
+        Without a case that only this branch matches, deleting it stays green."""
+        assert classify_content_genre(
+            self.OFFICIAL,
+            "FDIC enforcement action against a former officer of an insured bank",
+            "",
+        ) == "routine_regulatory"
+
+    def test_prohibition_order_against_individual_is_routine(self):
+        assert classify_content_genre(
+            self.OFFICIAL,
+            "OCC issues prohibition order against a former employee of a national bank",
+            "",
+        ) == "routine_regulatory"
+
+    def test_penalty_below_stage2_threshold(self):
+        assert calc_materiality_score(
+            self.OFFICIAL,
+            "Federal Reserve Board issues enforcement action with former employee of Regions Bank",
+            "", "monetary_policy", 0.0, "HIGH", "routine_regulatory",
+        ) < STAGE2_MATERIALITY_MIN
+
+    def test_institution_level_action_still_advances(self):
+        """Reverse assertion: the subject qualifier is what makes it routine.
+        An action against the bank itself is real news and must survive."""
+        headline = "Federal Reserve Board fines Regions Bank $150 million over compliance failures"
+        genre = classify_content_genre(self.OFFICIAL, headline, "")
+        assert genre == "straight_news"
+        assert calc_materiality_score(
+            self.OFFICIAL, headline, "", "monetary_policy", 0.0, "HIGH", genre,
+        ) >= STAGE2_MATERIALITY_MIN

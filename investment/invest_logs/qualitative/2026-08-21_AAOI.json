@@ -1,0 +1,203 @@
+{
+  "schema": "p5-qualitative/1.0",
+  "ticker": "AAOI",
+  "date": "2026-08-21",
+  "lanes": {
+    "fundamentals": {
+      "signal": "BUY",
+      "key_factors": [
+        "營收YoY大增86.4%成長加速",
+        "淨現金2.35億且負債比0.16",
+        "前瞻PE 28x與PEG 0.78"
+      ],
+      "risk_flags": [
+        "FCF利潤率-149%資本開支沉重",
+        "Piotroski分數僅2反映目前虧損"
+      ]
+    },
+    "sentiment": {
+      "signal": "HOLD",
+      "key_factors": [
+        "Insider distributing with ratio 0.04",
+        "Monthly MSPR -100 indicates heavy selling",
+        "Short float elevated at 12.81%"
+      ],
+      "risk_flags": [
+        "Persistent insider selling pressure",
+        "Divergence from bullish macro backdrop"
+      ]
+    },
+    "news": {
+      "signal": "BUY",
+      "key_factors": [
+        "800G/1.6T monthly capacity ramping to 200k units",
+        "Solid Q2 beat and raised forward outlook",
+        "9 Buy ratings and zero Sell ratings"
+      ],
+      "risk_flags": [
+        "Optical supply chain margin sensitivity via Fabrinet",
+        "Capacity expansion execution risk meeting backlog"
+      ]
+    },
+    "technical": {
+      "signal": "HOLD",
+      "key_factors": [
+        "Stage 1 basing above 20/200MA",
+        "Testing 50MA resistance at 129.90",
+        "MACD positive but histogram falling"
+      ],
+      "risk_flags": [
+        "Overhead supply below 50MA resistance",
+        "Insider distribution trend in Q3"
+      ]
+    },
+    "valuation": {
+      "signal": "BUY",
+      "key_factors": [
+        "Fair value $156.68 implies +22.16% upside",
+        "Forward earnings discounted anchor at $153.35",
+        "Analyst consensus price target at $160.00"
+      ],
+      "risk_flags": [
+        "Anchors solely reliant on sell-side projections",
+        "Negative TTM EPS and FCFF invalidate DCF"
+      ]
+    }
+  },
+  "red_team": {
+    "verdict": "STRONG_COUNTER",
+    "counter_thesis": "市場多頭過度押注800G/1.6T擴產帶來的遠期獲利預期，但公司FCF利潤率達-149%、Piotroski僅2分，且估值100%仰賴賣方預測；在10年期實質利率高達2.42%與內部人極端拋售（MSPR -100）下，激進擴產現金消耗將引發嚴重的流動性擠壓與估值崩塌。",
+    "kill_conditions": [
+      "IF 未來 2 季營收年化增速 < 33% WITHIN 180 天 THEN 現價內含的 33.45% 5年CAGR營收增長路徑破裂且EV/S面臨劇烈均值回歸",
+      "IF 10年期實質利率（DFII10）維持在 2.42% 以上且單季自由現金流（FCF）赤字未見收窄（持續低於 -$50M） WITHIN 90 天 THEN 高融資成本與擴產重資本支出將引發股權稀釋風險，推翻基本面買入論點",
+      "IF 內部人淨買賣比維持在 0.04 以下且股價收盤跌破關鍵支撐 $127.01 WITHIN 30 天 THEN 證實主力與內部人持續出貨，多頭整合與技術面支撐論點破裂"
+    ],
+    "counter_evidence_strength": 5,
+    "thesis_break_probability": 0.72
+  },
+  "burry_narrative": "Burry Score 43.3 (NEUTRAL, veto_flag=false). FCF yield is deeply negative at -8.8% with ongoing cash burn and capex intensity; however, balance sheet leverage is modest (D/E 0.18, Altman Z 9.54 safe). Heavy insider selling/distribution (-100 MSPR, sell ratio 0.04) and Piotroski score 2 highlight weak current accounting fundamentals, but no T4 veto triggered.",
+  "conflict_bias": {
+    "schema": "conflict_bias.v1",
+    "tentative_decision": "BUY",
+    "triggers_fired": [],
+    "conflict_summary": "none",
+    "t4_detail": null,
+    "t5_detail": null,
+    "proceed_to_phase3": true
+  },
+  "macro_context": "整體市場處於 RISK_ON 多頭架構，市場寬度指標健康（79.2）且 FTD 進入第 12 天。然而 FRED 總體環境顯示 10 年期實質利率高達 2.42%，對長存續期及虧損中成長股估值造成壓力；此外 Nasdaq 累積 6 日派發日，需留意回檔風險。",
+  "watch_conditions": {
+    "breakout_50ma": "日收盤價帶量站上 50MA（$129.90）且成交量 > 1.3 倍 20 日均量，確認突破延續性。",
+    "revenue_growth_milestone": "未來季度財報公布時，營收年增率需維持在 33% 以上且單季 FCF 赤字逐步收窄。",
+    "insider_selling_exhaustion": "內部人淨賣超趨緩，Q4 買賣比回升至 0.25 以上且無高層進一步大額減持。",
+    "stop_loss_trigger": "跌破保守停損價 $98.63 或關鍵支撐 $127.01 時啟動風險防禦停損/減倉。"
+  },
+  "key_risks": [
+    "FCF 利潤率達 -149%，重資本支出擴建產能引發持續現金消耗與潛在股權稀釋風險",
+    "10 年期實質利率維持在 2.42% 高位，壓抑高估值無獲利科技股之估值乘數",
+    "內部人持股呈現重度派發（Q3 賣超比 0.04，MSPR -100），反映高層短期逢高了結傾向",
+    "800G/1.6T 光收發模組量產與客戶驗證進度若不及預期，恐導致遠期獲利落空"
+  ],
+  "bias_notes": "基本面與新聞面受 AI 800G/1.6T 光模組需求驅動強烈看多，但情緒面（內部人拋售）與技術面（50MA 蓋頂震盪）提供適度降溫；透過 Red Team 反論與 Rec 11 熱區 probe 規則，將決策動態定位為 STAGED_ENTRY（30 bps），兼顧向上曝險與下檔保護。",
+  "phase2_fanout_mode": "PARALLEL_SUBAGENT",
+  "degraded_analysts": [],
+  "decision_point_days": 21,
+  "devils_advocate_filed": false,
+  "trade_metadata": {
+    "trade_type": "trend",
+    "event_tag": "ai_optical_transceiver_ramp"
+  },
+  "lane_detail": {
+    "fundamentals": {
+      "moat_assessment": {
+        "level": "NARROW",
+        "type": "IP-patent",
+        "evidence_one_line": "自製InP雷射晶圓與光引擎垂直整合具良率及供應鏈自主優勢"
+      },
+      "near_term_catalysts": [
+        {
+          "date": "2026-09-29",
+          "type": "earnings",
+          "description": "公布最新季度財報與800G/1.6T光收發模組出貨指引",
+          "impact": "high"
+        },
+        {
+          "date": "2026-10-15",
+          "type": "product_launch",
+          "description": "光通訊展會發表次世代CPO與1.6T超高功率雷射光引擎",
+          "impact": "medium"
+        },
+        {
+          "date": "2026-11-20",
+          "type": "guidance",
+          "description": "美國德州新廠全自動化產能擴建進度與良率更新",
+          "impact": "medium"
+        },
+        {
+          "date": "2026-12-10",
+          "type": "product_launch",
+          "description": "北美超大型雲端客戶(Tier-1 Hyperscaler)量產驗證通過",
+          "impact": "high"
+        }
+      ],
+      "bull_thesis_one_line": "營收YoY+86%且前瞻PE 28x，800G放量獲利轉正",
+      "bear_thesis_one_line": "FCF利潤率-149%，擴產加速現金消耗與同業競爭"
+    },
+    "sentiment": {
+      "market_sentiment_composite": 64.4,
+      "vix_current": 15.66,
+      "insider_signal": "distributing",
+      "short_pct_float": 12.81,
+      "mspr_latest": -100.0
+    },
+    "news": {
+      "immediate_catalyst_5d": null,
+      "decision_point_days": 21,
+      "cross_asset_spillover": [
+        {
+          "asset": "sector_XLK",
+          "direction": "BULLISH",
+          "mechanism": "AI optical transceiver capex demand tailwind"
+        }
+      ],
+      "reasoning_one_line": "Strong AI optical transceiver capacity ramp (800G/1.6T) and robust Q2 follow-through support bullish news sentiment despite temporary sector margin noise.",
+      "pt_revision_momentum": {
+        "direction": "FLAT",
+        "consensus_delta_pct_1m": null,
+        "unavailable_reason": null
+      }
+    },
+    "technical": {
+      "smart_money_analysis": {
+        "label": "distributing",
+        "narrative": "Insiders show net distribution with zero purchases in Q3 2026 while volume remains sub-average at 0.87x."
+      },
+      "pattern_taxonomy": {
+        "pattern": "consolidation",
+        "confirmation_criteria": "A daily close above the 50MA ($129.90) on >1.3x volume confirms breakout continuation."
+      },
+      "market_strength": "NEUTRAL",
+      "key_levels": {
+        "support": 127.01,
+        "resistance": 149.35,
+        "pivot": 129.90
+      },
+      "high_prob_scenario": "AAOI chops between $127.01 support and $129.90 50MA before attempting a breakout toward $149.35 resistance.",
+      "volatility": {
+        "atr_14": 17.75,
+        "hist_vol_20d_daily": 0.1042,
+        "momentum_20d_pct": 14.50
+      }
+    },
+    "valuation": {
+      "weighted_fair_value": 156.68,
+      "vs_current_pct": 22.16,
+      "verdict_band": "undervalued",
+      "suppression_proposals": [],
+      "valuation_commentary": "Traditional cash-flow and historical multiple valuations are ineligible due to negative TTM EPS and FCFF. Valuation is supported entirely by forward-looking anchors (Forward Earnings $153.35 and Consensus PT $160.00) yielding $156.68 (+22.16%). Both anchors derive from sell-side expectations.",
+      "cited_transition_overlay": false,
+      "transition_dissent_basis": null
+    }
+  },
+  "last_outcome": "UNKNOWN"
+}

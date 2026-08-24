@@ -33,12 +33,11 @@ document.addEventListener('DOMContentLoaded', () => {
     verifier: ['#22c55e', '#4ade80'], trader: ['#ec4899', '#f472b6'],
     researcher: ['#14b8a6', '#2dd4bf'],
   };
-  // Engines are shuffled across the non-Lead seats each run — show this run's
-  // actual assignment from meta.roles. Researcher is pinned gemini (phase 0).
+  // Roles define perspectives; the broker assigns actual providers per call.
   function renderRolePills(meta) {
     const host = $('of-role-pills');
     if (!host || !meta || !meta.roles || !meta.roles.length) return;
-    const pills = [`<span class="of-pill researcher" style="border-color:#14b8a6;color:#2dd4bf">Researcher · gemini</span>`]
+    const pills = [`<span class="of-pill researcher" style="border-color:#14b8a6;color:#2dd4bf">Researcher · Broker</span>`]
       .concat(meta.roles.map(r => {
         const c = ROLE_COLORS[r.key] || ['#a1a1aa', '#d4d4d8'];
         return `<span class="of-pill ${r.key}" style="border-color:${c[0]};color:${c[1]}">${r.name} · ${r.engine}</span>`;
@@ -159,7 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ? `<div class="of-concerns">缺口：${ev.gaps.map(esc).join('｜')}</div>` : '';
     card.innerHTML =
       `<div><span class="of-role researcher">${esc(ev.name || 'Researcher')}</span>
-         <span class="of-badge">${esc(ev.engine_used || 'gemini')}</span>${failed}</div>
+         <span class="of-badge">${esc(ev.engine_used || 'broker')}</span>${failed}</div>
        <div class="of-summary">${esc(ev.summary)}</div>
        <div class="of-detail"><ul>${facts}</ul></div>
        ${gaps}`;

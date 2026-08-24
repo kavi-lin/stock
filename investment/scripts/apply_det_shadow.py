@@ -360,7 +360,7 @@ CONTRACT_VERSION = "C1/1.0"
 # V4.6 的四 lane fanout 與今天的六 lane 契約不是同一回事，補一塊「看起來很完整」
 # 的 provenance 上去等於在稽核軌跡放假證據（Phase 6 按 provenance 分層時會直接吃到）。
 # 與 §13 / §14 同一條紀律：門檻綁 schema 版本，不綁日期。
-LANE_CONTRACT_VERSIONS = ("V5.3",)
+LANE_CONTRACT_VERSIONS = ("V5.3", "V5.4")
 
 # 六個 lane = 五個 Phase 2 分析 lane + Red Team。RT 放進同一張表而不是另立一組欄位，
 # 是為了讓 L8（RT decision-invariant skip）只要改 `lanes.red_team.provenance`，

@@ -19,16 +19,29 @@ from sector.lib.fmp_client import (  # noqa: E402
     TICKER_TO_SECTOR,
     cache_path,
     fmp_get,
+    fmp_get_many,
 )
 
+# The two per-ticker sweeps below are latency-bound, not budget-bound: run
+# sequentially they took ~4 min alone, close enough to phase_prefetch's 360s
+# per-task cap that sweep contention tripped it. Fan them out instead — the
+# cross-process fmp_pool window still caps aggregate RPM.
+SWEEP_MAX_WORKERS = 8
 
-def fetch_insider_stats_for_sector(symbols: list) -> dict:
-    """Aggregate most-recent-quarter acquired/disposed counts."""
-    acquired = 0
-    disposed = 0
-    sample_size = 0
-    for sym in symbols:
-        rows = fmp_get("/stable/insider-trading/statistics", {"symbol": sym})
+
+def _universe_pairs() -> list[tuple[str, str]]:
+    return [(sec, sym) for sec, syms in SECTOR_UNIVERSE.items() for sym in syms]
+
+
+def fetch_insider_stats_by_sector() -> dict:
+    """Aggregate most-recent-quarter acquired/disposed counts, per sector."""
+    pairs = _universe_pairs()
+    results = fmp_get_many(
+        [("/stable/insider-trading/statistics", {"symbol": sym}) for _, sym in pairs],
+        max_workers=SWEEP_MAX_WORKERS,
+    )
+    out = {sec: {"acquired": 0, "disposed": 0, "sample_size": 0} for sec in SECTOR_UNIVERSE}
+    for (sec, _sym), rows in zip(pairs, results):
         if not isinstance(rows, list) or not rows:
             continue
         latest = rows[0]
@@ -37,10 +50,10 @@ def fetch_insider_stats_for_sector(symbols: list) -> dict:
             d = int(latest.get("disposedTransactions") or 0)
         except (TypeError, ValueError):
             continue
-        acquired += a
-        disposed += d
-        sample_size += 1
-    return {"acquired": acquired, "disposed": disposed, "sample_size": sample_size}
+        out[sec]["acquired"] += a
+        out[sec]["disposed"] += d
+        out[sec]["sample_size"] += 1
+    return out
 
 
 def fetch_senate_window(lookback_days: int) -> list:
@@ -76,38 +89,43 @@ def aggregate_senate_by_sector(rows: list, lookback_days: int) -> dict:
     return by_sector
 
 
-def fetch_institutional_summary_for_sector(symbols: list, year: int, quarter: int) -> dict:
+def fetch_institutional_summary_by_sector(year: int, quarter: int) -> dict:
     """Aggregate Q-on-Q 13F institutional positions across mega-cap symbols.
 
-    Returns: {holders_qoq_delta_sum, ownership_pct_delta_median, sample_size}.
+    Per sector: {holders_qoq_delta_sum, ownership_pct_delta_median, sample_size}.
     Soft-fail per ticker (skip tickers that 4xx or have missing data).
     """
-    holders_deltas: list[int] = []
-    pct_deltas: list[float] = []
-    for sym in symbols:
-        rows = fmp_get(
-            "/stable/institutional-ownership/symbol-positions-summary",
-            {"symbol": sym, "year": year, "quarter": quarter},
-            hard_fail=False,
-            timeout=10,
-        )
+    pairs = _universe_pairs()
+    results = fmp_get_many(
+        [("/stable/institutional-ownership/symbol-positions-summary",
+          {"symbol": sym, "year": year, "quarter": quarter}) for _, sym in pairs],
+        max_workers=SWEEP_MAX_WORKERS,
+        hard_fail=False,
+        timeout=10,
+    )
+    holders: dict = {sec: [] for sec in SECTOR_UNIVERSE}
+    pcts: dict = {sec: [] for sec in SECTOR_UNIVERSE}
+    for (sec, _sym), rows in zip(pairs, results):
         if not isinstance(rows, list) or not rows:
             continue
         row = rows[0]
         try:
-            holders_deltas.append(int(row.get("investorsHoldingChange") or 0))
+            holders[sec].append(int(row.get("investorsHoldingChange") or 0))
         except (TypeError, ValueError):
             pass
         try:
             pct = row.get("ownershipPercentChange")
             if pct is not None:
-                pct_deltas.append(float(pct))
+                pcts[sec].append(float(pct))
         except (TypeError, ValueError):
             pass
     return {
-        "holders_qoq_delta_sum":      sum(holders_deltas) if holders_deltas else None,
-        "ownership_pct_delta_median": round(median(pct_deltas), 4) if pct_deltas else None,
-        "sample_size":                len(holders_deltas),
+        sec: {
+            "holders_qoq_delta_sum":      sum(holders[sec]) if holders[sec] else None,
+            "ownership_pct_delta_median": round(median(pcts[sec]), 4) if pcts[sec] else None,
+            "sample_size":                len(holders[sec]),
+        }
+        for sec in SECTOR_UNIVERSE
     }
 
 
@@ -125,9 +143,7 @@ def main() -> int:
     print("[fetch_smart_money] fetching insider-trading/statistics for "
           f"{sum(len(v) for v in SECTOR_UNIVERSE.values())} mega-cap tickers...",
           file=sys.stderr)
-    insider_by_sector = {}
-    for sec, syms in SECTOR_UNIVERSE.items():
-        insider_by_sector[sec] = fetch_insider_stats_for_sector(syms)
+    insider_by_sector = fetch_insider_stats_by_sector()
 
     print("[fetch_smart_money] fetching senate-latest...", file=sys.stderr)
     senate_rows = fetch_senate_window(args.lookback_days)
@@ -140,8 +156,7 @@ def main() -> int:
         institutional_quarter = f"{year}Q{quarter}"
         print(f"[fetch_smart_money] fetching institutional-ownership Q-on-Q ({institutional_quarter})...",
               file=sys.stderr)
-        for sec, syms in SECTOR_UNIVERSE.items():
-            institutional_by_sector[sec] = fetch_institutional_summary_for_sector(syms, year, quarter)
+        institutional_by_sector = fetch_institutional_summary_by_sector(year, quarter)
 
     sectors_out: dict = {}
     for sec in SECTOR_UNIVERSE:

@@ -1,0 +1,14 @@
+{
+  "decision_cap_active": true,
+  "decision_cap_reason": "low_valuation_confidence",
+  "final_decision": "HOLD",
+  "avg_confidence": 0.588,
+  "position_size_pct": 0.0,
+  "final_action": "CANCEL",
+  "hot_zone_probe": false,
+  "cap_override_reason": null,
+  "speculative": {
+    "pre_profit_anchor_live": false,
+    "sell_side_only": false
+  }
+}

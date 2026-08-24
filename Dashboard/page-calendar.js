@@ -1737,7 +1737,7 @@
     async function pollLlmReviewStatus() {
         const isZh = UI.currentLang === 'zh';
         try {
-            const r = await fetch('/api/run-protocol/status', { cache: 'no-store' });
+            const r = await fetch('/api/run-protocol/status?name=llm_review', { cache: 'no-store' });
             if (!r.ok) return;
             const s = await r.json();
             // Only react when the *currently active* protocol is llm_review
@@ -1760,7 +1760,7 @@
 
     async function checkLlmReviewRunning() {
         try {
-            const r = await fetch('/api/run-protocol/status', { cache: 'no-store' });
+            const r = await fetch('/api/run-protocol/status?name=llm_review', { cache: 'no-store' });
             if (!r.ok) return;
             const s = await r.json();
             if (s.name === 'llm_review' && s.status === 'running') startLlmReviewPoll();

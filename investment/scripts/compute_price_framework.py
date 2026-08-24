@@ -83,14 +83,15 @@ import sys
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, BASE_DIR)
 
-ENGINE_VERSION = "compute_price_framework.py v2.3 (V4.88.0)"
+ENGINE_VERSION = "compute_price_framework.py v2.4 (V4.131.13)"
 
 # Staged mode (V4.88.0). QUANT_BLOCK_KEYS = 完全由 engine-owned 決定論輸入算出的
 # block；MHP_QUALITATIVE_KEYS = 唯一需要等 Phase 2 lane 的欄位。
 QUANT_STAGE_SCHEMA = "price_framework_quant.v1"
 QUANT_BLOCK_KEYS = (
     "valuation_pack", "fair_value_summary", "fair_value_range",
-    "implied_expectations", "valuation_archetype_shadow", "valuation_explained_range",
+    "implied_expectations", "valuation_archetype_shadow", "forward_validation",
+    "valuation_explained_range",
 )
 MHP_QUALITATIVE_KEYS = (
     "pattern_taxonomy", "smart_money_label", "key_levels", "immediate_catalyst_5d",
@@ -520,7 +521,7 @@ def evaluate_fwd_anchor_scope(inp: dict) -> tuple[bool, str | None]:
 
 # pack entry 的 calibration 欄位鍵；reverse-implied PE 的重算只需要前四個
 # （implied_pe = price × (1+discount_rate)^horizon_years ÷ target_eps）。
-CALIBRATION_KEYS = ("target_fiscal_year", "target_eps", "discount_rate", "horizon_years",
+CALIBRATION_KEYS = ("target_fiscal_year", "target_eps", "analyst_count", "discount_rate", "horizon_years",
                     "justified_pe", "justified_pe_raw", "pe_clamp_binding", "growth_source",
                     "beta_used", "beta_source", "discount_clamp_binding")
 
@@ -1479,6 +1480,147 @@ def compute_archetype_shadow(inp: dict, fvs: dict) -> dict:
     }
 
 
+# ── V4.131.13: extreme-DCF forward validation ───────────────────────────────
+FORWARD_VALIDATION_SCHEMA = "forward_validation.v1"
+EXTREME_DCF_GAP_PCT = -30.0
+FORWARD_PRICE_SUPPORT_PCT = -10.0
+REVENUE_CAGR_TOLERANCE = 0.05
+FORWARD_MIN_EVALUATED_CHECKS = 2
+
+
+def compute_forward_validation(pack: dict, implied: dict, shadow: dict) -> dict:
+    """Test whether an extreme DCF gap survives independent forward evidence.
+
+    The DCF value and verdict remain untouched.  This block only adjusts the
+    valuation *score*: at least one credible forward support softens an extreme
+    negative score to -1; a hard T5 downgrade is reserved for a fully evaluated
+    FAIL.  Sparse evidence returns NO_DATA and never manufactures a hard veto.
+    """
+    cp = _pos(pack.get("current_price"))
+    raw_score = _num(pack.get("score"))
+    dcf = (pack.get("anchors") or {}).get("dcf_self_built") or {}
+    dcf_value = _pos(dcf.get("value"))
+    dcf_gap = ((dcf_value - cp) / cp * 100
+               if cp is not None and dcf_value is not None else None)
+    applies = bool(dcf.get("status") == "eligible" and dcf_gap is not None
+                   and dcf_gap <= EXTREME_DCF_GAP_PCT)
+
+    checks = []
+
+    def add_check(name, available, supports, actual, threshold, detail=None):
+        checks.append({
+            "name": name,
+            "available": bool(available),
+            "supports_current_price": bool(supports) if available else None,
+            "actual": actual,
+            "threshold": threshold,
+            "detail": detail,
+        })
+
+    if applies:
+        shadow_gap = _num(shadow.get("vs_current_pct_shadow"))
+        shadow_n = _num(shadow.get("anchors_used_n"))
+        shadow_available = shadow_gap is not None and shadow_n is not None and shadow_n >= 2
+        add_check(
+            "archetype_shadow",
+            shadow_available,
+            shadow_available and shadow_gap >= FORWARD_PRICE_SUPPORT_PCT,
+            shadow_gap,
+            f">={FORWARD_PRICE_SUPPORT_PCT:.0f}% vs current",
+            {"anchors_used_n": int(shadow_n) if shadow_n is not None else None},
+        )
+
+        fwd = (pack.get("anchors") or {}).get("fwd_earnings_discounted") or {}
+        fwd_value = _pos(fwd.get("value"))
+        fwd_cal = fwd.get("calibration") or {}
+        fwd_horizon = _num(fwd_cal.get("horizon_years"))
+        analyst_count = _num(fwd_cal.get("analyst_count"))
+        fwd_reason = str(fwd.get("reason") or "")
+        scope_only = (fwd.get("status") == "eligible"
+                      or fwd_reason.startswith("cashflow_intrinsic_anchors_live:")
+                      or fwd_reason == "profitable_issuer_shadow_only")
+        fwd_available = bool(
+            fwd_value is not None and cp is not None and scope_only
+            and analyst_count is not None and analyst_count >= FWD_MIN_ANALYSTS
+            and fwd_horizon is not None and fwd_horizon <= FWD_MAX_HORIZON_YEARS
+        )
+        fwd_gap = ((fwd_value - cp) / cp * 100
+                   if fwd_value is not None and cp is not None else None)
+        add_check(
+            "forward_earnings",
+            fwd_available,
+            fwd_available and fwd_gap >= FORWARD_PRICE_SUPPORT_PCT,
+            round(fwd_gap, 2) if fwd_gap is not None else None,
+            f">={FORWARD_PRICE_SUPPORT_PCT:.0f}% vs current",
+            {"analyst_count": int(analyst_count) if analyst_count is not None else None,
+             "horizon_years": fwd_horizon},
+        )
+
+        rev = (implied.get("market_implied_revenue") or {})
+        implied_cagr = _num(rev.get("implied_revenue_cagr"))
+        analyst_cagr = _num(rev.get("analyst_revenue_cagr"))
+        analyst_horizon = _num(rev.get("analyst_horizon_years"))
+        revenue_available = bool(
+            rev.get("applicable") is True and implied_cagr is not None
+            and analyst_cagr is not None and analyst_horizon is not None
+            and analyst_horizon > 0
+        )
+        add_check(
+            "revenue_path",
+            revenue_available,
+            revenue_available and implied_cagr <= analyst_cagr + REVENUE_CAGR_TOLERANCE,
+            implied_cagr,
+            f"<= analyst CAGR + {REVENUE_CAGR_TOLERANCE:.2f}",
+            {"analyst_revenue_cagr": analyst_cagr,
+             "analyst_horizon_years": analyst_horizon},
+        )
+
+    evaluated = [c for c in checks if c["available"]]
+    supported = [c for c in evaluated if c["supports_current_price"]]
+    failed = [c for c in evaluated if not c["supports_current_price"]]
+    quality_flags = []
+    rev_check = next((c for c in evaluated if c["name"] == "revenue_path"), None)
+    if rev_check and _num((rev_check.get("detail") or {}).get("analyst_horizon_years")) < 2:
+        quality_flags.append("analyst_revenue_horizon_under_2y")
+    if applies and implied.get("implied_out_of_range") is True:
+        quality_flags.append("reverse_dcf_growth_out_of_range")
+
+    if not applies:
+        status, reason = "NOT_APPLICABLE", "eligible DCF gap is not extreme"
+    elif len(evaluated) < FORWARD_MIN_EVALUATED_CHECKS:
+        status, reason = "NO_DATA", "fewer than two forward checks are evaluable"
+    elif not supported:
+        status, reason = "FAIL", "all evaluable forward checks reject current price"
+    elif not failed and not quality_flags:
+        status, reason = "PASS", "all evaluable forward checks support current price"
+    else:
+        status, reason = "STRETCHED", "at least one credible forward check supports current price"
+
+    effective_score = raw_score
+    if status in ("PASS", "STRETCHED") and raw_score is not None and raw_score <= -2:
+        effective_score = -1.0
+    return {
+        "schema": FORWARD_VALIDATION_SCHEMA,
+        "status": status,
+        "applies": applies,
+        "reason": reason,
+        "dcf_value": dcf_value,
+        "dcf_gap_pct": round(dcf_gap, 2) if dcf_gap is not None else None,
+        "extreme_dcf_threshold_pct": EXTREME_DCF_GAP_PCT,
+        "checks": checks,
+        "evaluated_count": len(evaluated),
+        "support_count": len(supported),
+        "supported_checks": [c["name"] for c in supported],
+        "failed_checks": [c["name"] for c in failed],
+        "quality_flags": quality_flags,
+        "valuation_score_before": raw_score,
+        "valuation_score_effective": effective_score,
+        "score_adjustment": ("soften_to_-1" if effective_score != raw_score else "none"),
+        "t5_hard_downgrade_eligible": bool(status == "FAIL" and raw_score is not None
+                                            and raw_score <= -3),
+    }
+
+
 # ── Volatility fetch (FMP OHLCV → sigma/atr/momentum；LLM 抄寫風險消除) ───────
 def fetch_volatility(ticker: str) -> dict:
     from scripts._shared import fmp_pool
@@ -1966,6 +2108,15 @@ def build_quant_stage(inp: dict, *, assembled: list | None = None) -> dict:
     if outlier_diagnostics:
         pack["outlier_diagnostics"] = outlier_diagnostics
         fvs["outlier_diagnostics"] = outlier_diagnostics
+    implied = compute_implied_expectations(inp)
+    shadow = compute_archetype_shadow(inp, fvs)
+    forward = compute_forward_validation(pack, implied, shadow)
+    pack["score_before_forward_validation"] = forward["valuation_score_before"]
+    pack["score"] = forward["valuation_score_effective"]
+    pack["forward_validation_status"] = forward["status"]
+    fvs["score_before_forward_validation"] = forward["valuation_score_before"]
+    fvs["score"] = forward["valuation_score_effective"]
+    fvs["forward_validation_status"] = forward["status"]
     return {
         "schema": QUANT_STAGE_SCHEMA,
         "stage": "quant",
@@ -1975,8 +2126,9 @@ def build_quant_stage(inp: dict, *, assembled: list | None = None) -> dict:
             "valuation_pack": pack,
             "fair_value_summary": fvs,
             "fair_value_range": frange,
-            "implied_expectations": compute_implied_expectations(inp),
-            "valuation_archetype_shadow": compute_archetype_shadow(inp, fvs),
+            "implied_expectations": implied,
+            "valuation_archetype_shadow": shadow,
+            "forward_validation": forward,
             "valuation_explained_range": build_explained_valuation_range(
                 pack, inp.get("valuation_scenarios") or {}),
         },
@@ -2011,6 +2163,7 @@ def build_full_output(quant: dict, qualitative: dict | None = None) -> dict:
         "multi_horizon_price_framework": compute_mhp(mhp_input, fvs),
         "implied_expectations": blocks["implied_expectations"],
         "valuation_archetype_shadow": blocks["valuation_archetype_shadow"],
+        "forward_validation": blocks["forward_validation"],
         "valuation_explained_range": blocks["valuation_explained_range"],
     }
     if quant.get("self_assembled_fields"):

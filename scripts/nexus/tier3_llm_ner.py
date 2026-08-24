@@ -1,4 +1,4 @@
-"""Tier 3 — Haiku 4.5 LLM named-entity / relationship extraction.
+"""Tier 3 — broker-routed LLM named-entity / relationship extraction.
 
 Reads MD reports (deep-dive, sector, news, postmortem), prompts Haiku 4.5 with
 prompt-cached system instruction, parses JSON triples, applies two-stage alias
@@ -13,15 +13,19 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import os
 import re
 import sys
-import time
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
 
 import yaml
+
+_PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
+
+from scripts._shared import llm_task_registry, model_router
 
 from .schema import (
     Edge,
@@ -152,28 +156,9 @@ def _build_alias_resolver(cfg: dict[str, Any], project_root: Path):
     return resolve, alias_map, universe
 
 
-def _call_haiku(client, system_prompt: str, doc: str, model: str, max_tokens: int) -> str:
-    resp = client.messages.create(
-        model=model,
-        max_tokens=max_tokens,
-        system=[
-            {
-                "type": "text",
-                "text": system_prompt,
-                "cache_control": {"type": "ephemeral"},
-            }
-        ],
-        messages=[
-            {"role": "user", "content": [{"type": "text", "text": doc}]}
-        ],
-    )
-    parts = []
-    for block in resp.content:
-        if hasattr(block, "text"):
-            parts.append(block.text)
-        elif isinstance(block, dict) and block.get("type") == "text":
-            parts.append(block["text"])
-    return "".join(parts)
+def _call_tier3(system_prompt: str, doc: str):
+    return model_router.run_role(
+        "nexus_tier3_ner", system_prompt, doc, timeout=240)
 
 
 def _parse_llm_json(raw: str) -> dict[str, Any] | None:
@@ -195,16 +180,8 @@ def _parse_llm_json(raw: str) -> dict[str, Any] | None:
 
 def collect(cfg: dict[str, Any], project_root: Path, full: bool = False) -> tuple[list[Node], list[Edge]]:
     tier3_cfg = cfg.get("tier3") or {}
-    api_key_env = tier3_cfg.get("api_key_env", "ANTHROPIC_API_KEY")
-    api_key = os.environ.get(api_key_env)
-    if not api_key:
-        _log(f"{api_key_env} not set — skipping Tier 3 (Tier 1+2 already populate graph)")
-        return [], []
-
-    try:
-        from anthropic import Anthropic
-    except ImportError:
-        _log("anthropic SDK not installed (pip install anthropic) — skipping Tier 3")
+    if not llm_task_registry.certified_models("nexus_tier3_ner"):
+        _log("no certified Tier 3 provider — skipping until canaries pass")
         return [], []
 
     reports_dir = project_root / cfg["sources"]["reports_dir"]
@@ -221,7 +198,6 @@ def collect(cfg: dict[str, Any], project_root: Path, full: bool = False) -> tupl
     system_path = Path(__file__).resolve().parent / "prompts" / "ner_system.md"
     system_prompt = system_path.read_text(encoding="utf-8")
 
-    client = Anthropic(api_key=api_key)
     resolve, alias_map, universe = _build_alias_resolver(cfg, project_root)
 
     # Defense in depth — same sector scope guard as Tier 2.
@@ -273,21 +249,14 @@ def collect(cfg: dict[str, Any], project_root: Path, full: bool = False) -> tupl
             except OSError:
                 continue
             doc = _slice_md(text, max_chars=int(tier3_cfg.get("window_tokens", 6000)) * 4)
-            try:
-                raw = _call_haiku(
-                    client,
-                    system_prompt,
-                    doc,
-                    model=tier3_cfg.get("model", "claude-haiku-4-5"),
-                    max_tokens=int(tier3_cfg.get("max_tokens", 1500)),
-                )
-            except Exception as e:
-                _log(f"haiku call failed for {md_path.name}: {e}")
-                continue
-            payload = _parse_llm_json(raw) or {}
+            res = _call_tier3(system_prompt, doc)
+            if res.exit_code != 0:
+                _log(f"broker call deferred for {md_path.name}: {res.error}")
+                break
+            payload = (res.parsed if isinstance(res.parsed, dict)
+                       else _parse_llm_json(res.raw_text or "")) or {}
             cache_file.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
             processed += 1
-            time.sleep(0.2)  # gentle rate-limit cushion
 
         if not payload:
             continue
@@ -398,7 +367,36 @@ def main() -> int:
     ap.add_argument("--limit", type=int, default=None, help="override backfill_limit")
     ap.add_argument("--full", action="store_true", help="process all matching MDs")
     ap.add_argument("--print", action="store_true")
+    ap.add_argument("--canary-provider", choices=list(llm_task_registry.official_models()),
+                    help="isolated broker-pinned schema canary; writes no graph/cache")
     args = ap.parse_args()
+
+    if args.canary_provider:
+        system = (
+            "Extract entities and relationships. Return ONLY one JSON object with "
+            "keys entities and triples. Entity fields: id,type,label. Triple fields: "
+            "source,edge,target,confidence. Use edge SUPPLIES_TO.")
+        user = ("NVIDIA (NVDA) supplies AI accelerators to Microsoft (MSFT). "
+                "Extract both ticker entities and that relationship.")
+        res = model_router.run_certification_probe(
+            args.canary_provider, "nexus_tier3_ner", system, user, timeout=180)
+        payload = res.parsed if isinstance(res.parsed, dict) else _parse_llm_json(
+            res.raw_text or "")
+        valid = (res.exit_code == 0 and isinstance(payload, dict)
+                 and isinstance(payload.get("entities"), list)
+                 and len(payload["entities"]) >= 2
+                 and isinstance(payload.get("triples"), list)
+                 and len(payload["triples"]) >= 1)
+        print(json.dumps({
+            "provider": args.canary_provider,
+            "model_used": getattr(res, "model_used", ""),
+            "route_note": getattr(res, "route_note", ""),
+            "schema_valid": valid,
+            "entity_count": len(payload.get("entities") or []) if isinstance(payload, dict) else 0,
+            "triple_count": len(payload.get("triples") or []) if isinstance(payload, dict) else 0,
+            "error": res.error,
+        }, ensure_ascii=False))
+        return 0 if valid else 1
 
     here = Path(__file__).resolve().parent
     project_root = here.parent.parent

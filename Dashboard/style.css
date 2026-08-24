@@ -97,6 +97,11 @@ header { background-color: var(--bg-header) !important; transition: background-c
 }
 [data-theme="light"] #history-drill-rail .glass-card {
   box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.18), 0 3px 8px -3px rgba(0, 0, 0, 0.08);
+  /* V4.130.1 — restored. This declaration had been separated from its rule and
+     left orphaned at the top level further down the file (see b955a5c for the
+     original), where the parser discarded it: light mode inherited the dark
+     rule's white border, i.e. no visible edge on a light background. */
+  border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 /* ── Score battery (10-cell gauge) ─────────────────────── */
@@ -280,9 +285,6 @@ header { background-color: var(--bg-header) !important; transition: background-c
 }
 [data-theme="light"] .news-sector-pill {
     background: #f3f4f6; border-color: #e5e7eb; color: #6b7280;
-}
-
-  border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .glow-green {
@@ -685,23 +687,23 @@ aside#sidebar { display: flex; flex-direction: column; }
   border-top: 1px solid color-mix(in srgb, var(--text-muted) 16%, transparent);
   opacity: 0.85;
 }
-/* Live-run dot (V4.122.1) — replaces the route chips that used to sit under
-   each bar. Pulses only while a protocol run holds this provider; hidden
-   otherwise, so the row is visually identical to before when nothing runs.
-   Green regardless of the row's quota accent: this reports work in flight, not
-   quota health, and a yellow "cooldown" row can still be the one running. */
+/* Live-run dots — green is this repo; blue is another broker project. Each
+   provider has one broker-exclusive slot, so rendering gives local green
+   precedence when an older broker row lacks project attribution. */
 .sidebar-llm-live {
   flex-shrink: 0;
   width: 6px; height: 6px; border-radius: 50%;
-  background: #10b981;
-  box-shadow: 0 0 0 0 color-mix(in srgb, #10b981 60%, transparent);
+  background: var(--llm-live-color);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--llm-live-color) 60%, transparent);
   animation: sidebar-llm-live-pulse 1.8s ease-in-out infinite;
   align-self: center;
 }
+.sidebar-llm-live-local { --llm-live-color: #10b981; }
+.sidebar-llm-live-external { --llm-live-color: #3b82f6; }
 .sidebar-llm-live[hidden] { display: none; }
 @keyframes sidebar-llm-live-pulse {
-  0%, 100% { box-shadow: 0 0 0 0   color-mix(in srgb, #10b981 55%, transparent); opacity: 1; }
-  50%      { box-shadow: 0 0 0 3px color-mix(in srgb, #10b981 0%,  transparent); opacity: 0.55; }
+  0%, 100% { box-shadow: 0 0 0 0   color-mix(in srgb, var(--llm-live-color) 55%, transparent); opacity: 1; }
+  50%      { box-shadow: 0 0 0 3px color-mix(in srgb, var(--llm-live-color) 0%,  transparent); opacity: 0.55; }
 }
 @media (prefers-reduced-motion: reduce) {
   .sidebar-llm-live { animation: none; }
@@ -720,6 +722,15 @@ aside#sidebar { display: flex; flex-direction: column; }
   font-size: 8.5px; font-weight: 700; letter-spacing: 0.03em;
   color: var(--llm-accent, var(--text-muted));
 }
+.sidebar-llm-restart {
+  width: 100%; margin-top: 7px; padding: 6px 8px;
+  border: 1px solid color-mix(in srgb, #eab308 45%, transparent);
+  border-radius: 6px; background: color-mix(in srgb, #eab308 10%, transparent);
+  color: #eab308; cursor: pointer;
+  font: 700 8.5px/1.2 'JetBrains Mono', monospace;
+  letter-spacing: 0.04em; text-transform: uppercase;
+}
+.sidebar-llm-restart:disabled { cursor: wait; opacity: 0.55; }
 .sidebar-llm-foot {
   display: flex; flex-direction: column; gap: 3px;
 }
@@ -940,6 +951,29 @@ aside#sidebar { display: flex; flex-direction: column; }
   color: #818cf8;
   border-color: rgba(99, 102, 241, 0.40);
 }
+
+/* Heatmap stock tooltip — same theme tokens as #radar-term-tooltip below.
+   V4.130.1: this was a hardcoded zinc-900 panel with zinc text classes inline,
+   so in light mode it rendered as a black card in the middle of a white page.
+   Styling lives here rather than in radar.html for the same reason the term
+   tooltip's does: a colour written into markup cannot follow the theme. */
+#radar-heatmap-tooltip {
+  background: var(--bg-card);
+  border-color: var(--border-hover);
+  color: var(--text-main);
+  z-index: 60;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  /* Component-scoped on purpose. Amber-400 is unreadable on a white card
+     (~1.7:1), but this exact value is written into ~33 JS sites and a dozen CSS
+     rules app-wide; inventing a global token here would leave the app with two
+     ambers that disagree. Scoped to this card, it is one card's contrast fix. */
+  --rht-warn: #fbbf24;
+}
+[data-theme="light"] #radar-heatmap-tooltip { --rht-warn: #b45309; }
+#radar-heatmap-tooltip .rht-label   { color: var(--text-muted); }
+#radar-heatmap-tooltip .rht-value   { color: var(--text-main); }
+#radar-heatmap-tooltip .rht-divider { border-color: var(--border); }
 
 /* Radar term hover tooltip — uses theme CSS variables (light + dark adaptive) */
 #radar-term-tooltip {
@@ -2572,8 +2606,7 @@ body.cal-detail-locked {
     position: fixed;
     bottom: 18px;
     right: 18px;
-    min-width: 230px;
-    max-width: 320px;
+    width: min(360px, calc(100vw - 36px));
     background: var(--bg-card);
     border: 1px solid var(--border-hover);
     border-radius: 12px;
@@ -2643,10 +2676,35 @@ body.cal-detail-locked {
     font-family: 'JetBrains Mono', monospace;
     margin-top: 1px;
 }
+.proto-pill-capacity {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+    margin-top: 6px;
+}
+.proto-pill-capacity-slot {
+    height: 4px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--text-muted) 20%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text-muted) 16%, transparent);
+}
+.proto-pill-capacity-slot.is-claude { background: #a855f7; box-shadow: 0 0 8px rgba(168,85,247,.45); }
+.proto-pill-capacity-slot.is-gemini { background: #3b82f6; box-shadow: 0 0 8px rgba(59,130,246,.45); }
+.proto-pill-capacity-slot.is-codex  { background: #22c55e; box-shadow: 0 0 8px rgba(34,197,94,.45); }
+.proto-pill-capacity-slot.is-grok   { background: #a1a1aa; box-shadow: 0 0 8px rgba(161,161,170,.35); }
+.proto-pill-capacity-slot.is-assigning {
+    background: #f59e0b;
+    animation: proto-slot-assigning 1.1s ease-in-out infinite;
+}
+@keyframes proto-slot-assigning { 50% { opacity: .35; } }
 .proto-status-pill.proto-pill-running {
     border-color: rgba(99, 102, 241, 0.55);
     box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.18), 0 12px 32px -8px rgba(0,0,0,0.55);
     animation: proto-pulse 2s ease-in-out infinite;
+}
+.proto-status-pill.proto-pill-has-failure:not(.proto-pill-running) {
+    border-color: rgba(239, 68, 68, 0.55);
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.13), 0 12px 32px -8px rgba(0,0,0,0.55);
 }
 @keyframes proto-pulse {
     0%, 100% { box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.18), 0 12px 32px -8px rgba(0,0,0,0.55); }
@@ -2674,9 +2732,141 @@ body.cal-detail-locked {
     background: rgba(99, 102, 241, 0.04);
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
 }
 .proto-pill-detail.hidden { display: none; }
+.proto-pill-slot {
+    display: grid;
+    grid-template-columns: 22px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+    min-height: 38px;
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--bg-card) 82%, transparent);
+}
+.proto-pill-slot.is-active { border-left: 3px solid var(--text-muted); }
+.proto-pill-slot.is-active[data-model='claude'] { border-left-color: #a855f7; }
+.proto-pill-slot.is-active[data-model='gemini'] { border-left-color: #3b82f6; }
+.proto-pill-slot.is-active[data-model='codex']  { border-left-color: #22c55e; }
+.proto-pill-slot.is-active[data-model='grok']   { border-left-color: #a1a1aa; }
+.proto-pill-slot.is-active[data-model='assigning'] { border-left-color: #f59e0b; }
+.proto-pill-slot.is-idle {
+    min-height: 30px;
+    border-style: dashed;
+    color: var(--text-muted);
+    opacity: .72;
+}
+.proto-pill-slot-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--text-muted) 10%, transparent);
+    color: var(--text-muted);
+    font: 700 9px/1 'JetBrains Mono', monospace;
+}
+.proto-pill-slot-job { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.proto-pill-slot-job strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text-main);
+    font: 800 11px/1.35 'JetBrains Mono', monospace;
+}
+.proto-pill-slot-engine {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text-muted);
+    font-size: 9.5px;
+}
+.proto-pill-slot-time { color: var(--text-muted); font: 700 9.5px/1 'JetBrains Mono', monospace; }
+.proto-pill-slot-empty { font-size: 10.5px; }
+.proto-pill-queue-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 3px;
+    color: var(--text-muted);
+    font: 700 9px/1 'JetBrains Mono', monospace;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+.proto-pill-queue-label::after { content: ''; height: 1px; flex: 1; background: var(--border); }
+.proto-pill-queue-label strong { order: 3; }
+.proto-pill-queue-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 7px;
+    padding: 2px 8px;
+    color: var(--text-muted);
+    font-size: 10px;
+}
+.proto-pill-queue-row strong {
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: 'JetBrains Mono', monospace;
+}
+.proto-pill-queue-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    font: 800 15px/1 'JetBrains Mono', monospace;
+}
+.proto-pill-queue-remove:hover {
+    border-color: rgba(239, 68, 68, .28);
+    background: rgba(239, 68, 68, .08);
+    color: #ef4444;
+}
+.proto-pill-queue-remove:disabled { cursor: wait; opacity: .35; }
+.proto-pill-queue-reason {
+    flex-basis: 100%;
+    padding-left: 21px;
+    color: #f59e0b;
+    font: 700 9px/1.3 'JetBrains Mono', monospace;
+}
+.proto-pill-failure-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 3px;
+    color: #ef4444;
+    font: 700 9px/1 'JetBrains Mono', monospace;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+.proto-pill-failure-label::after { content: ''; height: 1px; flex: 1; background: rgba(239, 68, 68, .25); }
+.proto-pill-failure-label strong { order: 3; }
+.proto-pill-failure-row {
+    display: grid;
+    grid-template-columns: 16px minmax(0, 1fr);
+    gap: 6px;
+    padding: 5px 8px;
+    border: 1px solid rgba(239, 68, 68, .22);
+    border-radius: 7px;
+    background: rgba(239, 68, 68, .045);
+    color: var(--text-main);
+}
+.proto-pill-failure-row strong,
+.proto-pill-failure-row small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.proto-pill-failure-row strong { font: 800 10px/1.3 'JetBrains Mono', monospace; }
+.proto-pill-failure-row small { margin-top: 2px; color: var(--text-muted); font-size: 9px; }
 .proto-pill-row {
     display: flex;
     align-items: center;
@@ -2705,182 +2895,318 @@ body.cal-detail-locked {
 }
 
 /* ════════════════════════════════════════════════════════════
-   V2.17.5 — Pre-market chain status pill (atomic 3-row unit)
+   Pre-market chain modal — compact 3-step progress rail
    ════════════════════════════════════════════════════════════ */
-.chain-status-pill {
-    position: fixed;
-    bottom: 18px;
-    right: 18px;
-    min-width: 250px;
-    max-width: 320px;
-    background: var(--bg-card);
-    border: 1px solid rgba(245, 158, 11, 0.5);
-    border-radius: 12px;
-    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.15), 0 12px 32px -8px rgba(0,0,0,0.55);
-    z-index: 9991;
-    backdrop-filter: blur(10px);
-    overflow: hidden;
-    transition: opacity 0.18s ease, transform 0.18s ease, bottom 0.2s ease;
-}
-[data-theme='dark'] .chain-status-pill {
-    background: rgba(24,24,27,0.95);
-}
-[data-theme='light'] .chain-status-pill {
-    background: rgba(255,255,255,0.98);
-    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.15), 0 12px 32px -8px rgba(0,0,0,0.18);
-}
-.chain-status-pill.hidden {
-    opacity: 0;
-    transform: translateY(20px);
-    pointer-events: none;
-}
-.chain-status-pill.has-proto-pill { bottom: 92px; }  /* lift above proto-status-pill */
-.chain-pill-head {
-    padding: 9px 12px 5px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 10.5px;
-    font-weight: 800;
-    color: rgb(245, 158, 11);
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-}
-.chain-pill-head-icon {
-    font-size: 14px;
-    animation: proto-spin 2.4s linear infinite;
-    display: inline-block;
-}
-.chain-pill-head-title { flex: 1; }
-.chain-pill-head-elapsed {
-    font-family: 'JetBrains Mono', monospace;
-    color: var(--text-muted);
-    font-size: 10px;
-    text-transform: none;
-    letter-spacing: 0;
-}
-.chain-pill-rows {
-    padding: 4px 12px 10px;
+.preflight-dialog {
+    width: min(700px, calc(100vw - 24px));
+    max-height: calc(100dvh - 24px);
     display: flex;
     flex-direction: column;
-    gap: 5px;
-    border-top: 1px dashed var(--border);
-    margin-top: 2px;
-    padding-top: 8px;
-    background: rgba(245, 158, 11, 0.04);
 }
-.chain-pill-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 11px;
-    line-height: 1.4;
-    color: var(--text-main);
+#preflight-body {
+    max-height: calc(100dvh - 132px);
+    min-height: 0;
 }
-.chain-pill-row-icon { font-size: 12px; width: 14px; flex-shrink: 0; text-align: center; }
-.chain-pill-row-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 800;
-    width: 50px;
-    flex-shrink: 0;
-    color: var(--text-main);
-}
-.chain-pill-row-meta {
+.preflight-esc {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
     font-family: 'JetBrains Mono', monospace;
     color: var(--text-muted);
-    font-size: 10.5px;
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    padding: 3px 9px;
+    border-radius: 6px;
+    border: 1px solid rgba(113, 113, 122, 0.28);
+    background: rgba(113, 113, 122, 0.06);
+    transition: color 0.18s ease, border-color 0.18s ease, background-color 0.18s ease;
+}
+.preflight-esc:hover {
+    color: var(--text-main);
+    border-color: rgba(113, 113, 122, 0.5);
+    background: rgba(113, 113, 122, 0.13);
 }
 
-/* ════════════════════════════════════════════════════════════
-   V2.7.17 — Pre-market chain modal (3 phase rows)
-   ════════════════════════════════════════════════════════════ */
-.preflight-phase {
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 10px 12px;
-    background: rgba(82, 82, 91, 0.04);
+#preflight-chain {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
 }
-[data-theme='dark'] .preflight-phase {
-    background: rgba(24, 24, 27, 0.4);
-    border-color: rgba(63, 63, 70, 0.4);
+#preflight-chain.hidden { display: none; }
+.preflight-phase {
+    position: relative;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+}
+/* Rail lives on the circle row only — the phase title sits on the row below,
+   so the connector never crosses label text (it used to strike through it). */
+.preflight-phase:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    z-index: 0;
+    top: 13px;
+    left: 34px;
+    right: -20px;
+    height: 2px;
+    border-radius: 999px;
+    background: rgba(113, 113, 122, 0.2);
+    transition: background-color 0.25s ease;
+}
+.preflight-phase.is-complete:not(:last-child)::after {
+    background: rgba(16, 185, 129, 0.55);
 }
 .preflight-phase-head {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+.preflight-phase-rail {
+    display: flex;
+    align-items: center;
+}
+.preflight-phase-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    flex: 0 0 26px;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    border-radius: 999px;
+    background: var(--bg-card);
+    border: 1.5px solid rgba(113, 113, 122, 0.32);
+    box-shadow: 0 0 0 4px var(--bg-card);
+    transition: color 0.25s ease, background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.preflight-phase.is-active .preflight-phase-num {
+    color: white;
+    background: rgb(99, 102, 241);
+    border-color: rgb(99, 102, 241);
+    box-shadow: 0 0 0 4px var(--bg-card), 0 0 0 7px rgba(99, 102, 241, 0.15);
+}
+.preflight-phase.is-complete .preflight-phase-num {
+    color: white;
+    background: rgb(16, 185, 129);
+    border-color: rgb(16, 185, 129);
+}
+.preflight-phase.is-error .preflight-phase-num {
+    color: white;
+    background: rgb(239, 68, 68);
+    border-color: rgb(239, 68, 68);
+}
+.preflight-phase.is-waiting { opacity: 0.55; }
+.preflight-phase-labels {
     display: flex;
     align-items: baseline;
     gap: 8px;
-    margin-bottom: 8px;
-}
-.preflight-phase-num {
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.10em;
-    text-transform: uppercase;
-    color: rgb(99, 102, 241);
-    font-family: 'JetBrains Mono', monospace;
-    padding: 2px 7px;
-    border-radius: 4px;
-    background: rgba(99, 102, 241, 0.12);
-    border: 1px solid rgba(99, 102, 241, 0.30);
+    min-width: 0;
 }
 .preflight-phase-title {
+    min-width: 0;
+    flex: 1 1 auto;
     font-size: 12px;
+    line-height: 1.25;
     font-weight: 700;
+    letter-spacing: 0.01em;
     color: var(--text-card-title);
 }
 .preflight-phase-hint {
-    margin-left: auto;
-    font-size: 10px;
+    flex: 0 0 auto;
+    font-size: 9.5px;
     color: var(--text-muted);
     font-family: 'JetBrains Mono', monospace;
+    white-space: nowrap;
+    opacity: 0.85;
 }
+
 .preflight-row {
+    position: relative;
+    display: grid;
+    grid-template-columns: 16px minmax(0, 1fr);
+    align-items: center;
+    column-gap: 9px;
+    row-gap: 8px;
+    min-height: 52px;
+    padding: 9px 11px 10px;
+    border: 1px solid rgba(113, 113, 122, 0.16);
+    border-radius: 10px;
+    background: rgba(113, 113, 122, 0.05);
+    transition: border-color 0.25s ease, background-color 0.25s ease;
+}
+.preflight-row + .preflight-row { margin-top: 8px; }
+.preflight-row.is-active {
+    border-color: rgba(99, 102, 241, 0.32);
+    background: rgba(99, 102, 241, 0.06);
+}
+.preflight-row.is-complete {
+    border-color: rgba(16, 185, 129, 0.26);
+    background: rgba(16, 185, 129, 0.05);
+}
+.preflight-row.is-error {
+    border-color: rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.05);
+}
+
+/* Status glyph is drawn in CSS from the row state class. The JS still writes an
+   emoji into this span (it is the state carrier) — we hide the glyph itself so
+   the four states read as one consistent visual language instead of mixed
+   vendor emoji. */
+.preflight-row-icon {
+    grid-column: 1;
+    grid-row: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    font-size: 0;
+    color: transparent;
+}
+.preflight-row-icon::before {
+    content: '';
+    display: block;
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    border: 1.5px solid rgba(113, 113, 122, 0.5);
+    background: transparent;
+    font-size: 9px;
+    font-weight: 800;
+    line-height: 1;
+    text-align: center;
+}
+.preflight-row.is-active .preflight-row-icon::before {
+    width: 8px; height: 8px;
+    border-color: rgb(99, 102, 241);
+    background: rgb(99, 102, 241);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
+}
+.preflight-row.is-complete .preflight-row-icon::before,
+.preflight-row.is-error .preflight-row-icon::before {
+    content: '✓';
+    width: 15px;
+    height: 15px;
+    border: 0;
+    color: white;
+    background: rgb(16, 185, 129);
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 6px 8px;
-    border-radius: 6px;
+    justify-content: center;
 }
-.preflight-row + .preflight-row {
-    margin-top: 4px;
+.preflight-row.is-error .preflight-row-icon::before {
+    content: '✕';
+    background: rgb(239, 68, 68);
 }
-.preflight-row-icon {
-    font-size: 14px;
-    flex-shrink: 0;
-}
+
 .preflight-row-text {
-    flex: 1;
+    grid-column: 2;
+    grid-row: 1;
     min-width: 0;
 }
 .preflight-row-label {
-    font-size: 11.5px;
-    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
     color: var(--text-main);
-    letter-spacing: 0.02em;
+    line-height: 1.25;
     font-family: 'JetBrains Mono', monospace;
 }
 .preflight-row-meta {
-    font-size: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 9.5px;
     color: var(--text-muted);
     font-family: 'JetBrains Mono', monospace;
-    margin-top: 1px;
+    margin-top: 3px;
 }
 .preflight-row-bar {
-    width: 90px;
-    height: 6px;
-    background: rgba(82, 82, 91, 0.18);
-    border-radius: 3px;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100%;
+    height: 2px;
+    background: rgba(113, 113, 122, 0.18);
+    border-radius: 999px;
     overflow: hidden;
-    flex-shrink: 0;
 }
 .preflight-row-bar-fill {
     height: 100%;
     width: 0%;
-    background: linear-gradient(90deg, rgb(99, 102, 241), rgb(167, 139, 250));
+    border-radius: 999px;
+    background: rgb(99, 102, 241);
     transition: width 0.5s ease;
+}
+.preflight-row.is-complete .preflight-row-bar-fill { background: rgb(16, 185, 129); }
+.preflight-row.is-error .preflight-row-bar-fill { background: rgb(239, 68, 68); }
+
+/* ── Footer buttons ─────────────────────────────────── */
+.preflight-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 9px;
+    font-size: 11.5px;
+    font-weight: 700;
+    border: 1px solid transparent;
+    transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, opacity 0.18s ease;
+}
+.preflight-btn-primary {
+    color: white;
+    background: rgb(99, 102, 241);
+}
+.preflight-btn-primary:hover:not([disabled]) { background: rgb(79, 82, 231); }
+.preflight-btn-ghost {
+    color: var(--text-main);
+    border-color: rgba(113, 113, 122, 0.28);
+    background: rgba(113, 113, 122, 0.07);
+}
+.preflight-btn-ghost:hover { background: rgba(113, 113, 122, 0.16); }
+.preflight-btn[disabled] {
+    cursor: default;
+    opacity: 0.55;
+    color: var(--text-muted);
+    background: rgba(113, 113, 122, 0.12);
+    border-color: rgba(113, 113, 122, 0.22);
+}
+
+@media (max-width: 640px) {
+    #preflight-chain {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    .preflight-phase:not(:last-child)::after {
+        top: 30px;
+        bottom: -12px;
+        left: 12px;
+        right: auto;
+        width: 2px;
+        height: auto;
+    }
+}
+@media (prefers-reduced-motion: no-preference) {
+    .preflight-phase.is-active .preflight-phase-num {
+        animation: preflight-phase-pulse 1.8s ease-in-out infinite;
+    }
+    .preflight-row.is-active .preflight-row-icon::before {
+        animation: preflight-dot-pulse 1.6s ease-in-out infinite;
+    }
+}
+@keyframes preflight-phase-pulse {
+    50% { box-shadow: 0 0 0 4px var(--bg-card), 0 0 0 9px rgba(99, 102, 241, 0.07); }
+}
+@keyframes preflight-dot-pulse {
+    50% { box-shadow: 0 0 0 5px rgba(99, 102, 241, 0.08); }
 }
 
 /* ── Segment grid ───────────────────────────────────── */
@@ -4942,3 +5268,72 @@ body.cal-detail-locked {
 .ie-tl-cell.on { background:#818cf8; }
 .ie-tl-cell.on.motif { background:#fb923c; }
 .ie-idea-row td { padding:6px 8px; font-size:11.5px; border-bottom:1px solid var(--border); }
+
+/* ── Cross-page signal queue (V4.133.0) ───────────────────────────────
+   The candidate strip that carries one page's conclusions onto another's.
+   Deliberately quieter than the host page's own cards: it is an inbound
+   suggestion, not that page's primary content, and styling it as an equal
+   would let a debate-derived hint read as a finished analysis. */
+.sq-wrap { margin: 0 0 20px; }
+.sq-title {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 600; color: var(--text-card-title);
+  margin: 0 0 10px; letter-spacing: .01em;
+}
+.sq-count {
+  font-size: 11px; font-weight: 500; color: var(--text-muted);
+  border: 1px solid var(--border); border-radius: 999px; padding: 1px 7px;
+}
+.sq-src { margin-left: auto; font-size: 11px; color: var(--text-muted); text-decoration: none; }
+.sq-src:hover { color: var(--secondary); }
+
+.sq-list { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+.sq-empty { font-size: 12px; color: var(--text-muted); margin: 0; padding: 10px 0; }
+
+.sq-card {
+  border: 1px solid var(--border); border-left-width: 3px;
+  border-radius: 10px; background: var(--bg-card); padding: 10px 12px;
+}
+.sq-card-up   { border-left-color: var(--status-bullish); }
+.sq-card-down { border-left-color: var(--status-bearish); }
+
+.sq-head { display: flex; align-items: center; gap: 8px; }
+.sq-ticker { font-weight: 700; font-size: 14px; color: var(--text-card-title); }
+.sq-dir { font-size: 11px; font-weight: 600; }
+.sq-up   { color: var(--status-bullish); }
+.sq-down { color: var(--status-bearish); }
+.sq-flag {
+  font-size: 10px; font-weight: 600; color: var(--status-binary);
+  border: 1px solid var(--status-binary); border-radius: 4px; padding: 0 5px;
+}
+.sq-score { margin-left: auto; font-size: 12px; font-variant-numeric: tabular-nums; color: var(--text-muted); }
+.sq-dismiss {
+  background: none; border: none; cursor: pointer; padding: 0 2px;
+  color: var(--text-muted); font-size: 15px; line-height: 1;
+}
+.sq-dismiss:hover { color: var(--danger); }
+
+.sq-note { margin: 6px 0 0; font-size: 11px; color: var(--text-muted); }
+.sq-evidence { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 4px; }
+.sq-evidence li { display: flex; gap: 6px; align-items: baseline; font-size: 11.5px; }
+.sq-ev { color: var(--text-main); text-decoration: none; flex: 1; }
+.sq-ev:hover { color: var(--secondary); text-decoration: underline; }
+.sq-ev-meta { color: var(--text-muted); font-size: 10px; white-space: nowrap; }
+
+.sq-foot { margin-top: 10px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.sq-btn {
+  font-size: 11.5px; font-weight: 600; padding: 5px 11px; border-radius: 6px;
+  border: 1px solid var(--secondary); background: transparent; color: var(--secondary);
+  cursor: pointer; text-decoration: none;
+}
+.sq-btn:hover { background: var(--secondary); color: #fff; }
+.sq-btn:disabled { opacity: .5; cursor: wait; }
+.sq-btn-ghost { border-color: var(--border-hover); color: var(--text-muted); }
+.sq-btn-ghost:hover { background: transparent; color: var(--text-main); border-color: var(--text-muted); }
+/* Not a button: the analysis already exists and re-running it would burn a
+   protocol slot to reproduce a report we hold. */
+.sq-btn-off { border-color: var(--border); color: var(--text-muted); cursor: default; }
+.sq-done { font-size: 11.5px; font-weight: 600; color: var(--status-bullish); text-decoration: none; }
+.sq-done:hover { text-decoration: underline; }
+.sq-pending { font-size: 11.5px; color: var(--text-muted); }
+.sq-failed  { font-size: 11.5px; color: var(--danger); }

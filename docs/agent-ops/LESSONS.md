@@ -1,5 +1,12 @@
 # 踩坑教訓（格式見 MAINTENANCE.md §4；>150 行時精簡）
 
+## 2026-08-21｜同檔重複 anchor 的 patch 必立刻驗證落點
+
+- 情境：在 `model_router.py` 的 protocol lease 入口加入「protocol name 必填」檢查。
+- 坑：patch 只用 `cfg = load_llm_config()` 當 anchor，先命中上方 `governed_call()`，把不存在的 `protocol` 變數插錯函式；若只跑語法檢查不走該分支，會到 runtime 才 NameError。
+- 修法：同檔有重複 anchor 時，patch 必同時帶函式宣告；落地後立刻 `rg` 新字串並 `sed` 看上下文，再跑入口 contract。
+- 已回寫規則？：否（MAINTENANCE §2c 已要求獨立驗證落地；本條是同型實例）。
+
 ## 2026-08-10｜落地的 artifact 是子集卻長得像全集，就是在等一個長 run 來踩
 
 - 情境：META invest run 兩次失敗，UI 報 `rc=0 but required artifact missing/stale`。使用者初判是 codex 的硬傷。
@@ -241,3 +248,15 @@
 - 修法：**回報外部系統有 bug 之前，先證明自己的觀測管道是完好的**——(a) 拿掉自己加的 timeout / size limit 重抓一次；(b) 比對 `size_download` 與 `Content-Length`；(c) 讀序列化那段原始碼，而不是從錯誤訊息反推。可重現才算成立：`curl --limit-rate 3000 -m 3` 重現了同一族錯誤，這才確定是自己的問題。
 - 這與 §2c「靜默綠」是同一枚硬幣的反面：靜默綠是「壞了但看起來像好的」，這次是「好的但看起來像壞的」。兩者都源自**觀測管道未經驗證**就拿它的輸出下結論。
 - 已回寫規則？：否（單一案例先記中繼站；若再犯就進 MAINTENANCE §2c 成為第 9 個成員）
+
+## 2026-08-14 ｜種回 bug 只破壞了規則的一部分，於是「全綠」什麼都沒證明
+- 情境：news genre 規則新增一條 regex（對個人的 enforcement 通知），照 §2c 規則 1 種回 bug 驗紅。
+- 坑：那條 regex 有兩個 alternation，我只把**第二個**換成永不匹配的字串，測試 56 passed。當下差點讀成「規則不生效也綠 → 測試沒接線」，但真相是**種的 bug 根本沒破壞被測行為**——兩個測試用的標題都由第一個 alternation 匹配。錯誤的種法會同時產生「假的靜默綠警訊」與「真的覆蓋盲點」。
+- 修法：種回 bug 的目標是**被測行為**，不是原始碼的某一行。多分支結構（regex alternation、`or` 條件、多個 early return）要嘛整塊拿掉，要嘛一次只留一個分支並確認**每個分支都有專屬案例**。這次的副產品是補了一個只有第二分支會匹配的案例（沒有它，刪掉那半永遠是綠的）。
+- 已回寫規則？：否（先記中繼站；再犯就進 MAINTENANCE §2c 規則 1 的說明文字）
+
+## 2026-08-14 ｜報錯的閘不是壞掉的閘：UI 只截得到第一行
+- 情境：使用者貼 `validator rc=1: [validate_digest_output] ✗ schema drift (expected V2.3):; - FR` 問為什麼。
+- 坑：validator 完全正常。當天沒產出 digest，它退回抓兩天前那份 → freshness fail，而 `dashboard_server` 把前 5 行用 `"; "` 接起來、UI 再截到約 60 字元，於是**只有標題行倖存**，標題行說的是 schema drift。真正的 rc=1 在 `news/scan_logs/` 的 `finalize_digest.py`。
+- 修法：(a) 診斷從 `news/scan_logs/<protocol>_*.log` 的**最後一個非 0 rc** 開始，不要從 validator 訊息往回推；(b) 寫 gate 的失敗輸出時，**第一行就要是結論**——後面的 bullet 在這條管線上等於不存在。`validate_digest_output.fail()` 因此加了 header 參數。
+- 已回寫規則？：是（`news/scripts/validate_digest_output.py` 的 `fail()` 註解寫明第一行是唯一倖存的行）

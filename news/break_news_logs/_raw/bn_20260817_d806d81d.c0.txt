@@ -1,0 +1,63 @@
+```json
+{
+  "commentary": "美股期貨走勢持穩，主因市場對聯準會升息預期降溫，大幅減輕科技成長股的評價面折現壓力。同時，AI指標企業 Anthropic 營收增長強勁，驗證生成式 AI 企業端商業化變現動能持續加速，實質提振市場對 AMZN、GOOGL 等主要雲端夥伴及整體 AI 基礎設施供應鏈的獲利展望與資本支出信心。",
+  "bull_points": [
+    "升息預期降溫緩解評價面折現壓力，支撐高估值成長股。",
+    "Anthropic營收增長驗證AI變現能力，提振雲端運算需求。"
+  ],
+  "bear_points": [
+    "總經數據若再度反覆，利率路徑不確定性恐引發震盪。",
+    "AI模型推理基礎設施成本高昂，需持續關注長期利潤率。"
+  ],
+  "final_take": "利率疑慮降溫疊加AI變現推進，短線偏多看待科技權值股。",
+  "entities": {
+    "tickers": [
+      "AMZN",
+      "GOOGL",
+      "NVDA",
+      "MSFT"
+    ],
+    "sectors": [
+      "Information Technology",
+      "Communication Services",
+      "Consumer Discretionary"
+    ],
+    "themes": [
+      "AI monetization",
+      "Cloud computing",
+      "Generative AI",
+      "Monetary policy"
+    ],
+    "tech_keywords": [
+      "LLM",
+      "AI inference",
+      "GPU"
+    ]
+  },
+  "relations": [
+    {
+      "subject": "ticker:AMZN",
+      "predicate": "BENEFITS_FROM",
+      "object": "narrative:ai_monetization"
+    },
+    {
+      "subject": "ticker:GOOGL",
+      "predicate": "BENEFITS_FROM",
+      "object": "narrative:ai_monetization"
+    },
+    {
+      "subject": "ticker:NVDA",
+      "predicate": "BENEFITS_FROM",
+      "object": "narrative:ai_monetization"
+    },
+    {
+      "subject": "theme:monetary_policy",
+      "predicate": "CATALYST_FOR",
+      "object": "sector:information_technology"
+    }
+  ],
+  "done": false,
+  "confidence": 0.82,
+  "rationale_short": "降息路徑預期趨穩且AI商業化獲利加速，雙重支撐市場風險偏好。"
+}
+```

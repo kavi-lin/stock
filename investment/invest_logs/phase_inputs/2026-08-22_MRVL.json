@@ -1,0 +1,239 @@
+{
+ "bundle_version": "P5-INPUTS/1.0",
+ "ticker": "MRVL",
+ "date": "2026-08-22",
+ "phase0": {
+  "regime_confidence": 0.75,
+  "market_top_zone": "Yellow (Early Warning)",
+  "ftd_state": "FTD_CONFIRMED",
+  "breadth_composite": 79.2,
+  "vix": 15.29,
+  "fred_verdict": "Transitional",
+  "real_rate_pct": 2.4,
+  "hot_sectors": [
+   "Consumer Discretionary",
+   "Communication Services",
+   "Technology",
+   "Financials"
+  ],
+  "cold_sectors": [
+   "Utilities",
+   "Real Estate",
+   "Consumer Staples"
+  ]
+ },
+ "lanes": {
+  "fundamentals": {
+   "signal": "HOLD",
+   "score": -1.0,
+   "confidence": 0.9,
+   "key_factors": [
+    "Revenue grew 27.6% year over year",
+    "FCF margin reached 26.0%",
+    "PE exceeds peer median by over 300%"
+   ],
+   "risk_flags": [
+    "Extreme valuation premium",
+    "Forward EPS growth negative 80.4%"
+   ],
+   "phase0_alignment": "NEUTRAL",
+   "subagent_isolated": true,
+   "skill_execution_failed": false,
+   "reasoning_one_line": "強勁營收、現金流與低負債被極端同業估值溢價及 EPS 衰退抵銷。",
+   "moat_assessment": {
+    "level": "NONE",
+    "type": "無",
+    "evidence_one_line": "INSUFFICIENT_DATA: Financial metrics alone cannot establish a durable moat."
+   },
+   "near_term_catalysts": [
+    {
+     "date": "2026-08-27",
+     "type": "earnings",
+     "description": "Revenue and EPS results versus expectations",
+     "impact": "high"
+    },
+    {
+     "date": "2026-08-27",
+     "type": "guidance",
+     "description": "Outlook may confirm current revenue acceleration",
+     "impact": "high"
+    },
+    {
+     "date": "2026-08-27",
+     "type": "earnings",
+     "description": "FCF margin and owner-earnings conversion update",
+     "impact": "medium"
+    }
+   ],
+   "bull_thesis_one_line": "營收年增 27.6%，自由現金流率 26%，負債穩健。",
+   "bear_thesis_one_line": "本益比逾同業中位數三倍，預估 EPS 成長負 80.4%。"
+  },
+  "sentiment": {
+   "signal": "BUY",
+   "score": 0.99,
+   "confidence": 0.78,
+   "key_factors": [
+    "Low short interest supports sentiment",
+    "Bullish congressional activity offsets insider weakness",
+    "Risk-on market backdrop is supportive"
+   ],
+   "risk_flags": [
+    "Latest insider MSPR is deeply negative",
+    "Institutional data unavailable"
+   ],
+   "phase0_alignment": "ALIGNED",
+   "subagent_isolated": true,
+   "skill_execution_failed": false,
+   "reasoning_one_line": "個股情緒 0.50 加上市場層 1.47，形成 0.99 的正向分數。",
+   "market_sentiment_composite": 64.7,
+   "vix_current": 15.29,
+   "insider_signal": "MSPR_BEARISH",
+   "short_pct_float": 4.79,
+   "mspr_latest": -100
+  },
+  "news": {
+   "signal": "BUY",
+   "score": 2.5,
+   "confidence": 0.72,
+   "key_factors": [
+    "Google custom-chip partnership supports AI demand",
+    "Buy consensus remains strongly positive",
+    "Multiple bullish analyst actions before earnings"
+   ],
+   "risk_flags": [
+    "PT consensus momentum declined 8.52% monthly",
+    "Google warrant creates dilution concern"
+   ],
+   "phase0_alignment": "ALIGNED",
+   "subagent_isolated": true,
+   "skill_execution_failed": false,
+   "reasoning_one_line": "Google AI 晶片合作與 Buy 共識勝過一個月 PT 下修動能。",
+   "analyst_consensus": {
+    "consensus": "Buy",
+    "strong_buy": 0,
+    "buy": 60,
+    "hold": 12,
+    "sell": 1,
+    "strong_sell": 0
+   },
+   "pt_revision_momentum": {
+    "direction": "DOWN",
+    "consensus_delta_pct_1m": -8.52
+   },
+   "immediate_catalyst_5d": {
+    "event": "Q2 earnings announcement",
+    "date": "2026-08-27",
+    "direction_lean": "BULLISH",
+    "expected_move_pct": null
+   },
+   "decision_point_days": 5,
+   "cross_asset_spillover": [
+    {
+     "asset": "AVGO",
+     "direction": "BEARISH",
+     "mechanism": "Google custom-chip sourcing broadens competition"
+    }
+   ]
+  },
+  "technical": {
+   "signal": "HOLD",
+   "score": 1.0,
+   "confidence": 0.6,
+   "key_factors": [
+    "Above 20, 50, and 200MA",
+    "RSI remains bullish at 56.1",
+    "MACD histogram positive but falling"
+   ],
+   "risk_flags": [
+    "Recent 20/50 death cross",
+    "Resistance near 251.64"
+   ],
+   "phase0_alignment": "ALIGNED",
+   "subagent_isolated": false,
+   "skill_execution_failed": false,
+   "reasoning_one_line": "價格守在主要均線之上，但 MACD 轉弱與近端壓力使追價勝率有限。",
+   "rubric_hint": "0 to +1 (basing — wait for confirmation)",
+   "rubric_override_reason": null,
+   "extension_penalty_note": null,
+   "smart_money_analysis": {
+    "label": "neutral",
+    "narrative": "OHLCV-only lane；成交量為 20 日均量 1.08 倍，未形成明確吸籌或出貨。"
+   },
+   "pattern_taxonomy": {
+    "pattern": "consolidation",
+    "confirmation_criteria": "站穩 50MA 並放量突破 251.64 才確認續攻。"
+   },
+   "market_strength": "NEUTRAL",
+   "key_levels": {
+    "support": 222.88,
+    "resistance": 251.64,
+    "pivot": 251.64
+   },
+   "high_prob_scenario": "未突破 251.64 前，較可能在 222.88 至 251.64 間整理。",
+   "volatility": {
+    "atr_14": null,
+    "hist_vol_20d_daily": null,
+    "momentum_20d_pct": null
+   }
+  },
+  "valuation": {
+   "signal": "SELL",
+   "score": -1.0,
+   "confidence": 0.92,
+   "key_factors": [
+    "Fair value sits far below price",
+    "Seven anchors show extreme dispersion",
+    "Forward validation remains stretched"
+   ],
+   "risk_flags": [
+    "Analyst target is a high outlier",
+    "Owner earnings anchor is a low outlier"
+   ],
+   "phase0_alignment": "MISALIGNED",
+   "subagent_isolated": true,
+   "skill_execution_failed": false,
+   "weighted_fair_value": 75.2,
+   "current_price": 237.695,
+   "vs_current_pct": -68.36,
+   "verdict_band": "extreme_overvalued",
+   "valuation_confidence": "low",
+   "anchors_available": 7,
+   "forward_validation_status": "STRETCHED",
+   "suppression_proposals": [
+    {
+     "anchor": "analyst_pt_consensus",
+     "action": "review_for_suppression",
+     "reason": "Outlier with 80.4% price-target dispersion",
+     "advisory_only": true,
+     "apply_current_session": false
+    },
+    {
+     "anchor": "owner_earnings_mult",
+     "action": "review_for_suppression",
+     "reason": "Outlier below diagnostic lower bound",
+     "advisory_only": true,
+     "apply_current_session": false
+    }
+   ],
+   "valuation_commentary": "七根合格錨的離散度極高，forward validation 僅把原始負分軟化到 -1；RISK_ON 背景不改寫估值數字。",
+   "cited_transition_overlay": false,
+   "transition_dissent_basis": "valuation_anchor"
+  }
+ },
+ "burry": {
+  "score": 33.4,
+  "narrative": "Burry 33.4/100（WARNING）：FCF yield 1.03%、EV/EBIT 81.5 與 insider SELL 偏空；Altman safe、Piotroski moderate 不調分，內部人 distributing、兩種 DCF 差逾 20%及相對估值昂貴列為敘事警告。"
+ },
+ "phase3": {
+  "final_score": 0.2516,
+  "final_decision": "HOLD",
+  "final_action": "CANCEL"
+ },
+ "phase4": {
+  "position_size_pct": null,
+  "analysis_price": 237.695
+ },
+ "red_team": {
+  "verdict": "STRONG_COUNTER"
+ }
+}

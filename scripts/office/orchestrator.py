@@ -4,8 +4,8 @@ Replaces the round-robin transcript loop: every turn used to re-read the full
 transcript (O(rounds²) tokens) and roles spent turns reacting to each other in
 sequence. v2 runs four phases (roles.py has the prompt contracts):
 
-  1. drafts      — the four role-pinned engines (claude/gemini/codex/grok)
-                   answer the task in parallel, blind to each other.
+  1. drafts      — three broker-assigned engines answer the task in parallel,
+                   blind to each other; no provider may self-select.
                    Cross-read tokens: zero.
   2. adjudicate  — one structured pass diffs the drafts into consensus vs. a
                    numbered disagreement list (max OFFICE_MAX_DISAGREEMENTS).
@@ -44,15 +44,8 @@ WALL_TIMEOUT_SEC = int(os.getenv("OFFICE_WALL_TIMEOUT_SEC", "1800"))
 PER_CALL_TIMEOUT = int(os.getenv("OFFICE_CALL_TIMEOUT_SEC",
                                  str(getattr(llm_drivers, "LLM_TIMEOUT_SEC", 180))))
 VERDICT_TIMEOUT = int(os.getenv("OFFICE_VERDICT_TIMEOUT_SEC", "300"))
-# grok CLI regularly needs 90-150s even on small prompts (no web search, long
-# reasoning) — the shared 180s cap made the Trader leg a coin flip.
-GROK_TIMEOUT = int(os.getenv("OFFICE_GROK_TIMEOUT_SEC", "300"))
 # Research pass reads the repo's data caches agentically — allow extra time.
 RESEARCH_TIMEOUT = int(os.getenv("OFFICE_RESEARCH_TIMEOUT_SEC", "240"))
-# claude legs: debate turns are text-only reasoning — pin a fast model for
-# drafts/rebuttals and a strong one for the final verdict.
-CLAUDE_DRAFT_MODEL = os.getenv("OFFICE_CLAUDE_MODEL", "sonnet")
-STRONG_MODEL = os.getenv("OFFICE_STRONG_MODEL", "opus")
 MAX_DISAGREEMENTS = int(os.getenv("OFFICE_MAX_DISAGREEMENTS", "5"))
 
 # run_id -> threading.Event (set => cooperative stop requested)
@@ -80,58 +73,17 @@ def is_running(run_id):
 
 # ── engine calls ─────────────────────────────────────────────────────────
 def _call_claude_text(system_prompt, user_prompt, model, timeout):
-    """Text-only claude turn: pinned model, no agentic loop, no MCP startup,
-    no built-in tools. One retry — headless `claude -p` occasionally fails
-    transiently even on prompts that normally succeed in under a minute.
-
-    V4.106.0: each attempt takes a quota reservation first. This path calls the
-    driver directly rather than through `run_with_fallback`, so before the broker
-    it was reported to the budget afterwards but gated by nothing — and a retry
-    doubled the spend. The Office is a decision-bearing flow, so a broker that
-    cannot answer stops it (fail-closed) rather than falling back to the local
-    counters; the caller already handles a failed `LLMResult`.
-    """
-    res = None
-    for _attempt in range(2):
-        try:
-            with model_router.governed_call("office", "claude",
-                                            system_prompt, user_prompt) as hold:
-                res = llm_drivers.run_claude(system_prompt, user_prompt, timeout=timeout,
-                                             model=model, max_turns=1, strict_mcp=True,
-                                             no_tools=True)
-                hold.settle(res)
-        except model_router.RunBlocked as blocked:
-            res = llm_drivers.LLMResult(
-                agent="claude", parsed=None, raw_text="", raw_stdout="",
-                exit_code=-9, latency_ms=0, parse_status="failed", error=str(blocked))
-            model_router.note_run("claude", False, str(blocked))
-            break
-        model_router.note_run("claude", res.exit_code == 0, res.error or "")
-        if res.exit_code == 0:
-            break
-    res.model_used = f"claude:{model}"
-    res.fell_back = False
-    return res
+    """Compatibility wrapper: broker owns provider selection; `model` is ignored."""
+    del model
+    return model_router.run_role("office", system_prompt, user_prompt,
+                                 timeout=timeout)
 
 
 def _call_role(role, system_prompt, user_prompt, timeout=PER_CALL_TIMEOUT):
-    """One structured call on the role's pinned engine, with one retry when the
-    reply has no extractable JSON (grok especially is flaky about envelope
-    discipline; a second attempt usually lands)."""
-    if role.engine == "grok":
-        timeout = max(timeout, GROK_TIMEOUT)
-    res = None
-    for _attempt in range(2):
-        if role.engine == "claude":
-            res = _call_claude_text(system_prompt, user_prompt,
-                                    CLAUDE_DRAFT_MODEL, timeout)
-        else:
-            res = model_router.run_with_fallback(role.engine, "office",
-                                                 system_prompt, user_prompt,
-                                                 timeout=timeout)
-        if res.exit_code == 0 and isinstance(res.parsed, dict):
-            break
-    return res
+    """One broker-selected structured call; role identity affects prompt only."""
+    del role
+    return model_router.run_role("office", system_prompt, user_prompt,
+                                 timeout=timeout)
 
 
 # ── phase 0: research (gemini reads the repo's fresh caches; facts only) ──
@@ -143,7 +95,7 @@ def _research(run_id, task):
                                 "name": role.name, "engine": role.engine})
     res = _call_role(role, role.system_prompt, f"TASK:\n{task}",
                      timeout=RESEARCH_TIMEOUT)
-    store.bump_spend(run_id, role.engine)
+    store.bump_spend(run_id, getattr(res, "model_used", None) or "broker")
     p = res.parsed if isinstance(res.parsed, dict) else {}
     facts = [f for f in (p.get("facts") or []) if isinstance(f, dict)
              and str(f.get("fact") or "").strip()][:12]
@@ -175,7 +127,7 @@ def _draft_one(run_id, task, role, fact_pack=""):
     usr = f"TASK:\n{task}" + (f"\n\n{fact_pack}" if fact_pack else "")
     res = _call_role(role, role.system_prompt, usr)
     engine_used = getattr(res, "model_used", None) or role.engine
-    store.bump_spend(run_id, role.engine)
+    store.bump_spend(run_id, engine_used)
     p = res.parsed if isinstance(res.parsed, dict) else {}
     raw = (res.raw_text or res.raw_stdout or "").strip()
     claims = p.get("claims")
@@ -208,15 +160,9 @@ def _render_drafts(drafts):
 def _adjudicate(run_id, task, drafts):
     usr = (f"TASK:\n{task}\n\nTHREE INDEPENDENT DRAFTS:\n"
            f"{_render_drafts(drafts)}")
-    res = _call_claude_text(roles_mod.ADJUDICATE_SYSTEM, usr,
-                            CLAUDE_DRAFT_MODEL, PER_CALL_TIMEOUT)
-    store.bump_spend(run_id, "claude")
-    if not (res.exit_code == 0 and isinstance(res.parsed, dict)):
-        # one retry on a different engine before giving up on structure
-        res = model_router.run_with_fallback(
-            "gemini", "office", roles_mod.ADJUDICATE_SYSTEM, usr,
-            timeout=PER_CALL_TIMEOUT)
-        store.bump_spend(run_id, "gemini")
+    res = model_router.run_role(
+        "office", roles_mod.ADJUDICATE_SYSTEM, usr, timeout=PER_CALL_TIMEOUT)
+    store.bump_spend(run_id, getattr(res, "model_used", None) or "broker")
     p = res.parsed if isinstance(res.parsed, dict) else {}
     consensus = [str(c) for c in p.get("consensus") or [] if str(c).strip()]
     dis = []
@@ -253,7 +199,7 @@ def _rebut_one(run_id, task, dis, role):
            f"其他人的立場:\n{others or '- (無)'}\n"
            f"CRUX: {dis['crux']}")
     res = _call_role(role, roles_mod.REBUTTAL_SYSTEM, usr)
-    store.bump_spend(run_id, role.engine)
+    store.bump_spend(run_id, getattr(res, "model_used", None) or "broker")
     p = res.parsed if isinstance(res.parsed, dict) else {}
     reb = {
         "type": "rebuttal", "role": role.key, "name": role.name,
@@ -357,13 +303,13 @@ def orchestrate(run_id, task, team=None, max_rounds=MAX_ROUNDS):  # noqa: ARG001
 
         # 4 — strong-model verdict + deliverable (fact pack included so the
         # ruling can be grounded in the same data the seats debated from)
-        _phase(5, "verdict", f"終局裁決（{STRONG_MODEL}）")
+        _phase(5, "verdict", "終局裁決（Broker）")
         vin = _render_verdict_input(task, consensus, disagreements, rebuttals)
         if fact_pack:
             vin = f"{fact_pack}\n\n{vin}"
-        vres = _call_claude_text(roles_mod.VERDICT_SYSTEM, vin,
-                                 STRONG_MODEL, VERDICT_TIMEOUT)
-        store.bump_spend(run_id, "claude")
+        vres = model_router.run_role(
+            "office_verdict", roles_mod.VERDICT_SYSTEM, vin, timeout=VERDICT_TIMEOUT)
+        store.bump_spend(run_id, getattr(vres, "model_used", None) or "broker")
         deliverable = (vres.raw_text or vres.raw_stdout or "").strip()
         if vres.exit_code != 0 or not deliverable:
             store.append_event(run_id, {

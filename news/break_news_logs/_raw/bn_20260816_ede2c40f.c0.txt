@@ -1,0 +1,55 @@
+```json
+{
+  "commentary": "Applied Materials (AMAT) 第三季度營收創下 91 億美元新高，年增 25%，顯示 AI 浪潮帶動先進製程與先進封裝設備需求強勁。然而股價自高點回檔逾 25%，反映市場對成熟製程資本支出放緩及地緣政治出口管制的擔憂。目前本益比具吸引力，長線受惠 Gate-All-Around 與 HBM 擴產趨勢。",
+  "bull_points": [
+    "Q3 營收創 91 億美元歷史新高，年增 25% 表現亮眼。",
+    "先進封裝與 GAA 技術節點推升沉積及蝕刻設備需求。",
+    "股價自高點修正逾 25%，評價面具備中長期修復空間。"
+  ],
+  "bear_points": [
+    "中國市場成熟製程設備拉貨力道可能面臨週期性放緩。",
+    "地緣政治與出口管制法規收緊可能壓抑未來海外營收。"
+  ],
+  "final_take": "基本面強勁但受地緣情緒壓抑，長線佈局價值浮現。",
+  "entities": {
+    "tickers": [
+      "AMAT"
+    ],
+    "sectors": [
+      "Information Technology",
+      "Semiconductors"
+    ],
+    "themes": [
+      "AI capex",
+      "Semiconductor Equipment",
+      "Advanced Packaging"
+    ],
+    "tech_keywords": [
+      "GAA",
+      "HBM",
+      "Gate-All-Around",
+      "Advanced Packaging"
+    ]
+  },
+  "relations": [
+    {
+      "subject": "ticker:AMAT",
+      "predicate": "BENEFITS_FROM",
+      "object": "theme:ai_capex"
+    },
+    {
+      "subject": "ticker:AMAT",
+      "predicate": "BENEFITS_FROM",
+      "object": "tech:advanced_packaging"
+    },
+    {
+      "subject": "ticker:AMAT",
+      "predicate": "HEADWIND_FROM",
+      "object": "narrative:export_controls"
+    }
+  ],
+  "done": false,
+  "confidence": 0.85,
+  "rationale_short": "營收創高與股價回檔形成背離，先進製程需求支撐長期展望。"
+}
+```

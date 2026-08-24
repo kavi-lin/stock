@@ -45,6 +45,18 @@
     cli_failures: { zh: 'CLI 連續失敗', en: 'cli_failures' },
     server_shutdown: { zh: '伺服器重啟', en: 'server_shutdown' },
     parse_failures:  { zh: '解析失敗',   en: 'parse_failures' },
+    // Reasons the orchestrator has emitted all along but which had no label —
+    // they rendered as raw slugs next to the ones that did.
+    converged_round1:    { zh: '一輪即收斂',   en: 'converged_round1' },
+    divergence_resolved: { zh: '爭點已解',     en: 'divergence_resolved' },
+    single_voice:        { zh: '僅一方發言',   en: 'single_voice' },
+    invalid_rebuttal:    { zh: '反駁不合格',   en: 'invalid_rebuttal' },
+    early_stop_low_relation_density: { zh: '無可交易標的', en: 'low_relation_density' },
+    // V4.132.0 — the tie-break path.
+    arbitrated:            { zh: '第三方裁決', en: 'arbitrated' },
+    arbiter_failed:        { zh: '裁決失敗',   en: 'arbiter_failed' },
+    unresolved_no_arbiter: { zh: '未解（無裁決者）', en: 'unresolved_no_arbiter' },
+    unresolved_timeout:    { zh: '未解（逾時）',     en: 'unresolved_timeout' },
   };
 
   function escapeHtml(s) {
@@ -183,6 +195,45 @@
     return { tickers, sectors, themes, tech_keywords: techs, total: tickers + sectors + themes + techs };
   }
 
+  // Side B's per-point adjudication of A's opener (V4.132.0). This is where the
+  // disagreement is now stated outright, so it gets the strongest visual weight
+  // in the bubble — a disputed point is the reason a third model may be called.
+  function renderAssessments(assessments) {
+    if (!Array.isArray(assessments) || !assessments.length) return '';
+    const lang = currentLang();
+    const rows = assessments.map(a => {
+      if (!a || !a.point) return '';
+      const disputed = a.verdict === 'dispute';
+      const color = disputed ? '#ef4444' : '#22c55e';
+      const mark  = disputed ? '✕' : '✓';
+      const word  = disputed ? (lang === 'zh' ? '反對' : 'dispute')
+                             : (lang === 'zh' ? '同意' : 'agree');
+      return `<div style="display:flex;gap:6px;align-items:baseline;margin-top:4px;">
+        <span style="color:${color};font-weight:700;font-size:11px;white-space:nowrap;">
+          ${mark} ${escapeHtml(a.point)} ${word}</span>
+        <span style="font-size:11px;color:var(--text-main);">${escapeHtml(a.reason || '')}</span>
+      </div>`;
+    }).filter(Boolean).join('');
+    return rows ? `<div style="margin-top:8px;">${rows}</div>` : '';
+  }
+
+  // What B says A missed. Kept separate from the assessments so "new point" is
+  // never mistaken for "disagreed with an existing one".
+  function renderAddedPoints(parsed) {
+    const bull = Array.isArray(parsed.added_bull) ? parsed.added_bull : [];
+    const bear = Array.isArray(parsed.added_bear) ? parsed.added_bear : [];
+    if (!bull.length && !bear.length) return '';
+    const lang = currentLang();
+    const label = lang === 'zh' ? '補充' : 'added';
+    const line = (points, color, sign) => points.map(p =>
+      `<div style="font-size:11px;color:var(--text-main);margin-top:3px;">
+        <span style="color:${color};font-weight:700;">${sign}</span> ${escapeHtml(p)}</div>`).join('');
+    return `<div style="margin-top:8px;">
+      <div style="font-size:10px;color:var(--text-muted);">${label}</div>
+      ${line(bull, '#22c55e', '▲')}${line(bear, '#ef4444', '▼')}
+    </div>`;
+  }
+
   // Thread bubble — one comment from one agent.
   function renderThreadBubble(comment) {
     if (!comment) return '';
@@ -191,18 +242,22 @@
     // Fallback for legacy comments with no `side`: parse the role label, then
     // last-resort the old claude===left heuristic.
     let side = comment.side;
-    if (side !== 'A' && side !== 'B') {
+    if (side !== 'A' && side !== 'B' && side !== 'C') {
       const lbl = comment.agent_role_label || {};
       const lblStr = (lbl.en || lbl.zh || '');
-      side = /-B\b|分析師 B/.test(lblStr) ? 'B'
+      side = /Arbiter-C|裁決者 C/.test(lblStr) ? 'C'
+           : /-B\b|分析師 B/.test(lblStr) ? 'B'
            : /-A\b|分析師 A/.test(lblStr) ? 'A'
            : (agent === 'claude' ? 'A' : 'B');
     }
     const isA = side === 'A';
+    const isC = side === 'C';
     const AVATARS = { claude: '🤖', gemini: '💎', codex: '🧠' };
-    const avatar  = AVATARS[agent] || (isA ? '🤖' : '💎');
-    const color   = isA ? '#f97316' : '#3b82f6';
-    const align   = isA ? 'flex-start' : 'flex-end';
+    const avatar  = isC ? '⚖️' : (AVATARS[agent] || (isA ? '🤖' : '💎'));
+    // The arbiter is neither side, so it is centred in violet rather than
+    // taking one of the two debaters' lanes.
+    const color   = isC ? '#a855f7' : (isA ? '#f97316' : '#3b82f6');
+    const align   = isC ? 'center' : (isA ? 'flex-start' : 'flex-end');
     const parsed  = comment.parsed || {};
     const commentary = parsed.commentary || '(no commentary)';
     const done = parsed.done === true ||
@@ -231,6 +286,8 @@
           ${parseWarn}
         </div>
         <div style="font-size:13px;color:var(--text-main);line-height:1.5;white-space:pre-wrap;">${escapeHtml(commentary)}</div>
+        ${renderAssessments(parsed.assessments)}
+        ${renderAddedPoints(parsed)}
         ${rationale ? `<div style="font-size:11px;color:var(--text-muted);margin-top:6px;font-style:italic;">${escapeHtml(rationale)}</div>` : ''}
         ${renderEntityChips(entities)
           ? `<div style="margin-top:8px;">${renderEntityChips(entities)}</div>` : ''}

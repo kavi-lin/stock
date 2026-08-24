@@ -31,7 +31,8 @@ Usage:
 Output JSON shape (mirrors what the protocol pastes into the 5 lanes):
   {
     "ticker", "generated_at",
-    "phase0_source", "phase0_stale_hours", "phase0": {...extracted core fields...},
+    "phase0_source", "phase0_stale_hours", "phase0_path",
+    "phase0": {...extracted core fields...},
     "phase0_validator_rc",
     "earnings_prewarm":   "ok | disabled | skipped: … | timeout: … | failed: … | error: …",
     "forecaster_prewarm": "ok | ok (refetched: earnings newer) | disabled | unavailable: … | …",
@@ -54,6 +55,8 @@ import time
 from datetime import date, datetime
 from statistics import median
 
+import validate_phase0 as phase0_gate
+
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 FRESH_SECONDS = 3 * 3600  # Phase 0 cache FRESH window (mtime < 3h), matches protocol
 
@@ -63,16 +66,48 @@ def _mtime_age_hours(path):
 
 
 # ---------------------------------------------------------------- Phase 0 (cache only)
+def _phase0_core(data):
+    """Keep the market-wide fields every downstream lane is allowed to see."""
+    return {
+        "macro_summary": data.get("macro_summary"),
+        "_market_signals": data.get("_market_signals"),
+        "fred_snapshot": data.get("fred_snapshot"),
+        "fred_available": data.get("fred_available"),
+        "phase3_macro_multiplier": data.get("phase3_macro_multiplier"),
+        "macro_multiplier_rationale": data.get("macro_multiplier_rationale"),
+    }
+
+
 def load_phase0(ticker):
-    """L1 sector_intel → L2 invest phase0. No L3 (heavy skill chain stays in protocol)."""
-    # L1: latest sector_intel
+    """Resolve one shared Phase 0 snapshot; sector cache is rebuild context only.
+
+    Returns ``(source, age_hours, core, frozen_path)``.  The exact path is carried
+    through validation and Phase 5 so a concurrent ticker cannot change which
+    market snapshot this run consumed.
+    """
+    logs_dir = os.path.join(REPO, "investment/invest_logs")
+    path = phase0_gate.find_latest(ticker, logs_dir=logs_dir)
+    if path:
+        age_h = _mtime_age_hours(path)
+        relpath = os.path.relpath(path, REPO)
+        try:
+            with open(path, encoding="utf-8") as f:
+                data = json.load(f)
+        except (OSError, json.JSONDecodeError):
+            return "INVALID_NEEDS_L3", age_h, {}, relpath
+        source = "INVEST_CACHE" if age_h * 3600 < FRESH_SECONDS else "STALE_NEEDS_L3"
+        return source, age_h, _phase0_core(data), relpath
+
+    # sector_intel is useful context for rebuilding Phase 0, but it is not a
+    # schema-complete Phase 0 artifact and must never satisfy the validator.
     l1 = sorted(glob.glob(os.path.join(REPO, "sector/sector_logs/*_sector_intel.json")))
     if l1:
         path = l1[-1]
         age_h = _mtime_age_hours(path)
         try:
-            d = json.load(open(path))
-        except Exception as e:
+            with open(path, encoding="utf-8") as f:
+                d = json.load(f)
+        except (OSError, json.JSONDecodeError):
             d = None
         if d is not None:
             p0 = d.get("_phase0", {}) or {}
@@ -87,33 +122,19 @@ def load_phase0(ticker):
                 "macro_summary": d.get("macro_summary"),
                 "_market_signals": d.get("_market_signals"),
             }
-            src = "SECTOR_CACHE" if age_h * 3600 < FRESH_SECONDS else "STALE_NEEDS_L3"
-            return src, age_h, core
-    # L2: invest_logs phase0
-    l2 = sorted(glob.glob(os.path.join(REPO, "investment/invest_logs/*_phase0.json")))
-    if l2:
-        path = l2[-1]
-        age_h = _mtime_age_hours(path)
-        try:
-            d = json.load(open(path))
-        except Exception:
-            d = None
-        if d is not None:
-            core = {
-                "macro_summary": d.get("macro_summary"),
-                "_market_signals": d.get("_market_signals"),
-                "fred_snapshot": d.get("fred_snapshot"),
-                "phase3_macro_multiplier": d.get("phase3_macro_multiplier"),
-            }
-            src = "INVEST_CACHE" if age_h * 3600 < FRESH_SECONDS else "STALE_NEEDS_L3"
-            return src, age_h, core
-    return "STALE_NEEDS_L3", None, {}
+            source = ("INCOMPLETE_NEEDS_L3"
+                      if age_h * 3600 < FRESH_SECONDS else "STALE_NEEDS_L3")
+            return source, age_h, core, None
+    return "STALE_NEEDS_L3", None, {}, None
 
 
-def validate_phase0_rc(ticker):
+def validate_phase0_rc(ticker, phase0_path=None):
     try:
+        source_args = (["--path", os.path.join(REPO, phase0_path)]
+                       if phase0_path else ["--ticker", ticker])
         r = subprocess.run(
-            [sys.executable, os.path.join(REPO, "investment/scripts/validate_phase0.py"), "--ticker", ticker],
+            [sys.executable, os.path.join(REPO, "investment/scripts/validate_phase0.py"),
+             *source_args],
             cwd=REPO, capture_output=True, text=True, timeout=120,
         )
         return r.returncode
@@ -449,14 +470,19 @@ def load_supp_bundle(ticker):
 # ---------------------------------------------------------------- main
 def build(ticker, run_validator=True, prewarm_earnings=True):
     ticker = ticker.upper()
-    phase0_source, stale_h, phase0 = load_phase0(ticker)
+    phase0_source, stale_h, phase0, phase0_path = load_phase0(ticker)
+    validator_rc = (validate_phase0_rc(ticker, phase0_path)
+                    if run_validator else None)
+    if run_validator and phase0_source == "INVEST_CACHE" and validator_rc != 0:
+        phase0_source = "INVALID_NEEDS_L3"
     out = {
         "ticker": ticker,
         "generated_at": datetime.now().isoformat(timespec="seconds"),
         "phase0_source": phase0_source,
         "phase0_stale_hours": stale_h,
         "phase0": phase0,
-        "phase0_validator_rc": validate_phase0_rc(ticker) if run_validator else None,
+        "phase0_path": phase0_path,
+        "phase0_validator_rc": validator_rc,
         "bundles": {},
         "bundles_loaded": {},
     }

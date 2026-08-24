@@ -728,10 +728,16 @@ const DECISION_TIPS = {
               scale: '🟢 ≥ 70%   high — standard size\n🟡 50-70%  medium — cut one notch\n⚪ < 50%   low — wait or tiny pilot (high fragility → just wait)' },
     },
     // ── Protocol version bookmarks ──────────────────────────────────────
+    version_v54: {
+        zh: { title: 'Protocol V5.4 — LLM 執行引擎標籤與多模型協同（最新）',
+              desc: 'V5.3 全部 + **卡片與決策審計完整標記 LLM 執行引擎**：決策卡片與 session export 明確記錄並標示各分析是由哪一個 LLM（Claude / Codex / Gemini / GPT 等）驅動，支援多模型派工與透明化溯源。\n\n**為什麼要這塊**：配合多 LLM 模型路由與 Broker 配額協調，使用者能一眼看出每張決策卡片是哪一個 AI 模組分析的，避免模型混淆，並為後續 cross-model backtest 與權重回歸提供乾淨的 attribution 基礎。' },
+        en: { title: 'Protocol V5.4 — LLM Engine Attribution & Multi-Model Coordination (current)',
+              desc: 'All of V5.3 + **Full LLM Engine Attribution & Multi-Model Tagging**: Decision cards and session exports explicitly record and display which LLM (Claude / Codex / Gemini / GPT etc.) executed the analysis, enabling multi-model dispatch and transparent provenance.\n\n**Why**: Coordinated with multi-LLM routing and broker quota management, users can see at a glance which AI engine drove each analysis card, preventing model confusion and establishing clean attribution for cross-model backtesting and weight calibration.' },
+    },
     version_v53: {
-        zh: { title: 'Protocol V5.3 — 統一 lane 資料契約（最新）',
+        zh: { title: 'Protocol V5.3 — 統一 lane 資料契約',
               desc: 'V5.2 全部 + **每個 lane 都要交代自己是誰產的**：entry 必須帶 `lane_contract` —— 六個 lane（五個分析 lane + Red Team）各自的 `{provenance, llm_invoked, producer_version, input_hash, shadow_score}`，加 session 層 `{analysis_mode, llm_invoked_lanes[], llm_skipped_lanes[]}`。validator §15 驗值域、驗 session 清單與 per-lane 的一致性、驗契約的 valuation shadow 與 `det_shadow` 同源。\n\n**為什麼要這塊**：lane 正在一個個從 LLM 換成 script（Sentiment → Technical → Red Team）。沒有 provenance，Phase 6 校準會把「LLM 打的分」與「公式算的分」混在同一個池子裡回歸，得到的權重兩邊都不適用。\n\n同版另有 **lane 區塊形狀鎖**：`moat_assessment` / `smart_money_analysis` 一律 dict、`immediate_catalyst_5d` 一律 dict 或 null（舊 entry 不受影響）。' },
-        en: { title: 'Protocol V5.3 — Unified Lane Data Contract (current)',
+        en: { title: 'Protocol V5.3 — Unified Lane Data Contract',
               desc: 'All of V5.2 + **every lane declares who produced it**: the entry must carry `lane_contract` — per-lane `{provenance, llm_invoked, producer_version, input_hash, shadow_score}` across all six lanes (five analysts + Red Team), plus a session layer `{analysis_mode, llm_invoked_lanes[], llm_skipped_lanes[]}`. Validator §15 checks the enums, that the session lists project the per-lane flags exactly, and that the contract\'s valuation shadow matches `det_shadow`.\n\n**Why**: lanes are being converted from LLM to script one at a time (Sentiment → Technical → Red Team). Without provenance, Phase 6 calibration regresses LLM-scored and formula-scored entries in one pool and the resulting weights fit neither.\n\nSame version also **locks lane block shapes**: `moat_assessment` / `smart_money_analysis` are always objects, `immediate_catalyst_5d` an object or null (older entries unaffected).' },
     },
     version_v52: {
@@ -883,9 +889,9 @@ function versionAtLeast(version, floor) {
 }
 
 const VERSION_COLOR = {
-    // V5.2 / V5.3 加在 V4.90.0：schema 已經跳到 V5.3，沒有這兩格的話新 entry 會落到
-    // LEGACY 的灰色 ARCHIVE badge —— 最新的 entry 被標成最舊的，是最糟的一種預設。
-    'V5.3':   { bg: 'rgba(139,92,246,0.22)',  border: 'rgba(167,139,250,0.70)', fg: '#c4b5fd', label: 'V5.3'   },
+    // V5.4 — LLM 執行引擎標籤與多模型審計
+    'V5.4':   { bg: 'rgba(139,92,246,0.25)',  border: 'rgba(167,139,250,0.85)', fg: '#c4b5fd', label: 'V5.4'   },
+    'V5.3':   { bg: 'rgba(139,92,246,0.18)',  border: 'rgba(167,139,250,0.60)', fg: '#c4b5fd', label: 'V5.3'   },
     'V5.2':   { bg: 'rgba(6,182,212,0.20)',   border: 'rgba(34,211,238,0.65)',  fg: '#67e8f9', label: 'V5.2'   },
     'V5.1':   { bg: 'rgba(20,184,166,0.22)',  border: 'rgba(45,212,191,0.70)',  fg: '#5eead4', label: 'V5.1'   },
     'V5.0':   { bg: 'rgba(16,185,129,0.18)',  border: 'rgba(16,185,129,0.55)',  fg: '#34d399', label: 'V5.0'   },
@@ -900,6 +906,7 @@ function buildVersionBookmark(version) {
     const c = VERSION_COLOR[version] || VERSION_COLOR['LEGACY'];
     // V2.17.8 — version bookmark gets rich tooltip via data-tip-key
     const tipKeyMap = {
+        'V5.4':   'version_v54',
         'V5.3':   'version_v53',
         'V5.2':   'version_v52',
         'V5.1':   'version_v51',
@@ -913,14 +920,72 @@ function buildVersionBookmark(version) {
     const tipKey = tipKeyMap[version] || 'version_legacy';
     return `
     <div class="version-bookmark" data-tip-key="${tipKey}"
-         style="position:absolute; top:0; right:8px; z-index:2;
-                padding:2px 7px 3px; font-size:8px; font-weight:800; letter-spacing:0.06em;
+         style="padding:2px 7px 3px; font-size:8px; font-weight:800; letter-spacing:0.06em;
                 border:1px solid ${c.border}; border-top:0;
                 border-bottom-left-radius:5px; border-bottom-right-radius:5px;
                 background:${c.bg}; color:${c.fg};
                 box-shadow: 0 1px 3px rgba(0,0,0,0.2); opacity: 0.85;
                 cursor: help;">
         ${c.label}
+    </div>`;
+}
+
+const LLM_PALETTES = {
+    'claude':   { label: 'Claude',   bg: 'rgba(234,88,12,0.18)',  border: 'rgba(251,146,60,0.65)', fg: '#fb923c', desc: '由 Anthropic Claude 分析' },
+    'gemini':   { label: 'Gemini',   bg: 'rgba(59,130,246,0.18)', border: 'rgba(96,165,250,0.65)', fg: '#60a5fa', desc: '由 Google Gemini 分析' },
+    'codex':    { label: 'Codex',    bg: 'rgba(16,185,129,0.18)', border: 'rgba(52,211,153,0.65)', fg: '#34d399', desc: '由 OpenAI Codex 分析' },
+    'gpt-4o':   { label: 'GPT-4o',   bg: 'rgba(16,185,129,0.18)', border: 'rgba(52,211,153,0.65)', fg: '#34d399', desc: '由 OpenAI GPT-4o 分析' },
+    'deepseek': { label: 'DeepSeek', bg: 'rgba(14,165,233,0.18)', border: 'rgba(56,189,248,0.65)', fg: '#38bdf8', desc: '由 DeepSeek 分析' },
+    'grok':     { label: 'Grok',     bg: 'rgba(148,163,184,0.18)', border: 'rgba(203,213,225,0.65)', fg: '#cbd5e1', desc: '由 xAI Grok 分析' },
+};
+
+function detectLlmModel(item) {
+    let m = item.llm_model || item.llm || item.model || item.llm_provider || item.analyst_model || item.engine || item.provider;
+    if (!m && item.export_provenance && item.export_provenance.llm) {
+        m = item.export_provenance.llm;
+    }
+    if (!m && item.bias_notes) {
+        const bn = String(item.bias_notes).toLowerCase();
+        if (bn.includes('gemini')) m = 'gemini';
+        else if (bn.includes('codex')) m = 'codex';
+        else if (bn.includes('gpt')) m = 'gpt-4o';
+        else if (bn.includes('deepseek')) m = 'deepseek';
+        else if (bn.includes('claude')) m = 'claude';
+    }
+    if (!m) m = 'claude';
+    return String(m).toLowerCase();
+}
+
+function buildLlmBookmark(item) {
+    const raw = detectLlmModel(item);
+    let key = 'claude';
+    if (raw.includes('gemini') || raw.includes('agy')) key = 'gemini';
+    else if (raw.includes('codex')) key = 'codex';
+    else if (raw.includes('gpt')) key = 'gpt-4o';
+    else if (raw.includes('deepseek')) key = 'deepseek';
+    else if (raw.includes('grok')) key = 'grok';
+    else if (raw.includes('claude') || raw.includes('sonnet') || raw.includes('opus')) key = 'claude';
+
+    const info = LLM_PALETTES[key] || {
+        label: raw.toUpperCase(),
+        bg: 'rgba(161,161,170,0.16)',
+        border: 'rgba(161,161,170,0.45)',
+        fg: '#a1a1aa',
+        desc: `由 ${raw} 分析`
+    };
+
+    const isZh = (typeof UI !== 'undefined' && UI.currentLang === 'zh');
+    const tipText = isZh ? info.desc : `Analyzed by ${info.label}`;
+
+    return `
+    <div class="llm-bookmark" title="${tipText}"
+         style="padding:2px 7px 3px; font-size:8px; font-weight:800; letter-spacing:0.04em;
+                border:1px solid ${info.border}; border-top:0;
+                border-bottom-left-radius:5px; border-bottom-right-radius:5px;
+                background:${info.bg}; color:${info.fg};
+                box-shadow: 0 1px 3px rgba(0,0,0,0.2); opacity: 0.9;
+                cursor: help;">
+        ${info.label}
     </div>`;
 }
 
@@ -1549,6 +1614,7 @@ function buildCard(item) {
     const v5Block      = versionAtLeast(version, 'V5.0') ? buildV5ValuationBlock(item, wl) : '';
     const redTeamBlock = versionAtLeast(version, 'V4.7') ? buildRedTeamBlock(item, wl) : '';
     const bookmarkHtml = buildVersionBookmark(version);
+    const llmBookmarkHtml = buildLlmBookmark(item);
 
     // Entry targets block — V4.6 supports dual-track
     const tgt = item.targets || {};
@@ -1680,7 +1746,10 @@ function buildCard(item) {
 
     return `
     <div class="glass-card dc-card-hover p-6 flex flex-col gap-0 ${statusGlow} cursor-pointer" data-history-ticker="${item.ticker}" data-protocol-version="${version}" style="position:relative;">
-        ${bookmarkHtml}
+        <div style="position:absolute; top:0; right:8px; z-index:2; display:flex; gap:4px; align-items:flex-start;">
+            ${llmBookmarkHtml}
+            ${bookmarkHtml}
+        </div>
         <!-- Header -->
         <div class="flex justify-between items-start mb-4">
             <div class="min-w-0 flex-1">
@@ -2119,6 +2188,11 @@ document.getElementById('refresh-btn').addEventListener('click', loadWatchlist);
 UI.boot('decisions', { translate: applyTranslations, reload: loadWatchlist });
 loadWatchlist();
 
+// Candidates the live-debate room pushed here. Lineage only: the card starts an
+// independent invest run, it never carries a verdict or a size into this page.
+const _dcSignalQueue = window.SignalQueue?.mount(
+    document.getElementById('sq-mount'), { lane: 'invest' }) || null;
+
 // ─── V1.74 Invest cmdbar (terminal-style quick-launch) ─────────────────
 const DC_RECENT_LS = 'dc_recent_invest_tickers';
 const DC_RECENT_MAX = 5;
@@ -2310,7 +2384,7 @@ function fmtElapsed(sec) {
 // Pull protocol status; update lock state; sync UI.
 async function pollProtocolStatus() {
     try {
-        const res = await fetch('/api/run-protocol/status');
+        const res = await fetch('/api/run-protocol/status?name=invest');
         if (!res.ok) return;
         const s = await res.json();
 

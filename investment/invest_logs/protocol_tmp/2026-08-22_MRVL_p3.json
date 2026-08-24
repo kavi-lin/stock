@@ -1,0 +1,107 @@
+{
+  "ticker": "MRVL",
+  "lane_scores": {
+    "fundamentals": -1.0,
+    "sentiment": 0.99,
+    "news": 2.5,
+    "technical": 1.0,
+    "valuation": -1.0
+  },
+  "lane_confidence": {
+    "fundamentals": 0.9,
+    "sentiment": 0.78,
+    "news": 0.72,
+    "technical": 0.6,
+    "valuation": 0.92
+  },
+  "valuation_lane": {
+    "score": -1.0,
+    "confidence": 0.92
+  },
+  "forward_validation": {
+    "schema": "forward_validation.v1",
+    "status": "STRETCHED",
+    "applies": true,
+    "reason": "at least one credible forward check supports current price",
+    "dcf_value": 41.9,
+    "dcf_gap_pct": -82.37,
+    "extreme_dcf_threshold_pct": -30.0,
+    "checks": [
+      {
+        "name": "archetype_shadow",
+        "available": true,
+        "supports_current_price": false,
+        "actual": -57.02,
+        "threshold": ">=-10% vs current",
+        "detail": {"anchors_used_n": 8}
+      },
+      {
+        "name": "forward_earnings",
+        "available": true,
+        "supports_current_price": true,
+        "actual": -6.32,
+        "threshold": ">=-10% vs current",
+        "detail": {"analyst_count": 5, "horizon_years": 3.444}
+      },
+      {
+        "name": "revenue_path",
+        "available": true,
+        "supports_current_price": false,
+        "actual": 0.4471,
+        "threshold": "<= analyst CAGR + 0.05",
+        "detail": {"analyst_revenue_cagr": 0.093, "analyst_horizon_years": 3.0}
+      }
+    ],
+    "evaluated_count": 3,
+    "support_count": 1,
+    "supported_checks": ["forward_earnings"],
+    "failed_checks": ["archetype_shadow", "revenue_path"],
+    "quality_flags": ["reverse_dcf_growth_out_of_range"],
+    "valuation_score_before": -3.0,
+    "valuation_score_effective": -1.0,
+    "score_adjustment": "soften_to_-1",
+    "t5_hard_downgrade_eligible": false
+  },
+  "weights": null,
+  "structural_shift": {"tier": "NONE"},
+  "red_team": {
+    "verdict": "STRONG_COUNTER",
+    "counter_thesis": "最脆弱的主論點是 Google 客製晶片合作可迅速轉化為足以支撐現價的營收與自由現金流成長；但現價隱含 5 年 FCF CAGR 60%及營收 CAGR 44.71%，遠高於分析師 CAGR 9.3%，而 25.38x EV/S、僅 1.03% FCF yield 與加權公允價值下行 68.36%顯示多頭幾乎沒有執行失誤空間。",
+    "kill_conditions": [
+      "IF 未來 2 季內 FCF 年化增速低於 30%，THEN 現價所隱含的 5 年 FCF CAGR 60%路徑破裂，客製晶片成長足以支撐估值的論點失效。",
+      "IF 未來 2 季內營收年化增速低於 45%，THEN 25.38x EV/S 收斂至 4x 所需的 44.71%五年營收 CAGR 路徑無法成立，現價多頭論點失效。",
+      "IF 未來 6 個月內 FRED 10 年期殖利率持續不低於 4.65%且實質利率持續不低於 2.4%，THEN Technology 長久期資產的折現壓力未解除，MRVL 高估值依靠倍數維持或擴張的論點失效。"
+    ],
+    "basis": "pure_forward",
+    "counter_evidence_strength": 5,
+    "thesis_break_probability": 0.86
+  },
+  "transition": {
+    "transition_signature": "neither",
+    "transition_signature_mtime": "2026-08-22T01:58:40+08:00",
+    "forecaster_transition_case": null,
+    "forecaster_transition_case_mtime": null,
+    "valuation_cited_transition_overlay": false,
+    "valuation_transition_dissent_basis": "valuation_anchor"
+  },
+  "macro": {
+    "macro_multiplier": 0.9,
+    "macro_backdrop_score": 1.0,
+    "market_regime": "RISK_ON"
+  },
+  "burry": {"score": 33.4, "veto_flag": false},
+  "gates": {
+    "proceed_to_phase3": true,
+    "risk_reward_ratio": null,
+    "binary_classification": "unknown",
+    "binary_event_within_48h": false,
+    "mandatory_risk_flags": ["valuation_extreme_overvalued"],
+    "phase2_fanout_mode": "PARTIAL_FALLBACK"
+  },
+  "hot_zone": {"industry_top_30pct": false},
+  "decision_cap": {
+    "anchors_available": 7,
+    "fair_value_confidence": "low",
+    "lane_data_quality_low": true
+  }
+}

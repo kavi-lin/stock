@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Validate the most recent `history.json` entry against the Phase 5 schema
-documented in `investment/phase5_export_schema.md`.
+Validate one isolated session object (or the latest legacy `history.json` entry)
+against the Phase 5 schema documented in `investment/phase5_export_schema.md`.
 
 Invocation (from protocol Phase 5 末尾):
     python3 investment/scripts/validate_session_export.py
@@ -330,8 +330,10 @@ def _diff_steps(ref, got, prefix=""):
 
 from compute_price_framework import (  # noqa: E402
     ANCHOR_DROPPED_VALUE,
+    FORWARD_VALIDATION_SCHEMA,
     SCRIPT_NOT_RUN,
     SCRIPT_SOURCED_ANCHORS,
+    compute_forward_validation,
 )
 
 ROOT         = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -339,17 +341,17 @@ HISTORY_JSON = os.path.join(ROOT, "investment/invest_logs/history.json")
 # Accepted schema versions, oldest → newest. V4.8 (4-lane legacy) lives until pre-V5.0
 # entries decay; V5.0 opened the 5-lane era; V5.1 makes the Phase 3 engine block mandatory;
 # V5.2 does the same for the Phase 4 engine block.
-ACCEPTED_VERSIONS = ("V4.8", "V5.0", "V5.1", "V5.2", "V5.3")
-CURRENT_VERSION   = "V5.3"
+ACCEPTED_VERSIONS = ("V4.8", "V5.0", "V5.1", "V5.2", "V5.3", "V5.4")
+CURRENT_VERSION   = "V5.4"
 # 5-lane era — valuation_lane / fair_value_summary required, Rec 11 + MHP instrumented.
-V5_VERSIONS = ("V5.0", "V5.1", "V5.2", "V5.3")
+V5_VERSIONS = ("V5.0", "V5.1", "V5.2", "V5.3", "V5.4")
 # Versions whose entries MUST carry the Phase 3 engine output (`calculation_steps` +
 # `decision_engine_version`). Version-keyed rather than date-keyed so a backfilled entry
 # stamped V5.1 is held to exactly the same bar as one exported today.
-CALC_STEPS_REQUIRED_VERSIONS = ("V5.1", "V5.2", "V5.3")
+CALC_STEPS_REQUIRED_VERSIONS = ("V5.1", "V5.2", "V5.3", "V5.4")
 # Versions whose entries MUST carry the Phase 4 engine output (`risk_audit` +
 # `trade_plan_builder_version` + `mandatory_risk_flags`). Same version-keyed discipline.
-RISK_AUDIT_REQUIRED_VERSIONS = ("V5.2", "V5.3")
+RISK_AUDIT_REQUIRED_VERSIONS = ("V5.2", "V5.3", "V5.4")
 # Versions whose entries MUST carry the C1 lane contract (`lane_contract`).
 # 值域與形狀的單一事實來源在 apply_det_shadow.py（producer），這裡只 import 不複製。
 LANE_CONTRACT_REQUIRED_VERSIONS = LANE_CONTRACT_VERSIONS
@@ -399,8 +401,8 @@ def fail(errors):
     for e in errors:
         print(f"  - {e}", file=sys.stderr)
     print(
-        "\nFix: rewrite the last history.json entry to match "
-        "investment/phase5_export_schema.md then re-run this validator.",
+        "\nFix: rebuild the isolated session export to match "
+        "investment/phase5_export_schema.md, then re-run this validator.",
         file=sys.stderr,
     )
     sys.exit(1)
@@ -608,6 +610,9 @@ def check_phase3_arithmetic(entry, trade, errors, warnings):
         allowed = {banded}
         if banded == "BUY" and polar.get("label") == "BIPOLAR":
             allowed.add("STAGED_ENTRY")          # Step 1.7 forced downgrade
+        t5_step = cs.get("t5_forward_validation") or {}
+        if t5_step.get("downgrade_applied") is True:
+            allowed.add(t5_step.get("decision_after"))  # engine 1.1.0 T5 downgrade
         if banded == "BUY" and trade.get("decision_cap_active") is True \
                 and trade.get("cap_override_reason"):
             allowed.add("STAGED_ENTRY")          # Phase 4.6 cap + override（不退到 HOLD）
@@ -1187,14 +1192,101 @@ def check_lane_contract(entry, trade, errors, warnings):
 
 
 # ---------------------------------------------------------------------------
+# V4.131.13 — extreme-DCF forward validation
+# ---------------------------------------------------------------------------
+FORWARD_VALIDATION_STATUSES = ("NOT_APPLICABLE", "NO_DATA", "PASS", "STRETCHED", "FAIL")
+
+
+def _engine_version_at_least(value, floor):
+    try:
+        got = tuple(int(x) for x in str(value).split("."))
+        want = tuple(int(x) for x in str(floor).split("."))
+        return got >= want
+    except (TypeError, ValueError):
+        return False
+
+
+def check_forward_validation(trade, errors, warnings):
+    """Require and rederive the forward block for decision engine 1.1.0+."""
+    engine_ver = trade.get("decision_engine_version")
+    required = _engine_version_at_least(engine_ver, "1.1.0")
+    fv = trade.get("forward_validation")
+    if not isinstance(fv, dict):
+        if required:
+            errors.append(
+                "forward_validation missing — decision_engine 1.1.0+ 的 T5 必須讀 pf_quant "
+                "forward_validation.v1，不得在資料缺漏時猜 FAIL")
+        elif fv is not None:
+            warnings.append("forward_validation must be an object when present")
+        return
+    if fv.get("schema") != FORWARD_VALIDATION_SCHEMA:
+        errors.append(f"forward_validation.schema={fv.get('schema')!r}; expected "
+                      f"{FORWARD_VALIDATION_SCHEMA!r}")
+    if fv.get("status") not in FORWARD_VALIDATION_STATUSES:
+        errors.append(f"forward_validation.status={fv.get('status')!r}; expected one of "
+                      f"{list(FORWARD_VALIDATION_STATUSES)}")
+
+    pack = trade.get("valuation_pack")
+    implied = trade.get("implied_expectations")
+    shadow = trade.get("valuation_archetype_shadow")
+    if not all(isinstance(x, dict) for x in (pack, implied, shadow)):
+        errors.append("forward_validation cannot be rederived: valuation_pack / "
+                      "implied_expectations / valuation_archetype_shadow must all be objects")
+        return
+    raw_pack = dict(pack)
+    raw_pack["score"] = pack.get("score_before_forward_validation", pack.get("score"))
+    expected = compute_forward_validation(raw_pack, implied, shadow)
+    diffs = _diff_steps(expected, fv)
+    if diffs:
+        errors.append("forward_validation 與 deterministic re-derivation 不符: "
+                      + "; ".join(diffs[:8]))
+    for field, want in (
+            ("score_before_forward_validation", fv.get("valuation_score_before")),
+            ("score", fv.get("valuation_score_effective")),
+            ("forward_validation_status", fv.get("status"))):
+        got = pack.get(field)
+        same = (_same_number(got, want, tol=1e-9)
+                if isinstance(want, (int, float)) and not isinstance(want, bool)
+                else got == want)
+        if not same:
+            errors.append(f"valuation_pack.{field}={got!r} != forward_validation {want!r}")
+    fvs = trade.get("fair_value_summary") or {}
+    for field, want in (
+            ("score_before_forward_validation", fv.get("valuation_score_before")),
+            ("score", fv.get("valuation_score_effective")),
+            ("forward_validation_status", fv.get("status"))):
+        got = fvs.get(field)
+        same = (_same_number(got, want, tol=1e-9)
+                if isinstance(want, (int, float)) and not isinstance(want, bool)
+                else got == want)
+        if not same:
+            errors.append(f"fair_value_summary.{field}={got!r} != forward_validation {want!r}")
+
+    val_score = ((trade.get("lane_scores") or {}).get("valuation")
+                 if isinstance(trade.get("lane_scores"), dict) else None)
+    if required and not _same_number(val_score, fv.get("valuation_score_effective"), tol=1e-9):
+        errors.append(f"lane_scores.valuation={val_score!r} != forward_validation."
+                      f"valuation_score_effective={fv.get('valuation_score_effective')!r}")
+    t5 = (trade.get("calculation_steps") or {}).get("t5_forward_validation")
+    if required and not isinstance(t5, dict):
+        errors.append("calculation_steps.t5_forward_validation missing for decision_engine 1.1.0+")
+    elif isinstance(t5, dict):
+        if t5.get("forward_validation_status") != fv.get("status"):
+            errors.append("calculation_steps.t5_forward_validation status != forward_validation.status")
+        if not _same_number(t5.get("valuation_score"), fv.get("valuation_score_effective"),
+                            tol=1e-9):
+            errors.append("calculation_steps.t5_forward_validation.valuation_score != "
+                          "forward_validation.valuation_score_effective")
+
+
+# ---------------------------------------------------------------------------
 # V4.122.0 §16 — Phase 2.5 CONFLICT & BIAS (`conflict_bias`)
 # ---------------------------------------------------------------------------
-# Phase 2.5 是 protocol 裡唯一「會改決策、卻從未留下任何紀錄」的一段：T4 可以 CANCEL、
-# T5 宣稱自動降階，而 189 筆 history 沒有一筆帶過它的輸出，schema 也沒有它的欄位。
-# 有沒有觸發、觸發了怎麼裁，事後完全不可考 —— 連「這條規則到底有沒有在動」都問不了。
+# V4.122.0 前，Phase 2.5 會改決策卻不留紀錄；189 筆 history 無法追查 T1–T5。
+# V4.131.13 再把 T5 接到 forward_validation producer + decision engine 1.1.0。
 #
-# 本節只做**紀錄與重算**，不改任何決策數學：
-#   - T1–T5 的條件在 protocol 裡是精確不等式，validator 直接**重算應觸發集合**再與
+# 本節做**紀錄與重算**；決策後果由 decision engine 執行：
+#   - T1–T4 是精確不等式；T5 另要求 forward_validation=FAIL。validator 重算後與
 #     export 宣稱的 `triggers_fired` 比對，不符 rc=1。自陳「沒觸發」不再是免費的。
 #   - 重算吃的輸入盡量錨在**偽造者改不動的欄位**上（§15 的紀律）：`lane_scores` 受 §13
 #     算術鏈保護、valuation 受 pack 一致性硬閘保護、`macro_backdrop_score` 進 §14 的
@@ -1204,15 +1296,9 @@ def check_lane_contract(entry, trade, errors, warnings):
 #     `burry_override_active`，而那個布林餵 trade_plan_builder 的 ×0.5，受 §14 重算。
 #     少了這兩道，新欄位就只是「模型打字出來的」，重算會退化成自己跟自己比對。
 #
-# 刻意**不**驗的兩件事，理由都是「規則本身還沒有被拍板過」：
-#   1. T5 宣稱的「−3 自動 downgrade」。`decision_engine.py` 全檔沒有任何 T5 邏輯，§13 的
-#      band 可達集合也沒有 T5 的路徑 —— 它今天是一條 V4.112 B2 式的幽靈規則（實據：
-#      2026-08-09 NOW，valuation −3、final STAGED_ENTRY、無 BIPOLAR/cap/probe，rc=0
-#      過關）。補實作等於今天才開始改變決策。這裡只在「該降而沒降」時留 warning。
-#   2. Anti-Bias 的「5 lane 同向」。protocol 沒有定義同向是看 score 正負還是看 signal，
+# 刻意不硬驗 Anti-Bias 的「5 lane 同向」：protocol 沒定義同向是看 score 正負還是看 signal，
 #      把一句沒定義過的話變成 rc=1 是單方面收緊。這裡用 score 正負當定義、只出 warning，
 #      並把定義寫進 schema 文件等拍板。
-# 兩者都見 docs/plan_invest_stale_stages.md T7。
 
 CONFLICT_BIAS_REQUIRED_FROM = "2026-08-10"
 CONFLICT_BIAS_SCHEMA = "conflict_bias.v1"
@@ -1225,7 +1311,7 @@ T4_RESOLUTIONS = ("CANCEL", "DOWNGRADE_DECISION", "OVERRIDE_BURRY")
 TENTATIVE_DECISIONS = ("BUY", "STAGED_ENTRY", "HOLD", "STAGED_EXIT", "SELL")
 BURRY_VETO_BELOW = 20.0          # protocol §PHASE 2 末段：burry_score < 20 → veto_flag
 T5_VALUATION_WARN = -2.0         # T5 觸發門檻
-T5_EXTREME_BAND = -3.0           # T5 宣稱自動降階的門檻（今天無產生器）
+T5_EXTREME_BAND = -3.0           # T5 hard downgrade 門檻（engine 1.1.0+）
 
 
 def _conflict_lane_scores(trade):
@@ -1245,7 +1331,8 @@ def _conflict_lane_scores(trade):
     return out
 
 
-def evaluate_conflict_triggers(scores, signals, macro, burry, tentative):
+def evaluate_conflict_triggers(scores, signals, macro, burry, tentative,
+                               forward_validation=None):
     """重算 T1–T5 + ANTI_BIAS。值為 True / False / None（None = 輸入缺，無法判定）。
 
     None 而不是 False：缺輸入時判 False 等於「猜它沒觸發」，而 T4/T5 沒觸發正是最需要
@@ -1281,10 +1368,17 @@ def evaluate_conflict_triggers(scores, signals, macro, burry, tentative):
     out["T4"] = (None if _some(burry, tentative) is None
                  else bool(burry < BURRY_VETO_BELOW and tentative == "BUY"))
 
-    # T5 — 估值警告撞上 BUY 側 tentative
-    out["T5"] = (None if _some(scores["valuation"], tentative) is None
-                 else bool(scores["valuation"] <= T5_VALUATION_WARN
-                           and tentative in ("BUY", "STAGED_ENTRY")))
+    # T5 — 只有 extreme valuation 通過 deterministic forward block 判 FAIL 才觸發。
+    # PASS/STRETCHED 已由 producer 將 score 軟化；NO_DATA 不得被猜成 FAIL。
+    t5_candidate = (None if _some(scores["valuation"], tentative) is None
+                    else bool(scores["valuation"] <= T5_VALUATION_WARN
+                              and tentative in ("BUY", "STAGED_ENTRY")))
+    if t5_candidate is not True:
+        out["T5"] = t5_candidate
+    elif not isinstance(forward_validation, dict):
+        out["T5"] = None
+    else:
+        out["T5"] = forward_validation.get("status") == "FAIL"
 
     # Anti-Bias — 五 lane 同向（本版定義：score 正負一致；warning-only）
     vals = [scores[l] for l in CONFLICT_LANES]
@@ -1391,7 +1485,8 @@ def check_conflict_bias(entry, trade, errors, warnings):
     # ── 重算應觸發集合 ─────────────────────────────────────────────────────
     macro = _numf((entry.get("phase0_macro_snapshot") or {}).get("macro_backdrop_score"))
     burry = _numf(trade.get("burry_score"))
-    expected = evaluate_conflict_triggers(scores, signals, macro, burry, tentative)
+    expected = evaluate_conflict_triggers(
+        scores, signals, macro, burry, tentative, trade.get("forward_validation"))
 
     undecidable = [t for t in CONFLICT_HARD_TRIGGERS if expected[t] is None]
     if undecidable:
@@ -1478,16 +1573,25 @@ def check_conflict_bias(entry, trade, errors, warnings):
     elif t5 is not None:
         errors.append("conflict_bias.t5_detail must be null when T5 did not fire")
 
-    # T5 幽靈：該降而沒降只留 warning（rc 不動）。見本節開頭第 1 點。
+    # 1.1.0 起 T5 有 deterministic producer + engine 後果；舊 engine 保留 warning-only。
     val_score = scores.get("valuation")
-    if (val_score is not None and val_score <= T5_EXTREME_BAND
-            and trade.get("final_decision") in ("BUY", "STAGED_ENTRY")):
+    engine_t5 = (trade.get("calculation_steps") or {}).get("t5_forward_validation")
+    if _engine_version_at_least(trade.get("decision_engine_version"), "1.1.0"):
+        if "T5" in claimed_set and isinstance(t5, dict) and isinstance(engine_t5, dict):
+            diffs = _diff_steps(engine_t5, t5)
+            if diffs:
+                errors.append("conflict_bias.t5_detail != decision engine T5 output: "
+                              + "; ".join(diffs[:6]))
+        if isinstance(engine_t5, dict) and engine_t5.get("hard_downgrade_eligible") is True \
+                and engine_t5.get("downgrade_applied") is not True:
+            errors.append("T5 hard downgrade eligible but decision_engine did not apply downgrade")
+    elif (val_score is not None and val_score <= T5_EXTREME_BAND
+          and trade.get("final_decision") in ("BUY", "STAGED_ENTRY")):
         warnings.append(
             f"conflict_bias: valuation score {val_score} ≤ {T5_EXTREME_BAND} 而 final_decision="
             f"{trade.get('final_decision')!r} — protocol T5 宣稱此時自動降階，但 "
-            "decision_engine.py 沒有任何 T5 邏輯、§13 的 band 可達集合也沒有 T5 的路徑。"
-            "本節刻意不強制（補實作＝改決策數學，需拍板；見 "
-            "docs/plan_invest_stale_stages.md T7）")
+            "這是 decision_engine 1.0.x 的 legacy entry；當時 T5 尚無 producer，故僅留 warning。"
+            "1.1.0+ 必須帶 forward_validation 並由 engine 執行後果")
 
     # proceed_to_phase3=false → protocol 明寫「跳 Phase 5 輸出 CANCEL」，而
     # decision_engine.py 也把它當 Auto REJECT 的一條理由，兩邊都錨得住。
@@ -1634,6 +1738,8 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description="Validate latest investment session export")
     ap.add_argument("--history", default=HISTORY_JSON,
                     help="history JSON path (default: investment/invest_logs/history.json)")
+    ap.add_argument("--require-committed-to",
+                    help="also require this session digest to exist in the named history array")
     args = ap.parse_args(argv)
     history_path = args.history
     if not os.path.exists(history_path):
@@ -1642,12 +1748,40 @@ def main(argv=None):
     with open(history_path, "r", encoding="utf-8") as fp:
         hist = json.load(fp)
 
-    if not isinstance(hist, list) or not hist:
-        fail(["history.json is empty or not a JSON array"])
-
-    entry = hist[-1]
+    if isinstance(hist, dict):
+        # Parallel invest runs validate their isolated session export. The
+        # committed history remains a list for every existing consumer.
+        entry = hist
+    elif isinstance(hist, list) and hist:
+        entry = hist[-1]
+    else:
+        fail(["session export must be an object or a non-empty history array"])
     errors = []
     warnings = []  # advisory-only findings — printed but never fail the gate
+
+    if args.require_committed_to:
+        try:
+            with open(args.require_committed_to, "r", encoding="utf-8") as fp:
+                committed = json.load(fp)
+        except (OSError, json.JSONDecodeError) as exc:
+            errors.append(f"committed history unreadable: {args.require_committed_to}: {exc}")
+            committed = None
+        target_provenance = entry.get("export_provenance")
+        target_digest = (target_provenance.get("entry_digest")
+                         if isinstance(target_provenance, dict) else None)
+        if not target_digest:
+            errors.append("cannot verify history commit: isolated session has no provenance digest")
+        elif not isinstance(committed, list):
+            if committed is not None:
+                errors.append("committed history must be a JSON array")
+        elif not any(
+            isinstance(item.get("export_provenance"), dict)
+            and item["export_provenance"].get("entry_digest") == target_digest
+            for item in committed if isinstance(item, dict)
+        ):
+            errors.append(
+                f"validated session was not committed to {args.require_committed_to} "
+                f"(digest {target_digest[:20]}… missing)")
 
     # ── 1. Legacy shape detection ────────────────────────────────────────
     is_legacy_flat = (
@@ -2329,6 +2463,7 @@ def main(argv=None):
 
     # ── 13. V4.80.0 — Phase 3 arithmetic re-derivation (decision_engine parity) ──
     # 舊 entry（無 calculation_steps 也無 decision_engine_version）整段跳過 → 向後相容。
+    check_forward_validation(trade, errors, warnings)
     check_phase3_arithmetic(entry, trade, errors, warnings)
 
     # ── 14. V4.82.0 — Phase 4 sizing re-derivation (trade_plan_builder parity) ──

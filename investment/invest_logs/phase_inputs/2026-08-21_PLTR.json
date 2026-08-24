@@ -1,0 +1,172 @@
+{
+ "bundle_version": "P5-INPUTS/1.0",
+ "ticker": "PLTR",
+ "date": "2026-08-21",
+ "phase0": {
+  "regime_confidence": 0.85,
+  "market_top_zone": "Orange (Elevated Risk)",
+  "ftd_state": "FTD_CONFIRMED",
+  "breadth_composite": 79.2,
+  "vix": 15.44,
+  "fred_verdict": "Transitional",
+  "real_rate_pct": 2.4,
+  "hot_sectors": [
+   "Industrials",
+   "Consumer Discretionary",
+   "Financials",
+   "Energy"
+  ],
+  "cold_sectors": [
+   "Technology",
+   "Real Estate",
+   "Consumer Staples",
+   "Utilities"
+  ]
+ },
+ "lanes": {
+  "fundamentals": {
+   "signal": "BUY",
+   "score": 2.5,
+   "confidence": 0.85,
+   "key_factors": [
+    "營收年增92.8%且加速成長",
+    "FCF利潤率達62.1%與淨現金92億",
+    "營業利益率擴張至47.1%"
+   ],
+   "risk_flags": [
+    "TTM本益比143倍高於同業中位數26倍",
+    "FCF殖利率僅0.78%估值容錯率低"
+   ],
+   "moat_assessment": {
+    "level": "WIDE",
+    "type": "switching_cost",
+    "evidence_one_line": "毛利率84.7%、淨利潤率54.9%且本業現金流轉換率達1.13"
+   },
+   "near_term_catalysts": [
+    {
+     "date": "2026-11-02",
+     "type": "earnings",
+     "description": "2026 Q3財報發布與AIP企業端商業化成長指引",
+     "impact": "high"
+    }
+   ],
+   "bull_thesis_one_line": "營收年增93%加速擴張，FCF利潤率達62%且無負債資產健全",
+   "bear_thesis_one_line": "PE達143倍估值偏高，但獲利年增225%高速成長支撐估值"
+  },
+  "sentiment": {
+   "signal": "HOLD",
+   "score": 0.15,
+   "confidence": 0.7,
+   "key_factors": [
+    "內部人過去4季維持重度減持",
+    "市場綜合情緒指數62.9偏貪婪",
+    "國會交易偏中性買賣各半"
+   ],
+   "risk_flags": [
+    "CEO年度薪酬增長97.8%觸發治理紅旗",
+    "內部人收購處置比僅0.15零買入"
+   ],
+   "market_sentiment_composite": 62.9,
+   "vix_current": 15.44,
+   "insider_signal": "distributing",
+   "short_pct_float": 3.17,
+   "mspr_latest": -84.72
+  },
+  "news": {
+   "signal": "BUY",
+   "score": 2.5,
+   "confidence": 0.85,
+   "key_factors": [
+    "企業端AIP導入與主權AI雙引擎加速",
+    "商業端營收高成長帶動GAAP淨利潤擴張",
+    "華爾街賣方評級維持穩健買入"
+   ],
+   "risk_flags": [
+    "Burry買入看跌期權引發市場估值擔憂",
+    "近30日目標價調升動能平緩僅+0.76%"
+   ],
+   "immediate_catalyst_5d": null,
+   "decision_point_days": 73,
+   "cross_asset_spillover": [
+    {
+     "asset": "sector_XLK / AI infra",
+     "direction": "BULLISH",
+     "mechanism": "Enterprise AI AIP adoption signal"
+    }
+   ],
+   "reasoning_one_line": "48h 輿情聚焦 AIP 商業化高成長與淨利率擴張，分析師共識偏多但 30d PT 調升動能平緩。",
+   "pt_revision_momentum": {
+    "direction": "FLAT",
+    "consensus_delta_pct_1m": 0.76
+   }
+  },
+  "technical": {
+   "signal": "HOLD",
+   "score": 1.0,
+   "confidence": 0.75,
+   "key_factors": [
+    "價格站上所有均線且均線黃金交叉",
+    "RSI達68且中期動能強勁",
+    "逼近179.6阻力但量能收縮"
+   ],
+   "risk_flags": [
+    "逼近179.60前高阻力且成交量萎縮",
+    "高檔內部人處於持續減持趨勢"
+   ],
+   "smart_money_analysis": {
+    "label": "mixed",
+    "narrative": "20日均量比降至 0.75x 呈縮量上攻，伴隨內部人持續減持，主力追高意願有所保留。"
+   },
+   "pattern_taxonomy": {
+    "pattern": "consolidation",
+    "confirmation_criteria": "放量突破 179.60 前高阻力且日收盤價站穩 180 上方"
+   },
+   "market_strength": "STRONG",
+   "key_levels": {
+    "support": 168.34,
+    "resistance": 179.6,
+    "pivot": 176.16
+   },
+   "high_prob_scenario": "預期未來 5-15 天在 168.34-179.60 區間高檔震盪蓄勢，消化獲利回吐賣壓後尋求量能配合突破。",
+   "volatility": {
+    "atr_14": 9.31,
+    "hist_vol_20d_daily": 0.072,
+    "momentum_20d_pct": 44.04
+   }
+  },
+  "valuation": {
+   "signal": "HOLD",
+   "score": -1.0,
+   "confidence": 0.5,
+   "key_factors": [
+    "加權公允價值$61.73 (-65.29%)",
+    "前瞻營收路徑支持軟化至-1.0",
+    "各模型錨點跨度高達22.7倍"
+   ],
+   "risk_flags": [
+    "極度溢價於DCF內在價值($10-17)",
+    "現價隱含5年FCF年化增速達60%"
+   ],
+   "cited_transition_overlay": false,
+   "transition_dissent_basis": null,
+   "suppression_proposals": [],
+   "valuation_commentary": "DCF 實質估值座落於 $10-17，但受賣方目標價 $172 與同業 multiples 拉抬，加權公允價值 $61.73。雖然前瞻營收路徑 (CAGR 79%) 軟化原始 -3.0 分至 -1.0，但估值仍處極度高估區間。"
+  }
+ },
+ "burry": {
+  "score": 29.2,
+  "narrative": "Burry Score 29.2 (WARNING)。FCF yield 0.53% 極低且 EV/EBIT 高達 153.6x，內部人處於淨賣出（SELL），反映極端高估值風險；D/E 0.02 財務健全未觸發 T4_VETO 否決。"
+ },
+ "phase3": {
+  "final_score": 0.7788,
+  "final_decision": "HOLD",
+  "final_action": "CANCEL"
+ },
+ "phase4": {
+  "position_size_pct": null,
+  "analysis_price": 177.845
+ },
+ "red_team": {
+  "verdict": "STRONG_COUNTER"
+ }
+}

@@ -29,6 +29,7 @@ let _charts = {};        // canvasId -> Chart (destroy on re-render)
 let _pollTimer = null;
 let _activeTicker = null;
 let _activeTemplate = null;
+let _activeQueueId = null;
 let _pollStarted = 0;
 let _template = 'ma_cross';   // 目前選中的策略模板 (預設 = 基準排名第 1)
 
@@ -304,6 +305,7 @@ async function runBacktest() {
     if (r.status === 202 && body.queued) {
       _activeTicker = p.ticker;
       _activeTemplate = p.template;
+      _activeQueueId = body.id || null;
       _pollStarted = Date.now();
       setRunning(true, `已排入 (${p.ticker} ${p.template})…`);
       if (_pollTimer) clearInterval(_pollTimer);
@@ -331,7 +333,10 @@ async function pollStatus() {
     return;
   }
   try {
-    const r = await fetch('/api/run-protocol/status');
+    const suffix = _activeQueueId
+      ? `?queue_id=${encodeURIComponent(_activeQueueId)}`
+      : '?name=quant_backtest';
+    const r = await fetch('/api/run-protocol/status' + suffix);
     if (!r.ok) return;
     const s = await r.json();
     const mine = s.name === 'quant_backtest' &&

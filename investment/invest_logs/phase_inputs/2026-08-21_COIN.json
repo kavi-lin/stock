@@ -1,0 +1,201 @@
+{
+ "bundle_version": "P5-INPUTS/1.0",
+ "ticker": "COIN",
+ "date": "2026-08-21",
+ "phase0": {
+  "regime_confidence": 0.85,
+  "market_top_zone": "Orange (Elevated Risk)",
+  "ftd_state": "FTD_CONFIRMED",
+  "breadth_composite": 79.2,
+  "vix": 15.44,
+  "fred_verdict": "Transitional",
+  "real_rate_pct": 2.4,
+  "hot_sectors": [
+   "Industrials",
+   "Consumer Discretionary",
+   "Financials",
+   "Energy"
+  ],
+  "cold_sectors": [
+   "Technology",
+   "Real Estate",
+   "Consumer Staples",
+   "Utilities"
+  ]
+ },
+ "lanes": {
+  "fundamentals": {
+   "signal": "HOLD",
+   "score": 0.5,
+   "confidence": 0.65,
+   "key_factors": [
+    "Robust FCF yield with clean cash conversion",
+    "Elevated Forward PE and PEG vs peers",
+    "Owner earnings QoQ growth of 22 percent"
+   ],
+   "risk_flags": [
+    "High earnings cyclicality tied to crypto volumes",
+    "Forward PE at 58.8x with low Piotroski score"
+   ],
+   "moat_assessment": {
+    "level": "NARROW",
+    "type": "network_effect",
+    "evidence_one_line": "Dominant US regulated exchange and institutional custody with growing Base L2 volume."
+   },
+   "near_term_catalysts": [
+    {
+     "date": "2026-10-28",
+     "type": "earnings",
+     "description": "Q3 2026 earnings release and institutional trading volume update",
+     "impact": "high"
+    },
+    {
+     "date": "2026-09-15",
+     "type": "product_launch",
+     "description": "Base L2 network upgrades and sequencer monetization expansion",
+     "impact": "medium"
+    },
+    {
+     "date": "2026-09-30",
+     "type": "macro_event",
+     "description": "US crypto market structure regulatory framework progress",
+     "impact": "medium"
+    },
+    {
+     "date": "2026-10-15",
+     "type": "guidance",
+     "description": "Subscription and services recurring revenue trajectory update",
+     "impact": "medium"
+    }
+   ],
+   "bull_thesis_one_line": "Robust FCF yield and Base L2 growth",
+   "bear_thesis_one_line": "High 58x fwd PE and crypto cycle risk"
+  },
+  "sentiment": {
+   "signal": "HOLD",
+   "score": -0.86,
+   "confidence": 0.75,
+   "key_factors": [
+    "Heavy insider distribution with zero purchases",
+    "Moderate short interest around 10% float",
+    "Broad market sentiment composite at 62.9"
+   ],
+   "risk_flags": [
+    "CEO compensation surged +34.2% YoY governance flag",
+    "Aggressive insider distribution ratio 0.0345 in Q3"
+   ],
+   "market_sentiment_composite": 62.9,
+   "vix_current": 15.44,
+   "insider_signal": "distributing",
+   "short_pct_float": 10.0,
+   "mspr_latest": -45.2
+  },
+  "news": {
+   "signal": "BUY",
+   "score": 2.5,
+   "confidence": 0.8,
+   "key_factors": [
+    "SEC token rule and White House summit",
+    "CLARITY Act Senate vote momentum",
+    "Base ecosystem expansion into perpetuals"
+   ],
+   "risk_flags": [
+    "Q2 earnings GAAP loss and volume volatility",
+    "Real rate pressure on risk assets"
+   ],
+   "immediate_catalyst_5d": null,
+   "decision_point_days": 68,
+   "cross_asset_spillover": [
+    {
+     "asset": "BTC",
+     "direction": "BULLISH",
+     "mechanism": "Surging crypto prices and volume drive transaction revenue and Base activity."
+    },
+    {
+     "asset": "treasury_10y",
+     "direction": "BEARISH",
+     "mechanism": "Elevated real yields create valuation headwind for high-multiple growth equities."
+    }
+   ],
+   "reasoning_one_line": "Constructive regulatory momentum from SEC token rule proposals and White House engagement offsets recent post-earnings volume softness.",
+   "analyst_consensus": "Buy",
+   "pt_revision_momentum": {
+    "direction": "DOWN",
+    "consensus_delta_pct_1m": -4.2
+   }
+  },
+  "technical": {
+   "signal": "BUY",
+   "score": 2.0,
+   "confidence": 0.7,
+   "key_factors": [
+    "Strong breakout above 20MA with high volume",
+    "RSI at 63.5 shows expanding bullish momentum",
+    "Risk-on macro regime supports high-beta upside"
+   ],
+   "risk_flags": [
+    "Overhead resistance cluster near 175 to 182",
+    "Insider distribution with low acquired-disposed ratio"
+   ],
+   "smart_money_analysis": {
+    "label": "mixed",
+    "narrative": "Insiders remain in distribution mode (ratio 0.0345), while market flow shows aggressive accumulation into the $172 breakout."
+   },
+   "pattern_taxonomy": {
+    "pattern": "oversold_bounce_attempt",
+    "confirmation_criteria": "Daily close above 175.00 with expanding volume to confirm breakout through 50MA."
+   },
+   "market_strength": "STRONG",
+   "key_levels": {
+    "support": 160.2,
+    "resistance": 174.8,
+    "pivot": 168.0
+   },
+   "high_prob_scenario": "COIN holds above the 168.00 pivot and tests 175.00 resistance driven by risk-on momentum.",
+   "volatility": {
+    "atr_14": 7.85,
+    "hist_vol_20d_daily": 0.038,
+    "momentum_20d_pct": 8.5
+   },
+   "extension_penalty_note": null
+  },
+  "valuation": {
+   "signal": "HOLD",
+   "score": -1.0,
+   "confidence": 0.6,
+   "key_factors": [
+    "Weighted fair value $120.17 (-30.28% downside)",
+    "DCF models indicate severe historical cash stretch",
+    "Analyst PT ($199.95) anchors upper valuation range"
+   ],
+   "risk_flags": [
+    "Severe dispersion between DCF ($21-$60) and PT ($200)",
+    "Forward validation STRETCHED on fundamental paths"
+   ],
+   "weighted_fair_value": 120.17,
+   "current_price": 172.35,
+   "vs_current_pct": -30.28,
+   "verdict_band": "extreme_overvalued",
+   "suppression_proposals": [],
+   "valuation_commentary": "Valuation analysis indicates an extreme overvaluation verdict with weighted fair value of $120.17 (-30.28% vs current $172.35). Substantial dispersion exists across anchors: historical cash flow DCF anchors (unlevered $21.24, self-built $52.95, levered $59.52) show severe downward gaps (-69.28% DCF gap), while analyst consensus PT ($199.95) and forward discounted earnings ($140.08) partially reflect market growth expectations. Forward validation is STRETCHED; archetype shadow provides near-term support around $160, but fundamental forward earnings and revenue path checks failed. Ineligible anchors include peer P/E, comps (<2 usable metrics), and forecaster blend.",
+   "cited_transition_overlay": false,
+   "transition_dissent_basis": "valuation_anchor"
+  }
+ },
+ "burry": {
+  "score": 50.4,
+  "narrative": "FCF yield 6.2% 與負債比 0.51 處於健康區間，但 EV/EBITDA 高達 62.0 且內部人持續賣超（Q3 處置比率 0.0345），整體給予 NEUTRAL (50.4/100) 評價，不觸發否決。"
+ },
+ "phase3": {
+  "final_score": 0.5203,
+  "final_decision": "HOLD",
+  "final_action": "CANCEL"
+ },
+ "phase4": {
+  "position_size_pct": null,
+  "analysis_price": 172.35
+ },
+ "red_team": {
+  "verdict": "STRONG_COUNTER"
+ }
+}

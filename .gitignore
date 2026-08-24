@@ -27,6 +27,10 @@ investment/invest_logs/*.SELFASSEMBLED_RAW.json
 # Phase 3 engine artifact（V4.117.0）：validator §5l 拿它比對 export 抄得對不對。
 # 每次跑 engine 就重寫，同 skills/*/cache 的性質——是證據不是紀錄。
 investment/invest_logs/decision_engine/
+# Per-run Phase 5 staging + stable append lock. Both are local runtime state.
+investment/invest_logs/session_exports/
+investment/invest_logs/history.json.lock
+investment/invest_logs/theses/.register.lock
 
 # Third-party reference repos (read-only, not part of protocol)
 reference/
@@ -122,5 +126,15 @@ news/x_kol_logs/
 config/x_kol_analysis_cursor.json
 config/x_kol_symbol_identity.json
 
+# 風向 runtime state。同 x_kol 的處理：config/wind.json（權重 + 預算上限）入版控，
+# 這些是每台機器各自的執行期狀態。wind_terms.json 每 tick 全檔重寫、穩態約 2-3 MB；
+# news/wind_logs/raw/ 是 last30days 引擎的 --save-dir 落地（含它自己的 sqlite index）。
+config/wind_usage.json*
+news/wind_logs/
+
 # 模型跑 protocol 時的暫存輸入（p3/p4 payload）。V4.127.0 起禁止在此放自組腳本。
 .codex_protocol_tmp/
+
+# Signal queue 的投遞帳本。每台機器各自的執行期狀態（誰接了、誰忽略了、跑出什麼），
+# 不是設定也不是產出——候選本身每次由 bn_*.json 即時重算，這裡只存使用者動作。
+signals/queue_state.json

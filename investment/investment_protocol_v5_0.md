@@ -25,9 +25,9 @@ Ticker 由 user 指定。**非互動模式**（Dashboard reverse-call via `claud
 3. **Parallel subagent (Phase 2)**: 5 lane 必須各自在**獨立 context** 執行，且**五個全部開起來之後才等待任何一個**（序列執行會讓後面的 lane 被前面的結論汙染）。Claude 的實現是單一訊息內 5 個 Agent tool_use blocks（`subagent_type: "general-purpose"`）；其他 CLI 對應到自己的隔離 subagent 機制——**契約是上面那兩句，語法不是**（詳見 §PHASE 2 Fan-Out 執行）。每個 subagent JSON 必須含 `subagent_isolated: true`；缺則 confidence cap 0.6 + `subagent_validation_failed: true`。
 4. **Red Team (Phase 2.8)**: 必須以 Agent tool 呼叫 subagent 執行，**禁止 inline 推理代替**。
 5. **MD Report (Phase 5)**: 存 `reports/YYYYMMDD_TICKER.md`。**不得省略**。
-6. **Phase 0 cache**: 三層優先（FRESH = mtime < 3h）— L1 sector_intel → L2 invest_logs phase0 → L3 skill chain。
+6. **Phase 0 cache**: Phase 0 是全市場 snapshot，不屬於 ticker。FRESH = mtime < 3h；優先讀 canonical `invest_logs/YYYY-MM-DD_phase0.json`（舊 ticker-scoped 檔只作相容 fallback）。sector_intel 只能當 L3 重建素材，不能通過 Phase 0 gate。
 7. **Validate gates rc=0**:
-   - Phase 0: `validate_phase0.py --ticker <T>`
+   - Phase 0: `validate_phase0.py --path <factpack.phase0_path>`
    - Phase 5: `validate_session_export.py` + `validate_markdown_export.py`
 
 ### MUST NOT
@@ -67,25 +67,27 @@ Burry 不參與 Phase 3 加權，僅作 T4 veto check。Valuation Specialist 參
 
 ## PHASE 0 — GLOBAL NEWS INTELLIGENCE
 
-### 三層 cache (FRESH = mtime < 3h / 10800s)
-1. **L1**: `../sector/sector_logs/*_sector_intel.json` 取最新檔 → 提取 `market_regime`, `exposure_ceiling`, `political_risk_summary`, `actionable_themes`, `_phase0.ftd.days_since_ftd` / `ftd_status_text` → Phase 1
-2. **L2**: `./invest_logs/*_phase0.json` → 載入
-3. **L3** (皆 STALE): 跑 4 個 skill chain：
+### 三層 resolver (FRESH = mtime < 3h / 10800s)
+1. **L1 — shared Phase 0 authority**: 把 canonical `./invest_logs/*_phase0.json` 與 migration 期間的 `*_phase0_<ticker>.json` 視為同一個市場 snapshot pool，取 mtime 最新者；同 mtime 時 canonical 優先。檔名中的 ticker **不是 ownership boundary**，所以 AAOI 產生的 fresh snapshot 可供稍後的 GEV 使用。
+2. **L2 — rebuild context only**: `../sector/sector_logs/*_sector_intel.json` 可提供 market regime / FTD / themes 等 L3 重建素材，但它缺完整 `macro_summary`、`_market_signals` 與 FRED schema，必須回報 `INCOMPLETE_NEEDS_L3`，不得當成可直接使用的 Phase 0。
+3. **L3** (`STALE_NEEDS_L3` / `INCOMPLETE_NEEDS_L3` / `INVALID_NEEDS_L3`): 跑 4 個 skill chain：
    ```bash
    python3 skills/market-sentiment-analyzer/scripts/sentiment.py --json-only
    python3 skills/market-breadth-analyzer/scripts/market_breadth_analyzer.py --output-dir sector/breadth_cache/
    python3 sector/ftd_yfinance.py --output-dir sector/ftd_cache/
    python3 sector/market_top_yfinance.py --output-dir sector/market_top_cache/
    ```
-   合成 + L4 FRED → 寫 `./invest_logs/YYYY-MM-DD_phase0.json`（`phase0_source: SKILL_CHAIN`）。≥ 2 skill 失敗 → fallback web search（`WEB_SEARCH_FALLBACK`）。
+   合成 + L4 FRED → **只寫 canonical** `./invest_logs/YYYY-MM-DD_phase0.json`（`phase0_source: SKILL_CHAIN`），不再複製 ticker-scoped Phase 0。≥ 2 skill 失敗 → fallback web search（`WEB_SEARCH_FALLBACK`）。寫完後重跑 factpack，凍結新的 `phase0_path`，再進 Phase 2。
 
-### L4 — FRED macro snapshot (MUST run, 任何層級皆執行)
+### L4 — FRED macro snapshot (每次新建 Phase 0 snapshot 都 MUST run)
 ```bash
 python3 skills/fred-macro/scripts/fetch.py --json-only
 ```
 > 讀取輸出前必讀 `skills/fred-macro/SECTOR_ROTATION_GUIDE.md`
 
-寫入 phase0 JSON 的 `fred_snapshot`。失敗 → `fred_available: false`，protocol 繼續。
+寫入 phase0 JSON 的 `fred_snapshot`。失敗 → `fred_available: false`，protocol 繼續。若直接重用
+FRESH 且 validator rc=0 的 shared snapshot，該檔已含通過 gate 的 L4 結果，不另做一次游離於
+snapshot 之外的 FRED fetch。
 
 ### Phase 0 JSON shape (核心欄位)
 
@@ -172,9 +174,9 @@ score=<raw> [consistency_cap=<cap> via <trigger>] → baseline=<b> [fred_caps: <
 
 ### Validator gate (MANDATORY)
 ```bash
-python3 investment/scripts/validate_phase0.py --ticker <TICKER>
+python3 investment/scripts/validate_phase0.py --path <factpack.phase0_path>
 ```
-rc ≠ 0 必須修正後重跑。
+rc ≠ 0 必須依 L3 修復 canonical snapshot、重跑 factpack，再驗新的 frozen path。
 
 ---
 
@@ -189,13 +191,14 @@ python3 investment/scripts/phase1_factpack.py <TICKER> --out /tmp/<TICKER>_factp
 ```
 
 讀回 `/tmp/<TICKER>_factpack.json`（~2-3k token，deterministic 0-LLM）一次拿齊：
-- `phase0`（L1 sector_intel / L2 invest cache 抽核心欄位）+ `phase0_source` + `phase0_validator_rc`
+- `phase0`（shared invest cache 抽核心欄位）+ `phase0_source` + `phase0_path` + `phase0_validator_rc`；validator 驗的是同一個 frozen path，不會被另一支 ticker 的並行 run 換檔
 - `bundles.ticker_data_bundle.scoring`（15 scalar，已剝 `_audit`）
 - `bundles.earnings_analyst_bundle` / `peer_bundle` / `fmp_supp_bundle`（appendix shape，fail-soft）
 
 **判讀規則**：
-- `phase0_source == "STALE_NEEDS_L3"` → 依 Phase 0 L3 重跑 skill chain（factpack 不跑重活），完成後再進 Phase 2。其餘值（`SECTOR_CACHE`/`INVEST_CACHE`）= phase0 FRESH，直接用。
-- `phase0_validator_rc != 0` → 修正後重跑（同 Validator gate）。
+- `phase0_source ∈ {"STALE_NEEDS_L3", "INCOMPLETE_NEEDS_L3", "INVALID_NEEDS_L3"}` → 依 Phase 0 L3 重跑 skill chain（factpack 不跑重活），寫 canonical 後**重跑 factpack**。只有 `INVEST_CACHE` 且 validator rc=0 才可直接用。
+- `phase0_validator_rc != 0` → 不得停在「fresh sector cache 不能重跑」的死結；執行 L3 修復 canonical snapshot，重跑 factpack，仍非 0 才中止。
+- `phase0_path` 從 Phase 1 起整場凍結；Phase 2 lanes、Phase 3 macro multiplier、Phase 5 export 必須消費同一路徑。
 - 任一 `bundles_loaded[*]` 非 ok → 該 lane 走原 fallback 規則（見下表 + appendix），**不**中止 protocol。
 - `forecaster_prewarm != "ok"` → `forecaster_blend`（0.05）缺席，且 `forecaster.transition_case` 讀不到值。**此時 `valuation_reviewer_gate` 的 `transition_case_active`（五個 trigger 中唯一 mandatory）不得解讀為「已確認非 transition case」——那是「未檢查」**。虧損股回報 `unavailable: negative_or_missing_ttm_eps` 屬正常（PE-multiple 對負 EPS 無效），非錯誤。
 - `earnings_prewarm != "ok"` → 財報 bundle 可能停在上一季。**Phase 1.5 的估值 anchor 幾乎全部從這份 bundle 取料**（唯一例外是第 9 根 `fwd_earnings_discounted`，走 analyst-estimates cache），缺了就是 0-1/9 → `insufficient_anchors` decision cap。此時要嘛手動補 `財報 <T>` 後重跑，要嘛在報告裡明講「本次估值無 decision grade」。`--no-prewarm` 只在離線／零 FMP 配額時使用。
@@ -224,7 +227,8 @@ python3 investment/scripts/phase1_factpack.py <TICKER> --out /tmp/<TICKER>_factp
 ```json
 {
   "phase": 1,
-  "phase0_source": "SECTOR_CACHE | INVEST_CACHE | FRESHLY_EXECUTED | WEB_SEARCH_FALLBACK",
+  "phase0_source": "INVEST_CACHE | FRESHLY_EXECUTED | WEB_SEARCH_FALLBACK",
+  "phase0_path": "investment/invest_logs/YYYY-MM-DD_phase0.json",
   "bundles_loaded": {
     "ticker_data_bundle":     "ok | unavailable",
     "earnings_analyst_bundle":"ok | not_available",
@@ -253,17 +257,19 @@ python3 investment/scripts/compute_price_framework.py \
 # → 寫 investment/invest_logs/<DATE>_<TICKER>_pf_quant.json（--out 可改路徑），同時印到 stdout
 ```
 
-一次產出 6 個 **quant block**：`valuation_pack`（唯一估值權威）+ `fair_value_summary`
+一次產出 7 個 **quant block**：`valuation_pack`（唯一估值權威）+ `fair_value_summary`
 （pack projection）+ `fair_value_range` + `valuation_explained_range` +
-`implied_expectations` + `valuation_archetype_shadow`（shadow-only，不得反寫 live pack）。
+`implied_expectations` + `valuation_archetype_shadow` + `forward_validation`。後者只在 eligible
+DCF 比現價低 ≥30% 時，以 archetype shadow／forward earnings／營收路徑做 deterministic 前瞻驗證；
+不改 DCF fair value 或 verdict，只能把有前瞻支持的極端負分軟化到 −1。
 
-**為什麼能提前**：V3.48.0 `--self-assemble` 之後，這 6 個 block 的輸入（9 anchor、`ev_block`、
+**為什麼能提前**：V3.48.0 `--self-assemble` 之後，這 7 個 block 的輸入（9 anchor、`ev_block`、
 peer/self ratios、beta、FRED、OHLCV、owner earnings、analyst estimates）全部由 engine 自讀 cache/API 組裝，
 **零 lane 輸入**。它們從來不需要等 Phase 2；舊版把整包壓在 Phase 2.4 才跑，才會產生
 「Valuation lane 的數字來源是一個在它之後才跑的引擎」這個時序矛盾。
 
 **凍結語意（重要）**：`current_price` 與 `volatility`（sigma/atr/momentum）在此刻定版，
-連同 6 個 block 一起持久化。Phase 2.4 **不得重抓** —— 否則 lane 已看過的 pack 會與最終
+連同 7 個 block 一起持久化。Phase 2.4 **不得重抓** —— 否則 lane 已看過的 pack 會與最終
 輸出的價格基準不同。Phase 2.4 只把 quant block verbatim 併回。
 
 **下游**：Phase 2 Valuation Specialist 直接注入本 artifact 的 pack projection（見該 lane 定義）；
@@ -618,10 +624,11 @@ shadow 樣本**（1 筆 = 一支個股的一次分析；多股 session 一場可
   | `forecaster_blend` | `python3 skills/earnings-valuation-forecaster/scripts/forecast.py <T> --json-only` (3-method blend) | 0.05 |
   | `fwd_earnings_discounted` **(條件錨)** | analyst-estimates cache：覆蓋 ≥3 家的最遠獲利年度 EPS × justified P/E ÷ CAPM 折現。**僅在 cashflow_intrinsic 四根皆非 live 且 TTM EPS 非正時 live**，否則只進 shadow 池 | 0.15（在八根的 1.0 預算之外） |
 - **缺 anchor 處理**：engine 保留 value + ineligible reason；不得由其他 family 暗中承接權重。
-- **`comps.py` 回 `comps_implied_value: null` 不是失敗，不得中止（V4.125.0 定案）**：同業不足
-  （`model_eligibility.reason` 例如 `fewer_than_3_business_similar_peers`）是**完整且正確的答案**，
-  V4.125.0 起 script 對這種情況回 **rc=0**。照「缺 anchor 處理」把它當 ineligible anchor 排除、
-  在 `valuation_reviewer_gate` 記下 `no_peer_cohort`，**繼續走完**。
+- **估值 script 回 null 不是失敗，不得中止（DCF 於 V4.131.10 對齊 comps）**：同業不足或
+  DCF 模型不適用（`model_eligibility.reason` 例如 `fewer_than_3_business_similar_peers`、
+  `negative_terminal_fcff`）是**完整且正確的答案**。`comps.py` 與 `dcf.py` 對成功產出這種
+  結構化 payload 的情況都回 **rc=0**。照「缺 anchor 處理」把它當 ineligible anchor 排除並
+  **繼續走完**；comps 同業不足時另在 `valuation_reviewer_gate` 記下 `no_peer_cohort`。
   超大型股常常沒有真同業（NVDA / META 實例），硬停等於這類標的永遠分析不了。
   V4.116.1 的閘門紀律（mandatory script `rc≠0` → 停下回報）**不變也不放寬**——rc≠0 仍然只代表
   「工具失敗」（抓取錯誤、ticker 無效、crash），那時照樣停。
@@ -851,7 +858,7 @@ python3 investment/scripts/compute_price_framework.py \
     --stage mhp --from-quant investment/invest_logs/<DATE>_<TICKER>_pf_quant.json
 ```
 
-輸出 = Phase 1.5 的 6 個 quant block **verbatim 併回** + 新算的
+輸出 = Phase 1.5 的 7 個 quant block **verbatim 併回** + 新算的
 `multi_horizon_price_framework`，共 7 個 block，shape 與 V4.87.0 單發模式完全相同
 （`phase5_export_schema.md` 不變）。PM **verbatim 抄寫**進後續 phase 輸出。
 
@@ -866,7 +873,7 @@ python3 investment/scripts/compute_price_framework.py \
 Valuation lane 當時拿不到 pack。
 
 **時點 2.4 的原因（V4.88.0 修正）**：留在這裡的只剩 MHP —— 它是唯一真正吃 Phase 2 lane
-輸出的 block（5 日帶要 news lane 的 catalyst 加寬、key_levels 做反射註記）。其餘 6 個
+輸出的 block（5 日帶要 news lane 的 catalyst 加寬、key_levels 做反射註記）。其餘 7 個
 quant block 沒有這個依賴，已前移 Phase 1.5。下游消費者不變：T5 (2.5) 用 `mhp_signal`、
 Red Team (2.8) 收 `red_team_kill_seed`（Phase 1.5 產出）、Phase 3/4/4.5 引用既存輸出。
 
@@ -880,7 +887,8 @@ PM (inline)。**Triggers**:
 - **T2**: `News.score < -3` AND `Technical.signal = BUY`
 - **T3**: `macro_backdrop_score < -3` AND any `signal = BUY` with `score > +3`
 - **T4**: `Burry.veto_flag = true` AND `tentative_decision = BUY`
-- **T5 (V5.0)**: `valuation_pack.score ≤ -2` AND `tentative_decision ∈ {BUY, STAGED_ENTRY}` → 估值警告
+- **T5 (V4.131.13)**: `valuation_pack.score ≤ -2` AND `forward_validation.status = FAIL`
+  AND `tentative_decision ∈ {BUY, STAGED_ENTRY}` → 估值警告／條件式降階
 - **Anti-Bias**: 5 lane 同向 → News 追加 `devils_advocate[]` (≤ 3 條)
 
 ### T4 仲裁
@@ -893,17 +901,18 @@ PM (inline)。**Triggers**:
   2. 必填 `override_justification` (≥ 20 字，具體引用 Phase 2 某 analyst 證據)
   3. 自動計算 `override_recheck_date` = 交易日 + 5 個交易日
 
-### T5 仲裁 (V5.0)
-- `Valuation.score = -2`: reasoning 加注「估值警告 (溢價 {pct}%)」，不強制 downgrade
-- `Valuation.score = -3` (extreme overvalued): **自動 downgrade BUY → STAGED_ENTRY**；STAGED_ENTRY → HOLD
+### T5 仲裁 (V4.131.13)
+- `forward_validation.status ∈ {PASS, STRETCHED}`：至少一項可信前瞻支持現價；producer 將
+  `valuation_pack.score ≤ -2` 軟化為 −1，DCF fair value／gap／verdict 原值保留供稽核。
+- `forward_validation.status = NO_DATA`：少於 2 項可判讀檢查；不得把缺資料猜成 FAIL，T5 不觸發。
+- `forward_validation.status = FAIL` 且 `Valuation.score = -2`：reasoning 加估值警告，不強制降階。
+- `forward_validation.status = FAIL` 且 `Valuation.score ≤ -3`：decision engine 1.1.0 自動
+  `BUY → STAGED_ENTRY`、`STAGED_ENTRY → HOLD`。
 
-> ⚠️ **V4.122.0 現況揭露 — 上面這條降階今天沒有產生器**。`decision_engine.py` 全檔沒有任何
-> T5 邏輯（valuation 只以 lane score 進 Step 1 加權），§13 的 band 可達集合也沒有 T5 的路徑
-> ——照這條手動降階反而可能被 validator 判成偏離 band。實據：2026-08-09 NOW，valuation −3、
-> final `STAGED_ENTRY`、無 BIPOLAR/cap/probe，rc=0 過關。形狀與 V4.112 B2 刪掉的 Burry
-> ×0.7/×1.15 完全相同（有文件、無實作、歷史上沒有一筆倉位反映過它）。
-> **補實作 = 今天才開始改變決策數學，需使用者拍板**；在那之前 §16 只記錄不強制，
-> 「該降而沒降」留 warning。選項與證據見 `docs/plan_invest_stale_stages.md` T7。
+`forward_validation.v1` 的三項檢查：archetype shadow 與現價差 ≥−10%；可信 forward earnings
+與現價差 ≥−10%；5Y market-implied revenue CAGR ≤ analyst CAGR +5pp。至少 2 項可判讀才可
+下 PASS/STRETCHED/FAIL；可判讀項全部失敗才是 FAIL。這是「DCF 極端差距先驗證模型是否漏掉
+前瞻 regime」的閘，不是把高成長當作無條件免死。
 - **V5.1 MHP 強化（reasoning-only，不改決策數學；V3.45.3 起 `mhp_signal` 由 Phase 2.4 engine 產出，T5 當下直接可用）**：
   - `wait_for_pullback`（短期帶下界 > 長期合理價）→ T5 reasoning 追加「短期超漲 vs 長期偏貴 (band_lower ${bl} > FV ${fv})，建議等回檔」
   - `momentum_not_value`（mid_target > 現價 > 長期合理價）→ 對齊既有 `hot_zone_probe` 語意（動能交易非價值持有）
@@ -921,7 +930,7 @@ PM (inline)。**Triggers**:
   "triggers_fired": ["T1", "T4", "T5"],
   "conflict_summary": "one sentence per trigger",
   "t4_detail": { /* burry_score, resolution, override_justification, override_recheck_date */ },
-  "t5_detail": { /* valuation_score, weighted_fair_value, vs_current_pct, downgrade_applied */ },
+  "t5_detail": { /* decision_engine.calculation_steps.t5_forward_validation verbatim */ },
   "proceed_to_phase3": "bool"
 }
 ```
@@ -1051,6 +1060,7 @@ Phase 3 的**全部算術**由 `investment/scripts/decision_engine.py` 執行。
    `structural_shift.tier`、`red_team`（verdict / counter_thesis / kill_conditions /
    counter_evidence_strength）、`transition`（V3.17 rule-2 四欄 + 兩個 mtime）、
    `macro`（multiplier / backdrop_score / regime）、`burry`、`gates`、`hot_zone`、
+   `forward_validation`（Phase 1.5 artifact 原樣副本）、
    `decision_cap`。完整 shape 見 script docstring。
 2. **跑一次**：
 
@@ -1064,7 +1074,7 @@ Phase 3 的**全部算術**由 `investment/scripts/decision_engine.py` 執行。
    `position_size_cap_pct` / `polar_position_cap_pct` 進 session export。
 
 **禁止手算 / 重算 / 微調任何 Phase 3 數字。** V4.81.0 起這是 schema 硬閘：export 戳
-`session_export_version: "V5.1"` 以上（現行 `"V5.3"`），缺 `calculation_steps` 或 `decision_engine_version`
+`session_export_version: "V5.1"` 以上（現行 `"V5.4"`），缺 `calculation_steps` 或 `decision_engine_version`
 → `validate_session_export.py` rc=1（省略整塊不再是繞道，是直接擋下）。
 
 > **V4.117.0 — 「抄寫」現在會被對答案。** engine 每次跑（`--phase 3`）都把輸出留在
@@ -1761,10 +1771,13 @@ python3 investment/scripts/build_session_export.py \
   --ticker <T> --date <DATE> \
   --qualitative investment/invest_logs/qualitative/<DATE>_<T>.json \
   --p3-input /tmp/<T>_p3.json --p4-input /tmp/<T>_p4.json \
-  | python3 investment/scripts/append_session_export.py
+  --phase0 <factpack.phase0_path> \
+  --session-out investment/invest_logs/session_exports/<DATE>_<T>.json
 ```
 
 任何 artifact 缺席 → rc=1 並指名是哪一包。**不要手補那包**，回去把對應 phase 跑完。
+這一步只寫本 ticker 的獨立 session，尚未碰 `history.json`；不同 ticker 可並行，
+同 ticker 仍由 Dashboard scheduler 互斥。
 
 > **為什麼禁止自寫組裝腳本（2026-08-10 META 事故）**：PM 過去每跑一次就現寫一支
 > `build_<T>_session.py`（約 130 行、~140 個欄位）。那次它把 engine artifact 當成完整
@@ -1772,8 +1785,8 @@ python3 investment/scripts/build_session_export.py \
 > 7.4M token 全損。artifact 已於 V4.126.0 補成完整，但**手寫組裝能打錯的欄位還有一百多個**，
 > 而且錯得「數字合理」時連 validator 都未必擋得住。組裝是機械工作，交給 script。
 
-腳本會：原子寫入（tmp + rename）、`fcntl.flock` 序列化、自動鏡射 top-level
-`ticker` / `final_action` / `date`、檢查最小 shape、蓋 `export_provenance`。失敗 → 修 entry 再重跑。
+腳本會原子寫入獨立 session 與 phase_inputs bundle。Step 1.5 再補 sidecar 並蓋
+`export_provenance`；所有閘門都綠之後，Step 6b 才在穩定 lock inode 下追加到 `history.json`。
 
 > **🚫 V4.117.0 — `history.json` 只由這支 script 寫，沒有例外。**
 >
@@ -1786,18 +1799,17 @@ python3 investment/scripts/build_session_export.py \
 > 重跑對應 engine → 重新組 entry → 重新寫入。這樣 digest 會跟著重新蓋；就地改則不會，
 > 那正是它要抓的事。
 >
-> **已經 append 過才發現要修 → 用 `--replace-last`，不要再 append 一次**：
+> **舊 session 已經 append 過才發現要修 → 用 `--replace-last`，不要再 append 一次**：
 >
 > ```bash
 > python3 investment/scripts/append_session_export.py --from-file /tmp/<ticker>_session.json --replace-last
-> python3 investment/scripts/apply_det_shadow.py --inplace investment/invest_logs/history.json
-> python3 investment/scripts/validate_session_export.py
+> python3 investment/scripts/validate_session_export.py --history investment/invest_logs/history.json
 > ```
 >
 > 直接再 append 會讓**同一個 session 留下兩筆**（history 已經有 5 組這種重複，包含
 > 2026-08-09 的 NOW）。`--replace-last` 在同一把鎖裡取代最後一筆，且只認**同 ticker +
-> 同 export_date**，取代別人的 session 會 rc=1。**取代後 Step 1.5 要重跑**——`det_shadow`
-> 與 `lane_contract` 不會自己跟著換。
+> 同 export_date**，取代別人的 session 會 rc=1。這是舊資料維修路徑；新流程在
+> Step 6b 前都只修獨立 session，不需要動全域 history。
 >
 > 要整份退回：用 `run_protocol_manual.py` 印出的 `.bak.json` 還原，不要手動 `pop()`。
 >
@@ -1819,9 +1831,15 @@ python3 investment/scripts/build_session_export.py \
 
 ### Step 1.5 — Apply deterministic shadow + lane 契約 (V2.10.0+ MUST-run)
 ```bash
-python3 investment/scripts/apply_det_shadow.py --inplace investment/invest_logs/history.json
+python3 investment/scripts/apply_det_shadow.py \
+  --inplace investment/invest_logs/session_exports/<DATE>_<T>.json
+python3 investment/scripts/append_session_export.py \
+  --from-file investment/invest_logs/session_exports/<DATE>_<T>.json \
+  --stamp-only \
+  --stamped-out investment/invest_logs/session_exports/<DATE>_<T>.json
 ```
-此步把兩塊 post-processor 產物寫入最新一筆 trades_this_session[]：
+此步把兩塊 post-processor 產物寫入本 ticker 獨立 session 的
+`trades_this_session[]`，然後蓋可驗證的 provenance stamp：
 
 **(A) `det_shadow`** — polarization 從 lane_scores 算；val_det 從 weighted_fair_value 算；
 red_team_det 從 det_inputs 6 條 kill triggers 算。
@@ -1833,16 +1851,17 @@ red_team_det 從 det_inputs 6 條 kill triggers 算。
 `{analysis_mode, llm_invoked_lanes[], llm_skipped_lanes[]}`。
 - **已有的值一律保留**：det producer（未來的 Sentiment / Technical / RT skip）在自己的 phase
   就寫好該 lane 的 provenance，這一步只補沒人認領的欄位（預設 = 今天的協定行為 `llm`）
-- 版號不在 `V5.3+` 的 entry **不寫契約** —— `--inplace history.json` 掃過全部舊 entry 時，
+- 版號不在 `V5.3+` 的 entry **不寫契約** —— maintenance 模式掃過全部舊 entry 時，
   不會給 V4.6 的四 lane session 補一份六 lane provenance
 
 兩塊都是 sidecar：LLM 主分數（final_score / valuation_lane.score / red_team_verdict）**不被覆蓋**。
 
 ### Step 2 — Schema validate (MANDATORY gate)
 ```bash
-python3 investment/scripts/validate_session_export.py
+python3 investment/scripts/validate_session_export.py \
+  --history investment/invest_logs/session_exports/<DATE>_<T>.json
 ```
-rc ≠ 0 → 修正最後一筆後重跑直到 rc=0。
+rc ≠ 0 → 修正本 ticker 的獨立 session 後重跑直到 rc=0。
 
 ### Step 3 — 確認 `./invest_logs/YYYY-MM-DD_phase0.json` 已存在
 
@@ -1888,7 +1907,8 @@ Burry components、Phase 0 明細）的來源只在這裡；不存檔等於渲�
 **4b. 渲染**
 
 ```bash
-python3 investment/scripts/render_investment_report.py
+python3 investment/scripts/render_investment_report.py \
+  --history investment/invest_logs/session_exports/<DATE>_<T>.json
 # 選項：--polish（見 4d）／--phase-inputs <path>／--out <path>／--stdout
 ```
 
@@ -1899,12 +1919,12 @@ renderer **import** `inject_report_facts.py` 的同一組 renderer 產生 ——
 
 **4c. 重疊欄位硬閘（rc=1，渲染前擋）**
 
-bundle 與 history 末筆重疊的每一欄都會交叉比對：5 個 lane score、raw confidence 的 c_eff
+bundle 與本 ticker session 重疊的每一欄都會交叉比對：5 個 lane score、raw confidence 的 c_eff
 帶域、final_score / final_decision / final_action、position_size_pct、analysis_price、
 burry_score、red_team_verdict。有 `calculation_steps` 時**額外**比對 step 字串裡決策數學
 實際吃到的 score 與 c_eff。
 
-- 任一不符 → rc=1，逐條列出差異，**不產出任何檔案**。修 bundle（history 是權威）後重跑。
+- 任一不符 → rc=1，逐條列出差異，**不產出任何檔案**。修 bundle（session export 是權威）後重跑。
 - 例外：Step 1.5 覆寫過的 lane（step 字串帶 `// ...` 註記，例如 `score 0.0 → -1.5`）只比對
   c_eff，不比對 score —— 那個差異是設計，不是漂移。
 
@@ -1926,11 +1946,13 @@ Bull Case、Bear Case。不帶 flag → 由 JSON 推導的制式句，0 LLM，CI
 
 ### Step 5 — Markdown Score-Scale Validation Gate
 ```bash
-python3 investment/scripts/validate_markdown_export.py
+python3 investment/scripts/validate_markdown_export.py \
+  --report reports/<YYYYMMDD>_<T>.md \
+  --history investment/invest_logs/session_exports/<DATE>_<T>.json
 ```
 - rc=0 → 完成
-- rc=1 → **renderer 的 bug 或 history 資料異常，不是「重寫一次就好」**。讀 stderr 的違規清單、
-  修 renderer 或修 history 末筆，重跑 Step 4 → Step 5。V4.87.0 起報告是渲染出來的，同一份輸入
+- rc=1 → **renderer 的 bug 或 session 資料異常，不是「重寫一次就好」**。讀 stderr 的違規清單、
+  修 renderer 或修本 ticker session，重跑 Step 4 → Step 5。V4.87.0 起報告是渲染出來的，同一份輸入
   必產出同一份輸出，所以「retry 一次看看」不會有不同結果。
 - 若 rc=1 來自 `--polish`：那不可能——polish 的三道守衛 fail-open，失敗只會退回制式句。真的發生
   代表守衛有洞，補 `test_render_investment_report.py` Fixture E 再修。
@@ -1939,19 +1961,31 @@ python3 investment/scripts/validate_markdown_export.py
 
 ### Step 6 — Phase 5.5: Thesis Registry Wire-up (V2.14.0+, non-fatal)
 
-把本次 session 自動 register 進 trader-memory-core thesis 生命週期，產出 `thesis_id` 寫回 `history.json` 最後一筆。
+把本次 session 自動 register 進 trader-memory-core thesis 生命週期，產出 `thesis_id` 寫回本 ticker 的獨立 session。
 
 ```bash
-python3 investment/scripts/register_thesis.py
+python3 investment/scripts/register_thesis.py \
+  --session investment/invest_logs/session_exports/<DATE>_<T>.json
 ```
 
-- **rc=0 + 「✓ registered」**：成功 register，`history.json[-1].trades_this_session[0].thesis_id` 已填。後續 review queue / postmortem 都靠此 ID 串接。
+- **rc=0 + 「✓ registered」**：成功 register，本 session 的 `trades_this_session[0].thesis_id` 已填。後續 review queue / postmortem 都靠此 ID 串接。
 - **rc=0 + 「unavailable」**：trader-memory-core 模組缺 dep / 不在路徑。**non-fatal** — `thesis_id` 留 null，不擋 protocol 結束。
 - **rc=1**：`thesis_store.register()` 真的炸了（state dir 寫不進去 / 資料 corrupt）。報錯後 PM 可選擇手動 register 或 skip。
 
-**Idempotent**：若 last entry 已有 thesis_id（同一 protocol run 重跑），script 直接 rc=0 退出，不重複 register。
+**Idempotent**：若本 session 已有 thesis_id（同一 protocol run 重跑），script 直接 rc=0 退出，不重複 register。
 
 **State 位置**：`investment/invest_logs/theses/`（project-local，不汙染 global trader-memory-core state）。
+
+### Step 6b — Commit validated session to global history (MANDATORY)
+
+```bash
+python3 investment/scripts/append_session_export.py \
+  --from-file investment/invest_logs/session_exports/<DATE>_<T>.json \
+  --preserve-stamp
+```
+
+`--preserve-stamp` 會重驗 digest，再以 `history.json.lock` 的穩定 inode 序列化
+read-modify-write。不同 ticker 同時完成也不會丟 entry；digest 不符或少 stamp 直接 rc=1。
 
 ### Step 7 — IC Memo Hook (V3.25.0+, non-fatal, `--memo` flag only)
 

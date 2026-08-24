@@ -1,0 +1,54 @@
+```json
+{
+  "commentary": "Nebius大幅調升簽約電力指引，彰顯其在AI基礎設施與GPU雲端運算（Neocloud）領域的擴張決心。在電力供應成為全球AI資料中心核心瓶頸的背景下，鎖定充足電力儲備能確保未來順利部署Blackwell等高階GPU集群，顯著增強中長期算力服務營收能見度。但龐大Capex投入與電網實際交付時程仍是需留意的執行風險。",
+  "bull_points": [
+    "簽約電力容量大幅攀升，奠定大規模AI GPU算力擴展基礎。",
+    "提前鎖定稀缺電力資源，強化相對於同業的Neocloud競爭優勢。"
+  ],
+  "bear_points": [
+    "資料中心建置與硬體採購需龐大Capex，短期壓抑自由現金流。",
+    "公用事業電網併網與供電進度若遞延，恐拖累營收兌現時程。"
+  ],
+  "final_take": "電力儲備強化算力擴張優勢，偏多看待但需關注資本支出與交付進度。",
+  "entities": {
+    "tickers": [
+      "NBIS",
+      "NVDA"
+    ],
+    "sectors": [
+      "Information Technology"
+    ],
+    "themes": [
+      "AI infrastructure",
+      "Neocloud",
+      "AI capex",
+      "Data Center Power"
+    ],
+    "tech_keywords": [
+      "Blackwell",
+      "GPU cluster",
+      "Liquid Cooling"
+    ]
+  },
+  "relations": [
+    {
+      "subject": "ticker:NBIS",
+      "predicate": "BENEFITS_FROM",
+      "object": "theme:data-center-power"
+    },
+    {
+      "subject": "ticker:NBIS",
+      "predicate": "BENEFITS_FROM",
+      "object": "theme:ai-infrastructure"
+    },
+    {
+      "subject": "ticker:NBIS",
+      "predicate": "CUSTOMER_OF",
+      "object": "ticker:NVDA"
+    }
+  ],
+  "done": false,
+  "confidence": 0.82,
+  "rationale_short": "電力為AI算力擴張關鍵瓶頸，簽約量激增提升長期成長動能。"
+}
+```

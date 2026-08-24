@@ -1,0 +1,195 @@
+{
+  "schema": "p5-qualitative/1.0",
+  "ticker": "TER",
+  "date": "2026-08-17",
+  "lanes": {
+    "fundamentals": {
+      "signal": "BUY",
+      "key_factors": [
+        "Accelerating 103.9% YoY revenue hypergrowth",
+        "Robust 28.5% FCF margin and conversion",
+        "Attractive 0.92 PEG against growth profile"
+      ],
+      "risk_flags": [
+        "Semiconductor capital equipment cyclicality risk",
+        "Customer concentration in major chipmakers"
+      ]
+    },
+    "sentiment": {
+      "signal": "HOLD",
+      "key_factors": [
+        "Market sentiment strongly greedy at 72.7",
+        "Insider distribution trend with -100 MSPR",
+        "Congressional net purchases offer slight tailwind"
+      ],
+      "risk_flags": [
+        "Persistent insider selling with zero recent buys",
+        "Short interest float elevated at 5.94%"
+      ]
+    },
+    "news": {
+      "signal": "BUY",
+      "key_factors": [
+        "分析師共識 Buy 且零賣評",
+        "近1月目標價動能上修 +4.79%",
+        "AI晶片複雜度推升測試需求"
+      ],
+      "risk_flags": [
+        "48小時內直接催化劑偏少",
+        "距下次財報尚有70天"
+      ]
+    },
+    "technical": {
+      "signal": "BUY",
+      "key_factors": [
+        "Reclaimed 20D/50D/200D MAs with strong upward momentum",
+        "MACD histogram expanding in positive territory",
+        "RSI at 63 in bullish regime"
+      ],
+      "risk_flags": [
+        "Recent 20D/50D death cross creates structural overhead chop",
+        "Insider distribution trend with 4 Q3 sales"
+      ]
+    },
+    "valuation": {
+      "signal": "SELL",
+      "key_factors": [
+        "DCF anchors indicate extreme overvaluation",
+        "Current price implies 60% FCF CAGR",
+        "Analyst targets reflect aggressive AI momentum"
+      ],
+      "risk_flags": [
+        "Multiples vulnerable to ATE cycle slowdown",
+        "Severe intrinsic DCF gap exceeding 85%"
+      ]
+    }
+  },
+  "lane_detail": {
+    "fundamentals": {
+      "moat_assessment": {
+        "level": "WIDE",
+        "type": "switching_cost",
+        "evidence_one_line": "Duopolistic position in semiconductor ATE with deep test program integration and high switching costs."
+      },
+      "near_term_catalysts": [
+        {
+          "date": "2026-10-26",
+          "type": "earnings",
+          "description": "Q3 2026 earnings release and Q4 revenue/margin guidance updates.",
+          "impact": "high"
+        },
+        {
+          "date": "2026-09-15",
+          "type": "product_launch",
+          "description": "UltraFLEXplus platform expansion for advanced AI ASIC and high-bandwidth memory testing.",
+          "impact": "medium"
+        },
+        {
+          "date": "2026-11-12",
+          "type": "analyst_day",
+          "description": "Investor & Automation Technology Day highlighting Universal Robots collaborative robotics demand.",
+          "impact": "medium"
+        },
+        {
+          "date": "2026-12-05",
+          "type": "macro_event",
+          "description": "Global semiconductor capex update and WSTS test equipment spending forecast revisions.",
+          "impact": "low"
+        }
+      ],
+      "bull_thesis_one_line": "Explosive 103.9% revenue and 378% EPS growth driven by AI compute testing demand, paired with 28.5% FCF margin and PEG under 1.0.",
+      "bear_thesis_one_line": "Cyclical semiconductor capex pauses or robotics adoption deceleration could compress the 35.3x forward P/E multiple."
+    },
+    "sentiment": {
+      "insider_signal": "distributing",
+      "short_pct_float": 5.94,
+      "mspr_latest": -100.0
+    },
+    "news": {
+      "pt_revision_momentum": {
+        "direction": "UP",
+        "consensus_delta_pct_1m": 4.79
+      },
+      "immediate_catalyst_5d": null,
+      "decision_point_days": 21,
+      "cross_asset_spillover": [
+        {
+          "asset": "SOXX",
+          "direction": "BULLISH",
+          "mechanism": "ATE 測試設備需求反映晶圓廠與先進封裝資本支出擴張"
+        }
+      ],
+      "reasoning_one_line": "分析師共識偏多且近 1 個月目標價維持上修動能(+4.79%)，AI 晶片與先進封裝測試需求支撐中線基本面。"
+    },
+    "technical": {
+      "smart_money_analysis": {
+        "label": "distributing",
+        "narrative": "Insider selling trend in Q3 (4 sales vs 0 purchases) contrasts with technical rebound on average volume."
+      },
+      "pattern_taxonomy": {
+        "pattern": "pullback_in_uptrend",
+        "confirmation_criteria": "Sustained daily close above $435 with 20D MA turning back above 50D MA."
+      },
+      "market_strength": "STRONG",
+      "key_levels": {
+        "support": 414.93,
+        "resistance": 459.19,
+        "pivot": 428.48
+      },
+      "high_prob_scenario": "Sustained hold above pivot $428.48 targets nearest resistance at $459.19, while a drop below $414.93 risks a pullback toward the 50D MA at $383.96.",
+      "volatility": {
+        "atr_14": 29.02,
+        "hist_vol_20d_daily": 0.0562,
+        "momentum_20d_pct": 29.58
+      }
+    },
+    "valuation": {
+      "valuation_commentary": "Cash flow-based intrinsic anchors (Unlevered DCF at $45.99, Levered DCF at $50.14, Self-built DCF at $63.24, and Owner Earnings at $46.80) reflect a severe intrinsic valuation gap (-85.37% DCF gap) against the current price of $432.185, pricing in an aggressive 5-year FCF CAGR of 60%. In contrast, the sell-side consensus PT of $461.50 reflects high market optimism around AI-driven ATE compute testing and advanced packaging demand. Forward revenue validation confirmed that while the top-line trajectory is supported, the valuation remains stretched, softening the initial severe penalty to -1.0. The resulting weighted fair value of $254.78 (-41.05% vs current price) places TER firmly in the extreme_overvalued verdict band.",
+      "cited_transition_overlay": false,
+      "transition_dissent_basis": "valuation_anchor"
+    }
+  },
+  "red_team": {
+    "verdict": "STRONG_COUNTER",
+    "counter_evidence_strength": 5,
+    "thesis_break_probability": 0.78,
+    "counter_thesis": "當前多頭定價隱含未來 5 年 FCF 複合增長率需達 60%（EV/Sales 15.07x、FCF Yield 僅 0.67%），但在 FRED 實質利率高達 2.41% 的緊縮估值環境與半導體 ATE 資本支出週期性見頂下，內部人已全面拋售（MSPR -100），極度脆弱的長天期現金流多倍數定價將面臨猛烈均值回歸。",
+    "kill_conditions": [
+      "IF 未來 2 季（180 天內）FCF 年化增速低於 30%（不及當前市場隱含 60% CAGR 之一半）WITHIN 180 天 THEN 證明終端需求無法支撐 43.4x EV/EBITDA 估值，多頭成長論點正式破滅。",
+      "IF 10 年期實質利率維持在 2.40% 以上且 ATE 測試設備季度訂單季增率（QoQ）轉負或營收增速回落至 40% 以下 WITHIN 120 天 THEN 長久期 DCF 現金流貼現折價壓力爆發，引發估值倍數向歷史中樞收斂至 $150 以下。",
+      "IF 內部人淨賣出評分（MSPR）持續維持在 -80 以下且做空比例突破 8% WITHIN 90 天 THEN 證實內部管理層對 103.9% 營收加速的不可持續性具備高度共識，終結多頭趨勢。"
+    ]
+  },
+  "burry_narrative": "Burry 評分 27.9 (WARNING)：EV/EBITDA 43.4x 且 FCF Yield 僅 0.67%，內部人淨賣出評分達 -100，凸顯當前股價嚴重透支未來現金流。",
+  "conflict_bias": {
+    "schema": "conflict_bias.v1",
+    "tentative_decision": "STAGED_ENTRY",
+    "triggers_fired": [],
+    "conflict_summary": "無觸發 T1-T5 衝突仲裁；多數分析師偏多，估值與紅隊維持謹慎",
+    "t4_detail": null,
+    "t5_detail": null,
+    "proceed_to_phase3": true
+  },
+  "macro_context": "大盤處於 RISK_ON 體制（Soft Landing），寬度健康且 FTD 確認（第 8 天），科技與工業為主流；但 10 年期實質利率 2.41% 偏高，對高倍數成長股帶來 DCF 折現壓力。",
+  "watch_conditions": {
+    "q3_earnings_and_capex_guidance": "2026-10-26 Q3 財報公佈，需密切觀察營收增速是否維持在 80% 以上以及先進封裝 ATE 訂單指引。",
+    "support_level_hold": "股價回檔時需守穩 $414.93 支撐位（與短天期下軌 $364.40 防線），若跌破則需啟動停損退場機制。",
+    "insider_selling_abatement": "觀察內部人拋售是否放緩（MSPR 回升至 -30 以上），確認管理層對高估值擴張之信心。"
+  },
+  "key_risks": [
+    "現價隱含 5 年 FCF CAGR 高達 60%，實質利率 2.41% 下估值倍數收斂風險極高",
+    "半導體晶圓廠與封測廠資本支出循環見頂導致 ATE 設備拉貨動能放緩",
+    "內部人連續兩季賣超（Q3 4 筆賣出、0 筆買入，MSPR -100）呈現籌碼派發",
+    "技術面短期漲幅過大與長期公允價 ($254.78) 存在 -41.05% 顯著折價"
+  ],
+  "bias_notes": "多頭動能與基本面爆發（營收 YoY +103.9%）強勁，但長期估值與現金流折現大幅背離；協議嚴格執行估值蓋頂與分批進場紀律，避免盲目追高。",
+  "phase2_fanout_mode": "PARALLEL_SUBAGENT",
+  "degraded_analysts": [],
+  "decision_point_days": 21,
+  "devils_advocate_filed": false,
+  "trade_metadata": {
+    "trade_type": "trend",
+    "event_tag": "ai_ate_expansion"
+  },
+  "last_outcome": "UNKNOWN"
+}

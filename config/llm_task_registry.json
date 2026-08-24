@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "official_models": ["claude", "gemini", "codex"],
+  "categories": {
+    "agentic_protocol": {
+      "description": "Long-running repository protocol driven by one agentic CLI process",
+      "execution_mode": "agentic",
+      "default_outage_policy": "interactive_queue"
+    },
+    "ensemble": {
+      "description": "Multi-voice debate or committee turn",
+      "execution_mode": "ensemble",
+      "default_outage_policy": "daemon_defer"
+    },
+    "structured_research": {
+      "description": "Single-turn structured extraction or research JSON",
+      "execution_mode": "structured_json",
+      "default_outage_policy": "daemon_defer"
+    },
+    "narrative_synthesis": {
+      "description": "Single-turn prose or briefing synthesis",
+      "execution_mode": "narrative",
+      "default_outage_policy": "daemon_defer"
+    },
+    "external_tool_reasoning": {
+      "description": "Broker-owned provider injected into an external reasoning engine",
+      "execution_mode": "tool_reasoning",
+      "default_outage_policy": "daemon_defer"
+    }
+  },
+  "tasks": {
+    "agentic_protocol-invest": {"category": "agentic_protocol", "input_tokens": 200000, "output_tokens": 40000, "requires_web": true},
+    "agentic_protocol-sector": {"category": "agentic_protocol", "input_tokens": 200000, "output_tokens": 40000, "requires_web": true},
+    "agentic_protocol-news": {"category": "agentic_protocol", "input_tokens": 200000, "output_tokens": 40000, "requires_web": true},
+    "agentic_protocol-earnings": {"category": "agentic_protocol", "input_tokens": 200000, "output_tokens": 40000, "requires_web": true},
+    "agentic_protocol-flash": {"category": "agentic_protocol", "input_tokens": 200000, "output_tokens": 40000, "requires_web": true},
+    "agentic_protocol-flash_text": {"category": "agentic_protocol", "input_tokens": 200000, "output_tokens": 40000, "requires_web": true},
+    "agentic_protocol-review": {"category": "agentic_protocol", "input_tokens": 200000, "output_tokens": 40000, "requires_web": true},
+    "agentic_protocol-triage": {"category": "agentic_protocol", "input_tokens": 240000, "output_tokens": 32000, "requires_web": true},
+    "agentic_protocol-link_digest": {"category": "agentic_protocol", "input_tokens": 200000, "output_tokens": 40000, "requires_web": true},
+    "agentic_protocol-llm_review": {"category": "agentic_protocol", "input_tokens": 200000, "output_tokens": 40000, "requires_web": false},
+    "agentic_protocol-playbook": {"category": "agentic_protocol", "input_tokens": 200000, "output_tokens": 40000, "requires_web": true},
+
+    "debate": {"category": "ensemble", "output_tokens": 3000, "requires_web": false},
+    "office": {"category": "ensemble", "output_tokens": 3000, "requires_web": false, "outage_policy": "interactive_queue"},
+    "office_verdict": {"category": "ensemble", "output_tokens": 4000, "requires_web": false, "outage_policy": "interactive_queue", "response_format": "text"},
+
+    "generate": {"category": "structured_research", "output_tokens": 4000, "requires_web": true, "outage_policy": "interactive_queue"},
+    "nexus_gap_fill": {"category": "structured_research", "output_tokens": 4000, "requires_web": false},
+    "nexus_tier3_ner": {"category": "structured_research", "output_tokens": 1500, "requires_web": false, "certified_models": ["claude", "gemini", "codex"]},
+    "narrative_confirm": {"category": "structured_research", "output_tokens": 2000, "requires_web": false},
+    "capability_probe": {"category": "structured_research", "input_tokens": 500, "output_tokens": 100, "requires_web": false},
+    "link_digest": {"category": "structured_research", "output_tokens": 2000, "requires_web": false},
+
+    "brief": {"category": "narrative_synthesis", "output_tokens": 2000, "requires_web": false},
+    "intraday_eval": {"category": "narrative_synthesis", "output_tokens": 1500, "requires_web": false},
+    "report_polish": {"category": "narrative_synthesis", "output_tokens": 6000, "requires_web": false, "outage_policy": "deterministic_fallback"},
+
+    "wind_reasoning": {"category": "external_tool_reasoning", "input_tokens": 100000, "output_tokens": 15000, "requires_web": false}
+  }
+}

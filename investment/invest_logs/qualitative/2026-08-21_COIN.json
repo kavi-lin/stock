@@ -1,0 +1,208 @@
+{
+  "schema": "p5-qualitative/1.0",
+  "ticker": "COIN",
+  "date": "2026-08-21",
+  "lanes": {
+    "fundamentals": {
+      "signal": "HOLD",
+      "key_factors": [
+        "Robust FCF yield with clean cash conversion",
+        "Elevated Forward PE and PEG vs peers",
+        "Owner earnings QoQ growth of 22 percent"
+      ],
+      "risk_flags": [
+        "High earnings cyclicality tied to crypto volumes",
+        "Forward PE at 58.8x with low Piotroski score"
+      ]
+    },
+    "sentiment": {
+      "signal": "HOLD",
+      "key_factors": [
+        "Heavy insider distribution with zero purchases",
+        "Moderate short interest around 10% float",
+        "Broad market sentiment composite at 62.9"
+      ],
+      "risk_flags": [
+        "CEO compensation surged +34.2% YoY governance flag",
+        "Aggressive insider distribution ratio 0.0345 in Q3"
+      ]
+    },
+    "news": {
+      "signal": "BUY",
+      "key_factors": [
+        "SEC token rule and White House summit",
+        "CLARITY Act Senate vote momentum",
+        "Base ecosystem expansion into perpetuals"
+      ],
+      "risk_flags": [
+        "Q2 earnings GAAP loss and volume volatility",
+        "Real rate pressure on risk assets"
+      ]
+    },
+    "technical": {
+      "signal": "BUY",
+      "key_factors": [
+        "Strong breakout above 20MA with high volume",
+        "RSI at 63.5 shows expanding bullish momentum",
+        "Risk-on macro regime supports high-beta upside"
+      ],
+      "risk_flags": [
+        "Overhead resistance cluster near 175 to 182",
+        "Insider distribution with low acquired-disposed ratio"
+      ]
+    },
+    "valuation": {
+      "signal": "HOLD",
+      "key_factors": [
+        "Weighted fair value $120.17 (-30.28% downside)",
+        "DCF models indicate severe historical cash stretch",
+        "Analyst PT ($199.95) anchors upper valuation range"
+      ],
+      "risk_flags": [
+        "Severe dispersion between DCF ($21-$60) and PT ($200)",
+        "Forward validation STRETCHED on fundamental paths"
+      ]
+    }
+  },
+  "lane_detail": {
+    "fundamentals": {
+      "moat_assessment": {
+        "level": "NARROW",
+        "type": "network_effect",
+        "evidence_one_line": "Dominant US regulated exchange and institutional custody with growing Base L2 volume."
+      },
+      "near_term_catalysts": [
+        {
+          "date": "2026-10-28",
+          "type": "earnings",
+          "description": "Q3 2026 earnings release and institutional trading volume update",
+          "impact": "high"
+        },
+        {
+          "date": "2026-09-15",
+          "type": "product_launch",
+          "description": "Base L2 network upgrades and sequencer monetization expansion",
+          "impact": "medium"
+        },
+        {
+          "date": "2026-09-30",
+          "type": "macro_event",
+          "description": "US crypto market structure regulatory framework progress",
+          "impact": "medium"
+        },
+        {
+          "date": "2026-10-15",
+          "type": "guidance",
+          "description": "Subscription and services recurring revenue trajectory update",
+          "impact": "medium"
+        }
+      ],
+      "bull_thesis_one_line": "Robust FCF yield and Base L2 growth",
+      "bear_thesis_one_line": "High 58x fwd PE and crypto cycle risk"
+    },
+    "sentiment": {
+      "market_sentiment_composite": 62.9,
+      "vix_current": 15.44,
+      "insider_signal": "distributing",
+      "short_pct_float": 10.0,
+      "mspr_latest": -45.2
+    },
+    "news": {
+      "immediate_catalyst_5d": null,
+      "decision_point_days": 68,
+      "cross_asset_spillover": [
+        {
+          "asset": "BTC",
+          "direction": "BULLISH",
+          "mechanism": "Surging crypto prices and volume drive transaction revenue and Base activity."
+        },
+        {
+          "asset": "treasury_10y",
+          "direction": "BEARISH",
+          "mechanism": "Elevated real yields create valuation headwind for high-multiple growth equities."
+        }
+      ],
+      "reasoning_one_line": "Constructive regulatory momentum from SEC token rule proposals and White House engagement offsets recent post-earnings volume softness.",
+      "analyst_consensus": "Buy",
+      "pt_revision_momentum": {
+        "direction": "DOWN",
+        "consensus_delta_pct_1m": -4.2
+      }
+    },
+    "technical": {
+      "smart_money_analysis": {
+        "label": "mixed",
+        "narrative": "Insiders remain in distribution mode (ratio 0.0345), while market flow shows aggressive accumulation into the $172 breakout."
+      },
+      "pattern_taxonomy": {
+        "pattern": "oversold_bounce_attempt",
+        "confirmation_criteria": "Daily close above 175.00 with expanding volume to confirm breakout through 50MA."
+      },
+      "market_strength": "STRONG",
+      "key_levels": {
+        "support": 160.2,
+        "resistance": 174.8,
+        "pivot": 168.0
+      },
+      "high_prob_scenario": "COIN holds above the 168.00 pivot and tests 175.00 resistance driven by risk-on momentum.",
+      "volatility": {
+        "atr_14": 7.85,
+        "hist_vol_20d_daily": 0.038,
+        "momentum_20d_pct": 8.5
+      },
+      "extension_penalty_note": null
+    },
+    "valuation": {
+      "weighted_fair_value": 120.17,
+      "current_price": 172.35,
+      "vs_current_pct": -30.28,
+      "verdict_band": "extreme_overvalued",
+      "suppression_proposals": [],
+      "valuation_commentary": "Valuation analysis indicates an extreme overvaluation verdict with weighted fair value of $120.17 (-30.28% vs current $172.35). Substantial dispersion exists across anchors: historical cash flow DCF anchors (unlevered $21.24, self-built $52.95, levered $59.52) show severe downward gaps (-69.28% DCF gap), while analyst consensus PT ($199.95) and forward discounted earnings ($140.08) partially reflect market growth expectations. Forward validation is STRETCHED; archetype shadow provides near-term support around $160, but fundamental forward earnings and revenue path checks failed. Ineligible anchors include peer P/E, comps (<2 usable metrics), and forecaster blend.",
+      "cited_transition_overlay": false,
+      "transition_dissent_basis": "valuation_anchor"
+    }
+  },
+  "red_team": {
+    "verdict": "STRONG_COUNTER",
+    "counter_thesis": "看多論點過度依賴短期技術與消息面情緒，嚴重忽視市場現價隱含 60% FCF CAGR 與 +14.3% 營收成長的極端預期；在 10 年期實質利率達 2.4% 及分析師共識預期營收衰退 -7.8% 的基本面衝突下，多頭估值支撐極度脆弱。",
+    "kill_conditions": [
+      "IF 未來 2 季（180天）自由現金流（FCF）年化增速低於 30%（遠低於市場隱含的 60% 5Y CAGR） WITHIN 180 天 THEN 現價依賴高增長定價的估值擴張論點破滅",
+      "IF 單季營收增速落入分析師共識預期的衰退區間（營收年增率 < 0%，對比市場隱含需達 +14.3% CAGR）且 10 年期實質利率維持在 2.4% 以上高位 WITHIN 90 天 THEN 估值倍數將面臨強烈均值回歸殺估值",
+      "IF 宏觀市場頂部風險處於 Orange 警戒區（40.4）且全平台季度交易手續費營收季減逾 20% WITHIN 60 天 THEN 短期技術與消息面支撐的多頭共識全面瓦解"
+    ],
+    "counter_evidence_strength": 5,
+    "thesis_break_probability": 0.8,
+    "execution_failed": false
+  },
+  "burry_narrative": "FCF yield 6.2% 與負債比 0.51 處於健康區間，但 EV/EBITDA 高達 62.0 且內部人持續賣超（Q3 處置比率 0.0345），整體給予 NEUTRAL (50.4/100) 評價，不觸發否決。",
+  "conflict_bias": {
+    "tentative_decision": "HOLD",
+    "conflict_summary": "無 T1-T5 衝突觸發；短期動能與政策預期推升技術與消息面，但長線估值偏貴與實質利率壓制拉回中性。",
+    "triggers_fired": [],
+    "t4_detail": null,
+    "t5_detail": null,
+    "proceed_to_phase3": true
+  },
+  "macro_context": "大盤處於 RISK_ON 體制（信心度 0.85），市場廣度健全（79.2）且 FTD 確認（第 12 天），但 FRED 10 年期實質利率處於 2.4% 高位且市場頂部警示處於 Orange 區（40.4），宏觀乘數維持 0.9。",
+  "watch_conditions": {
+    "pullback_support": "股價回測 20MA/支撐位 $160.20 且守穩量縮 → 重啟小倉位分批佈局評估",
+    "resistance_breakout": "放量突破上方壓力叢集 $174.80 - $182.00 且站穩 5 個交易日 → 評估動能追價",
+    "earnings_crypto_volume": "2026-10-28 Q3 財報公布 — 若平台交易手續費營收未達預期或活躍用戶放緩 → 評估空方避險"
+  },
+  "key_risks": [
+    "加密貨幣交易量高度週期性與市場回檔風險",
+    "10 年期實質利率 2.4% 對 58.8x 前瞻本益比高估值標的持續產生折現率壓力",
+    "內部人持續重度處置持股（Q3 賣超比率 0.0345）與高管薪酬年增 34.2% 之治理關注"
+  ],
+  "bias_notes": "分析團隊呈現訊號分歧（Technical/News 偏多，Fundamentals/Sentiment/Valuation 偏中性偏空），Red Team 提出強烈反駁，經決策引擎加權收斂至 HOLD。",
+  "phase2_fanout_mode": "PARALLEL_SUBAGENT",
+  "degraded_analysts": [],
+  "decision_point_days": 68,
+  "devils_advocate_filed": false,
+  "trade_metadata": {
+    "trade_type": "mean_reversion",
+    "event_tag": "earnings"
+  },
+  "last_outcome": "UNKNOWN"
+}

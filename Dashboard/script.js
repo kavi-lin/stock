@@ -1702,12 +1702,38 @@ let _chainPollTimers = { proto: null };
 const ZH = () => UI.currentLang === 'zh';
 
 function _setRow(rowKey, icon, meta, barPct) {
+  const row = document.getElementById(`preflight-row-${rowKey}`);
   const ic = document.getElementById(`preflight-icon-${rowKey}`);
   const mt = document.getElementById(`preflight-meta-${rowKey}`);
   const bar = document.getElementById(`preflight-bar-${rowKey}`);
   if (ic) ic.textContent = icon;
   if (mt) mt.textContent = meta;
   if (bar) bar.style.width = `${Math.max(0, Math.min(100, barPct || 0))}%`;
+  if (row) {
+    row.classList.remove('is-active', 'is-complete', 'is-error', 'is-waiting');
+    const state = icon === '✅' ? 'is-complete'
+                : icon === '❌' ? 'is-error'
+                : icon === '🔄' ? 'is-active' : 'is-waiting';
+    row.classList.add(state);
+  }
+}
+function _setPhaseState(phase, state) {
+  const el = document.getElementById(`preflight-phase-${phase}`);
+  if (!el) return;
+  el.classList.remove('is-active', 'is-complete', 'is-error', 'is-waiting');
+  el.classList.add(`is-${state}`);
+  el.dataset.phaseState = state;
+  const node = el.querySelector('.preflight-phase-num');
+  if (node) node.textContent = state === 'complete' ? '✓' : String(phase);
+}
+function _setChainButtonState(running) {
+  const button = document.getElementById('preflight-run-chain');
+  const label = document.getElementById('preflight-run-chain-label');
+  if (running) button?.setAttribute('disabled', 'true');
+  else button?.removeAttribute('disabled');
+  if (label) label.textContent = running
+    ? (ZH() ? '檢查進行中' : 'Check in progress')
+    : (ZH() ? '開始盤前檢查' : 'Run pre-market check');
 }
 function _fmtSec(s) {
   if (s == null) return '—';
@@ -1723,7 +1749,12 @@ async function runPremarketChain() {
   const isZh = ZH();
   document.getElementById('preflight-chain')?.classList.remove('hidden');
   document.getElementById('preflight-checklist')?.classList.add('hidden');
-  document.getElementById('preflight-run-chain').setAttribute('disabled', 'true');
+  document.getElementById('preflight-run-free')?.classList.add('hidden');
+  document.getElementById('preflight-run-all')?.classList.add('hidden');
+  _setChainButtonState(true);
+  _setPhaseState(1, 'active');
+  _setPhaseState(2, 'waiting');
+  _setPhaseState(3, 'waiting');
 
   _setRow('daily', '⏳', isZh ? '排隊中…' : 'queued…', 0);
   _setRow('news',  '⏳', isZh ? '排隊中…' : 'queued…', 0);
@@ -1736,12 +1767,12 @@ async function runPremarketChain() {
     if (!res.ok && res.status !== 409) {
       const err = await res.json().catch(() => ({}));
       _setRow('daily', '❌', `${isZh?'啟動失敗':'start failed'}: ${err.error || res.status}`, 0);
-      document.getElementById('preflight-run-chain')?.removeAttribute('disabled');
+      _setChainButtonState(false);
       return;
     }
   } catch (e) {
     _setRow('daily', '❌', `${isZh?'網路錯誤':'network error'}: ${e.message}`, 0);
-    document.getElementById('preflight-run-chain')?.removeAttribute('disabled');
+    _setChainButtonState(false);
     return;
   }
 
@@ -1795,14 +1826,29 @@ async function _pollPremarketChain() {
     renderItem('news');
     renderItem('sector');
 
+    const terminal = new Set(['done', 'degraded', 'skipped']);
+    const phaseState = (statuses, fallback = 'waiting') => {
+      if (statuses.some(x => x === 'error')) return 'error';
+      if (statuses.length && statuses.every(x => terminal.has(x))) return 'complete';
+      if (statuses.some(x => x === 'running' || x === 'queued')) return 'active';
+      return fallback;
+    };
+    _setPhaseState(1, phaseState([
+      items.daily?.status || 'idle', items.news?.status || 'idle'
+    ], s.status === 'running' ? 'active' : 'waiting'));
+    _setPhaseState(2, phaseState([items.sector?.status || 'idle']));
+    if (s.status !== 'done' && s.status !== 'error') _setPhaseState(3, 'waiting');
+
     // ── chain terminal state ──
     if (s.status === 'done') {
       clearInterval(_chainPollTimers.proto);
+      _setPhaseState(3, 'active');
       _setRow('verdict', '🔄', isZh ? '刷新中…' : 'refreshing…', 50);
       setTimeout(() => {
+        _setPhaseState(3, 'complete');
         _setRow('verdict', '✅', isZh ? 'Dashboard 更新完成' : 'dashboard updated', 100);
         updateDashboard();
-        document.getElementById('preflight-run-chain')?.removeAttribute('disabled');
+        _setChainButtonState(false);
         // A non-blocking phase-1 failure (news) no longer stops the chain, so
         // 'done' can carry warnings. Say so instead of a clean success toast —
         // the failed row already shows ❌ in the modal.
@@ -1825,8 +1871,9 @@ async function _pollPremarketChain() {
       }, 3000);
     } else if (s.status === 'error') {
       clearInterval(_chainPollTimers.proto);
+      _setPhaseState(3, 'error');
       _setRow('verdict', '❌', `${isZh?'鏈條失敗':'chain error'}: ${(s.error || '').slice(0, 80)}`, 100);
-      document.getElementById('preflight-run-chain')?.removeAttribute('disabled');
+      _setChainButtonState(false);
       UI.showToast(isZh ? `盤前檢查失敗: ${s.error}` : `Pre-market check failed: ${s.error}`, 'error', 8000);
     }
   } catch {}
@@ -1855,7 +1902,9 @@ document.getElementById('preflight-run-chain')?.addEventListener('click', runPre
     if (s.status === 'running' || (s.status !== 'idle' && endedRecently)) {
       document.getElementById('preflight-chain')?.classList.remove('hidden');
       document.getElementById('preflight-checklist')?.classList.add('hidden');
-      document.getElementById('preflight-run-chain')?.setAttribute('disabled', 'true');
+      document.getElementById('preflight-run-free')?.classList.add('hidden');
+      document.getElementById('preflight-run-all')?.classList.add('hidden');
+      _setChainButtonState(true);
       _setRow('daily', '⏳', isZh ? '恢復狀態…' : 'resuming…', 0);
       _setRow('news',  '⏳', isZh ? '恢復狀態…' : 'resuming…', 0);
       _setRow('sector','⏳', isZh ? '恢復狀態…' : 'resuming…', 0);

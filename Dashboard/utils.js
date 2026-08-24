@@ -8,7 +8,7 @@
 
   // Semantic release tag shown in sidebar footer. Bump on meaningful releases.
   // Cache-busting is handled separately by dashboard_server.py (mtime injection).
-  const VERSION = 'V4.131.12';
+  const VERSION = 'V4.135.5';
 
   // V1.71.x — group field enables sectioned sidebar layout
   const NAV_ITEMS = [
@@ -233,8 +233,7 @@
 
     // ── Quota-broker attribution ─────────────────────────────────────────
     // Every protocol run publishes `model` / `model_tier` (V4.114.0); the
-    // broker picks per run from the primary → secondary → tertiary chain and
-    // the providers are NOT interchangeable, so "who ran this" belongs next to
+    // broker picks per run from the certified provider set, so "who ran this" belongs next to
     // every place a run is shown. This is the single source for how a provider
     // is drawn — the queue strip and the floating pill render from here so they
     // cannot drift apart.
@@ -246,7 +245,6 @@
       claude: { icon: '🟣', label: 'Claude' },
       gemini: { icon: '🔵', label: 'Gemini (agy)' },
       codex:  { icon: '🟢', label: 'Codex' },
-      grok:   { icon: '⚫', label: 'Grok' },
     },
 
     modelMeta(m) {
@@ -719,14 +717,14 @@
             </button>
             <div class="sidebar-llm-help">
               <div>${isZh
-                ? '額度由 quota broker 授權，它只派還有額度的一家，所以沒有「降級順序」可設。要改指派請編輯 <code>config/llm_config.json</code>。'
-                : 'Quota is authorised by the broker, which only ever assigns a provider that has quota — there is no fallback order to configure. Edit <code>config/llm_config.json</code> to change assignments.'}</div>
+                ? '額度與模型都由 quota broker 分配；只有 task registry 已認證的 Claude、Agy、Codex 能執行。broker 不可用時不啟動 LLM。'
+                : 'The quota broker assigns every model; only task-registry-certified Claude, Agy, and Codex may run. No LLM starts while the broker is unavailable.'}</div>
               <div>${isZh
                 ? '長條 = 該家 <strong>5 小時窗口</strong>已用多少（越長越滿；沒有 5h 窗口的那家會標明退回哪個讀數）；虛線是 broker 的硬保留線，越過它就不再派工——派工看的是全部窗口的最緊值，不是這條長條。滑過任一家可看各窗口（5h / 週）各自的長條、重置時間與今日花費，`▸` 是長條讀的那個窗口。窗口百分比帶虛線底線的，代表該家只回報剩餘量、消費數字是推算的。'
                 : 'Each bar is how much of that provider\'s <strong>five-hour window</strong> is used — longer means fuller; a provider reporting no such window says which reading it fell back to. The dashed line is the broker hard reserve, past which nothing is dispatched — dispatch reads the tightest of all windows, not this bar. Hover a provider for a bar per window (5h / weekly), reset times and spend; `▸` is the window the bar reads. A dotted-underlined percentage means that provider reports only what is left, so consumption was inferred.'}</div>
               <div>${isZh
-                ? '花費只有本地帳本有（broker 不報金額）。呼叫次數上限只有在 broker 關掉或連不上時才是真的限制，所以平常不顯示。'
-                : 'Spend comes from the local ledger only — the broker does not report cost. The per-day call caps bind only when the broker is off or unreachable, so they stay hidden until then.'}</div>
+                ? '綠燈＝AI 投資委員會正在使用；藍燈＝其他程式正透過 broker 使用。每家 provider 只有一個互斥執行槽，本專案正在使用時只顯示綠燈。'
+                : 'Green = AI Investment Committee activity; blue = another program using the broker. Each provider has one exclusive execution slot, so local activity shows only green.'}</div>
             </div>
           </div>
         </div>
@@ -892,6 +890,40 @@
         return { pct: 100 - Number(r), derived: true };
       };
 
+      // The sidebar must show the same constraint the broker routes against,
+      // not an arbitrarily preferred window. For providers with independent
+      // pools (agy), only buckets in the currently routable pool count. The
+      // tightest remaining bucket is the one that can block the next run.
+      const bindingBucket = (info) => {
+        const buckets = Array.isArray(info.buckets) ? info.buckets : [];
+        const pool = String(info.routable_pool || '');
+        const routed = pool
+          ? buckets.filter(b => {
+              const name = String(b.name || '');
+              return name === pool || name.startsWith(`${pool}.`);
+            })
+          : buckets;
+        const measurable = (routed.length ? routed : buckets)
+          .filter(b => Number.isFinite(Number(b.remaining_percent)));
+        return measurable.reduce((tightest, bucket) => (
+          !tightest || Number(bucket.remaining_percent) < Number(tightest.remaining_percent)
+            ? bucket : tightest
+        ), null);
+      };
+
+      const bindingWindowLabel = (bucket, zh) => {
+        if (!bucket) return '';
+        const name = String(bucket.name || '').toLowerCase();
+        const label = String(bucket.label || '').toLowerCase();
+        const minutes = Number(bucket.window_minutes);
+        if (name.split('.').some(seg => seg === 'five_hour' || seg === 'session')
+            || /five hour|5h|session/.test(label)
+            || (minutes > 0 && minutes <= 360)) return '5h';
+        if (name.split('.').includes('weekly') || /weekly/.test(label)
+            || minutes >= 10080) return zh ? '週' : 'wk';
+        return bucketLabel(bucket, zh);
+      };
+
       // Providers report resets three different ways and never all three, and
       // the string form arrives however that CLI happened to print it — the
       // same broker payload carries both "Aug13at12pm" and "Aug 13 at 11:59am".
@@ -947,6 +979,36 @@
         return String(b.reset_label || '').replace(/\s*\([^)]*\)\s*/g, '').trim().replace(/\s+/g, ' ');
       };
 
+      // Pinned-card countdown for the same binding bucket as the percentage,
+      // in compact operator form ("3D23H reset"). Showing a weekly reset next
+      // to a 5h percentage was the other half of the old mixed-window display.
+      const bindingResetCountdown = (info, bucket) => {
+        if (!bucket) return '';
+
+        let seconds = null;
+        if (bucket.resets_at !== null && bucket.resets_at !== undefined) {
+          const numeric = Number(bucket.resets_at);
+          const resetMs = Number.isFinite(numeric)
+            ? numeric * (numeric < 1e12 ? 1000 : 1)
+            : Date.parse(String(bucket.resets_at));
+          if (Number.isFinite(resetMs)) seconds = (resetMs - Date.now()) / 1000;
+        }
+        if (seconds === null && Number.isFinite(Number(bucket.refresh_in_seconds))) {
+          seconds = Number(bucket.refresh_in_seconds) - Math.max(0, Number(info.age_seconds) || 0);
+        }
+        if (seconds === null) {
+          const at = parseResetLabel(bucket.reset_label);
+          if (at) seconds = (at.getTime() - Date.now()) / 1000;
+        }
+        if (!Number.isFinite(seconds) || seconds <= 0) return '';
+        const totalHours = Math.max(0, Math.floor(seconds / 3600));
+        const days = Math.floor(totalHours / 24);
+        const hours = totalHours % 24;
+        if (days) return `${days}D${hours}H reset`;
+        if (totalHours) return `${totalHours}H reset`;
+        return `${Math.max(1, Math.floor(seconds / 60))}M reset`;
+      };
+
       const ageLabel = (sec, zh) => {
         const s = Number(sec);
         if (!Number.isFinite(s)) return '';
@@ -964,10 +1026,12 @@
         // Claude Code usage panel this was modelled on. They used to draw what
         // was left, so a long green bar meant "healthy" here and "nearly out"
         // in every other quota UI the operator sees. One direction, everywhere.
-        const remaining = info.remaining_percent;
+        const binding = bindingBucket(info);
+        const remaining = binding ? Number(binding.remaining_percent) : info.remaining_percent;
         const has = remaining !== null && remaining !== undefined;
         const used = has ? 100 - Number(remaining) : null;
         const width = has ? Math.max(0, Math.min(100, used)) : 0;
+        const windowLabel = bindingWindowLabel(binding, zh);
         let state = 'ok', flag = '';
         // Only while the deadline is still ahead. The broker's `providers` row
         // keeps the last cooldown after it lapses, so a bare truthiness test
@@ -977,6 +1041,7 @@
         // the worst mistake this panel can make, so the doubt goes that way.
         const coolUntil = Date.parse(info.cooldown_until || '');
         const cooling = Number.isFinite(coolUntil) && coolUntil > Date.now();
+        const bindingReset = bindingResetCountdown(info, binding);
         if (cooling)                { state = 'cool'; flag = zh ? '冷卻中' : 'cooldown'; }
         else if (info.reserve_only) { state = 'cool'; flag = zh ? '保留區' : 'reserve'; }
         else if (has && reserveLine !== null && width >= reserveLine) {
@@ -994,17 +1059,19 @@
         // while the live dot below answers the question the panel is actually
         // read for — is anything spending this provider right now.
         //
-        // The dot is rendered empty and painted by _paintLlmActive(); this
+        // The dots are rendered empty and painted by _paintLlmActive(); this
         // markup is rewritten every 30s from the quota poll, which is far too
         // slow to be a liveness indicator on its own.
         // V4.131.3 — remove native title tooltip so it doesn't conflict with
         // the custom white hover card on the right (llmTipHTML).
         return `<div class="sidebar-llm-prov sidebar-llm-${state}" data-llm-prov="${esc(model)}">
           <div class="sidebar-llm-prov-head">
-            <span class="sidebar-llm-live" hidden></span>
+            <span class="sidebar-llm-live sidebar-llm-live-local" hidden></span>
+            <span class="sidebar-llm-live sidebar-llm-live-external" hidden></span>
             <span class="sidebar-llm-prov-name">${esc(model)}</span>
             ${flag ? `<span class="sidebar-llm-flag">${esc(flag)}</span>` : ''}
-            <span class="sidebar-llm-prov-pct">${pct(used)}</span>
+            ${bindingReset ? `<span class="sidebar-llm-state">${esc(bindingReset)}</span>` : ''}
+            <span class="sidebar-llm-prov-pct">${windowLabel ? `${esc(windowLabel)} ` : ''}${pct(used)}</span>
           </div>
           <div class="sidebar-llm-bar">
             <div class="sidebar-llm-bar-fill" style="width:${width}%"></div>
@@ -1026,14 +1093,17 @@
         // provider with independent pools (agy) has windows the broker will not
         // route against at all, and they sit in this list looking exactly like
         // the ones that bind.
-        // V4.130.0 — `▸` marks the window the sidebar bar is drawing (the
-        // five-hour one), falling back to the routing pool for a provider that
-        // reports no such window. This list is where that number is checked, so
-        // the mark belongs on the row it came from.
-        const pool = String(info.headline_bucket || info.routable_pool || '');
+        // V4.135.5 — `▸` marks the binding window the sidebar bar is drawing,
+        // falling back to the routing pool only when no measurable bucket was
+        // reported. This list is where that number is checked, so the marker
+        // must identify the same constraint used by providerRow().
+        const binding = bindingBucket(info);
+        const bindingName = String((binding || {}).name || '');
+        const pool = String(info.routable_pool || '');
         const inPool = (b) => {
-          if (!pool) return false;
           const n = String(b.name || '');
+          if (bindingName) return n === bindingName;
+          if (!pool) return false;
           return n === pool || n.startsWith(pool + '.');
         };
         const rows = (info.buckets || []).map(b => {
@@ -1043,8 +1113,8 @@
           const raw = String(b.reset_label || '').trim();
           const routable = inPool(b);
           const tip = [
-            routable ? (info.headline_bucket
-                         ? (zh ? '側欄長條讀的就是這個窗口' : 'the window the sidebar bar draws')
+            routable ? (bindingName
+                         ? (zh ? 'broker 派選的限制窗口' : 'the binding window used for broker routing')
                          : (zh ? '目前路由的池' : 'the pool being routed to')) : '',
             u.derived ? (zh ? '由剩餘量推算' : 'derived from remaining') : '',
             raw,
@@ -1100,22 +1170,30 @@
       const notice = (cls, main, sub) =>
         `<div class="sidebar-llm-notice sidebar-llm-${cls}"><span>${esc(main)}</span><span>${esc(sub)}</span></div>`;
 
-      // Local call counters. Only rendered when the broker is NOT the authority
-      // — that is the one situation where `calls / daily_max` is the limit that
-      // actually stops a run. While the broker is up they describe a fallback
-      // nobody is on, and showing "2/300" next to a refusing broker is how an
-      // operator concludes there is plenty of room when there is none.
-      const localCallsHTML = (status, zh) => {
-        const models = (status && status.models) || {};
-        return ['claude', 'gemini', 'codex', 'grok'].map(m => {
-          const s = models[m] || {};
-          let tag = '', cls = 'ok';
-          if (!s.enabled)                                { tag = zh ? '停用' : 'off';   cls = 'off'; }
-          else if (s.unavailable_reason === 'cooldown')  { tag = zh ? '冷卻中' : 'cooldown'; cls = 'cool'; }
-          else if (s.unavailable_reason === 'budget')    { tag = zh ? '額度滿' : 'maxed'; cls = 'cool'; }
-          return `<div class="sidebar-llm-row sidebar-llm-${cls}"><span>${esc(m)}</span>`
-            + `<span>${s.calls || 0}/${s.daily_max || 0}${tag ? ' · ' + tag : ''}</span></div>`;
-        }).join('');
+      const restartHTML = (zh) =>
+        `<button type="button" class="sidebar-llm-restart" data-broker-restart>`
+        + `${zh ? '一鍵重啟 broker' : 'restart broker'}</button>`;
+
+      const bindRestart = () => {
+        const button = hostEl.querySelector('[data-broker-restart]');
+        if (!button) return;
+        button.addEventListener('click', async () => {
+          const zh = UI.currentLang === 'zh';
+          button.disabled = true;
+          button.textContent = zh ? '重啟中…' : 'restarting…';
+          try {
+            const response = await fetch('/api/broker/restart', {method: 'POST'});
+            const payload = await response.json();
+            if (!response.ok || !payload.ok) {
+              throw new Error(payload.error || `HTTP ${response.status}`);
+            }
+            render(payload.status);
+          } catch (error) {
+            button.disabled = false;
+            button.textContent = zh ? '重啟失敗，再試一次' : 'restart failed — retry';
+            button.title = String(error && error.message || error);
+          }
+        });
       };
 
       // Spend is local-ledger-only — the broker reports percentages, never
@@ -1138,6 +1216,14 @@
       const render = (status) => {
         const zh = UI.currentLang === 'zh';
         const broker = (status || {}).broker;
+        UI._llmBrokerRuns = ((broker && broker.active_reservations) || []).map(run => ({
+          model: run.model,
+          scope: run.is_local_project === true ? 'local' : 'external',
+          label: [run.project || (zh ? '其他 broker 程式' : 'other broker program'),
+            run.task_type || run.task_id, zh ? '執行中' : 'active']
+            .filter(Boolean).join(' · '),
+        }));
+        UI._paintLlmActive();
 
         if (!broker) {
           // No `broker` key at all — not the same as "switched off". The usual
@@ -1151,17 +1237,31 @@
           return;
         }
 
-        const authoritative = broker.enabled && broker.reachable === true;
+        const authoritative = broker.enabled && broker.authority === true;
         if (!authoritative) {
-          const [main, sub] = !broker.enabled
-            ? [zh ? 'broker 已關閉' : 'broker disabled', zh ? '改走本地預算' : 'local budget in force']
-            // No last-known percentages on purpose: a number from an unknown
-            // time reads as current and is exactly the false precision to avoid.
-            : [zh ? 'broker 連不上' : 'broker unreachable', zh ? '決策流程停派' : 'decision flows halted'];
-          if (stateEl) { stateEl.textContent = zh ? '降級' : 'degraded'; stateEl.className = 'sidebar-llm-state sidebar-llm-state-warn'; }
+          const handshake = broker.handshake_status;
+          let main, sub, canRestart = false;
+          if (!broker.enabled) {
+            [main, sub] = [zh ? 'broker 已關閉' : 'broker disabled', zh ? '所有 LLM 停派' : 'all LLM work halted'];
+          } else if (handshake === 'broker_restart_required') {
+            main = zh ? 'broker 版本過舊' : 'stale broker';
+            sub = `${broker.broker_version || '?'} → ${broker.client_version || '?'}`;
+            canRestart = true;
+          } else if (handshake === 'client_update_required') {
+            main = zh ? 'client 版本過舊' : 'stale client';
+            sub = zh ? '請更新 Dashboard client' : 'update the Dashboard client';
+          } else if (handshake === 'unreachable') {
+            main = zh ? 'broker 沒有執行' : 'broker not running';
+            sub = zh ? '決策流程停派' : 'decision flows halted';
+            canRestart = true;
+          } else {
+            main = zh ? 'broker 無法授權' : 'broker cannot authorise';
+            sub = broker.error || (zh ? '決策流程停派' : 'decision flows halted');
+          }
+          if (stateEl) { stateEl.textContent = zh ? '停派' : 'blocked'; stateEl.className = 'sidebar-llm-state sidebar-llm-state-warn'; }
           hostEl.innerHTML = notice('cool', main, sub)
-            + `<div class="sidebar-llm-sub">${zh ? '本地呼叫上限（此時才是真限制）' : 'Local call caps (binding now)'}</div>`
-            + localCallsHTML(status, zh);
+            + (canRestart ? restartHTML(zh) : '');
+          bindRestart();
           if (footEl) footEl.innerHTML = spendHTML(status, zh);
           return;
         }
@@ -1208,7 +1308,9 @@
           // Tightest first — same order as the buckets, and the provider about
           // to run out is the one worth seeing without scrolling.
           names.sort((a, b) => {
-            const pa = providers[a].remaining_percent, pb = providers[b].remaining_percent;
+            const ba = bindingBucket(providers[a]), bb = bindingBucket(providers[b]);
+            const pa = ba ? ba.remaining_percent : providers[a].remaining_percent;
+            const pb = bb ? bb.remaining_percent : providers[b].remaining_percent;
             return (pa === null || pa === undefined ? 101 : pa) - (pb === null || pb === undefined ? 101 : pb);
           });
           hostEl.innerHTML = names
@@ -1293,35 +1395,44 @@
       // so it always polls — but not while the tab is in the background, where
       // nobody can read it and every tick is a wasted broker round-trip.
       if (UI._llmPanelTimer) clearInterval(UI._llmPanelTimer);
-      UI._llmPanelTimer = setInterval(() => { if (!document.hidden) refresh(); }, 30000);
+      UI._llmPanelTimer = setInterval(() => { if (!document.hidden) refresh(); }, 10000);
       document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
     },
 
     // ── Live "this provider is spending right now" dot ───────────────────
-    // Set by the protocol-queue poll (every 5s) and repainted after every
-    // quota render. `_llmActiveRun` is {model, label} or null.
-    //
-    // Scope, deliberately narrow and stated in the tooltip: this lights only
-    // for protocol runs dispatched by this server (invest / news / sector /
-    // earnings), because `/api/protocol-queue` is the only place a provider is
-    // attributed to work in flight — the broker reports quota, not leases. The
-    // Break News daemon, Nexus gap-fill and the intraday narrator all spend
-    // quota without passing through here, so a dark dot means "no protocol run
-    // holds this provider", NOT "nothing is using it". Widening it would need
-    // an in-flight registry that does not exist yet; claiming the wider meaning
-    // with the narrower data is how a panel starts lying.
-    _llmActiveRun: null,
+    // Protocol polling gives immediate local attribution. Broker status adds
+    // every governed task and marks project ownership server-side: local is
+    // green and external is blue. A provider slot is broker-exclusive, so a
+    // protocol run that proves local ownership takes precedence over a broker
+    // row whose older wire shape omitted `project`.
+    _llmActiveRuns: [],
+    _llmBrokerRuns: [],
 
     _paintLlmActive() {
-      const run = UI._llmActiveRun;
-      const want = run && run.model ? String(run.model).toLowerCase() : null;
+      const localRuns = [
+        ...(Array.isArray(UI._llmActiveRuns) ? UI._llmActiveRuns : []),
+        ...(Array.isArray(UI._llmBrokerRuns)
+          ? UI._llmBrokerRuns.filter(run => run?.scope === 'local') : []),
+      ];
+      const externalRuns = Array.isArray(UI._llmBrokerRuns)
+        ? UI._llmBrokerRuns.filter(run => run?.scope !== 'local') : [];
       document.querySelectorAll('[data-llm-prov]').forEach(row => {
-        const isRun = !!want && String(row.dataset.llmProv || '').toLowerCase() === want;
-        row.classList.toggle('sidebar-llm-inuse', isRun);
-        const dot = row.querySelector('.sidebar-llm-live');
-        if (!dot) return;
-        dot.hidden = !isRun;
-        dot.title = isRun ? (run.label || '') : '';
+        const provider = String(row.dataset.llmProv || '').toLowerCase();
+        const localRun = localRuns.find(
+          item => String(item?.model || '').toLowerCase() === provider);
+        const externalRun = localRun ? null : externalRuns.find(
+          item => String(item?.model || '').toLowerCase() === provider);
+        row.classList.toggle('sidebar-llm-inuse', !!localRun || !!externalRun);
+        const localDot = row.querySelector('.sidebar-llm-live-local');
+        const externalDot = row.querySelector('.sidebar-llm-live-external');
+        if (localDot) {
+          localDot.hidden = !localRun;
+          localDot.title = localRun ? (localRun.label || '') : '';
+        }
+        if (externalDot) {
+          externalDot.hidden = !externalRun;
+          externalDot.title = externalRun ? (externalRun.label || '') : '';
+        }
       });
     },
 
@@ -1492,6 +1603,7 @@
         <div class="proto-pill-text">
           <div class="proto-pill-label" id="proto-pill-label">—</div>
           <div class="proto-pill-meta" id="proto-pill-meta">—</div>
+          <div class="proto-pill-capacity" id="proto-pill-capacity" aria-label="Execution slots"></div>
         </div>
         <button class="proto-pill-toggle" id="proto-pill-toggle" title="展開詳情">
           <i data-lucide="chevron-up" class="w-3 h-3"></i>
@@ -1517,36 +1629,57 @@
     return `${m}m ${String(s).padStart(2, '0')}s`;
   }
 
+  // Workflow provenance belongs in the one global task queue, not in a second
+  // floating status card. Only broker-governed protocol jobs are labelled
+  // here; daily_update remains visible in the pre-market modal and never
+  // occupies one of the three provider slots.
+  const PREMARKET_PROTOCOL_LABELS = Object.freeze({
+    news: 'News Digest',
+    sector: 'Sector Scan',
+  });
+  function protoSourceLabel(run, isZh) {
+    if (run?.source !== 'premarket_chain') return '';
+    const task = PREMARKET_PROTOCOL_LABELS[run.name];
+    if (!task) return '';
+    return `${isZh ? '盤前檢查' : 'Pre-market check'} · ${task}`;
+  }
+
   async function pollProtoPill() {
     try {
       const r = await fetch('/api/protocol-queue', { cache: 'no-store' });
       if (!r.ok) return;
       const state = await r.json();
       const pill = ensureProtoPill();
-      const active = state.active;
+      const active = Array.isArray(state.active)
+        ? state.active
+        : (state.active ? [state.active] : []);
       const queue = state.queue || [];
-      // V4.121.4 — the invest→invest wait, published by the worker. Server-side
-      // this used to be an invisible sleep; a pill that hides during it teaches
-      // the user the queue is dead and to re-queue (which is how a duplicate
-      // NVDA run happened on 2026-08-10).
-      const cooldown = state.cooldown || null;
+      const recentFailures = (state.recent || []).filter(run => {
+        if (!['error', 'cancelled'].includes(run?.status)) return false;
+        const ended = Date.parse(run.ended_at || '');
+        return Number.isFinite(ended) && (Date.now() - ended) < 10 * 60 * 1000;
+      }).slice(0, 3);
+      const capacity = Math.max(1, Number(state.capacity) || 3);
       const lbl = pill.querySelector('#proto-pill-label');
       const meta = pill.querySelector('#proto-pill-meta');
+      const capacityEl = pill.querySelector('#proto-pill-capacity');
       const det = pill.querySelector('#proto-pill-detail');
+      const pillIcon = pill.querySelector('.proto-pill-icon');
 
       // The quota panel's live dot rides on this poll — it is the only one that
       // knows which provider a run holds, and 5s is fast enough to read as
       // "now". Set before the idle early-return so finishing a run clears it.
-      UI._llmActiveRun = (active && active.model)
-        ? { model: active.model,
-            label: [active.name, active.ticker, fmtElapsed(active.elapsed_sec)]
-                     .filter(Boolean).join(' · ') }
-        : null;
+      UI._llmActiveRuns = active.filter(run => run.model).map(run => ({
+        model: run.model,
+        scope: 'local',
+        label: [run.name, run.ticker, fmtElapsed(run.elapsed_sec)].filter(Boolean).join(' · '),
+      }));
       UI._paintLlmActive();
 
-      if (!active && queue.length === 0 && !cooldown) {
+      if (active.length === 0 && queue.length === 0 && recentFailures.length === 0) {
         pill.classList.add('hidden');
         pill.classList.remove('proto-pill-running');
+        pill.classList.remove('proto-pill-has-failure');
         return;
       }
       pill.classList.remove('hidden');
@@ -1558,150 +1691,137 @@
       // Null in the first seconds — say "still choosing" rather than nothing,
       // which would read as a broken badge.
       const assigning = `⏳ ${isZh ? '選派中' : 'assigning'}`;
+      const activeWord = isZh ? '執行中' : 'active';
+      const waitingWord = isZh ? '等待中' : 'waiting';
+      const idleWord = isZh ? '空閒' : 'available';
+      const failedWord = isZh ? '失敗' : 'failed';
+      pill.classList.toggle('proto-pill-has-failure', recentFailures.length > 0);
+      if (pillIcon) pillIcon.textContent = active.length ? '🔄' : (recentFailures.length ? '❌' : '⏳');
 
-      if (active) {
-        const name = active.name || '?';
-        const ticker = active.ticker || active.label || '';
-        lbl.innerHTML = ticker
-          ? `<strong>${name}</strong> · <span class="proto-pill-ticker">${ticker}</span>`
-          : `<strong>${name}</strong>`;
+      // Fixed-capacity strip: one segment per execution slot. A pending job is
+      // deliberately not painted into a slot until the broker assigns it.
+      capacityEl.innerHTML = Array.from({ length: capacity }, (_, index) => {
+        const run = active[index];
+        const model = ['claude', 'gemini', 'codex'].includes(run?.model)
+          ? run.model : (run ? 'assigning' : 'idle');
+        const label = run
+          ? [protoSourceLabel(run, isZh) || run.label || run.ticker || run.name,
+             UI.modelText(run.model), fmtElapsed(run.elapsed_sec)].filter(Boolean).join(' · ')
+          : `${isZh ? '槽位' : 'Slot'} ${index + 1} · ${idleWord}`;
+        return `<span class="proto-pill-capacity-slot is-${model}" title="${UI.escapeHTML(label)}"></span>`;
+      }).join('');
+      capacityEl.setAttribute('aria-label', `${active.length}/${capacity} ${activeWord}`);
+
+      if (active.length) {
+        const activeNames = [...new Set(active.map(run => String(run.name || '?')))];
+        const sourceLabels = active.map(run => protoSourceLabel(run, isZh));
+        const activeLabels = active.map((run, index) => UI.escapeHTML(
+          sourceLabels[index] || run.ticker || run.label || run.name || '?'));
+        if (active.length === 1) {
+          if (sourceLabels[0]) {
+            lbl.innerHTML = `<strong>${activeLabels[0]}</strong>`;
+          } else {
+            const name = UI.escapeHTML(activeNames[0]);
+            const ticker = activeLabels[0] === name ? '' : activeLabels[0];
+            lbl.innerHTML = ticker
+              ? `<strong>${name}</strong> · <span class="proto-pill-ticker">${ticker}</span>`
+              : `<strong>${name}</strong>`;
+          }
+        } else {
+          const groupName = activeNames.length === 1
+            ? UI.escapeHTML(`${activeNames[0]} ×${active.length}`)
+            : UI.escapeHTML(`${isZh ? 'AI 研究' : 'AI research'} ×${active.length}`);
+          lbl.innerHTML = `<strong>${groupName}</strong> · ` +
+            `<span class="proto-pill-ticker">${activeLabels.join(' / ')}</span>`;
+        }
         // textContent, not innerHTML — the provider string reaches the DOM as
         // text and never as markup.
-        meta.textContent = `running · ${fmtElapsed(active.elapsed_sec)}` +
-                           ` · ${UI.modelText(active.model) || assigning}` +
-                           (queue.length ? ` · queue +${queue.length}` : '');
+        meta.textContent = `${active.length}/${capacity} ${activeWord}` +
+                           (queue.length ? ` · ${queue.length} ${waitingWord}` : '') +
+                           (recentFailures.length ? ` · ${recentFailures.length} ${failedWord}` : '');
         pill.classList.add('proto-pill-running');
-      } else if (cooldown) {
-        const nextLabel = cooldown.label || queue[0]?.label || cooldown.name || '';
-        lbl.innerHTML = `<strong>cooldown</strong>` +
-          (nextLabel ? ` · <span class="proto-pill-ticker">${UI.escapeHTML(nextLabel)}</span>` : '');
-        meta.textContent = `⏸ ${isZh ? '冷卻中' : 'cooling down'} · ${fmtElapsed(cooldown.remaining_sec)}` +
-                           ` · ${queue.length} pending`;
-        pill.classList.remove('proto-pill-running');
       } else {
-        lbl.innerHTML = `<strong>queue</strong>`;
-        meta.textContent = `${queue.length} pending`;
+        lbl.innerHTML = `<strong>AI research</strong>`;
+        meta.textContent = `0/${capacity} ${activeWord}` +
+                           (queue.length ? ` · ${queue.length} ${waitingWord}` : '') +
+                           (recentFailures.length ? ` · ${recentFailures.length} ${failedWord}` : '');
         pill.classList.remove('proto-pill-running');
       }
 
-      // Detail panel: list active log_tail (truncated) + pending queue items
+      // Detail panel: always render every execution slot. Pending work gets a
+      // separate section, so it cannot look like a fourth occupied bucket.
       const lines = [];
-      if (active) {
-        const activeLabel = active.label || active.ticker || active.name || '?';
-        lines.push(`<div class="proto-pill-row"><span class="proto-pill-row-icon">▶</span><span><strong>${activeLabel}</strong> · ${fmtElapsed(active.elapsed_sec)}</span></div>`);
-        // Expanded view has room for the tier (opus / sonnet / …), which the
-        // collapsed meta line drops. 'cli-default' tiers render as bare names.
-        lines.push(`<div class="proto-pill-row proto-pill-row-engine"><span class="proto-pill-row-icon">⚙</span><span>engine · ${UI.escapeHTML(UI.modelText(active.model, active.model_tier) || assigning)}</span></div>`);
+      for (let index = 0; index < capacity; index += 1) {
+        const run = active[index];
+        if (!run) {
+          lines.push(`<div class="proto-pill-slot is-idle"><span class="proto-pill-slot-number">${index + 1}</span><span class="proto-pill-slot-empty">${idleWord}</span></div>`);
+          continue;
+        }
+        const activeLabel = UI.escapeHTML(
+          protoSourceLabel(run, isZh) || run.label || run.ticker || run.name || '?');
+        const engine = UI.escapeHTML(UI.modelText(run.model) || assigning);
+        const model = ['claude', 'gemini', 'codex'].includes(run.model) ? run.model : 'assigning';
+        const tier = run.model_tier && run.model_tier !== 'cli-default'
+          ? ` · ${UI.escapeHTML(run.model_tier)}` : '';
+        lines.push(`<div class="proto-pill-slot is-active" data-model="${model}"><span class="proto-pill-slot-number">${index + 1}</span><span class="proto-pill-slot-job"><strong>${activeLabel}</strong><span class="proto-pill-slot-engine" title="${engine}${tier}">${engine}</span></span><span class="proto-pill-slot-time">${fmtElapsed(run.elapsed_sec)}</span></div>`);
       }
-      if (!active && cooldown) {
-        lines.push(`<div class="proto-pill-row proto-pill-row-engine"><span class="proto-pill-row-icon">⏸</span><span>${isZh ? '兩輪 invest 之間的冷卻' : 'inter-invest cooldown'} · ${fmtElapsed(cooldown.remaining_sec)}</span></div>`);
+      if (queue.length) {
+        lines.push(`<div class="proto-pill-queue-label"><span>${waitingWord}</span><strong>${queue.length}</strong></div>`);
       }
-      for (const q of queue.slice(0, 5)) {
-        const qLabel = q.label || q.params?.ticker || q.name || '?';
-        lines.push(`<div class="proto-pill-row"><span class="proto-pill-row-icon">⏳</span><span><strong>${qLabel}</strong></span></div>`);
+      for (const q of queue.slice(0, 3)) {
+        const qLabel = UI.escapeHTML(
+          protoSourceLabel(q, isZh) || q.label || q.params?.ticker || q.name || '?');
+        const queueId = UI.escapeHTML(q.id || '');
+        const reasons = {
+          broker_unavailable: isZh ? 'broker 暫時無回應，自動重試' : 'broker unavailable, retrying',
+          quota_wait: isZh ? '等待額度釋放，自動重試' : 'waiting for quota, retrying',
+          provider_busy: isZh ? '模型忙碌，等候空位' : 'provider busy, waiting',
+          artifact_busy: isZh ? '同一產物執行中' : 'output busy, waiting',
+        };
+        const reason = reasons[q.waiting_reason] || '';
+        const attempt = Number(q.attempts) > 0 ? ` · #${Number(q.attempts)}` : '';
+        const removeButton = queueId
+          ? `<button type="button" class="proto-pill-queue-remove" data-proto-queue-remove="${queueId}" title="${isZh ? '從等待中移除' : 'Remove from queue'}" aria-label="${isZh ? '從等待中移除' : 'Remove from queue'} ${qLabel}">×</button>`
+          : '';
+        lines.push(`<div class="proto-pill-queue-row"><span>⏳</span><strong>${qLabel}</strong>${removeButton}${reason ? `<span class="proto-pill-queue-reason">${reason}${attempt}</span>` : ''}</div>`);
       }
-      if (queue.length > 5) lines.push(`<div class="proto-pill-row proto-pill-row-more">+${queue.length - 5} more</div>`);
+      if (queue.length > 3) lines.push(`<div class="proto-pill-row-more">+${queue.length - 3} more</div>`);
+      if (recentFailures.length) {
+        lines.push(`<div class="proto-pill-failure-label"><span>${failedWord}</span><strong>${recentFailures.length}</strong></div>`);
+      }
+      for (const failed of recentFailures) {
+        const failedLabel = UI.escapeHTML(failed.label || failed.ticker || failed.name || '?');
+        const rawError = String(failed.error || (isZh ? '未知錯誤' : 'unknown error'));
+        const shortError = rawError.includes('broker:unavailable')
+          ? (isZh ? 'broker 暫時無回應；未啟動模型' : 'broker unavailable; model not started')
+          : rawError.slice(0, 110);
+        lines.push(`<div class="proto-pill-failure-row"><span>❌</span><span><strong>${failedLabel}</strong><small title="${UI.escapeHTML(rawError)}">${UI.escapeHTML(shortError)}</small></span></div>`);
+      }
       det.innerHTML = lines.join('');
+      det.querySelectorAll('[data-proto-queue-remove]').forEach(button => {
+        button.addEventListener('click', async event => {
+          event.stopPropagation();
+          const queueId = button.dataset.protoQueueRemove;
+          if (!queueId || button.disabled) return;
+          button.disabled = true;
+          try {
+            const response = await fetch(`/api/protocol-queue/${encodeURIComponent(queueId)}`, {
+              method: 'DELETE',
+            });
+            const payload = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(payload.error || `HTTP ${response.status}`);
+            UI.showToast(isZh ? '已從等待中移除' : 'Removed from queue', 'info', 2500);
+            pollProtoPill();
+          } catch (error) {
+            button.disabled = false;
+            UI.showToast(`${isZh ? '移除失敗' : 'Remove failed'}：${error.message}`, 'error');
+          }
+        });
+      });
     } catch { /* silent */ }
   }
   setInterval(pollProtoPill, 5000);
   setTimeout(pollProtoPill, 1200);
-
-  // ── V2.17.5 — Premarket chain status pill (single unit with 3 sub-rows) ──
-  // Surfaces /api/run-premarket-chain/status across every page so when user
-  // closes the preflight modal mid-run, they still see daily/news/sector
-  // progress as ONE pill (cannot dismiss individual rows — chain is atomic).
-  function ensureChainPill() {
-    let pill = document.getElementById('chain-status-pill');
-    if (pill) return pill;
-    pill = document.createElement('div');
-    pill.id = 'chain-status-pill';
-    pill.className = 'chain-status-pill hidden';
-    pill.innerHTML = `
-      <div class="chain-pill-head">
-        <span class="chain-pill-head-icon">🔄</span>
-        <span class="chain-pill-head-title">盤前檢查</span>
-        <span class="chain-pill-head-elapsed" id="chain-pill-elapsed">—</span>
-      </div>
-      <div class="chain-pill-rows">
-        <div class="chain-pill-row" data-key="daily">
-          <span class="chain-pill-row-icon">⏳</span>
-          <span class="chain-pill-row-label">daily</span>
-          <span class="chain-pill-row-meta">—</span>
-        </div>
-        <div class="chain-pill-row" data-key="news">
-          <span class="chain-pill-row-icon">⏳</span>
-          <span class="chain-pill-row-label">news</span>
-          <span class="chain-pill-row-meta">—</span>
-        </div>
-        <div class="chain-pill-row" data-key="sector">
-          <span class="chain-pill-row-icon">⏳</span>
-          <span class="chain-pill-row-label">sector</span>
-          <span class="chain-pill-row-meta">—</span>
-        </div>
-      </div>`;
-    document.body.appendChild(pill);
-    return pill;
-  }
-
-  const _CHAIN_GLYPH = { skipped: '✅', queued: '⏳', running: '🔄', done: '✅', degraded: '⚠️', error: '❌' };
-  function _chainMeta(it, isZh) {
-    const el = fmtElapsed(it.elapsed_sec || 0);
-    switch (it.status) {
-      case 'skipped': return isZh ? '已新鮮 · 跳過' : 'fresh · skipped';
-      case 'queued':  return isZh ? '排隊中' : 'queued';
-      case 'running': return `${isZh ? '執行中' : 'running'} · ${el}`;
-      case 'done':    return `${isZh ? '完成' : 'done'} · ${el}`;
-      case 'degraded': return `${isZh ? '降級完成，繼續' : 'degraded, continuing'} · ${el}`;
-      case 'error':   return (it.error || '').slice(0, 60) || (isZh ? '錯誤' : 'error');
-      default:        return '—';
-    }
-  }
-
-  // V2.17.11 — terminal-state auto-hide is computed each tick from server's
-  // `ended_at` (no setTimeout needed). Previous setTimeout-based approach kept
-  // re-showing the pill after the timer fired because the next poll saw
-  // status='done' (server keeps the terminal state until next chain run) and
-  // unconditionally removed the hidden class. Computing the age fresh per tick
-  // gives a stable "show while running, then 60s, then hide forever" behavior.
-  const TERMINAL_GRACE_MS = 60000;
-  async function pollChainPill() {
-    try {
-      const r = await fetch('/api/run-premarket-chain/status', { cache: 'no-store' });
-      if (!r.ok) return;
-      const s = await r.json();
-      const pill = ensureChainPill();
-      const isZh = (window.UI && UI.currentLang === 'zh') || (document.documentElement.lang || '').startsWith('zh');
-
-      const modalOpen = !document.getElementById('preflight-modal')?.classList.contains('hidden');
-      const terminal  = (s.status === 'done' || s.status === 'error');
-      const terminalAgedOut = terminal && s.ended_at &&
-        (Date.now() - new Date(s.ended_at).getTime()) > TERMINAL_GRACE_MS;
-
-      if (s.status === 'idle' || modalOpen || terminalAgedOut) {
-        pill.classList.add('hidden');
-        return;
-      }
-      pill.classList.remove('hidden');
-
-      const protoPill = document.getElementById('proto-status-pill');
-      pill.classList.toggle('has-proto-pill', !!protoPill && !protoPill.classList.contains('hidden'));
-
-      pill.querySelector('.chain-pill-head-title').textContent = isZh ? '盤前檢查' : 'Pre-market check';
-      pill.querySelector('#chain-pill-elapsed').textContent = fmtElapsed(s.elapsed_sec || 0);
-
-      const items = s.items || {};
-      for (const k of ['daily', 'news', 'sector']) {
-        const row = pill.querySelector(`.chain-pill-row[data-key="${k}"]`);
-        if (!row) continue;
-        const it = items[k] || {};
-        row.querySelector('.chain-pill-row-icon').textContent = _CHAIN_GLYPH[it.status] || '⏳';
-        row.querySelector('.chain-pill-row-meta').textContent = _chainMeta(it, isZh);
-      }
-    } catch { /* silent */ }
-  }
-  setInterval(pollChainPill, 3000);
-  setTimeout(pollChainPill, 1400);
 
 })();
 

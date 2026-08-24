@@ -1,0 +1,77 @@
+=== script_protocol=shadow_report cmd=['python3', 'investment/scripts/shadow_report.py'] started=2026-08-16T00:05:12 ===
+# Shadow Report — 2026-08-16
+
+> 唯讀讀出端。history entries scanned: 192。
+
+## #2 Anchor Dispersion（backfill — 立即可用）
+
+- 樣本 n=80，CV min/P33/median/P66/max = 0.033 / 0.392 / 0.4568 / 0.5406 / 1.3224
+- 現行門檻 high<0.15 / low>0.35（拍腦袋初值）
+- **建議門檻（33/66 pct）**: high<0.392 / low>0.5406
+- 建議門檻 = 歷史 CV 33/66 percentile（三等分 high/medium/low）。#2 cap 接線前由 user 核可。
+
+## #6 Owner-Earnings 倍數 shadow
+
+- 累積 18/20 session；翻轉 8 筆（rate=0.4444）；decision: **accumulating**
+- checkpoint: ≥20 session 且翻轉率 <15% → 切換提案
+
+## #3 Valuation Archetype shadow
+
+- 累積 45/20 session；翻轉率 0.3333；archetype 分布 {'hypergrowth': 21, 'balanced': 18, 'cyclical': 3, 'financial': 3}
+- checkpoint: ≥20 session → 翻轉率報告 → user 拍 → #3b 切 live（含 cap/T5 接線）
+
+## #4 News PT 去重監測
+
+- post-切換 8 session（凍結窗剩 2）
+- baseline mean 1.71 → post mean 1.125（shift -0.585）
+- 分布 baseline {'-1': 1, '0': 2, '1': 6, '2': 18, '3': 4} → post {'-1': 1, '0': 1, '1': 3, '2': 2, '3': 1}
+- leakage: 0/42（rate=0.0）
+- 預期 post mean 較 baseline 下移（PT +1 源移除）；下移 ≈ 證實 PT 曾在計分。凍結窗滿後恢復 News weight 調整。
+
+## L5 Sentiment deterministic shadow
+
+- 累積 6/20 筆樣本；方向翻轉 0 筆（rate=0.0，門檻 <20%）；decision: **accumulating**
+- |det − LLM| 平均 0.002／最大 0.005
+- checkpoint: ≥20 筆 shadow 樣本（1 筆 = 一支個股的一次分析，非 session 數）且方向翻轉率（POS↔NEG 對翻）<20% → 翻預設提案（**需使用者拍板**）。翻後照 V3.45.4 News 前例上 weight 凍結窗。det 拿掉了 LLM 的規則表外因子，分數差異是預期的；band_mismatch（NEUTRAL↔方向性）另列——它量的是帶寬不是方向，集中出現時該檢討 SENTIMENT_NEUTRAL_BAND 而不是擋翻預設。另看 missing_inputs 是否集中在同幾檔。
+
+| 日期 | ticker | LLM | det | Δ | 方向 | missing |
+|---|---|---|---|---|---|---|
+| 2026-08-07 | NET | 0.97 | 0.965 | -0.005 | POS→POS | 2 |
+| 2026-08-07 | AAOI | -0.55 | -0.545 | +0.005 | NEG→NEG | 2 |
+| 2026-08-09 | PLTR | 0.33 | 0.33 | +0.0 | NEUTRAL→NEUTRAL | 2 |
+| 2026-08-09 | BAC | 0.83 | 0.83 | +0.0 | POS→POS | 2 |
+| 2026-08-10 | RKLB | 0.08 | 0.08 | +0.0 | NEUTRAL→NEUTRAL | 2 |
+| 2026-08-10 | NVDA | 0.58 | 0.58 | +0.0 | POS→POS | 2 |
+
+## FWD_PE_CLAMP 校準（V4.108.0 — 反解市場隱含 PE，立即可用）
+
+- 來源 `*_pf_quant.json`（同標的取最新一次）；全母體 n=6，其中 anchor live **n=1**
+- **live cohort**（判準來源）隱含 PE min/P33/median/P66/max = 241.3 / 241.3 / 241.3 / 241.3 / 241.3
+- 全母體（背景脈絡，混 archetype，**不是**校準目標）= 13.5 / 21.7 / 26.8 / 31.9 / 241.3；帶內 3/6，高於上限 2，低於下限 1
+- 現行 clamp [15.0, 35.0]；上限實際綁到 2/6（rate=0.3333）
+- 折現率：beta fallback 0/6（rate=0.0，資料品質訊號——偏高就該重量 `FWD_BETA_FALLBACK`）；折現率 clamp 綁到 2/6
+- **判準**: accumulating（live cohort 1/5）
+- 上限校準判準 = **live cohort** 的市場隱含 PE P33–P66 是否包住現行上限（包住 = 對中位數標的不帶方向）。全母體那組只是背景脈絡，混了 archetype，不可當校準目標。**不可自動跟隨中位數**：泡沫期中位數上移、上限跟著上移，錨就永遠不會說貴——與 agreement_grade 同紀律，改值一律 user 核准。
+
+| ticker | 狀態 | 目標年 | 市場隱含 PE | 我們給的 PE | 未夾前 | clamp | anchor | 價 |
+|---|---|---|---:|---:|---:|---|---:|---:|
+| BAC | ineligible | 2028-12 | 13.5 | 15.0 | 11.87 | lower | 70.02 | 63.17 |
+| META | ineligible | 2029-12 | 16.4 | 27.03 | 27.03 | — | 977.93 | 592.1 |
+| NOW | ineligible | 2029-12 | 24.3 | 16.55 | 16.55 | — | 85.01 | 124.88 |
+| NVDA | ineligible | 2030-01 | 29.2 | 15.0 | -19.8 | lower | 114.9 | 223.96 |
+| PLTR | ineligible | 2029-12 | 37.4 | 35.0 | 97.07 | upper | 160.97 | 172.01 |
+| RKLB | eligible | 2029-12 | 241.3 | 35.0 | 84.24 | upper | 12.01 | 82.83 |
+
+## Lane Model 分層哨兵（V4.0.0 — Sent/News/Tech → Sonnet 監測）
+
+- 近 10 session（baseline n=80）lane mean drift：
+  - fundamentals: baseline 1.35 → recent 2.0（drift 0.65）
+  - sentiment: baseline 0.39 → recent 0.81（drift 0.42）
+  - news: baseline 1.68 → recent 1.74（drift 0.06）
+  - technical: baseline 0.74 → recent 1.3（drift 0.56）
+- 近 10 val DISAGREE: 0；polarization 異常: 4
+- 哨兵規則：降級 lane 的 |drift| 明顯 > 其他 lane、或 DISAGREE/BIPOLAR 率較歷史升 → 該 lane 改回 inherit（V4.0.0 Phase 2 model 分層表）
+
+[shadow_report] written: /Users/kavi/Developer/Claude/Projects/ai-investment-committee/reports/SHADOW_REPORT_2026-08-16.md
+
+=== ended=2026-08-16T00:05:12 rc=0 ===

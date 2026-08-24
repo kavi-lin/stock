@@ -5,7 +5,8 @@ The gate exists because on 2026-08-09 a run turned `✗ no *_phase0_*.json found
 into `✓ V4.9 compliant` by copying a two-day-old snapshot and editing one field.
 Every field check in the validator passed, because none of them read a date.
 
-Two properties are pinned here, and they answer different questions:
+The contract pins resolver, freshness, copy detection, and the real CLI schema gate.
+The two freshness properties answer different questions:
 
   * the date says what the file *claims*;
   * the copy check says whether anything was actually *fetched*.
@@ -22,8 +23,10 @@ from __future__ import annotations
 import copy
 import json
 import os
+import subprocess
 import sys
 import tempfile
+import time
 from datetime import date, timedelta
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -43,6 +46,7 @@ GOOD = {
     "phase": 0,
     "scan_date": "2026-08-09",
     "phase0_source": "fred-macro",
+    "macro_summary": {"market_regime": "Goldilocks"},
     "fred_available": True,
     "fred_snapshot": {
         "regime_label": "Goldilocks",
@@ -165,6 +169,41 @@ with tempfile.TemporaryDirectory() as d:
     pb = write(d, "x_phase0_b.json", bad)
     check("malformed_date.rejected",
           any("not YYYY-MM-DD" in e for e in run(d, pb, bad)), "")
+
+with tempfile.TemporaryDirectory() as d:
+    # Phase 0 is market-wide: a GEV run can reuse an AAOI-era legacy filename,
+    # and a canonical file wins an mtime tie while migration remains compatible.
+    legacy = write(d, "2026-08-21_phase0_aaoi.json", GOOD)
+    check("resolver.cross_ticker_legacy",
+          vp.find_latest("GEV", logs_dir=d) == os.path.abspath(legacy), "")
+    canonical = write(d, "2026-08-21_phase0.json", GOOD)
+    tied = time.time() - 1
+    os.utime(legacy, (tied, tied))
+    os.utime(canonical, (tied, tied))
+    check("resolver.canonical_wins_tie",
+          vp.find_latest("GEV", logs_dir=d) == os.path.abspath(canonical), "")
+
+with tempfile.TemporaryDirectory() as d:
+    # Walk the real CLI entry so removing the schema check from main() makes
+    # this contract red (a helper-only test would miss a disconnected gate).
+    current = copy.deepcopy(GOOD)
+    current["scan_date"] = date.today().isoformat()
+    good_path = write(d, "current_phase0.json", current)
+    cli = subprocess.run(
+        [sys.executable, vp.__file__, "--path", good_path],
+        capture_output=True, text=True,
+    )
+    check("cli.explicit_path_passes", cli.returncode == 0, cli.stderr)
+    missing = copy.deepcopy(current)
+    missing.pop("macro_summary")
+    bad_path = write(d, "missing_macro_phase0.json", missing)
+    cli = subprocess.run(
+        [sys.executable, vp.__file__, "--path", bad_path],
+        capture_output=True, text=True,
+    )
+    check("cli.missing_macro_rejected",
+          cli.returncode == 1 and "missing top-level key: macro_summary" in cli.stderr,
+          cli.stderr)
 
 if failures:
     print("✗ phase0 freshness gate contract violated:")

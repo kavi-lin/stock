@@ -609,10 +609,10 @@ _SIG = {l: "BUY" for l in V.CONFLICT_LANES}
 
 
 def cb_eval(label, want, *, scores=None, signals=None, macro=-1.0, burry=37.1,
-            tentative="BUY"):
+            tentative="BUY", forward=None):
     sc = dict(_S, **(scores or {}))
     sg = dict(_SIG, **(signals or {}))
-    got = V.evaluate_conflict_triggers(sc, sg, macro, burry, tentative)
+    got = V.evaluate_conflict_triggers(sc, sg, macro, burry, tentative, forward)
     for trig, expect in want.items():
         check(f"cb.eval.{label}.{trig}", got[trig] is expect,
               f"{trig}={got[trig]!r} want {expect!r}")
@@ -639,12 +639,17 @@ cb_eval("t3_needs_high_buy_lane", {"T3": False}, macro=-4.0,
 cb_eval("t4_fires", {"T4": True}, burry=15.0)
 cb_eval("t4_boundary", {"T4": False}, burry=20.0)
 cb_eval("t4_needs_buy_tentative", {"T4": False}, burry=15.0, tentative="HOLD")
-# T5 — 估值警告撞上 BUY 側 tentative（STAGED_ENTRY 也算 BUY 側）。
-cb_eval("t5_fires", {"T5": True}, scores={"valuation": -2.0})
+# T5 — 負估值 + BUY 側 tentative 還不夠；forward_validation 必須明確 FAIL。
+_FV_FAIL = {"status": "FAIL", "applies": True}
+cb_eval("t5_fires", {"T5": True}, scores={"valuation": -2.0}, forward=_FV_FAIL)
 cb_eval("t5_staged_counts", {"T5": True}, scores={"valuation": -3.0},
-        tentative="STAGED_ENTRY")
+        tentative="STAGED_ENTRY", forward=_FV_FAIL)
 cb_eval("t5_hold_does_not", {"T5": False}, scores={"valuation": -3.0},
-        tentative="HOLD")
+        tentative="HOLD", forward=_FV_FAIL)
+cb_eval("t5_forward_support_blocks", {"T5": False}, scores={"valuation": -3.0},
+        tentative="STAGED_ENTRY", forward={"status": "STRETCHED", "applies": True})
+cb_eval("t5_missing_forward_is_unknown", {"T5": None}, scores={"valuation": -3.0},
+        tentative="STAGED_ENTRY")
 # 缺輸入 → None（不得猜成 False）。判 False 等於替最需要證據的那一側背書。
 cb_eval("indeterminate_missing_score", {"T5": None}, scores={"valuation": None})
 cb_eval("indeterminate_missing_signal", {"T2": None}, scores={"news": -4.0},
@@ -726,8 +731,12 @@ cb_case("cb.no_proceed_must_be_cancel", 1, "proceed_to_phase3=false",
 cb_case("cb.schema_tag_enforced", 1, "conflict_bias.schema",
         mutate=lambda t, e: t["conflict_bias"].update(schema="conflict_bias.v2"))
 
-# T5 幽靈規則刻意**不**強制：valuation ≤ −3 而 final_decision 仍在 BUY 側，只留 warning。
-# 實據 2026-08-09 NOW。這條鎖住「沒有人偷偷把它變成 error」——補實作是改決策數學，需拍板。
+# Engine 1.1.0 is the cutover: omitting the deterministic block must fail through
+# the real validator entry point, not merely through a directly-called helper.
+cb_case("forward.required_for_engine_1_1", 1, "forward_validation missing",
+        mutate=lambda t, e: t.update(decision_engine_version="1.1.0"))
+
+# Legacy 1.0.x 沒有 producer，仍維持歷史相容：valuation ≤−3 只留 warning。
 _t5_errors, _t5_warnings = [], []
 V.check_conflict_bias(
     {"export_date": CB_CUTOFF, "phase0_macro_snapshot": {"macro_backdrop_score": -1.0}},
@@ -744,10 +753,38 @@ V.check_conflict_bias(
                        "t5_detail": {"valuation_score": -3.0, "downgrade_applied": False},
                        "proceed_to_phase3": True}},
     _t5_errors, _t5_warnings)
-check("cb.t5_phantom_is_not_enforced", not _t5_errors,
-      f"T5 的自動降階今天沒有產生器，validator 不得強制它：{_t5_errors}")
-check("cb.t5_phantom_is_recorded", any("T5" in w for w in _t5_warnings),
-      f"該降而沒降至少要留下 warning，否則幽靈規則連紀錄都沒有：{_t5_warnings}")
+check("cb.t5_legacy_is_not_enforced", not _t5_errors,
+      f"engine 1.0.x 沒有 producer，validator 不得溯及既往：{_t5_errors}")
+check("cb.t5_legacy_is_recorded", any("T5" in w for w in _t5_warnings),
+      f"legacy T5 至少要留下 warning：{_t5_warnings}")
+
+# New engine: the exact same false non-downgrade is now an error when forward FAIL exists.
+_new_t5 = {
+    "forward_validation_status": "FAIL", "forward_validation_applies": True,
+    "valuation_score": -3.0, "warning_triggered": True,
+    "hard_downgrade_eligible": True, "downgrade_applied": False,
+    "decision_before": "STAGED_ENTRY", "decision_after": "STAGED_ENTRY",
+}
+_new_t5_errors, _new_t5_warnings = [], []
+V.check_conflict_bias(
+    {"export_date": CB_CUTOFF, "phase0_macro_snapshot": {"macro_backdrop_score": -1.0}},
+    {"decision_engine_version": "1.1.0", "final_decision": "STAGED_ENTRY",
+     "final_action": "STAGED", "burry_score": 37.1,
+     "forward_validation": {"status": "FAIL", "applies": True},
+     "calculation_steps": {"t5_forward_validation": dict(_new_t5)},
+     "lane_scores": {"fundamentals": 2.5, "sentiment": 2.0, "news": 2.0,
+                     "technical": 2.5, "valuation": -3.0},
+     "valuation_lane": {"signal": "SELL", "score": -3.0},
+     "conflict_bias": {"schema": "conflict_bias.v1", "tentative_decision": "STAGED_ENTRY",
+                       "lane_signals": {"fundamentals": "BUY", "sentiment": "BUY",
+                                        "news": "BUY", "technical": "BUY",
+                                        "valuation": "SELL"},
+                       "triggers_fired": ["T5"], "t4_detail": None,
+                       "t5_detail": dict(_new_t5), "proceed_to_phase3": True}},
+    _new_t5_errors, _new_t5_warnings)
+check("cb.t5_new_engine_enforces_downgrade",
+      any("hard downgrade eligible" in e for e in _new_t5_errors),
+      f"engine 1.1.0 的 T5 必須把未降級升為 error：{_new_t5_errors}")
 
 # ── 7. V4.122.0 §17 — Phase 2 fan-in 紀律（inline fallback 的 confidence cap）─────
 # 「subagent 失敗 → PM inline，confidence cap 0.6」從 V4.8 寫到今天，沒有一處驗算過。
@@ -852,4 +889,4 @@ if failures:
     sys.exit(1)
 print("✓ export gate contract holds (valuation_reviewer_gate + technical rubric + "
       "export_provenance + pt_revision_momentum + calculation_steps parity + "
-      "conflict_bias + fan-in discipline)")
+      "forward_validation + conflict_bias + fan-in discipline)")

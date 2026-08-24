@@ -316,6 +316,29 @@ def resolve_identity(tickers: list[str]) -> dict:
     return flags
 
 
+def price_backend_status() -> str | None:
+    """Why the price backend is unusable right now, or None when it is fine.
+
+    Split out so `mark_unanalyzable` can tell two opposite things apart. Both
+    arrive as "this symbol is missing from `prices`":
+
+      * FMP was asked and has no series for it   → a fact about the TICKER
+      * FMP was never asked                      → a fact about this MACHINE
+
+    Real case, 2026-08-16: Homebrew upgraded the default `python3` to 3.14 with
+    an empty site-packages, so `import requests` (via fmp_pool) raised, this
+    function's caller returned `{}`, and the page reported "no price series in
+    FMP" for every symbol including NVDA and AMZN. FMP was fine; nothing had
+    called it. An error message that names the wrong subsystem sends you to
+    debug the wrong thing.
+    """
+    try:
+        from scripts._shared import fmp_pool  # noqa: F401
+    except Exception as exc:
+        return f"{type(exc).__name__}: {exc}"
+    return None
+
+
 def fetch_price_context(tickers: list[str]) -> dict:
     """5d / 1m / YTD move per ticker, so a promote/reject call is informed rather
     than a guess. Degrades to {} — heat must still print if FMP is unavailable."""
@@ -361,9 +384,16 @@ def mark_unanalyzable(stats: dict, prices: dict, identity: dict) -> dict:
     cluster — it just can never be promoted to a position-level analysis. Those
     are different jobs, which is exactly why they are separate stages here.
     """
+    backend_error = price_backend_status()
     out = {}
     for sym in stats:
         if sym in prices:
+            continue
+        if backend_error:
+            # Say what actually happened. Claiming FMP has no series for NVDA
+            # is a false statement about the ticker, and it points whoever
+            # reads it at the data vendor instead of at this machine.
+            out[sym] = f"price backend unavailable on this host ({backend_error})"
             continue
         reason = "no price series in FMP"
         info = identity.get(sym) or {}

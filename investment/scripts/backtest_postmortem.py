@@ -18,6 +18,7 @@ import argparse
 import datetime as dt
 import re
 import sys
+from collections import Counter
 from pathlib import Path
 
 try:
@@ -32,7 +33,11 @@ DEFAULT_REPORTS = ROOT / "reports"
 
 # ----------------- regex parsers -----------------
 
-DEC_RE = re.compile(r"\|\s*\*?\*?Final Decision\*?\*?\s*\|\s*\*?\*?(BUY|HOLD|SELL|STAGED_ENTRY)\*?\*?\s*\|", re.I)
+# V4.128.0 — 允許決策格帶後綴。V4.87.0 的 deterministic renderer 把 action 摺進同一格
+# （`| Final Decision | HOLD（action: CANCEL） |`），舊 regex 要求決策字後面直接接 `|`，
+# 於是 145 份 NEW-format 報告裡有 33 份解析成 None —— 而工具照樣 rc=0 吐一張 None 表。
+DEC_RE = re.compile(
+    r"\|\s*\*?\*?Final Decision\*?\*?\s*\|\s*\*?\*?(BUY|HOLD|SELL|STAGED_ENTRY)\*?\*?", re.I)
 # Fallback: extract decision from RESULT row when summary table missing/non-standard
 RESULT_DEC_RE = re.compile(
     r"\|\s*[A-Z]*\s*\|\s*\*?\*?(BUY|HOLD|SELL|STAGED_ENTRY)\*?\*?\s*\|\s*[+-]?\d+\.?\d*\s*\|",
@@ -43,6 +48,10 @@ SCORE_RE = re.compile(r"\|\s*\*{0,2}Final Score\*{0,2}\s*\|\s*\*{0,2}([+-]?\d+\.
 POS_RE = re.compile(r"\|\s*\*?\*?Position Size\*?\*?\s*\|\s*([\d.]+)%", re.I)
 RR_RE = re.compile(r"\|\s*\*?\*?Risk/Reward\*?\*?\s*\|\s*([\d.]+)", re.I)
 ACTION_RE = re.compile(r"\|\s*\*?\*?Action\*?\*?\s*\|\s*\*?\*?(EXECUTE|CANCEL|SKIP|STAGED|WAIT|MONITOR)\*?\*?", re.I)
+# 同上：現行 renderer 沒有獨立的 `| Action |` 列，action 寫在決策格的括號裡
+# （全形或半形括號都出現過）。126/145 份報告的 action 過去都解析成 None。
+ACTION_INLINE_RE = re.compile(
+    r"Final Decision.*?[（(]\s*action\s*[:：]\s*(EXECUTE|CANCEL|SKIP|STAGED|WAIT|MONITOR)", re.I)
 
 # per-lane in Visualization Table — "| Fundamentals | BUY | 2.5 | 0.78 | ..."
 LANE_RE = re.compile(
@@ -107,7 +116,12 @@ def parse_report(path):
     out["final_score"] = float(find1(SCORE_RE)) if find1(SCORE_RE) else None
     out["pos_pct"] = float(find1(POS_RE)) if find1(POS_RE) else None
     out["rr"] = float(find1(RR_RE)) if find1(RR_RE) else None
-    out["action"] = find1(ACTION_RE)
+    out["action"] = find1(ACTION_RE) or find1(ACTION_INLINE_RE)
+    # 解析不出決策的報告要能被數出來。**這支工具的每一列都以 decision 為主詞**，
+    # 靜靜填 None 會讓「renderer 換格式」和「那天沒做決策」在輸出上長得一模一樣
+    # （MAINTENANCE §2c）。旗標由 main() 彙總成一行 stderr 警告。
+    out["parse_incomplete"] = [k for k in ("decision", "action", "final_score")
+                               if out.get(k) is None]
 
     # Lanes
     lanes = {}
@@ -490,6 +504,19 @@ def main():
         print(f"  {parsed['date']} {parsed['ticker']}: "
               f"{parsed.get('decision', '?')} score={parsed.get('final_score')} "
               f"ret10d={parsed.get('ret_10d')}", file=sys.stderr)
+
+    # 解析缺口彙總。V4.87.0 的 renderer 換了決議摘要的格式，而舊 regex 靜靜回 None：
+    # 145 份 NEW-format 報告裡 decision 漏 33 份、action 漏 126 份，工具照樣 rc=0。
+    # 下次 renderer 再變格式時，這行會先講話，不必等到有人發現整欄都是 None。
+    incomplete = [r for r in rows if r.get("parse_incomplete")]
+    if incomplete:
+        miss = Counter(k for r in incomplete for k in r["parse_incomplete"])
+        print(f"⚠ {len(incomplete)}/{len(rows)} 份報告有欄位解析不出來："
+              f"{dict(miss)} — 報告格式可能又變了，先確認 regex 再讀下面的統計",
+              file=sys.stderr)
+        for r in incomplete[:5]:
+            print(f"    {r['date']} {r['ticker']}: 缺 {r['parse_incomplete']}",
+                  file=sys.stderr)
 
     run_date = dt.date.today().isoformat()
     report_md = render_report(rows, run_date)

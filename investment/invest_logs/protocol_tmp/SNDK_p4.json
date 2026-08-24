@@ -1,0 +1,57 @@
+{
+  "ticker": "SNDK",
+  "final_decision": "STAGED_ENTRY",
+  "analysis_price": 1600.62,
+  "time_horizon": "mid",
+  "sector": "Technology",
+  "multi_horizon_price_framework": {
+    "short_term_5d": {
+      "band": [1154.32, 1600.62, 2046.92],
+      "band_capped": [1514.36, 1600.62, 1696.37],
+      "drift_sigma": 0.0,
+      "sigma_daily": 0.09742,
+      "atr_14": 143.6793,
+      "confidence": "high",
+      "catalyst_widened": false,
+      "key_level_note": "下界受 support $1514.36 撐住（原始 $1154.32）；上界受 resistance $1696.37 壓制（原始 $2046.92）"
+    },
+    "mid_term_60d": {
+      "momentum_target": 1595.82,
+      "pt_60d": 1670.33,
+      "earnings_revision": null,
+      "weights_used": {"momentum": 0.5333, "pt_60d": 0.4667},
+      "mid_target": 1630.59,
+      "reality_check_note": "mid_target 在 key levels 區間內"
+    },
+    "long_term_ref": {
+      "weighted_fair_value": 285.58,
+      "verdict_band": "extreme_overvalued",
+      "confidence": "low"
+    },
+    "convergence": {
+      "mhp_signal": "wait_for_pullback",
+      "signal_note": "5d 帶下界 $1514.36 > 長期FV $285.58 → 短期超漲、長期偏貴，等回檔（長期FV 信心 low，訊號僅供參考）"
+    },
+    "engine": "compute_price_framework.py v2.4 (V4.131.13)"
+  },
+  "technical": {
+    "key_levels": {"support": 1514.36, "resistance": 1696.37},
+    "pattern": "consolidation",
+    "rs_rating": null,
+    "distance_from_50ma_pct": -3.29
+  },
+  "phase0": {
+    "ftd": {"state": "FTD_CONFIRMED", "days_since_ftd": 12},
+    "macro_backdrop_score": 0.0
+  },
+  "phase3": {
+    "position_size_cap_pct": 100,
+    "polar_position_cap_pct": 100,
+    "hot_zone_probe": false,
+    "hot_zone_position_size_cap": null,
+    "t4_resolution": "NONE",
+    "binary_classification": "unknown",
+    "binary_event_within_48h": false
+  },
+  "mandatory_risk_flags": ["valuation_sell"]
+}

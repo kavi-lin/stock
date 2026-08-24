@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts._shared import broker_gate, model_router  # noqa: E402
+from scripts._shared import broker_gate, llm_task_registry, model_router  # noqa: E402
 from scripts._shared.broker_client import BrokerError, parse_run_stream  # noqa: E402
 from scripts.break_news import llm_drivers  # noqa: E402
 from scripts.wind import budget as budget_mod  # noqa: E402
@@ -258,7 +258,9 @@ def acquire_reasoning_lease(config: dict):
     agents = dispatch.get("reasoning_agents") or ["claude", "gemini", "codex"]
     if not isinstance(agents, list):
         raise RuntimeError("dispatch.reasoning_agents must be a JSON list")
-    allowed_agents = [str(agent).strip().lower() for agent in agents]
+    certified = set(llm_task_registry.certified_models("wind_reasoning"))
+    allowed_agents = [str(agent).strip().lower() for agent in agents
+                      if str(agent).strip().lower() in certified]
     providers = [broker_gate.provider_for(agent) for agent in allowed_agents]
     providers = [provider for provider in providers if provider]
     if not providers:
@@ -269,15 +271,16 @@ def acquire_reasoning_lease(config: dict):
     if broker is None:
         raise RuntimeError("quota broker is disabled; Wind reasoning is fail-closed")
 
-    estimated_input = int(dispatch.get("reasoning_estimated_input_tokens", 40_000))
-    estimated_output = int(dispatch.get("reasoning_estimated_output_tokens", 8_000))
+    default_input, default_output = llm_task_registry.token_estimate("wind_reasoning")
+    estimated_input = int(dispatch.get("reasoning_estimated_input_tokens", default_input))
+    estimated_output = int(dispatch.get("reasoning_estimated_output_tokens", default_output))
     ttl = int(dispatch.get("reasoning_reservation_ttl_sec", 900))
     lease = broker.acquire(
         task_id=broker_gate.new_task_id("wind-reasoning"),
         task_type="wind_reasoning",
         estimated_input_tokens=estimated_input,
         estimated_output_tokens=estimated_output,
-        requires_web=False,
+        requires_web=llm_task_registry.requires_web("wind_reasoning"),
         preferred_providers=providers,
         forbidden_providers=[p for p in _ALL_PROVIDER_IDS if p not in providers],
         reservation_ttl_seconds=ttl,

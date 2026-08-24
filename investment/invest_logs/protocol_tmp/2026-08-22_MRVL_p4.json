@@ -1,0 +1,58 @@
+{
+  "ticker": "MRVL",
+  "final_decision": "HOLD",
+  "analysis_price": 237.695,
+  "time_horizon": "mid",
+  "sector": "Technology",
+  "stop_buffer_pct": 1.0,
+  "multi_horizon_price_framework": {
+    "short_term_5d": {
+      "band": [196.85, 237.69, 278.54],
+      "band_capped": [222.88, 237.69, 251.64],
+      "drift_sigma": 0.0,
+      "sigma_daily": 0.06004,
+      "atr_14": 17.535,
+      "confidence": "high",
+      "catalyst_widened": false,
+      "key_level_note": "下界受 support $222.88 撐住（原始 $196.85）；上界受 resistance $251.64 壓制（原始 $278.54）"
+    },
+    "mid_term_60d": {
+      "momentum_target": 264.26,
+      "pt_60d": 237.46,
+      "earnings_revision": null,
+      "weights_used": {"momentum": 0.5333, "pt_60d": 0.4667},
+      "mid_target": 251.75,
+      "reality_check_note": "需突破 $251.64 才成立"
+    },
+    "long_term_ref": {
+      "weighted_fair_value": 75.2,
+      "verdict_band": "extreme_overvalued",
+      "confidence": "low"
+    },
+    "convergence": {
+      "mhp_signal": "wait_for_pullback",
+      "signal_note": "5d 帶下界 $222.88 > 長期FV $75.20 → 短期超漲、長期偏貴，等回檔（長期FV 信心 low，訊號僅供參考）"
+    },
+    "engine": "compute_price_framework.py v2.4 (V4.131.13)"
+  },
+  "technical": {
+    "key_levels": {"support": 222.88, "resistance": 251.64},
+    "pattern": "consolidation",
+    "rs_rating": null,
+    "distance_from_50ma_pct": 1.71
+  },
+  "phase0": {
+    "ftd": {"state": "FTD_CONFIRMED", "days_since_ftd": 13},
+    "macro_backdrop_score": 1.0
+  },
+  "phase3": {
+    "position_size_cap_pct": 100,
+    "polar_position_cap_pct": 100,
+    "hot_zone_probe": false,
+    "hot_zone_position_size_cap": null,
+    "t4_resolution": "NONE",
+    "binary_classification": "unknown",
+    "binary_event_within_48h": false
+  },
+  "mandatory_risk_flags": ["valuation_extreme_overvalued"]
+}

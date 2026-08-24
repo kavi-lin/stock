@@ -1,0 +1,565 @@
+{
+  "as_of": "2026-08-17",
+  "week_label": "2026-08-17 當週",
+  "capital_per_basket": 100000,
+  "tier_weights": {
+    "core": 15000,
+    "standard": 10000,
+    "light": 5000
+  },
+  "discipline_note": "每籃固定核心 $15k×3、標準 $10k×4、輕倉 $5k×3。Greed、低 VIX 與偏高 SKEW 並存，原籃雖為 100% 名目配置，執行時採三段進場；近月急漲股僅列輕倉並等回檔，不追單日跳空。",
+  "macro": {
+    "regime": "Expansion；mood=Greed (23)，VIX 14.25 / LOW，殖利率曲線未倒掛",
+    "exposure_ceiling": "原三籃 100% 名目配置；實際首輪部署上限 85%，其餘待回檔或事件確認",
+    "breadth": "AI 與半導體 5 日廣度 66.7%，機器人 78.6%，雲端 100%；主線偏多但跨題材強弱不均",
+    "market_top": "SPY 776.34，位於 50 日均線之上；RSI(14)=65.8，接近過熱但尚未失速",
+    "sentiment": "Fear & Greed 65、VIX 14.25 偏低，SKEW 138.4 顯示尾部風險定價不可忽略",
+    "real_rate_10y": "1.37%（pack estimate）",
+    "key_events": [
+      "監測 SPY 是否維持 50 日均線之上",
+      "監測 10 年實質利率是否由 1.37% 持續上行",
+      "監測 VIX 14.25 與 SKEW 138.4 是否同步惡化"
+    ],
+    "playbook_logic": "擴張環境與 SPY 站上 50 日線支持風險資產；但 Greed、低 VIX、高 SKEW 限制追價。保險籃優先承接高質地回檔，激進籃聚焦 AI/半導體、雲端網路與電力基建，近月急漲或明顯高於委員會公平價值者降為輕倉。"
+  },
+  "codex_review": {
+    "label": "Codex Review",
+    "reviewed_on": "2026-08-17",
+    "review_mode": "committee_informed",
+    "committee_dependency": "medium",
+    "dependency_note": "市場狀態、題材廣度、動能與替代配置由 pack 獨立重排；META、NVDA、PLTR 的倉位另參考近 14 日委員會分數與公平價值，因此本 review 不宣稱 committee-blind。",
+    "verdict": "三籃的質地／高 beta 分層清楚，但 100% 名目股票曝險在 Greed、低 VIX、SKEW 138.4 的組合下偏積極。替代配置保留 20% 現金／短債，降低半導體與 AI 基建的共同因子集中，並只用 2% 觀察倉參與 PLTR。",
+    "comparison_notes": [
+      {
+        "title": "總曝險",
+        "original": "原三籃各配置 $100k 股票，合計權重 100%。",
+        "note": "建議只先部署 80%，保留 20% 現金／短債；若 SPY 守住 50 日線且 VIX/SKEW 未同步升高，再分批補足。"
+      },
+      {
+        "title": "集中度與相關性",
+        "original": "三籃核心仍集中於大型科技、AI 半導體、網路與資料中心電力鏈。",
+        "note": "即使 ticker 分散，營收與估值驅動因子高度重疊；替代配置壓低單一標的至 12%，並以現金緩衝共同回撤。"
+      },
+      {
+        "title": "高動能追價",
+        "original": "SMCI 1 月 +48.2%、NBIS 5 日 +47.7%、PLTR 1 月 +30.1% 均列激進籃輕倉等回檔。",
+        "note": "原分級方向正確；替代配置排除 SMCI、NBIS，PLTR 僅留 2% 觀察倉，避免跳空後均值回歸侵蝕本金。"
+      },
+      {
+        "title": "委員會爭議標的",
+        "original": "META、NVDA、PLTR 具有近 14 日委員會 verdict；其中現價均高於 pack 所列公平價值。",
+        "note": "META 的回檔可保留 8%，NVDA 因現價 225.16 相對公平價值 132.65 的落差而暫不列替代配置；PLTR 只留 2%，不以題材熱度覆蓋估值風險。"
+      },
+      {
+        "title": "風控可執行性",
+        "original": "原籃每檔均設週收盤 kill 條件，並要求分批進場。",
+        "note": "建議把 kill 與總曝險聯動：任兩檔觸發 kill 時停止補倉；SPY 跌回 50 日線下時，總股票曝險降至 60% 以下。"
+      }
+    ],
+    "recommended_allocation": [
+      {
+        "ticker": "現金／短債",
+        "weight_pct": 20,
+        "role": "事件風險與回檔加碼預備金"
+      },
+      {
+        "ticker": "GOOGL",
+        "weight_pct": 12,
+        "role": "大型平台與 AI 現金流核心"
+      },
+      {
+        "ticker": "TSM",
+        "weight_pct": 12,
+        "role": "先進製程核心"
+      },
+      {
+        "ticker": "AAPL",
+        "weight_pct": 10,
+        "role": "高品質終端平台與回檔承接"
+      },
+      {
+        "ticker": "META",
+        "weight_pct": 8,
+        "role": "廣告現金流與 AI 應用"
+      },
+      {
+        "ticker": "AVGO",
+        "weight_pct": 8,
+        "role": "客製晶片與網路基建"
+      },
+      {
+        "ticker": "AMD",
+        "weight_pct": 7,
+        "role": "AI 加速器高 beta"
+      },
+      {
+        "ticker": "ANET",
+        "weight_pct": 7,
+        "role": "AI 網路與雲端基建"
+      },
+      {
+        "ticker": "VRT",
+        "weight_pct": 6,
+        "role": "資料中心電力與散熱"
+      },
+      {
+        "ticker": "MRVL",
+        "weight_pct": 5,
+        "role": "AI 互連與客製晶片"
+      },
+      {
+        "ticker": "CEG",
+        "weight_pct": 3,
+        "role": "資料中心電力供應"
+      },
+      {
+        "ticker": "PLTR",
+        "weight_pct": 2,
+        "role": "高估值 AI 軟體觀察倉"
+      }
+    ],
+    "execution": [
+      "首日只建目標股票部位的 40%，不追高開超過前收 3% 的標的。",
+      "第二批 30% 僅在 SPY 仍位於 50 日線上且個股未觸發 kill 時投入。",
+      "剩餘 30% 等個股回測 10 日線或題材廣度再擴散；SMCI、NBIS 不以跳空方式追價。",
+      "任兩檔觸發 kill 即停止全組合加碼；SPY 跌破 50 日線時把股票曝險降至 60% 以下。"
+    ],
+    "sources": [
+      {
+        "label": "Federal Reserve Bank of St. Louis — 10-Year Real Interest Rate",
+        "url": "https://fred.stlouisfed.org/series/DFII10"
+      },
+      {
+        "label": "Cboe — VIX Index",
+        "url": "https://www.cboe.com/tradable_products/vix/"
+      },
+      {
+        "label": "NVIDIA Investor Relations",
+        "url": "https://investor.nvidia.com/"
+      }
+    ]
+  },
+  "baskets": {
+    "conservative": {
+      "label_zh": "保險",
+      "label_en": "Conservative",
+      "thesis": "以大型平台、先進製程與成熟半導體現金流為主，承接 GOOGL、AAPL、META、TXN、AMAT 的近月回檔；對月線急漲的 MSFT 與高於委員會公平價值的 NVDA 只給輕倉。",
+      "picks": [
+        {
+          "ticker": "GOOGL",
+          "tier": "core",
+          "weight_usd": 15000,
+          "theme": "AI 平台與雲端",
+          "price": 345.9,
+          "mom_5d": -2.4,
+          "mom_1mo": -6.7,
+          "committee": "近 14 日無 verdict",
+          "reason": "大型平台現金流與 AI/雲端選擇權兼具，月線回檔提供較佳切入點。",
+          "data": "現價 345.90；5 日 -2.4%，1 月 -6.7%。",
+          "kill": "週收盤跌破 $311，或雲端／廣告基本面明顯轉弱。"
+        },
+        {
+          "ticker": "AAPL",
+          "tier": "core",
+          "weight_usd": 15000,
+          "theme": "AI 終端與消費平台",
+          "price": 305.93,
+          "mom_5d": -2.3,
+          "mom_1mo": -6.5,
+          "committee": "近 14 日無 verdict",
+          "reason": "高品質生態系與服務現金流，月線回檔符合保險籃承接紀律。",
+          "data": "現價 305.93；5 日 -2.3%，1 月 -6.5%；AI 半導體題材 mover。",
+          "kill": "週收盤跌破 $275，或服務／終端需求同時惡化。"
+        },
+        {
+          "ticker": "TSM",
+          "tier": "core",
+          "weight_usd": 15000,
+          "theme": "先進製程",
+          "price": 426.35,
+          "mom_5d": 1.5,
+          "mom_1mo": 1.6,
+          "committee": "近 14 日無 verdict",
+          "reason": "AI 晶片供應鏈核心，短中期動能溫和，較少追價壓力。",
+          "data": "現價 426.35；5 日 +1.5%，1 月 +1.6%。",
+          "kill": "週收盤跌破 $384，或先進製程需求／產能利用率顯著轉弱。"
+        },
+        {
+          "ticker": "AVGO",
+          "tier": "standard",
+          "weight_usd": 10000,
+          "theme": "AI 客製晶片與網路",
+          "price": 392.99,
+          "mom_5d": -8.1,
+          "mom_1mo": -0.3,
+          "committee": "近 14 日無 verdict",
+          "reason": "AI 網路與客製晶片質地佳，5 日急跌適合分批而非一次抄底。",
+          "data": "現價 392.99；5 日 -8.1%，1 月 -0.3%。",
+          "kill": "週收盤跌破 $354，或 AI 網路訂單趨勢轉負。"
+        },
+        {
+          "ticker": "META",
+          "tier": "standard",
+          "weight_usd": 10000,
+          "theme": "AI 應用與數位廣告",
+          "price": 589.85,
+          "mom_5d": -0.4,
+          "mom_1mo": -13.4,
+          "committee": "2026-08-10 score 0.1271；FV 520.54；decision_cap=false",
+          "reason": "月線回檔支持再進場，但現價仍高於委員會公平價值，故不列核心。",
+          "data": "現價 589.85；5 日 -0.4%，1 月 -13.4%；較 FV 520.54 仍有溢價。",
+          "kill": "週收盤跌破 $531，或廣告變現與資本支出紀律同步惡化。"
+        },
+        {
+          "ticker": "TXN",
+          "tier": "standard",
+          "weight_usd": 10000,
+          "theme": "類比半導體",
+          "price": 279.58,
+          "mom_5d": -2.3,
+          "mom_1mo": -6.7,
+          "committee": "近 14 日無 verdict",
+          "reason": "成熟類比半導體分散純 AI beta，月線回檔有利風險報酬。",
+          "data": "現價 279.58；5 日 -2.3%，1 月 -6.7%。",
+          "kill": "週收盤跌破 $252，或工業／汽車需求復甦論點失效。"
+        },
+        {
+          "ticker": "ASML",
+          "tier": "standard",
+          "weight_usd": 10000,
+          "theme": "半導體設備",
+          "price": 1844.08,
+          "mom_5d": 5.9,
+          "mom_1mo": 1.7,
+          "committee": "近 14 日無 verdict",
+          "reason": "先進製程設備核心地位提供質地，月動能仍溫和。",
+          "data": "現價 1844.08；5 日 +5.9%，1 月 +1.7%。",
+          "kill": "週收盤跌破 $1660，或先進製程設備需求顯著下修。"
+        },
+        {
+          "ticker": "MSFT",
+          "tier": "light",
+          "weight_usd": 5000,
+          "theme": "雲端與企業 AI",
+          "price": 495.4,
+          "mom_5d": -0.9,
+          "mom_1mo": 25.2,
+          "committee": "近 14 日無 verdict",
+          "reason": "質地符合保險籃，但月線 +25.2% 已擴張，僅以輕倉等回檔。",
+          "data": "現價 495.40；5 日 -0.9%，1 月 +25.2%。",
+          "kill": "週收盤跌破 $446，或雲端成長／AI 變現明顯低於預期。"
+        },
+        {
+          "ticker": "NVDA",
+          "tier": "light",
+          "weight_usd": 5000,
+          "theme": "AI 加速器",
+          "price": 225.16,
+          "mom_5d": 0.5,
+          "mom_1mo": 6.0,
+          "committee": "2026-08-10 score 1.0166；FV 132.65；decision_cap=false",
+          "reason": "AI 主線核心但現價明顯高於委員會公平價值，只保留輕倉參與。",
+          "data": "現價 225.16；5 日 +0.5%，1 月 +6.0%；委員會 FV 132.65。",
+          "kill": "週收盤跌破 $203，或 AI 加速器需求／毛利率趨勢反轉。"
+        },
+        {
+          "ticker": "CEG",
+          "tier": "light",
+          "weight_usd": 5000,
+          "theme": "資料中心電力",
+          "price": 282.5,
+          "mom_5d": 4.7,
+          "mom_1mo": 9.4,
+          "committee": "近 14 日無 verdict",
+          "reason": "用電需求提供 AI 基建分散，但公用事業題材方向偏弱，限制為輕倉。",
+          "data": "現價 282.50；5 日 +4.7%，1 月 +9.4%；機器人題材 mover。",
+          "kill": "週收盤跌破 $254，或資料中心電力合約／政策支持轉弱。"
+        }
+      ]
+    },
+    "aggressive": {
+      "label_zh": "激進",
+      "label_en": "Aggressive",
+      "thesis": "聚焦最熱的 AI/半導體、雲端網路、資料中心電力與 PLTR 機器人／量子交集；核心選月線未過熱者，SMCI、NBIS、PLTR 因月線急漲或估值風險降為輕倉等回檔。",
+      "picks": [
+        {
+          "ticker": "AMD",
+          "tier": "core",
+          "weight_usd": 15000,
+          "theme": "AI 加速器",
+          "price": 514.39,
+          "mom_5d": 6.4,
+          "mom_1mo": -2.8,
+          "committee": "近 14 日無 verdict",
+          "reason": "AI 半導體主線高 beta，短線轉強但月線仍回檔，追價風險低於已暴漲標的。",
+          "data": "現價 514.39；5 日 +6.4%，1 月 -2.8%。",
+          "kill": "週收盤跌破 $452，或 AI 加速器市占／供應進度明顯惡化。"
+        },
+        {
+          "ticker": "MRVL",
+          "tier": "core",
+          "weight_usd": 15000,
+          "theme": "AI 互連與客製晶片",
+          "price": 222.02,
+          "mom_5d": 1.5,
+          "mom_1mo": 7.6,
+          "committee": "近 14 日無 verdict",
+          "reason": "位於最熱 AI 半導體題材且是當週 mover，動能正向但未極端。",
+          "data": "現價 222.02；5 日 +1.5%，1 月 +7.6%；AI 半導體題材 mover。",
+          "kill": "週收盤跌破 $195，或 AI 互連／客製晶片訂單動能轉負。"
+        },
+        {
+          "ticker": "VRT",
+          "tier": "core",
+          "weight_usd": 15000,
+          "theme": "資料中心電力與散熱",
+          "price": 293.84,
+          "mom_5d": 7.9,
+          "mom_1mo": -3.5,
+          "committee": "近 14 日無 verdict",
+          "reason": "資料中心基建高 beta，短線動能回升而月線尚未追高。",
+          "data": "現價 293.84；5 日 +7.9%，1 月 -3.5%。",
+          "kill": "週收盤跌破 $259，或資料中心電力／散熱訂單顯著轉弱。"
+        },
+        {
+          "ticker": "ANET",
+          "tier": "standard",
+          "weight_usd": 10000,
+          "theme": "AI 網路與雲端",
+          "price": 198.82,
+          "mom_5d": 5.4,
+          "mom_1mo": 15.6,
+          "committee": "近 14 日無 verdict",
+          "reason": "同時受惠機器人與雲端熱題，廣度強；月線偏熱故降為標準倉。",
+          "data": "現價 198.82；5 日 +5.4%，1 月 +15.6%；機器人與雲端 mover。",
+          "kill": "週收盤跌破 $175，或雲端網路訂單增速顯著放緩。"
+        },
+        {
+          "ticker": "CRDO",
+          "tier": "standard",
+          "weight_usd": 10000,
+          "theme": "高速連接",
+          "price": 259.9,
+          "mom_5d": 4.0,
+          "mom_1mo": 14.6,
+          "committee": "近 14 日無 verdict",
+          "reason": "AI 資料中心高速連接高 beta，動能強但尚未達極端追價區。",
+          "data": "現價 259.90；5 日 +4.0%，1 月 +14.6%。",
+          "kill": "週收盤跌破 $229，或高速連接需求／主要客戶動能轉負。"
+        },
+        {
+          "ticker": "MU",
+          "tier": "standard",
+          "weight_usd": 10000,
+          "theme": "AI 記憶體",
+          "price": 971.66,
+          "mom_5d": 10.7,
+          "mom_1mo": 7.5,
+          "committee": "近 14 日無 verdict",
+          "reason": "AI 記憶體延續主線，5 日快速上漲但月線尚未極端，採標準倉分批。",
+          "data": "現價 971.66；5 日 +10.7%，1 月 +7.5%。",
+          "kill": "週收盤跌破 $855，或記憶體價格／需求週期反轉。"
+        },
+        {
+          "ticker": "CEG",
+          "tier": "standard",
+          "weight_usd": 10000,
+          "theme": "資料中心電力",
+          "price": 282.5,
+          "mom_5d": 4.7,
+          "mom_1mo": 9.4,
+          "committee": "近 14 日無 verdict",
+          "reason": "提供 AI 算力鏈的電力延伸 beta，且被機器人題材列為 mover。",
+          "data": "現價 282.50；5 日 +4.7%，1 月 +9.4%。",
+          "kill": "週收盤跌破 $249，或資料中心電力合約／政策支持轉弱。"
+        },
+        {
+          "ticker": "SMCI",
+          "tier": "light",
+          "weight_usd": 5000,
+          "theme": "AI 伺服器",
+          "price": 39.84,
+          "mom_5d": 28.0,
+          "mom_1mo": 48.2,
+          "committee": "近 14 日無 verdict",
+          "reason": "高 beta 符合激進籃，但 5 日與月線已暴漲，只以輕倉等回檔，禁止追價。",
+          "data": "現價 39.84；5 日 +28.0%，1 月 +48.2%。",
+          "kill": "週收盤跌破 $34，或治理／交付風險再次升高。"
+        },
+        {
+          "ticker": "NBIS",
+          "tier": "light",
+          "weight_usd": 5000,
+          "theme": "AI 雲端基建",
+          "price": 277.68,
+          "mom_5d": 47.7,
+          "mom_1mo": 39.2,
+          "committee": "近 14 日無 verdict",
+          "reason": "AI 雲端高 beta，但 5 日 +47.7% 已是跳躍式動能，僅輕倉等回檔。",
+          "data": "現價 277.68；5 日 +47.7%，1 月 +39.2%。",
+          "kill": "週收盤跌破 $236，或雲端容量需求／融資條件惡化。"
+        },
+        {
+          "ticker": "PLTR",
+          "tier": "light",
+          "weight_usd": 5000,
+          "theme": "AI 軟體、機器人與量子交集",
+          "price": 174.04,
+          "mom_5d": 1.2,
+          "mom_1mo": 30.1,
+          "committee": "2026-08-09 score 0.5165；FV 61.68；decision_cap=false",
+          "reason": "同時位於機器人與量子熱題，但月線 +30.1% 且現價遠高於委員會公平價值，只留輕倉等回檔。",
+          "data": "現價 174.04；5 日 +1.2%，1 月 +30.1%；委員會 FV 61.68。",
+          "kill": "週收盤跌破 $148，或商業成長／政府訂單動能明顯失速。"
+        }
+      ]
+    },
+    "hybrid": {
+      "label_zh": "混合",
+      "label_en": "Hybrid",
+      "thesis": "保險 sleeve 用三個核心與兩個標準倉合計 $65k；激進 sleeve 用兩個標準與三個輕倉合計 $35k。以大型平台與製程作底，疊加 AI 網路、加速器與受控高 beta。",
+      "picks": [
+        {
+          "ticker": "GOOGL",
+          "tier": "core",
+          "weight_usd": 15000,
+          "theme": "AI 平台與雲端",
+          "price": 345.9,
+          "mom_5d": -2.4,
+          "mom_1mo": -6.7,
+          "committee": "近 14 日無 verdict",
+          "reason": "大型平台現金流配合月線回檔，作為混合籃主要防守核心。",
+          "data": "現價 345.90；5 日 -2.4%，1 月 -6.7%。",
+          "kill": "週收盤跌破 $311，或雲端／廣告基本面明顯轉弱。",
+          "sleeve": "保險"
+        },
+        {
+          "ticker": "TSM",
+          "tier": "core",
+          "weight_usd": 15000,
+          "theme": "先進製程",
+          "price": 426.35,
+          "mom_5d": 1.5,
+          "mom_1mo": 1.6,
+          "committee": "近 14 日無 verdict",
+          "reason": "AI 供應鏈核心且短中期動能不極端，平衡激進 sleeve 的波動。",
+          "data": "現價 426.35；5 日 +1.5%，1 月 +1.6%。",
+          "kill": "週收盤跌破 $384，或先進製程需求／產能利用率顯著轉弱。",
+          "sleeve": "保險"
+        },
+        {
+          "ticker": "AAPL",
+          "tier": "core",
+          "weight_usd": 15000,
+          "theme": "AI 終端與消費平台",
+          "price": 305.93,
+          "mom_5d": -2.3,
+          "mom_1mo": -6.5,
+          "committee": "近 14 日無 verdict",
+          "reason": "高品質生態系加上月線回檔，為保險 sleeve 提供穩定底座。",
+          "data": "現價 305.93；5 日 -2.3%，1 月 -6.5%。",
+          "kill": "週收盤跌破 $275，或服務／終端需求同時惡化。",
+          "sleeve": "保險"
+        },
+        {
+          "ticker": "META",
+          "tier": "standard",
+          "weight_usd": 10000,
+          "theme": "AI 應用與數位廣告",
+          "price": 589.85,
+          "mom_5d": -0.4,
+          "mom_1mo": -13.4,
+          "committee": "2026-08-10 score 0.1271；FV 520.54；decision_cap=false",
+          "reason": "月線深回檔提供再進場價值，但仍高於公平價值，因此只列標準倉。",
+          "data": "現價 589.85；5 日 -0.4%，1 月 -13.4%；委員會 FV 520.54。",
+          "kill": "週收盤跌破 $531，或廣告變現與資本支出紀律同步惡化。",
+          "sleeve": "保險"
+        },
+        {
+          "ticker": "AVGO",
+          "tier": "standard",
+          "weight_usd": 10000,
+          "theme": "AI 客製晶片與網路",
+          "price": 392.99,
+          "mom_5d": -8.1,
+          "mom_1mo": -0.3,
+          "committee": "近 14 日無 verdict",
+          "reason": "AI 基建質地佳且短線回檔，分批承接以控制落刀風險。",
+          "data": "現價 392.99；5 日 -8.1%，1 月 -0.3%。",
+          "kill": "週收盤跌破 $354，或 AI 網路訂單趨勢轉負。",
+          "sleeve": "保險"
+        },
+        {
+          "ticker": "ANET",
+          "tier": "standard",
+          "weight_usd": 10000,
+          "theme": "AI 網路與雲端",
+          "price": 198.82,
+          "mom_5d": 5.4,
+          "mom_1mo": 15.6,
+          "committee": "近 14 日無 verdict",
+          "reason": "同時承接機器人與雲端高廣度題材，是激進 sleeve 的主要網路 beta。",
+          "data": "現價 198.82；5 日 +5.4%，1 月 +15.6%。",
+          "kill": "週收盤跌破 $175，或雲端網路訂單增速顯著放緩。",
+          "sleeve": "激進"
+        },
+        {
+          "ticker": "AMD",
+          "tier": "standard",
+          "weight_usd": 10000,
+          "theme": "AI 加速器",
+          "price": 514.39,
+          "mom_5d": 6.4,
+          "mom_1mo": -2.8,
+          "committee": "近 14 日無 verdict",
+          "reason": "AI 半導體高 beta 且月線仍回檔，避免追逐已過熱標的。",
+          "data": "現價 514.39；5 日 +6.4%，1 月 -2.8%。",
+          "kill": "週收盤跌破 $452，或 AI 加速器市占／供應進度明顯惡化。",
+          "sleeve": "激進"
+        },
+        {
+          "ticker": "MRVL",
+          "tier": "light",
+          "weight_usd": 5000,
+          "theme": "AI 互連與客製晶片",
+          "price": 222.02,
+          "mom_5d": 1.5,
+          "mom_1mo": 7.6,
+          "committee": "近 14 日無 verdict",
+          "reason": "最熱 AI 半導體題材 mover，以輕倉增添互連 beta。",
+          "data": "現價 222.02；5 日 +1.5%，1 月 +7.6%。",
+          "kill": "週收盤跌破 $195，或 AI 互連／客製晶片訂單動能轉負。",
+          "sleeve": "激進"
+        },
+        {
+          "ticker": "PLTR",
+          "tier": "light",
+          "weight_usd": 5000,
+          "theme": "AI 軟體、機器人與量子交集",
+          "price": 174.04,
+          "mom_5d": 1.2,
+          "mom_1mo": 30.1,
+          "committee": "2026-08-09 score 0.5165；FV 61.68；decision_cap=false",
+          "reason": "題材交集強但估值與月線動能極端，只留輕倉等回檔。",
+          "data": "現價 174.04；5 日 +1.2%，1 月 +30.1%；委員會 FV 61.68。",
+          "kill": "週收盤跌破 $148，或商業成長／政府訂單動能明顯失速。",
+          "sleeve": "激進"
+        },
+        {
+          "ticker": "NBIS",
+          "tier": "light",
+          "weight_usd": 5000,
+          "theme": "AI 雲端基建",
+          "price": 277.68,
+          "mom_5d": 47.7,
+          "mom_1mo": 39.2,
+          "committee": "近 14 日無 verdict",
+          "reason": "高 beta 符合激進 sleeve，但跳躍式動能只適合輕倉等回檔。",
+          "data": "現價 277.68；5 日 +47.7%，1 月 +39.2%。",
+          "kill": "週收盤跌破 $236，或雲端容量需求／融資條件惡化。",
+          "sleeve": "激進"
+        }
+      ]
+    }
+  }
+}

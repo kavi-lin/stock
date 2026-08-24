@@ -1,0 +1,187 @@
+{
+ "bundle_version": "P5-INPUTS/1.0",
+ "ticker": "TER",
+ "date": "2026-08-17",
+ "phase0": {
+  "regime_confidence": 0.74,
+  "market_top_zone": "Yellow",
+  "ftd_state": "FTD_CONFIRMED",
+  "breadth_composite": 79,
+  "vix": 14.25,
+  "fred_verdict": "Soft Landing",
+  "real_rate_pct": 1.37,
+  "hot_sectors": [
+   "Technology",
+   "Industrials",
+   "Consumer Discretionary",
+   "Financials",
+   "Energy"
+  ],
+  "cold_sectors": [
+   "Consumer Staples",
+   "Utilities",
+   "Real Estate"
+  ]
+ },
+ "lanes": {
+  "fundamentals": {
+   "signal": "BUY",
+   "score": 4.2,
+   "confidence": 0.9,
+   "key_factors": [
+    "Accelerating 103.9% YoY revenue hypergrowth",
+    "Robust 28.5% FCF margin and conversion",
+    "Attractive 0.92 PEG against growth profile"
+   ],
+   "risk_flags": [
+    "Semiconductor capital equipment cyclicality risk",
+    "Customer concentration in major chipmakers"
+   ],
+   "moat_assessment": {
+    "level": "WIDE",
+    "type": "switching_cost",
+    "evidence_one_line": "Duopolistic position in semiconductor ATE with deep test program integration and high switching costs."
+   },
+   "near_term_catalysts": [
+    {
+     "date": "2026-10-26",
+     "type": "earnings",
+     "description": "Q3 2026 earnings release and Q4 revenue/margin guidance updates.",
+     "impact": "high"
+    },
+    {
+     "date": "2026-09-15",
+     "type": "product_launch",
+     "description": "UltraFLEXplus platform expansion for advanced AI ASIC and high-bandwidth memory testing.",
+     "impact": "medium"
+    },
+    {
+     "date": "2026-11-12",
+     "type": "analyst_day",
+     "description": "Investor & Automation Technology Day highlighting Universal Robots collaborative robotics demand.",
+     "impact": "medium"
+    },
+    {
+     "date": "2026-12-05",
+     "type": "macro_event",
+     "description": "Global semiconductor capex update and WSTS test equipment spending forecast revisions.",
+     "impact": "low"
+    }
+   ],
+   "bull_thesis_one_line": "Explosive 103.9% revenue and 378% EPS growth driven by AI compute testing demand, paired with 28.5% FCF margin and PEG under 1.0.",
+   "bear_thesis_one_line": "Cyclical semiconductor capex pauses or robotics adoption deceleration could compress the 35.3x forward P/E multiple."
+  },
+  "sentiment": {
+   "signal": "HOLD",
+   "score": 0.39,
+   "confidence": 0.75,
+   "key_factors": [
+    "Market sentiment strongly greedy at 72.7",
+    "Insider distribution trend with -100 MSPR",
+    "Congressional net purchases offer slight tailwind"
+   ],
+   "risk_flags": [
+    "Persistent insider selling with zero recent buys",
+    "Short interest float elevated at 5.94%"
+   ],
+   "insider_signal": "distributing",
+   "short_pct_float": 5.94,
+   "mspr_latest": -100.0
+  },
+  "news": {
+   "signal": "BUY",
+   "score": 2.2,
+   "confidence": 0.75,
+   "key_factors": [
+    "分析師共識 Buy 且零賣評",
+    "近1月目標價動能上修 +4.79%",
+    "AI晶片複雜度推升測試需求"
+   ],
+   "risk_flags": [
+    "48小時內直接催化劑偏少",
+    "距下次財報尚有70天"
+   ],
+   "pt_revision_momentum": {
+    "direction": "UP",
+    "consensus_delta_pct_1m": 4.79
+   },
+   "immediate_catalyst_5d": null,
+   "decision_point_days": 21,
+   "cross_asset_spillover": [
+    {
+     "asset": "SOXX",
+     "direction": "BULLISH",
+     "mechanism": "ATE 測試設備需求反映晶圓廠與先進封裝資本支出擴張"
+    }
+   ],
+   "reasoning_one_line": "分析師共識偏多且近 1 個月目標價維持上修動能(+4.79%)，AI 晶片與先進封裝測試需求支撐中線基本面。"
+  },
+  "technical": {
+   "signal": "BUY",
+   "score": 1.0,
+   "confidence": 0.75,
+   "key_factors": [
+    "Reclaimed 20D/50D/200D MAs with strong upward momentum",
+    "MACD histogram expanding in positive territory",
+    "RSI at 63 in bullish regime"
+   ],
+   "risk_flags": [
+    "Recent 20D/50D death cross creates structural overhead chop",
+    "Insider distribution trend with 4 Q3 sales"
+   ],
+   "smart_money_analysis": {
+    "label": "distributing",
+    "narrative": "Insider selling trend in Q3 (4 sales vs 0 purchases) contrasts with technical rebound on average volume."
+   },
+   "pattern_taxonomy": {
+    "pattern": "pullback_in_uptrend",
+    "confirmation_criteria": "Sustained daily close above $435 with 20D MA turning back above 50D MA."
+   },
+   "market_strength": "STRONG",
+   "key_levels": {
+    "support": 414.93,
+    "resistance": 459.19,
+    "pivot": 428.48
+   },
+   "high_prob_scenario": "Sustained hold above pivot $428.48 targets nearest resistance at $459.19, while a drop below $414.93 risks a pullback toward the 50D MA at $383.96.",
+   "volatility": {
+    "atr_14": 29.02,
+    "hist_vol_20d_daily": 0.0562,
+    "momentum_20d_pct": 29.58
+   }
+  },
+  "valuation": {
+   "signal": "SELL",
+   "score": -1.0,
+   "confidence": 0.6,
+   "key_factors": [
+    "DCF anchors indicate extreme overvaluation",
+    "Current price implies 60% FCF CAGR",
+    "Analyst targets reflect aggressive AI momentum"
+   ],
+   "risk_flags": [
+    "Multiples vulnerable to ATE cycle slowdown",
+    "Severe intrinsic DCF gap exceeding 85%"
+   ],
+   "valuation_commentary": "Cash flow-based intrinsic anchors (Unlevered DCF at $45.99, Levered DCF at $50.14, Self-built DCF at $63.24, and Owner Earnings at $46.80) reflect a severe intrinsic valuation gap (-85.37% DCF gap) against the current price of $432.185, pricing in an aggressive 5-year FCF CAGR of 60%. In contrast, the sell-side consensus PT of $461.50 reflects high market optimism around AI-driven ATE compute testing and advanced packaging demand. Forward revenue validation confirmed that while the top-line trajectory is supported, the valuation remains stretched, softening the initial severe penalty to -1.0. The resulting weighted fair value of $254.78 (-41.05% vs current price) places TER firmly in the extreme_overvalued verdict band.",
+   "cited_transition_overlay": false,
+   "transition_dissent_basis": "valuation_anchor"
+  }
+ },
+ "burry": {
+  "score": 27.9,
+  "narrative": "Burry 評分 27.9 (WARNING)：EV/EBITDA 43.4x 且 FCF Yield 僅 0.67%，內部人淨賣出評分達 -100，凸顯當前股價嚴重透支未來現金流。"
+ },
+ "phase3": {
+  "final_score": 0.9218,
+  "final_decision": "STAGED_ENTRY",
+  "final_action": "EXECUTE"
+ },
+ "phase4": {
+  "position_size_pct": null,
+  "analysis_price": 432.185
+ },
+ "red_team": {
+  "verdict": "STRONG_COUNTER"
+ }
+}

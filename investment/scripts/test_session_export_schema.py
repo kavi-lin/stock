@@ -37,6 +37,8 @@ import tempfile
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from apply_det_shadow import build_lane_contract  # noqa: E402
 from decision_engine import SPECULATIVE_CONFIDENCE_CAP, run_phase3  # noqa: E402
+from compute_price_framework import compute_forward_validation  # noqa: E402
+import append_session_export  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 SCHEMA_MD = os.path.join(ROOT, "investment/phase5_export_schema.md")
@@ -70,7 +72,12 @@ def extract_full_example() -> dict:
     fence = text.index("```json", start) + len("```json")
     end = text.index("```", fence)
     entry = json.loads(text[fence:end])
+    entry["ticker"] = "FIXTURE_MU"
     trade = entry["trades_this_session"][0]
+    trade["ticker"] = "FIXTURE_MU"
+    trade.setdefault("technical_lane", {})["rubric_override_reason"] = (
+        "historical example replay / stage transition"
+    )
     trade.setdefault("det_shadow", copy.deepcopy(DET_SHADOW))
     # C1 (V5.3) — same story as det_shadow, one step later in the same post-process.
     # Built by the **real** producer rather than a literal, so a contract shape change
@@ -115,6 +122,29 @@ def run(entry: dict, label: str, want_rc: int, want_substr: str | None = None) -
         os.unlink(path)
 
 
+def run_commit_gate(entry: dict, *, committed: bool, want_rc: int) -> None:
+    isolated = copy.deepcopy(entry)
+    append_session_export._stamp_provenance(isolated)
+    with tempfile.TemporaryDirectory() as tmp:
+        session_path = os.path.join(tmp, "session.json")
+        history_path = os.path.join(tmp, "history.json")
+        with open(session_path, "w", encoding="utf-8") as fp:
+            json.dump(isolated, fp, ensure_ascii=False)
+        with open(history_path, "w", encoding="utf-8") as fp:
+            json.dump([isolated] if committed else [], fp, ensure_ascii=False)
+        p = subprocess.run([
+            sys.executable, VALIDATOR, "--history", session_path,
+            "--require-committed-to", history_path,
+        ], capture_output=True, text=True)
+        label = f"isolated commit gate ({'present' if committed else 'missing'})"
+        if p.returncode != want_rc:
+            FAILS.append(
+                f"{label}: rc={p.returncode}, want {want_rc}\n"
+                f"      {(p.stdout + p.stderr)[:300]}")
+        else:
+            print(f"  ok  {label} (rc={p.returncode})")
+
+
 def without(entry: dict, *keys: str) -> dict:
     e = copy.deepcopy(entry)
     for k in keys:
@@ -152,14 +182,36 @@ STAGED_INPUT = {
 }
 
 
+def attach_forward_validation(tr: dict) -> dict:
+    """Upgrade a doc-derived trade to the engine-1.1 forward contract."""
+    pack = tr["valuation_pack"]
+    raw_pack = dict(pack)
+    raw_pack["score"] = pack.get("score_before_forward_validation", pack.get("score"))
+    implied = tr.setdefault("implied_expectations", {})
+    shadow = tr.setdefault("valuation_archetype_shadow", {})
+    fv = compute_forward_validation(
+        raw_pack, implied, shadow)
+    pack["score_before_forward_validation"] = fv["valuation_score_before"]
+    pack["score"] = fv["valuation_score_effective"]
+    pack["forward_validation_status"] = fv["status"]
+    fvs = tr.setdefault("fair_value_summary", {})
+    fvs["score_before_forward_validation"] = fv["valuation_score_before"]
+    fvs["score"] = fv["valuation_score_effective"]
+    fvs["forward_validation_status"] = fv["status"]
+    tr["forward_validation"] = fv
+    tr.setdefault("lane_scores", {})["valuation"] = fv["valuation_score_effective"]
+    return fv
+
+
 def staged_entry_fixture(ex: dict) -> dict:
-    r = run_phase3(copy.deepcopy(STAGED_INPUT))
+    e = copy.deepcopy(ex)
+    tr = e["trades_this_session"][0]
+    forward = attach_forward_validation(tr)
+    r = run_phase3({**copy.deepcopy(STAGED_INPUT), "forward_validation": forward})
     if r["final_decision"] != "STAGED_ENTRY":
         FAILS.append(f"staged fixture: engine returned {r['final_decision']!r}, "
                      "expected STAGED_ENTRY — the escape-direction cases need a score "
                      "that genuinely bands to STAGED_ENTRY")
-    e = copy.deepcopy(ex)
-    tr = e["trades_this_session"][0]
     tr["calculation_steps"] = r["calculation_steps"]
     tr["decision_engine_version"] = r["decision_engine_version"]
     for k in ("final_score", "avg_confidence", "hot_zone_probe", "hot_zone_eval",
@@ -203,9 +255,10 @@ BONUS_INPUT = {
 
 def bonus_entry(ex: dict) -> dict:
     """The doc example re-scored as a consensus-bonus chain (engine output spliced in)."""
-    r = run_phase3(copy.deepcopy(BONUS_INPUT))
     e = copy.deepcopy(ex)
     tr = e["trades_this_session"][0]
+    forward = attach_forward_validation(tr)
+    r = run_phase3({**copy.deepcopy(BONUS_INPUT), "forward_validation": forward})
     tr["calculation_steps"] = r["calculation_steps"]
     tr["decision_engine_version"] = r["decision_engine_version"]
     for k in ("final_score", "final_decision", "avg_confidence", "hot_zone_probe",
@@ -225,6 +278,8 @@ def main() -> int:
 
     print("[version gate — §13 Phase 3 engine]")
     run(ex, "V5.3 full example", 0)
+    run_commit_gate(ex, committed=True, want_rc=0)
+    run_commit_gate(ex, committed=False, want_rc=1)
     run(without(ex, "calculation_steps", "decision_engine_version"),
         "V5.3 minus calculation_steps", 1, "calculation_steps missing")
     run(without(ex, "decision_engine_version"),

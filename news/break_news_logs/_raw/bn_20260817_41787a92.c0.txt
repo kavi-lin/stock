@@ -1,0 +1,62 @@
+```json
+{
+  "commentary": "美股半導體設備族群全面走揚，主要受惠於先進製程節點推進（如 GAA 結構）與 AI 晶片先進封裝（CoWoS、HBM）需求維持強勁，帶動全球晶圓廠設備支出（WFE）展望上修。AXT Inc 大漲更反映光通訊及化合物半導體基板需求回溫。整體設備板塊短線動能充沛，但後續仍需檢視非 AI 成熟製程訂單的復甦力道。",
+  "bull_points": [
+    "AI晶片與先進封裝擴產推升WFE設備資本支出",
+    "先進製程微縮帶動沉積與蝕刻設備採購增長"
+  ],
+  "bear_points": [
+    "成熟製程拉貨動能分化恐壓抑部分設備商毛利",
+    "短線漲幅偏大需留意總經與禁令政策不確定性"
+  ],
+  "final_take": "設備族群受AI擴產激勵，短線偏多但須防追高。",
+  "entities": {
+    "tickers": [
+      "AXTI",
+      "AMAT",
+      "ACLS",
+      "KLAC",
+      "TER",
+      "LRCX"
+    ],
+    "sectors": [
+      "Information Technology",
+      "Semiconductors & Semiconductor Equipment"
+    ],
+    "themes": [
+      "AI capex",
+      "WFE",
+      "Advanced Packaging",
+      "Compound Semiconductor"
+    ],
+    "tech_keywords": [
+      "WFE",
+      "CoWoS",
+      "HBM3e",
+      "GAA",
+      "InP",
+      "GaAs"
+    ]
+  },
+  "relations": [
+    {
+      "subject": "ticker:AMAT",
+      "predicate": "BENEFITS_FROM",
+      "object": "narrative:ai-capex"
+    },
+    {
+      "subject": "ticker:LRCX",
+      "predicate": "BENEFITS_FROM",
+      "object": "narrative:wfe-growth"
+    },
+    {
+      "subject": "ticker:AXTI",
+      "predicate": "BENEFITS_FROM",
+      "object": "tech:inp"
+    }
+  ],
+  "done": false,
+  "confidence": 0.75,
+  "rationale_short": "AI晶片與先進封裝需求強勁，帶動設備板塊整體估值修復。"
+}
+```

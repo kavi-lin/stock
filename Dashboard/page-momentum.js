@@ -843,6 +843,18 @@ async function loadMomentumData() {
             if (known.has(deepSector)) _state.filter.sector = deepSector;
         }
 
+        // Deep-link: ?ticker=XXX from a signal-queue card. Purely a view filter
+        // — it must not touch the screener snapshot, because a single-ticker
+        // re-scan would replace the whole grid (and the journal snapshot) with
+        // one row. The score floor has to drop too: defaultFilter() starts at
+        // 50, so linking to a weak name would land on an empty table and read
+        // as a broken link.
+        const deepTicker = (qp.get('ticker') || '').toUpperCase();
+        if (deepTicker && ms.rows.some(r => String(r.ticker).toUpperCase() === deepTicker)) {
+            _state.filter.search = deepTicker;
+            _state.filter.minScore = 0;
+        }
+
         document.getElementById('no-data-banner').classList.add('hidden');
         document.getElementById('meta-strip').classList.remove('hidden');
         document.getElementById('filter-bar').classList.remove('hidden');
@@ -2914,6 +2926,12 @@ function translate() {
 /* ── Boot ─────────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
     UI.boot('momentum', { translate, reload: loadMomentumData });
+
+    // Tickers the live debates flagged. Display-only by design: the accept
+    // path on this lane is a deep-link into the grid, never a scan — the
+    // screener run is a global singleton whose output replaces the whole
+    // snapshot, so one ticker's worth of it would wipe the rest.
+    window.SignalQueue?.mount(document.getElementById('sq-mount'), { lane: 'momentum' });
 
     document.getElementById('refresh-momentum').addEventListener('click', triggerRescan);
     document.getElementById('history-close').addEventListener('click', closeHistory);

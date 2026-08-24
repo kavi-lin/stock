@@ -1,41 +1,10 @@
-"""LLM Quota Broker gate — this project's half of the Phase 7 integration.
+"""Strict broker boundary shared by every repository LLM adapter.
 
-`model_router.py` used to be the whole quota authority for this repo: a daily
-call budget, a rolling five-hour window, and a cooldown, all counted in
-`config/llm_usage.json`. The problem those counters cannot solve is that the
-Taiwan-stock project is spending the *same* subscriptions and has never been
-able to see this file. Two independent budgets against one pool cannot add up.
-
-So the broker is now the authority, and this module is the boundary:
-
-* **What the broker decides** — whether there is quota to spend, and on which
-  provider. It sees every project's holds in one ledger and enforces the 20%
-  hard reserve that neither project can turn off.
-* **What this project still decides** — which providers are acceptable for a
-  given role (the debater pins a model per voice on purpose), what the prompts
-  are, and what to do with the answer. Those rules travel to the broker as
-  `preferred_providers` / `forbidden_providers`; none of them moved.
-
-Local counters keep recording (see `model_router._record`), because they are
-what the degraded path below runs on. They no longer *block* while the broker
-is answering — two enforcers against one pool is the same mistake in miniature.
-
-Failure policy (Phase 7, decided 2026-08-08)
---------------------------------------------
-
-Fail-closed by default. A flow that cannot reach the broker does not run.
-
-The single exception is the news line — the Break News debate and brief, and
-the link digest — which may fall back to the local budget. Those are continuous,
-non-decision-bearing flows where hours of silence costs more than the
-imprecision of a local counter, and their spend is still bounded by
-`config/llm_config.json`.
-
-That permission applies **only** when the broker could not answer. When the
-broker answers "no capacity", every flow stops, news included: falling back
-there would spend exactly the reserve the broker just declined to spend.
-`BrokerRefused` and `BrokerUnavailable` exist to keep those two cases from ever
-being confused, and `_run_chain` branches on the type, never on a message.
+The task registry supplies the certified provider set; llm-quota-broker owns
+selection, reservation, and settlement. Local counters are telemetry only.
+Broker off, unreachable, incompatible, or out of capacity always means no LLM
+process starts. Daemon callers may defer or use deterministic output, but may
+not start an unleased model.
 """
 from __future__ import annotations
 
@@ -49,12 +18,15 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts._shared.broker_client import (  # noqa: E402
-    BrokerAuthError, BrokerClient, BrokerError, BrokerRefused, BrokerRejected, BrokerUnavailable,
+    CLIENT_BROKER_VERSION, BrokerAuthError, BrokerClient, BrokerError, BrokerRefused,
+    BrokerRejected, BrokerUnavailable, BrokerVersionMismatch,
 )
+from scripts._shared import llm_task_registry  # noqa: E402
 
 __all__ = [
-    "BROKER_PROJECT", "BrokerAuthError", "BrokerError", "BrokerRefused", "BrokerRejected",
-    "BrokerUnavailable", "TASK_TYPE_PATTERN", "broker_client", "broker_config",
+    "BROKER_PROJECT", "CLIENT_BROKER_VERSION", "BrokerAuthError", "BrokerError", "BrokerRefused",
+    "BrokerRejected", "BrokerUnavailable", "BrokerVersionMismatch", "TASK_TYPE_PATTERN",
+    "assigned_model", "broker_client", "broker_config",
     "estimate_tokens", "governed_models",
     "is_degradable", "new_task_id", "protocol_estimate", "protocol_task_type",
     "provider_for", "provider_quota", "quota_snapshot",
@@ -72,16 +44,13 @@ PROVIDER_FOR_MODEL = {
     "claude": "claude",
     "gemini": "agy",
     "codex": "codex",
-    # `grok` has no entry on purpose. The broker keeps the id dormant (Phase 3
-    # deferred it: its weekly pool is only readable by scraping a logged-in
-    # settings page), so it can neither reserve nor be recommended. A grok call
-    # therefore stays governed by this repo's local budget alone, which is
-    # stated here rather than discovered later from a KeyError.
+    # Grok remains disabled until llm-quota-broker can reserve its quota pool.
 }
 MODEL_FOR_PROVIDER = {provider: model for model, provider in PROVIDER_FOR_MODEL.items()}
 
-#: Roles permitted to degrade to the local budget when the broker cannot answer.
-DEFAULT_DEGRADABLE_ROLES = ("debate", "brief", "link_digest")
+#: Broker-only means there is no inference fallback.  Callers may still fall
+#: back to deterministic prose/data, but no LLM process starts without a lease.
+DEFAULT_DEGRADABLE_ROLES: tuple[str, ...] = ()
 
 #: Rough per-role output priors, in tokens. Input is measured from the actual
 #: prompt; only the reply has to be guessed.
@@ -154,13 +123,11 @@ def broker_config(cfg: dict | None = None) -> dict:
     """
     raw = (cfg or {}).get("broker")
     raw = raw if isinstance(raw, dict) else {}
-    roles = raw.get("degradable_roles")
     return {
         "enabled": raw.get("enabled", True) is not False,
         "base_url": str(raw.get("base_url") or "").strip() or None,
         "timeout_sec": _positive_float(raw.get("timeout_sec"), 10.0),
-        "degradable_roles": tuple(str(r).strip().lower() for r in roles if str(r).strip())
-                            if isinstance(roles, list) else DEFAULT_DEGRADABLE_ROLES,
+        "degradable_roles": DEFAULT_DEGRADABLE_ROLES,
         "protocol_tokens": _protocol_token_table(raw.get("protocol_tokens")),
     }
 
@@ -189,12 +156,7 @@ def _protocol_token_table(raw: object) -> dict:
 
 
 def broker_client(cfg: dict | None = None) -> BrokerClient | None:
-    """A client, or `None` when this project is configured not to use the broker.
-
-    `None` means "the broker is switched off here", which is a different state
-    from "the broker is down": the caller keeps its old local-budget behaviour
-    rather than taking the degraded path or refusing.
-    """
+    """A client, or `None` when configured off; callers must fail closed."""
     settings = broker_config(cfg)
     if not settings["enabled"]:
         return None
@@ -206,8 +168,28 @@ def broker_client(cfg: dict | None = None) -> BrokerClient | None:
 
 
 def is_degradable(role: str, cfg: dict | None = None) -> bool:
-    """Whether this role may fall back to the local budget when the broker is down."""
-    return str(role or "").strip().lower() in set(broker_config(cfg)["degradable_roles"])
+    """No LLM role may run without broker authorisation."""
+    return False
+
+
+def assigned_model(lease) -> str:
+    """The vendor-native model the broker assigned to `lease`, or `""`.
+
+    Only agy ever fills this in, and there it is not advisory. That CLI meters
+    its Gemini models and its Claude/GPT models in two pools that refill
+    independently, so the broker picks a pool when the task names no model —
+    and a hold taken against one pool is only true while the run stays inside
+    it. Passing this to the CLI as `--model` is what keeps those two facts the
+    same fact; running whatever the TUI happens to have selected spends a
+    window nothing is holding.
+
+    Empty for every single-pool provider, so a caller may pass it on
+    unconditionally. Read defensively because `broker_client.py` is vendored:
+    a copy predating the field is a stale sync, not a crash.
+    """
+    if lease is None:
+        return ""
+    return str(getattr(lease, "model", "") or "")
 
 
 def provider_for(model: str) -> str | None:
@@ -231,10 +213,9 @@ def estimate_tokens(role: str, *prompts: str, cfg: dict | None = None) -> tuple[
     Input is measured from the prompts actually being sent, which is the one
     number here that is not a guess. Output is a per-role prior.
     """
-    characters = sum(len(part or "") for part in prompts)
-    estimated_input = max(1, -(-characters // CHARS_PER_TOKEN))
     key = str(role or "").strip().lower()
-    return estimated_input, int(OUTPUT_TOKEN_PRIORS.get(key, DEFAULT_OUTPUT_TOKENS))
+    characters = sum(len(part or "") for part in prompts)
+    return llm_task_registry.token_estimate(key, characters, CHARS_PER_TOKEN)
 
 
 def protocol_estimate(cfg: dict | None = None, protocol: str | None = None) -> tuple[int, int]:
@@ -243,9 +224,12 @@ def protocol_estimate(cfg: dict | None = None, protocol: str | None = None) -> t
     An unrecognised name falls back to `default`, never to zero: a protocol we
     have no numbers for is the one most likely to surprise us.
     """
+    task_id = llm_task_registry.protocol_task_id(protocol)
+    registry_estimate = llm_task_registry.token_estimate(task_id)
+    # Keep measured operator overrides in llm_config until they are migrated to
+    # the catalog; the registry is the conservative required fallback.
     table = broker_config(cfg)["protocol_tokens"]
-    fallback = table.get("default", (PROTOCOL_INPUT_TOKENS, PROTOCOL_OUTPUT_TOKENS))
-    return table.get(str(protocol or "").strip().lower(), fallback)
+    return table.get(str(protocol or "").strip().lower(), registry_estimate)
 
 
 def sanitize_task_type(name: object, default: str = "") -> str:
@@ -301,9 +285,10 @@ def usage_for_broker(tokens: dict | None) -> dict:
                 usage[target] = max(0, int(tokens.get(source) or 0))
                 break
     if usage:
-        # One governed call. The broker never sums tokens across providers, but
-        # it does count calls, and this is the honest count for this path.
-        usage["model_calls"] = 1
+        # Ordinary governed paths are one inference.  Long-running adapters may
+        # aggregate several same-provider inference turns behind one lease; if
+        # they measured that count, preserve it rather than flattening it to 1.
+        usage["model_calls"] = max(1, int(tokens.get("model_calls") or 1))
     return usage
 
 
@@ -321,11 +306,8 @@ def ranked_models(role: str = "debate", *, count: int = 0, requires_web: bool = 
     Returned as **this repo's** model names. Three outcomes, and callers must
     tell them apart:
 
-    * `None` — the broker is switched off or could not answer. The caller falls
-      back to its own configuration (the news line is allowed to; see the module
-      docstring).
-    * `[]` — the broker answered and *nothing* is eligible. Not a fallback
-      condition: that answer is about the hard reserve.
+    * `None` — the broker is switched off or could not answer. Callers defer.
+    * `[]` — the broker answered and *nothing* is eligible. Callers defer.
     * a list — ranked best first, already filtered to providers with capacity.
 
     Uses a preview (`reserve=false`), so it holds no quota. The broker records
@@ -365,6 +347,81 @@ def ranked_models(role: str = "debate", *, count: int = 0, requires_web: bool = 
     return models[:count] if count else models
 
 
+SHARED_POOL_LEAF = "all_models"
+
+#: Upper bound, in minutes, for the short rolling window the panel reads. Sized
+#: to cover a five-hour window reported with slack, and to stay far below the
+#: daily/weekly pools it must never match.
+SHORT_WINDOW_MINUTES = 360
+
+#: Window names that mean the short rolling window. claude calls its five-hour
+#: window `session`; agy namespaces `five_hour` under each pool.
+SHORT_WINDOW_NAMES = ("five_hour", "session")
+
+
+def _is_short_window(bucket: dict) -> bool:
+    """The five-hour window, however this provider happens to name it.
+
+    Three signals because no provider sends all three: the namespaced name
+    (`gemini.five_hour`, `session`), `window_minutes` when the provider reports
+    it (only codex does, and only for its weekly pool), and the provider's own
+    `label` as a last resort.
+    """
+    name = str(bucket.get("name") or "")
+    if any(seg in SHORT_WINDOW_NAMES for seg in name.split(".")):
+        return True
+    try:
+        if 0 < float(bucket.get("window_minutes")) <= SHORT_WINDOW_MINUTES:
+            return True
+    except (TypeError, ValueError):
+        pass
+    label = str(bucket.get("label") or "").lower()
+    return "five hour" in label or "5h" in label or "session" in label
+
+
+def _headline_bucket(buckets: list[dict], routable_pool: str | None = None) -> dict | None:
+    """The five-hour window the panel's headline reads, or None if there is none.
+
+    The bars answer "how much have I burned in the last few hours", so all of
+    them read the same kind of window. The broker's own headline cannot serve
+    that: it is the minimum across everything it sees, which on 2026-08-14 drew
+    claude at 45% from `weekly.fable` — one model's weekly pool — while the
+    five-hour window was at 8%. Which window is tightest is a routing question,
+    and the broker still answers it: `reserve_only` and `cooldown_until` are
+    passed through untouched, so a provider the broker will not send work to is
+    drawn as unusable no matter what this returns.
+
+    Returns None when the provider reports no such window (codex sends only a
+    weekly `primary`). The caller keeps the broker's headline there rather than
+    presenting a weekly figure as if it were five-hour; `headline_bucket` names
+    the window either way, so the panel can say which one it is showing.
+
+    Two tie-breaks, in order: stay inside the pool the broker would route to
+    (agy meters `gemini.*` and `claude_gpt.*` independently), then prefer a
+    shared sub-pool over a per-model one. Anything still tied resolves to the
+    tightest.
+    """
+    short = [b for b in buckets
+             if _is_short_window(b) and b.get("remaining_percent") is not None]
+    if not short:
+        return None
+    pool = str(routable_pool or "")
+    if pool:
+        short = [b for b in short
+                 if str(b["name"]) == pool or str(b["name"]).startswith(pool + ".")]
+        if not short:
+            # The only five-hour windows belong to pools the broker will not
+            # route to. Borrowing one of them is the exact failure V4.129.0 fixed
+            # — agy drawn at 0% from `claude_gpt.five_hour` while dispatching
+            # Gemini work — so this reports no five-hour window instead.
+            return None
+    shared = [b for b in short
+              if str(b["name"]).partition(".")[2] == SHARED_POOL_LEAF]
+    if shared:
+        short = shared
+    return min(short, key=lambda b: float(b["remaining_percent"]))
+
+
 def provider_quota(cfg: dict | None = None) -> dict:
     """Live remaining quota per model, straight from the broker. For the UI.
 
@@ -374,10 +431,16 @@ def provider_quota(cfg: dict | None = None) -> dict:
     percentage from an unknown time is exactly the false precision DESIGN §2.1
     forbids.
 
-    `remaining_percent` is the **worst** bucket, matching what `lqb status`
-    prints. Agy's two pools are separate, so a global minimum can under-report
-    headroom for a task aimed at the healthier group; under-reporting is the
-    safe direction and keeps this number comparable across providers.
+    `remaining_percent` is the broker's own headline, matching what `lqb status`
+    prints: the tightest window among the ones a run would actually touch. For
+    agy that is the pool the router would charge (`routable_pool`), not the
+    minimum across both — V4.129.0. Until then this recomputed the global
+    minimum locally, which on 2026-08-10 drew agy as "0% left / 保留區" from a
+    `claude_gpt` five-hour window the router had already ruled out, while it was
+    dispatching Gemini work to a pool with 100% of its five-hour window free. A
+    panel that disagrees with the router about whether a provider is usable is
+    worse than no panel, and the rule belongs in the one place that makes the
+    routing decision.
 
     `buckets` carries the individual windows behind that minimum, tightest
     first. The min alone is not enough to act on: "claude 54%" is a weekly pool
@@ -398,7 +461,7 @@ def quota_snapshot(cfg: dict | None = None) -> dict:
     information. Shape: `{"providers": {...}, "hard_reserve_percent": float|None}`.
     """
     client = broker_client(cfg)
-    empty = {"providers": {}, "hard_reserve_percent": None}
+    empty = {"providers": {}, "hard_reserve_percent": None, "active_reservations": []}
     if client is None:
         return empty
     try:
@@ -416,7 +479,6 @@ def quota_snapshot(cfg: dict | None = None) -> dict:
             continue
         snapshot = entry.get("snapshot") or {}
         raw_buckets = snapshot.get("buckets") if isinstance(snapshot, dict) else None
-        remaining = None
         buckets: list[dict] = []
         if isinstance(raw_buckets, dict) and raw_buckets:
             for name, window in raw_buckets.items():
@@ -443,17 +505,37 @@ def quota_snapshot(cfg: dict | None = None) -> dict:
                     "window_minutes": window.get("window_minutes"),
                     "reserve_only": bool(window.get("reserve_only")),
                 })
-            values = [b["remaining_percent"] for b in buckets
-                      if b["remaining_percent"] is not None]
-            if values:
-                remaining = min(float(v) for v in values)
             # Tightest first: the binding window is the one worth reading first,
             # and a bucket with no percentage cannot bind anything.
             buckets.sort(key=lambda b: (b["remaining_percent"] is None,
                                         b["remaining_percent"]))
+        try:
+            remaining = float(entry["remaining_percent"])
+        except (KeyError, TypeError, ValueError):
+            # Only a broker too old to send the field, or one with no snapshot
+            # to reduce. The local minimum is the honest fallback: it is what
+            # this computed before the field existed, and it errs low.
+            values = [b["remaining_percent"] for b in buckets
+                      if b["remaining_percent"] is not None]
+            remaining = min((float(v) for v in values), default=None)
+        # The panel reads the five-hour window; the broker's headline is whatever
+        # window is tightest, which is the routing answer, not this one. A
+        # provider with no such window keeps the broker's figure rather than
+        # having a weekly number relabelled as five-hour.
+        headline = _headline_bucket(buckets, entry.get("routable_pool"))
+        if headline is not None:
+            remaining = float(headline["remaining_percent"])
         out[model] = {
             "provider": provider_id,
             "remaining_percent": remaining,
+            # Which pool the broker would charge, for a provider metering more
+            # than one. `None` = one pool. Left exactly as the broker sent it:
+            # it is a routing fact, and `headline_bucket` below is the separate
+            # question of which window the number above was read from.
+            "routable_pool": entry.get("routable_pool"),
+            # The window `remaining_percent` came from, so the panel can name it
+            # and mark the matching row. `None` = the broker's own headline.
+            "headline_bucket": str(headline["name"]) if headline is not None else None,
             "buckets": buckets,
             # Display identity is supplied by the broker. `plan` below remains
             # the provider-native value for diagnostics and must not leak into
@@ -476,7 +558,33 @@ def quota_snapshot(cfg: dict | None = None) -> dict:
         reserve = float(status.get("hard_reserve_percent"))
     except (TypeError, ValueError):
         reserve = None
-    return {"providers": out, "hard_reserve_percent": reserve}
+    active = []
+    for row in status.get("active_reservations") or []:
+        if not isinstance(row, dict):
+            continue
+        reservation = row.get("reservation") if isinstance(row.get("reservation"), dict) else row
+        task = row.get("task") if isinstance(row.get("task"), dict) else {}
+        provider_id = str(reservation.get("provider") or row.get("provider") or "")
+        model = MODEL_FOR_PROVIDER.get(provider_id)
+        if not model:
+            continue
+        project = task.get("project") or reservation.get("project") or row.get("project")
+        active.append({
+            "reservation_id": reservation.get("reservation_id"),
+            "provider": provider_id,
+            "model": model,
+            "project": project,
+            # Missing attribution is external by default. A shared broker row
+            # must prove it belongs to this repo before the Dashboard may paint
+            # the local green light.
+            "is_local_project": project == BROKER_PROJECT,
+            "task_type": task.get("task_type") or row.get("task_type"),
+            "task_id": task.get("task_id") or reservation.get("task_id") or row.get("task_id"),
+            "state": reservation.get("state") or row.get("state"),
+            "created_at": reservation.get("created_at") or row.get("created_at"),
+        })
+    return {"providers": out, "hard_reserve_percent": reserve,
+            "active_reservations": active}
 
 
 def _positive_int(value, default: int) -> int:

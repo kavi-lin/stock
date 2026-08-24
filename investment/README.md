@@ -252,10 +252,10 @@ reports/
 ```
 
 **自動化行為**：
-- **Phase 0 三層 cache**（優先順序）：
-  1. `../sector/sector_logs/YYYY-MM-DD_sector_intel.json` ← 最優先，sector_protocol 跑過後直接用
-  2. `./invest_logs/YYYY-MM-DD_phase0.json` ← 備用 cache
-  3. 都沒有 → 執行 web search（優先用 `market-news-analyst` skill）
+- **Phase 0 三層 resolver**（Phase 0 是全市場共用 snapshot）：
+  1. canonical `*_phase0.json` + legacy `*_phase0_<ticker>.json` 視為同一 pool，取 mtime 最新者（同 mtime canonical 優先）；fresh 且 validator rc=0 才直接用
+  2. legacy 檔只作 migration 相容；檔名 ticker 不限制其他股票共用，新產出一律寫 canonical
+  3. `../sector/sector_logs/YYYY-MM-DD_sector_intel.json` 只作 L3 重建素材；缺完整 schema 時執行 skill chain 並寫回 canonical
 - Prior context：自動讀 `history.json` 最新一筆
 - Phase 5：自動 append session export 到 `history.json`，並強制產出 `../reports/YYYYMMDD_TICKER.md`
 

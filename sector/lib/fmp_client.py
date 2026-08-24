@@ -43,12 +43,39 @@ def fmp_get(
     )
 
 
+def fmp_get_many(
+    reqs: list[tuple[str, dict]],
+    *,
+    max_workers: int = 8,
+    retries: int = 2,
+    timeout: int = 20,
+    hard_fail: bool = True,
+) -> list:
+    """Threaded fan-out of :func:`fmp_get`; results align positionally with reqs.
+
+    Same path/hard_fail semantics as fmp_get (caller supplies the leading
+    '/'). Aggregate RPM stays governed by the central fmp_pool window, so
+    max_workers only bounds local concurrency — use this for the per-ticker
+    sweeps whose sequential wall time would otherwise trip phase_prefetch's
+    per-task cap.
+    """
+    return fmp_pool.fetch_many(
+        [
+            {"path": path, "params": params, "stable": False, "retries": retries,
+             "timeout": timeout, "hard_fail": hard_fail}
+            for path, params in reqs
+        ],
+        max_workers=max_workers,
+    )
+
+
 def cache_path(name: str, as_of: str) -> str:
     return os.path.join(CACHE_DIR, f"{name}_{as_of}.json")
 
 
 __all__ = [
     "fmp_get",
+    "fmp_get_many",
     "cache_path",
     "BASE_DIR",
     "CACHE_DIR",

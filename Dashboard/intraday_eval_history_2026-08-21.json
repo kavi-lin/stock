@@ -1,0 +1,339 @@
+{
+  "date": "2026-08-21",
+  "windows": [
+    {
+      "as_of": "2026-08-21T08:41:59+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "crypto_fintech_riskon",
+        "avoid_laggards"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-21T09:03:07+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "crypto_fintech_riskon",
+        "avoid_laggards"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-21T13:33:26+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "crypto_fintech_riskon",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-21T13:43:45+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-21T13:54:02+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-21T14:04:02+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-21T14:14:02+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-21T14:24:27+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-21T14:34:27+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-21T14:44:27+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-21T14:54:48+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-21T15:04:48+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-21T15:15:07+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-21T15:25:35+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-21T15:35:35+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "avoid_laggards",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-21T15:45:50+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "avoid_laggards",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-21T15:56:00+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-21T16:06:41+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-21T16:16:42+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-21T16:26:42+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "avoid_laggards",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-21T16:37:00+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "avoid_laggards",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-21T16:44:32+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "avoid_laggards"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-21T16:54:32+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "avoid_laggards"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-21T17:04:32+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "avoid_laggards"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-21T17:14:38+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "avoid_laggards"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-21T17:24:44+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "avoid_laggards"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-21T17:34:51+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "avoid_laggards"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-21T17:53:14+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "avoid_laggards"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-21T18:03:24+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-21T21:29:49+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    }
+  ]
+}

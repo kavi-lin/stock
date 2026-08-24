@@ -1,0 +1,128 @@
+# ASTS 財報分析 — AST SpaceMobile, Inc.
+
+> Run: 2026-08-11  ·  Last Earnings: 2026-06-30 (2026 Q2)  ·  Next ≈ 2026-09-29
+> Source: FMP HTTP REST  ·  Schema V1.0
+
+## 1. Snapshot
+
+- **AST SpaceMobile, Inc.** (NASDAQ Global Select) — Communication Services / Telecommunications Services
+- Price: **$68.76**  ·  Market Cap: $27.98B
+- CEO: Abel Avellan  ·  Employees: 1126  ·  IPO: 2019-11-01
+
+## 2. Quarterly P&L Trend (last 8 Q)
+
+| Q | Period | Revenue | Gross | Op Inc | Net Inc | EPS | GM | OM | NM |
+|---|---|---|---|---|---|---|---|---|---|
+| 2026-06-30 | 2026 Q2 | $31.5M | $9.1M | $-297.6M | $-230.9M | $-0.77 | 28.9% | -944.1% | -732.6% |
+| 2026-03-31 | 2026 Q1 | $14.7M | $3.7M | $-149.4M | $-191.0M | $-0.66 | 24.9% | -1014.0% | -1296.3% |
+| 2025-12-31 | 2025 Q4 | $54.3M | $-37.0M | $-72.3M | $-74.0M | $-0.28 | -68.1% | -133.1% | -136.2% |
+| 2025-09-30 | 2025 Q3 | $14.7M | $9.2M | $-79.7M | $-122.9M | $-0.45 | 62.6% | -540.6% | -833.7% |
+| 2025-06-30 | 2025 Q2 | $1.2M | $1.2M | $-72.8M | $-99.4M | $-0.41 | 100.0% | -6297.3% | -8598.1% |
+| 2025-03-31 | 2025 Q1 | $718.0K | $-26.5M | $-63.0M | $-45.7M | $-0.20 | -3688.9% | -8769.2% | -6365.7% |
+| 2024-12-31 | 2024 Q4 | $1.9M | $1.9M | $-50.3M | $-35.9M | $-0.18 | 100.0% | -2620.6% | -1869.5% |
+| 2024-09-30 | 2024 Q3 | $1.1M | $1.1M | $-65.5M | $-171.9M | $-1.10 | 100.0% | -5958.7% | -15631.5% |
+
+**YoY**: revenue +2626.6%  ·  operating -308.8%  ·  earnings -132.3%
+**QoQ**: revenue +113.9%  ·  acceleration: **accelerating**
+
+## 3. Balance Sheet Health (latest Q)
+
+- Total Assets: **$5.85B**  ·  Total Liabilities: $3.46B  ·  Total Equity: $2.90B
+- Working Capital: **$2.30B**  ·  Current Ratio: 13.05
+- Total Debt: $30.3M  ·  D/E: **0.01**  ·  Net Cash (cash+ST inv − debt): **$2.26B**
+- Cash + ST Investments: $2.29B  ·  Inventory: $28.4M  ·  Receivables: $622.9M
+
+## 4. Cash Flow Quality
+
+- Latest Q: OpCF $-97.2M  ·  FCF **$-694.8M**  ·  CapEx $-597.6M
+- TTM: OpCF $-144.7M  ·  NI $-618.8M
+- **FCF Margin (latest Q)**: -2204.2%  ·  **Cash Conversion (TTM OpCF/NI)**: 0.23  ·  CapEx Intensity: 1896.0%
+- Stock Buybacks (latest Q): $0.00  ·  Dividends: $0.00
+- SBC (latest Q): $63.5M
+
+## 5. Profitability & Efficiency
+
+8Q margin trend (newest → oldest):
+
+| Q | Gross | Operating | Net |
+|---|---|---|---|
+| 2026-06-30 Q2 | 28.9% | -944.1% | -732.6% |
+| 2026-03-31 Q1 | 24.9% | -1014.0% | -1296.3% |
+| 2025-12-31 Q4 | -68.1% | -133.1% | -136.2% |
+| 2025-09-30 Q3 | 62.6% | -540.6% | -833.7% |
+| 2025-06-30 Q2 | 100.0% | -6297.3% | -8598.1% |
+| 2025-03-31 Q1 | -3688.9% | -8769.2% | -6365.7% |
+| 2024-12-31 Q4 | 100.0% | -2620.6% | -1869.5% |
+| 2024-09-30 Q3 | 100.0% | -5958.7% | -15631.5% |
+
+**TTM Ratios** — Gross -13.0%  ·  Operating -519.5%  ·  Net -536.7%  ·  EBIT -409.7%
+**Capital Efficiency** — Income Quality TTM: 0.19  ·  FCF Yield: -5.9%  ·  CapEx/OCF: -1032.0%  ·  DSO: 1,971.8d
+
+## 6. Growth Trajectory
+
+- **Latest YoY**: revenue +2626.6%  ·  earnings -132.3%  ·  operating -308.8%
+- Acceleration: **accelerating** (vs prior-Q YoY)
+
+Annual growth rates (newest → oldest):
+
+| FY | Revenue | NetIncome | OpIncome | FCF |
+|---|---|---|---|---|
+| 2025 | +1505.2% | -13.9% | -18.5% | -278.4% |
+| 2024 | +0.0% | -242.7% | -9.2% | -12.1% |
+| 2023 | -100.0% | -176.7% | -52.6% | -25.3% |
+| 2022 | +11.4% | -3.6% | -73.9% | -58.5% |
+| 2021 | +107.9% | -27.0% | -257.2% | -153.5% |
+
+**Per-share CAGR** — 3y rev: +9.1%  ·  5y rev: +140.2%  ·  5y NI: -187.2%
+
+## 7. Valuation
+
+- Price: **$68.76**  ·  PE TTM: -31.83  ·  PB TTM: 8.58
+- EV/EBITDA TTM: -38.73  ·  EV/FCF TTM: -15.70  ·  EV/Sales TTM: 223.07  ·  P/FCF TTM: -17.08  ·  Net Debt/EBITDA TTM: 3.40
+- **DCF Intrinsic**: $-0.48  ·  Upside vs Price: **-100.7%**
+- FCF Yield TTM: -5.9%
+
+**Ratings Snapshot** (FMP composite, 1-5):
+- Overall: **D+** (1/5)
+- DCF: 1/5  ·  PE: 1/5  ·  PB: 1/5  ·  D/E: 2/5  ·  ROE: 1/5  ·  ROA: 1/5
+
+## 8. Analyst Consensus
+
+- Price: $68.76  →  PT consensus **$100.00** (median $106.00, high $108.00, low $80.00)
+- **PT Upside vs Price**: +45.4%
+
+Monthly grades trend (newest → oldest):
+
+| Date | StrongBuy | Buy | Hold | Sell | StrongSell |
+|---|---|---|---|---|---|
+| 2026-08-01 | 1 | 3 | 7 | 1 | 1 |
+| 2026-07-01 | 1 | 3 | 7 | 1 | 2 |
+| 2026-06-01 | 0 | 2 | 7 | 0 | 2 |
+| 2026-05-01 | 0 | 3 | 7 | 0 | 2 |
+| 2026-04-01 | 0 | 3 | 5 | 0 | 2 |
+| 2026-03-01 | 0 | 3 | 5 | 0 | 2 |
+
+> Forward EPS estimate: paid-plan only;use `skills/earnings-valuation-forecaster` 3-method 自算可補(若需)。
+
+## 9. Quality Flags(deterministic)
+
+- 🟢 **Cash conversion positive gap (clean)** — OpCF > NI 且非營運資金驅動(純資訊,不扣分)
+- 🔴 **Negative FCF** — 最新 Q 自由現金流為負
+
+## 10. Bottom Line
+
+### 🟡 **MIXED** — Composite Score: **61/100**
+
+| 元件 | 分數 | 滿分 |
+|---|---|---|
+| Quality | 21 | 30 |
+| Growth | 30 | 30 |
+| Valuation | 0 | 25 |
+| Analyst | 10 | 15 |
+| **Total** | **61** | **100** |
+
+> Verdict 對照: 80+ STRONG / 65+ SOLID / 50+ MIXED / 35+ WEAK / <35 DETERIORATING
+
+---
+
+> Generated by `skills/earnings-analyst` from FMP HTTP REST.  Cache: `skills/earnings-analyst/cache/ASTS_2026-06-30.json`

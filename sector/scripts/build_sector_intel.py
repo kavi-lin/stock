@@ -337,6 +337,12 @@ def build(date: str, decision_path: Path) -> dict:
         "hot_sectors": (decision.get("summary") or {}).get("hot_sectors", []),
         "cold_sectors": (decision.get("summary") or {}).get("cold_sectors", []),
         "rotation_theme": decision.get("rotation_theme", ""),
+        # Provenance: sector-pe-snapshot carries trading days only, so a
+        # weekend/holiday run legitimately reports the prior close's PEs.
+        # Surface which date they came from rather than letting the report
+        # imply they are same-day.
+        "pe_snapshot_date": valuation.get("pe_snapshot_date"),
+        "pe_snapshot_lag_days": valuation.get("pe_snapshot_lag_days"),
     }
 
     # ── _phase3 : catalysts/overlay from decision, pulse/smartmoney from cache ─

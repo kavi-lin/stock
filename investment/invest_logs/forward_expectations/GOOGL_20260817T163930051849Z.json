@@ -1,0 +1,3309 @@
+{
+  "engine": "forward_expectations.py v1.14 (point-in-time forward curve + calibrated horizon labels)",
+  "ticker": "GOOGL",
+  "run_id": "20260817T163930051849Z",
+  "generated_at": "2026-08-17T16:39:30.051849+00:00",
+  "as_of_earnings_date": "2026-08-17",
+  "current_price": 343.785,
+  "shadow_only": true,
+  "consensus_lane": {
+    "available": true,
+    "revenue_cagr": 0.1725,
+    "eps_cagr": 0.0475,
+    "window_from": "2026-12-31",
+    "window_to": "2030-12-31",
+    "window_years": 4.0,
+    "eps_spread_pct": 26.2,
+    "num_analysts_eps": 16,
+    "num_analysts_revenue": 33,
+    "analyst_rating_direction": "FLAT",
+    "estimate_cutoff_date": "2026-08-17",
+    "excluded_nonforward_rows": 1,
+    "note": "future-only estimate-window CAGR（2026-12→2030-12）；排除 cutoff 前資料，非 trailing-base"
+  },
+  "market_implied_lane": {
+    "available": false,
+    "required_fcf_cagr": null,
+    "out_of_range": false,
+    "fcf_base_per_share": null,
+    "wacc_used": 0.0913,
+    "note": "FCF base ≤ 0 或缺，reverse DCF 不適用；改用營收路徑：EV/S 9.48x → 收斂到 4x 需營收 ×2.37（5Y CAGR 19%，且 EV 原地不動）；若倍數只收斂到科技中樞 8x 則需 3%；分析師路徑 16%；→ 市場要求的成長高於賣方預估，定價已跑在共識前面"
+  },
+  "base_rate_lane": {
+    "available": false,
+    "peer_rev_cagr_median": null,
+    "peer_rev_cagr_p25": null,
+    "peer_rev_cagr_p75": null,
+    "peers_used": [],
+    "self_revenue_yoy": 0.2423,
+    "growth_acceleration": "accelerating",
+    "cohort": {
+      "engine": "forward_expectations_cohort.py v1.0",
+      "available": false,
+      "subject_classification": {
+        "sector": "Communication Services",
+        "growth_stage": "growth",
+        "margin_tier": "mid",
+        "size_tier": "mega"
+      },
+      "rationale": {
+        "criteria": [
+          "sector(exact)",
+          "growth_stage(+/-1)",
+          "margin_tier(+/-1)",
+          "size_tier(+/-1)"
+        ],
+        "rule": "sector must match and >=3 members each matching >=2/3 graded dims",
+        "subject_classification": {
+          "sector": "Communication Services",
+          "growth_stage": "growth",
+          "margin_tier": "mid",
+          "size_tier": "mega"
+        },
+        "tolerances": {
+          "dim_adjacency": 1,
+          "min_dim_matches": 2
+        },
+        "anti_cherry_pick": "Criteria and tolerances are fixed before selection; every member records its match reasons."
+      },
+      "candidates_considered": 10,
+      "members": [
+        {
+          "ticker": "META",
+          "revenue_cagr": 0.1851,
+          "classification": {
+            "sector": "Communication Services",
+            "growth_stage": "growth",
+            "margin_tier": "high",
+            "size_tier": "mega"
+          },
+          "match_reasons": [
+            "growth_stage:growth~growth",
+            "margin_tier:high~mid",
+            "size_tier:mega~mega"
+          ],
+          "dim_matches": 3
+        }
+      ],
+      "member_count": 1,
+      "distribution": {
+        "median": null,
+        "p25": null,
+        "p75": null
+      },
+      "status": "insufficient_cohort",
+      "note": "only 1 matched members (<3); caller should fall back to raw peers"
+    },
+    "basis": "raw_peers_advisory_only",
+    "peer_universe_source": "provider_peer_endpoint",
+    "raw_peer_distribution": {
+      "median": 0.131,
+      "p25": 0.0929,
+      "p75": 0.2093,
+      "peers": [
+        "AAPL",
+        "AVGO",
+        "CSCO",
+        "FLEX",
+        "GRMN",
+        "META",
+        "MGIC",
+        "MSFT",
+        "NVDA",
+        "TSM"
+      ]
+    },
+    "note": "cohort 不足（1 名）；10 名 raw peers 僅揭露、不進 numeric base-rate，避免 broad-sector peers 冒充 business comparables"
+  },
+  "independent_lane": {
+    "available": false,
+    "revenue_cagr": null,
+    "reason": "no_matched_adapter"
+  },
+  "adapter_evaluation": {
+    "selected_adapter": {
+      "adapter_id": null,
+      "adapter_version": null,
+      "match": {
+        "status": "unknown",
+        "score": 0,
+        "reasons": [
+          "no_fully_matched_adapter"
+        ]
+      },
+      "independent_lane": {
+        "available": false,
+        "revenue_cagr": null,
+        "reason": "no_matched_adapter"
+      }
+    },
+    "candidates": [
+      {
+        "adapter_id": "royalty_ip",
+        "match": {
+          "status": "generic",
+          "score": 0,
+          "reasons": [
+            "no_royalty_or_license_segment"
+          ]
+        }
+      },
+      {
+        "adapter_id": "semiconductor",
+        "match": {
+          "status": "generic",
+          "score": 0,
+          "reasons": [
+            "no_semiconductor_end_market_segments"
+          ]
+        }
+      }
+    ]
+  },
+  "evidence_inventory": {
+    "ticker": "GOOGL",
+    "generated_at": "2026-08-17T16:39:30.051849+00:00",
+    "adapter_id": null,
+    "summary": {
+      "accepted_count": 18,
+      "provisional_count": 44,
+      "missing_source_count": 1,
+      "missing_driver_count": 0,
+      "numeric_transmission_evidence_count": 0
+    },
+    "accepted": [
+      {
+        "evidence_id": "company_segment:GOOGL:google_network:2025-12-31",
+        "metric": "segment_revenue:google_network",
+        "value": 29792000000,
+        "unit": "currency",
+        "source_type": "structured_company_segment",
+        "source_ref": "earnings-analyst cache segments.product_fy",
+        "as_of": "2025-12-31",
+        "status": "accepted",
+        "numeric_eligible": true,
+        "reason": "company segment value from structured provider",
+        "confidence": "high",
+        "metadata": {
+          "product": "Google Network"
+        }
+      },
+      {
+        "evidence_id": "company_segment:GOOGL:google_search_&_other:2025-12-31",
+        "metric": "segment_revenue:google_search_&_other",
+        "value": 224532000000,
+        "unit": "currency",
+        "source_type": "structured_company_segment",
+        "source_ref": "earnings-analyst cache segments.product_fy",
+        "as_of": "2025-12-31",
+        "status": "accepted",
+        "numeric_eligible": true,
+        "reason": "company segment value from structured provider",
+        "confidence": "high",
+        "metadata": {
+          "product": "Google Search & Other"
+        }
+      },
+      {
+        "evidence_id": "company_segment:GOOGL:youtube_advertising_revenue:2025-12-31",
+        "metric": "segment_revenue:youtube_advertising_revenue",
+        "value": 40367000000,
+        "unit": "currency",
+        "source_type": "structured_company_segment",
+        "source_ref": "earnings-analyst cache segments.product_fy",
+        "as_of": "2025-12-31",
+        "status": "accepted",
+        "numeric_eligible": true,
+        "reason": "company segment value from structured provider",
+        "confidence": "high",
+        "metadata": {
+          "product": "YouTube Advertising Revenue"
+        }
+      },
+      {
+        "evidence_id": "company_segment:GOOGL:google_inc.:2025-12-31",
+        "metric": "segment_revenue:google_inc.",
+        "value": 48030000000,
+        "unit": "currency",
+        "source_type": "structured_company_segment",
+        "source_ref": "earnings-analyst cache segments.product_fy",
+        "as_of": "2025-12-31",
+        "status": "accepted",
+        "numeric_eligible": true,
+        "reason": "company segment value from structured provider",
+        "confidence": "high",
+        "metadata": {
+          "product": "Google Inc."
+        }
+      },
+      {
+        "evidence_id": "company_segment:GOOGL:google_cloud:2025-12-31",
+        "metric": "segment_revenue:google_cloud",
+        "value": 58705000000,
+        "unit": "currency",
+        "source_type": "structured_company_segment",
+        "source_ref": "earnings-analyst cache segments.product_fy",
+        "as_of": "2025-12-31",
+        "status": "accepted",
+        "numeric_eligible": true,
+        "reason": "company segment value from structured provider",
+        "confidence": "high",
+        "metadata": {
+          "product": "Google Cloud"
+        }
+      },
+      {
+        "evidence_id": "company_segment:GOOGL:other_bets:2025-12-31",
+        "metric": "segment_revenue:other_bets",
+        "value": 1537000000,
+        "unit": "currency",
+        "source_type": "structured_company_segment",
+        "source_ref": "earnings-analyst cache segments.product_fy",
+        "as_of": "2025-12-31",
+        "status": "accepted",
+        "numeric_eligible": true,
+        "reason": "company segment value from structured provider",
+        "confidence": "high",
+        "metadata": {
+          "product": "Other Bets"
+        }
+      },
+      {
+        "evidence_id": "company_segment:GOOGL:other_segments:2025-12-31",
+        "metric": "segment_revenue:other_segments",
+        "value": -127000000,
+        "unit": "currency",
+        "source_type": "structured_company_segment",
+        "source_ref": "earnings-analyst cache segments.product_fy",
+        "as_of": "2025-12-31",
+        "status": "accepted",
+        "numeric_eligible": true,
+        "reason": "company segment value from structured provider",
+        "confidence": "high",
+        "metadata": {
+          "product": "Other Segments"
+        }
+      },
+      {
+        "evidence_id": "company_derived:GOOGL:revenue_yoy:2026-08-17",
+        "metric": "revenue_yoy",
+        "value": 0.2423,
+        "unit": "ratio",
+        "source_type": "structured_company_financials",
+        "source_ref": "earnings-analyst cache derived",
+        "as_of": "2026-08-17",
+        "status": "accepted",
+        "numeric_eligible": true,
+        "reason": "deterministic calculation from structured financial statements",
+        "confidence": "medium",
+        "metadata": {}
+      },
+      {
+        "evidence_id": "company_derived:GOOGL:gross_margin_latest:2026-08-17",
+        "metric": "gross_margin_latest",
+        "value": 0.6164896991552306,
+        "unit": "ratio",
+        "source_type": "structured_company_financials",
+        "source_ref": "earnings-analyst cache derived",
+        "as_of": "2026-08-17",
+        "status": "accepted",
+        "numeric_eligible": true,
+        "reason": "deterministic calculation from structured financial statements",
+        "confidence": "medium",
+        "metadata": {}
+      },
+      {
+        "evidence_id": "consensus:GOOGL:revenue:2030-12-31",
+        "metric": "consensus_revenue",
+        "value": 936258242857,
+        "unit": "currency",
+        "source_type": "analyst_consensus",
+        "source_ref": "earnings-analyst cache annual_estimates",
+        "as_of": "2030-12-31",
+        "status": "accepted",
+        "numeric_eligible": true,
+        "reason": "analyst consensus is an independent lane input",
+        "confidence": "medium",
+        "metadata": {}
+      },
+      {
+        "evidence_id": "consensus:GOOGL:revenue:2029-12-31",
+        "metric": "consensus_revenue",
+        "value": 815730364847,
+        "unit": "currency",
+        "source_type": "analyst_consensus",
+        "source_ref": "earnings-analyst cache annual_estimates",
+        "as_of": "2029-12-31",
+        "status": "accepted",
+        "numeric_eligible": true,
+        "reason": "analyst consensus is an independent lane input",
+        "confidence": "medium",
+        "metadata": {}
+      },
+      {
+        "evidence_id": "consensus:GOOGL:revenue:2028-12-31",
+        "metric": "consensus_revenue",
+        "value": 721625172376,
+        "unit": "currency",
+        "source_type": "analyst_consensus",
+        "source_ref": "earnings-analyst cache annual_estimates",
+        "as_of": "2028-12-31",
+        "status": "accepted",
+        "numeric_eligible": true,
+        "reason": "analyst consensus is an independent lane input",
+        "confidence": "medium",
+        "metadata": {}
+      },
+      {
+        "evidence_id": "consensus:GOOGL:revenue:2027-12-31",
+        "metric": "consensus_revenue",
+        "value": 606613875390,
+        "unit": "currency",
+        "source_type": "analyst_consensus",
+        "source_ref": "earnings-analyst cache annual_estimates",
+        "as_of": "2027-12-31",
+        "status": "accepted",
+        "numeric_eligible": true,
+        "reason": "analyst consensus is an independent lane input",
+        "confidence": "medium",
+        "metadata": {}
+      },
+      {
+        "evidence_id": "consensus:GOOGL:revenue:2026-12-31",
+        "metric": "consensus_revenue",
+        "value": 495359381557,
+        "unit": "currency",
+        "source_type": "analyst_consensus",
+        "source_ref": "earnings-analyst cache annual_estimates",
+        "as_of": "2026-12-31",
+        "status": "accepted",
+        "numeric_eligible": true,
+        "reason": "analyst consensus is an independent lane input",
+        "confidence": "medium",
+        "metadata": {}
+      },
+      {
+        "evidence_id": "consensus:GOOGL:revenue:2025-12-31",
+        "metric": "consensus_revenue",
+        "value": 400299098598,
+        "unit": "currency",
+        "source_type": "analyst_consensus",
+        "source_ref": "earnings-analyst cache annual_estimates",
+        "as_of": "2025-12-31",
+        "status": "accepted",
+        "numeric_eligible": true,
+        "reason": "analyst consensus is an independent lane input",
+        "confidence": "medium",
+        "metadata": {}
+      },
+      {
+        "evidence_id": "revision:GOOGL:revenue:2026-12-31",
+        "metric": "consensus_revision:revenue",
+        "value": {
+          "avg": 495359381557,
+          "low": 488997304016,
+          "high": 500792939672,
+          "spread_pct": 2.38
+        },
+        "unit": "currency",
+        "source_type": "analyst_consensus",
+        "source_ref": "earnings-analyst cache annual_estimates",
+        "as_of": "2026-12-31",
+        "status": "accepted",
+        "numeric_eligible": true,
+        "reason": "point-in-time analyst consensus estimate snapshot; revision delta requires future snapshots",
+        "confidence": "medium",
+        "metadata": {
+          "value_type": "consensus",
+          "estimate_revision_delta_available": false,
+          "estimate_revision_delta_reason": "annual_estimates cache has latest forward curve only; compare future ledger snapshots for deltas",
+          "num_analysts": 36
+        }
+      },
+      {
+        "evidence_id": "revision:GOOGL:eps:2026-12-31",
+        "metric": "consensus_revision:eps",
+        "value": {
+          "avg": 20.23712,
+          "low": 19.4379,
+          "high": 21.50009,
+          "spread_pct": 10.19
+        },
+        "unit": "currency_per_share",
+        "source_type": "analyst_consensus",
+        "source_ref": "earnings-analyst cache annual_estimates",
+        "as_of": "2026-12-31",
+        "status": "accepted",
+        "numeric_eligible": true,
+        "reason": "point-in-time analyst consensus estimate snapshot; revision delta requires future snapshots",
+        "confidence": "medium",
+        "metadata": {
+          "value_type": "consensus",
+          "estimate_revision_delta_available": false,
+          "estimate_revision_delta_reason": "annual_estimates cache has latest forward curve only; compare future ledger snapshots for deltas",
+          "num_analysts": 39
+        }
+      },
+      {
+        "evidence_id": "revision:GOOGL:rating_momentum:2026-08-01",
+        "metric": "consensus_revision:rating_momentum",
+        "value": {
+          "direction": "FLAT",
+          "delta": 0.0062,
+          "net_bull_from": 0.9,
+          "net_bull_to": 0.9062
+        },
+        "unit": "score_delta",
+        "source_type": "analyst_consensus",
+        "source_ref": "earnings-analyst cache analyst_grades",
+        "as_of": "2026-08-01",
+        "status": "accepted",
+        "numeric_eligible": true,
+        "reason": "analyst rating momentum from dated analyst_grades snapshots",
+        "confidence": "medium",
+        "metadata": {
+          "value_type": "consensus",
+          "from": "2026-03-01",
+          "to": "2026-08-01"
+        }
+      }
+    ],
+    "provisional": [
+      {
+        "evidence_id": "nexus:GOOGL:3",
+        "metric": "external_transmission_relation",
+        "value": null,
+        "unit": null,
+        "source_type": "nexus_relation",
+        "source_ref": "break_news:bn_20260720_5fa15124,break_news:bn_20260730_7a8b50fe,break_news:bn_20260803_8a050a3a,break_news:bn_20260803_8f4cfb06",
+        "as_of": "2026-08-03",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "relation type is not an approved causal supply-chain relation",
+        "confidence": "low",
+        "metadata": {
+          "source": "ticker:AMZN",
+          "target": "ticker:GOOGL",
+          "relation_type": "COMPETES_WITH",
+          "support_count": null,
+          "cross_item_count": null
+        }
+      },
+      {
+        "evidence_id": "nexus:GOOGL:9",
+        "metric": "external_transmission_relation",
+        "value": null,
+        "unit": null,
+        "source_type": "nexus_relation",
+        "source_ref": "break_news:bn_20260709_4da8972f,break_news:bn_20260808_4bc7f1ae",
+        "as_of": "2026-08-08",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "causal relation lacks independent corroboration",
+        "confidence": "medium",
+        "metadata": {
+          "source": "ticker:AVGO",
+          "target": "ticker:GOOGL",
+          "relation_type": "SUPPLIES_TO",
+          "support_count": null,
+          "cross_item_count": null
+        }
+      },
+      {
+        "evidence_id": "nexus:GOOGL:18",
+        "metric": "external_transmission_relation",
+        "value": null,
+        "unit": null,
+        "source_type": "nexus_relation",
+        "source_ref": "break_news:bn_20260706_f65c78d5,break_news:bn_20260708_4ec74764,break_news:bn_20260709_8b1a8914,break_news:bn_20260717_9d712dc6,break_news:bn_20260730_51b7fa71,break_news:bn_20260807_61106c84",
+        "as_of": "2026-08-07",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "relation type is not an approved causal supply-chain relation",
+        "confidence": "low",
+        "metadata": {
+          "source": "ticker:GOOGL",
+          "target": "ticker:META",
+          "relation_type": "COMPETES_WITH",
+          "support_count": null,
+          "cross_item_count": null
+        }
+      },
+      {
+        "evidence_id": "nexus:GOOGL:19",
+        "metric": "external_transmission_relation",
+        "value": null,
+        "unit": null,
+        "source_type": "nexus_relation",
+        "source_ref": "break_news:bn_20260703_0cb3c3f0,break_news:bn_20260708_1bfba7ad,break_news:bn_20260708_85ece64a,break_news:bn_20260708_90260032,break_news:bn_20260716_96342f94,break_news:bn_20260814_60d5079b",
+        "as_of": "2026-08-14",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "relation type is not an approved causal supply-chain relation",
+        "confidence": "low",
+        "metadata": {
+          "source": "ticker:GOOGL",
+          "target": "ticker:MSFT",
+          "relation_type": "COMPETES_WITH",
+          "support_count": null,
+          "cross_item_count": null
+        }
+      },
+      {
+        "evidence_id": "nexus:GOOGL:20",
+        "metric": "external_transmission_relation",
+        "value": null,
+        "unit": null,
+        "source_type": "nexus_relation",
+        "source_ref": "break_news:bn_20260707_a5474ef5,break_news:bn_20260808_4bc7f1ae",
+        "as_of": "2026-08-08",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "relation type is not an approved causal supply-chain relation",
+        "confidence": "low",
+        "metadata": {
+          "source": "ticker:GOOGL",
+          "target": "ticker:NVDA",
+          "relation_type": "COMPETES_WITH",
+          "support_count": null,
+          "cross_item_count": null
+        }
+      },
+      {
+        "evidence_id": "nexus:GOOGL:99",
+        "metric": "external_transmission_relation",
+        "value": null,
+        "unit": null,
+        "source_type": "nexus_relation",
+        "source_ref": "co_theme:theme:cloud_computing__saas",
+        "as_of": "unknown",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "co-theme relation is association, not causal transmission evidence",
+        "confidence": "low",
+        "metadata": {
+          "source": "ticker:GOOGL",
+          "target": "ticker:MSFT",
+          "relation_type": "CO_THEME",
+          "support_count": null,
+          "cross_item_count": null
+        }
+      },
+      {
+        "evidence_id": "nexus:GOOGL:104",
+        "metric": "external_transmission_relation",
+        "value": null,
+        "unit": null,
+        "source_type": "nexus_relation",
+        "source_ref": "co_theme:theme:cloud_computing__saas",
+        "as_of": "unknown",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "co-theme relation is association, not causal transmission evidence",
+        "confidence": "low",
+        "metadata": {
+          "source": "ticker:ANET",
+          "target": "ticker:GOOGL",
+          "relation_type": "CO_THEME",
+          "support_count": null,
+          "cross_item_count": null
+        }
+      },
+      {
+        "evidence_id": "nexus:GOOGL:109",
+        "metric": "external_transmission_relation",
+        "value": null,
+        "unit": null,
+        "source_type": "nexus_relation",
+        "source_ref": "co_theme:theme:cloud_computing__saas",
+        "as_of": "unknown",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "co-theme relation is association, not causal transmission evidence",
+        "confidence": "low",
+        "metadata": {
+          "source": "ticker:GOOGL",
+          "target": "ticker:WDAY",
+          "relation_type": "CO_THEME",
+          "support_count": null,
+          "cross_item_count": null
+        }
+      },
+      {
+        "evidence_id": "nexus:GOOGL:110",
+        "metric": "external_transmission_relation",
+        "value": null,
+        "unit": null,
+        "source_type": "nexus_relation",
+        "source_ref": "co_theme:theme:cloud_computing__saas",
+        "as_of": "unknown",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "co-theme relation is association, not causal transmission evidence",
+        "confidence": "low",
+        "metadata": {
+          "source": "ticker:AMZN",
+          "target": "ticker:GOOGL",
+          "relation_type": "CO_THEME",
+          "support_count": null,
+          "cross_item_count": null
+        }
+      },
+      {
+        "evidence_id": "nexus:GOOGL:111",
+        "metric": "external_transmission_relation",
+        "value": null,
+        "unit": null,
+        "source_type": "nexus_relation",
+        "source_ref": "co_theme:theme:cloud_computing__saas",
+        "as_of": "unknown",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "co-theme relation is association, not causal transmission evidence",
+        "confidence": "low",
+        "metadata": {
+          "source": "ticker:GOOGL",
+          "target": "ticker:PANW",
+          "relation_type": "CO_THEME",
+          "support_count": null,
+          "cross_item_count": null
+        }
+      },
+      {
+        "evidence_id": "nexus:GOOGL:112",
+        "metric": "external_transmission_relation",
+        "value": null,
+        "unit": null,
+        "source_type": "nexus_relation",
+        "source_ref": "co_theme:theme:cloud_computing__saas",
+        "as_of": "unknown",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "co-theme relation is association, not causal transmission evidence",
+        "confidence": "low",
+        "metadata": {
+          "source": "ticker:CRWD",
+          "target": "ticker:GOOGL",
+          "relation_type": "CO_THEME",
+          "support_count": null,
+          "cross_item_count": null
+        }
+      },
+      {
+        "evidence_id": "discovered:website:GOOGL",
+        "metric": "primary_source_candidate",
+        "value": null,
+        "unit": null,
+        "source_type": "company_ir",
+        "source_ref": "https://www.abc.xyz",
+        "as_of": "unknown",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "Company website is a discovery root, not a verified IR document.",
+        "confidence": "medium",
+        "metadata": {
+          "channel": "company_website_root",
+          "form": null,
+          "filing_family": null,
+          "period": null,
+          "discovery_status": "metadata_only",
+          "discovery_origin": "company_profile"
+        }
+      },
+      {
+        "evidence_id": "discovered:sec-submissions:GOOGL",
+        "metric": "primary_source_candidate",
+        "value": null,
+        "unit": null,
+        "source_type": "company_filing",
+        "source_ref": "https://data.sec.gov/submissions/CIK0001652044.json",
+        "as_of": "unknown",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "SEC submissions manifest can enumerate filings; it contains no driver evidence.",
+        "confidence": "medium",
+        "metadata": {
+          "channel": "sec_submissions_manifest",
+          "form": null,
+          "filing_family": null,
+          "period": null,
+          "discovery_status": "metadata_only",
+          "discovery_origin": "company_profile_cik"
+        }
+      },
+      {
+        "evidence_id": "discovered:filing:GOOGL:0",
+        "metric": "primary_source_candidate",
+        "value": null,
+        "unit": null,
+        "source_type": "company_filing",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1063259/000110465924030026/dnn-20231231xex99d1.htm",
+        "as_of": "2024-03-01 00:00:00",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired.",
+        "confidence": "medium",
+        "metadata": {
+          "channel": "regulatory_filing",
+          "form": "6-K",
+          "filing_family": "foreign_issuer_report",
+          "period": null,
+          "discovery_status": "metadata_only",
+          "discovery_origin": "fmp_sec_filings_financials"
+        }
+      },
+      {
+        "evidence_id": "discovered:filing:GOOGL:1",
+        "metric": "primary_source_candidate",
+        "value": null,
+        "unit": null,
+        "source_type": "company_filing",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1396033/000095017024023941/ll-ex99_1.htm",
+        "as_of": "2024-03-01 00:00:00",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired.",
+        "confidence": "medium",
+        "metadata": {
+          "channel": "regulatory_filing",
+          "form": "8-K",
+          "filing_family": "current_report",
+          "period": null,
+          "discovery_status": "metadata_only",
+          "discovery_origin": "fmp_sec_filings_financials"
+        }
+      },
+      {
+        "evidence_id": "discovered:filing:GOOGL:2",
+        "metric": "primary_source_candidate",
+        "value": null,
+        "unit": null,
+        "source_type": "company_filing",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1013880/000110465924030001/tm247637d1_ex99-1.htm",
+        "as_of": "2024-03-01 00:00:00",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired.",
+        "confidence": "medium",
+        "metadata": {
+          "channel": "regulatory_filing",
+          "form": "8-K",
+          "filing_family": "current_report",
+          "period": null,
+          "discovery_status": "metadata_only",
+          "discovery_origin": "fmp_sec_filings_financials"
+        }
+      },
+      {
+        "evidence_id": "discovered:filing:GOOGL:3",
+        "metric": "primary_source_candidate",
+        "value": null,
+        "unit": null,
+        "source_type": "company_filing",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/936340/000093634024000090/dtegasexhibit991123123.htm",
+        "as_of": "2024-03-01 00:00:00",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired.",
+        "confidence": "medium",
+        "metadata": {
+          "channel": "regulatory_filing",
+          "form": "8-K",
+          "filing_family": "current_report",
+          "period": null,
+          "discovery_status": "metadata_only",
+          "discovery_origin": "fmp_sec_filings_financials"
+        }
+      },
+      {
+        "evidence_id": "discovered:filing:GOOGL:8",
+        "metric": "primary_source_candidate",
+        "value": null,
+        "unit": null,
+        "source_type": "company_filing",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/913760/000091376024000055/stonex-indenturebondoffe.htm",
+        "as_of": "2024-03-01 00:00:00",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired.",
+        "confidence": "medium",
+        "metadata": {
+          "channel": "regulatory_filing",
+          "form": "8-K",
+          "filing_family": "current_report",
+          "period": null,
+          "discovery_status": "metadata_only",
+          "discovery_origin": "fmp_sec_filings_financials"
+        }
+      },
+      {
+        "evidence_id": "discovered:filing:GOOGL:9",
+        "metric": "primary_source_candidate",
+        "value": null,
+        "unit": null,
+        "source_type": "company_filing",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1750/000110465924029986/tm246820d2_ex4-1.htm",
+        "as_of": "2024-03-01 00:00:00",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired.",
+        "confidence": "medium",
+        "metadata": {
+          "channel": "regulatory_filing",
+          "form": "8-K",
+          "filing_family": "current_report",
+          "period": null,
+          "discovery_status": "metadata_only",
+          "discovery_origin": "fmp_sec_filings_financials"
+        }
+      },
+      {
+        "evidence_id": "discovered:filing:GOOGL:10",
+        "metric": "primary_source_candidate",
+        "value": null,
+        "unit": null,
+        "source_type": "company_filing",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1725964/000119312524055135/d473973dex991.htm",
+        "as_of": "2024-03-01 00:00:00",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired.",
+        "confidence": "medium",
+        "metadata": {
+          "channel": "regulatory_filing",
+          "form": "6-K",
+          "filing_family": "foreign_issuer_report",
+          "period": null,
+          "discovery_status": "metadata_only",
+          "discovery_origin": "fmp_sec_filings_financials"
+        }
+      },
+      {
+        "evidence_id": "discovered:filing:GOOGL:11",
+        "metric": "primary_source_candidate",
+        "value": null,
+        "unit": null,
+        "source_type": "company_filing",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/43920/000004392024000012/gef2024q18-kerex991.htm",
+        "as_of": "2024-03-01 00:00:00",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired.",
+        "confidence": "medium",
+        "metadata": {
+          "channel": "regulatory_filing",
+          "form": "8-K",
+          "filing_family": "current_report",
+          "period": null,
+          "discovery_status": "metadata_only",
+          "discovery_origin": "fmp_sec_filings_financials"
+        }
+      },
+      {
+        "evidence_id": "discovered:filing:GOOGL:13",
+        "metric": "primary_source_candidate",
+        "value": null,
+        "unit": null,
+        "source_type": "company_filing",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/2098/000095017024023566/acu-ex99_1.htm",
+        "as_of": "2024-03-01 00:00:00",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired.",
+        "confidence": "medium",
+        "metadata": {
+          "channel": "regulatory_filing",
+          "form": "8-K",
+          "filing_family": "current_report",
+          "period": null,
+          "discovery_status": "metadata_only",
+          "discovery_origin": "fmp_sec_filings_financials"
+        }
+      },
+      {
+        "evidence_id": "discovered:filing:GOOGL:14",
+        "metric": "primary_source_candidate",
+        "value": null,
+        "unit": null,
+        "source_type": "company_filing",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1009829/000118518524000198/ex_632477.htm",
+        "as_of": "2024-03-01 00:00:00",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired.",
+        "confidence": "medium",
+        "metadata": {
+          "channel": "regulatory_filing",
+          "form": "8-K",
+          "filing_family": "current_report",
+          "period": null,
+          "discovery_status": "metadata_only",
+          "discovery_origin": "fmp_sec_filings_financials"
+        }
+      },
+      {
+        "evidence_id": "discovered:filing:GOOGL:15",
+        "metric": "primary_source_candidate",
+        "value": null,
+        "unit": null,
+        "source_type": "company_filing",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/314203/000110465924029694/tm247723d1_ex99-1.htm",
+        "as_of": "2024-03-01 00:00:00",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired.",
+        "confidence": "medium",
+        "metadata": {
+          "channel": "regulatory_filing",
+          "form": "8-K",
+          "filing_family": "current_report",
+          "period": null,
+          "discovery_status": "metadata_only",
+          "discovery_origin": "fmp_sec_filings_financials"
+        }
+      },
+      {
+        "evidence_id": "discovered:filing:GOOGL:16",
+        "metric": "primary_source_candidate",
+        "value": null,
+        "unit": null,
+        "source_type": "company_filing",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1679268/000167926824000003/a2023-12x31exx991.htm",
+        "as_of": "2024-03-01 00:00:00",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired.",
+        "confidence": "medium",
+        "metadata": {
+          "channel": "regulatory_filing",
+          "form": "8-K",
+          "filing_family": "current_report",
+          "period": null,
+          "discovery_status": "metadata_only",
+          "discovery_origin": "fmp_sec_filings_financials"
+        }
+      },
+      {
+        "evidence_id": "discovered:filing:GOOGL:17",
+        "metric": "primary_source_candidate",
+        "value": null,
+        "unit": null,
+        "source_type": "company_filing",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1854545/000095017024023547/0000950170-24-023547.txt",
+        "as_of": "2024-03-01 00:00:00",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired.",
+        "confidence": "medium",
+        "metadata": {
+          "channel": "regulatory_filing",
+          "form": "6-K",
+          "filing_family": "foreign_issuer_report",
+          "period": null,
+          "discovery_status": "metadata_only",
+          "discovery_origin": "fmp_sec_filings_financials"
+        }
+      },
+      {
+        "evidence_id": "discovered:filing:GOOGL:18",
+        "metric": "primary_source_candidate",
+        "value": null,
+        "unit": null,
+        "source_type": "company_filing",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1572621/000121390024018770/0001213900-24-018770.txt",
+        "as_of": "2024-03-01 00:00:00",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired.",
+        "confidence": "medium",
+        "metadata": {
+          "channel": "regulatory_filing",
+          "form": "6-K",
+          "filing_family": "foreign_issuer_report",
+          "period": null,
+          "discovery_status": "metadata_only",
+          "discovery_origin": "fmp_sec_filings_financials"
+        }
+      },
+      {
+        "evidence_id": "discovered:filing:GOOGL:19",
+        "metric": "primary_source_candidate",
+        "value": null,
+        "unit": null,
+        "source_type": "company_filing",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1013131/000110465924029627/0001104659-24-029627.txt",
+        "as_of": "2024-03-01 00:00:00",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired.",
+        "confidence": "medium",
+        "metadata": {
+          "channel": "regulatory_filing",
+          "form": "6-K",
+          "filing_family": "foreign_issuer_report",
+          "period": null,
+          "discovery_status": "metadata_only",
+          "discovery_origin": "fmp_sec_filings_financials"
+        }
+      },
+      {
+        "evidence_id": "discovered:filing:GOOGL:20",
+        "metric": "primary_source_candidate",
+        "value": null,
+        "unit": null,
+        "source_type": "company_filing",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1484769/000149315224008410/ex99-1.htm",
+        "as_of": "2024-03-01 00:00:00",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired.",
+        "confidence": "medium",
+        "metadata": {
+          "channel": "regulatory_filing",
+          "form": "8-K",
+          "filing_family": "current_report",
+          "period": null,
+          "discovery_status": "metadata_only",
+          "discovery_origin": "fmp_sec_filings_financials"
+        }
+      },
+      {
+        "evidence_id": "discovered:filing:GOOGL:21",
+        "metric": "primary_source_candidate",
+        "value": null,
+        "unit": null,
+        "source_type": "company_filing",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1449488/000144948824000011/cclpq42023pressrelease-123.htm",
+        "as_of": "2024-03-01 00:00:00",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired.",
+        "confidence": "medium",
+        "metadata": {
+          "channel": "regulatory_filing",
+          "form": "8-K",
+          "filing_family": "current_report",
+          "period": null,
+          "discovery_status": "metadata_only",
+          "discovery_origin": "fmp_sec_filings_financials"
+        }
+      },
+      {
+        "evidence_id": "discovered:filing:GOOGL:22",
+        "metric": "primary_source_candidate",
+        "value": null,
+        "unit": null,
+        "source_type": "company_filing",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/938323/000165495424002443/0001654954-24-002443.txt",
+        "as_of": "2024-03-01 00:00:00",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired.",
+        "confidence": "medium",
+        "metadata": {
+          "channel": "regulatory_filing",
+          "form": "6-K",
+          "filing_family": "foreign_issuer_report",
+          "period": null,
+          "discovery_status": "metadata_only",
+          "discovery_origin": "fmp_sec_filings_financials"
+        }
+      },
+      {
+        "evidence_id": "discovered:filing:GOOGL:23",
+        "metric": "primary_source_candidate",
+        "value": null,
+        "unit": null,
+        "source_type": "company_filing",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1873331/000095017024023517/0000950170-24-023517.txt",
+        "as_of": "2024-03-01 00:00:00",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired.",
+        "confidence": "medium",
+        "metadata": {
+          "channel": "regulatory_filing",
+          "form": "6-K",
+          "filing_family": "foreign_issuer_report",
+          "period": null,
+          "discovery_status": "metadata_only",
+          "discovery_origin": "fmp_sec_filings_financials"
+        }
+      },
+      {
+        "evidence_id": "discovered:filing:GOOGL:24",
+        "metric": "primary_source_candidate",
+        "value": null,
+        "unit": null,
+        "source_type": "company_filing",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1437352/000119312524054346/d746222dex21.htm",
+        "as_of": "2024-03-01 00:00:00",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired.",
+        "confidence": "medium",
+        "metadata": {
+          "channel": "regulatory_filing",
+          "form": "8-K",
+          "filing_family": "current_report",
+          "period": null,
+          "discovery_status": "metadata_only",
+          "discovery_origin": "fmp_sec_filings_financials"
+        }
+      },
+      {
+        "evidence_id": "discovered:filing:GOOGL:25",
+        "metric": "primary_source_candidate",
+        "value": null,
+        "unit": null,
+        "source_type": "company_filing",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/947263/000094726324000006/ex991.htm",
+        "as_of": "2024-03-01 00:00:00",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired.",
+        "confidence": "medium",
+        "metadata": {
+          "channel": "regulatory_filing",
+          "form": "6-K",
+          "filing_family": "foreign_issuer_report",
+          "period": null,
+          "discovery_status": "metadata_only",
+          "discovery_origin": "fmp_sec_filings_financials"
+        }
+      },
+      {
+        "evidence_id": "discovered:filing:GOOGL:26",
+        "metric": "primary_source_candidate",
+        "value": null,
+        "unit": null,
+        "source_type": "company_filing",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1723128/000172312824000007/amrx-q42023ex991.htm",
+        "as_of": "2024-03-01 00:00:00",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired.",
+        "confidence": "medium",
+        "metadata": {
+          "channel": "regulatory_filing",
+          "form": "8-K",
+          "filing_family": "current_report",
+          "period": null,
+          "discovery_status": "metadata_only",
+          "discovery_origin": "fmp_sec_filings_financials"
+        }
+      },
+      {
+        "evidence_id": "discovered:filing:GOOGL:27",
+        "metric": "primary_source_candidate",
+        "value": null,
+        "unit": null,
+        "source_type": "company_filing",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1713334/000119312524054318/d760892dex991.htm",
+        "as_of": "2024-03-01 00:00:00",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired.",
+        "confidence": "medium",
+        "metadata": {
+          "channel": "regulatory_filing",
+          "form": "6-K",
+          "filing_family": "foreign_issuer_report",
+          "period": null,
+          "discovery_status": "metadata_only",
+          "discovery_origin": "fmp_sec_filings_financials"
+        }
+      },
+      {
+        "evidence_id": "discovered:filing:GOOGL:28",
+        "metric": "primary_source_candidate",
+        "value": null,
+        "unit": null,
+        "source_type": "company_filing",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1873331/000095017024023510/pgru-ex99_1.htm",
+        "as_of": "2024-03-01 00:00:00",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired.",
+        "confidence": "medium",
+        "metadata": {
+          "channel": "regulatory_filing",
+          "form": "6-K",
+          "filing_family": "foreign_issuer_report",
+          "period": null,
+          "discovery_status": "metadata_only",
+          "discovery_origin": "fmp_sec_filings_financials"
+        }
+      },
+      {
+        "evidence_id": "discovered:filing:GOOGL:29",
+        "metric": "primary_source_candidate",
+        "value": null,
+        "unit": null,
+        "source_type": "company_filing",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/15615/000119312524054015/d775448dex991.htm",
+        "as_of": "2024-03-01 00:00:00",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired.",
+        "confidence": "medium",
+        "metadata": {
+          "channel": "regulatory_filing",
+          "form": "8-K",
+          "filing_family": "current_report",
+          "period": null,
+          "discovery_status": "metadata_only",
+          "discovery_origin": "fmp_sec_filings_financials"
+        }
+      },
+      {
+        "evidence_id": "discovered:filing:GOOGL:30",
+        "metric": "primary_source_candidate",
+        "value": null,
+        "unit": null,
+        "source_type": "company_filing",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1725057/000095017024023418/day-ex10_1.htm",
+        "as_of": "2024-03-01 00:00:00",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired.",
+        "confidence": "medium",
+        "metadata": {
+          "channel": "regulatory_filing",
+          "form": "8-K",
+          "filing_family": "current_report",
+          "period": null,
+          "discovery_status": "metadata_only",
+          "discovery_origin": "fmp_sec_filings_financials"
+        }
+      },
+      {
+        "evidence_id": "discovered:filing:GOOGL:32",
+        "metric": "primary_source_candidate",
+        "value": null,
+        "unit": null,
+        "source_type": "company_filing",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1345099/000134509924000024/exhibit991hy1fy24results.htm",
+        "as_of": "2024-03-01 00:00:00",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired.",
+        "confidence": "medium",
+        "metadata": {
+          "channel": "regulatory_filing",
+          "form": "6-K",
+          "filing_family": "foreign_issuer_report",
+          "period": null,
+          "discovery_status": "metadata_only",
+          "discovery_origin": "fmp_sec_filings_financials"
+        }
+      },
+      {
+        "evidence_id": "discovered:filing:GOOGL:34",
+        "metric": "primary_source_candidate",
+        "value": null,
+        "unit": null,
+        "source_type": "company_filing",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1401257/000140125724000036/fetq42023earningsrelease.htm",
+        "as_of": "2024-03-01 00:00:00",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired.",
+        "confidence": "medium",
+        "metadata": {
+          "channel": "regulatory_filing",
+          "form": "8-K",
+          "filing_family": "current_report",
+          "period": null,
+          "discovery_status": "metadata_only",
+          "discovery_origin": "fmp_sec_filings_financials"
+        }
+      },
+      {
+        "evidence_id": "discovered:filing:GOOGL:35",
+        "metric": "primary_source_candidate",
+        "value": null,
+        "unit": null,
+        "source_type": "company_filing",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1859795/000095017024023263/nvx-ex99_1.htm",
+        "as_of": "2024-02-29 00:00:00",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired.",
+        "confidence": "medium",
+        "metadata": {
+          "channel": "regulatory_filing",
+          "form": "6-K",
+          "filing_family": "foreign_issuer_report",
+          "period": null,
+          "discovery_status": "metadata_only",
+          "discovery_origin": "fmp_sec_filings_financials"
+        }
+      },
+      {
+        "evidence_id": "discovered:filing:GOOGL:37",
+        "metric": "primary_source_candidate",
+        "value": null,
+        "unit": null,
+        "source_type": "company_filing",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1830214/000162828024008045/ex-991fy2023earnings.htm",
+        "as_of": "2024-02-29 00:00:00",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired.",
+        "confidence": "medium",
+        "metadata": {
+          "channel": "regulatory_filing",
+          "form": "8-K",
+          "filing_family": "current_report",
+          "period": null,
+          "discovery_status": "metadata_only",
+          "discovery_origin": "fmp_sec_filings_financials"
+        }
+      },
+      {
+        "evidence_id": "discovered:filing:GOOGL:39",
+        "metric": "primary_source_candidate",
+        "value": null,
+        "unit": null,
+        "source_type": "company_filing",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1373670/000137367024000007/a2q42023ex99earningsrelease.htm",
+        "as_of": "2024-02-29 00:00:00",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired.",
+        "confidence": "medium",
+        "metadata": {
+          "channel": "regulatory_filing",
+          "form": "8-K",
+          "filing_family": "current_report",
+          "period": null,
+          "discovery_status": "metadata_only",
+          "discovery_origin": "fmp_sec_filings_financials"
+        }
+      }
+    ],
+    "missing_sources": [
+      {
+        "evidence_id": "missing_source:GOOGL:transcript:2026-08-17",
+        "metric": "earnings_transcript",
+        "value": null,
+        "unit": null,
+        "source_type": "company_transcript",
+        "source_ref": "earnings-analyst cache transcript",
+        "as_of": "2026-08-17",
+        "status": "missing",
+        "numeric_eligible": false,
+        "reason": "transcript unavailable",
+        "confidence": "unknown",
+        "metadata": {}
+      }
+    ],
+    "missing_drivers": [],
+    "primary_acquisition_summary": {
+      "candidate_count": 0,
+      "promoted_count": 0,
+      "provisional_count": 0,
+      "driver_candidate_count": 0,
+      "guidance_candidate_count": 0,
+      "guidance_promoted_count": 0
+    },
+    "source_discovery_summary": {
+      "candidate_count": 33,
+      "filing_family_counts": {
+        "foreign_issuer_report": 12,
+        "current_report": 19
+      }
+    },
+    "revision_snapshot_summary": {
+      "available": true,
+      "estimate_revision_delta_available": false,
+      "rating_momentum_direction": "FLAT"
+    },
+    "promotion_policy": "Association, narrative, or uncorroborated relation evidence remains provisional. Numeric drivers require point-in-time primary evidence."
+  },
+  "source_discovery": {
+    "ticker": "GOOGL",
+    "profile_origin": "profile_cache",
+    "filing_metadata_origin": "fmp_sec_filings_financials",
+    "network_fetch_used": true,
+    "candidate_count": 33,
+    "filing_family_counts": {
+      "foreign_issuer_report": 12,
+      "current_report": 19
+    },
+    "candidates": [
+      {
+        "source_id": "website:GOOGL",
+        "source_type": "company_ir",
+        "channel": "company_website_root",
+        "form": null,
+        "filing_family": null,
+        "published_at": null,
+        "period": null,
+        "source_url": "https://www.abc.xyz",
+        "source_ref": "https://www.abc.xyz",
+        "status": "metadata_only",
+        "numeric_eligible": false,
+        "discovery_origin": "company_profile",
+        "reason": "Company website is a discovery root, not a verified IR document."
+      },
+      {
+        "source_id": "sec-submissions:GOOGL",
+        "source_type": "company_filing",
+        "channel": "sec_submissions_manifest",
+        "form": null,
+        "filing_family": null,
+        "published_at": null,
+        "period": null,
+        "source_url": "https://data.sec.gov/submissions/CIK0001652044.json",
+        "source_ref": "https://data.sec.gov/submissions/CIK0001652044.json",
+        "status": "metadata_only",
+        "numeric_eligible": false,
+        "discovery_origin": "company_profile_cik",
+        "reason": "SEC submissions manifest can enumerate filings; it contains no driver evidence."
+      },
+      {
+        "source_id": "filing:GOOGL:0",
+        "source_type": "company_filing",
+        "channel": "regulatory_filing",
+        "form": "6-K",
+        "filing_family": "foreign_issuer_report",
+        "published_at": "2024-03-01 00:00:00",
+        "period": null,
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1063259/000110465924030026/dnn-20231231xex99d1.htm",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1063259/000110465924030026/dnn-20231231xex99d1.htm",
+        "status": "metadata_only",
+        "numeric_eligible": false,
+        "discovery_origin": "fmp_sec_filings_financials",
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired."
+      },
+      {
+        "source_id": "filing:GOOGL:1",
+        "source_type": "company_filing",
+        "channel": "regulatory_filing",
+        "form": "8-K",
+        "filing_family": "current_report",
+        "published_at": "2024-03-01 00:00:00",
+        "period": null,
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1396033/000095017024023941/ll-ex99_1.htm",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1396033/000095017024023941/ll-ex99_1.htm",
+        "status": "metadata_only",
+        "numeric_eligible": false,
+        "discovery_origin": "fmp_sec_filings_financials",
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired."
+      },
+      {
+        "source_id": "filing:GOOGL:2",
+        "source_type": "company_filing",
+        "channel": "regulatory_filing",
+        "form": "8-K",
+        "filing_family": "current_report",
+        "published_at": "2024-03-01 00:00:00",
+        "period": null,
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1013880/000110465924030001/tm247637d1_ex99-1.htm",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1013880/000110465924030001/tm247637d1_ex99-1.htm",
+        "status": "metadata_only",
+        "numeric_eligible": false,
+        "discovery_origin": "fmp_sec_filings_financials",
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired."
+      },
+      {
+        "source_id": "filing:GOOGL:3",
+        "source_type": "company_filing",
+        "channel": "regulatory_filing",
+        "form": "8-K",
+        "filing_family": "current_report",
+        "published_at": "2024-03-01 00:00:00",
+        "period": null,
+        "source_url": "https://www.sec.gov/Archives/edgar/data/936340/000093634024000090/dtegasexhibit991123123.htm",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/936340/000093634024000090/dtegasexhibit991123123.htm",
+        "status": "metadata_only",
+        "numeric_eligible": false,
+        "discovery_origin": "fmp_sec_filings_financials",
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired."
+      },
+      {
+        "source_id": "filing:GOOGL:8",
+        "source_type": "company_filing",
+        "channel": "regulatory_filing",
+        "form": "8-K",
+        "filing_family": "current_report",
+        "published_at": "2024-03-01 00:00:00",
+        "period": null,
+        "source_url": "https://www.sec.gov/Archives/edgar/data/913760/000091376024000055/stonex-indenturebondoffe.htm",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/913760/000091376024000055/stonex-indenturebondoffe.htm",
+        "status": "metadata_only",
+        "numeric_eligible": false,
+        "discovery_origin": "fmp_sec_filings_financials",
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired."
+      },
+      {
+        "source_id": "filing:GOOGL:9",
+        "source_type": "company_filing",
+        "channel": "regulatory_filing",
+        "form": "8-K",
+        "filing_family": "current_report",
+        "published_at": "2024-03-01 00:00:00",
+        "period": null,
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1750/000110465924029986/tm246820d2_ex4-1.htm",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1750/000110465924029986/tm246820d2_ex4-1.htm",
+        "status": "metadata_only",
+        "numeric_eligible": false,
+        "discovery_origin": "fmp_sec_filings_financials",
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired."
+      },
+      {
+        "source_id": "filing:GOOGL:10",
+        "source_type": "company_filing",
+        "channel": "regulatory_filing",
+        "form": "6-K",
+        "filing_family": "foreign_issuer_report",
+        "published_at": "2024-03-01 00:00:00",
+        "period": null,
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1725964/000119312524055135/d473973dex991.htm",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1725964/000119312524055135/d473973dex991.htm",
+        "status": "metadata_only",
+        "numeric_eligible": false,
+        "discovery_origin": "fmp_sec_filings_financials",
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired."
+      },
+      {
+        "source_id": "filing:GOOGL:11",
+        "source_type": "company_filing",
+        "channel": "regulatory_filing",
+        "form": "8-K",
+        "filing_family": "current_report",
+        "published_at": "2024-03-01 00:00:00",
+        "period": null,
+        "source_url": "https://www.sec.gov/Archives/edgar/data/43920/000004392024000012/gef2024q18-kerex991.htm",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/43920/000004392024000012/gef2024q18-kerex991.htm",
+        "status": "metadata_only",
+        "numeric_eligible": false,
+        "discovery_origin": "fmp_sec_filings_financials",
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired."
+      },
+      {
+        "source_id": "filing:GOOGL:13",
+        "source_type": "company_filing",
+        "channel": "regulatory_filing",
+        "form": "8-K",
+        "filing_family": "current_report",
+        "published_at": "2024-03-01 00:00:00",
+        "period": null,
+        "source_url": "https://www.sec.gov/Archives/edgar/data/2098/000095017024023566/acu-ex99_1.htm",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/2098/000095017024023566/acu-ex99_1.htm",
+        "status": "metadata_only",
+        "numeric_eligible": false,
+        "discovery_origin": "fmp_sec_filings_financials",
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired."
+      },
+      {
+        "source_id": "filing:GOOGL:14",
+        "source_type": "company_filing",
+        "channel": "regulatory_filing",
+        "form": "8-K",
+        "filing_family": "current_report",
+        "published_at": "2024-03-01 00:00:00",
+        "period": null,
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1009829/000118518524000198/ex_632477.htm",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1009829/000118518524000198/ex_632477.htm",
+        "status": "metadata_only",
+        "numeric_eligible": false,
+        "discovery_origin": "fmp_sec_filings_financials",
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired."
+      },
+      {
+        "source_id": "filing:GOOGL:15",
+        "source_type": "company_filing",
+        "channel": "regulatory_filing",
+        "form": "8-K",
+        "filing_family": "current_report",
+        "published_at": "2024-03-01 00:00:00",
+        "period": null,
+        "source_url": "https://www.sec.gov/Archives/edgar/data/314203/000110465924029694/tm247723d1_ex99-1.htm",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/314203/000110465924029694/tm247723d1_ex99-1.htm",
+        "status": "metadata_only",
+        "numeric_eligible": false,
+        "discovery_origin": "fmp_sec_filings_financials",
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired."
+      },
+      {
+        "source_id": "filing:GOOGL:16",
+        "source_type": "company_filing",
+        "channel": "regulatory_filing",
+        "form": "8-K",
+        "filing_family": "current_report",
+        "published_at": "2024-03-01 00:00:00",
+        "period": null,
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1679268/000167926824000003/a2023-12x31exx991.htm",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1679268/000167926824000003/a2023-12x31exx991.htm",
+        "status": "metadata_only",
+        "numeric_eligible": false,
+        "discovery_origin": "fmp_sec_filings_financials",
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired."
+      },
+      {
+        "source_id": "filing:GOOGL:17",
+        "source_type": "company_filing",
+        "channel": "regulatory_filing",
+        "form": "6-K",
+        "filing_family": "foreign_issuer_report",
+        "published_at": "2024-03-01 00:00:00",
+        "period": null,
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1854545/000095017024023547/0000950170-24-023547.txt",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1854545/000095017024023547/0000950170-24-023547.txt",
+        "status": "metadata_only",
+        "numeric_eligible": false,
+        "discovery_origin": "fmp_sec_filings_financials",
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired."
+      },
+      {
+        "source_id": "filing:GOOGL:18",
+        "source_type": "company_filing",
+        "channel": "regulatory_filing",
+        "form": "6-K",
+        "filing_family": "foreign_issuer_report",
+        "published_at": "2024-03-01 00:00:00",
+        "period": null,
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1572621/000121390024018770/0001213900-24-018770.txt",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1572621/000121390024018770/0001213900-24-018770.txt",
+        "status": "metadata_only",
+        "numeric_eligible": false,
+        "discovery_origin": "fmp_sec_filings_financials",
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired."
+      },
+      {
+        "source_id": "filing:GOOGL:19",
+        "source_type": "company_filing",
+        "channel": "regulatory_filing",
+        "form": "6-K",
+        "filing_family": "foreign_issuer_report",
+        "published_at": "2024-03-01 00:00:00",
+        "period": null,
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1013131/000110465924029627/0001104659-24-029627.txt",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1013131/000110465924029627/0001104659-24-029627.txt",
+        "status": "metadata_only",
+        "numeric_eligible": false,
+        "discovery_origin": "fmp_sec_filings_financials",
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired."
+      },
+      {
+        "source_id": "filing:GOOGL:20",
+        "source_type": "company_filing",
+        "channel": "regulatory_filing",
+        "form": "8-K",
+        "filing_family": "current_report",
+        "published_at": "2024-03-01 00:00:00",
+        "period": null,
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1484769/000149315224008410/ex99-1.htm",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1484769/000149315224008410/ex99-1.htm",
+        "status": "metadata_only",
+        "numeric_eligible": false,
+        "discovery_origin": "fmp_sec_filings_financials",
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired."
+      },
+      {
+        "source_id": "filing:GOOGL:21",
+        "source_type": "company_filing",
+        "channel": "regulatory_filing",
+        "form": "8-K",
+        "filing_family": "current_report",
+        "published_at": "2024-03-01 00:00:00",
+        "period": null,
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1449488/000144948824000011/cclpq42023pressrelease-123.htm",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1449488/000144948824000011/cclpq42023pressrelease-123.htm",
+        "status": "metadata_only",
+        "numeric_eligible": false,
+        "discovery_origin": "fmp_sec_filings_financials",
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired."
+      },
+      {
+        "source_id": "filing:GOOGL:22",
+        "source_type": "company_filing",
+        "channel": "regulatory_filing",
+        "form": "6-K",
+        "filing_family": "foreign_issuer_report",
+        "published_at": "2024-03-01 00:00:00",
+        "period": null,
+        "source_url": "https://www.sec.gov/Archives/edgar/data/938323/000165495424002443/0001654954-24-002443.txt",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/938323/000165495424002443/0001654954-24-002443.txt",
+        "status": "metadata_only",
+        "numeric_eligible": false,
+        "discovery_origin": "fmp_sec_filings_financials",
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired."
+      },
+      {
+        "source_id": "filing:GOOGL:23",
+        "source_type": "company_filing",
+        "channel": "regulatory_filing",
+        "form": "6-K",
+        "filing_family": "foreign_issuer_report",
+        "published_at": "2024-03-01 00:00:00",
+        "period": null,
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1873331/000095017024023517/0000950170-24-023517.txt",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1873331/000095017024023517/0000950170-24-023517.txt",
+        "status": "metadata_only",
+        "numeric_eligible": false,
+        "discovery_origin": "fmp_sec_filings_financials",
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired."
+      },
+      {
+        "source_id": "filing:GOOGL:24",
+        "source_type": "company_filing",
+        "channel": "regulatory_filing",
+        "form": "8-K",
+        "filing_family": "current_report",
+        "published_at": "2024-03-01 00:00:00",
+        "period": null,
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1437352/000119312524054346/d746222dex21.htm",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1437352/000119312524054346/d746222dex21.htm",
+        "status": "metadata_only",
+        "numeric_eligible": false,
+        "discovery_origin": "fmp_sec_filings_financials",
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired."
+      },
+      {
+        "source_id": "filing:GOOGL:25",
+        "source_type": "company_filing",
+        "channel": "regulatory_filing",
+        "form": "6-K",
+        "filing_family": "foreign_issuer_report",
+        "published_at": "2024-03-01 00:00:00",
+        "period": null,
+        "source_url": "https://www.sec.gov/Archives/edgar/data/947263/000094726324000006/ex991.htm",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/947263/000094726324000006/ex991.htm",
+        "status": "metadata_only",
+        "numeric_eligible": false,
+        "discovery_origin": "fmp_sec_filings_financials",
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired."
+      },
+      {
+        "source_id": "filing:GOOGL:26",
+        "source_type": "company_filing",
+        "channel": "regulatory_filing",
+        "form": "8-K",
+        "filing_family": "current_report",
+        "published_at": "2024-03-01 00:00:00",
+        "period": null,
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1723128/000172312824000007/amrx-q42023ex991.htm",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1723128/000172312824000007/amrx-q42023ex991.htm",
+        "status": "metadata_only",
+        "numeric_eligible": false,
+        "discovery_origin": "fmp_sec_filings_financials",
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired."
+      },
+      {
+        "source_id": "filing:GOOGL:27",
+        "source_type": "company_filing",
+        "channel": "regulatory_filing",
+        "form": "6-K",
+        "filing_family": "foreign_issuer_report",
+        "published_at": "2024-03-01 00:00:00",
+        "period": null,
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1713334/000119312524054318/d760892dex991.htm",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1713334/000119312524054318/d760892dex991.htm",
+        "status": "metadata_only",
+        "numeric_eligible": false,
+        "discovery_origin": "fmp_sec_filings_financials",
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired."
+      },
+      {
+        "source_id": "filing:GOOGL:28",
+        "source_type": "company_filing",
+        "channel": "regulatory_filing",
+        "form": "6-K",
+        "filing_family": "foreign_issuer_report",
+        "published_at": "2024-03-01 00:00:00",
+        "period": null,
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1873331/000095017024023510/pgru-ex99_1.htm",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1873331/000095017024023510/pgru-ex99_1.htm",
+        "status": "metadata_only",
+        "numeric_eligible": false,
+        "discovery_origin": "fmp_sec_filings_financials",
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired."
+      },
+      {
+        "source_id": "filing:GOOGL:29",
+        "source_type": "company_filing",
+        "channel": "regulatory_filing",
+        "form": "8-K",
+        "filing_family": "current_report",
+        "published_at": "2024-03-01 00:00:00",
+        "period": null,
+        "source_url": "https://www.sec.gov/Archives/edgar/data/15615/000119312524054015/d775448dex991.htm",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/15615/000119312524054015/d775448dex991.htm",
+        "status": "metadata_only",
+        "numeric_eligible": false,
+        "discovery_origin": "fmp_sec_filings_financials",
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired."
+      },
+      {
+        "source_id": "filing:GOOGL:30",
+        "source_type": "company_filing",
+        "channel": "regulatory_filing",
+        "form": "8-K",
+        "filing_family": "current_report",
+        "published_at": "2024-03-01 00:00:00",
+        "period": null,
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1725057/000095017024023418/day-ex10_1.htm",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1725057/000095017024023418/day-ex10_1.htm",
+        "status": "metadata_only",
+        "numeric_eligible": false,
+        "discovery_origin": "fmp_sec_filings_financials",
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired."
+      },
+      {
+        "source_id": "filing:GOOGL:32",
+        "source_type": "company_filing",
+        "channel": "regulatory_filing",
+        "form": "6-K",
+        "filing_family": "foreign_issuer_report",
+        "published_at": "2024-03-01 00:00:00",
+        "period": null,
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1345099/000134509924000024/exhibit991hy1fy24results.htm",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1345099/000134509924000024/exhibit991hy1fy24results.htm",
+        "status": "metadata_only",
+        "numeric_eligible": false,
+        "discovery_origin": "fmp_sec_filings_financials",
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired."
+      },
+      {
+        "source_id": "filing:GOOGL:34",
+        "source_type": "company_filing",
+        "channel": "regulatory_filing",
+        "form": "8-K",
+        "filing_family": "current_report",
+        "published_at": "2024-03-01 00:00:00",
+        "period": null,
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1401257/000140125724000036/fetq42023earningsrelease.htm",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1401257/000140125724000036/fetq42023earningsrelease.htm",
+        "status": "metadata_only",
+        "numeric_eligible": false,
+        "discovery_origin": "fmp_sec_filings_financials",
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired."
+      },
+      {
+        "source_id": "filing:GOOGL:35",
+        "source_type": "company_filing",
+        "channel": "regulatory_filing",
+        "form": "6-K",
+        "filing_family": "foreign_issuer_report",
+        "published_at": "2024-02-29 00:00:00",
+        "period": null,
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1859795/000095017024023263/nvx-ex99_1.htm",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1859795/000095017024023263/nvx-ex99_1.htm",
+        "status": "metadata_only",
+        "numeric_eligible": false,
+        "discovery_origin": "fmp_sec_filings_financials",
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired."
+      },
+      {
+        "source_id": "filing:GOOGL:37",
+        "source_type": "company_filing",
+        "channel": "regulatory_filing",
+        "form": "8-K",
+        "filing_family": "current_report",
+        "published_at": "2024-02-29 00:00:00",
+        "period": null,
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1830214/000162828024008045/ex-991fy2023earnings.htm",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1830214/000162828024008045/ex-991fy2023earnings.htm",
+        "status": "metadata_only",
+        "numeric_eligible": false,
+        "discovery_origin": "fmp_sec_filings_financials",
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired."
+      },
+      {
+        "source_id": "filing:GOOGL:39",
+        "source_type": "company_filing",
+        "channel": "regulatory_filing",
+        "form": "8-K",
+        "filing_family": "current_report",
+        "published_at": "2024-02-29 00:00:00",
+        "period": null,
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1373670/000137367024000007/a2q42023ex99earningsrelease.htm",
+        "source_ref": "https://www.sec.gov/Archives/edgar/data/1373670/000137367024000007/a2q42023ex99earningsrelease.htm",
+        "status": "metadata_only",
+        "numeric_eligible": false,
+        "discovery_origin": "fmp_sec_filings_financials",
+        "reason": "Filing metadata identifies a candidate source; document content is not acquired."
+      }
+    ],
+    "policy": "Ticker-neutral discovery classifies observed metadata only. No document text, driver value, or numeric evidence is promoted."
+  },
+  "document_acquisition": {
+    "ticker": "GOOGL",
+    "cache_first": true,
+    "network_fetch_used": false,
+    "summary": {
+      "document_count": 0,
+      "skipped_count": 33,
+      "cache_hit_count": 0,
+      "network_fetch_count": 0
+    },
+    "documents": [],
+    "skipped": [
+      {
+        "source_id": "website:GOOGL",
+        "source_url": "https://www.abc.xyz",
+        "reason": "host_not_allowlisted"
+      },
+      {
+        "source_id": "sec-submissions:GOOGL",
+        "source_url": "https://data.sec.gov/submissions/CIK0001652044.json",
+        "reason": "sec_manifest_metadata_only"
+      },
+      {
+        "source_id": "filing:GOOGL:0",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1063259/000110465924030026/dnn-20231231xex99d1.htm",
+        "reason": "fetch_disabled"
+      },
+      {
+        "source_id": "filing:GOOGL:1",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1396033/000095017024023941/ll-ex99_1.htm",
+        "reason": "fetch_disabled"
+      },
+      {
+        "source_id": "filing:GOOGL:2",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1013880/000110465924030001/tm247637d1_ex99-1.htm",
+        "reason": "fetch_disabled"
+      },
+      {
+        "source_id": "filing:GOOGL:3",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/936340/000093634024000090/dtegasexhibit991123123.htm",
+        "reason": "fetch_disabled"
+      },
+      {
+        "source_id": "filing:GOOGL:8",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/913760/000091376024000055/stonex-indenturebondoffe.htm",
+        "reason": "fetch_disabled"
+      },
+      {
+        "source_id": "filing:GOOGL:9",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1750/000110465924029986/tm246820d2_ex4-1.htm",
+        "reason": "fetch_disabled"
+      },
+      {
+        "source_id": "filing:GOOGL:10",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1725964/000119312524055135/d473973dex991.htm",
+        "reason": "fetch_disabled"
+      },
+      {
+        "source_id": "filing:GOOGL:11",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/43920/000004392024000012/gef2024q18-kerex991.htm",
+        "reason": "fetch_disabled"
+      },
+      {
+        "source_id": "filing:GOOGL:13",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/2098/000095017024023566/acu-ex99_1.htm",
+        "reason": "fetch_disabled"
+      },
+      {
+        "source_id": "filing:GOOGL:14",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1009829/000118518524000198/ex_632477.htm",
+        "reason": "fetch_disabled"
+      },
+      {
+        "source_id": "filing:GOOGL:15",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/314203/000110465924029694/tm247723d1_ex99-1.htm",
+        "reason": "fetch_disabled"
+      },
+      {
+        "source_id": "filing:GOOGL:16",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1679268/000167926824000003/a2023-12x31exx991.htm",
+        "reason": "fetch_disabled"
+      },
+      {
+        "source_id": "filing:GOOGL:17",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1854545/000095017024023547/0000950170-24-023547.txt",
+        "reason": "fetch_disabled"
+      },
+      {
+        "source_id": "filing:GOOGL:18",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1572621/000121390024018770/0001213900-24-018770.txt",
+        "reason": "fetch_disabled"
+      },
+      {
+        "source_id": "filing:GOOGL:19",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1013131/000110465924029627/0001104659-24-029627.txt",
+        "reason": "fetch_disabled"
+      },
+      {
+        "source_id": "filing:GOOGL:20",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1484769/000149315224008410/ex99-1.htm",
+        "reason": "fetch_disabled"
+      },
+      {
+        "source_id": "filing:GOOGL:21",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1449488/000144948824000011/cclpq42023pressrelease-123.htm",
+        "reason": "fetch_disabled"
+      },
+      {
+        "source_id": "filing:GOOGL:22",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/938323/000165495424002443/0001654954-24-002443.txt",
+        "reason": "fetch_disabled"
+      },
+      {
+        "source_id": "filing:GOOGL:23",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1873331/000095017024023517/0000950170-24-023517.txt",
+        "reason": "fetch_disabled"
+      },
+      {
+        "source_id": "filing:GOOGL:24",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1437352/000119312524054346/d746222dex21.htm",
+        "reason": "fetch_disabled"
+      },
+      {
+        "source_id": "filing:GOOGL:25",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/947263/000094726324000006/ex991.htm",
+        "reason": "fetch_disabled"
+      },
+      {
+        "source_id": "filing:GOOGL:26",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1723128/000172312824000007/amrx-q42023ex991.htm",
+        "reason": "fetch_disabled"
+      },
+      {
+        "source_id": "filing:GOOGL:27",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1713334/000119312524054318/d760892dex991.htm",
+        "reason": "fetch_disabled"
+      },
+      {
+        "source_id": "filing:GOOGL:28",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1873331/000095017024023510/pgru-ex99_1.htm",
+        "reason": "fetch_disabled"
+      },
+      {
+        "source_id": "filing:GOOGL:29",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/15615/000119312524054015/d775448dex991.htm",
+        "reason": "fetch_disabled"
+      },
+      {
+        "source_id": "filing:GOOGL:30",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1725057/000095017024023418/day-ex10_1.htm",
+        "reason": "fetch_disabled"
+      },
+      {
+        "source_id": "filing:GOOGL:32",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1345099/000134509924000024/exhibit991hy1fy24results.htm",
+        "reason": "fetch_disabled"
+      },
+      {
+        "source_id": "filing:GOOGL:34",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1401257/000140125724000036/fetq42023earningsrelease.htm",
+        "reason": "fetch_disabled"
+      },
+      {
+        "source_id": "filing:GOOGL:35",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1859795/000095017024023263/nvx-ex99_1.htm",
+        "reason": "fetch_disabled"
+      },
+      {
+        "source_id": "filing:GOOGL:37",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1830214/000162828024008045/ex-991fy2023earnings.htm",
+        "reason": "fetch_disabled"
+      },
+      {
+        "source_id": "filing:GOOGL:39",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1373670/000137367024000007/a2q42023ex99earningsrelease.htm",
+        "reason": "fetch_disabled"
+      }
+    ],
+    "policy": "Only allowlisted SEC filing document URLs are fetched. Normalized text is not evidence until promotion gates pass."
+  },
+  "primary_source_acquisition": {
+    "ticker": "GOOGL",
+    "cache_first": true,
+    "network_fetch_used": false,
+    "document_count": 0,
+    "summary": {
+      "candidate_count": 0,
+      "promoted_count": 0,
+      "provisional_count": 0,
+      "driver_candidate_count": 0,
+      "guidance_candidate_count": 0,
+      "guidance_promoted_count": 0
+    },
+    "promoted": [],
+    "provisional": [],
+    "guidance_promoted": [],
+    "guidance_provisional": [],
+    "documents": [],
+    "policy": "No web fetch; no narrative inference; incomplete candidates remain provisional. Driver and guidance candidates are separate evidence types."
+  },
+  "guidance_extraction": {
+    "summary": {
+      "candidate_count": 0,
+      "promoted_count": 0,
+      "provisional_count": 0
+    },
+    "promoted": [],
+    "provisional": [],
+    "policy": "Management guidance is structured evidence; ranges remain ranges."
+  },
+  "estimate_revision_snapshot": {
+    "ticker": "GOOGL",
+    "generated_at": "2026-08-17T16:39:30.051849+00:00",
+    "available": true,
+    "estimate_revision_delta_available": false,
+    "estimate_revision_delta_reason": "annual_estimates cache has latest forward curve only; compare future ledger snapshots for deltas",
+    "annual_estimate_snapshot": {
+      "available": true,
+      "window_from": "2026-12-31",
+      "window_to": "2030-12-31",
+      "entries": [
+        {
+          "date": "2026-12-31",
+          "revenue_avg": 495359381557,
+          "revenue_low": 488997304016,
+          "revenue_high": 500792939672,
+          "revenue_spread_pct": 2.38,
+          "eps_avg": 20.23712,
+          "eps_low": 19.4379,
+          "eps_high": 21.50009,
+          "eps_spread_pct": 10.19,
+          "num_analysts_revenue": 36,
+          "num_analysts_eps": 39
+        },
+        {
+          "date": "2027-12-31",
+          "revenue_avg": 606613875390,
+          "revenue_low": 574771304904,
+          "revenue_high": 654529255511,
+          "revenue_spread_pct": 13.15,
+          "eps_avg": 15.00595,
+          "eps_low": 13.92609,
+          "eps_high": 16.67667,
+          "eps_spread_pct": 18.33,
+          "num_analysts_revenue": 39,
+          "num_analysts_eps": 42
+        },
+        {
+          "date": "2028-12-31",
+          "revenue_avg": 721625172376,
+          "revenue_low": 538737786017,
+          "revenue_high": 797028800359,
+          "revenue_spread_pct": 35.79,
+          "eps_avg": 17.71607,
+          "eps_low": 13.68538,
+          "eps_high": 20.25047,
+          "eps_spread_pct": 37.06,
+          "num_analysts_revenue": 37,
+          "num_analysts_eps": 34
+        },
+        {
+          "date": "2029-12-31",
+          "revenue_avg": 815730364847,
+          "revenue_low": 714345859869,
+          "revenue_high": 878987166090,
+          "revenue_spread_pct": 20.18,
+          "eps_avg": 20.29981,
+          "eps_low": 17.01991,
+          "eps_high": 22.34624,
+          "eps_spread_pct": 26.24,
+          "num_analysts_revenue": 23,
+          "num_analysts_eps": 29
+        },
+        {
+          "date": "2030-12-31",
+          "revenue_avg": 936258242857,
+          "revenue_low": 819893715344,
+          "revenue_high": 1008861524693,
+          "revenue_spread_pct": 20.18,
+          "eps_avg": 24.36571,
+          "eps_low": 20.42887,
+          "eps_high": 26.82202,
+          "eps_spread_pct": 26.24,
+          "num_analysts_revenue": 33,
+          "num_analysts_eps": 16
+        }
+      ]
+    },
+    "latest_year": {
+      "date": "2026-12-31",
+      "revenue_avg": 495359381557,
+      "revenue_low": 488997304016,
+      "revenue_high": 500792939672,
+      "revenue_spread_pct": 2.38,
+      "eps_avg": 20.23712,
+      "eps_low": 19.4379,
+      "eps_high": 21.50009,
+      "eps_spread_pct": 10.19,
+      "num_analysts_revenue": 36,
+      "num_analysts_eps": 39
+    },
+    "rating_momentum": {
+      "available": true,
+      "from": "2026-03-01",
+      "to": "2026-08-01",
+      "net_bull_from": 0.9,
+      "net_bull_to": 0.9062,
+      "delta": 0.0062,
+      "direction": "FLAT"
+    },
+    "policy": "This is a point-in-time market-expectations snapshot, not a live valuation input."
+  },
+  "forward_financial_bridge": {
+    "available": true,
+    "status": "available",
+    "generated_at": "2026-08-17T16:39:30.051849+00:00",
+    "forecast_basis": "consensus_annual_estimates_plus_historical_conversion",
+    "estimate_cutoff_date": "2026-08-17",
+    "excluded_nonforward_estimate_rows": 1,
+    "assumption_basis": "historical_ratios_held_constant",
+    "held_constant_assumptions": [
+      {
+        "driver": "gross_margin",
+        "held_constant_value": 0.6072,
+        "basis": "derived.margins_8q_latest4_median",
+        "assumption": "held_constant_at_historical_value"
+      },
+      {
+        "driver": "operating_margin",
+        "held_constant_value": 0.328,
+        "basis": "derived.margins_8q_latest4_median",
+        "assumption": "held_constant_at_historical_value"
+      },
+      {
+        "driver": "net_margin",
+        "held_constant_value": 0.4556,
+        "basis": "derived.margins_8q_latest4_median",
+        "assumption": "held_constant_at_historical_value"
+      },
+      {
+        "driver": "fcf_margin",
+        "held_constant_value": -0.0489,
+        "basis": "historical",
+        "assumption": "held_constant_at_historical_value"
+      },
+      {
+        "driver": "capex_intensity",
+        "held_constant_value": 0.375,
+        "basis": "historical",
+        "assumption": "held_constant_at_historical_value"
+      },
+      {
+        "driver": "diluted_share_count",
+        "held_constant_value": 12309000000,
+        "basis": "historical_latest",
+        "assumption": "held_constant_at_historical_value"
+      },
+      {
+        "driver": "tax_and_other_rate",
+        "held_constant_value": -0.389,
+        "basis": "observed_net_to_operating_bridge",
+        "assumption": "held_constant_at_historical_value"
+      }
+    ],
+    "terminal_sensitivity": {
+      "horizon_date": "2030-12-31",
+      "basis": "illustrative_elasticity_not_a_scenario",
+      "net_margin_sensitivity": {
+        "minus_20pct_relative": {
+          "net_margin": 0.3645,
+          "net_income": 341247893761.0,
+          "eps_implied": 27.7234
+        },
+        "held_constant": {
+          "net_margin": 0.4556,
+          "net_income": 426559867201.0,
+          "eps_implied": 34.6543
+        },
+        "plus_20pct_relative": {
+          "net_margin": 0.5467,
+          "net_income": 511871840641.0,
+          "eps_implied": 41.5852
+        }
+      },
+      "share_count_sensitivity": {
+        "minus_10pct_buyback": {
+          "diluted_share_count": 11078100000.0,
+          "eps_implied": 38.5048
+        },
+        "held_constant": {
+          "diluted_share_count": 12309000000.0,
+          "eps_implied": 34.6543
+        },
+        "plus_10pct_dilution": {
+          "diluted_share_count": 13539900000.0,
+          "eps_implied": 31.5039
+        }
+      },
+      "policy": "Shows how much forward net income / EPS move with the held-constant net margin and share-count assumptions. This is a sensitivity probe, not a bear/base/bull scenario, and produces no fair value, target price, or verdict."
+    },
+    "historical_conversion": {
+      "gross_margin": 0.6072,
+      "operating_margin": 0.328,
+      "net_margin": 0.4556,
+      "source": "derived.margins_8q_latest4_median",
+      "fcf_margin": -0.0489,
+      "fcf_margin_source": "derived.cash_flow_quality.fcf_margin",
+      "capex_intensity": 0.375,
+      "capex_intensity_source": "derived.cash_flow_quality.capex_intensity",
+      "diluted_share_count": 12309000000,
+      "diluted_share_count_source": "quarterly_pnl.weightedAverageShsOutDil",
+      "tax_and_other_rate": -0.389,
+      "tax_and_other_rate_source": "observed_net_to_operating_bridge"
+    },
+    "rows": [
+      {
+        "date": "2026-12-31",
+        "forecast_basis": "consensus_annual_estimates",
+        "revenue": {
+          "point": 495359381557,
+          "low": 488997304016,
+          "high": 500792939672,
+          "source": "annual_estimates"
+        },
+        "gross_profit": {
+          "point": 300787587379.0,
+          "low": 296924464916.0,
+          "high": 304086902779.0
+        },
+        "operating_income": {
+          "point": 162481000625.0,
+          "low": 160394199076.0,
+          "high": 164263241948.0
+        },
+        "tax_and_other_rate": {
+          "point": -0.389,
+          "source": "observed_net_to_operating_bridge",
+          "note": "Includes tax plus below-operating items because cache provides net margin, not a clean tax schedule."
+        },
+        "net_income_from_margin": {
+          "point": 225686057907.0,
+          "low": 222787491223.0,
+          "high": 228161590535.0
+        },
+        "eps_consensus": {
+          "point": 20.2371,
+          "low": 19.4379,
+          "high": 21.5001,
+          "source": "annual_estimates"
+        },
+        "eps_implied_net_income": {
+          "point": 249098710080.0,
+          "low": 239261111100.0,
+          "high": 264644607810.0
+        },
+        "free_cash_flow": {
+          "point": -24223073758.0,
+          "low": -23911968166.0,
+          "high": -24488774750.0
+        },
+        "capex": {
+          "point": 185759768084.0,
+          "low": 183373989006.0,
+          "high": 187797352377.0
+        },
+        "guidance_overlay": {},
+        "coverage": {
+          "num_analysts_revenue": 36,
+          "num_analysts_eps": 39
+        },
+        "consistency_checks": [
+          {
+            "check": "eps_vs_margin_net_income",
+            "gap_pct": 0.1037,
+            "status": "ok",
+            "note": "Compares consensus EPS implied net income with historical-margin implied net income."
+          },
+          {
+            "check": "fcf_margin_sign",
+            "status": "negative_fcf",
+            "fcf_margin": -0.0489
+          }
+        ]
+      },
+      {
+        "date": "2027-12-31",
+        "forecast_basis": "consensus_annual_estimates",
+        "revenue": {
+          "point": 606613875390,
+          "low": 574771304904,
+          "high": 654529255511,
+          "source": "annual_estimates"
+        },
+        "gross_profit": {
+          "point": 368342522303.0,
+          "low": 349007368253.0,
+          "high": 397437260632.0
+        },
+        "operating_income": {
+          "point": 198973176115.0,
+          "low": 188528612213.0,
+          "high": 214689722923.0
+        },
+        "tax_and_other_rate": {
+          "point": -0.389,
+          "source": "observed_net_to_operating_bridge",
+          "note": "Includes tax plus below-operating items because cache provides net margin, not a clean tax schedule."
+        },
+        "net_income_from_margin": {
+          "point": 276373677992.0,
+          "low": 261866182072.0,
+          "high": 298203956483.0
+        },
+        "eps_consensus": {
+          "point": 15.006,
+          "low": 13.9261,
+          "high": 16.6767,
+          "source": "annual_estimates"
+        },
+        "eps_implied_net_income": {
+          "point": 184708238550.0,
+          "low": 171416241810.0,
+          "high": 205273131030.0
+        },
+        "free_cash_flow": {
+          "point": -29663418507.0,
+          "low": -28106316810.0,
+          "high": -32006480594.0
+        },
+        "capex": {
+          "point": 227480203271.0,
+          "low": 215539239339.0,
+          "high": 245448470817.0
+        },
+        "guidance_overlay": {},
+        "coverage": {
+          "num_analysts_revenue": 39,
+          "num_analysts_eps": 42
+        },
+        "consistency_checks": [
+          {
+            "check": "eps_vs_margin_net_income",
+            "gap_pct": -0.3317,
+            "status": "wide_gap",
+            "note": "Compares consensus EPS implied net income with historical-margin implied net income."
+          },
+          {
+            "check": "fcf_margin_sign",
+            "status": "negative_fcf",
+            "fcf_margin": -0.0489
+          }
+        ]
+      },
+      {
+        "date": "2028-12-31",
+        "forecast_basis": "consensus_annual_estimates",
+        "revenue": {
+          "point": 721625172376,
+          "low": 538737786017,
+          "high": 797028800359,
+          "source": "annual_estimates"
+        },
+        "gross_profit": {
+          "point": 438178628835.0,
+          "low": 327127424894.0,
+          "high": 483964529304.0
+        },
+        "operating_income": {
+          "point": 236697606727.0,
+          "low": 176709390810.0,
+          "high": 261430472161.0
+        },
+        "tax_and_other_rate": {
+          "point": -0.389,
+          "source": "observed_net_to_operating_bridge",
+          "note": "Includes tax plus below-operating items because cache provides net margin, not a clean tax schedule."
+        },
+        "net_income_from_margin": {
+          "point": 328772900048.0,
+          "low": 245449287323.0,
+          "high": 363126842226.0
+        },
+        "eps_consensus": {
+          "point": 17.7161,
+          "low": 13.6854,
+          "high": 20.2505,
+          "source": "annual_estimates"
+        },
+        "eps_implied_net_income": {
+          "point": 218067105630.0,
+          "low": 168453342420.0,
+          "high": 249263035230.0
+        },
+        "free_cash_flow": {
+          "point": -35287470929.0,
+          "low": -26344277736.0,
+          "high": -38974708338.0
+        },
+        "capex": {
+          "point": 270609439641.0,
+          "low": 202026669756.0,
+          "high": 298885800135.0
+        },
+        "guidance_overlay": {},
+        "coverage": {
+          "num_analysts_revenue": 37,
+          "num_analysts_eps": 34
+        },
+        "consistency_checks": [
+          {
+            "check": "eps_vs_margin_net_income",
+            "gap_pct": -0.3367,
+            "status": "wide_gap",
+            "note": "Compares consensus EPS implied net income with historical-margin implied net income."
+          },
+          {
+            "check": "fcf_margin_sign",
+            "status": "negative_fcf",
+            "fcf_margin": -0.0489
+          }
+        ]
+      },
+      {
+        "date": "2029-12-31",
+        "forecast_basis": "consensus_annual_estimates",
+        "revenue": {
+          "point": 815730364847,
+          "low": 714345859869,
+          "high": 878987166090,
+          "source": "annual_estimates"
+        },
+        "gross_profit": {
+          "point": 495320322032.0,
+          "low": 433758551355.0,
+          "high": 533730537604.0
+        },
+        "operating_income": {
+          "point": 267564703235.0,
+          "low": 234309946325.0,
+          "high": 288313332906.0
+        },
+        "tax_and_other_rate": {
+          "point": -0.389,
+          "source": "observed_net_to_operating_bridge",
+          "note": "Includes tax plus below-operating items because cache provides net margin, not a clean tax schedule."
+        },
+        "net_income_from_margin": {
+          "point": 371647287226.0,
+          "low": 325456440513.0,
+          "high": 400467127205.0
+        },
+        "eps_consensus": {
+          "point": 20.2998,
+          "low": 17.0199,
+          "high": 22.3462,
+          "source": "annual_estimates"
+        },
+        "eps_implied_net_income": {
+          "point": 249870361290.0,
+          "low": 209498072190.0,
+          "high": 275059868160.0
+        },
+        "free_cash_flow": {
+          "point": -39889214841.0,
+          "low": -34931512548.0,
+          "high": -42982472422.0
+        },
+        "capex": {
+          "point": 305898886818.0,
+          "low": 267879697451.0,
+          "high": 329620187284.0
+        },
+        "guidance_overlay": {},
+        "coverage": {
+          "num_analysts_revenue": 23,
+          "num_analysts_eps": 29
+        },
+        "consistency_checks": [
+          {
+            "check": "eps_vs_margin_net_income",
+            "gap_pct": -0.3277,
+            "status": "wide_gap",
+            "note": "Compares consensus EPS implied net income with historical-margin implied net income."
+          },
+          {
+            "check": "fcf_margin_sign",
+            "status": "negative_fcf",
+            "fcf_margin": -0.0489
+          }
+        ]
+      },
+      {
+        "date": "2030-12-31",
+        "forecast_basis": "consensus_annual_estimates",
+        "revenue": {
+          "point": 936258242857,
+          "low": 819893715344,
+          "high": 1008861524693,
+          "source": "annual_estimates"
+        },
+        "gross_profit": {
+          "point": 568506156374.0,
+          "low": 497848353594.0,
+          "high": 612591656301.0
+        },
+        "operating_income": {
+          "point": 307098607207.0,
+          "low": 268930308450.0,
+          "high": 330912941447.0
+        },
+        "tax_and_other_rate": {
+          "point": -0.389,
+          "source": "observed_net_to_operating_bridge",
+          "note": "Includes tax plus below-operating items because cache provides net margin, not a clean tax schedule."
+        },
+        "net_income_from_margin": {
+          "point": 426559867201.0,
+          "low": 373544112433.0,
+          "high": 459637969845.0
+        },
+        "eps_consensus": {
+          "point": 24.3657,
+          "low": 20.4289,
+          "high": 26.822,
+          "source": "annual_estimates"
+        },
+        "eps_implied_net_income": {
+          "point": 299917524390.0,
+          "low": 251458960830.0,
+          "high": 330152244180.0
+        },
+        "free_cash_flow": {
+          "point": -45783028076.0,
+          "low": -40092802680.0,
+          "high": -49333328557.0
+        },
+        "capex": {
+          "point": 351096841071.0,
+          "low": 307460143254.0,
+          "high": 378323071760.0
+        },
+        "guidance_overlay": {},
+        "coverage": {
+          "num_analysts_revenue": 33,
+          "num_analysts_eps": 16
+        },
+        "consistency_checks": [
+          {
+            "check": "eps_vs_margin_net_income",
+            "gap_pct": -0.2969,
+            "status": "ok",
+            "note": "Compares consensus EPS implied net income with historical-margin implied net income."
+          },
+          {
+            "check": "fcf_margin_sign",
+            "status": "negative_fcf",
+            "fcf_margin": -0.0489
+          }
+        ]
+      }
+    ],
+    "missing_inputs": [],
+    "warnings": [
+      "negative_observed_tax_and_other_rate_non_operating_items_or_timing_effects"
+    ],
+    "policy": "Shadow-only financial bridge. It maps sourced forward estimates through observed historical conversion ratios; it is not a valuation model and must not alter live decisions."
+  },
+  "multiple_anchor": {
+    "engine": "forward_expectations_multiple_anchor.py v1.0",
+    "ticker": "GOOGL",
+    "available": true,
+    "anchor_independent_of_current_price": true,
+    "source": "fmp_ratios_annual_history",
+    "history_points": 6,
+    "by_metric": {
+      "pe": {
+        "usable": true,
+        "n": 6,
+        "p25": 23.443,
+        "p50": 24.6882,
+        "p75": 27.8812,
+        "dispersion_ratio": 1.189,
+        "source": "fmp_ratios_annual_history:priceToEarningsRatio",
+        "reason": null,
+        "compressed": false,
+        "growth_tier": "peg_terminal",
+        "growth_used": 0.1304,
+        "compression_factor": 1.0,
+        "terminal_pe_peg": 28.6896,
+        "pe_ceiling_applied": false,
+        "historical_band": {
+          "p25": 23.443,
+          "p50": 24.6882,
+          "p75": 27.8812
+        },
+        "method": "peg_terminal_growth_bound"
+      },
+      "ps": {
+        "usable": true,
+        "n": 6,
+        "p25": 4.8699,
+        "p50": 5.4118,
+        "p75": 5.9829,
+        "dispersion_ratio": 1.229,
+        "source": "fmp_ratios_annual_history:priceToSalesRatio",
+        "reason": null,
+        "compressed": true,
+        "growth_tier": "growth",
+        "growth_used": 0.1725,
+        "compression_factor": 0.82,
+        "pe_absolute_ceiling": null,
+        "pe_ceiling_applied": false,
+        "historical_band": {
+          "p25": 5.9389,
+          "p50": 6.5998,
+          "p75": 7.2962
+        },
+        "method": "historical_regime_growth_compressed"
+      },
+      "pfcf": {
+        "usable": true,
+        "n": 6,
+        "p25": 13.5216,
+        "p50": 14.7455,
+        "p75": 16.2512,
+        "dispersion_ratio": 1.202,
+        "source": "fmp_ratios_annual_history:priceToFreeCashFlowRatio",
+        "reason": null,
+        "compressed": true,
+        "growth_tier": "slowing",
+        "growth_used": 0.0475,
+        "compression_factor": 0.52,
+        "pe_absolute_ceiling": null,
+        "pe_ceiling_applied": false,
+        "historical_band": {
+          "p25": 26.003,
+          "p50": 28.3568,
+          "p75": 31.2523
+        },
+        "method": "historical_regime_growth_compressed"
+      }
+    },
+    "warnings": [],
+    "policy": "Historical valuation regime; shadow-only multiple anchor.",
+    "compression": {
+      "engine": "forward_expectations_multiple_compression.py v1.1 (PEG terminal P/E)",
+      "applied": true,
+      "growth_signals": {
+        "eps": 0.0475,
+        "revenue": 0.1725
+      },
+      "terminal_growth": 0.1304,
+      "terminal_growth_basis": "prior_year_yoy_terminal_noise_guard",
+      "terminal_pe_peg": 28.6896,
+      "peg_policy": "terminal_pe = clamp(2.2 * terminal_growth_pct, 20.0, 60.0); bound to terminal growth, not year.",
+      "policy": "Historical multiple compressed toward forward-growth-justified level; shadow only."
+    }
+  },
+  "margin_normalization": {
+    "engine": "forward_expectations_margin_normalization.py v1.0",
+    "applied": true,
+    "shadow_only": true,
+    "held_net_margin": 0.4556,
+    "elevated_threshold": 0.4,
+    "value_currency_basis": "reporting_currency",
+    "policy": "Durable-platform retention margin path; NOT sector mean reversion; shadow only.",
+    "reason": null,
+    "own_recent_net_margin": 0.3418,
+    "floor_net_margin": 0.2905,
+    "retention_factors": {
+      "bear": 0.62,
+      "base": 0.8,
+      "bull": 1.0
+    },
+    "scenario_net_margins": {
+      "bear": 0.2825,
+      "base": 0.3645,
+      "bull": 0.4556
+    },
+    "scenario_revenue": {
+      "bear": 819893715344,
+      "base": 936258242857,
+      "bull": 1008861524693
+    },
+    "normalized_net_income": {
+      "bear": 231597017561.0,
+      "base": 341247404357.0,
+      "bull": 459637310650.0
+    },
+    "normalized_eps": {
+      "low": 18.8153,
+      "point": 27.7234,
+      "high": 37.3416
+    },
+    "held_margin_eps_base": 34.6543,
+    "method": "durable_platform_retention_path",
+    "note": "Bear/base/bull combine the analyst revenue envelope with a retained-margin path; bull keeps today's margin (monopoly persists) and is a tail, not the base."
+  },
+  "currency_normalization": {
+    "fx": 1.0,
+    "source": "reporting_currency_usd",
+    "reporting_currency": "USD",
+    "statement_ttm_eps": 19.91,
+    "trading_eps": null,
+    "shadow_only": true,
+    "policy": "Converts reporting-currency EPS/revenue to the trading currency for the shadow future price range; does not alter live decisions."
+  },
+  "expectations_gap": {
+    "available": true,
+    "summary": {
+      "status": "bridge_risk_only",
+      "same_metric_gap_count": 0,
+      "unavailable_metric_count": 3,
+      "bridge_risk_count": 9
+    },
+    "metrics": {
+      "revenue_cagr": {
+        "market_implied": null,
+        "consensus": 0.1725,
+        "independent": null,
+        "base_rate": null
+      },
+      "eps_cagr": {
+        "market_implied": null,
+        "consensus": 0.0475,
+        "independent": null,
+        "base_rate": null
+      },
+      "fcf_cagr": {
+        "market_implied": null,
+        "consensus": null,
+        "independent": null,
+        "base_rate": null
+      }
+    },
+    "same_metric_gaps": [],
+    "unavailable_same_metric": [
+      {
+        "metric": "revenue_cagr",
+        "available_sources": [
+          "consensus"
+        ],
+        "status": "no_same_metric_comparator"
+      },
+      {
+        "metric": "eps_cagr",
+        "available_sources": [
+          "consensus"
+        ],
+        "status": "no_same_metric_comparator"
+      },
+      {
+        "metric": "fcf_cagr",
+        "available_sources": [],
+        "status": "no_metric_values"
+      }
+    ],
+    "cross_metric_observations": [],
+    "financial_bridge_risks": [
+      {
+        "source": "forward_financial_bridge",
+        "risk": "negative_observed_tax_and_other_rate_non_operating_items_or_timing_effects",
+        "severity": "medium",
+        "policy": "Bridge warning is a financial narrative risk, not a valuation verdict."
+      },
+      {
+        "source": "forward_financial_bridge",
+        "date": "2026-12-31",
+        "check": "fcf_margin_sign",
+        "status": "negative_fcf",
+        "gap_pct": null,
+        "fcf_margin": -0.0489,
+        "severity": "medium",
+        "policy": "Consistency checks describe forecast bridge risk only."
+      },
+      {
+        "source": "forward_financial_bridge",
+        "date": "2027-12-31",
+        "check": "eps_vs_margin_net_income",
+        "status": "wide_gap",
+        "gap_pct": -0.3317,
+        "fcf_margin": null,
+        "severity": "high",
+        "policy": "Consistency checks describe forecast bridge risk only."
+      },
+      {
+        "source": "forward_financial_bridge",
+        "date": "2027-12-31",
+        "check": "fcf_margin_sign",
+        "status": "negative_fcf",
+        "gap_pct": null,
+        "fcf_margin": -0.0489,
+        "severity": "medium",
+        "policy": "Consistency checks describe forecast bridge risk only."
+      },
+      {
+        "source": "forward_financial_bridge",
+        "date": "2028-12-31",
+        "check": "eps_vs_margin_net_income",
+        "status": "wide_gap",
+        "gap_pct": -0.3367,
+        "fcf_margin": null,
+        "severity": "high",
+        "policy": "Consistency checks describe forecast bridge risk only."
+      },
+      {
+        "source": "forward_financial_bridge",
+        "date": "2028-12-31",
+        "check": "fcf_margin_sign",
+        "status": "negative_fcf",
+        "gap_pct": null,
+        "fcf_margin": -0.0489,
+        "severity": "medium",
+        "policy": "Consistency checks describe forecast bridge risk only."
+      },
+      {
+        "source": "forward_financial_bridge",
+        "date": "2029-12-31",
+        "check": "eps_vs_margin_net_income",
+        "status": "wide_gap",
+        "gap_pct": -0.3277,
+        "fcf_margin": null,
+        "severity": "high",
+        "policy": "Consistency checks describe forecast bridge risk only."
+      },
+      {
+        "source": "forward_financial_bridge",
+        "date": "2029-12-31",
+        "check": "fcf_margin_sign",
+        "status": "negative_fcf",
+        "gap_pct": null,
+        "fcf_margin": -0.0489,
+        "severity": "medium",
+        "policy": "Consistency checks describe forecast bridge risk only."
+      },
+      {
+        "source": "forward_financial_bridge",
+        "date": "2030-12-31",
+        "check": "fcf_margin_sign",
+        "status": "negative_fcf",
+        "gap_pct": null,
+        "fcf_margin": -0.0489,
+        "severity": "medium",
+        "policy": "Consistency checks describe forecast bridge risk only."
+      }
+    ],
+    "policy": "Expectations Gap is shadow-only. Numeric gaps require the same metric; bridge risks do not alter fair value, decisions, thresholds, or sizing."
+  },
+  "scenario_policy": {
+    "available": true,
+    "status": "range_or_overlay_only",
+    "gates": {
+      "base_metric": {
+        "status": "pass",
+        "reason": "consensus_growth_available"
+      },
+      "driver_evidence": {
+        "status": "fail",
+        "reason": "no_matched_adapter",
+        "missing": []
+      },
+      "conversion_method": {
+        "status": "fail",
+        "reason": "no_numeric_transmission_conversion",
+        "numeric_transmission_paths": 0
+      },
+      "bridge": {
+        "status": "pass",
+        "reason": "forward_bridge_available"
+      },
+      "range_discipline": {
+        "status": "pass",
+        "reason": "ranges_must_remain_ranges",
+        "range_guidance_present": false
+      }
+    },
+    "allowed_modes": [
+      {
+        "mode": "qualitative_driver_watchlist",
+        "status": "allowed",
+        "reason": "Always allowed when clearly marked qualitative-only."
+      },
+      {
+        "mode": "consensus_range_bridge",
+        "status": "allowed",
+        "reason": "Consensus annual estimates can be rendered through financial bridge ranges."
+      }
+    ],
+    "forbidden_methods": [
+      "fixed_pct_eps_pe_haircut",
+      "fixed_pct_revenue_haircut_without_driver",
+      "llm_invented_tam_or_penetration",
+      "cross_metric_gap_as_numeric_driver",
+      "single_point_guidance_range_collapse"
+    ],
+    "scenario_requirements": [
+      "Bear/base/bull numeric scenarios must change explicit operating drivers.",
+      "Driver values require point-in-time evidence and source lineage.",
+      "Transmission from external trend to company revenue requires lag, exposure, and conversion method.",
+      "Guidance ranges must remain ranges; midpoint is only a derived helper.",
+      "Scenarios must not alter live fair value, verdict, thresholds, or sizing."
+    ],
+    "policy": "Scenario policy is shadow-only. It authorizes scenario modes but does not generate valuation outputs or live decisions."
+  },
+  "operating_driver_scenarios": {
+    "builder": "forward_expectations_scenario_builder.py v2.0 (evidence-dispersion spread)",
+    "available": false,
+    "status": "range_or_overlay_only",
+    "mode": "range_or_overlay_only",
+    "shadow_only": true,
+    "valuation_output": false,
+    "changes_live_decision": false,
+    "cases": [],
+    "guidance_overlays": [],
+    "qualitative_watchlist": [
+      {
+        "item": "numeric_transmission_conversion",
+        "reason": "no_numeric_transmission_conversion",
+        "needed_for": "driver_numeric_bear_base_bull"
+      }
+    ],
+    "policy": "Operating-driver scenarios are advisory shadow output only. They do not alter fair value, verdict, decision lock, thresholds, or sizing."
+  },
+  "future_price_range": {
+    "engine": "forward_expectations_price_range.py v1.3 (explicit terminal horizon + annualized return)",
+    "ticker": "GOOGL",
+    "available": true,
+    "status": "low_confidence_terminal_range",
+    "shadow_only": true,
+    "valuation_output": "future_price_range_shadow",
+    "changes_live_decision": false,
+    "horizon_date": "2030-12-31",
+    "horizon_basis": "terminal_margin_normalized",
+    "horizon_years": 4.37,
+    "horizon_coverage": 16,
+    "horizon_interpretation": "multi_year_terminal_value_not_12m_price_target",
+    "horizon_coverage_quality": "thin",
+    "reporting_to_trading_fx": 1.0,
+    "method": "eps_x_pe",
+    "multiple_quality": "historical",
+    "cases": {
+      "bear": {
+        "case": "bear",
+        "target_price": 441.09,
+        "upside_pct": 28.3,
+        "metric": "eps_margin_normalized",
+        "metric_value": 18.8153,
+        "multiple": 23.443,
+        "annualized_pct": 5.9
+      },
+      "base": {
+        "case": "base",
+        "target_price": 684.44,
+        "upside_pct": 99.1,
+        "metric": "eps_margin_normalized",
+        "metric_value": 27.7234,
+        "multiple": 24.6882,
+        "annualized_pct": 17.1
+      },
+      "bull": {
+        "case": "bull",
+        "target_price": 1041.13,
+        "upside_pct": 202.8,
+        "metric": "eps_margin_normalized",
+        "metric_value": 37.3416,
+        "multiple": 27.8812,
+        "annualized_pct": 28.9
+      }
+    },
+    "range": {
+      "low": 441.09,
+      "base": 684.44,
+      "high": 1041.13
+    },
+    "multiple_range": {
+      "p25": 23.443,
+      "p50": 24.6882,
+      "p75": 27.8812,
+      "source": "fmp_ratios_annual_history:priceToEarningsRatio",
+      "method": "historical_multiple_regime",
+      "history_points": 6,
+      "dispersion_ratio": 1.189,
+      "compressed": false,
+      "growth_tier": "peg_terminal",
+      "growth_used": 0.1304,
+      "compression_factor": 1.0,
+      "pe_ceiling_applied": false,
+      "historical_band": {
+        "p25": 23.443,
+        "p50": 24.6882,
+        "p75": 27.8812
+      },
+      "band_policy": "p25/p50/p75 from the ticker's own historical valuation regime; price-independent; shadow only."
+    },
+    "trajectory": [
+      {
+        "date": "2026-12-31",
+        "years_out": 0.37,
+        "coverage": 36,
+        "thin_coverage": false,
+        "consensus_eps": 20.24,
+        "is_terminal": false,
+        "targets": {
+          "bear": 351.16,
+          "base": 364.55,
+          "bull": 377.8
+        },
+        "cumulative_upside_pct": {
+          "bear": 2.1,
+          "base": 6.0,
+          "bull": 9.9
+        },
+        "annualized_pct": {
+          "bear": 5.9,
+          "base": 17.1,
+          "bull": 28.8
+        }
+      },
+      {
+        "date": "2027-12-31",
+        "years_out": 1.37,
+        "coverage": 39,
+        "thin_coverage": false,
+        "consensus_eps": 15.01,
+        "is_terminal": false,
+        "targets": {
+          "bear": 371.74,
+          "base": 426.68,
+          "bull": 486.69
+        },
+        "cumulative_upside_pct": {
+          "bear": 8.1,
+          "base": 24.1,
+          "bull": 41.6
+        },
+        "annualized_pct": {
+          "bear": 5.9,
+          "base": 17.1,
+          "bull": 28.8
+        }
+      },
+      {
+        "date": "2028-12-31",
+        "years_out": 2.37,
+        "coverage": 34,
+        "thin_coverage": false,
+        "consensus_eps": 17.72,
+        "is_terminal": false,
+        "targets": {
+          "bear": 393.6,
+          "base": 499.62,
+          "bull": 627.39
+        },
+        "cumulative_upside_pct": {
+          "bear": 14.5,
+          "base": 45.3,
+          "bull": 82.5
+        },
+        "annualized_pct": {
+          "bear": 5.9,
+          "base": 17.1,
+          "bull": 28.8
+        }
+      },
+      {
+        "date": "2029-12-31",
+        "years_out": 3.37,
+        "coverage": 23,
+        "thin_coverage": false,
+        "consensus_eps": 20.3,
+        "is_terminal": false,
+        "targets": {
+          "bear": 416.67,
+          "base": 584.77,
+          "bull": 808.2
+        },
+        "cumulative_upside_pct": {
+          "bear": 21.2,
+          "base": 70.1,
+          "bull": 135.1
+        },
+        "annualized_pct": {
+          "bear": 5.9,
+          "base": 17.1,
+          "bull": 28.8
+        }
+      },
+      {
+        "date": "2030-12-31",
+        "years_out": 4.37,
+        "coverage": 16,
+        "thin_coverage": true,
+        "consensus_eps": 24.37,
+        "is_terminal": true,
+        "targets": {
+          "bear": 441.09,
+          "base": 684.44,
+          "bull": 1041.13
+        },
+        "cumulative_upside_pct": {
+          "bear": 28.3,
+          "base": 99.1,
+          "bull": 202.8
+        },
+        "annualized_pct": {
+          "bear": 5.9,
+          "base": 17.1,
+          "bull": 28.8
+        }
+      }
+    ],
+    "warnings": [
+      "eps_margin_normalized",
+      "multi_year_terminal_range_not_12m_target",
+      "thin_terminal_analyst_coverage"
+    ],
+    "policy": "Future price range is shadow-only and must not alter live fair_value_summary, decision_lock, thresholds, or sizing without explicit user approval.",
+    "eps_basis": "margin_normalized"
+  },
+  "expectations_matrix": {
+    "metrics": {
+      "revenue_cagr": {
+        "market_implied": null,
+        "consensus": 0.1725,
+        "independent": null,
+        "base_rate": null
+      },
+      "eps_cagr": {
+        "market_implied": null,
+        "consensus": 0.0475,
+        "independent": null,
+        "base_rate": null
+      },
+      "fcf_cagr": {
+        "market_implied": null,
+        "consensus": null,
+        "independent": null,
+        "base_rate": null
+      }
+    },
+    "same_metric_comparisons": [],
+    "verdict": "comparison_unavailable",
+    "assessment": "分析師共識 EPS CAGR 5%；分析師共識營收 CAGR 17%",
+    "cross_metric_policy": "FCF、EPS、營收 CAGR 不互減、不產生跨口徑 verdict。"
+  },
+  "evidence_contract": {
+    "status": "pass",
+    "accepted_count": 2,
+    "rejected_count": 0,
+    "accepted": [
+      {
+        "metric": "consensus_revenue_cagr",
+        "value": 0.1725,
+        "unit": "ratio",
+        "value_type": "consensus",
+        "source_type": "fmp_analyst_estimates",
+        "source_ref": "earnings-analyst cache annual_estimates",
+        "published_at": "2026-08-17",
+        "retrieved_at": "2026-08-17T16:39:30.051849+00:00",
+        "confidence": "medium"
+      },
+      {
+        "metric": "consensus_eps_cagr",
+        "value": 0.0475,
+        "unit": "ratio",
+        "value_type": "consensus",
+        "source_type": "fmp_analyst_estimates",
+        "source_ref": "earnings-analyst cache annual_estimates",
+        "published_at": "2026-08-17",
+        "retrieved_at": "2026-08-17T16:39:30.051849+00:00",
+        "confidence": "medium"
+      }
+    ],
+    "rejected": []
+  }
+}

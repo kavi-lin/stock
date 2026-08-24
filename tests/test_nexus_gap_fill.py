@@ -274,6 +274,7 @@ def test_nexus_claude_role_uses_single_turn_text_only_profile(monkeypatch):
     assert result.exit_code == 0
     assert calls == [("SYS", "USR", {
         "timeout": 360,
+        "process_callback": None,
         "model": "sonnet",
         "max_turns": 1,
         "strict_mcp": True,
@@ -281,7 +282,7 @@ def test_nexus_claude_role_uses_single_turn_text_only_profile(monkeypatch):
     })]
 
 
-def test_governed_chain_reaches_text_only_dispatch_without_fallback(monkeypatch):
+def test_broker_lease_reaches_text_only_dispatch_without_fallback(monkeypatch):
     calls = []
     cfg = {
         "primary": "claude",
@@ -289,17 +290,22 @@ def test_governed_chain_reaches_text_only_dispatch_without_fallback(monkeypatch)
         "tertiary": "codex",
         "enabled": {"claude": True, "gemini": True, "codex": True, "grok": True},
         "budgets": {},
-        "broker": {"enabled": False},
+        "broker": {"enabled": True},
     }
 
     monkeypatch.setattr(model_router, "load_llm_config", lambda: cfg)
-    monkeypatch.setattr(model_router, "_acquire", lambda *args, **kwargs: (None, "broker:off", True))
-    monkeypatch.setattr(model_router, "model_available", lambda *args, **kwargs: (True, ""))
-    monkeypatch.setattr(model_router, "_load_usage", lambda *args, **kwargs: {"models": {}})
+    lease = SimpleNamespace(provider="claude", model="")
+    monkeypatch.setattr(
+        model_router, "_acquire",
+        lambda *args, **kwargs: (lease, "broker:claude", True),
+    )
     monkeypatch.setattr(model_router, "_record", lambda *args, **kwargs: None)
     monkeypatch.setattr(model_router, "_settle", lambda *args, **kwargs: None)
 
-    def fake_dispatch(model, role, system, user, timeout):
+    # **kwargs so the fake keeps matching the real dispatcher's signature. The
+    # caller gained `provider_model=` in V4.132.0 and this stub did not, which
+    # turned a passing test into a TypeError inside the chain.
+    def fake_dispatch(model, role, system, user, timeout, **kwargs):
         calls.append((model, role, timeout))
         return _llm_result(model)
 
@@ -322,8 +328,8 @@ def test_governed_chain_reaches_text_only_dispatch_without_fallback(monkeypatch)
 def test_text_only_profile_reaches_final_claude_cli_argv(monkeypatch):
     calls = []
 
-    def fake_run_cli(cmd, timeout):
-        calls.append((cmd, timeout))
+    def fake_run_cli(cmd, timeout, process_callback=None):
+        calls.append((cmd, timeout, process_callback))
         envelope = json.dumps({"result": '{"ok": true}', "usage": {}})
         return 0, envelope, "", 1, None
 
@@ -335,8 +341,9 @@ def test_text_only_profile_reaches_final_claude_cli_argv(monkeypatch):
 
     assert result.parsed == {"ok": True}
     assert len(calls) == 1
-    cmd, timeout = calls[0]
+    cmd, timeout, process_callback = calls[0]
     assert timeout == 360
+    assert process_callback is None
     assert cmd[cmd.index("--model") + 1] == "sonnet"
     assert cmd[cmd.index("--max-turns") + 1] == "1"
     assert "--strict-mcp-config" in cmd

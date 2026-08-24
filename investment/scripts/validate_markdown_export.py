@@ -76,6 +76,17 @@ def _resolve_latest_report():
     return candidate, last
 
 
+def _load_entry(path):
+    """Load one isolated session object or the latest entry in a history list."""
+    with open(path, "r", encoding="utf-8") as fp:
+        payload = json.load(fp)
+    if isinstance(payload, dict):
+        return payload
+    if isinstance(payload, list) and payload:
+        return payload[-1]
+    fail([f"session export must be an object or non-empty history array: {path}"])
+
+
 def _check_final_score(text, errors):
     """Final Score 若有 scale 標註 → 必須 /3.0；裸數字接受任何值。"""
     m = re.search(
@@ -158,14 +169,17 @@ def validate(report_path, history_entry=None):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--report", help="absolute or repo-relative path; default = derive from history.json last entry")
+    ap.add_argument("--history", help="session object/history used for report context")
     args = ap.parse_args()
 
     if args.report:
         path = args.report
         if not os.path.isabs(path):
             path = os.path.join(ROOT, path)
-        history_entry = None  # standalone audit, no history context
+        history_entry = _load_entry(args.history) if args.history else None
     else:
+        if args.history:
+            ap.error("--history requires --report")
         path, history_entry = _resolve_latest_report()
 
     return validate(path, history_entry)

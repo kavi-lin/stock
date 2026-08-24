@@ -1,0 +1,74 @@
+{
+  "date": "2026-08-16",
+  "windows": [
+    {
+      "as_of": "2026-08-16T05:10:09+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-08-16T06:14:15+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-08-16T06:31:15+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-08-16T09:30:45+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-16T10:03:48+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-16T11:12:33+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-16T14:00:58+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-16T14:10:21+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-16T14:45:48+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    }
+  ]
+}

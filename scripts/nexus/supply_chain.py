@@ -31,7 +31,6 @@ _ROOT = Path(__file__).resolve().parents[2]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from scripts.break_news.llm_drivers import run_llm, primary_model, VALID_MODELS  # noqa: E402, F401
 from scripts._shared.model_router import run_role, run_with_fallback  # noqa: E402
 from scripts._shared import fmp_pool  # noqa: E402
 
@@ -1703,7 +1702,7 @@ def export_corroborated_edges(slugs: list[str] | None = None, *,
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--theme", default=None, help="theme / technology to map")
-    ap.add_argument("--agent", choices=list(VALID_MODELS), default=None,
+    ap.add_argument("--agent", choices=["claude", "gemini", "codex"], default=None,
                     help="LLM to draft the chain (default: configured primary)")
     ap.add_argument("--rerun", action="store_true",
                     help="refresh an existing chain incrementally using its prior YAML as context")

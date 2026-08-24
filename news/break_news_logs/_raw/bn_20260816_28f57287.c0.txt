@@ -1,0 +1,53 @@
+```json
+{
+  "commentary": "Microsoft 旗下 Azure 年營收突破千億美元大關，驗證生成式 AI 商業化變現能力加速發酵。此里程碑不僅鞏固其在雲端基礎設施的領先地位，也為龐大的 AI 資本支出提供獲利支撐。短期股價強彈 18% 後評價偏高，但長期雲端運算與企業 AI 轉型需求依然強勁。",
+  "bull_points": [
+    "Azure 年營收突破千億美元，AI 商業化變現模式獲得市場驗證",
+    "企業級生成式 AI 滲透率持續提升，帶動雲端高毛利營收增長"
+  ],
+  "bear_points": [
+    "短期單週急漲 18%，本益比評價偏高面臨獲利了結賣壓",
+    "AI 基礎建設龐大資本支出若未持續轉換為獲利，恐壓抑長期利潤率"
+  ],
+  "final_take": "長期基本面穩健，但短期急漲後建議分批布局而非追高",
+  "entities": {
+    "tickers": [
+      "MSFT"
+    ],
+    "sectors": [
+      "Information Technology"
+    ],
+    "themes": [
+      "Generative AI",
+      "Cloud Computing",
+      "AI Capex",
+      "Enterprise Software"
+    ],
+    "tech_keywords": [
+      "Azure AI",
+      "Copilot",
+      "Cloud Infrastructure"
+    ]
+  },
+  "relations": [
+    {
+      "subject": "ticker:MSFT",
+      "predicate": "BENEFITS_FROM",
+      "object": "theme:cloud_computing"
+    },
+    {
+      "subject": "ticker:MSFT",
+      "predicate": "BENEFITS_FROM",
+      "object": "theme:generative_ai"
+    },
+    {
+      "subject": "ticker:MSFT",
+      "predicate": "CATALYST_FOR",
+      "object": "theme:ai_capex"
+    }
+  ],
+  "done": false,
+  "confidence": 0.85,
+  "rationale_short": "雲端千億營收確立 AI 領先優勢，惟短期評價面臨均值回歸"
+}
+```

@@ -141,6 +141,60 @@ def test_finalize_output_passes_real_validator(tmp_path):
     assert Path(result["digest"]).exists()
 
 
+def _flatten(debate: dict, news_id: str):
+    """Make one item's Bull/Bear come back inside the non-substantive band."""
+    debate["lanes"]["bull"]["per_item"][news_id]["impact_score"] = 1
+    debate["lanes"]["bear"]["per_item"][news_id]["impact_score"] = -1
+
+
+def test_flat_item_is_demoted_to_shallow_not_fatal(tmp_path):
+    debate_path = _setup(tmp_path)
+    debate = json.loads(debate_path.read_text())
+    _flatten(debate, "n0000")
+    _write(debate_path, debate)
+
+    result = finalize(
+        DATE, debate_path, root=tmp_path, now=f"{DATE} 10:30",
+        validate=True, patch_caches=False,
+    )
+    digest = json.loads(Path(result["digest"]).read_text())
+
+    assert digest["demoted_stage2"] == ["n0000"]
+    assert digest["stage2_count"] == 1
+    deep = [v for v in digest["verdicts"] if v["depth"] == "deep"]
+    shallow = [v for v in digest["verdicts"] if v["depth"] == "shallow"]
+    assert [v["news_id"] for v in deep] == ["n0001"]
+    # Demoted row is present, marked, and took a slot rather than a seat past
+    # the projection's 10-row shallow cap.
+    assert len(shallow) == 10
+    demoted_rows = [v for v in shallow if v["news_id"] == "n0000"]
+    assert len(demoted_rows) == 1
+    assert demoted_rows[0]["demoted_from"] == "stage2_non_substantive"
+    assert demoted_rows[0]["verdict"] is None
+    assert "n0000" in Path(result["report"]).read_text()
+
+
+def test_majority_flat_debate_still_fails(tmp_path):
+    debate_path = _setup(tmp_path)
+    debate = json.loads(debate_path.read_text())
+    _flatten(debate, "n0000")
+    _flatten(debate, "n0001")
+    _write(debate_path, debate)
+    with pytest.raises(DebateInputError, match="absent debate"):
+        finalize(DATE, debate_path, root=tmp_path, now=f"{DATE} 10:30", validate=False)
+
+
+def test_flat_item_with_empty_interpretation_still_fails(tmp_path):
+    """Demotion must not become the cheap exit for a lane that wrote nothing."""
+    debate_path = _setup(tmp_path)
+    debate = json.loads(debate_path.read_text())
+    _flatten(debate, "n0000")
+    debate["lanes"]["bear"]["per_item"]["n0000"]["interpretation"] = "   "
+    _write(debate_path, debate)
+    with pytest.raises(DebateInputError, match="interpretation must be non-empty"):
+        finalize(DATE, debate_path, root=tmp_path, now=f"{DATE} 10:30", validate=False)
+
+
 def test_partial_fallback_caps_degraded_lane_confidence(tmp_path):
     debate_path = _setup(tmp_path)
     debate = json.loads(debate_path.read_text())

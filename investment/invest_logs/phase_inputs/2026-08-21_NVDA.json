@@ -1,0 +1,212 @@
+{
+ "bundle_version": "P5-INPUTS/1.0",
+ "ticker": "NVDA",
+ "date": "2026-08-21",
+ "phase0": {
+  "regime_confidence": 0.85,
+  "market_top_zone": "Orange (Elevated Risk)",
+  "ftd_state": "FTD_CONFIRMED",
+  "breadth_composite": 79.2,
+  "vix": 15.44,
+  "fred_verdict": "Transitional",
+  "real_rate_pct": 2.4,
+  "hot_sectors": [
+   "Industrials",
+   "Consumer Discretionary",
+   "Financials",
+   "Energy"
+  ],
+  "cold_sectors": [
+   "Technology",
+   "Real Estate",
+   "Consumer Staples",
+   "Utilities"
+  ]
+ },
+ "lanes": {
+  "fundamentals": {
+   "signal": "BUY",
+   "score": 3.2,
+   "confidence": 0.78,
+   "key_factors": [
+    "Revenue +85% YoY, accelerating",
+    "Forward PE 18.1, PEG 0.58",
+    "Piotroski 7, Altman safe zone"
+   ],
+   "risk_flags": [
+    "FCF yield only 2.2% (<5% bar)",
+    "Earnings within days, date conflict"
+   ],
+   "moat_assessment": {
+    "level": "WIDE",
+    "type": "switching_cost",
+    "evidence_one_line": "CUDA 生態 + 整櫃系統鎖定：毛利率 74.93%、營益率 65.60% 在營收 +85% YoY 下仍維持，代表有定價權且未流失市佔"
+   },
+   "near_term_catalysts": [
+    {
+     "date": "2026-08-26",
+     "type": "earnings",
+     "description": "Q2 FY27 財報（多家獨立媒體交叉確認 8/26；finnhub 的 11-17 為過期佔位）",
+     "impact": "high"
+    },
+    {
+     "date": "2026-Q4",
+     "type": "guidance",
+     "description": "次世代資料中心平台放量指引；毛利率能否守住 74.93% 是關鍵變數",
+     "impact": "high"
+    },
+    {
+     "date": "2026-Q4",
+     "type": "macro_event",
+     "description": "DFII10 實質利率 2.40% 壓抑長存續期折現；再上行將直接壓縮 33.98x 的 TTM 本益比",
+     "impact": "medium"
+    },
+    {
+     "date": "2026-Q4",
+     "type": "product_launch",
+     "description": "員工數 42,000（+16.7% YoY）顯示產品/藍圖擴張節奏未減",
+     "impact": "low"
+    }
+   ],
+   "bull_thesis_one_line": "營收+85%、營益率65.6%、forwardPE 18.1、PEG 0.58 — 成長遠超估值定價。",
+   "bear_thesis_one_line": "FCF yield 僅2.2%、PB 28.8x，現金轉換0.787，成長一減速多重壓縮極痛。"
+  },
+  "sentiment": {
+   "signal": "HOLD",
+   "score": 0.65,
+   "confidence": 0.55,
+   "key_factors": [
+    "Insider MSPR deeply negative (-100)",
+    "Short interest very low (1.26%)",
+    "Market composite mildly greedy"
+   ],
+   "risk_flags": [
+    "Insider selling across 2026 Q1-Q3",
+    "Institutional/comp data missing"
+   ],
+   "market_sentiment_composite": 62.9,
+   "vix_current": 15.44,
+   "insider_signal": "neutral",
+   "short_pct_float": 1.26,
+   "mspr_latest": -100,
+   "stock_specific_subscore": 0.0,
+   "missing_inputs": [
+    "institutional.accumulation_signal",
+    "comp_benchmark.ceo_vs_peer_pct",
+    "SBC % of revenue"
+   ]
+  },
+  "news": {
+   "signal": "BUY",
+   "score": 2.5,
+   "confidence": 0.62,
+   "key_factors": [
+    "Buy consensus 60/79 analysts",
+    "PT momentum UP +5.72% 1m",
+    "Dense pre-earnings bullish actions",
+    "Custom-silicon competition headlines"
+   ],
+   "risk_flags": [
+    "Earnings in 5d = binary event",
+    "Rising custom-silicon competition"
+   ],
+   "analyst_consensus": "Buy",
+   "pt_revision_momentum": {
+    "direction": "UP",
+    "consensus_delta_pct_1m": 5.72,
+    "unavailable_reason": null
+   },
+   "immediate_catalyst_5d": {
+    "event": "Q2 FY27 earnings",
+    "date": "2026-08-26",
+    "direction_lean": "BULLISH",
+    "expected_move_pct": null
+   },
+   "decision_point_days": 5,
+   "cross_asset_spillover": [
+    {
+     "asset": "sector_SOX (AMD/AVGO/MU)",
+     "direction": "BULLISH",
+     "mechanism": "NVDA 財報結果直接決定 AI capex 讀數，牽動整個 AI 半導體族群定價"
+    },
+    {
+     "asset": "treasury_10y",
+     "direction": "BEARISH",
+     "mechanism": "AI 資本支出續強 → 週期性通膨壓力 → 殖利率上行"
+    }
+   ],
+   "reasoning_one_line": "Buy 共識 + PT 上修動能 + 財報前密集偏多分析師動作，蓋過自研晶片競爭雜訊。"
+  },
+  "technical": {
+   "signal": "BUY",
+   "score": 1.8,
+   "confidence": 0.62,
+   "key_factors": [
+    "Stage 2 uptrend above all MAs",
+    "20/50 golden cross 10d ago",
+    "Price sits at support 216.2"
+   ],
+   "risk_flags": [
+    "MACD histogram fading",
+    "Only 0.3% above support"
+   ],
+   "rubric_hint_from_script": "+1 to +2",
+   "rubric_override_reason": null,
+   "extension_penalty_note": null,
+   "smart_money_analysis": {
+    "label": "accumulating",
+    "narrative": "insider latest_trend 標 accumulating、Q2 ratio 0.79 / Q3 1.0，但 Q3 絕對值仍是賣出 1,000,000 股 vs 買進 2,410 股 — 方向轉正但量能微弱，只能當輕微順風而非主要依據"
+   },
+   "pattern_taxonomy": {
+    "pattern": "uptrend_continuation",
+    "confirmation_criteria": "站穩 216.2 支撐與 20MA 212.78 → 續勢成立；帶量收破 212.78 → 轉為回檔失效"
+   },
+   "market_strength": "STRONG",
+   "key_levels": {
+    "support": 216.2,
+    "resistance": 224.76,
+    "pivot": 212.78
+   },
+   "high_prob_scenario": "未來 5-10 天於 216-217 打底重測，守住 20MA 212.78 則上攻 224.76 壓力；帶量跌破 212.78 則此劇本失效",
+   "volatility": {
+    "atr_14": null,
+    "hist_vol_20d_daily": null,
+    "momentum_20d_pct": null
+   }
+  },
+  "valuation": {
+   "signal": "SELL",
+   "score": -1.0,
+   "confidence": 0.6,
+   "key_factors": [
+    "DCF self-built sole eligible anchor",
+    "PT dispersion 116.7% invalidates consensus",
+    "Implied 54% FCF CAGR unrealistic"
+   ],
+   "risk_flags": [
+    "Single-anchor concentration, no peers",
+    "Archetype shadow still supports price"
+   ],
+   "cited_transition_overlay": true,
+   "transition_dissent_basis": "thesis_fundamental",
+   "suppression_proposals": [],
+   "valuation_commentary": "dcf_self_built 133.03（as_of 2026-08-21，structural_shift_through_cycle 模式，敏感度 118.23–152.76）拿到 100% 有效權重，因為其餘錨全被規則性排除：dcf_unlevered 247.42 與 dcf_levered 258.14 為 2026-04-26 舊版、已被可稽核的 through-cycle DCF 取代；peer_pe_implied 與 comps_implied 因 NVDA 無 curated 也無 discovered 同業（no_peer_cohort）而雙雙 null，這對 5.4T 超大型股是合法結果而非資料失敗；owner_earnings_mult 31.80 落在 [63.41, 570.68] 之外被判 outlier；forecaster_blend 因 low_forecast_confidence + transition_without_safe_model 失格。analyst_pt_consensus 309.46 雖合格但有效權重 0，且 pt_dispersion_pct 高達 116.7 — 賣方內部本身就沒有共識，309.46 與 133.03 的 2.3 倍落差不是「市場看得更遠」，而是兩套時間軸：PT 錨定未來 12 個月的 AI 資本支出動能，DCF 錨定 through-cycle 正常化後的自由現金流。forward_validation 給 STRETCHED 而非直接極端，是因為三項檢查只有一項支持現價：archetype_shadow（+0.04%）說明對照同類高成長 archetype 現價並不離譜；forward_earnings（-46.76%，11 位分析師）說明用賣方 EPS 折現也補不上近半缺口；revenue_path（隱含 38.95% CAGR vs 賣方 21.19%+5pp 上限）說明營收路徑要求已超出共識。reverse DCF 的 implied_5y_fcf_cagr 54.11% 在絕對值上可信度低（owner earnings 基數偏低放大了要求），但方向與 EV/S 20.72x 收斂測試一致：即使只收斂到科技中樞 8x 也需 20.96%，恰好貼齊賣方 21.19%，等於現價已把賣方最好情境完全計入。transition_signature = paradigm_only 代表本次轉型只有敘事層級訊號、沒有可驗證的 segment/margin 矩陣支撐，因此 overlay 無法為 133.03 之上的溢價提供結構性辯護。"
+  }
+ },
+ "burry": {
+  "score": 31.2,
+  "narrative": "Burry 31.2/100 → WARNING（veto_flag=false，未達 20 分的 T4 否決線）。components: FCF yield 0.89%（分項僅 14.4 分，五項中最弱）、EV/EBIT 31.46（10.0 分）、D/E 0.07（90.0 分，資產負債表無瑕疵）、距 52 週高點僅 7.91%（27.8 分）、insider_net=NEUTRAL（50 分）。規則調整：FMP_SUPP quality_scores.piotroski_strength=strong（F-Score 7）依規則 +1 → 30.2 調整為 31.2；altman_zone=safe 不扣分；DCF FCFF 247.42 vs FCFE 258.14 差距僅 4.3%（<20%）無資本結構警告；PEER_BUNDLE 無同業故 mispricing 規則不適用；comp_benchmark 空白故治理紅旗規則不適用。Burry 之聲：這是一家財務品質極佳但價格已把未來全部買走的公司 — 0.89% 的 FCF yield 意味著以自由現金流計算要 112 年回本，深度價值的反面。"
+ },
+ "phase3": {
+  "final_score": 1.0588,
+  "final_decision": "STAGED_ENTRY",
+  "final_action": "EXECUTE"
+ },
+ "phase4": {
+  "position_size_pct": null,
+  "analysis_price": 216.85
+ },
+ "red_team": {
+  "verdict": "STRONG_COUNTER"
+ }
+}

@@ -1,0 +1,52 @@
+```json
+{
+  "commentary": "美股期貨走勢分歧，市場焦點轉向即將公布的 Fed 會議紀要與大型零售商財報。零售業績將揭示美國消費者支出韌性與通膨承受力，為實體經濟需求提供關鍵指引。若 Fed 紀要釋出偏鴿訊號且消費數據穩健，將有助於支撐整體美股評價；反之若消費疲軟或降息預期降溫，短期將壓抑 Consumer Discretionary 等板塊表現。",
+  "bull_points": [
+    "若零售商財報獲利優於預期，將確認終端消費動能與經濟韌性。",
+    "Fed 紀要若釋出偏鴿派政策訊號，有助於舒緩市場折現率壓力。"
+  ],
+  "bear_points": [
+    "若零售商下修財測指引，將引發市場對下半年消費放緩之擔憂。",
+    "若通膨黏性促使降息時程推遲，恐限制大盤短期本益比擴張空間。"
+  ],
+  "final_take": "短期觀望氛圍濃厚，聚焦零售財報與聯準會政策指引。",
+  "entities": {
+    "tickers": [
+      "WMT",
+      "TGT",
+      "HD",
+      "SPY"
+    ],
+    "sectors": [
+      "Consumer Discretionary",
+      "Consumer Staples"
+    ],
+    "themes": [
+      "interest rate policy",
+      "consumer spending",
+      "retail earnings"
+    ],
+    "tech_keywords": []
+  },
+  "relations": [
+    {
+      "subject": "ticker:WMT",
+      "predicate": "BENEFITS_FROM",
+      "object": "narrative:consumer_spending"
+    },
+    {
+      "subject": "sector:consumer_discretionary",
+      "predicate": "HEADWIND_FROM",
+      "object": "macro:interest_rates"
+    },
+    {
+      "subject": "narrative:fed_minutes",
+      "predicate": "CATALYST_FOR",
+      "object": "ticker:SPY"
+    }
+  ],
+  "done": false,
+  "confidence": 0.75,
+  "rationale_short": "靜待聯準會會議紀要與零售巨頭業績指引方向。"
+}
+```

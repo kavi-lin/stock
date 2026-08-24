@@ -1,0 +1,194 @@
+{
+ "bundle_version": "P5-INPUTS/1.0",
+ "ticker": "MU",
+ "date": "2026-08-21",
+ "phase0": {
+  "regime_confidence": 0.85,
+  "market_top_zone": "Orange (Elevated Risk)",
+  "ftd_state": "FTD_CONFIRMED",
+  "breadth_composite": 79.2,
+  "vix": 15.44,
+  "fred_verdict": "Transitional",
+  "real_rate_pct": null,
+  "hot_sectors": [
+   "Industrials",
+   "Consumer Discretionary",
+   "Financials",
+   "Energy"
+  ],
+  "cold_sectors": [
+   "Technology",
+   "Real Estate",
+   "Consumer Staples",
+   "Utilities"
+  ]
+ },
+ "lanes": {
+  "fundamentals": {
+   "signal": "BUY",
+   "score": 4.5,
+   "confidence": 0.9,
+   "key_factors": [
+    "Forward PE 5.9x with 0.12 PEG",
+    "Revenue surged 346% YoY with 66% OM",
+    "Net cash balance sheet Piotroski 8"
+   ],
+   "risk_flags": [
+    "Memory industry pricing cycle fluctuations",
+    "Customer CapEx digestion risk"
+   ],
+   "moat_assessment": {
+    "level": "WIDE",
+    "type": "scale_economies",
+    "evidence_one_line": "DRAM/HBM3E global 3-player oligopoly with massive CapEx/R&D barrier"
+   },
+   "near_term_catalysts": [
+    {
+     "date": "2026-09-22",
+     "type": "earnings",
+     "description": "FQ4 2026 earnings release and HBM4 shipment guidance",
+     "impact": "high"
+    },
+    {
+     "date": "2026-10-15",
+     "type": "product_launch",
+     "description": "Next-gen HBM3E 12-high mass qualification with Tier-1 GPU maker",
+     "impact": "high"
+    },
+    {
+     "date": "2026-11-10",
+     "type": "analyst_day",
+     "description": "Micron AI Memory & Storage Technology Roadmap Day",
+     "impact": "medium"
+    }
+   ],
+   "bull_thesis_one_line": "HBM供不應求帶動營收年增346%，Forward PE僅5.9倍極度被低估。",
+   "bear_thesis_one_line": "市場擔憂記憶體週期見頂，但AI長約鎖定產能且淨現金資產負債表穩健。"
+  },
+  "sentiment": {
+   "signal": "BUY",
+   "score": 1.15,
+   "confidence": 0.75,
+   "key_factors": [
+    "Market composite 62.9 reflects Greed backdrop",
+    "Short float at 2.65% shows minimal skepticism",
+    "Positive monthly MSPR offsets insider selling"
+   ],
+   "risk_flags": [
+    "Heavy insider distribution with zero purchases",
+    "Elevated market top score at 40.4"
+   ],
+   "market_sentiment_composite": 62.9,
+   "vix_current": 15.44,
+   "insider_signal": "distributing",
+   "short_pct_float": 2.65,
+   "mspr_latest": 100.0
+  },
+  "news": {
+   "signal": "BUY",
+   "score": 3.0,
+   "confidence": 0.8,
+   "key_factors": [
+    "Analyst PT momentum up 21.6% 1M",
+    "Unveiled B Boise AI research lab",
+    "Strategic AI HBM memory pricing surge"
+   ],
+   "risk_flags": [
+    "Druckenmiller 13F profit-taking exit",
+    "Rising 10Y Treasury yield pressure"
+   ],
+   "immediate_catalyst_5d": {
+    "event": "NVIDIA Q2 Earnings & HBM Demand Readout",
+    "date": "2026-08-26",
+    "direction_lean": "BULLISH",
+    "expected_move_pct": 7.5
+   },
+   "decision_point_days": 5,
+   "cross_asset_spillover": [
+    {
+     "asset": "treasury_10y",
+     "direction": "BEARISH",
+     "mechanism": "High capex sensitivity to elevated yields"
+    },
+    {
+     "asset": "nvda_equity",
+     "direction": "BULLISH",
+     "mechanism": "Direct HBM supplier co-dependence on AI GPU roadmap"
+    }
+   ],
+   "reasoning_one_line": "Strong upward analyst revisions (+21.6% 1M) and B R&D expansion outweigh high-multiple valuation and macro yield headwinds.",
+   "pt_revision_momentum": {
+    "direction": "UP",
+    "consensus_delta_pct_1m": 21.63
+   }
+  },
+  "technical": {
+   "signal": "HOLD",
+   "score": 0.5,
+   "confidence": 0.7,
+   "key_factors": [
+    "Reclaiming 50MA in Stage 1 basing",
+    "MACD histogram expanding with RSI 55.2",
+    "Volume light at 0.62x 20D average"
+   ],
+   "risk_flags": [
+    "Low volume on rebound lacks institutional conviction",
+    "Overhead resistance near 1011.77 swing high"
+   ],
+   "smart_money_analysis": {
+    "label": "neutral",
+    "narrative": "Price bounced above MA50 but volume remains subdued at 62% of 20-day average, signaling short-covering rather than aggressive institutional accumulation."
+   },
+   "pattern_taxonomy": {
+    "pattern": "consolidation",
+    "confirmation_criteria": "A decisive close above 1011.77 on volume > 1.3x 20-day average confirms breakout from Stage 1 base."
+   },
+   "market_strength": "NEUTRAL",
+   "key_levels": {
+    "support": 891.66,
+    "resistance": 1011.77,
+    "pivot": 963.04
+   },
+   "high_prob_scenario": "未來 5-15 天預期在 930-1012 區間震盪築底，需放量突破 1012 阻力方能重啟升勢。",
+   "volatility": {
+    "atr_14": 58.705,
+    "hist_vol_20d_daily": 0.06313,
+    "momentum_20d_pct": -1.6
+   }
+  },
+  "valuation": {
+   "signal": "SELL",
+   "score": -1.0,
+   "confidence": 0.65,
+   "key_factors": [
+    "Through-cycle self-built DCF baseline at .13",
+    "Owner earnings multiple model (.50) below spot",
+    "Sell-side PT  reflects peak multiple extrapolation"
+   ],
+   "risk_flags": [
+    "Memory cycle peak valuation risk",
+    "Storage peer comps ineligible"
+   ],
+   "cited_transition_overlay": true,
+   "transition_dissent_basis": "valuation_anchor",
+   "suppression_proposals": [],
+   "valuation_commentary": "Valuation synthesis for MU indicates clear overvaluation relative to intrinsic cash flow generation capacity. The primary anchor is the through-cycle DCF (effective weight 100%), yielding a fair value of .13 against the current market price of .33 (-21.78% premium to intrinsic value). Corroborating intrinsic frameworks such as the Buffett Owner Earnings multiple indicate a fair value of .50, reinforcing that normalized long-term cash flows do not justify current market levels. While sell-side consensus maintains an aggressive price target of ,468.26, this relies on peak-cycle margin and revenue extrapolation during the AI/HBM paradigm shift. Under the paradigm-only transition signature, our fundamental DCF anchor exercises disciplined cycle normalization, triggering an overvalued verdict and a score of -1.0."
+  }
+ },
+ "burry": {
+  "score": 41.1,
+  "narrative": "Burry Score 41.1 (NEUTRAL)。FCF yield 0.71% 偏低反映高資本支出，但淨現金體質且 D/E 僅 0.06 財務結構極為穩健；內部人維持淨賣出（SELL），未達 T4_VETO 否決標準。"
+ },
+ "phase3": {
+  "final_score": 1.2637,
+  "final_decision": "STAGED_ENTRY",
+  "final_action": "EXECUTE"
+ },
+ "phase4": {
+  "position_size_pct": null,
+  "analysis_price": 974.33
+ },
+ "red_team": {
+  "verdict": "STRONG_COUNTER"
+ }
+}

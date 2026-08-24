@@ -18,6 +18,7 @@ import glob
 import json
 import os
 import re
+import shutil
 import sys
 import time
 import subprocess
@@ -161,7 +162,6 @@ _state_lock = threading.Lock()
 CLAUDE_BIN = os.environ.get("CLAUDE_BIN") or "/Users/kavi/.local/bin/claude"
 AGY_BIN    = os.environ.get("AGY_BIN")    or "agy"
 CODEX_BIN  = os.environ.get("CODEX_BIN")  or "/usr/local/bin/codex"
-GROK_BIN   = os.environ.get("GROK_BIN")   or "/Users/kavi/.grok/bin/grok"
 
 # Multi-model governance. Soft-import so the server still boots if the module
 # is missing; that degraded path retains Claude as the safe legacy default.
@@ -171,6 +171,46 @@ try:
 except Exception as _mr_e:
     MODEL_ROUTER_AVAILABLE = False
     sys.stderr.write(f"[model_router] load failed: {_mr_e}\n")
+
+_BROKER_RESTART_LOCK = threading.Lock()
+_BROKER_RESTART_TIMEOUT_SEC = 30
+_BROKER_HANDSHAKE_WAIT_SEC = 10
+
+
+def _restart_broker():
+    """Restart the caller-owned LaunchAgent and wait for an exact handshake."""
+    executable = shutil.which("lqb")
+    if executable is None:
+        return 503, {"ok": False, "error": "lqb_not_found"}
+    try:
+        result = subprocess.run(
+            [executable, "launchagent", "restart"],
+            capture_output=True,
+            text=True,
+            timeout=_BROKER_RESTART_TIMEOUT_SEC,
+            check=False,
+            shell=False,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        sys.stderr.write(f"[broker-restart] command failed: {type(exc).__name__}\n")
+        return 502, {"ok": False, "error": "restart_command_failed"}
+    if result.returncode != 0:
+        sys.stderr.write(f"[broker-restart] lqb rc={result.returncode}\n")
+        return 502, {"ok": False, "error": "restart_failed"}
+
+    deadline = time.monotonic() + _BROKER_HANDSHAKE_WAIT_SEC
+    while time.monotonic() < deadline:
+        try:
+            status = _mrouter.model_status()
+            handshake = (status.get("broker") or {}).get("handshake_status")
+            if handshake == "compatible":
+                return 200, {"ok": True, "status": _annotate_plans(status)}
+            if handshake == "client_update_required":
+                return 409, {"ok": False, "error": handshake, "status": status}
+        except Exception as exc:  # daemon is expected to disappear briefly
+            sys.stderr.write(f"[broker-restart] handshake retry: {type(exc).__name__}\n")
+        time.sleep(0.25)
+    return 504, {"ok": False, "error": "handshake_timeout"}
 
 
 # Per-protocol Claude model tier. Deep-reasoning protocols (multi-lane debate,
@@ -314,10 +354,6 @@ def _protocol_command(model, prompt, claude_model=None, timeout_sec=None, agy_mo
         return [CODEX_BIN, "exec", "--json", "-C", ROOT,
                 "--dangerously-bypass-approvals-and-sandbox", "--color", "never",
                 "--ephemeral", prompt]
-    if model == "grok":
-        grok_bin = GROK_BIN if os.path.exists(GROK_BIN) else "grok"
-        return [grok_bin, "--output-format", "streaming-json", "--cwd", ROOT,
-                "--always-approve", "--no-memory", prompt]
     if model != "claude":
         raise ValueError(f"unsupported protocol model: {model}")
     claude_bin = CLAUDE_BIN if os.path.exists(CLAUDE_BIN) else "claude"
@@ -341,11 +377,10 @@ def _select_protocol_model(name=None):
     ledger, because a `triage` run and an `invest` run are not the same order of
     magnitude — see `broker_gate.PROTOCOL_TASK_TYPE_PREFIX`.
 
-    `acquire_protocol_lease()` preserves the UI's documented primary → secondary
-    → tertiary availability policy, but settles it against the quota broker's
-    view of what is actually left rather than a local call count. Agentic
-    protocols cannot safely replay after a half-completed failure, so both the
-    selection and the reservation happen once, before the subprocess starts.
+    `acquire_protocol_lease()` offers the protocol's certified set and the
+    broker selects the provider with real remaining quota. Agentic protocols
+    cannot safely replay after a half-completed failure, so selection and the
+    reservation happen once, before the subprocess starts.
 
     Raises when the run must not start — the broker unreachable, or no provider
     with capacity outside its 20% hard reserve. The caller turns that into a
@@ -358,7 +393,7 @@ def _select_protocol_model(name=None):
     if MODEL_ROUTER_AVAILABLE:
         model, lease, _note = _mrouter.acquire_protocol_lease("agentic_protocol", name)
         return model, lease
-    return "claude", None
+    raise RuntimeError("model router unavailable; broker-only mode blocks LLM launch")
 
 
 # V4.114.0 — Each CLI has exactly one project context file it treats as its own.
@@ -377,7 +412,6 @@ PROVIDER_CONTEXT_FILE = {
     "claude": "CLAUDE.md",
     "gemini": "GEMINI.md",
     "codex":  "AGENTS.md",
-    "grok":   "AGENTS.md",
 }
 
 # Protocol → its own spec document, named directly in the prompt so a run never
@@ -630,6 +664,17 @@ PROTOCOL_VALIDATORS = {
     "invest": ["investment/scripts/validate_session_export.py"],
 }
 
+# Arguments are separate from PROTOCOL_VALIDATORS so the latter remains a
+# literal script registry (and its existence contract cannot confuse a flag for
+# a path). Parallel invest runs validate their own immutable session object,
+# never whichever ticker happens to be history.json[-1] at process exit.
+PROTOCOL_VALIDATOR_ARGS = {
+    "invest": [
+        "--history", "investment/invest_logs/session_exports/{today}_{ticker}.json",
+        "--require-committed-to", "investment/invest_logs/history.json",
+    ],
+}
+
 # Post-run required-artifact gate. Catches a model returning rc=0 while leaving
 # the expected output file unwritten (e.g. a fallback model timing out without
 # producing the MD, yet the CLI still exiting 0). At least ONE listed path must
@@ -637,12 +682,71 @@ PROTOCOL_VALIDATORS = {
 # of being silently marked "done". `{today}` = run-start date (YYYY-MM-DD).
 PROTOCOL_REQUIRED_ARTIFACTS = {
     "llm_review": ["reports/decision_review/REVIEW_{today}.md"],
-    # V4.116.2 — the validator above reads the LAST entry in history.json, so a
-    # run that dies before writing anything leaves the previous session's entry
-    # in place and validates clean. The report is the artifact that cannot be
-    # inherited from an earlier run, which is what makes it the right check.
+    # Signal Queue may dispatch both earnings paths. A zero exit code without a
+    # fresh report is not a consumed candidate; it is a failed delivery that the
+    # card must allow the user to retry.
+    "earnings": ["reports/{today}_{ticker}_earnings.md"],
+    "earnings_preview": ["reports/{today_compact}_{ticker}_pre_earnings.md"],
+    # The validator above reads this ticker's isolated session export. The MD
+    # remains a second freshness gate so a run cannot stop after JSON validation
+    # and still render as completed.
     "invest": ["reports/{today_compact}_{ticker}.md"],
+    # V4.131.14 — sector/news were named in the comment above from the start but
+    # never actually listed here, so a run that halted at a HARD gate exited
+    # rc=0 with no gate firing and rendered as a completed scan. On 2026-08-16
+    # four sector runs died at the Phase 1 valuation gate while the UI reported
+    # success; only the preflight panel (reading sector_intel's generated_at)
+    # told the truth — 50.9h stale. A correct halt and a finished scan must not
+    # look identical.
+    # Only the DIGEST-producing news mode belongs here: flash / flash_text /
+    # review / triage / link_digest are separate protocol names and several are
+    # explicitly forbidden from writing digest.json.
+    "sector": ["sector/sector_logs/{today}_sector_intel.json"],
+    "news":   ["news/news_logs/{today}_digest.json"],
 }
+
+
+def _required_artifact_error(name, params, start, log_path=None):
+    """Return an error when a protocol did not publish a fresh required file."""
+    templates = PROTOCOL_REQUIRED_ARTIFACTS.get(name) or []
+    if not templates:
+        return None
+    subs = {
+        "{today}": start.strftime("%Y-%m-%d"),
+        "{today_compact}": start.strftime("%Y%m%d"),
+        "{ticker}": str((params or {}).get("ticker") or "").upper(),
+    }
+    wanted = []
+    for template in templates:
+        rel = template
+        for key, value in subs.items():
+            rel = rel.replace(key, value)
+        wanted.append(rel)
+    fresh = False
+    for rel in wanted:
+        fp = os.path.join(ROOT, rel)
+        try:
+            if os.path.exists(fp) and os.path.getmtime(fp) >= start.timestamp() - 1:
+                fresh = True
+                break
+        except OSError:
+            pass
+    if fresh:
+        return None
+    error = (
+        "rc=0 but required artifact missing/stale: "
+        + ", ".join(wanted)
+        + " — 兩種可能：(a) 前置 script rc≠0，模型依閘門紀律中止（正確行為，"
+        + "非缺陷）；(b) 流程跑完但沒寫檔。看 run log 末段的結案訊息可分辨"
+        + (f"：{os.path.relpath(log_path, ROOT)}" if log_path else "")
+    )
+    if log_path:
+        try:
+            with open(log_path, "a") as log_file:
+                log_file.write(f"\n=== artifact gate FAILED: {error} ===\n")
+        except Exception:
+            pass
+    return error
 
 _protocol_state = {
     "job_id":     None,   # YYYYMMDD_HHMMSS id, None when idle
@@ -660,6 +764,99 @@ _protocol_state = {
 }
 _protocol_lock = threading.Lock()
 _protocol_proc = {"p": None}  # mutable holder so cancel can reach it
+
+# V4.134.0 — active protocol state is now a registry, not a process-local
+# singleton. The quota broker owns the three exclusive LLM execution slots;
+# this server only protects output domains that cannot be written concurrently.
+PROTOCOL_MAX_ACTIVE = int(os.getenv("PROTOCOL_MAX_ACTIVE", "3"))
+_protocol_runs = {}  # job_id -> {state: dict, proc: {p: Popen|None}}
+
+_NEWS_PROTOCOLS = {"news", "flash", "flash_text", "review", "triage", "link_digest"}
+
+
+def _protocol_artifact_key(name, params=None):
+    """Return the output domain that must remain single-writer."""
+    params = params or {}
+    ticker = str(params.get("ticker") or "").upper()
+    # V4.134.2 — Phase 5 now stages one session object per ticker and commits
+    # through a stable history lock, so unrelated invest jobs no longer share
+    # an artificial global execution lock.
+    if name == "invest":
+        return f"invest:{ticker or '?'}"
+    if name in _NEWS_PROTOCOLS:
+        return "news-global"
+    if name == "sector":
+        return "sector-global"
+    if name in {"earnings", "earnings_preview"}:
+        return f"earnings:{ticker or '?'}"
+    if name == "supply_chain_generate":
+        return f"supply-chain:{params.get('slug') or params.get('theme') or '?'}"
+    return f"protocol:{name}:{ticker}"
+
+
+def _active_protocol_states():
+    """Live state dicts, oldest first. Caller holds _protocol_lock when mutating."""
+    states = [run["state"] for run in _protocol_runs.values()
+              if run["state"].get("status") == "running"]
+    return sorted(states, key=lambda s: s.get("started_at") or "")
+
+
+def _latest_protocol_state():
+    """Backward-compatible singular view for legacy status consumers."""
+    states = [run["state"] for run in _protocol_runs.values()]
+    if not states:
+        return _protocol_state
+    active = [s for s in states if s.get("status") == "running"]
+    pool = active or states
+    return max(pool, key=lambda s: s.get("started_at") or s.get("ended_at") or "")
+
+
+def _find_protocol_run(*, job_id=None, queue_id=None, name=None, artifact_key=None):
+    if job_id and job_id in _protocol_runs:
+        return _protocol_runs[job_id]
+    if queue_id:
+        matches = [run for run in _protocol_runs.values()
+                   if run["state"].get("queue_id") == queue_id]
+        if matches:
+            return max(matches, key=lambda run: run["state"].get("started_at") or "")
+    if name:
+        matches = [run for run in _protocol_runs.values()
+                   if run["state"].get("name") == name]
+        if matches:
+            active = [run for run in matches if run["state"].get("status") == "running"]
+            pool = active or matches
+            return max(pool, key=lambda run: run["state"].get("started_at") or "")
+    if artifact_key:
+        matches = [run for run in _protocol_runs.values()
+                   if run["state"].get("artifact_key") == artifact_key]
+        if matches:
+            active = [run for run in matches if run["state"].get("status") == "running"]
+            pool = active or matches
+            return max(pool, key=lambda run: run["state"].get("started_at") or "")
+    return None
+
+
+def _protocol_start_error(name, params=None):
+    active = _active_protocol_states()
+    if len(active) >= PROTOCOL_MAX_ACTIVE:
+        return f"protocol capacity is full ({PROTOCOL_MAX_ACTIVE})"
+    key = _protocol_artifact_key(name, params)
+    if any(s.get("artifact_key") == key for s in active):
+        return f"protocol output domain is busy: {key}"
+    return None
+
+
+def _register_protocol_run(job_id, state, proc_holder):
+    """Register atomically and prune old completed states."""
+    _protocol_runs[job_id] = {"state": state, "proc": proc_holder}
+    terminal = sorted(
+        (jid for jid, run in _protocol_runs.items()
+         if run["state"].get("status") != "running"),
+        key=lambda jid: _protocol_runs[jid]["state"].get("ended_at") or "",
+        reverse=True,
+    )
+    for jid in terminal[20:]:
+        _protocol_runs.pop(jid, None)
 
 # V2.7.17 — daily_update.sh shell pipeline state (parallel to Claude protocol queue)
 # Tracks the bash daily_update.sh subprocess used by the new pre-market check
@@ -931,16 +1128,16 @@ def _run_script_protocol(name, params=None):
             return None, f"protocol '{name}' requires '{req}'"
 
     with _protocol_lock:
-        if _protocol_state["status"] == "running":
-            return None, f"another protocol is running: {_protocol_state['name']}"
+        if start_error := _protocol_start_error(name, params):
+            return None, start_error
 
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-        job_id = f"{name}_{ts}"
+        job_id = f"{name}_{ts}_{os.urandom(2).hex()}"
         log_dir = os.path.join(ROOT, PROTOCOL_LOG_DIRS[name])
         os.makedirs(log_dir, exist_ok=True)
         log_path = os.path.join(log_dir, f"{job_id}.log")
 
-        _protocol_state.update({
+        state = {
             "job_id":      job_id,
             "name":        name,
             "status":      "running",
@@ -950,7 +1147,12 @@ def _run_script_protocol(name, params=None):
             "error":       None,
             "elapsed_sec": 0,
             "ticker":      params.get("ticker"),
-        })
+            "artifact_key": _protocol_artifact_key(name, params),
+            "model":       None,
+            "model_tier":  None,
+        }
+        proc_holder = {"p": None}
+        _register_protocol_run(job_id, state, proc_holder)
 
     def _run():
         start = datetime.now()
@@ -970,9 +1172,14 @@ def _run_script_protocol(name, params=None):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 text=True, bufsize=1,
+                start_new_session=True,
                 env={**os.environ, "PATH": os.environ.get("PATH", "") + ":/Users/kavi/.local/bin"},
             )
-            _protocol_proc["p"] = proc
+            # Publish the child under the same lock used by cancel_protocol().
+            # Until this point cancellation returns 409 instead of marking the
+            # run terminal while its worker is still able to spawn a process.
+            with _protocol_lock:
+                proc_holder["p"] = proc
 
             def _reader():
                 try:
@@ -991,34 +1198,42 @@ def _run_script_protocol(name, params=None):
             try:
                 rc = proc.wait(timeout=spec.get("timeout", 180))
             except subprocess.TimeoutExpired:
-                proc.kill()
+                try:
+                    os.killpg(os.getpgid(proc.pid), 9)
+                except (OSError, ProcessLookupError):
+                    proc.kill()
                 rc = -1
                 with _protocol_lock:
-                    _protocol_state["error"] = f"timeout after {spec.get('timeout', 180)}s (hard kill)"
+                    state["error"] = f"timeout after {spec.get('timeout', 180)}s (hard kill)"
             rt.join(timeout=3)
             lf.write(f"\n=== ended={_now_iso()} rc={rc} ===\n")
             lf.close()
+            artifact_err = (_required_artifact_error(name, params, start, log_path)
+                            if rc == 0 else None)
 
             with _protocol_lock:
-                _protocol_state["ended_at"]    = _now_iso()
-                _protocol_state["elapsed_sec"] = int((datetime.now() - start).total_seconds())
-                if _protocol_state["status"] == "cancelled":
+                state["ended_at"]    = _now_iso()
+                state["elapsed_sec"] = int((datetime.now() - start).total_seconds())
+                if state["status"] == "cancelled":
                     pass
-                elif rc == 0:
-                    _protocol_state["status"] = "done"
+                elif rc == 0 and artifact_err is None:
+                    state["status"] = "done"
                 else:
-                    _protocol_state["status"] = "error"
-                    if not _protocol_state["error"]:
-                        _protocol_state["error"] = f"script exited rc={rc}"
-            _protocol_proc["p"] = None
+                    state["status"] = "error"
+                    if not state["error"]:
+                        state["error"] = (
+                            artifact_err or f"script exited rc={rc}"
+                        )
+                proc_holder["p"] = None
             # No bridge re-run for script protocols — they don't change data.json
         except Exception as e:
             with _protocol_lock:
-                _protocol_state["status"]      = "error"
-                _protocol_state["error"]       = str(e)
-                _protocol_state["ended_at"]    = _now_iso()
-                _protocol_state["elapsed_sec"] = int((datetime.now() - start).total_seconds())
-            _protocol_proc["p"] = None
+                if state["status"] != "cancelled":
+                    state["status"] = "error"
+                    state["error"] = str(e)
+                state["ended_at"]    = _now_iso()
+                state["elapsed_sec"] = int((datetime.now() - start).total_seconds())
+                proc_holder["p"] = None
 
     threading.Thread(target=_run, daemon=True).start()
     return job_id, None
@@ -1032,15 +1247,15 @@ def _run_custom_protocol(name, params=None):
         if not params.get(req):
             return None, f"protocol '{name}' requires '{req}'"
     with _protocol_lock:
-        if _protocol_state["status"] == "running":
-            return None, f"another protocol is running: {_protocol_state['name']}"
+        if start_error := _protocol_start_error(name, params):
+            return None, start_error
 
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-        job_id = f"{name}_{ts}"
+        job_id = f"{name}_{ts}_{os.urandom(2).hex()}"
         log_dir = os.path.join(ROOT, PROTOCOL_LOG_DIRS[name])
         os.makedirs(log_dir, exist_ok=True)
         log_path = os.path.join(log_dir, f"{job_id}.log")
-        _protocol_state.update({
+        state = {
             "job_id":      job_id,
             "name":        name,
             "status":      "running",
@@ -1051,7 +1266,12 @@ def _run_custom_protocol(name, params=None):
             "elapsed_sec": 0,
             "ticker":      None,
             "params":      params,
-        })
+            "artifact_key": _protocol_artifact_key(name, params),
+            "model":       None,
+            "model_tier":  None,
+        }
+        proc_holder = {"p": None}
+        _register_protocol_run(job_id, state, proc_holder)
 
     def _run():
         start = datetime.now()
@@ -1080,10 +1300,10 @@ def _run_custom_protocol(name, params=None):
                     raise RuntimeError(f"unknown custom protocol: {name}")
                 lf.write(f"=== ended={_now_iso()} ok ===\n")
             with _protocol_lock:
-                _protocol_state["ended_at"] = _now_iso()
-                _protocol_state["elapsed_sec"] = int((datetime.now() - start).total_seconds())
-                if _protocol_state["status"] != "cancelled":
-                    _protocol_state["status"] = "done"
+                state["ended_at"] = _now_iso()
+                state["elapsed_sec"] = int((datetime.now() - start).total_seconds())
+                if state["status"] != "cancelled":
+                    state["status"] = "done"
         except Exception as e:
             try:
                 with open(log_path, "a", encoding="utf-8") as lf:
@@ -1091,10 +1311,10 @@ def _run_custom_protocol(name, params=None):
             except Exception:
                 pass
             with _protocol_lock:
-                _protocol_state["status"] = "error"
-                _protocol_state["error"] = str(e)
-                _protocol_state["ended_at"] = _now_iso()
-                _protocol_state["elapsed_sec"] = int((datetime.now() - start).total_seconds())
+                state["status"] = "error"
+                state["error"] = str(e)
+                state["ended_at"] = _now_iso()
+                state["elapsed_sec"] = int((datetime.now() - start).total_seconds())
 
     threading.Thread(target=_run, daemon=True).start()
     return job_id, None
@@ -1131,16 +1351,16 @@ def run_protocol(name, params=None):
         params["risk_tolerance"] = rt
 
     with _protocol_lock:
-        if _protocol_state["status"] == "running":
-            return None, f"another protocol is running: {_protocol_state['name']}"
+        if start_error := _protocol_start_error(name, params):
+            return None, start_error
 
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-        job_id = f"{name}_{ts}"
+        job_id = f"{name}_{ts}_{os.urandom(2).hex()}"
         log_dir = os.path.join(ROOT, PROTOCOL_LOG_DIRS[name])
         os.makedirs(log_dir, exist_ok=True)
         log_path = os.path.join(log_dir, f"{job_id}.log")
 
-        _protocol_state.update({
+        state = {
             "job_id":      job_id,
             "name":        name,
             "status":      "running",
@@ -1153,7 +1373,11 @@ def run_protocol(name, params=None):
             # chosen per run, and a stale badge is worse than no badge.
             "model":       None,
             "model_tier":  None,
-        })
+            "ticker":      params.get("ticker"),
+            "artifact_key": _protocol_artifact_key(name, params),
+        }
+        proc_holder = {"p": None}
+        _register_protocol_run(job_id, state, proc_holder)
 
     def _run():
         start = datetime.now()
@@ -1176,11 +1400,11 @@ def run_protocol(name, params=None):
             proto_model, proto_lease = _select_protocol_model(name)
         except Exception as e:
             with _protocol_lock:
-                _protocol_state["status"]      = "error"
-                _protocol_state["error"]       = f"quota broker: {e}"
-                _protocol_state["ended_at"]    = _now_iso()
-                _protocol_state["elapsed_sec"] = int((datetime.now() - start).total_seconds())
-            _protocol_proc["p"] = None
+                state["status"]      = "error"
+                state["error"]       = f"quota broker: {e}"
+                state["ended_at"]    = _now_iso()
+                state["elapsed_sec"] = int((datetime.now() - start).total_seconds())
+            proc_holder["p"] = None
             return
         prompt = _adapt_protocol_prompt(proto_model, prompt, name)
         claude_model = (_protocol_model_for(name) if proto_model == "claude" else None)
@@ -1196,8 +1420,8 @@ def run_protocol(name, params=None):
         # place this is knowable is here.
         model_tier = claude_model or agy_model or "cli-default"
         with _protocol_lock:
-            _protocol_state["model"]      = proto_model
-            _protocol_state["model_tier"] = model_tier
+            state["model"]      = proto_model
+            state["model_tier"] = model_tier
         # Resolved BEFORE the command is built, not after Popen as it used to be:
         # a CLI with its own shorter default deadline has to be told this number
         # or it silently overrides it (see the agy --print-timeout note above).
@@ -1221,6 +1445,7 @@ def run_protocol(name, params=None):
                 stderr=subprocess.STDOUT,
                 text=True,
                 bufsize=1,
+                start_new_session=True,
                 env={
                     **os.environ,
                     "PATH": os.environ.get("PATH", "") + ":/Users/kavi/.local/bin",
@@ -1237,7 +1462,23 @@ def run_protocol(name, params=None):
                     "AIC_PROTOCOL_JOB_ID":     job_id,
                 },
             )
-            _protocol_proc["p"] = proc
+            # Synchronize child publication with cancel_protocol(); a cancel
+            # request cannot release the scheduler slot before a child exists.
+            with _protocol_lock:
+                proc_holder["p"] = proc
+            if MODEL_ROUTER_AVAILABLE and proto_lease is not None:
+                try:
+                    proto_lease.attach_process(proc.pid, os.getpgid(proc.pid))
+                except Exception:
+                    try:
+                        os.killpg(os.getpgid(proc.pid), 15)
+                        proc.wait(timeout=5)
+                    except (OSError, ProcessLookupError, subprocess.TimeoutExpired):
+                        try:
+                            os.killpg(os.getpgid(proc.pid), 9)
+                        except (OSError, ProcessLookupError):
+                            pass
+                    raise
 
             # Reader thread: pipe stdout line-by-line into log file
             def _reader():
@@ -1260,10 +1501,13 @@ def run_protocol(name, params=None):
             try:
                 rc = proc.wait(timeout=timeout_sec)
             except subprocess.TimeoutExpired:
-                proc.kill()
+                try:
+                    os.killpg(os.getpgid(proc.pid), 9)
+                except (OSError, ProcessLookupError):
+                    proc.kill()
                 rc = -1
                 with _protocol_lock:
-                    _protocol_state["error"] = f"timeout after {timeout_sec}s (hard kill)"
+                    state["error"] = f"timeout after {timeout_sec}s (hard kill)"
             rt.join(timeout=3)
             lf.write(f"\n=== ended={_now_iso()} rc={rc} ===\n")
             lf.close()
@@ -1293,8 +1537,20 @@ def run_protocol(name, params=None):
             validator_err = None
             if rc == 0 and name in PROTOCOL_VALIDATORS:
                 try:
+                    validator_args = list(PROTOCOL_VALIDATOR_ARGS.get(name) or [])
+                    substitutions = {
+                        "{today}": start.strftime("%Y-%m-%d"),
+                        "{today_compact}": start.strftime("%Y%m%d"),
+                        "{ticker}": str((params or {}).get("ticker") or "").upper(),
+                    }
+                    for index, token in enumerate(validator_args):
+                        for key, value in substitutions.items():
+                            token = token.replace(key, value)
+                        validator_args[index] = token
                     vr = subprocess.run(
-                        [sys.executable, *[os.path.join(ROOT, p) for p in PROTOCOL_VALIDATORS[name]]],
+                        [sys.executable,
+                         *[os.path.join(ROOT, p) for p in PROTOCOL_VALIDATORS[name]],
+                         *validator_args],
                         cwd=ROOT, capture_output=True, text=True, timeout=60,
                     )
                     if vr.returncode != 0:
@@ -1314,71 +1570,29 @@ def run_protocol(name, params=None):
             # the run produced no fresh output file (fallback/timeout can exit 0
             # while writing nothing). At least one listed path must exist and be
             # newer than the run start; otherwise downgrade to "error".
-            artifact_err = None
-            if rc == 0 and validator_err is None and name in PROTOCOL_REQUIRED_ARTIFACTS:
-                today = start.strftime("%Y-%m-%d")
-                start_ts = start.timestamp()
-                # Two date shapes because the repo uses both: dashed for the
-                # review/news/sector families, compact for deep-dive reports.
-                subs = {
-                    "{today}": today,
-                    "{today_compact}": start.strftime("%Y%m%d"),
-                    "{ticker}": str((params or {}).get("ticker") or "").upper(),
-                }
-                wanted = []
-                for a in PROTOCOL_REQUIRED_ARTIFACTS[name]:
-                    for key, value in subs.items():
-                        a = a.replace(key, value)
-                    wanted.append(a)
-                fresh = False
-                for rel in wanted:
-                    fp = os.path.join(ROOT, rel)
-                    try:
-                        if os.path.exists(fp) and os.path.getmtime(fp) >= start_ts - 1:
-                            fresh = True
-                            break
-                    except OSError:
-                        pass
-                if not fresh:
-                    # V4.125.0 — the old wording asserted a cause ("model may have
-                    # finished without writing output"). That is right for a run that
-                    # died mid-Phase-5, and actively wrong for one that stopped on
-                    # purpose: V4.116.1 requires the PM to halt when a mandatory
-                    # script returns rc≠0, and such a run legitimately produces no
-                    # report. Both rendered identically as 分析失敗, so the discipline
-                    # working looked the same as the engine breaking. State the fact,
-                    # name both branches, and point at the log that distinguishes them.
-                    artifact_err = (
-                        "rc=0 but required artifact missing/stale: "
-                        + ", ".join(wanted)
-                        + " — 兩種可能：(a) 前置 script rc≠0，模型依閘門紀律中止（正確行為，"
-                        + "非缺陷）；(b) 模型跑完但沒寫檔。看 run log 末段的結案訊息可分辨"
-                        + (f"：{os.path.relpath(log_path, ROOT)}" if log_path else "")
-                    )
-                    try:
-                        with open(log_path, "a") as _lf:
-                            _lf.write(f"\n=== artifact gate FAILED: {artifact_err} ===\n")
-                    except Exception:
-                        pass
+            artifact_err = (
+                _required_artifact_error(name, params, start, log_path)
+                if rc == 0 and validator_err is None else None
+            )
 
             with _protocol_lock:
-                _protocol_state["ended_at"]    = _now_iso()
-                _protocol_state["elapsed_sec"] = int((datetime.now() - start).total_seconds())
-                if _protocol_state["status"] == "cancelled":
+                state["ended_at"]    = _now_iso()
+                state["elapsed_sec"] = int((datetime.now() - start).total_seconds())
+                if state["status"] == "cancelled":
                     pass
                 elif rc == 0 and validator_err is None and artifact_err is None:
-                    _protocol_state["status"] = "done"
+                    state["status"] = "done"
                 else:
-                    _protocol_state["status"] = "error"
-                    if not _protocol_state["error"]:
-                        _protocol_state["error"] = (
+                    state["status"] = "error"
+                    if not state["error"]:
+                        state["error"] = (
                             validator_err or artifact_err
                             or _extract_error_from_log(log_path, rc)
                         )
-            _protocol_proc["p"] = None
+                proc_holder["p"] = None
 
             # Success → refresh data.json so Dashboard picks up new state
-            if _protocol_state["status"] == "done":
+            if state["status"] == "done":
                 if name == "news":
                     try:
                         from news.scripts.news_event_store import append_run_telemetry
@@ -1436,11 +1650,12 @@ def run_protocol(name, params=None):
                 run_bridge(reason=f"after {name} scan")
         except Exception as e:
             with _protocol_lock:
-                _protocol_state["status"]    = "error"
-                _protocol_state["error"]     = str(e)
-                _protocol_state["ended_at"]  = _now_iso()
-                _protocol_state["elapsed_sec"] = int((datetime.now() - start).total_seconds())
-            _protocol_proc["p"] = None
+                if state["status"] != "cancelled":
+                    state["status"] = "error"
+                    state["error"] = str(e)
+                state["ended_at"]  = _now_iso()
+                state["elapsed_sec"] = int((datetime.now() - start).total_seconds())
+                proc_holder["p"] = None
         finally:
             # A hold that outlives its run makes every other project — and the
             # next protocol launch — see less headroom than really exists. The
@@ -1469,6 +1684,7 @@ def run_protocol(name, params=None):
 _protocol_queue = []
 _protocol_queue_lock = threading.Lock()
 _protocol_history = []  # last 10 completions
+_protocol_inflight = {}  # job_id -> original queue entry
 _PROTOCOL_HISTORY_MAX = 10
 
 # V4.121.4 — the invest→invest cooldown is now published instead of slept
@@ -1478,37 +1694,6 @@ _PROTOCOL_HISTORY_MAX = 10
 # duplicate ran a second full analysis after the first one failed. The entry now
 # stays in the queue until dispatch (so enqueue dedup still sees it) and the
 # deadline is exported for the UI.
-_protocol_cooldown = {"until": None, "label": None, "name": None}
-_protocol_cooldown_lock = threading.Lock()
-
-
-def _cooldown_remaining_sec(last_name, last_finished_at, next_name, now=None):
-    """Seconds still owed before dispatching `next_name`; 0 = dispatch now.
-    Only two consecutive invest runs cool down (token rate-limit pressure)."""
-    if last_name != "invest" or next_name != "invest" or last_finished_at is None:
-        return 0
-    try:
-        cooldown = int(os.getenv("INTER_ANALYSIS_COOLDOWN_SEC", "180"))
-    except (TypeError, ValueError):
-        cooldown = 180
-    if cooldown <= 0:
-        return 0
-    elapsed = ((now or datetime.now()) - last_finished_at).total_seconds()
-    return max(0, int(cooldown - elapsed))
-
-
-def _publish_cooldown(remaining_sec=0, entry=None):
-    """Make the wait visible to the UI. remaining_sec<=0 clears it."""
-    with _protocol_cooldown_lock:
-        if remaining_sec <= 0 or not entry:
-            _protocol_cooldown.update({"until": None, "label": None, "name": None})
-        else:
-            _protocol_cooldown.update({
-                "until": (datetime.now() + timedelta(seconds=remaining_sec)).isoformat(timespec="seconds"),
-                "label": entry.get("label"),
-                "name":  entry.get("name"),
-            })
-
 # Backward-compat aliases (existing analyze-queue endpoints + worker name keep working)
 _analyze_queue        = _protocol_queue
 _analyze_queue_lock   = _protocol_queue_lock
@@ -1516,15 +1701,19 @@ _analyze_history      = _protocol_history
 _ANALYZE_HISTORY_MAX  = _PROTOCOL_HISTORY_MAX
 
 
-def _currently_analyzing_ticker():
-    """Return ticker currently being analyzed via invest protocol, or None.
-    (Backward-compat for analyze-queue.js widget that only cares about invest.)"""
+def _currently_analyzing_tickers():
+    """All tickers currently running through the invest protocol."""
     with _protocol_lock:
-        if _protocol_state.get("status") != "running":
-            return None
-        if _protocol_state.get("name") != "invest":
-            return None
-        return _protocol_state.get("analyze_ticker")
+        return {
+            str(state.get("analyze_ticker") or state.get("ticker") or "").upper()
+            for state in _active_protocol_states()
+            if state.get("name") == "invest"
+        } - {""}
+
+
+def _currently_analyzing_ticker():
+    """Backward-compatible singular view for the old invest widget."""
+    return next(iter(_currently_analyzing_tickers()), None)
 
 
 def _label_for(name, params):
@@ -1587,9 +1776,8 @@ def enqueue_protocol(name, params=None, source="direct"):
         if ticker:
             params["ticker"] = ticker
             with _protocol_lock:
-                cur = _protocol_state
-                if (cur.get("status") == "running" and cur.get("name") == name
-                        and (cur.get("ticker") or "").upper() == ticker):
+                if any(s.get("name") == name and (s.get("ticker") or "").upper() == ticker
+                       for s in _active_protocol_states()):
                     return {"queued": False, "reason": "duplicate_active", "ticker": ticker}, "duplicate"
             with _protocol_queue_lock:
                 if any(q.get("name") == name and (q.get("params") or {}).get("ticker") == ticker
@@ -1598,7 +1786,7 @@ def enqueue_protocol(name, params=None, source="direct"):
         else:
             # V4.6 — parameterless script protocols (weekly_review 等): dedup by name
             with _protocol_lock:
-                if _protocol_state.get("status") == "running" and _protocol_state.get("name") == name:
+                if any(s.get("name") == name for s in _active_protocol_states()):
                     return {"queued": False, "reason": "duplicate_active"}, "duplicate"
             with _protocol_queue_lock:
                 if any(q.get("name") == name for q in _protocol_queue):
@@ -1613,10 +1801,10 @@ def enqueue_protocol(name, params=None, source="direct"):
         slug = _sc.slugify(theme) if SUPPLY_CHAIN_AVAILABLE else theme.lower().replace(" ", "_")[:48]
         params["slug"] = slug
         with _protocol_lock:
-            cur = _protocol_state
-            if (cur.get("status") == "running" and cur.get("name") == name
-                    and ((cur.get("params") or {}).get("slug") == slug
-                         or cur.get("queue_label") == _label_for(name, params))):
+            if any(s.get("name") == name
+                   and ((s.get("params") or {}).get("slug") == slug
+                        or s.get("queue_label") == _label_for(name, params))
+                   for s in _active_protocol_states()):
                 return {"queued": False, "reason": "duplicate_active", "theme": theme}, "duplicate"
         with _protocol_queue_lock:
             if any(q.get("name") == name and (q.get("params") or {}).get("slug") == slug
@@ -1633,9 +1821,9 @@ def enqueue_protocol(name, params=None, source="direct"):
             rt = "MEDIUM"
         params["ticker"] = ticker
         params["risk_tolerance"] = rt
-        active = _currently_analyzing_ticker()
+        active = _currently_analyzing_tickers()
         with _protocol_queue_lock:
-            if active == ticker:
+            if ticker in active:
                 return {"queued": False, "reason": "duplicate_active", "ticker": ticker}, "duplicate"
             if any(q.get("name") == "invest" and (q.get("params") or {}).get("ticker") == ticker
                    for q in _protocol_queue):
@@ -1648,9 +1836,8 @@ def enqueue_protocol(name, params=None, source="direct"):
             return None, "missing ticker"
         params["ticker"] = ticker
         with _protocol_lock:
-            cur = _protocol_state
-            if (cur.get("status") == "running" and cur.get("name") == "earnings"
-                    and (cur.get("ticker") or "").upper() == ticker):
+            if any(s.get("name") == "earnings" and (s.get("ticker") or "").upper() == ticker
+                   for s in _active_protocol_states()):
                 return {"queued": False, "reason": "duplicate_active", "ticker": ticker}, "duplicate"
         with _protocol_queue_lock:
             if any(q.get("name") == "earnings" and (q.get("params") or {}).get("ticker") == ticker
@@ -1660,7 +1847,7 @@ def enqueue_protocol(name, params=None, source="direct"):
     # playbook dedup: parameterless generator — reject if already running/queued
     if name == "playbook":
         with _protocol_lock:
-            if _protocol_state.get("status") == "running" and _protocol_state.get("name") == "playbook":
+            if any(s.get("name") == "playbook" for s in _active_protocol_states()):
                 return {"queued": False, "reason": "duplicate_active"}, "duplicate"
         with _protocol_queue_lock:
             if any(q.get("name") == "playbook" for q in _protocol_queue):
@@ -1677,8 +1864,7 @@ def enqueue_protocol(name, params=None, source="direct"):
     # Calc position: 1-indexed across (running + queued)
     running = 0
     with _protocol_lock:
-        if _protocol_state.get("status") == "running":
-            running = 1
+        running = len(_active_protocol_states())
     with _protocol_queue_lock:
         _protocol_queue.append(entry)
         position    = running + len(_protocol_queue)   # 1-indexed: this entry's slot
@@ -1705,183 +1891,260 @@ def enqueue_analysis(ticker, risk_tolerance="MEDIUM"):
     return state, err
 
 
+def _record_signal_delivery(entry, *, status, error=None, report_path=None):
+    """Best-effort terminal writeback for every protocol-queue exit path."""
+    params = (entry or {}).get("params") or {}
+    if not globals().get("SIGNAL_QUEUE_AVAILABLE", False) or not params.get("signal_id"):
+        return False
+    try:
+        _signal_queue.record_delivery(
+            str(params["signal_id"]),
+            params.get("signal_revision"),
+            status=status,
+            refs=params.get("signal_refs"),
+            protocol=(entry or {}).get("name"),
+            ticker=params.get("ticker"),
+            report_path=report_path,
+            error=error,
+        )
+        _invalidate_signal_cache()
+        return True
+    except Exception as exc:
+        sys.stderr.write(f"[signal_queue] writeback failed: {exc}\n")
+        return False
+
+
 def remove_from_queue(target_id_or_ticker):
     """Remove pending entry by id (preferred) or by ticker (legacy invest path).
     Cannot cancel active run."""
     key = (target_id_or_ticker or "").strip()
     with _protocol_queue_lock:
-        before = len(_protocol_queue)
-        _protocol_queue[:] = [
+        removed_entries = [
             q for q in _protocol_queue
-            if q.get("id") != key
-            and (q.get("params") or {}).get("ticker", "").upper() != key.upper()
+            if q.get("id") == key
+            or (q.get("params") or {}).get("ticker", "").upper() == key.upper()
         ]
-        removed = before - len(_protocol_queue)
-    return removed > 0
+        removed_ids = {id(q) for q in removed_entries}
+        _protocol_queue[:] = [q for q in _protocol_queue if id(q) not in removed_ids]
+    for entry in removed_entries:
+        _record_signal_delivery(
+            entry,
+            status="failed",
+            error="removed from pending protocol queue",
+        )
+    return bool(removed_entries)
 
 
 def get_queue_state():
     """Return {active, queue, recent}.
-    active: {ticker, name, label, ...} of currently running (any protocol)
+    active: list of up to three concurrently running protocols
     queue:  list of pending entries
     recent: last 10 completions"""
-    active = None
+    active = []
     with _protocol_lock:
-        if _protocol_state.get("status") == "running":
-            started = _protocol_state.get("started_at")
+        for state in _active_protocol_states():
+            started = state.get("started_at")
             elapsed = 0
             if started:
                 try:
                     elapsed = int((datetime.now() - datetime.fromisoformat(started)).total_seconds())
                 except Exception:
                     pass
-            active = {
-                "name":        _protocol_state.get("name"),
-                "ticker":      _protocol_state.get("analyze_ticker"),     # any ticker-scoped protocol; None for DIGEST/sector
-                "label":       _protocol_state.get("queue_label"),        # set on dispatch
-                "job_id":      _protocol_state.get("job_id"),
+            active.append({
+                "name":        state.get("name"),
+                "ticker":      state.get("analyze_ticker") or state.get("ticker"),
+                "label":       state.get("queue_label"),
+                "job_id":      state.get("job_id"),
+                "queue_id":    state.get("queue_id"),
                 "started_at":  started,
                 "elapsed_sec": elapsed,
-                "source":      _protocol_state.get("analyze_source", "direct"),
+                "source":      state.get("analyze_source", "direct"),
                 # None for the first seconds of a run — the broker has not
                 # answered yet. The UI omits the badge rather than guessing.
-                "model":       _protocol_state.get("model"),
-                "model_tier":  _protocol_state.get("model_tier"),
-            }
+                "model":       state.get("model"),
+                "model_tier":  state.get("model_tier"),
+            })
     with _protocol_queue_lock:
         queue_snapshot = [dict(q) for q in _protocol_queue]
         history_snapshot = list(_protocol_history)
-    # Recomputed per request rather than served as a stored countdown: a client
-    # polling every 5s would otherwise show a number that only moves when the
-    # worker happens to touch it.
-    with _protocol_cooldown_lock:
-        cd = dict(_protocol_cooldown)
-    cooldown = None
-    if cd.get("until"):
-        try:
-            remaining = int((datetime.fromisoformat(cd["until"]) - datetime.now()).total_seconds())
-        except (TypeError, ValueError):
-            remaining = 0
-        if remaining > 0:
-            cooldown = {"until": cd["until"], "remaining_sec": remaining,
-                        "label": cd.get("label"), "name": cd.get("name")}
     return {"active": active, "queue": queue_snapshot, "recent": history_snapshot,
-            "cooldown": cooldown}
+            "capacity": PROTOCOL_MAX_ACTIVE}
+
+
+_SIGNAL_REPORT_GLOBS = {
+    # Two naming conventions, both live: dashed dates for the earnings skill,
+    # compact for the invest protocol's deep-dive report.
+    "earnings":         "reports/*_{ticker}_earnings.md",
+    "earnings_preview": "reports/*_{ticker}_pre_earnings.md",
+    "invest":           "reports/*_{ticker}.md",
+}
+
+
+def _signal_report_path(name, ticker, *, since=None):
+    """Newest report this protocol writes for `ticker`, as a repo-relative path.
+
+    Best-effort: the delivery record is still correct without it, the card just
+    loses its "open the report" link.
+    """
+    pattern = _SIGNAL_REPORT_GLOBS.get(name)
+    ticker = str(ticker or "").upper()
+    if not pattern or not ticker:
+        return None
+    hits = glob.glob(os.path.join(ROOT, pattern.format(ticker=ticker)))
+    if since is not None:
+        try:
+            cutoff = (float(since) if isinstance(since, (int, float))
+                      else datetime.fromisoformat(str(since)).timestamp())
+            hits = [path for path in hits if os.path.getmtime(path) >= cutoff - 1]
+        except (OSError, TypeError, ValueError):
+            hits = []
+    if not hits:
+        return None
+    newest = max(hits, key=os.path.getmtime)
+    return os.path.relpath(newest, ROOT)
+
+
+def _retryable_dispatch_error(error):
+    text = str(error or "").lower()
+    return any(marker in text for marker in (
+        "provider_busy", "protocol capacity is full", "protocol output domain is busy",
+        # The broker can be healthy again by the next poll (INTC failed twice
+        # with this while GEV obtained a lease one minute later). Selection has
+        # not launched a model yet, so retrying is safe and must not consume a
+        # second inference turn.
+        "broker:unavailable", "broker:refused", "broker:off", "broker:version",
+    ))
+
+
+def _queue_history_entry(entry, state):
+    params = entry.get("params") or {}
+    return {
+        "name": entry["name"],
+        "label": entry.get("label", entry["name"]),
+        "ticker": params.get("ticker"),
+        "status": state.get("status", "error"),
+        "error": state.get("error") if state.get("status") == "error" else None,
+        "ended_at": state.get("ended_at") or _now_iso(),
+        "model": state.get("model"),
+        "model_tier": state.get("model_tier"),
+    }
+
+
+def _requeue_protocol_entry(entry, reason):
+    retry = dict(entry)
+    reason_text = str(reason or "").lower()
+    attempts = int(entry.get("attempts") or 0) + 1
+    if any(marker in reason_text for marker in (
+            "broker:unavailable", "broker:off", "broker:version")):
+        waiting_reason = "broker_unavailable"
+        # Avoid hammering a daemon that is restarting, while still recovering
+        # quickly from the 1-2 second localhost timeout seen in production.
+        retry_delay = min(30, 3 * (2 ** min(attempts - 1, 3)))
+    elif "broker:refused" in reason_text:
+        waiting_reason = "quota_wait"
+        retry_delay = 30
+    elif "provider_busy" in reason_text:
+        waiting_reason = "provider_busy"
+        retry_delay = 3
+    else:
+        waiting_reason = "artifact_busy"
+        retry_delay = 3
+    retry["waiting_reason"] = waiting_reason
+    retry["retry_at"] = time.time() + retry_delay
+    retry["attempts"] = attempts
+    retry["last_dispatch_error"] = str(reason or "")[:500]
+    with _protocol_queue_lock:
+        _protocol_queue.insert(0, retry)
+
+
+def _next_dispatchable_entry():
+    with _protocol_lock:
+        active = _active_protocol_states()
+        if len(active) >= PROTOCOL_MAX_ACTIVE:
+            return None
+        busy_keys = {state.get("artifact_key") for state in active}
+    now = time.time()
+    with _protocol_queue_lock:
+        for index, entry in enumerate(_protocol_queue):
+            if float(entry.get("retry_at") or 0) > now:
+                continue
+            key = _protocol_artifact_key(entry["name"], entry.get("params"))
+            if key not in busy_keys:
+                return _protocol_queue.pop(index)
+    return None
+
+
+def _finalize_inflight_runs():
+    """Publish every newly terminal run without blocking other dispatches."""
+    with _protocol_lock:
+        terminal = [
+            (job_id, entry, _protocol_runs[job_id]["state"])
+            for job_id, entry in list(_protocol_inflight.items())
+            if job_id in _protocol_runs
+            and _protocol_runs[job_id]["state"].get("status")
+            in ("done", "error", "cancelled", "idle")
+        ]
+    for job_id, entry, state in terminal:
+        _protocol_inflight.pop(job_id, None)
+        final_error = state.get("error")
+        if state.get("status") == "error" and _retryable_dispatch_error(final_error):
+            _requeue_protocol_entry(entry, final_error)
+            continue
+
+        with _protocol_queue_lock:
+            _protocol_history.insert(0, _queue_history_entry(entry, state))
+            del _protocol_history[_PROTOCOL_HISTORY_MAX:]
+
+        params = entry.get("params") or {}
+        if SIGNAL_QUEUE_AVAILABLE and params.get("signal_id"):
+            _record_signal_delivery(
+                entry,
+                status=("consumed" if state.get("status") == "done" else "failed"),
+                report_path=(
+                    _signal_report_path(
+                        entry["name"], params.get("ticker"), since=state.get("started_at")
+                    )
+                    if state.get("status") == "done" else None
+                ),
+                error=(final_error if state.get("status") != "done" else None),
+            )
 
 
 def _analyze_worker():
-    """Background loop: pull next entry off _protocol_queue, dispatch via run_protocol().
-    3-min cooldown only between two consecutive invest items (token rate-limit pressure)."""
-    last_finished_name = None
-    last_finished_at = None
-    cooldown_logged = None
+    """Dispatch up to three safe jobs; broker assigns one exclusive LLM each."""
     while True:
         try:
-            # Wait until queue has work AND no protocol is running
-            with _protocol_lock:
-                proto_busy = _protocol_state.get("status") == "running"
-            with _protocol_queue_lock:
-                queue_empty = not _protocol_queue
-                next_entry = None if queue_empty else dict(_protocol_queue[0])
-            if proto_busy or queue_empty:
-                _publish_cooldown(0)
-                cooldown_logged = None
-                time.sleep(1.5)
-                continue
-
-            # Cooldown only between two consecutive invest runs. Evaluated as a
-            # deadline against a short sleep instead of one long blocking sleep,
-            # so the entry stays in the queue for the whole wait: visible in the
-            # UI, still removable, and still seen by the enqueue dedup check.
-            remaining = _cooldown_remaining_sec(last_finished_name, last_finished_at,
-                                                next_entry.get("name"))
-            if remaining > 0:
-                _publish_cooldown(remaining, next_entry)
-                if cooldown_logged != next_entry.get("id"):
-                    sys.stderr.write(f"[protocol_worker] cooldown {remaining}s before next invest "
-                                     f"({next_entry.get('label')})\n")
-                    cooldown_logged = next_entry.get("id")
-                time.sleep(1.5)
-                continue
-            _publish_cooldown(0)
-            cooldown_logged = None
-
-            with _protocol_queue_lock:
-                if not _protocol_queue:
-                    continue
-                entry = _protocol_queue.pop(0)
-
-            name   = entry["name"]
-            params = entry.get("params") or {}
-            label  = entry.get("label", name)
-
-            job_id, err = run_protocol(name, params)
-            if err:
-                with _protocol_queue_lock:
-                    _protocol_history.insert(0, {
-                        "name":     name,
-                        "label":    label,
-                        "ticker":   params.get("ticker"),
-                        "status":   "error",
-                        "error":    err,
-                        "ended_at": _now_iso(),
-                        # Rejected before dispatch, so no provider was ever
-                        # chosen. Keys kept for a uniform shape in the UI.
-                        "model":      None,
-                        "model_tier": None,
-                    })
-                    del _protocol_history[_PROTOCOL_HISTORY_MAX:]
-                # Rejected before dispatch — nothing was spent, so nothing to
-                # cool down from.
-                last_finished_name = None
-                last_finished_at   = None
-                continue
-            with _protocol_lock:
-                # Always overwrite analyze_ticker — None for ticker-less protocols
-                # (news/DIGEST, sector, triage, flash_text, review). Conditional set
-                # caused stale-ticker leak: a prior invest CRWV would persist into
-                # the next news run's proto-pill ("news · CRWV") because the field
-                # wasn't cleared on dispatch. Bug 2026-05-03.
-                _protocol_state["analyze_ticker"] = params.get("ticker")
-                _protocol_state["analyze_source"] = entry.get("source", "queue")
-                _protocol_state["queue_label"]   = label
-                _protocol_state["queue_id"]      = entry.get("id")
-
-            # Wait for run to finish.
-            # Defensive: terminal status alone is enough (don't gate on ended_at).
-            # Previously required `ended_at` too, but if cancel_protocol left
-            # ended_at unset and _run thread hung in post-wait, worker would
-            # block forever blocking the rest of the queue.
+            _finalize_inflight_runs()
+            dispatched = False
             while True:
-                time.sleep(2)
-                with _protocol_lock:
-                    s = _protocol_state.get("status")
-                if s in ("done", "error", "cancelled", "idle"):
+                entry = _next_dispatchable_entry()
+                if entry is None:
                     break
-
-            with _protocol_lock:
-                final_status = _protocol_state.get("status")
-                final_error  = _protocol_state.get("error")
-                final_model  = _protocol_state.get("model")
-                final_tier   = _protocol_state.get("model_tier")
-            with _protocol_queue_lock:
-                _protocol_history.insert(0, {
-                    "name":     name,
-                    "label":    label,
-                    "ticker":   params.get("ticker"),
-                    "status":   final_status,
-                    "error":    final_error if final_status == "error" else None,
-                    "ended_at": _now_iso(),
-                    # Which engine actually ran it. The 2026-08-09 invest failure
-                    # was only diagnosable by opening the log header; a run that
-                    # went to an unexpected provider should be visible in the UI.
-                    "model":      final_model,
-                    "model_tier": final_tier,
-                })
-                del _protocol_history[_PROTOCOL_HISTORY_MAX:]
-
-            last_finished_name = name
-            last_finished_at   = datetime.now()
+                name = entry["name"]
+                params = entry.get("params") or {}
+                job_id, err = run_protocol(name, params)
+                if err:
+                    if _retryable_dispatch_error(err):
+                        _requeue_protocol_entry(entry, err)
+                    else:
+                        state = {"status": "error", "error": err, "ended_at": _now_iso()}
+                        with _protocol_queue_lock:
+                            _protocol_history.insert(0, _queue_history_entry(entry, state))
+                            del _protocol_history[_PROTOCOL_HISTORY_MAX:]
+                        _record_signal_delivery(entry, status="failed", error=err)
+                    continue
+                with _protocol_lock:
+                    run = _protocol_runs[job_id]
+                    state = run["state"]
+                    state.update({
+                        "analyze_ticker": params.get("ticker"),
+                        "analyze_source": entry.get("source", "queue"),
+                        "queue_label": entry.get("label", name),
+                        "queue_id": entry.get("id"),
+                    })
+                    _protocol_inflight[job_id] = entry
+                dispatched = True
+            time.sleep(0.25 if dispatched else 1.0)
         except Exception as e:
             sys.stderr.write(f"[protocol_worker error] {e}\n")
             time.sleep(3)
@@ -2443,9 +2706,13 @@ def _wait_protocol_completion(name, baseline_ts, timeout_sec, on_progress=None):
     while True:
         time.sleep(2)
         with _protocol_lock:
-            cur_name    = _protocol_state.get("name")
-            cur_status  = _protocol_state.get("status")
-            cur_started = _protocol_state.get("started_at")
+            current = next(
+                (state for state in _active_protocol_states() if state.get("name") == name),
+                None,
+            )
+            cur_name = current.get("name") if current else None
+            cur_status = current.get("status") if current else None
+            cur_started = current.get("started_at") if current else None
         cur_elapsed = (
             int((datetime.now() - datetime.fromisoformat(cur_started)).total_seconds())
             if cur_started else 0
@@ -2869,39 +3136,57 @@ def run_journal_update():
     return _journal_update_state.copy(), None
 
 
-def cancel_protocol():
+def cancel_protocol(job_id=None, queue_id=None):
     with _protocol_lock:
-        if _protocol_state["status"] != "running":
+        run = _find_protocol_run(job_id=job_id, queue_id=queue_id)
+        if run is None:
+            active = _active_protocol_states()
+            if len(active) != 1:
+                return False
+            run = _protocol_runs.get(active[0].get("job_id"))
+        if run is None:
+            return False
+        state = run["state"]
+        proc_holder = run["proc"]
+        if state["status"] != "running":
             # Recovery path: if previously cancelled but ended_at never got set
             # (because _run thread got stuck in proc.wait/lf.close), allow a
             # second cancel call to forcibly mark ended_at so the analyze worker
             # can dispatch the next queued item.
-            if _protocol_state["status"] == "cancelled" and not _protocol_state.get("ended_at"):
-                _protocol_state["ended_at"] = _now_iso()
+            if state["status"] == "cancelled" and not state.get("ended_at"):
+                state["ended_at"] = _now_iso()
                 try:
-                    started = datetime.fromisoformat(_protocol_state["started_at"])
-                    _protocol_state["elapsed_sec"] = int((datetime.now() - started).total_seconds())
+                    started = datetime.fromisoformat(state["started_at"])
+                    state["elapsed_sec"] = int((datetime.now() - started).total_seconds())
                 except Exception:
                     pass
-                _protocol_proc["p"] = None
+                proc_holder["p"] = None
                 return True
             return False
-        _protocol_state["status"] = "cancelled"
+        proc = proc_holder.get("p")
+        if proc is None:
+            # The worker is still selecting a broker slot (or is an in-process
+            # custom job). Marking it terminal now would let the scheduler start
+            # another writer while this worker can still begin or keep writing.
+            return False
+        state["status"] = "cancelled"
         # Set ended_at immediately so worker can proceed even if _run thread
         # gets stuck before its post-wait block runs (claude CLI sometimes
         # ignores SIGTERM / pipes hang on close after kill).
-        _protocol_state["ended_at"] = _now_iso()
+        state["ended_at"] = _now_iso()
         try:
-            started = datetime.fromisoformat(_protocol_state["started_at"])
-            _protocol_state["elapsed_sec"] = int((datetime.now() - started).total_seconds())
+            started = datetime.fromisoformat(state["started_at"])
+            state["elapsed_sec"] = int((datetime.now() - started).total_seconds())
         except Exception:
             pass
-    proc = _protocol_proc.get("p")
     if proc and proc.poll() is None:
         try:
-            proc.terminate()
-        except Exception:
-            pass
+            os.killpg(os.getpgid(proc.pid), 15)
+        except (OSError, ProcessLookupError):
+            try:
+                proc.terminate()
+            except Exception:
+                pass
     return True
 
 
@@ -4296,6 +4581,41 @@ except Exception as _bn_e:
 _bn_trend_cache = {"data": None, "ts": 0.0}
 BN_TREND_TTL_SEC = 60
 
+# Cross-page signal queue — one page's conclusions become another's candidates.
+# Kept separate from BREAK_NEWS_AVAILABLE because break-news is only V1's
+# collector; the queue itself is meant to outlive that being the only source.
+try:
+    import scripts.signal_queue as _signal_queue
+    SIGNAL_QUEUE_AVAILABLE = True
+except Exception as _sq_e:
+    SIGNAL_QUEUE_AVAILABLE = False
+    sys.stderr.write(f"[signal_queue] module load failed: {_sq_e}\n")
+
+# Recomputing is ~50ms, but four pages polling it would still add up. The TTL
+# bounds the cost; the signature bounds the staleness, so a debate that closes
+# (or a card the user dismisses) shows up at once instead of up to a TTL later.
+_signal_cache = {"data": None, "ts": 0.0, "sig": None, "key": None}
+_signal_cache_lock = threading.Lock()
+SIGNAL_QUEUE_TTL_SEC = 90
+
+
+def _clamp_int(raw, default, low, high):
+    """Query-string int with a hard range. Junk falls back rather than 500s."""
+    try:
+        return max(low, min(high, int(raw)))
+    except (TypeError, ValueError):
+        return default
+
+
+def _invalidate_signal_cache():
+    """Force the next queue read to recompute after we changed the ledger.
+
+    The signature covers the state file's mtime, but a user who just clicked
+    should not have to wait on filesystem timestamp granularity to see it.
+    """
+    with _signal_cache_lock:
+        _signal_cache.update({"data": None, "ts": 0.0, "sig": None, "key": None})
+
 # Supply-chain explorer — LLM-drafted value chains + live grounding.
 try:
     from scripts.nexus import supply_chain as _sc
@@ -5345,6 +5665,68 @@ class Handler(SimpleHTTPRequestHandler):
             cache["ts"] = now_ts
             return self._json(200, {**data, "cached": False})
 
+        # ── Cross-page signal queue ────────────────────────────────
+        if path == "/api/signal-queue":
+            if not SIGNAL_QUEUE_AVAILABLE:
+                return self._json(503, {"error": "signal_queue module not loaded"})
+            q = parse_qs(urlparse(self.path).query)
+            lane = (q.get("lane", ["all"])[0] or "all").strip()
+            if lane != "all" and lane not in _signal_queue.LANES:
+                return self._json(400, {"error": "invalid lane"})
+            lanes = _signal_queue.LANES if lane == "all" else (lane,)
+            days = _clamp_int(q.get("days", [None])[0],
+                              _signal_queue.DEFAULT_WINDOW_DAYS,
+                              1, _signal_queue.MAX_WINDOW_DAYS)
+            limit = _clamp_int(q.get("limit", [None])[0], 20, 1, 50)
+            include_dismissed = q.get("include_dismissed", ["0"])[0] in ("1", "true")
+            try:
+                min_score = float(q.get("min_score", [_signal_queue.MIN_SCORE])[0])
+            except (TypeError, ValueError):
+                min_score = _signal_queue.MIN_SCORE
+            key = (tuple(lanes), days, limit, include_dismissed, round(min_score, 3))
+
+            now_ts = time.time()
+            try:
+                sig = _signal_queue.scan_signature(days)
+            except Exception:
+                sig = None
+            with _signal_cache_lock:
+                fresh = (_signal_cache["data"] is not None
+                         and _signal_cache["key"] == key
+                         and _signal_cache["sig"] == sig
+                         and (now_ts - _signal_cache["ts"]) < SIGNAL_QUEUE_TTL_SEC)
+                if fresh:
+                    return self._json(200, {**_signal_cache["data"], "cached": True})
+            try:
+                data = _signal_queue.attach_eligibility(
+                    _signal_queue.compute_signal_queue(
+                        days, min_score=min_score,
+                        include_dismissed=include_dismissed,
+                        limit=limit, lanes=tuple(lanes)))
+            except Exception as e:
+                return self._json(500, {"error": str(e)[:300]})
+            with _signal_cache_lock:
+                _signal_cache.update({"data": data, "ts": now_ts, "sig": sig, "key": key})
+            return self._json(200, {**data, "cached": False})
+
+        if path == "/api/signal-queue/eligibility":
+            if not SIGNAL_QUEUE_AVAILABLE:
+                return self._json(503, {"error": "signal_queue module not loaded"})
+            q = parse_qs(urlparse(self.path).query)
+            raw = (q.get("tickers", [""])[0] or "").split(",")
+            tickers = [t for t in (_signal_queue.normalize_ticker(x) for x in raw) if t]
+            if not tickers:
+                return self._json(400, {"error": "no valid tickers"})
+            if len(tickers) > 25:
+                return self._json(400, {"error": "too many tickers (max 25)"})
+            try:
+                calendar = _signal_queue._fmp_earnings_dates()
+                out = {t: _signal_queue.earnings_eligibility(t, calendar=calendar)
+                       for t in tickers}
+            except Exception as e:
+                return self._json(500, {"error": str(e)[:300]})
+            return self._json(200, out)
+
         # ── Supply-Chain Explorer API ──────────────────────────────
         if path == "/api/supply-chain/list":
             if not SUPPLY_CHAIN_AVAILABLE:
@@ -5544,8 +5926,24 @@ class Handler(SimpleHTTPRequestHandler):
             return self._json(200, payload)
 
         if path == "/api/run-protocol/status":
+            qs = parse_qs(urlparse(self.path).query)
+            job_id = (qs.get("job_id") or [None])[0]
+            queue_id = (qs.get("queue_id") or [None])[0]
+            name = (qs.get("name") or [None])[0]
+            artifact_key = (qs.get("artifact_key") or [None])[0]
             with _protocol_lock:
-                state = dict(_protocol_state)
+                run = _find_protocol_run(
+                    job_id=job_id, queue_id=queue_id, name=name, artifact_key=artifact_key
+                )
+                if run is not None:
+                    state = dict(run["state"])
+                elif job_id or queue_id:
+                    state = {"job_id": job_id, "queue_id": queue_id, "status": "queued"}
+                elif name or artifact_key:
+                    state = {"name": name, "status": "idle"}
+                else:
+                    state = dict(_latest_protocol_state())
+                state["active_count"] = len(_active_protocol_states())
             if state.get("status") == "running" and state.get("started_at"):
                 try:
                     state["elapsed_sec"] = int(
@@ -5668,6 +6066,16 @@ class Handler(SimpleHTTPRequestHandler):
     def do_POST(self):
         path = urlparse(self.path).path
 
+        if path == "/api/broker/restart":
+            if not MODEL_ROUTER_AVAILABLE:
+                return self._json(503, {"ok": False, "error": "model_router_unavailable"})
+            if not _BROKER_RESTART_LOCK.acquire(blocking=False):
+                return self._json(409, {"ok": False, "error": "restart_in_progress"})
+            try:
+                return self._json(*_restart_broker())
+            finally:
+                _BROKER_RESTART_LOCK.release()
+
         # ── X KOL collection ────────────────────────────────────────────
         # The page's refresh button is an explicit user action. Keep the
         # collector out of GET /api/x-kol/heat so ordinary page loads remain
@@ -5780,7 +6188,7 @@ class Handler(SimpleHTTPRequestHandler):
                 body = json.loads(self.rfile.read(length).decode("utf-8"))
             except Exception as e:
                 return self._json(400, {"error": f"invalid JSON: {e}"})
-            valid = {"claude", "gemini", "codex", "grok"}
+            valid = {"claude", "gemini", "codex"}
             # Merge onto existing config so a partial POST (e.g. only the
             # dropdowns) keeps budgets / enabled / cooldown intact.
             cfg_path = os.path.join(ROOT, "config", "llm_config.json")
@@ -6162,8 +6570,77 @@ class Handler(SimpleHTTPRequestHandler):
                 return self._json(400, {"error": err})
             return self._json(202, state)
 
+        if path == "/api/signal-queue/action":
+            if not SIGNAL_QUEUE_AVAILABLE:
+                return self._json(503, {"error": "signal_queue module not loaded"})
+            length = int(self.headers.get("Content-Length", 0))
+            try:
+                body = json.loads(self.rfile.read(length).decode("utf-8")) if length else {}
+            except Exception as e:
+                return self._json(400, {"error": f"invalid JSON: {e}"})
+            candidate_id = str(body.get("candidate_id") or "")
+            revision = str(body.get("revision") or "")
+            action = str(body.get("action") or "")
+            if _signal_queue.parse_candidate_id(candidate_id) is None:
+                return self._json(400, {"error": "invalid candidate_id"})
+            if action not in ("accept", "dismiss"):
+                return self._json(400, {"error": "invalid action"})
+
+            # Re-derive rather than trust the posted copy: `source_refs` decides
+            # which files the writeback later stamps, so it must be ours.
+            try:
+                candidate = _signal_queue.find_candidate(candidate_id)
+            except Exception as e:
+                return self._json(500, {"error": str(e)[:300]})
+            if candidate is None:
+                return self._json(404, {"error": "candidate not found"})
+            # A revision mismatch means the evidence moved under the user since
+            # the card was rendered. Acting on the stale view would file the
+            # decision against a different set of debates than the one they read.
+            if revision and revision != candidate["revision"]:
+                return self._json(409, {"error": "stale revision",
+                                        "revision": candidate["revision"]})
+
+            lane = candidate["lane"]
+            job_id = None
+            queue_state = None
+            if action == "accept":
+                allowed = _signal_queue.LANE_PROTOCOLS.get(lane)
+                if not allowed:
+                    return self._json(400, {"error": f"lane '{lane}' is display-only"})
+                name = str(body.get("protocol") or "").strip()
+                if name not in allowed:
+                    return self._json(400, {"error": "protocol not allowed for lane"})
+                queue_state, err = enqueue_protocol(name, {
+                    "ticker": candidate["ticker"],
+                    "signal_id": candidate_id,
+                    "signal_revision": candidate["revision"],
+                    "signal_lane": lane,
+                    "signal_refs": candidate["source_refs"],
+                })
+                if err == "duplicate":
+                    return self._json(409, {"error": "duplicate", "state": queue_state})
+                if err:
+                    return self._json(400, {"error": err})
+                job_id = (queue_state or {}).get("id")
+
+            try:
+                entry = _signal_queue.record_action(
+                    candidate_id, candidate["revision"], action,
+                    candidate=candidate, job_id=job_id)
+            except ValueError as e:
+                return self._json(400, {"error": str(e)})
+            _invalidate_signal_cache()
+            return self._json(200, {"ok": True, "candidate_id": candidate_id,
+                                    "entry": entry, "queue": queue_state})
+
         if path == "/api/run-protocol/cancel":
-            ok = cancel_protocol()
+            length = int(self.headers.get("Content-Length", 0))
+            try:
+                body = json.loads(self.rfile.read(length).decode("utf-8")) if length else {}
+            except Exception as e:
+                return self._json(400, {"error": f"invalid JSON: {e}"})
+            ok = cancel_protocol(job_id=body.get("job_id"), queue_id=body.get("queue_id"))
             return self._json(200 if ok else 409, {"cancelled": ok})
 
         if path == "/api/run-momentum-screen":
@@ -6284,6 +6761,21 @@ class Handler(SimpleHTTPRequestHandler):
             if not removed:
                 return self._json(404, {"error": f"queue entry not found: {qid}"})
             return self._json(200, {"removed": qid})
+
+        # Undo a dismissal. Scoped to the revision it was made against so a
+        # stale "un-dismiss" cannot resurrect a card against newer evidence.
+        m = re.match(r"^/api/signal-queue/action/([a-z_]+:[A-Z][A-Z0-9.\-]{0,5})$", path)
+        if m:
+            if not SIGNAL_QUEUE_AVAILABLE:
+                return self._json(503, {"error": "signal_queue module not loaded"})
+            qs = parse_qs(urlparse(self.path).query)
+            revision = (qs.get("revision", [""])[0] or "").strip() or None
+            try:
+                removed = _signal_queue.clear_action(m.group(1), revision)
+            except ValueError as e:
+                return self._json(400, {"error": str(e)})
+            _invalidate_signal_cache()
+            return self._json(200, {"ok": True, "removed": removed})
 
         m = re.match(r"^/api/momentum-watchlist/([A-Za-z0-9\.\-]+)$", path)
         if m:

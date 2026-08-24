@@ -1,0 +1,56 @@
+```json
+{
+  "commentary": "受中國記憶體晶片動向與全球供應鏈調整影響，Western Digital (WDC) 旗下 SanDisk 與 NAND Flash 業務重獲動能。隨著 Enterprise SSD 需求回溫及原廠產能調控，記憶體報價具備支撐，有助改善產品利潤率。然而，仍需留意中國本土廠商擴產競爭與出口管制政策變數帶來的長期波動。",
+  "bull_points": [
+    "NAND 報價反彈與產能控制有助帶動毛利率持續回升",
+    "AI 伺服器擴張推升 Enterprise SSD 高容量採購需求"
+  ],
+  "bear_points": [
+    "中國本土記憶體廠商加速替代恐侵蝕成熟市場份額",
+    "美中科技出口管制與地緣政治審查帶來法規不確定性"
+  ],
+  "final_take": "短線受惠報價回溫與庫存去化，但須嚴密追蹤地緣政策風險",
+  "entities": {
+    "tickers": [
+      "WDC",
+      "MU"
+    ],
+    "sectors": [
+      "Information Technology",
+      "Semiconductors"
+    ],
+    "themes": [
+      "NAND Flash Recovery",
+      "Memory Pricing",
+      "China Geopolitics",
+      "Enterprise Storage"
+    ],
+    "tech_keywords": [
+      "3D NAND",
+      "Enterprise SSD",
+      "BiCS NAND",
+      "QLC"
+    ]
+  },
+  "relations": [
+    {
+      "subject": "ticker:WDC",
+      "predicate": "BENEFITS_FROM",
+      "object": "theme:nand_flash_recovery"
+    },
+    {
+      "subject": "theme:china_geopolitics",
+      "predicate": "CATALYST_FOR",
+      "object": "ticker:WDC"
+    },
+    {
+      "subject": "ticker:WDC",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:MU"
+    }
+  ],
+  "done": false,
+  "confidence": 0.78,
+  "rationale_short": "記憶體週期反轉與地緣動態提供短線動能，但政策風險猶存"
+}
+```

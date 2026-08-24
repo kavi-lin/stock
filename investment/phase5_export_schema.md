@@ -1,9 +1,13 @@
 # Phase 5 Session Export Schema
 
-> **Schema Version**: `V5.3`
+> **Schema Version**: `V5.4`
 > **Consumer**: `bridge.py` / Dashboard decisions cards / decision history
 > **Producer**: Investment Protocol Phase 5 (PM / deterministic renderer)
-> **Last updated**: 2026-08-03
+> **Last updated**: 2026-08-21
+>
+> **V5.4 changes vs V5.3**（LLM 執行引擎標籤與多模型協同）:
+> - 新增 `llm_model` / `llm_provider` 標記支援：在決策卡片與 session export 明確標示各分析是由哪一個 LLM（Claude / Codex / Gemini / GPT 等）驅動，並於前端右上角展示專屬 LLM 書籤小標籤。
+> - 既有 V5.0 / V5.1 / V5.2 / V5.3 entry **不需回填**：舊版號照原規則驗，永久相容
 >
 > **V5.3 changes vs V5.2**（C1 — 統一 lane 資料契約）:
 > - 新增必填 `lane_contract`：六個 lane（五個分析 lane + Red Team）各自的
@@ -68,7 +72,10 @@ Claude（或 Sonnet 格式化 subagent）在 Phase 5 末尾**必須**：
 
 ### `export_provenance` (V4.117.0 — history.json 的唯一寫入者證明)
 
-`history.json` 只由 `append_session_export.py` 追加。這個 block 是它蓋的，`export_date >= 2026-08-09` 的 entry 缺它 → validator rc=1。
+`history.json` 只由 `append_session_export.py` 追加。並行流程先用 `--stamp-only`
+為每個 ticker 的獨立 session 蓋這個 block，各自驗證／渲染／register 後，再用
+`--preserve-stamp` 驗 digest 並在 `history.json.lock` 的穩定 inode 下 commit。
+`export_date >= 2026-08-09` 的 entry 缺 stamp → validator rc=1。
 
 | Field | Type | Note |
 |---|---|---|
@@ -86,7 +93,7 @@ Claude（或 Sonnet 格式化 subagent）在 Phase 5 末尾**必須**：
 | `trades[].thesis_id` / `trades[].thesis_registered_at` | `register_thesis.py` |
 | `trades[]` 底下任何 `_` 開頭的鍵 | post-processor 暫存（如 `_as_of_date_inherited`）|
 
-**其餘全部是決策內容，append 當下凍結。** 要改 `final_score`、`calculation_steps`、lane 分數這類欄位，唯一合法途徑是**重跑產生它的 engine，然後重新 append**；直接 `json.dump` 回 history.json 會讓 digest 對不上（rc=1），手寫的新 entry 則根本沒有 stamp（rc=1）。
+**其餘全部是決策內容，stamp 當下凍結。** 要改 `final_score`、`calculation_steps`、lane 分數這類欄位，唯一合法途徑是**重跑產生它的 engine，然後重新組裝與蓋章**；直接 `json.dump` 回 history.json 會讓 digest 對不上（rc=1），手寫的新 entry 則根本沒有 stamp（rc=1）。
 
 > 為什麼是內容摘要而不是一個記號：記號誰打字誰就有。2026-08-09 的實際事故是一次 run 在乾淨 append 之後把 `final_score` 和整塊重打的 `calculation_steps` 就地寫進決策紀錄，另一次在閘變紅時用臨時 `json.dump` 把 entry `pop()` 掉 —— 兩者 validator 都綠，因為手寫的 entry 和 script 寫的 entry 是同一份 JSON。
 
@@ -148,6 +155,7 @@ Claude（或 Sonnet 格式化 subagent）在 Phase 5 末尾**必須**：
 | `valuation_explained_range` | object（見下） | **V4.76.0+ optional** | structural-shift DCF 為 primary FV；DCF sensitivity + without/with-peer + 其他 eligible anchor 的解釋帶。range-only peer 不進 primary FV |
 | `implied_expectations` | object（掛 `valuation_lane` 或 trade 頂層；見下） | **V3.45.1+ optional**；缺 → warning（rc 0）| reverse DCF 隱含預期。**V3.45.3 起由 `compute_price_framework.py` engine 計算**（V4.88.0 起在 Phase 1.5；非 LLM 手算）。**不**進加權 / lane score / decision_lock |
 | `valuation_archetype_shadow` | object（見下） | **V3.46.0+ optional**；缺 → warning（rc 0）| Phase 1.5 engine archetype 分類 + 9-anchor shadow blend。**shadow-only** — live `fair_value_summary` 不動、不進 decision_lock。≥20 session 翻轉率報告後才議切換（#3b）|
+| `forward_validation` | object（見下） | **decision_engine 1.1.0+ 必填**；缺／與 quant block 不一致 → rc=1 | Eligible DCF 比現價低 ≥30% 時的 deterministic 前瞻驗證。至少一項可信支持可將 valuation score 軟化到 −1；只有完整 FAIL 可觸發 T5 hard downgrade。DCF fair value／gap／verdict 不改 |
 | `valuation_reviewer_gate` | object（見下） | **V4.116.3 起：`export_date >= 2026-08-09` 的 session 缺此 block → rc=1**；之前的 entry 仍靜默（172 筆歷史 entry 都沒有它）。protocol §PHASE 2 一直要求把它寫進 export，但 validator 過去只在它出現時才驗，等於選配——2026-08-09 兩次實測顯示：codex 跑了、agy 沒跑，兩者都 rc=0 | L4b 條件式 Valuation Specialist 的 **shadow 紀錄**：`{schema, ticker, would_invoke, mandatory_fired, triggers_fired[], shadow_only}`。`shadow_only=false` → **rc=1**（翻預設需使用者拍板，session 不得自行讓 gate 生效）。`triggers_fired` 只認 5 個具名 trigger；`would_invoke` 必須等於 `bool(triggers_fired)` |
 | `lane_scores` | `{fundamentals: int, sentiment: int, news: int, technical: int}` | **V2.10.0+ 必填** | Phase 2 五 lane 中除 valuation 外的 4 個 raw score（−5..+5，V4.72.0 修正——原文件誤寫 −3..+3 與協議 Phase 2 量表矛盾，歷史 9 筆合法 ±4 分即超出舊註記）；用於 polarization detection。validator §12 強制值域 |
 | `conflict_bias` | object（見下） | **V4.122.0 起：`export_date >= 2026-08-10` 的 session 缺此 block → rc=1**；之前的 entry 靜默（189 筆歷史 entry 一筆都沒有） | Phase 2.5 的輸出：`{schema, tentative_decision, lane_signals, triggers_fired[], t4_detail, t5_detail, proceed_to_phase3}`。Validator §16 **重算** T1–T5 應觸發集合再與宣稱比對，不符 rc=1 |
@@ -488,6 +496,39 @@ sector 情境的 `required_revenue_multiple_sector` 下限為 1.0——EV/S 已�
 > 新 anchor 0 → shadow==live、flip=false（自驗路徑）。PEER_BUNDLE V3.46.0 新欄：`peer_ev_ebitda_median` /
 > `peer_ev_sales_median` / `peer_pb_median` / `peer_ratios_n` / `self_ratios_ttm`。
 
+### `forward_validation` (V4.131.13 — extreme DCF 前瞻驗證)
+
+```json
+{
+  "schema": "forward_validation.v1",
+  "status": "NOT_APPLICABLE | NO_DATA | PASS | STRETCHED | FAIL",
+  "applies": true,
+  "dcf_value": 285.58,
+  "dcf_gap_pct": -82.60,
+  "checks": [
+    {"name": "archetype_shadow | forward_earnings | revenue_path",
+     "available": true, "supports_current_price": true,
+     "actual": 0.2413, "threshold": "string", "detail": {}}
+  ],
+  "evaluated_count": 3,
+  "support_count": 2,
+  "supported_checks": ["forward_earnings", "revenue_path"],
+  "failed_checks": ["archetype_shadow"],
+  "quality_flags": [],
+  "valuation_score_before": -3.0,
+  "valuation_score_effective": -1.0,
+  "score_adjustment": "soften_to_-1 | none",
+  "t5_hard_downgrade_eligible": false
+}
+```
+
+- `NOT_APPLICABLE`：沒有 eligible extreme DCF；分數不動。
+- `NO_DATA`：少於 2 項檢查可判讀；不得猜 FAIL，分數不動且 T5 不觸發。
+- `PASS` / `STRETCHED`：至少一項可信支持現價；原始 score ≤−2 時有效分數固定 −1。
+- `FAIL`：至少 2 項可判讀且全部失敗；score 保留，只有 score ≤−3 才具 hard downgrade 資格。
+- Validator 以 `valuation_pack.score_before_forward_validation` + `implied_expectations` +
+  `valuation_archetype_shadow` 重算整塊，並鎖定 `lane_scores.valuation` 必須等於有效分數。
+
 ### `lane_scores` (V2.10.0)
 
 LLM 在 Phase 2 末尾彙總 4 個 lane 各自最終 raw score，寫入 trades_this_session[]：
@@ -514,6 +555,7 @@ Phase 3 全部算術由 `investment/scripts/decision_engine.py` 產出，PM **ve
 | `calculation_steps.penalty_value` | `float｜null` | 實際套用的 cascade 乘數（0.85 / 0.925 / 0.95）；`penalty_applied=true` 時必填 |
 | `calculation_steps.cascade_rule_applied` | `string` | `no_penalty` / `consensus_bonus` / `rule_1..5_*`；與 `penalty_value` 必須對得上 |
 | `calculation_steps.red_team_effective_verdict` | `string` | rule 1 降級後的 verdict（未降級時等同 `red_team_verdict`） |
+| `calculation_steps.t5_forward_validation` | `object` | engine 1.1.0+ 必填；記錄 status、score、decision_before/after、hard eligibility 與是否降階 |
 
 **Validator §13（V4.80.0）**：
 
@@ -777,12 +819,7 @@ T5 宣稱自動降階，而 **189 筆歷史 entry 沒有一筆帶過它的輸出
     "override_justification": "string ≥20 字 or null — OVERRIDE_BURRY 必填",
     "override_recheck_date": "YYYY-MM-DD or null — OVERRIDE_BURRY 必填"
   },
-  "t5_detail": {
-    "valuation_score": "float",
-    "weighted_fair_value": "float | null",
-    "vs_current_pct": "float | null",
-    "downgrade_applied": "bool"
-  },
+  "t5_detail": "calculation_steps.t5_forward_validation verbatim | null",
   "proceed_to_phase3": "bool"
 }
 ```
@@ -795,7 +832,8 @@ T5 宣稱自動降階，而 **189 筆歷史 entry 沒有一筆帶過它的輸出
 
 - `export_date >= 2026-08-10` 缺 block → **rc=1**；之前的 entry **整段跳過**。舊 entry 不回填：
   補一塊「看起來很完整」的觸發紀錄上去，等於在稽核軌跡放假證據（同 §15）。
-- **重算應觸發集合**：T1–T5 在 protocol 裡是精確不等式，validator 直接依 export 自己的欄位
+- **重算應觸發集合**：T1–T4 是精確不等式；T5 另要求 `forward_validation.status=FAIL`。
+  Validator 直接依 export 自己的欄位
   重算，與 `triggers_fired` 比對，少報／多報一律 **rc=1**。自陳「沒觸發」不再是免費的。
 - 重算吃的輸入盡量錨在**偽造者改不動的欄位**上：`lane_scores`（§13 算術鏈）、
   `valuation_lane.score`（pack 一致性硬閘）、`macro_backdrop_score`（§14 macro_cap 重算）、
@@ -811,13 +849,9 @@ T5 宣稱自動降階，而 **189 筆歷史 entry 沒有一筆帶過它的輸出
 - `proceed_to_phase3 = false` ⟹ `final_action == "CANCEL"`（protocol 明寫，且
   `decision_engine.py` 也把它列為 Auto REJECT 的觸發理由）。
 
-**兩件刻意不驗的事**（規則本身還沒被拍板過，見 `docs/plan_invest_stale_stages.md` T7）：
+**仍刻意不驗的事**：
 
-1. **T5 的「−3 自動 downgrade」今天是幽靈規則**。`decision_engine.py` 全檔沒有任何 T5 邏輯，
-   §13 的 band 可達集合也沒有 T5 的路徑。實據：2026-08-09 NOW，valuation −3、
-   final `STAGED_ENTRY`、無 BIPOLAR/cap/probe，validator rc=0 過關。補實作等於今天才開始
-   改變決策（同 V4.112 B2 的 ×0.7/×1.15）。§16 只在「該降而沒降」時留 warning。
-2. **Anti-Bias 的「5 lane 同向」**。protocol 沒定義同向是看 score 正負還是看 signal。
+1. **Anti-Bias 的「5 lane 同向」**。protocol 沒定義同向是看 score 正負還是看 signal。
    本版採 **score 正負一致**當定義，且**只出 warning**——把一句沒定義過的話變成 rc=1
    是單方面收緊。`ANTI_BIAS` 觸發但 `devils_advocate_filed != true` 同樣只是 warning。
 

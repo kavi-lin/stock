@@ -1,0 +1,9 @@
+=== script_protocol=weekly_review cmd=['python3', 'skills/short-term-target/scripts/weekly_review.py'] started=2026-08-14T20:44:02 ===
+Loading recommendations from past 7 days...
+Found 5 recommendation files
+Computing outcomes (yfinance fetches)...
+Evaluated 281 predictions with elapsed window
+
+Wrote /Users/kavi/Developer/Claude/Projects/ai-investment-committee/reports/SHORT_TERM_WEEKLY_2026-08-14.md
+
+=== ended=2026-08-14T20:44:24 rc=0 ===

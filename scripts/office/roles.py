@@ -2,15 +2,15 @@
 
 v2 pipeline (orchestrator.py):
 
-  Phase 0  research     — Researcher (pinned gemini — retrieval is its
-                          strength) gathers a facts-only pack from the repo's
+  Phase 0  research     — a broker-selected certified provider gathers a
+                          facts-only pack from the repo's
                           fresh data caches; all seats draft from the same
                           neutral facts.
   Phase 1  drafts       — Lead / Critic / Verifier / Trader answer the TASK in
                           PARALLEL, each blind to the others. Cross-read tokens
                           = 0 and disagreement is real (no anchoring on the
-                          first speaker). Lead is pinned claude; the other
-                          seats are shuffled per run (random_team below).
+                          first speaker). Three seats match the three formal
+                          broker providers.
   Phase 2  adjudicate   — one cheap structured pass extracts consensus vs. a
                           numbered disagreement list from the three drafts.
   Phase 3  rebuttals    — each disagreement goes back ONLY to the roles that
@@ -25,15 +25,14 @@ Roles are data — edit this file to rename / re-prompt / swap engines without
 touching the orchestrator.
 """
 
-import random
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
 class Role:
     key: str          # stable id (lead / critic / verifier)
     name: str         # display name
-    engine: str       # model_router engine: claude | gemini | codex
+    engine: str       # display routing owner; runtime provider comes from broker
     system_prompt: str
 
 
@@ -61,7 +60,7 @@ Reply with ONLY a single JSON object, no prose outside it, no code fence:
 LEAD = Role(
     key="lead",
     name="Lead",
-    engine="claude",
+    engine="broker",
     system_prompt=(
         "You are the LEAD (主筆) of an analyst team. Produce the best complete "
         "answer to the task: a clear thesis, the supporting reasoning, and an "
@@ -73,7 +72,7 @@ LEAD = Role(
 CRITIC = Role(
     key="critic",
     name="Critic",
-    engine="gemini",
+    engine="broker",
     system_prompt=(
         "You are the CRITIC (挑戰者) of an analyst team. Answer the task "
         "yourself, but from a skeptic's frame: what is the strongest bearish / "
@@ -86,7 +85,7 @@ CRITIC = Role(
 VERIFIER = Role(
     key="verifier",
     name="Verifier",
-    engine="codex",
+    engine="broker",
     system_prompt=(
         "You are the VERIFIER (佐證者) of an analyst team. Answer the task "
         "grounded in checkable reality: verified numbers, dates, mechanics, "
@@ -99,7 +98,7 @@ VERIFIER = Role(
 TRADER = Role(
     key="trader",
     name="Trader",
-    engine="grok",
+    engine="broker",
     system_prompt=(
         "You are the TRADER (盤面派) of an analyst team. Answer the task from "
         "the market's point of view, not the fundamental narrative: price "
@@ -142,29 +141,17 @@ Max 12 facts — pick the most decision-relevant.
 RESEARCHER = Role(
     key="researcher",
     name="Researcher",
-    engine="gemini",
+    engine="broker",
     system_prompt=RESEARCH_SPEC,
 )
 
-# Canonical roster with the historical engine pinning (also the fallback and
-# the by_key registry). Actual runs use random_team() below.
-DEFAULT_TEAM = [LEAD, CRITIC, VERIFIER, TRADER]
+# Three independent seats; the broker assigns providers at call time.
+DEFAULT_TEAM = [LEAD, CRITIC, VERIFIER]
 
-# Seat assignment each run: Lead stays claude (it anchors the deliverable).
-# gemini is deliberately excluded from the CRITIC seat — its observed failure
-# mode is confident aggressive claims that fold under rebuttal (user call,
-# 2026-07-17); it keeps Verifier/Trader eligibility plus the pinned Researcher
-# job. Critic goes to codex or grok. meta.roles records each run's assignment
-# so per-engine concede-rate stats stay possible.
+
 def random_team(rng=None):
-    r = rng or random
-    critic_engine = r.choice(["codex", "grok"])
-    rest = ["gemini", "codex" if critic_engine == "grok" else "grok"]
-    r.shuffle(rest)
-    return [LEAD,
-            replace(CRITIC, engine=critic_engine),
-            replace(VERIFIER, engine=rest[0]),
-            replace(TRADER, engine=rest[1])]
+    del rng
+    return list(DEFAULT_TEAM)
 
 
 # ── Phase 2: adjudication (structured diff of the three drafts) ──────────

@@ -198,6 +198,7 @@ def assemble_digest(date: str, debate: dict, root: Path = ROOT, now: str | None 
     if not isinstance(arbiter_items, dict):
         raise DebateInputError("arbiter.per_item must be an object")
     deep = []
+    demoted = []
     macro_deltas = []
     expected_ids = {item.get("news_id") for item in stage2}
     for item in stage2:
@@ -214,11 +215,24 @@ def assemble_digest(date: str, debate: dict, root: Path = ROOT, now: str | None 
             raise DebateInputError(
                 f"{news_id} degraded lane confidence exceeds 0.5: {sorted(too_confident)}"
             )
-        if abs(scores["bull"]) <= 1 and abs(scores["bear"]) <= 1:
-            raise DebateInputError(f"{news_id} Bull/Bear both have |impact|<=1; debate is not substantive")
         for lane in ("bull", "bear"):
             if not str(lane_items[lane].get("interpretation") or "").strip():
                 raise DebateInputError(f"{news_id} {lane}.interpretation must be non-empty")
+        # Non-substantive debate → demote this one item to shallow rather than
+        # kill the run. news_protocol_v2.md states the rule per item ("退回該
+        # 則"); the fatal version meant a single immaterial headline that Stage 1
+        # advanced discarded a finished four-lane debate (2026-08-14 n0376, a Fed
+        # notice about one former bank employee). Laziness is still caught: both
+        # interpretations are required above, and a debate where most items come
+        # back flat fails at the majority guard after this loop.
+        if abs(scores["bull"]) <= 1 and abs(scores["bear"]) <= 1:
+            demoted.append(item)
+            print(
+                f"WARN: {news_id} demoted to shallow — Bull/Bear both have "
+                "|impact|<=1; debate is not substantive",
+                file=sys.stderr,
+            )
+            continue
         net, weights = compute_net_impact(
             scores,
             item.get("news_type"),
@@ -283,8 +297,27 @@ def assemble_digest(date: str, debate: dict, root: Path = ROOT, now: str | None 
     if extra_ids:
         raise DebateInputError(f"arbiter contains unknown news_ids: {sorted(extra_ids)}")
 
+    # One flat item is an immaterial news story; most of them flat is a debate
+    # that never happened. The second case must not be able to buy a passing
+    # digest by demoting its way to an empty deep section.
+    if demoted and len(demoted) * 2 > len(stage2):
+        raise DebateInputError(
+            f"{len(demoted)}/{len(stage2)} stage2 items have Bull/Bear both |impact|<=1: "
+            f"{[x['news_id'] for x in demoted]} — that is an absent debate, not an "
+            "immaterial news day"
+        )
+
+    demoted_ids = {item["news_id"] for item in demoted}
+    # Demoted items take slots from the shallow tail instead of being appended.
+    # The projection caps shallow at 10 by materiality (news_event_store.
+    # _cap_shallow), so appending an 11th row would silently drop whichever row
+    # ranks last — and a demoted item cleared the Stage 2 materiality gate, so
+    # it outranks the tail it would be cut against.
+    shallow_pool = packet["shallow_items"]
+    if demoted:
+        shallow_pool = shallow_pool[: max(0, len(shallow_pool) - len(demoted))]
     shallow = []
-    for item in packet["shallow_items"]:
+    for item in shallow_pool + demoted:
         shallow.append({
             "news_id": item["news_id"], "event_id": _event_id(item),
             "depth": "shallow", "review_status": "reviewed",
@@ -301,6 +334,7 @@ def assemble_digest(date: str, debate: dict, root: Path = ROOT, now: str | None 
             "binary_risk": bool(item.get("binary_flag")), "binary_event_date": None,
             "within_48h": False, "cache_updated": False,
             "affected_sectors": [], "tickers_mentioned": [], "subagent_isolated": None,
+            "demoted_from": ("stage2_non_substantive" if item["news_id"] in demoted_ids else None),
         })
 
     session_delta = max(-1.0, min(1.0, round(sum(macro_deltas), 2)))
@@ -310,6 +344,9 @@ def assemble_digest(date: str, debate: dict, root: Path = ROOT, now: str | None 
         "mode": "DIGEST", "stage1_count": packet["triage_stats"]["exported_shallow_count"],
         "stage2_count": len(deep), "fanout_mode": fanout,
         "degraded_agents": [str(x) for x in degraded],
+        # Recorded, not just logged: a reader comparing stage2_items to the deep
+        # section has to be able to see why an item is missing from it.
+        "demoted_stage2": [item["news_id"] for item in demoted],
         "verdicts": deep + shallow, "session_macro_delta": session_delta,
     }
 
@@ -321,8 +358,15 @@ def render_markdown(data: dict) -> str:
         f"# News Digest — {data['timestamp'][:10]}", "",
         f"**Mode**: DIGEST ｜ **Generated**: {data['timestamp']} Asia/Taipei ｜ "
         f"**Stage 1**: {data['stage1_count']} ｜ **Stage 2**: {data['stage2_count']} ｜ "
-        f"**Fan-out**: {data['fanout_mode']}", "", "## Deep Analysis", "",
+        f"**Fan-out**: {data['fanout_mode']}", "",
     ]
+    if data.get("demoted_stage2"):
+        lines += [
+            "> 降級為 shallow（Bull/Bear 皆 |impact| ≤ 1，無實質辯論）："
+            + "、".join(data["demoted_stage2"]),
+            "",
+        ]
+    lines += ["## Deep Analysis", ""]
     for v in deep:
         lines += [
             f"### [{v['verdict']} {v['net_impact_score']:+.1f}] {v['news_id']} — {v['headline_zh']}",

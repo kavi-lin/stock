@@ -251,6 +251,25 @@ eq("A.outlier.no_block_at_all", R._outlier_note({}), [])
 eq("A.outlier.malformed_is_silent",
    R._outlier_note({"fair_value_summary": {"outlier_diagnostics": ["junk"]}}), [])
 
+# V4.131.13: an extreme DCF must not appear next to STAGED_ENTRY without the
+# forward evidence that explains why the valuation score was softened.
+from inject_report_facts import render_fair_value_anchors as _render_fv  # noqa: E402
+_fv_forward = _render_fv({
+    "fair_value_summary": {"anchors": {}, "weighted_fair_value": 285.58,
+                           "vs_current_pct": -82.6, "verdict_band": "extreme_overvalued",
+                           "confidence": "medium", "current_price": 1641.11},
+    "forward_validation": {
+        "status": "STRETCHED", "dcf_gap_pct": -82.6,
+        "supported_checks": ["forward_earnings", "revenue_path"],
+        "failed_checks": ["archetype_shadow"],
+        "valuation_score_before": -3.0, "valuation_score_effective": -1.0,
+        "t5_hard_downgrade_eligible": False,
+    },
+})
+contains("A.forward.status", _fv_forward, "前瞻驗證 (forward_validation): **STRETCHED**")
+contains("A.forward.score", _fv_forward, "Valuation score: -3.0 → -1.0")
+contains("A.forward.support", _fv_forward, "forward_earnings, revenue_path")
+
 
 # ── Fixture B: decision-locked numbers actually reach the page ───────────────
 for label, needle in [
@@ -499,7 +518,7 @@ with tempfile.TemporaryDirectory() as tmp:
     bundle_path = os.path.join(tmp, "bundle.json")
     out_path = os.path.join(tmp, "report.md")
     with open(hist_path, "w", encoding="utf-8") as fp:
-        json.dump([MSFT], fp, ensure_ascii=False)
+        json.dump(MSFT, fp, ensure_ascii=False)
     with open(bundle_path, "w", encoding="utf-8") as fp:
         json.dump(MSFT_BUNDLE, fp, ensure_ascii=False)
 
@@ -514,7 +533,7 @@ with tempfile.TemporaryDirectory() as tmp:
 
     v = subprocess.run(
         [sys.executable, os.path.join(HERE, "validate_markdown_export.py"),
-         "--report", out_path], capture_output=True, text=True)
+         "--report", out_path, "--history", hist_path], capture_output=True, text=True)
     eq("F.validator_rc", v.returncode, 0)
 
     # A drifted bundle must abort with rc=1 and name the field — never render.

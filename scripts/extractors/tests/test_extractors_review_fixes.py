@@ -184,6 +184,27 @@ def test_macro_regime_date_level_cache_fallback(
     assert out["source"] == "phase0_cache"
 
 
+def test_macro_regime_shared_canonical_beats_ticker_legacy(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    """Phase 0 is market-wide; a stale ticker copy cannot override canonical."""
+    logs = tmp_path / "investment" / "invest_logs"
+    logs.mkdir(parents=True)
+    (logs / "2026-08-21_phase0.json").write_text(
+        json.dumps({"market_regime": "RISK_ON", "phase3_macro_multiplier": 1.0}),
+        encoding="utf-8",
+    )
+    (logs / "2026-08-21_phase0_gev.json").write_text(
+        json.dumps({"market_regime": "STALE_LEGACY", "phase3_macro_multiplier": 0.7}),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(dde, "ROOT", tmp_path)
+
+    out = _find_macro_regime("", decision_date="2026-08-21", ticker="GEV")
+    assert out["market_regime"] == "RISK_ON"
+    assert out["macro_multiplier"] == 1.0
+
+
 def test_macro_regime_md_regex_fallback(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ):

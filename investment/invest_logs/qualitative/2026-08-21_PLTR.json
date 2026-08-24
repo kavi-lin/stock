@@ -1,0 +1,181 @@
+{
+  "schema": "p5-qualitative/1.0",
+  "ticker": "PLTR",
+  "date": "2026-08-21",
+  "lanes": {
+    "fundamentals": {
+      "signal": "BUY",
+      "key_factors": [
+        "營收年增92.8%且加速成長",
+        "FCF利潤率達62.1%與淨現金92億",
+        "營業利益率擴張至47.1%"
+      ],
+      "risk_flags": [
+        "TTM本益比143倍高於同業中位數26倍",
+        "FCF殖利率僅0.78%估值容錯率低"
+      ]
+    },
+    "sentiment": {
+      "signal": "HOLD",
+      "key_factors": [
+        "內部人過去4季維持重度減持",
+        "市場綜合情緒指數62.9偏貪婪",
+        "國會交易偏中性買賣各半"
+      ],
+      "risk_flags": [
+        "CEO年度薪酬增長97.8%觸發治理紅旗",
+        "內部人收購處置比僅0.15零買入"
+      ]
+    },
+    "news": {
+      "signal": "BUY",
+      "key_factors": [
+        "企業端AIP導入與主權AI雙引擎加速",
+        "商業端營收高成長帶動GAAP淨利潤擴張",
+        "華爾街賣方評級維持穩健買入"
+      ],
+      "risk_flags": [
+        "Burry買入看跌期權引發市場估值擔憂",
+        "近30日目標價調升動能平緩僅+0.76%"
+      ]
+    },
+    "technical": {
+      "signal": "HOLD",
+      "key_factors": [
+        "價格站上所有均線且均線黃金交叉",
+        "RSI達68且中期動能強勁",
+        "逼近179.6阻力但量能收縮"
+      ],
+      "risk_flags": [
+        "逼近179.60前高阻力且成交量萎縮",
+        "高檔內部人處於持續減持趨勢"
+      ]
+    },
+    "valuation": {
+      "signal": "HOLD",
+      "key_factors": [
+        "加權公允價值$61.73 (-65.29%)",
+        "前瞻營收路徑支持軟化至-1.0",
+        "各模型錨點跨度高達22.7倍"
+      ],
+      "risk_flags": [
+        "極度溢價於DCF內在價值($10-17)",
+        "現價隱含5年FCF年化增速達60%"
+      ]
+    }
+  },
+  "lane_detail": {
+    "fundamentals": {
+      "moat_assessment": {
+        "level": "WIDE",
+        "type": "switching_cost",
+        "evidence_one_line": "毛利率84.7%、淨利潤率54.9%且本業現金流轉換率達1.13"
+      },
+      "near_term_catalysts": [
+        {
+          "date": "2026-11-02",
+          "type": "earnings",
+          "description": "2026 Q3財報發布與AIP企業端商業化成長指引",
+          "impact": "high"
+        }
+      ],
+      "bull_thesis_one_line": "營收年增93%加速擴張，FCF利潤率達62%且無負債資產健全",
+      "bear_thesis_one_line": "PE達143倍估值偏高，但獲利年增225%高速成長支撐估值"
+    },
+    "sentiment": {
+      "market_sentiment_composite": 62.9,
+      "vix_current": 15.44,
+      "insider_signal": "distributing",
+      "short_pct_float": 3.17,
+      "mspr_latest": -84.72
+    },
+    "news": {
+      "immediate_catalyst_5d": null,
+      "decision_point_days": 73,
+      "cross_asset_spillover": [
+        {
+          "asset": "sector_XLK / AI infra",
+          "direction": "BULLISH",
+          "mechanism": "Enterprise AI AIP adoption signal"
+        }
+      ],
+      "reasoning_one_line": "48h 輿情聚焦 AIP 商業化高成長與淨利率擴張，分析師共識偏多但 30d PT 調升動能平緩。",
+      "pt_revision_momentum": {
+        "direction": "FLAT",
+        "consensus_delta_pct_1m": 0.76
+      }
+    },
+    "technical": {
+      "smart_money_analysis": {
+        "label": "mixed",
+        "narrative": "20日均量比降至 0.75x 呈縮量上攻，伴隨內部人持續減持，主力追高意願有所保留。"
+      },
+      "pattern_taxonomy": {
+        "pattern": "consolidation",
+        "confirmation_criteria": "放量突破 179.60 前高阻力且日收盤價站穩 180 上方"
+      },
+      "market_strength": "STRONG",
+      "key_levels": {
+        "support": 168.34,
+        "resistance": 179.60,
+        "pivot": 176.16
+      },
+      "high_prob_scenario": "預期未來 5-15 天在 168.34-179.60 區間高檔震盪蓄勢，消化獲利回吐賣壓後尋求量能配合突破。",
+      "volatility": {
+        "atr_14": 9.31,
+        "hist_vol_20d_daily": 0.072,
+        "momentum_20d_pct": 44.04
+      }
+    },
+    "valuation": {
+      "cited_transition_overlay": false,
+      "transition_dissent_basis": null,
+      "suppression_proposals": [],
+      "valuation_commentary": "DCF 實質估值座落於 $10-17，但受賣方目標價 $172 與同業 multiples 拉抬，加權公允價值 $61.73。雖然前瞻營收路徑 (CAGR 79%) 軟化原始 -3.0 分至 -1.0，但估值仍處極度高估區間。"
+    }
+  },
+  "red_team": {
+    "verdict": "STRONG_COUNTER",
+    "counter_thesis": "現價 $177.85 內含未來 5 年營收 CAGR 74% 與 FCF CAGR 60% 的超高預期定價，在實質利率 2.4% 的高壓環境下，143x PE 與 64.6x EV/Sales 毫無容錯空間，任何成長動能放緩均將引發毀滅性估值壓縮。",
+    "kill_conditions": [
+      "IF 未來 2 季營收年化增速 < 74% 或自由現金流年化增速 < 30% WITHIN 180 天 THEN 宣告現價隱含之高速成長路徑破裂，多頭估值定價破滅",
+      "IF 實質利率維持在 2.4% 以上且 10 年期美債殖利率維持在 4.65% 以上，壓抑長久期資產估值使 EV/Sales 壓縮至 40x 以下 WITHIN 90 天 THEN 宣告高估值倍數擴張論點失效",
+      "IF 股價未能帶量突破 179.60 美元阻力位且成交量持續低於 20 日均量 0.75x，疊加內部人減持比例持續擴大 WITHIN 60 天 THEN 確立技術面量價背離與籌碼分貨反轉"
+    ],
+    "counter_evidence_strength": 5,
+    "thesis_break_probability": 0.75
+  },
+  "burry_narrative": "Burry Score 29.2 (WARNING)。FCF yield 0.53% 極低且 EV/EBIT 高達 153.6x，內部人處於淨賣出（SELL），反映極端高估值風險；D/E 0.02 財務健全未觸發 T4_VETO 否決。",
+  "conflict_bias": {
+    "schema": "conflict_bias.v1",
+    "tentative_decision": "HOLD",
+    "triggers_fired": [],
+    "conflict_summary": "無觸發 T1-T5 衝突條款。",
+    "t4_detail": null,
+    "t5_detail": null,
+    "proceed_to_phase3": true
+  },
+  "macro_context": "大盤處於 RISK_ON 體制且市場寬度健全 (79.2)，但 10Y 實質利率高達 2.40% 且市場頭部警告達 40.4 Orange，高久期成長股面臨折現率與估值壓縮壓力。",
+  "watch_conditions": {
+    "revenue_growth_durability": "追蹤未來 2 季 AIP 商業營收增速是否維持在 70% 以上，若增速放緩則觸發估值重估。",
+    "valuation_pullback_entry": "若股價拉回測試短期帶下界 $168.34 或更深支撐且獲利動能無損，啟動分批試探進場。",
+    "resistance_breakout_volume": "若股價放量突破 $179.60 前高阻力且成交量 > 1.3x 20D 均量，確認高檔整固完成。",
+    "insider_selling_abatement": "監控內部人處置股份節奏，若減持壓力緩解或出現高管增持則強化信心。"
+  },
+  "key_risks": [
+    "極端估值溢價（PE 143x、EV/S 64.6x）容錯率極低",
+    "現價隱含 5 年營收 CAGR 74% 與 FCF CAGR 60% 預期過高",
+    "10Y 實質利率 2.40% 高壓環境對超高本益比資產構成折現率挑戰",
+    "內部人過去 4 季持續淨減持且 CEO 薪酬年增 98% 治理疑慮"
+  ],
+  "bias_notes": "本場委員會在 Fundamentals (+2.5) 與 News (+2.5) 商業化高成長推動下偏多，但 Valuation (-1.0)、Burry (29.2 WARNING) 與 Red Team 強烈反對指出現價隱含預期過高且無容錯空間。在 MIXED 偏極化與估值 low_valuation_confidence 決策上限約束下，系統理性裁定 HOLD / CANCEL，嚴格落實防禦觀望紀律。",
+  "phase2_fanout_mode": "PARALLEL_SUBAGENT",
+  "degraded_analysts": [],
+  "decision_point_days": 73,
+  "devils_advocate_filed": false,
+  "trade_metadata": {
+    "trade_type": "trend",
+    "event_tag": "enterprise_aip_expansion"
+  },
+  "last_outcome": "WIN"
+}

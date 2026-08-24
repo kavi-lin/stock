@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-08-21",
+  "category_models": {
+    "agentic_protocol": {
+      "claude": {"status": "accepted_existing", "evidence": "user-confirmed invest/sector/news formal runs"},
+      "gemini": {"status": "accepted_existing", "evidence": "user-confirmed invest/sector/news formal runs"},
+      "codex": {"status": "accepted_existing", "evidence": "user-confirmed invest/sector/news formal runs"}
+    },
+    "ensemble": {
+      "claude": {"status": "passed", "evidence": "broker ledger debate successes"},
+      "gemini": {"status": "passed", "evidence": "broker ledger debate successes via agy"},
+      "codex": {"status": "passed", "evidence": "broker ledger debate successes"}
+    },
+    "structured_research": {
+      "claude": {"status": "passed", "evidence": "broker-governed structured debate output"},
+      "gemini": {"status": "passed", "evidence": "broker-governed structured debate output via agy"},
+      "codex": {"status": "passed", "evidence": "broker-governed structured debate output"}
+    },
+    "narrative_synthesis": {
+      "claude": {"status": "passed", "evidence": "broker ledger brief and intraday_eval successes"},
+      "gemini": {"status": "accepted_existing", "evidence": "user-confirmed formal protocol narrative output"},
+      "codex": {"status": "accepted_existing", "evidence": "user-confirmed formal protocol narrative output"}
+    },
+    "external_tool_reasoning": {
+      "claude": {"status": "passed", "evidence": "broker ledger wind_reasoning success"},
+      "gemini": {"status": "passed", "evidence": "broker ledger wind_reasoning success via agy"},
+      "codex": {"status": "passed", "evidence": "broker ledger wind_reasoning success"}
+    }
+  },
+  "task_models": {
+    "agentic_protocol-invest": ["claude", "gemini", "codex"],
+    "agentic_protocol-sector": ["claude", "gemini", "codex"],
+    "agentic_protocol-news": ["claude", "gemini", "codex"],
+    "nexus_tier3_ner": ["claude", "gemini", "codex"]
+  },
+  "task_evidence": {
+    "nexus_tier3_ner": {
+      "date": "2026-08-21",
+      "mode": "isolated_schema_canary_no_graph_writes",
+      "claude": "reservation 9a29c1a137c44bafa3d04d53f52125b8; 2 entities / 1 triple",
+      "gemini": "reservation d2604621ea1c42de994456332735d16e; 2 entities / 1 triple",
+      "codex": "reservation 77ecb0b3c71b42f793e8b0d30a3c3123; 2 entities / 1 triple"
+    }
+  }
+}

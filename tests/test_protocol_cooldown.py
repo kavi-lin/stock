@@ -1,31 +1,15 @@
 #!/usr/bin/env python3
-"""Contract for the invest→invest cooldown (V4.121.4).
-
-Two claims, and the second is the one that matters:
-  1. `_cooldown_remaining_sec` computes the wait correctly.
-  2. The **real worker loop** honours it — the waiting entry stays in the queue,
-     a countdown is published, and re-queuing that ticker mid-wait is rejected.
-
-Claim 2 goes through `_analyze_worker` itself rather than calling the helper,
-because the 2026-08-10 incident was not a wrong number: it was a correct wait
-that nothing could see. A helper-only test would have stayed green through it.
-Delete the cooldown branch from the worker and `worker.gap_enforced` +
-`worker.cooldown_visible` go red.
-"""
+"""Contract for broker-backed multi-active protocol scheduling (V4.134.0)."""
 from __future__ import annotations
 
-import os
 import sys
 import threading
 import time
-from datetime import datetime, timedelta
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.argv = ["dashboard_server.py"]
-# Read per call, so setting it here shortens the test without touching prod.
-os.environ["INTER_ANALYSIS_COOLDOWN_SEC"] = "4"
 
 import dashboard_server as ds  # noqa: E402
 
@@ -37,115 +21,152 @@ def check(name, condition, detail=""):
         failures.append(f"{name}: {detail}")
 
 
-# ── 1. The wait itself ────────────────────────────────────────────────────
-now = datetime(2026, 8, 10, 8, 40, 0)
+# Different tickers own isolated Phase 5 session exports; the same ticker still
+# remains single-writer so a rerun cannot overwrite its per-session files.
+check("domain.invest_per_ticker",
+      ds._protocol_artifact_key("invest", {"ticker": "AAA"})
+      != ds._protocol_artifact_key("invest", {"ticker": "BBB"}))
+check("domain.invest_same_ticker",
+      ds._protocol_artifact_key("invest", {"ticker": "AAA"})
+      == ds._protocol_artifact_key("invest", {"ticker": "aaa"}))
+check("domain.news_global",
+      ds._protocol_artifact_key("news") == ds._protocol_artifact_key("flash"))
+check("domain.earnings_per_ticker",
+      ds._protocol_artifact_key("earnings", {"ticker": "AAA"})
+      != ds._protocol_artifact_key("earnings", {"ticker": "BBB"}))
+check("broker_busy.retryable", ds._retryable_dispatch_error("broker:refused(provider_busy)"))
+check("broker_unavailable.retryable", ds._retryable_dispatch_error(
+      "quota broker: did not authorise (broker:unavailable)"))
+check("hard_reserve.waits_in_queue", ds._retryable_dispatch_error(
+      "broker:refused(no_capacity): every provider is reserve-only"))
 
-check("pure.just_finished",
-      ds._cooldown_remaining_sec("invest", now - timedelta(seconds=1), "invest", now) == 3,
-      "1s after an invest run, 3 of the 4s cooldown remain")
-check("pure.already_elapsed",
-      ds._cooldown_remaining_sec("invest", now - timedelta(seconds=30), "invest", now) == 0,
-      "past the window → dispatch immediately")
-check("pure.non_invest_before",
-      ds._cooldown_remaining_sec("news", now, "invest", now) == 0,
-      "only two consecutive invest runs cool down")
-check("pure.non_invest_after",
-      ds._cooldown_remaining_sec("invest", now, "news", now) == 0)
-check("pure.no_previous_run",
-      ds._cooldown_remaining_sec("invest", None, "invest", now) == 0,
-      "nothing finished yet → nothing to wait for")
+with ds._protocol_queue_lock:
+    ds._protocol_queue.clear()
+ds._requeue_protocol_entry(
+    {"id": "retry-quota", "name": "invest", "params": {"ticker": "NVDA"}},
+    "broker:refused(no_capacity): every provider is reserve-only",
+)
+with ds._protocol_queue_lock:
+    quota_entry = ds._protocol_queue.pop(0)
+check("hard_reserve.reason_visible", quota_entry.get("waiting_reason") == "quota_wait",
+      repr(quota_entry))
 
-os.environ["INTER_ANALYSIS_COOLDOWN_SEC"] = "0"
-check("pure.disabled",
-      ds._cooldown_remaining_sec("invest", now, "invest", now) == 0,
-      "0 disables the cooldown entirely")
-os.environ["INTER_ANALYSIS_COOLDOWN_SEC"] = "4"
+with ds._protocol_queue_lock:
+    ds._protocol_queue.clear()
+ds._requeue_protocol_entry(
+    {"id": "retry-intc", "name": "invest", "params": {"ticker": "INTC"}},
+    "quota broker: broker:unavailable",
+)
+with ds._protocol_queue_lock:
+    retry_entry = ds._protocol_queue.pop(0)
+check("broker_unavailable.reason_visible",
+      retry_entry.get("waiting_reason") == "broker_unavailable", repr(retry_entry))
+check("broker_unavailable.attempt_tracked", retry_entry.get("attempts") == 1,
+      repr(retry_entry))
+check("broker_unavailable.backoff_bounded",
+      0 < retry_entry.get("retry_at", 0) - time.time() <= 3.1, repr(retry_entry))
 
-# ── 2. It is exported, and the countdown moves with wall-clock ────────────
-ds._publish_cooldown(120, {"label": "🔬 NVDA", "name": "invest", "id": "x"})
-snap = ds.get_queue_state().get("cooldown")
-check("publish.exported", snap is not None, "get_queue_state must carry the wait")
-check("publish.remaining", bool(snap) and 115 <= snap["remaining_sec"] <= 120,
-      f"remaining_sec={snap and snap.get('remaining_sec')}")
-check("publish.label", bool(snap) and snap["label"] == "🔬 NVDA",
-      "the UI names the run that is waiting, not just 'something'")
-ds._publish_cooldown(0)
-check("publish.cleared", ds.get_queue_state().get("cooldown") is None)
+# A run has a short broker-select -> Popen window. Cancelling while no child is
+# published must not mark it terminal and free its artifact/scheduler slot.
+starting_state = {
+    "job_id": "starting_cancel_guard",
+    "name": "news",
+    "status": "running",
+    "started_at": ds._now_iso(),
+    "ended_at": None,
+    "artifact_key": ds._protocol_artifact_key("news"),
+}
+with ds._protocol_lock:
+    ds._register_protocol_run(starting_state["job_id"], starting_state, {"p": None})
+check("cancel.starting_rejected", not ds.cancel_protocol(job_id=starting_state["job_id"]))
+check("cancel.starting_keeps_slot", starting_state["status"] == "running"
+      and starting_state["ended_at"] is None, repr(starting_state))
+with ds._protocol_lock:
+    ds._protocol_runs.pop(starting_state["job_id"], None)
 
-
-# ── 3. The worker loop actually gates on it ───────────────────────────────
+release = threading.Event()
 dispatched = []
+peak_active = 0
+real_run_protocol = ds.run_protocol
 
 
 def fake_run_protocol(name, params=None):
-    """Stand-in for a real dispatch: flips the state machine the worker polls,
-    finishes fast, spawns no subprocess and spends no quota."""
-    dispatched.append((name, (params or {}).get("ticker"), time.monotonic()))
-    job = f"fake_{len(dispatched)}"
+    """Register a real per-job state while avoiding vendor CLIs and quota."""
+    global peak_active
+    params = params or {}
+    job_id = f"fake_{len(dispatched) + 1}"
+    state = {
+        "job_id": job_id,
+        "name": name,
+        "status": "running",
+        "started_at": ds._now_iso(),
+        "ended_at": None,
+        "error": None,
+        "ticker": params.get("ticker"),
+        "model": ["claude", "codex", "gemini"][len(dispatched) % 3],
+        "model_tier": "test",
+        "artifact_key": ds._protocol_artifact_key(name, params),
+    }
     with ds._protocol_lock:
-        ds._protocol_state.update({
-            "job_id": job, "name": name, "status": "running",
-            "started_at": ds._now_iso(), "ended_at": None, "error": None,
-            "model": "codex", "model_tier": "cli-default",
-        })
+        ds._register_protocol_run(job_id, state, {"p": None})
+        dispatched.append((name, params.get("ticker"), time.monotonic()))
+        peak_active = max(peak_active, len(ds._active_protocol_states()))
 
-    def _finish():
-        time.sleep(0.5)
+    def finish():
+        release.wait(timeout=10)
         with ds._protocol_lock:
-            ds._protocol_state.update({"status": "done", "ended_at": ds._now_iso()})
+            state.update({"status": "done", "ended_at": ds._now_iso()})
 
-    threading.Thread(target=_finish, daemon=True).start()
-    return job, None
+    threading.Thread(target=finish, daemon=True).start()
+    return job_id, None
 
 
-real_run_protocol = ds.run_protocol
-ds.run_protocol = fake_run_protocol
 try:
     with ds._protocol_queue_lock:
         ds._protocol_queue.clear()
         ds._protocol_history.clear()
     with ds._protocol_lock:
-        ds._protocol_state.update({"status": "idle", "name": None, "ended_at": None})
-    ds._publish_cooldown(0)
+        ds._protocol_runs.clear()
+        ds._protocol_inflight.clear()
+    ds.run_protocol = fake_run_protocol
 
+    # Four different invest tickers: three occupy the three broker slots and
+    # the fourth stays queued. This is the user-visible research concurrency
+    # contract, not merely a mixed-protocol scheduler test.
     ds.enqueue_protocol("invest", {"ticker": "AAAA"})
     ds.enqueue_protocol("invest", {"ticker": "BBBB"})
+    ds.enqueue_protocol("invest", {"ticker": "CCCC"})
+    ds.enqueue_protocol("invest", {"ticker": "DDDD"})
 
-    saw_cooldown_with_entry_queued = False
-    dedup_verdict = None
-    deadline = time.monotonic() + 25
-    while time.monotonic() < deadline and len(dispatched) < 2:
-        st = ds.get_queue_state()
-        waiting = any((q.get("params") or {}).get("ticker") == "BBBB" for q in st["queue"])
-        if st.get("cooldown") and waiting:
-            saw_cooldown_with_entry_queued = True
-            if dedup_verdict is None:
-                # The root cause of the duplicate NVDA run: an entry popped
-                # before the sleep was in neither the queue nor the active
-                # slot, so this guard could not see it.
-                _state, _err = ds.enqueue_protocol("invest", {"ticker": "BBBB"})
-                dedup_verdict = (_state or {}).get("reason"), _err
-        time.sleep(0.2)
+    deadline = time.monotonic() + 6
+    while time.monotonic() < deadline and len(dispatched) < 3:
+        time.sleep(0.05)
 
-    check("worker.both_dispatched", len(dispatched) == 2,
-          f"dispatched={[(d[0], d[1]) for d in dispatched]}")
-    check("worker.cooldown_visible", saw_cooldown_with_entry_queued,
-          "the waiting invest must stay in the queue AND publish a countdown")
-    check("worker.dedup_during_cooldown", dedup_verdict == ("duplicate_pending", "duplicate"),
-          f"re-queue during cooldown returned {dedup_verdict}, expected a duplicate rejection")
-    if len(dispatched) == 2:
-        gap = dispatched[1][2] - dispatched[0][2]
-        check("worker.gap_enforced", gap >= 4.0,
-              f"gap={gap:.1f}s — the cooldown was not actually waited out")
+    state = ds.get_queue_state()
+    check("worker.three_parallel", len(dispatched) == 3, repr(dispatched))
+    check("worker.active_array", len(state["active"]) == 3, repr(state["active"]))
+    check("worker.capacity_exact", peak_active == ds.PROTOCOL_MAX_ACTIVE == 3,
+          f"peak={peak_active}, capacity={ds.PROTOCOL_MAX_ACTIVE}")
+    check("worker.fourth_waits", len(state["queue"]) == 1, repr(state["queue"]))
+
+    release.set()
+    deadline = time.monotonic() + 6
+    while time.monotonic() < deadline and len(dispatched) < 4:
+        time.sleep(0.05)
+    check("worker.refills_slot", len(dispatched) == 4, repr(dispatched))
 finally:
+    release.set()
     ds.run_protocol = real_run_protocol
+    time.sleep(1.2)
     with ds._protocol_queue_lock:
         ds._protocol_queue.clear()
-    ds._publish_cooldown(0)
+    with ds._protocol_lock:
+        ds._protocol_runs.clear()
+        ds._protocol_inflight.clear()
 
 if failures:
     print("FAIL")
-    for f in failures:
-        print(" -", f)
+    for failure in failures:
+        print(" -", failure)
     sys.exit(1)
-print(f"OK — protocol cooldown contract ({len(dispatched)} dispatches through the real worker)")
+print("OK — broker-backed protocol scheduler (3 parallel, bounded, refill verified)")

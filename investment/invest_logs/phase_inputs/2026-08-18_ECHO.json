@@ -1,0 +1,182 @@
+{
+ "bundle_version": "P5-INPUTS/1.0",
+ "ticker": "ECHO",
+ "date": "2026-08-18",
+ "phase0": {
+  "regime_confidence": 0.74,
+  "market_top_zone": "Yellow",
+  "ftd_state": "FTD_CONFIRMED",
+  "breadth_composite": 79,
+  "vix": 15.21,
+  "fred_verdict": "Soft Landing",
+  "real_rate_pct": 1.37,
+  "hot_sectors": [
+   "Technology",
+   "Industrials",
+   "Consumer Discretionary",
+   "Financials",
+   "Energy"
+  ],
+  "cold_sectors": [
+   "Consumer Staples",
+   "Utilities",
+   "Real Estate"
+  ]
+ },
+ "lanes": {
+  "fundamentals": {
+   "signal": "SELL",
+   "score": -3.5,
+   "confidence": 0.8,
+   "key_factors": [
+    "Revenue YoY contraction of -3.99%",
+    "Negative TTM EPS and operating cash",
+    "High leverage with Z-score 0.85"
+   ],
+   "risk_flags": [
+    "Altman Z-Score in danger zone",
+    "Heavy net debt exceeding B"
+   ],
+   "moat_assessment": {
+    "level": "NONE",
+    "type": "none",
+    "evidence_one_line": "Negative cash flows and lack of pricing power indicate no structural competitive advantage."
+   },
+   "near_term_catalysts": [
+    {
+     "date": "2026-11-04",
+     "type": "earnings",
+     "description": "Q3 2026 earnings release and updated full-year guidance.",
+     "impact": "high"
+    },
+    {
+     "date": "2026-09-15",
+     "type": "guidance",
+     "description": "Mid-quarter operational update and debt refinancing commentary.",
+     "impact": "medium"
+    },
+    {
+     "date": "2026-10-01",
+     "type": "macro_event",
+     "description": "Broader industry demand trends and freight/logistics macro index release.",
+     "impact": "medium"
+    }
+   ],
+   "bull_thesis_one_line": "Turnaround execution achieves forward profitability while debt burden is successfully managed.",
+   "bear_thesis_one_line": "Persistent negative cash flows and heavy debt service increase liquidity distress risks."
+  },
+  "sentiment": {
+   "signal": "HOLD",
+   "score": -0.3,
+   "confidence": 0.78,
+   "key_factors": [
+    "High short interest float at 24.1%",
+    "Negative insider MSPR indicating net selling",
+    "Broad market greed supports macro backdrop"
+   ],
+   "risk_flags": [
+    "Elevated short squeeze or dump volatility",
+    "Persistent insider share disposals in Q3"
+   ],
+   "insider_signal": "bearish",
+   "short_pct_float": 24.1,
+   "mspr_latest": -44.2537
+  },
+  "news": {
+   "signal": "HOLD",
+   "score": 1.0,
+   "confidence": 0.68,
+   "key_factors": [
+    "Institutional inflow headline provides flow support",
+    "Consensus rating remains Buy across coverage",
+    "3M PT revision momentum tilted downward"
+   ],
+   "risk_flags": [
+    "Downward 3-month PT trend (-4.31%)",
+    "Frequent 8-K restructuring filings overhang"
+   ],
+   "pt_revision_momentum": {
+    "direction": "UNKNOWN",
+    "consensus_delta_pct_1m": null,
+    "unavailable_reason": "No 30d analyst PT revisions; 3m delta is -4.31%"
+   },
+   "immediate_catalyst_5d": null,
+   "decision_point_days": 21,
+   "cross_asset_spillover": [
+    {
+     "asset": "High-Yield Telecom Debt",
+     "direction": "NEUTRAL",
+     "mechanism": "Recent 8-K corporate restructurings influence secondary bond pricing and spectrum asset credit collateral"
+    }
+   ],
+   "reasoning_one_line": "Institutional stake addition and overall Buy consensus balanced by negative 3-month PT momentum and frequent 8-K restructuring disclosures."
+  },
+  "technical": {
+   "signal": "HOLD",
+   "score": 1.0,
+   "confidence": 0.7,
+   "key_factors": [
+    "Stage 1 base holding above 20MA",
+    "MACD histogram rising in bullish convergence",
+    "Volume contracting near resistance 96.03"
+   ],
+   "risk_flags": [
+    "Recent 50/200MA death cross confirms macro downtrend",
+    "Overhead resistance at 50MA 98.05"
+   ],
+   "smart_money_analysis": {
+    "label": "neutral",
+    "narrative": "Trading volume has contracted to 0.51x the 20-day average during base formation above the 20MA, reflecting neutral accumulation without aggressive institutional sponsorship."
+   },
+   "pattern_taxonomy": {
+    "pattern": "consolidation",
+    "confirmation_criteria": "A decisive daily close above 50-day MA (.05) on volume exceeding 1.2x the 20-day average."
+   },
+   "market_strength": "NEUTRAL",
+   "key_levels": {
+    "support": 91.92,
+    "resistance": 96.03,
+    "pivot": 93.81
+   },
+   "high_prob_scenario": "ECHO consolidates between .92 support and .03 resistance before attempting a test of the 50-day moving average at .05.",
+   "volatility": {
+    "atr_14": 4.195,
+    "hist_vol_20d_daily": 0.0308,
+    "momentum_20d_pct": 3.85
+   }
+  },
+  "valuation": {
+   "signal": "BUY",
+   "score": 1.0,
+   "confidence": 0.7,
+   "key_factors": [
+    "Analyst PT consensus anchor at .00 (weight: 57.14%)",
+    "Forward earnings discounted anchor at .46 (weight: 42.86%)",
+    "DCF models excluded due to negative terminal FCFF"
+   ],
+   "risk_flags": [
+    "High reliance on forward estimates and sell-side price targets",
+    "Absence of viable peer cohort creates peer-relative valuation blindspot"
+   ],
+   "valuation_commentary": "ECHO 估值模型共納入 2 根合格 Anchor：(1) 賣方目標價共識 (Analyst PT Consensus) .00，有效權重 57.14%；(2) 遠期獲利折現 (Forward Earnings Discounted) .46，有效權重 42.86%。兩者加權計算之合理價值為 .23，相對於現價具備 +12.16% 潛在空間，量化評分為 1.0 (Undervalued)。現金流折現模型 (DCF) 因終值為負現金流排除，同業模型因缺乏 3 家以上相似商業模式同業排除。",
+   "cited_transition_overlay": false,
+   "transition_dissent_basis": null
+  }
+ },
+ "burry": {
+  "score": 31.5,
+  "narrative": "Burry 評分 31.5 (WARNING)：FCF 收益率 -43.1% 嚴重失血，EV/EBIT 22.0x，負債權益比 1.24，內部人淨賣出，財務結構面臨巨大壓力。"
+ },
+ "phase3": {
+  "final_score": -0.1958,
+  "final_decision": "HOLD",
+  "final_action": "CANCEL"
+ },
+ "phase4": {
+  "position_size_pct": null,
+  "analysis_price": 93.8203
+ },
+ "red_team": {
+  "verdict": "STRONG_COUNTER"
+ }
+}

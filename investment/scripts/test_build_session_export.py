@@ -219,6 +219,18 @@ with tempfile.TemporaryDirectory() as tmp:
     write(tmp, "q2.json", base_qual())
     os.makedirs(os.path.join(tmp, "investment/invest_logs/decision_engine"), exist_ok=True)
 
+    canonical_p0 = write(tmp, "investment/invest_logs/2026-08-21_phase0.json", PHASE0)
+    real_root = B.ROOT
+    B.ROOT = tmp
+    try:
+        eq("phase0.shared_default_for_other_ticker",
+           B._resolve_phase0_path("GEV"), canonical_p0)
+        eq("phase0.explicit_factpack_path_wins",
+           B._resolve_phase0_path("GEV", "investment/invest_logs/frozen.json"),
+           os.path.join(tmp, "investment/invest_logs/frozen.json"))
+    finally:
+        B.ROOT = real_root
+
     def _load_with_engine(eng):
         real_root = B.ROOT
         B.ROOT = tmp
@@ -234,6 +246,32 @@ with tempfile.TemporaryDirectory() as tmp:
     raises("engine.wrong_ticker_rejected",
            lambda: _load_with_engine({**ENGINE, "ticker": "OTHER"}),
            "被別支股票蓋掉")
+
+    # CLI wiring: parallel Phase 5 uses an isolated object, and --session-out
+    # must create its parent atomically instead of relying on shell redirection.
+    session_path = os.path.join(tmp, "nested", "session.json")
+    real_load_artifacts = B.load_artifacts
+    real_load_qualitative = B.load_qualitative
+    real_build_entry = B.build_entry
+    real_build_bundle = B.build_bundle
+    try:
+        B.load_artifacts = lambda *a, **k: ART
+        B.load_qualitative = lambda *a, **k: qual
+        B.build_entry = lambda *a, **k: entry
+        B.build_bundle = lambda *a, **k: bundle
+        cli_rc = B.main([
+            "--ticker", TICKER, "--date", DATE, "--qualitative", "ignored.json",
+            "--p3-input", "ignored-p3.json", "--p4-input", "ignored-p4.json",
+            "--no-bundle", "--session-out", session_path,
+        ])
+    finally:
+        B.load_artifacts = real_load_artifacts
+        B.load_qualitative = real_load_qualitative
+        B.build_entry = real_build_entry
+        B.build_bundle = real_build_bundle
+    eq("cli.session_out_rc", cli_rc, 0)
+    with open(session_path, encoding="utf-8") as fp:
+        eq("cli.session_out_object", json.load(fp), entry)
 
 if FAILS:
     print(f"✗ {len(FAILS)} failure(s):")

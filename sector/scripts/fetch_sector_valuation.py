@@ -32,18 +32,41 @@ SECTOR_ETF = {
 
 EXCHANGES = ["NASDAQ", "NYSE"]
 
+# sector-pe-snapshot only carries trading days, so a weekend/holiday as_of gets
+# an empty list back. Walk back far enough to clear a 3-day holiday weekend.
+PE_SNAPSHOT_MAX_LOOKBACK_DAYS = 5
 
-def fetch_pe_snapshot(d: str) -> dict:
-    out: dict = {v: {} for v in CANONICAL_SECTORS}
-    for exch in EXCHANGES:
-        rows = fmp_get("/stable/sector-pe-snapshot", {"date": d, "exchange": exch}, timeout=15)
-        if not isinstance(rows, list) or not rows:
-            sys.exit(f"[ERROR] FMP sector-pe-snapshot returned empty for {d}/{exch}")
-        for row in rows:
-            proj = canonicalize_sector_name(row.get("sector"))
-            if proj in CANONICAL_SECTORS:
-                out[proj][exch] = float(row["pe"])
-    return out
+
+def fetch_pe_snapshot(d: str) -> tuple[dict, str]:
+    """Fetch the sector PE snapshot, backing off to the most recent trading day.
+
+    Returns (snapshot, snapshot_date). The caller records snapshot_date so a
+    Sunday run is explicitly labelled as carrying Friday's PEs rather than
+    passing them off as today's.
+    """
+    start = datetime.strptime(d, "%Y-%m-%d").date()
+    for back in range(PE_SNAPSHOT_MAX_LOOKBACK_DAYS + 1):
+        probe = (start - timedelta(days=back)).isoformat()
+        by_exch: dict = {}
+        for exch in EXCHANGES:
+            rows = fmp_get("/stable/sector-pe-snapshot",
+                           {"date": probe, "exchange": exch}, timeout=15)
+            if not isinstance(rows, list) or not rows:
+                break
+            by_exch[exch] = rows
+        if len(by_exch) != len(EXCHANGES):
+            print(f"[fetch_sector_valuation] no sector-pe-snapshot for {probe} "
+                  f"(non-trading day?) — backing off one day", file=sys.stderr)
+            continue
+        out: dict = {v: {} for v in CANONICAL_SECTORS}
+        for exch, rows in by_exch.items():
+            for row in rows:
+                proj = canonicalize_sector_name(row.get("sector"))
+                if proj in CANONICAL_SECTORS:
+                    out[proj][exch] = float(row["pe"])
+        return out, probe
+    sys.exit(f"[ERROR] FMP sector-pe-snapshot returned empty for {d} and each of "
+             f"the {PE_SNAPSHOT_MAX_LOOKBACK_DAYS} preceding days")
 
 
 def fetch_pe_history(from_d: str, to_d: str) -> dict:
@@ -126,7 +149,12 @@ def main() -> int:
 
     print(f"[fetch_sector_valuation] as_of={as_of}", file=sys.stderr)
 
-    pe_snap = fetch_pe_snapshot(as_of)
+    pe_snap, pe_snapshot_date = fetch_pe_snapshot(as_of)
+    pe_snapshot_lag_days = (datetime.strptime(as_of, "%Y-%m-%d").date()
+                            - datetime.strptime(pe_snapshot_date, "%Y-%m-%d").date()).days
+    if pe_snapshot_lag_days:
+        print(f"[fetch_sector_valuation] pe snapshot = {pe_snapshot_date} "
+              f"({pe_snapshot_lag_days}d before as_of)", file=sys.stderr)
     pe_hist = fetch_pe_history(one_year_ago, as_of)
 
     spy_chart = fetch_eod_chart("SPY", three_m_ago, as_of)
@@ -175,6 +203,8 @@ def main() -> int:
     payload = {
         "as_of_date": as_of,
         "schema_version": "V1.4",
+        "pe_snapshot_date": pe_snapshot_date,
+        "pe_snapshot_lag_days": pe_snapshot_lag_days,
         "spy_3m_return": spy_3m_ret,
         "sectors": sectors_out,
     }

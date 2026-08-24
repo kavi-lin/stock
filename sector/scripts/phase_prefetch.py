@@ -44,10 +44,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 PY = sys.executable or "python3"
 
-# Per-task subprocess wall cap. Most fetches are <30s, but fetch_smart_money
-# issues ~131 sequential per-ticker insider-stat calls and, under the central
-# fmp_pool RPM cap + 9-way sweep contention, can run 3-5 min — so the cap must
-# clear it or the whole HARD task spuriously trips hard_fail. 360s leaves slack.
+# Per-task subprocess wall cap. Most fetches are <30s; the long pole is
+# fetch_smart_money's two ~131-ticker sweeps. Those were sequential and took
+# ~242s alone — under 9-way sweep contention that overran this cap and
+# spuriously tripped hard_fail (2026-08-16). They now fan out via
+# fmp_client.fmp_get_many (~68s alone), so 360s has real slack again.
 TASK_TIMEOUT_SEC = int(os.getenv("SECTOR_PREFETCH_TIMEOUT_SEC", "360"))
 
 

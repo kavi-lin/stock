@@ -1,0 +1,43 @@
+```json
+{
+  "commentary": "Encompass Health (EHC) 財報後股價走揚，CFO 獲利了結賣出 18,869 股。高層於高檔減持短期易引發市場對估值見頂的疑慮，對追價動能造成心理壓抑。然而，住院復健醫療需求具備高度防禦性與穩定現金流，若基本面營運成長趨勢不變，內部人常規減持對長期營運影響有限，短線股價以技術面震盪整理為主。",
+  "bull_points": [
+    "財報亮眼激勵股價創高，反映復健醫療需求強勁。",
+    "營運基本面與現金流健全，中長期成長動能仍穩健。"
+  ],
+  "bear_points": [
+    "CFO 於財報後高檔減持，短期引發獲利了結疑慮。",
+    "內部人持股下降壓抑短線市場情緒與追價意願。"
+  ],
+  "final_take": "高層減持壓抑短線情緒，中長線仍回歸醫療本業動能。",
+  "entities": {
+    "tickers": [
+      "EHC"
+    ],
+    "sectors": [
+      "Health Care"
+    ],
+    "themes": [
+      "insider selling",
+      "post-earnings momentum",
+      "inpatient rehabilitation"
+    ],
+    "tech_keywords": []
+  },
+  "relations": [
+    {
+      "subject": "ticker:EHC",
+      "predicate": "HEADWIND_FROM",
+      "object": "theme:insider_selling"
+    },
+    {
+      "subject": "ticker:EHC",
+      "predicate": "BENEFITS_FROM",
+      "object": "theme:inpatient_rehabilitation"
+    }
+  ],
+  "done": false,
+  "confidence": 0.75,
+  "rationale_short": "高層減持屬短線心理利空，基本面防禦與現金流仍具韌性。"
+}
+```

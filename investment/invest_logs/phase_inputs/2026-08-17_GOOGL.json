@@ -1,0 +1,192 @@
+{
+ "bundle_version": "P5-INPUTS/1.0",
+ "ticker": "GOOGL",
+ "date": "2026-08-17",
+ "phase0": {
+  "regime_confidence": 0.74,
+  "market_top_zone": "Yellow",
+  "ftd_state": "FTD_CONFIRMED",
+  "breadth_composite": 79,
+  "vix": 14.25,
+  "fred_verdict": "Soft Landing",
+  "real_rate_pct": 1.37,
+  "hot_sectors": [
+   "Technology",
+   "Industrials",
+   "Consumer Discretionary",
+   "Financials",
+   "Energy"
+  ],
+  "cold_sectors": [
+   "Consumer Staples",
+   "Utilities",
+   "Real Estate"
+  ]
+ },
+ "lanes": {
+  "fundamentals": {
+   "signal": "BUY",
+   "score": 2.8,
+   "confidence": 0.82,
+   "key_factors": [
+    "Attractive P/E 17.3x vs Meta 21.9x",
+    "Accelerating revenue growth up 24.2% YoY",
+    "Robust balance sheet with $130B net cash"
+   ],
+   "risk_flags": [
+    "High capex intensity squeezing free cash flow",
+    "Heavy AI infrastructure spending drag"
+   ],
+   "moat_assessment": {
+    "level": "WIDE",
+    "type": "network_effect",
+    "evidence_one_line": "Dominant global search share and Android/YouTube ecosystem"
+   },
+   "near_term_catalysts": [
+    {
+     "date": "2026-10-27",
+     "type": "earnings",
+     "description": "Q3 2026 earnings release and Cloud/AI revenue metrics",
+     "impact": "high"
+    },
+    {
+     "date": "2026-09-15",
+     "type": "product_launch",
+     "description": "Gemini enterprise suite and custom AI silicon updates",
+     "impact": "high"
+    },
+    {
+     "date": "2026-10-01",
+     "type": "macro_event",
+     "description": "Digital advertising spending & enterprise tech budget review",
+     "impact": "medium"
+    }
+   ],
+   "bull_thesis_one_line": "Low 17x P/E with accelerating 24% growth",
+   "bear_thesis_one_line": "Heavy AI capex dragging near-term FCF"
+  },
+  "sentiment": {
+   "signal": "HOLD",
+   "score": 1.14,
+   "confidence": 0.75,
+   "key_factors": [
+    "Market greed and low VIX support sentiment",
+    "Low short interest float at 1.2 percent",
+    "Insider distribution offsets stock level sentiment"
+   ],
+   "risk_flags": [
+    "Insider distribution trend with low acquire ratio",
+    "Latest monthly MSPR turned negative"
+   ],
+   "insider_signal": "distributing",
+   "short_pct_float": 1.2,
+   "mspr_latest": -3.21
+  },
+  "news": {
+   "signal": "BUY",
+   "score": 2.2,
+   "confidence": 0.78,
+   "key_factors": [
+    "Gemini hits 1B active users milestone",
+    "Berkshire Hathaway adds $17B GOOGL stake",
+    "Debut $3.6B AUD bond for AI capex",
+    "Massive SpaceX investment stake value unlocked"
+   ],
+   "risk_flags": [
+    "Heavy AI capex dragging free cash flow",
+    "Pershing Square 13F trimming Alphabet position"
+   ],
+   "pt_revision_momentum": {
+    "direction": "FLAT",
+    "consensus_delta_pct_1m": 0.74
+   },
+   "immediate_catalyst_5d": {
+    "event": "Debut $3.6B AUD bond pricing for AI capex funding",
+    "date": "2026-08-20",
+    "direction_lean": "NEUTRAL",
+    "expected_move_pct": null
+   },
+   "decision_point_days": 21,
+   "cross_asset_spillover": [
+    {
+     "asset": "Semiconductors & AI Hardware (NVDA/AVGO)",
+     "direction": "BULLISH",
+     "mechanism": "Massive AI capex guidance ensures sustained compute & datacenter hardware procurement."
+    },
+    {
+     "asset": "Corporate Credit & AUD Bond Market",
+     "direction": "NEUTRAL",
+     "mechanism": "Debut $3.6B bond sale tests international corporate debt appetite for Big Tech AI financing."
+    }
+   ],
+   "reasoning_one_line": "Strong institutional backing from Berkshire and Gemini 1B user milestone outweigh AI capex FCF drag concerns."
+  },
+  "technical": {
+   "signal": "HOLD",
+   "score": -1.5,
+   "confidence": 0.75,
+   "key_factors": [
+    "Trading below 20D and 50D moving averages",
+    "MACD histogram negative and expanding downward",
+    "RSI at 46.3 showing softening momentum"
+   ],
+   "risk_flags": [
+    "Break below nearest support at 340.88",
+    "Contracting volume alongside insider distribution trend"
+   ],
+   "smart_money_analysis": {
+    "label": "distributing",
+    "narrative": "Insider acquired-to-disposed ratio is 0.55 in Q3 2026, indicating net distribution alongside contracting volume."
+   },
+   "pattern_taxonomy": {
+    "pattern": "topping_pattern",
+    "confirmation_criteria": "A decisive break and daily close below major support at 340.88."
+   },
+   "market_strength": "NEUTRAL",
+   "key_levels": {
+    "support": 340.88,
+    "resistance": 372.08,
+    "pivot": 345.34
+   },
+   "high_prob_scenario": "Consolidation between 340.88 support and 353.34 50-day moving average resistance with elevated downside risk if support breaks.",
+   "volatility": {
+    "atr_14": 11.02,
+    "hist_vol_20d_daily": 0.0301,
+    "momentum_20d_pct": -1.99
+   }
+  },
+  "valuation": {
+   "signal": "HOLD",
+   "score": -1.0,
+   "confidence": 0.55,
+   "key_factors": [
+    "Weighted fair value $286.47 implies 16.95% overvaluation",
+    "DCF anchors clustered tightly between $128-$167",
+    "Sell-side consensus elevated at $427.55"
+   ],
+   "risk_flags": [
+    "Owner earnings severely distorted by CapEx surge",
+    "Forward validation stretched on archetype shadow checks"
+   ],
+   "valuation_commentary": "Valuation structure across 5 eligible anchors yields a weighted fair value of $286.47 (-16.95% vs current price $344.92, verdict: overvalued). Intrinsic DCF anchors cluster tightly between $128.66 and $167.28, while analyst price target consensus ($427.55, 50% weight) provides significant upward skew. The Buffett owner earnings multiple anchor ($7.71, 16.67% weight) is heavily distorted by aggressive AI infrastructure CapEx cycles depressing reported free cash flows. Forward validation is classified as STRETCHED: although top-line revenue trajectory (18.8% path) supports current market capitalization relative to analyst CAGR (15.6%), both archetype shadow and forward earnings checks fail, indicating current pricing demands flawless operational execution.",
+   "cited_transition_overlay": false,
+   "transition_dissent_basis": "valuation_anchor"
+  }
+ },
+ "burry": {
+  "score": 33.3,
+  "narrative": "Burry 評分 33.3 (WARNING)：FCF Yield 僅 0.55% 且內部人呈現淨賣出（SELL），龐大 AI CapEx 壓縮實質自由現金流，高實質利率環境下估值承壓。"
+ },
+ "phase3": {
+  "final_score": 0.4993,
+  "final_decision": "HOLD",
+  "final_action": "CANCEL"
+ },
+ "phase4": {
+  "position_size_pct": null,
+  "analysis_price": 344.9229
+ },
+ "red_team": {
+  "verdict": "STRONG_COUNTER"
+ }
+}

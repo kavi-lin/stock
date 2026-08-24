@@ -102,11 +102,21 @@ trade["valuation_lane"].update({
     "vs_current_pct": pack["vs_current_pct"],
     "score": pack["score"],
 })
-trade["multi_horizon_price_framework"]["long_term_ref"].update({
-    "weighted_fair_value": pack["weighted_fair_value"],
-    "verdict_band": pack["verdict_band"],
-    "confidence": pack["confidence"],
-})
+# MHP 是 schema 明訂的 **optional** 區塊（「V5.0+ optional（過渡中）；缺/不全 → validator
+# 印 warning，非 fatal」），而本 fixture 的來源是 history.json 的**最後一筆真實 entry**。
+# 2026-08-10 的 META entry 就是缺 MHP 的，於是這裡 KeyError 崩掉——整套測試被一筆資料
+# 弄紅，而且是 traceback 不是診斷。測試不能比它所驗的 schema 更嚴格：缺就跳過該段對齊，
+# 讓 validator 自己去出那個 warning。
+_mhp = trade.get("multi_horizon_price_framework")
+if isinstance(_mhp, dict) and isinstance(_mhp.get("long_term_ref"), dict):
+    _mhp["long_term_ref"].update({
+        "weighted_fair_value": pack["weighted_fair_value"],
+        "verdict_band": pack["verdict_band"],
+        "confidence": pack["confidence"],
+    })
+else:
+    print(f"↷ 最後一筆 entry（{entry.get('export_date')} {trade.get('ticker')}）沒有 "
+          "multi_horizon_price_framework — 該區塊 optional，跳過 MHP 對齊段")
 # Version has to be threaded through exactly as Phase 5 Step 1.5 does it: the C1 lane
 # contract is only written on V5.3+, and stamping one onto an older entry is itself a
 # validator error (§2e). The fixture inherits whatever the newest real entry is stamped.

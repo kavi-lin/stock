@@ -106,32 +106,91 @@ invest 現由 `config/llm_config.json` 的 `protocol_providers` 限 **claude + c
 - [x] 明標 `protocol_providers.invest` 今天只開 claude + codex，gemini 執行能力未驗、沒過不得加白名單。
 - [ ] gemini 的實跑驗證維持 `TODO.md` 既有項的判準，不在本項範圍。
 
-### T4 — Fundamentals lane 補進錨盤點
+### T4 — Fundamentals lane 錨盤點 ✅ **已完成（V4.128.0）**
+
+**盤點結果**：Fundamentals rubric 的計分成分裡，**六條是純門檻運算、四項是真判斷**。
+
+| 成分 | 型態 | 資料源 |
+|---|---|---|
+| `peer_pe_median` 差距 >30% → ±1、>50% → ±2 | **可 script** | PEER_BUNDLE |
+| `altman_zone == danger` → −1；`piotroski_strength` strong/weak → ±1 | **可 script** | FMP_SUPP_BUNDLE |
+| `owner_earnings.qoq_growth` >0.15 註記、<−0.30 → −0.5 | **可 script** | FMP_SUPP_BUNDLE |
+| `employee_history` 5Y CAGR >15% → +0.5；1Y −5% → −0.5 | **可 script** | FMP_SUPP_BUNDLE |
+| 強訊號 `FCF yield >5% AND rev_growth >20%` → +3/+4 | **半可 script**（門檻確定，+3 vs +4 是判斷） | us-stock-analysis |
+| `quality_flags` 觸發 → ±1 | **可 script** | EARNINGS_ANALYST_BUNDLE |
+| base score（P/E・rev YoY・FCF margin・D/E・earnings date・EPS growth 的**加權**） | 真判斷 | — |
+| `moat_assessment` / `near_term_catalysts` / bull・bear thesis | 真判斷 | — |
+
+**缺口與 Technical 在 V4.116.3 之前完全同形**：`skills/us-stock-analysis/scripts/analyze.py`
+算得出全部六個 rubric scalar，但**只印到 stdout**——數字最後躺在 lane subagent 的 transcript 裡，
+validator 構不到。Technical 的 `analyze.py` 早已落地 `cache/<T>_technical_payload.json`。
+
+- [x] **走便宜路線：producer 留下物證**。`analyze.py` 收尾無條件寫
+  `skills/us-stock-analysis/cache/<T>_fundamentals_payload.json`（含 valuation / growth /
+  margins_cash / balance_sheet / earnings_calendar / analyst 六塊），與 Technical 同一個 pattern，
+  不擴 lane 契約。`test_bundle_merge.py` 加兩類斷言（接線＋形狀），種回驗紅。
+- [x] **刻意不做 `rubric_hint`**：Technical 的 hint 是「stage 結構 → 分數帶」的既有翻譯；
+  Fundamentals **沒有議定過的 base-score 公式**（rubric 給的是調整項不是基準分），
+  現在發明一個等於寫進一條新的計分規則。**證據先落地，公式待拍板。**
+- [ ] **待拍板**：要不要用這份 payload 建 Fundamentals 的 `rubric_hint`／validator 硬閘。
+  前置是先定 base-score 公式。σ 量測（TODO 既有的 MU/AAOI 12-run）建議連 Fundamentals 一起量，
+  且**按 provider 分開統計**，先分清漂移是模型性質還是 lane 性質。
+
+### ~~T4 — Fundamentals lane 補進錨盤點~~（原始描述，已由上方取代）
 
 - [ ] TODO.md 的錨盤點（2026-08-09 BAC 三跑診斷）列了 Valuation（pack 硬閘）、Technical（`rubric_hint` 硬閘）、Sentiment（`sentiment_det` shadow）、News（已立項）——**Fundamentals 是唯一連「有沒有錨」都沒被盤點的 lane**。先盤點：rubric（365-407）裡哪些計分成分 script 算得出（bundle 內 scalar 佔比高，可能比 News 還容易接）、哪些是真判斷留 LLM。
 - [ ] 盤點產出後，若要接錨，走 Technical V4.116.3 的便宜路線：**producer 留物證**（落 cache payload，validator 直接讀），不擴 lane 契約。
 - [ ] 與 TODO.md 既有的 MU/AAOI 12-run σ 量測併批：Fundamentals 的三跑全距一起量，帶寬用量出來的數字定。
 - **多模型**：deterministic producer + validator 讀物證＝天然 provider-agnostic；σ 量測按 provider 分開統計（claude 3 跑 + codex 3 跑），先確認漂移是模型性質還是 lane 性質。
 
-### T5 — 決策後回饋迴路腳本翻新
+### T5 — 決策後回饋迴路腳本翻新 ✅ **已完成（V4.128.0）——四支裡兩支我原本的判斷都錯了**
+
+- [x] **`register_thesis.py`（05-10）→ 從上線起就沒運作過，這是四支裡最嚴重的**。
+  它 import trader-memory-core 的 `thesis_store`，而 **`~/.claude/skills/` 底下只有 `grill-me`，
+  TMC 從來沒安裝過**。實跑：`trader-memory-core unavailable (No module named 'thesis_store')`，
+  **rc=0**（non-fatal hook，照設計不紅）。後果實測：**183 筆 trade 的 `thesis_id` 全部是 null**。
+  連帶 **V20-F1 sector concentration 從來沒生效過**——11 筆帶 `sector_concentration_f1` 的 entry 裡
+  7 筆 `registry_unavailable`、4 筆 `explicit_count`，**`applied=true` 是 0 筆**。
+  這正是 reviewer session 這次在 live run 觀察到的 `registry_unavailable`。
+  **未修，需拍板**：裝 TMC、或改用 history.json 自算同 sector active 部位（＝建新功能）、
+  或承認 F1 為 inert 並把文件講清楚。三條都改變風控行為。
+- [x] **`backtest_postmortem.py`（06-15）→ 對 V4.87.0 renderer 靜默半殘，已修**。
+  renderer 把 action 摺進決策格（`| Final Decision | HOLD（action: CANCEL） |`），舊 regex 要求
+  決策字後直接接 `|`，於是 **145 份 NEW-format 報告裡 decision 漏 33 份、action 漏 126 份**，
+  而工具 rc=0 照吐一張 None 表。修 regex 後 decision 112→131、action 19→35（其餘是報告本身
+  真的沒有那一列，非 regex 問題）。**更重要的是加了解析缺口彙總警告**——下次 renderer 再變格式
+  會先出聲，不必等人發現整欄都是 None。
+- [x] **`backtest_watchlist.py`（05-10）→ 完全正常**，`--dry-run` rc=0 產出完整報告。
+  順帶：TODO 的 `[V20-D2] 加 --dry-run flag` **早就做完了沒勾銷**。
+  ⚠️ 但 `watchlist_lifecycle.jsonl` 的 881 筆事件停在 **2026-07-20**，三週沒有新事件——
+  **輸入停止累積**，要查 news 端的 producer 還在不在跑（已記 TODO）。
+- [x] **`validate_v219.py`（05-10）→ 不是 legacy，我原本猜錯**。16 個 fixture 全過，
+  而且它 import 的是**真 producer**（`apply_det_shadow.compute_polarization` /
+  `classify_red_team_basis`），沒有複製一份邏輯，驗的 4-tier polarization 與 RT basis 今天仍是
+  §13 的活規則。真正的問題是**它不在 OPS §7 對照表裡**——改 polarization 的人不會知道要跑它。
+  已補進 §7。
+
+### ~~T5 — 決策後回饋迴路腳本翻新~~（原始描述，已由上方取代）
 
 - [ ] `register_thesis.py`（05-10）：Phase 5 Step 6 是 non-fatal hook，壞了不會紅。對 V5.1+ export schema 跑一次 round-trip 確認還能吃當前 entry shape；順手補一條 smoke test 進 §7 測試對照表。
 - [ ] `backtest_watchlist.py`（05-10）/ `backtest_postmortem.py`（06-15）：整條決策鏈 V4.80–4.117 script 化之後，這兩支還在讀舊世界的欄位假設。確認對 `calculation_steps` / `decision_cap` / `speculative_grade` 等新欄位的相容性；探索層定位不變（產出永不進決策）。
 - [ ] `validate_v219.py`（05-10）：疑 legacy。確認無 caller 後刪除或移 `archive/`。
 - **多模型**：這三支是純 python 離線工具，本身 provider-agnostic；唯一要求是它們讀的 history.json 欄位以 schema 為準，不假設某家模型的填寫習慣（例如 null vs 缺鍵——V4.116 的教訓）。
 
-### T7 — T5 自動降階與 Anti-Bias 同向定義（**T1 施工中挖出，待使用者逐項拍板**）
+### T7 — T5 自動降階 ✅（V4.131.13）；Anti-Bias 同向定義仍待拍板
 
-T1 動工時發現兩條「protocol 寫了、沒有產生器」的規則。兩者都**沒有**在 V4.122.0 動——
-補實作等於今天才開始改變決策，那需要拍板；§16 只記錄並留 warning。
+T1 動工時發現兩條「protocol 寫了、沒有產生器」的規則。T5 已由使用者於 2026-08-16
+拍板成「先做 forward validation、完整 FAIL 才硬降級」；Anti-Bias 仍維持 warning。
 
-**T7a — T5 的「valuation −3 → 自動 downgrade」**
+**T7a — T5 的「valuation −3 → 自動 downgrade」✅ 已完成（V4.131.13）**
 
-- **證據**：`decision_engine.py` 全檔沒有任何 T5 邏輯（valuation 只以 lane score 進 Step 1 加權，權重 0.15）。§13 的 band 可達集合四條路徑（BIPOLAR / cap+override / Auto REJECT / Rec 11 probe）**沒有 T5 的路徑**——照 protocol 手動降階反而可能被判成偏離 band。
-- **實據**：2026-08-09 NOW，valuation −3、`final_decision = STAGED_ENTRY`、無 BIPOLAR/cap/probe、validator rc=0 過關。T5 說 `STAGED_ENTRY → HOLD`，沒發生，也沒有任何東西注意到。歷史上 valuation ≤ −2 共 53 筆，其中 −3 而收在 BUY 側的有 4 筆（2026-05-20 MU、2026-06-21 MU、2026-08-09 NOW ×2）。
-- **形狀與 V4.112 B2 完全相同**（Burry ×0.7/×1.15：有文件、無實作、174 筆歷史沒有一筆倉位反映過它）。B2 當時的拍板是**刪文件**，理由是「補實作等於今天才開始改變倉位，而它從沒被驗證過」。
-- **選項**：(a) 照 B2 先例**刪降階宣稱**，T5 降為 reasoning-only（−2 與 −3 都只加註）；(b) **補產生器**——把 T5 接進 `decision_engine.py` 並在 §13 的 band 可達集合開一條 T5 路徑，同時要決定它與 Rec 11 熱區鬆綁方向相反時誰優先。**傾向 (a)**：valuation lane 已經以 0.15 權重進了 final_score，−3 已經在壓分數，再加一道硬降階是同一個訊號扣兩次，而那從未被驗證過。
-- **決策前置**：先跑 T1 累積的 ≥20 場 `conflict_bias` 樣本，看 T5 實際 fire 率與 −3 場次的 30d outcome，再判斷「壓兩次」是否有鑑別度。
+- [x] `compute_price_framework.py` 產 `forward_validation.v1`：eligible DCF gap ≤−30% 時，
+  交叉檢查 archetype shadow、forward earnings、revenue path；至少 2 項可判讀。
+- [x] 任一可信支持成立 → PASS/STRETCHED，valuation score 最低 −1；`NO_DATA` 不猜 FAIL。
+- [x] 可判讀項全部失敗 → FAIL；decision engine 1.1.0 只在 FAIL + score ≤−3 時降一階，
+  並讓 T5 優先於 Rec 11 probe（hard downgrade 不得被熱區例外重新打開）。
+- [x] Validator／schema／export／renderer／replay 接線。歷史完整 artifact cohort：NOW、PLTR
+  分數上修但 final decision 不變；SNDK 原 score 已 −1，仍 STAGED_ENTRY。
 
 **T7b — Anti-Bias 的「5 lane 同向」沒有定義**
 

@@ -30,6 +30,7 @@ from decision_engine import (  # noqa: E402
     evaluate_auto_reject,
     evaluate_decision_cap_triggers,
     evaluate_hot_zone,
+    evaluate_t5_forward_validation,
     run_phase3,
     DEFAULT_WEIGHTS,
 )
@@ -464,6 +465,22 @@ eq("cap.trigger.precedence",
 eq("cap.trigger.absent_block_not_evaluated",
    evaluate_decision_cap_triggers(None)["evaluated"], False)
 
+# T5 is no longer a score-only ghost rule: only deterministic forward FAIL may downgrade.
+t5_pass = evaluate_t5_forward_validation(
+    "STAGED_ENTRY", -3.0, {"status": "STRETCHED", "applies": True})
+eq("t5.forward_support.no_downgrade", t5_pass["decision_after"], "STAGED_ENTRY")
+eq("t5.forward_support.not_triggered", t5_pass["warning_triggered"], False)
+t5_fail_staged = evaluate_t5_forward_validation(
+    "STAGED_ENTRY", -3.0, {"status": "FAIL", "applies": True})
+eq("t5.fail.staged_to_hold", t5_fail_staged["decision_after"], "HOLD")
+eq("t5.fail.applied", t5_fail_staged["downgrade_applied"], True)
+t5_fail_buy = evaluate_t5_forward_validation(
+    "BUY", -3.0, {"status": "FAIL", "applies": True})
+eq("t5.fail.buy_to_staged", t5_fail_buy["decision_after"], "STAGED_ENTRY")
+t5_no_data = evaluate_t5_forward_validation(
+    "STAGED_ENTRY", -3.0, {"status": "NO_DATA", "applies": True})
+eq("t5.no_data.no_false_kill", t5_no_data["decision_after"], "STAGED_ENTRY")
+
 l_buy = apply_decision_cap({
     "decision_cap": {"anchors_available": 1}, "final_decision": "BUY",
     "avg_confidence": 0.82, "position_size_pct": 0.02, "final_action": "EXECUTE"})
@@ -640,6 +657,21 @@ eq("e2e.bipolar.band_before", mb["decision_band_before_adjustments"], "BUY")
 eq("e2e.bipolar.decision", mb["final_decision"], "STAGED_ENTRY")
 eq("e2e.bipolar.polar_cap", mb["polar_position_cap_pct"], 25)
 eq("e2e.bipolar.conf", mb["avg_confidence"], round(0.7 * 0.5, 4))
+
+# Full entry-point wiring: a genuine BUY reaches T5 and is downgraded exactly one band.
+M_T5 = {
+    **M_BASE,
+    "lane_scores": {"fundamentals": 5.0, "sentiment": 5.0, "news": 5.0,
+                    "technical": 5.0, "valuation": -3.0},
+    "lane_confidence": {k: 0.7 for k in
+                        ("fundamentals", "sentiment", "news", "technical", "valuation")},
+    "forward_validation": {"status": "FAIL", "applies": True},
+}
+mt5 = run_phase3(M_T5)
+eq("e2e.t5.band_before", mt5["decision_band_before_adjustments"], "BUY")
+eq("e2e.t5.decision", mt5["final_decision"], "STAGED_ENTRY")
+eq("e2e.t5.applied",
+   mt5["calculation_steps"]["t5_forward_validation"]["downgrade_applied"], True)
 
 # FULL_FALLBACK forces a BUY-side decision to HOLD
 mf = run_phase3({**M_BIPOLAR, "gates": {**M_BIPOLAR["gates"],

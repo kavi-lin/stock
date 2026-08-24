@@ -1,0 +1,169 @@
+{
+ "bundle_version": "P5-INPUTS/1.0",
+ "ticker": "ECHO",
+ "date": "2026-08-21",
+ "phase0": {
+  "regime_confidence": 0.75,
+  "market_top_zone": "Yellow",
+  "ftd_state": "FTD_CONFIRMED",
+  "breadth_composite": 79,
+  "vix": 15.72,
+  "fred_verdict": "Transitional",
+  "real_rate_pct": 1.4,
+  "hot_sectors": [
+   "Technology",
+   "Healthcare",
+   "Financials",
+   "Energy"
+  ],
+  "cold_sectors": [
+   "Consumer Staples",
+   "Utilities",
+   "Real Estate"
+  ]
+ },
+ "lanes": {
+  "fundamentals": {
+   "signal": "SELL",
+   "score": -3.5,
+   "confidence": 0.85,
+   "key_factors": [
+    "Contracting revenue YoY and QoQ",
+    "Negative FCF and cash burn",
+    "Altman Z 0.84 distress zone"
+   ],
+   "risk_flags": [
+    "Severe leverage with -$17.06B net cash",
+    "Negative owner earnings and TTM OCF"
+   ],
+   "moat_assessment": {
+    "level": "ERODING",
+    "type": "regulation",
+    "evidence_one_line": "Valuable wireless spectrum licenses burdened by high capital intensity and operating deficits."
+   },
+   "near_term_catalysts": [
+    {
+     "date": "2026-11-04",
+     "type": "earnings",
+     "description": "Q3 2026 earnings release and spectrum buildout liquidity update",
+     "impact": "high"
+    }
+   ],
+   "bull_thesis_one_line": "Working capital of $16.04B and unique spectrum holdings offer monetization potential if wireless 5G revenue inflects.",
+   "bear_thesis_one_line": "Persistent cash burn (OCF -$85.3M), -$17.06B net cash, and Altman Z (0.84) drive substantial solvency pressure."
+  },
+  "sentiment": {
+   "signal": "HOLD",
+   "score": -0.78,
+   "confidence": 0.75,
+   "key_factors": [
+    "High short interest at 24.1% float",
+    "Negative insider MSPR at -44.25",
+    "Supportive risk-on market backdrop at 64.4"
+   ],
+   "risk_flags": [
+    "Crowded short interest exceeding 20% float",
+    "Negative insider disposition momentum in August"
+   ],
+   "insider_signal": "neutral",
+   "short_pct_float": 24.1,
+   "mspr_latest": -44.2537
+  },
+  "news": {
+   "signal": "BUY",
+   "score": 2.2,
+   "confidence": 0.75,
+   "key_factors": [
+    "Strong Buy consensus with recent upgrades",
+    "30-day PT trend revised upward",
+    "Spectrum sales alleviate debt overhang",
+    "Boost Mobile hybrid lowers capex"
+   ],
+   "risk_flags": [
+    "HughesNet subsidiary Chapter 11 restructuring",
+    "Refinancing execution on remaining debt maturities"
+   ],
+   "pt_revision_momentum": {
+    "direction": "UP",
+    "consensus_delta_pct_1m": 34.26
+   },
+   "immediate_catalyst_5d": null,
+   "decision_point_days": 21,
+   "cross_asset_spillover": [
+    {
+     "asset": "sector_XLC",
+     "direction": "BULLISH",
+     "mechanism": "5G spectrum monetization aids telecom sentiment"
+    }
+   ],
+   "reasoning_one_line": "Bullish analyst upgrades and massive spectrum asset monetization offset satellite subsidiary restructuring risks."
+  },
+  "technical": {
+   "signal": "SELL",
+   "score": -3.0,
+   "confidence": 0.85,
+   "key_factors": [
+    "Stage 4 downtrend below 20/50/200 MAs",
+    "Recent 50/200 death cross confirms downtrend",
+    "RSI at 39.4 with contracting volume"
+   ],
+   "risk_flags": [
+    "Breakdown below nearest support at $82.48",
+    "MACD histogram fading near zero line"
+   ],
+   "smart_money_analysis": {
+    "label": "distributing",
+    "narrative": "Sustained price action below MA200 with contracting bounce volume reflects institutional distribution."
+   },
+   "pattern_taxonomy": {
+    "pattern": "downtrend",
+    "confirmation_criteria": "A daily close below $82.48 support confirms continuation toward the $78-$80 zone."
+   },
+   "market_strength": "WEAK",
+   "key_levels": {
+    "support": 82.48,
+    "resistance": 91.86,
+    "pivot": 88.31
+   },
+   "high_prob_scenario": "5-15 day outlook: ECHO is expected to retest support at $82.48; a failure to hold $82.48 opens downside toward $78.00-$80.00, while rallies remain capped near $88.31-$91.86.",
+   "volatility": {
+    "atr_14": 4.0229,
+    "hist_vol_20d_daily": 0.02913,
+    "momentum_20d_pct": -6.66
+   }
+  },
+  "valuation": {
+   "signal": "BUY",
+   "score": 1.0,
+   "confidence": 0.65,
+   "key_factors": [
+    "Weighted fair value $105.26 yields +23.2%",
+    "Analyst PT consensus anchor targets $126.00",
+    "Pre-profit discounted earnings anchor $84.52"
+   ],
+   "risk_flags": [
+    "Heavy reliance on sell-side analyst targets",
+    "DCF and comps anchors ineligible"
+   ],
+   "valuation_commentary": "ECHO 模型計算之加權公允價值為 $105.26（相較現價 $85.44 隱含 +23.2% 溢價），落於 undervalued 區間，對應分數 1.0。然而，估值基礎受到大量 anchor 資格限制：自建 DCF 因終值 FCFF 為負無法啟用、owner earnings 為負值、comps 因缺乏可比同業排除。因此現行估值完全依賴賣方分析師目標價共識（$126.00）與獲利前折現盈餘錨點（$84.52），估值品質屬 speculative grade。",
+   "cited_transition_overlay": false,
+   "transition_dissent_basis": null
+  }
+ },
+ "burry": {
+  "score": 33.2,
+  "narrative": "Burry 評分 33.2 (WARNING)：FCF yield -44.1%、EV/EBIT 21.5x、D/E 1.24、距 52 週高點回檔 39.8%、內部人呈現淨賣出，資本結構與流動性極其脆弱。"
+ },
+ "phase3": {
+  "final_score": -0.7203,
+  "final_decision": "HOLD",
+  "final_action": "CANCEL"
+ },
+ "phase4": {
+  "position_size_pct": null,
+  "analysis_price": 85.4396
+ },
+ "red_team": {
+  "verdict": "STRONG_COUNTER"
+ }
+}

@@ -395,7 +395,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--output", type=Path, default=root / "Dashboard/nexus_gap_fills.json")
     parser.add_argument("--prompt", type=Path, default=root / "scripts/nexus/prompts/evidence_gap_fill_system.md")
     parser.add_argument("--topic")
-    parser.add_argument("--agent", choices=("claude", "gemini", "codex", "grok"))
+    parser.add_argument("--agent", choices=("claude", "gemini", "codex"))
     parser.add_argument("--timeout", type=int, default=360)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--check", action="store_true")

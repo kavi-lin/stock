@@ -170,7 +170,7 @@ Agent(
 - **Macro**：`{fed_path_delta, yield_curve_impact, fx_commodity_impact, historical_analogue, impact_score -5~+5, confidence}`
 
 #### 辯論強制規則（Arbiter 驗證）
-- Bull / Bear 不得同為 `|impact| ≤ 1`（代表沒真正辯論）→ 退回該則要求 re-analyze
+- Bull / Bear 不得同為 `|impact| ≤ 1`（代表沒真正辯論）→ finalizer 自動把**該則**降級為 shallow（digest 記在 `demoted_stage2`、該筆標 `demoted_from`），deep 少一則但整批照常產出；**超過半數**晉級項同時落在這個區間才整批 rc≠0（那是辯論沒發生，不是當天沒新聞）。兩個 lane 的 `interpretation` 仍必須非空，空的直接 rc≠0，不得走降級
 - `source_credibility = LOW` → 四方 confidence 上限 0.5
 - 含 binary event → Bear + Macro 必須標記 `binary_risk: true`
 

@@ -1,0 +1,58 @@
+```json
+{
+  "commentary": "金價逼近每盎司 4,400 美元，主因美元走弱與中東地緣通膨風險升溫。此趨勢對黃金採礦業者如 NEM、GOLD 形成直接營收與毛利擴張利多，並驅動資金流入貴金屬 ETF。然而，通膨隱憂可能延緩降息節奏，對高估值科技股造成評價壓力，市場短期呈現防禦性資產與原物料板塊走強之輪動格局。",
+  "bull_points": [
+    "美元走弱與地緣避險需求推升金價，直接增厚金礦業者獲利能力。",
+    "避險買盤推升貴金屬資產需求，有利原物料與黃金 ETF 資金流入。"
+  ],
+  "bear_points": [
+    "通膨疑慮恐延後寬鬆週期，對高估值成長股帶來資金成本壓力。",
+    "金價接近歷史高位，若地緣局勢緩和恐引發短線獲利了結回檔。"
+  ],
+  "final_take": "看多金礦與避險標的，但需警戒降息延後對成長股的估值修正。",
+  "entities": {
+    "tickers": [
+      "NEM",
+      "GOLD",
+      "AEM",
+      "GLD"
+    ],
+    "sectors": [
+      "Materials",
+      "Financials"
+    ],
+    "themes": [
+      "Gold hedging",
+      "Geopolitical risk",
+      "Inflation hedge",
+      "De-dollarization"
+    ],
+    "tech_keywords": []
+  },
+  "relations": [
+    {
+      "subject": "ticker:NEM",
+      "predicate": "BENEFITS_FROM",
+      "object": "theme:gold_hedging"
+    },
+    {
+      "subject": "ticker:GOLD",
+      "predicate": "BENEFITS_FROM",
+      "object": "theme:gold_hedging"
+    },
+    {
+      "subject": "sector:materials",
+      "predicate": "BENEFITS_FROM",
+      "object": "theme:gold_hedging"
+    },
+    {
+      "subject": "sector:information_technology",
+      "predicate": "HEADWIND_FROM",
+      "object": "theme:inflation_hedge"
+    }
+  ],
+  "done": false,
+  "confidence": 0.85,
+  "rationale_short": "金價受美元走弱與地緣通膨雙重推升，利好礦業股但壓抑科技成長股。"
+}
+```

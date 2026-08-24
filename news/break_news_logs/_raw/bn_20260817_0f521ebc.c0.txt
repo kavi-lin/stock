@@ -1,0 +1,49 @@
+```json
+{
+  "commentary": "L3Harris (LHX) 宣布由內部資深主管 Sam Mehta 接替 Christopher Kubasik 出任執行長。內部提拔有助於降低國防專案與 Aerojet Rocketdyne 併購整合的營運震盪，確保美國國防部 (DoD) 標案交付進度。然而，高層人事更迭短期內可能引發市場對長期資本配置及營業利益率改善節奏的觀望情緒。",
+  "bull_points": [
+    "內部接班確保國防合約交付與業務策略延續性",
+    "降低管理層斷層風險，利於延續利潤率改善計畫"
+  ],
+  "bear_points": [
+    "高層換屆短期內帶來潛在策略調整與執行風險",
+    "國防預算審查趨嚴下，資本配置效率面臨檢驗"
+  ],
+  "final_take": "內部接班維持營運穩定，短期中立偏多但需觀察執行力",
+  "entities": {
+    "tickers": [
+      "LHX"
+    ],
+    "sectors": [
+      "Industrials",
+      "Aerospace & Defense"
+    ],
+    "themes": [
+      "Defense spending",
+      "Executive transition",
+      "Corporate governance"
+    ],
+    "tech_keywords": [
+      "Tactical communications",
+      "Rocket propulsion",
+      "Avionics",
+      "Electronic warfare"
+    ]
+  },
+  "relations": [
+    {
+      "subject": "ticker:LHX",
+      "predicate": "MENTIONED_IN",
+      "object": "narrative:executive_transition"
+    },
+    {
+      "subject": "ticker:LHX",
+      "predicate": "BENEFITS_FROM",
+      "object": "theme:defense_spending"
+    }
+  ],
+  "done": false,
+  "confidence": 0.82,
+  "rationale_short": "內部提拔降低交接風險，有利策略延續但需觀察過渡期"
+}
+```

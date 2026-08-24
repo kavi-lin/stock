@@ -1,22 +1,22 @@
 # Pre-Market Morning Brief — 2026-08-10
-_Generated 2026-08-09 20:35 UTC · pre-open snapshot (EOD + overnight, no live intraday)_
+_Generated 2026-08-10 15:49 UTC · pre-open snapshot (EOD + overnight, no live intraday)_
 
 ## 1. Regime Snapshot
 
 - **Breadth**: 76.2/100 — Healthy (exposure 75-90%)
-- **FTD**: FTD_CONFIRMED — Strong FTD (exposure 75-100%, day 3)
-- **Market-Top**: 31.0/100 — Yellow (Early Warning) (risk budget 80-90%)
-- **Regime**: RISK_ON · cycle Early · Fear/Greed 69 (Greed) · macro 1.05x
-- **Hot**: Healthcare  |  **Cold**: Energy, Financials, Consumer_Discretionary, Consumer_Staples
+- **FTD**: FTD_CONFIRMED — Strong FTD (exposure 75-100%, day 4)
+- **Market-Top**: 31.2/100 — Yellow (Early Warning) (risk budget 80-90%)
+- **Regime**: RISK_ON · cycle Early · Fear/Greed 71 (Greed) · macro 1.06x
+- **Hot**: Technology, Healthcare, Industrials  |  **Cold**: Real_Estate
 
 ## 2. Overnight / Pre-Market Index Moves
 
 | Index | Last | Chg% |
 |---|--:|--:|
-| S&P 500 (^GSPC) | 7,757.64 | +0.62% |
-| Nasdaq Comp (^IXIC) | 26,690.62 | +1.30% |
-| Dow Jones (^DJI) | 54,036.93 | +0.28% |
-| VIX (^VIX) | 14.90 | -1.65% |
+| S&P 500 (^GSPC) | 7,759.70 | +0.03% |
+| Nasdaq Comp (^IXIC) | 26,628.60 | -0.23% |
+| Dow Jones (^DJI) | 53,990.54 | -0.09% |
+| VIX (^VIX) | 15.16 | +1.74% |
 
 ## 3. Biggest Movers — Large Caps (overnight)
 
@@ -25,46 +25,46 @@ _(ranked across 131 mega-cap names)_
 ### Gainers
 | Ticker | Chg% | Price | Name |
 |---|--:|--:|---|
-| NEM | +7.16% | 112.98 | Newmont Corporation |
-| NOW | +6.42% | 124.88 | ServiceNow, Inc. |
-| QCOM | +4.66% | 167.86 | QUALCOMM Incorporated |
-| BKNG | +3.39% | 214.42 | Booking Holdings Inc. |
-| CRM | +3.20% | 192.74 | Salesforce, Inc. |
-| TSLA | +2.83% | 328.58 | Tesla, Inc. |
-| TXN | +2.76% | 286.08 | Texas Instruments Incorporat |
-| PCG | +2.71% | 17.46 | PG&E Corporation |
-| ORCL | +2.42% | 146.94 | Oracle Corporation |
-| TMO | +2.41% | 594.00 | Thermo Fisher Scientific Inc |
+| MPC | +4.72% | 312.27 | Marathon Petroleum Corporati |
+| VLO | +4.55% | 311.87 | Valero Energy Corporation |
+| EOG | +4.16% | 140.34 | EOG Resources, Inc. |
+| PSX | +3.98% | 212.03 | Phillips 66 |
+| OXY | +3.68% | 57.97 | Occidental Petroleum Corpora |
+| SLB | +3.62% | 52.36 | Slb N.V. |
+| CVX | +3.43% | 192.95 | Chevron Corporation |
+| XOM | +3.37% | 158.19 | Exxon Mobil Corporation |
+| COP | +3.36% | 121.56 | ConocoPhillips |
+| NEM | +2.64% | 115.96 | Newmont Corporation |
 
 ### Losers
 | Ticker | Chg% | Price | Name |
 |---|--:|--:|---|
-| DOW | -3.17% | 29.34 | Dow Inc. |
-| CHTR | -3.09% | 152.57 | Charter Communications, Inc. |
-| CMG | -2.67% | 32.81 | Chipotle Mexican Grill, Inc. |
-| SLB | -1.96% | 50.53 | Slb N.V. |
-| WMB | -1.90% | 70.40 | The Williams Companies, Inc. |
-| CAT | -1.72% | 842.19 | Caterpillar Inc. |
-| TMUS | -1.54% | 177.19 | T-Mobile US, Inc. |
-| VLO | -1.54% | 298.31 | Valero Energy Corporation |
-| CVX | -1.41% | 186.56 | Chevron Corporation |
-| KMI | -1.37% | 30.85 | Kinder Morgan, Inc. |
+| INTC | -3.70% | 97.89 | Intel Corp. |
+| PPG | -2.69% | 116.50 | PPG Industries, Inc. |
+| MO | -2.63% | 66.55 | Altria Group, Inc. |
+| EXR | -2.57% | 145.70 | Extra Space Storage Inc. |
+| AEP | -2.43% | 122.67 | American Electric Power Comp |
+| QCOM | -2.32% | 163.97 | QUALCOMM Incorporated |
+| CCI | -2.32% | 73.84 | Crown Castle Inc. |
+| LOW | -2.31% | 218.18 | Lowe's Companies, Inc. |
+| DUK | -2.26% | 122.03 | Duke Energy Corporation |
+| EXC | -2.26% | 44.58 | Exelon Corporation |
 
 ## 4. Sector Performance (prev session)
 
 | Sector | Chg% |
 |---|--:|
-| Utilities | +1.80% |
-| Industrials | +0.75% |
-| Healthcare | +0.66% |
-| Financial Services | +0.17% |
-| Energy | +0.12% |
-| Consumer Cyclical | +0.05% |
+| Energy | +1.98% |
+| Consumer Cyclical | +1.24% |
+| Healthcare | +0.89% |
+| Financial Services | +0.71% |
+| Real Estate | +0.56% |
+| Industrials | +0.39% |
+| Consumer Defensive | +0.25% |
+| Basic Materials | +0.12% |
 | Communication Services | -0.01% |
-| Real Estate | -0.17% |
-| Technology | -0.75% |
-| Consumer Defensive | -1.22% |
-| Basic Materials | -1.39% |
+| Utilities | -0.03% |
+| Technology | -0.35% |
 
 ## 5. Today's Earnings
 
@@ -92,31 +92,37 @@ _structural watchlist empty._
 
 | Rank | Ticker | Score | 1d% | Stage | Signals |
 |--:|---|--:|--:|---|---|
-| 1 | GEN | 76.2 | +3.81% | Stage 2 uptrend | stage2_uptrend_intact, volume_expansion, macd_ |
-| 2 | TECH | 77.5 | +0.54% | Stage 2 uptrend | stage2_uptrend_intact, fresh_golden_cross_50_2 |
-| 3 | ABNB | 76.2 | +17.43% | Stage 2 uptrend | stage2_uptrend_intact, heavy_volume_spike_toda |
-| 4 | WY | 70.0 | +0.51% | Stage 2 uptrend | stage2_uptrend_intact, volume_expansion, fresh |
-| 5 | SWK | 68.8 | +2.82% | Stage 2 uptrend | stage2_uptrend_intact, at_52w_new_high, rs_lea |
-| 6 | GPN | 77.5 | -1.79% | Stage 2 uptrend | stage2_uptrend_intact, fresh_golden_cross_50_2 |
-| 7 | AIZ | 68.8 | -2.31% | Stage 2 uptrend | stage2_uptrend_intact, near_52w_high, rs_leade |
-| 8 | BR | 70.0 | +1.06% | Stage 1 basing | volume_expansion, fresh_golden_cross_20_50 |
-| 9 | TEAM | 73.8 | +35.31% | Stage 1 basing | heavy_volume_spike_today, high_short_interest, |
-| 10 | EA | 72.5 | -0.10% | Stage 2 uptrend | stage2_uptrend_intact, volume_expansion, heavy |
+| 1 | ABNB | 76.2 | +2.23% | Stage 2 uptrend | stage2_uptrend_intact, volume_expansion, macd_ |
+| 2 | AXON | 73.8 | +4.00% | Stage 2 uptrend | stage2_uptrend_intact, volume_expansion, fresh |
+| 3 | VRTX | 67.5 | +7.11% | Stage 2 uptrend | stage2_uptrend_intact, low_short_interest, mac |
+| 4 | DXCM | 66.2 | +3.32% | Stage 2 uptrend | stage2_uptrend_intact, macd_histogram_rising,  |
+| 5 | TEAM | 70.0 | -0.54% | Stage 1 basing | volume_expansion, high_short_interest, fresh_g |
+| 6 | TECH | 68.8 | -0.14% | Stage 2 uptrend | stage2_uptrend_intact, macd_histogram_rising,  |
+| 7 | EA | 72.5 | -0.10% | Stage 2 uptrend | stage2_uptrend_intact, volume_expansion, heavy |
+| 8 | PLTR | 66.2 | +3.67% | Stage 1 basing | volume_expansion, fresh_golden_cross_20_50, ma |
+| 9 | HUM | 66.2 | +0.67% | Stage 2 uptrend | stage2_uptrend_intact, macd_histogram_rising,  |
+| 10 | IQV | 63.8 | +1.09% | Stage 2 uptrend | stage2_uptrend_intact, fresh_golden_cross_50_2 |
 
 ## 10. Watch Items / Binary Risks (≤48h)
 
+- ⚠️ {'event': '美國成屋銷售', 'date': '2026-08-11', 'days_until': 1, 'affected_sectors': ['Real_Estate', 'Financials'], 'within_48h': True}
+- ⚠️ {'event': 'LITE 財報', 'date': '2026-08-11', 'days_until': 1, 'affected_sectors': ['Technology'], 'within_48h': True}
+- ⚠️ {'event': 'CAH 財報', 'date': '2026-08-11', 'days_until': 1, 'affected_sectors': ['Healthcare'], 'within_48h': True}
+- ⚠️ {'event': '美國 CPI／核心 CPI', 'date': '2026-08-12', 'days_until': 2, 'affected_sectors': ['Technology', 'Real_Estate', 'Utilities'], 'within_48h': True}
+- ⚠️ {'event': 'OPEC 月報', 'date': '2026-08-12', 'days_until': 2, 'affected_sectors': ['Energy'], 'within_48h': True}
+- ⚠️ {'event': 'EIA 原油庫存', 'date': '2026-08-12', 'days_until': 2, 'affected_sectors': ['Energy'], 'within_48h': True}
 - 🔴 binary · 2026-08-10 · SPG第二季財報 (earnings, impact high)
-- 🟡 high-impact · 2026-08-11 · CAH 財報 (earnings, impact high)
+- 🔴 binary · 2026-08-11 · CAH 財報 (earnings, impact high)
 - 🟡 high-impact · 2026-08-11 · Existing Home Sales (Jul) (econ, impact high)
 - 🔴 binary · 2026-08-11 · LITE、CRWV與SMCI財報 (earnings, impact high)
 - 🟡 high-impact · 2026-08-11 · SMCI 財報 (earnings, impact high)
 - 🔴 binary · 2026-08-11 · 美國7月成屋銷售 (econ, impact high)
+- 🔴 binary · 2026-08-11 · 美國成屋銷售 (econ, impact high)
 - 🔴 binary · 2026-08-12 · CPI MoM (Jul) (econ, impact high)
 - 🔴 binary · 2026-08-12 · CPI YoY (Jul) (econ, impact high)
 - 🔴 binary · 2026-08-12 · CSCO 財報 (earnings, impact high)
 - 🔴 binary · 2026-08-12 · Core CPI MoM (Jul) (econ, impact high)
 - 🟡 high-impact · 2026-08-12 · Core Inflation Rate MoM (Jul) (econ, impact high)
-- 🟡 high-impact · 2026-08-12 · Core Inflation Rate YoY (Jul) (econ, impact high)
 
 ---
 

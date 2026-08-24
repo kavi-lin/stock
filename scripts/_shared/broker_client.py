@@ -56,6 +56,9 @@ entirely on this distinction:
   declined to spend, which is the one thing the whole system exists to prevent.
 * :class:`BrokerRejected` — the broker rejected the request itself (4xx). That
   is a bug in the caller, not a quota condition; falling back would hide it.
+* :class:`BrokerVersionMismatch` — the client and daemon are different protocol
+  versions. This is fail-closed like a rejected request; callers must never
+  bypass a stale broker and spend quota behind its back.
 """
 
 from __future__ import annotations
@@ -64,6 +67,8 @@ import json
 import os
 import shutil
 import subprocess
+import threading
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -79,15 +84,20 @@ __all__ = [
     "DEFAULT_TIMEOUT_SECONDS",
     "ERROR_CLASSES",
     "TOKEN_ENV_VAR",
+    "CLIENT_BROKER_VERSION",
     "BrokerAuthError",
     "BrokerClient",
     "BrokerError",
+    "BrokerHandshake",
     "BrokerRefused",
     "BrokerRejected",
     "BrokerUnavailable",
+    "BrokerVersionMismatch",
     "Lease",
+    "RunStream",
     "default_base_url",
     "load_token",
+    "parse_run_stream",
 ]
 
 #: The broker binds loopback by default (DESIGN §3); Phase 8 fronts it with a
@@ -100,6 +110,12 @@ TOKEN_ENV_VAR = "LQB_API_TOKEN"
 #: spend real quota, and a caller blocked on a wedged daemon is worse off than
 #: one told promptly that the broker is unavailable.
 DEFAULT_TIMEOUT_SECONDS = 10.0
+
+#: Wire-contract version expected by this vendored client. It intentionally
+#: moves with the broker package version: every caller sends new work only when
+#: the daemon it reached was started from the same release.
+CLIENT_BROKER_VERSION = "0.3.0"
+HEARTBEAT_INTERVAL_SECONDS = 15.0
 
 #: Keychain coordinates, mirroring ``llm_quota_broker.server.tokens``. Duplicated
 #: rather than imported because this file is vendored; the drift test keeps the
@@ -168,9 +184,46 @@ class BrokerRejected(BrokerError):
         self.code = code
 
 
+class BrokerVersionMismatch(BrokerError):
+    """The reachable daemon and this client do not speak the same release."""
+
+    def __init__(self, handshake: BrokerHandshake) -> None:
+        super().__init__(handshake.message)
+        self.client_version = handshake.client_version
+        self.broker_version = handshake.broker_version
+        self.status = handshake.status
+
+
+@dataclass(frozen=True)
+class BrokerHandshake:
+    """Compatibility result from the public liveness endpoint."""
+
+    client_version: str
+    broker_version: str | None
+    status: str
+    message: str
+
+    @property
+    def compatible(self) -> bool:
+        return self.status == "compatible"
+
+    @property
+    def restart_required(self) -> bool:
+        return self.status == "broker_restart_required"
+
+
 def default_base_url(env: Mapping[str, str] | None = None) -> str:
     environ = os.environ if env is None else env
     return (environ.get(BASE_URL_ENV_VAR) or "").strip() or DEFAULT_BASE_URL
+
+
+def _version_key(value: str) -> tuple[int, int, int] | None:
+    """Comparable release core for direction hints; compatibility stays exact."""
+    core = value.strip().removeprefix("v").split("+", 1)[0].split("-", 1)[0]
+    parts = core.split(".")
+    if len(parts) != 3 or any(not part.isdigit() for part in parts):
+        return None
+    return int(parts[0]), int(parts[1]), int(parts[2])
 
 
 def load_token(env: Mapping[str, str] | None = None, *, use_keychain: bool = True) -> str | None:
@@ -231,6 +284,13 @@ class Lease:
     decision_id: str
     task_id: str
     expires_at: str
+    #: The model the broker chose; empty when it chose none. **Run this model.**
+    #: Agy meters its Gemini models and its Claude/GPT models in two pools that
+    #: refill independently, so a hold taken against one of them is true only
+    #: while the run stays inside it — dispatching something else spends quota
+    #: no reservation covers. Empty for every single-pool provider, and for a
+    #: task that pinned a model of its own, where the caller's choice stands.
+    model: str = ""
     #: Every candidate's evaluation, winners and losers alike. The losers carry
     #: the exclusion reasons, which is what an operator needs when the winner
     #: was not the expected provider.
@@ -238,21 +298,88 @@ class Lease:
     fallback_used: bool = False
     started: bool = False
     settled: bool = False
+    _heartbeat_stop: threading.Event = field(default_factory=threading.Event, repr=False)
+    _heartbeat_thread: threading.Thread | None = field(default=None, repr=False)
 
-    def start(self, *, model: str | None = None) -> dict[str, Any]:
+    def start(
+        self,
+        *,
+        model: str | None = None,
+        process_pid: int | None = None,
+        process_pgid: int | None = None,
+    ) -> dict[str, Any]:
         """Move the reservation to ACTIVE and open its execution row.
 
         Settlement needs that row, so :meth:`complete` calls this itself when a
         caller has not. ``model`` is recorded here and nowhere else — the
         settlement request has no field for it.
+
+        Defaults to :attr:`model` when the broker chose one, so the ledger
+        records what the reservation is actually against. Pass ``model``
+        explicitly only when the run really used something else; the recorded
+        value is what later calibrates that pool's burn rate, and a convenient
+        alias there ("gemini") costs a real observation.
         """
+        chosen = model if model is not None else (self.model or None)
+        body: dict[str, Any] = {} if chosen is None else {"model": chosen}
+        if process_pid is not None:
+            body["process_pid"] = int(process_pid)
+        if process_pgid is not None:
+            body["process_pgid"] = int(process_pgid)
         response = self.client.request(
             "POST",
             f"/v1/reservations/{self.reservation_id}/start",
-            body={} if model is None else {"model": model},
+            body=body,
         )
         self.started = True
+        self._start_heartbeat()
         return response
+
+    def heartbeat(
+        self, *, process_pid: int | None = None, process_pgid: int | None = None
+    ) -> dict[str, Any]:
+        body: dict[str, Any] = {}
+        if process_pid is not None:
+            body["process_pid"] = int(process_pid)
+        if process_pgid is not None:
+            body["process_pgid"] = int(process_pgid)
+        return self.client.request(
+            "POST", f"/v1/reservations/{self.reservation_id}/heartbeat", body=body
+        )
+
+    def attach_process(self, process_pid: int, process_pgid: int | None = None) -> None:
+        """Bind the lease to the real CLI child so a crashed owner cannot free it early."""
+        if not self.started:
+            self.start(process_pid=process_pid, process_pgid=process_pgid)
+            return
+        self.heartbeat(process_pid=process_pid, process_pgid=process_pgid)
+
+    def _start_heartbeat(self) -> None:
+        if self._heartbeat_thread is not None and self._heartbeat_thread.is_alive():
+            return
+        self._heartbeat_stop.clear()
+
+        def beat() -> None:
+            while not self._heartbeat_stop.wait(HEARTBEAT_INTERVAL_SECONDS):
+                try:
+                    self.heartbeat()
+                except BrokerError:
+                    # A daemon restart is recoverable. Persisted process identity
+                    # keeps the provider locked while this request cannot land.
+                    time.sleep(0)
+
+        self._heartbeat_thread = threading.Thread(
+            target=beat,
+            name=f"lqb-heartbeat-{self.reservation_id[:8]}",
+            daemon=True,
+        )
+        self._heartbeat_thread.start()
+
+    def _stop_heartbeat(self) -> None:
+        self._heartbeat_stop.set()
+        thread = self._heartbeat_thread
+        if thread is not None and thread is not threading.current_thread():
+            thread.join(timeout=1.0)
 
     def complete(
         self,
@@ -283,20 +410,28 @@ class Lease:
             # The broker caps this at 2000 characters; trim here so a long CLI
             # traceback becomes a short explanation rather than a 422.
             body["error_detail"] = str(error_detail)[:2_000]
-        response = self.client.request(
-            "POST", f"/v1/reservations/{self.reservation_id}/complete", body=body
-        )
-        self.settled = True
-        return response
+        self._stop_heartbeat()
+        try:
+            response = self.client.request(
+                "POST", f"/v1/reservations/{self.reservation_id}/complete", body=body
+            )
+            self.settled = True
+            return response
+        finally:
+            self._stop_heartbeat()
 
     def cancel(self, reason: str | None = None) -> dict[str, Any]:
         """Release the hold without recording a run."""
         body = {"reason": str(reason)[:500]} if reason else {}
-        response = self.client.request(
-            "POST", f"/v1/reservations/{self.reservation_id}/cancel", body=body
-        )
-        self.settled = True
-        return response
+        self._stop_heartbeat()
+        try:
+            response = self.client.request(
+                "POST", f"/v1/reservations/{self.reservation_id}/cancel", body=body
+            )
+            self.settled = True
+            return response
+        finally:
+            self._stop_heartbeat()
 
 
 class BrokerClient:
@@ -390,6 +525,68 @@ class BrokerClient:
     def health(self) -> dict[str, Any]:
         return self.request("GET", "/v1/health")
 
+    def handshake(self) -> BrokerHandshake:
+        """Compare this client with the daemon before dispatching new work."""
+        health = self.health()
+        raw_version = health.get("broker_version")
+        broker_version = str(raw_version).strip() if raw_version is not None else ""
+        if not broker_version:
+            return BrokerHandshake(
+                client_version=CLIENT_BROKER_VERSION,
+                broker_version=None,
+                status="broker_restart_required",
+                message=(
+                    "the broker is running an older release without version handshake; "
+                    "restart the broker"
+                ),
+            )
+
+        client_key = _version_key(CLIENT_BROKER_VERSION)
+        broker_key = _version_key(broker_version)
+        if client_key is None or broker_key is None:
+            return BrokerHandshake(
+                client_version=CLIENT_BROKER_VERSION,
+                broker_version=broker_version,
+                status="broker_restart_required",
+                message=(
+                    f"cannot compare client {CLIENT_BROKER_VERSION} with broker "
+                    f"{broker_version}; restart the broker"
+                ),
+            )
+        if broker_version == CLIENT_BROKER_VERSION:
+            return BrokerHandshake(
+                client_version=CLIENT_BROKER_VERSION,
+                broker_version=broker_version,
+                status="compatible",
+                message=f"client and broker are both {broker_version}",
+            )
+        if client_key >= broker_key:
+            return BrokerHandshake(
+                client_version=CLIENT_BROKER_VERSION,
+                broker_version=broker_version,
+                status="broker_restart_required",
+                message=(
+                    f"client {CLIENT_BROKER_VERSION} is newer than broker {broker_version}; "
+                    "restart the broker"
+                ),
+            )
+        return BrokerHandshake(
+            client_version=CLIENT_BROKER_VERSION,
+            broker_version=broker_version,
+            status="client_update_required",
+            message=(
+                f"broker {broker_version} is newer than client {CLIENT_BROKER_VERSION}; "
+                "update this client"
+            ),
+        )
+
+    def ensure_compatible(self) -> BrokerHandshake:
+        """Fail closed unless the public version handshake is an exact match."""
+        handshake = self.handshake()
+        if not handshake.compatible:
+            raise BrokerVersionMismatch(handshake)
+        return handshake
+
     def status(self) -> dict[str, Any]:
         return self.request("GET", "/v1/status")
 
@@ -429,7 +626,7 @@ class BrokerClient:
         ``preferred_providers`` / ``forbidden_providers`` are how a project keeps
         its domain rules while the broker keeps the quota decision: the project
         states which providers are acceptable for this piece of work, and the
-        broker picks among them on quota, confidence and success rate.
+        broker picks among them by projected quota headroom.
         """
         task: dict[str, Any] = {
             "project": project or self.project,
@@ -459,6 +656,7 @@ class BrokerClient:
         Returns the raw response, including the losing candidates. Raises
         :class:`BrokerRefused` when nothing could be recommended.
         """
+        self.ensure_compatible()
         response = self.request(
             "POST", "/v1/recommend", body={"task": dict(task), "reserve": bool(reserve)}
         )
@@ -492,13 +690,15 @@ class BrokerClient:
                 decision_id=str(response.get("decision_id") or ""),
                 candidates=_candidates(response),
             )
+        provider = str(response.get("recommended") or reservation.get("provider_id") or "")
         return Lease(
             client=self,
             reservation_id=str(reservation["reservation_id"]),
-            provider=str(response.get("recommended") or reservation.get("provider_id") or ""),
+            provider=provider,
             decision_id=str(response.get("decision_id") or ""),
             task_id=str(response.get("task_id") or task["task_id"]),
             expires_at=str(reservation.get("expires_at") or ""),
+            model=_selected_model(response, provider),
             candidates=_candidates(response),
             fallback_used=bool(response.get("fallback_used")),
         )
@@ -523,6 +723,243 @@ class BrokerClient:
                     pass
 
 
+@dataclass(frozen=True)
+class RunStream:
+    """What one CLI run said about itself, read from its structured output.
+
+    ``usage`` is ready to hand to :meth:`Lease.complete` unchanged, and empty
+    when the run reported nothing — which is a different fact from "it cost
+    nothing", and the broker records it as such.
+    """
+
+    answer: str | None = None
+    usage: dict[str, int] = field(default_factory=dict)
+    model: str | None = None
+    events_parsed: int = 0
+
+
+def parse_run_stream(provider: str, stdout: str) -> RunStream:
+    """Read a vendor CLI's structured run output: the answer and what it cost.
+
+    Every caller needs both, from the same bytes, and getting the second one
+    wrong is invisible. Before this existed each project extracted the answer
+    itself and reported usage only for the vendors whose envelope it happened to
+    understand, which on the live ledger meant 96% of Agy runs and 90% of Codex
+    runs settling as "no tokens" — indistinguishable, to anything reading the
+    ledger later, from runs that were free.
+
+    The field maps are the ones this repository validated against captured live
+    output (``adapters/parsers.py``, and the fixtures beside its tests), which is
+    the only reason they can be trusted: every one of them was wrong at some
+    point in a way that produced plausible small numbers rather than an error.
+
+    **The CLI has to be asked for this output.** In plain-text mode there is no
+    usage anywhere in the stream, and no parser recovers what was never printed:
+
+    * ``codex exec --json``
+    * ``agy --print <prompt> --output-format stream-json``
+    * ``claude -p --output-format json`` (or ``stream-json``)
+    * ``grok --single <prompt> --output-format json``
+
+    An unrecognised provider, unparseable output, or a run that simply said
+    nothing all return an empty :class:`RunStream` rather than raising. This
+    sits between a finished run and its settlement; refusing to parse must not
+    be the reason a hold leaks.
+    """
+    reader = _STREAM_READERS.get((provider or "").strip().lower())
+    if reader is None:
+        return RunStream()
+
+    answer: str | None = None
+    usage: dict[str, int] = {}
+    model: str | None = None
+    parsed = 0
+
+    for line in (stdout or "").splitlines():
+        stripped = line.strip()
+        if not stripped.startswith("{"):
+            continue
+        try:
+            event = json.loads(stripped)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(event, dict):
+            continue
+        parsed += 1
+        # Later wins for all three: these streams restate the running total and
+        # end with the final answer, so the last statement is the complete one.
+        found_answer, found_usage, found_model = reader(event)
+        if found_answer is not None:
+            answer = found_answer
+        if found_usage is not None:
+            usage = found_usage
+        if found_model:
+            model = found_model
+
+    return RunStream(answer=answer, usage=usage, model=model, events_parsed=parsed)
+
+
+_StreamFields = tuple[str | None, dict[str, int] | None, str | None]
+
+
+def _codex_event(event: Mapping[str, Any]) -> _StreamFields:
+    """``codex exec --json``: session events nest their payload under ``msg``."""
+    nested = event.get("msg")
+    payload: Mapping[str, Any] = nested if isinstance(nested, Mapping) else event
+
+    usage = None
+    block = payload.get("total_token_usage") or payload.get("last_token_usage")
+    if isinstance(block, Mapping):
+        usage = _usage_fields(
+            block,
+            input_tokens="input_tokens",
+            output_tokens="output_tokens",
+            cache_read_tokens="cached_input_tokens",
+            reasoning_tokens="reasoning_output_tokens",
+            total_tokens="total_tokens",
+        )
+
+    answer = None
+    message = payload.get("last_agent_message")
+    if isinstance(message, str) and message:
+        answer = message
+    elif payload.get("type") == "agent_message":
+        candidate = payload.get("message")
+        if isinstance(candidate, str) and candidate:
+            answer = candidate
+
+    model = None
+    for key in ("model", "model_name"):
+        candidate = payload.get(key)
+        if isinstance(candidate, str) and candidate:
+            model = candidate
+    return answer, usage, model
+
+
+def _agy_event(event: Mapping[str, Any]) -> _StreamFields:
+    """``--output-format stream-json``: each line names its event and nests it.
+
+    Both envelopes are read because Agy emits both, and looking only at the top
+    level is how this returned zero tokens for every real run once already.
+    """
+    name = event.get("event") or event.get("type")
+    nested = event.get(name) if isinstance(name, str) else None
+    bodies: list[Mapping[str, Any]] = [event]
+    if isinstance(nested, Mapping):
+        bodies.append(nested)
+
+    usage = None
+    model = None
+    for body in bodies:
+        block = body.get("usage")
+        if not isinstance(block, Mapping) and {"input_tokens", "total_tokens"} <= set(body):
+            block = body
+        if isinstance(block, Mapping):
+            usage = _usage_fields(
+                block,
+                input_tokens="input_tokens",
+                output_tokens="output_tokens",
+                thinking_tokens="thinking_tokens",
+                cache_read_tokens="cache_read_tokens",
+                total_tokens="total_tokens",
+            )
+        candidate = body.get("model")
+        if isinstance(candidate, str) and candidate:
+            model = candidate
+
+    answer = None
+    if name == "result":
+        text = event.get("result")
+        if isinstance(text, str):
+            answer = text
+        elif isinstance(nested, Mapping) and isinstance(nested.get("response"), str):
+            answer = nested["response"]
+    return answer, usage, model
+
+
+def _claude_event(event: Mapping[str, Any]) -> _StreamFields:
+    """``--output-format json`` and ``stream-json`` share one envelope."""
+    message = event.get("message")
+    block = event.get("usage")
+    if not isinstance(block, Mapping) and isinstance(message, Mapping):
+        block = message.get("usage")
+    usage = None
+    if isinstance(block, Mapping):
+        usage = _usage_fields(
+            block,
+            input_tokens="input_tokens",
+            output_tokens="output_tokens",
+            cache_read_tokens="cache_read_input_tokens",
+            cache_write_tokens="cache_creation_input_tokens",
+        )
+
+    candidate = event.get("model")
+    if not isinstance(candidate, str) and isinstance(message, Mapping):
+        candidate = message.get("model")
+    model = candidate if isinstance(candidate, str) and candidate else None
+
+    answer = None
+    if event.get("type") == "result":
+        text = event.get("result")
+        if isinstance(text, str):
+            answer = text
+    return answer, usage, model
+
+
+def _grok_event(event: Mapping[str, Any]) -> _StreamFields:
+    """``--output-format json``: one envelope, camelCase usage."""
+    block = event.get("usage")
+    usage = None
+    if isinstance(block, Mapping):
+        usage = _usage_fields(
+            block,
+            input_tokens="inputTokens",
+            output_tokens="outputTokens",
+            cache_read_tokens="cachedReadTokens",
+            reasoning_tokens="reasoningTokens",
+            total_tokens="totalTokens",
+            model_calls="modelCalls",
+        )
+
+    answer = None
+    for key in ("result", "response", "text"):
+        text = event.get(key)
+        if isinstance(text, str) and text:
+            answer = text
+            break
+
+    candidate = event.get("model")
+    model = candidate if isinstance(candidate, str) and candidate else None
+    return answer, usage, model
+
+
+#: Provider id (as the broker names it) to the reader for that CLI's output.
+_STREAM_READERS = {
+    "codex": _codex_event,
+    "agy": _agy_event,
+    "claude": _claude_event,
+    "grok": _grok_event,
+}
+
+
+def _usage_fields(block: Mapping[str, Any], **sources: str) -> dict[str, int]:
+    """Pull ``TokenUsage`` fields out of one vendor's usage block.
+
+    Absent keys are dropped rather than sent as ``0``: the broker distinguishes
+    "the vendor does not report this" from "this was zero", and filling in zeros
+    here would erase that distinction at the only point where it is still known.
+    """
+    usage: dict[str, int] = {}
+    for target, source in sources.items():
+        if source not in block:
+            continue
+        try:
+            usage[target] = max(0, int(block.get(source) or 0))
+        except (TypeError, ValueError):
+            continue
+    return usage
+
+
 def _clean_usage(usage: Mapping[str, int] | None) -> dict[str, int]:
     """Keep only the fields ``TokenUsage`` declares.
 
@@ -543,6 +980,21 @@ def _clean_usage(usage: Mapping[str, int] | None) -> dict[str, int]:
         "model_calls",
     )
     return {key: max(0, int(usage.get(key) or 0)) for key in allowed if key in usage}
+
+
+def _selected_model(response: Mapping[str, Any], provider: str) -> str:
+    """The winning candidate's ``model``, or ``""`` when the broker chose none.
+
+    Read from the candidate rather than from the reservation because the pool
+    choice belongs to the routing decision: the reservation records *which*
+    pool is held, and the model is how a caller lands in it.
+    """
+    if not provider:
+        return ""
+    for candidate in _candidates(response):
+        if str(candidate.get("provider") or "") == provider:
+            return str(candidate.get("model") or "")
+    return ""
 
 
 def _candidates(response: Mapping[str, Any]) -> list[dict[str, Any]]:

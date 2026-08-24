@@ -11,6 +11,10 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+
+from scripts.break_news import schema as agent_schema  # noqa: E402
+
 STORE_DIR = ROOT / "news" / "break_news_logs"
 
 REQUIRED_TOP_KEYS = {
@@ -28,6 +32,54 @@ VALID_STATES = {
 REQUIRED_COMMENT_KEYS = {
     "comment_id", "agent", "round", "ts", "parsed", "parse_status", "exit_code",
 }
+LINK_DIGEST_TOP_KEYS = {
+    "news_id", "schema_version", "state", "fetched_at", "source",
+    "headline", "summary", "origin",
+}
+LINK_DIGEST_SUMMARY_KEYS = {
+    "consensus_verdict", "merged_entities", "merged_relations",
+    "bull_summary", "bear_summary", "final_take", "final_take_by",
+    "rounds_completed", "closed_at", "close_reason", "divergence_note",
+}
+
+
+def _validate_merged_relations(path: Path, relations, label: str) -> list[str]:
+    issues: list[str] = []
+    if not isinstance(relations, list):
+        return [f"{path.name}: {label} is not a list"]
+    required = {
+        "support_count", "source_agents", "source_rounds",
+        "evidence_snippets", "provisional", "confidence_avg",
+    }
+    for i, rel in enumerate(relations):
+        if not isinstance(rel, dict):
+            issues.append(f"{path.name}: {label}[{i}] is not a dict")
+            continue
+        missing = required - set(rel)
+        if missing:
+            issues.append(f"{path.name}: {label}[{i}] missing keys: {sorted(missing)}")
+    return issues
+
+
+def _validate_link_digest(path: Path, payload: dict) -> list[str]:
+    """Validate the deterministic Link Digest projection stored beside debates."""
+    issues: list[str] = []
+    missing = LINK_DIGEST_TOP_KEYS - set(payload)
+    if missing:
+        issues.append(f"{path.name}: link_digest missing top keys: {sorted(missing)}")
+    if payload.get("state") != "closed":
+        issues.append(f"{path.name}: link_digest state must be 'closed'")
+    source = payload.get("source") or {}
+    missing = REQUIRED_SOURCE_KEYS - set(source)
+    if missing:
+        issues.append(f"{path.name}: link_digest source missing keys: {sorted(missing)}")
+    summary = payload.get("summary") or {}
+    missing = LINK_DIGEST_SUMMARY_KEYS - set(summary)
+    if missing:
+        issues.append(f"{path.name}: link_digest summary missing keys: {sorted(missing)}")
+    issues.extend(_validate_merged_relations(
+        path, summary.get("merged_relations"), "link_digest merged_relations"))
+    return issues
 
 
 def validate_file(path: Path) -> list[str]:
@@ -37,6 +89,12 @@ def validate_file(path: Path) -> list[str]:
             d = json.load(f)
     except (OSError, json.JSONDecodeError) as e:
         return [f"{path.name}: cannot read: {e}"]
+
+    # Link Digest writes a deterministic summary projection into the same
+    # directory but has no agent thread by design.  It needs a separate schema,
+    # otherwise the main validator is permanently red on a valid non-debate.
+    if d.get("origin") == "link_digest":
+        return _validate_link_digest(path, d)
 
     miss = REQUIRED_TOP_KEYS - set(d.keys())
     if miss:
@@ -69,6 +127,17 @@ def validate_file(path: Path) -> list[str]:
             is_strict = True
 
     thread = d.get("thread") or []
+    raw_payload_schema_version = (
+        (d.get("summary") or {}).get("agent_payload_schema_version"))
+    if raw_payload_schema_version is None:
+        payload_schema_version = 0
+    elif isinstance(raw_payload_schema_version, bool) or not isinstance(
+            raw_payload_schema_version, int):
+        issues.append(
+            f"{path.name}: summary.agent_payload_schema_version must be integer")
+        payload_schema_version = agent_schema.AGENT_PAYLOAD_SCHEMA_VERSION
+    else:
+        payload_schema_version = raw_payload_schema_version
     last_round = -1
     for i, c in enumerate(thread):
         miss = REQUIRED_COMMENT_KEYS - set(c.keys())
@@ -82,6 +151,40 @@ def validate_file(path: Path) -> list[str]:
                 f"{path.name}: thread[{i}].round={rnd} decreasing (prev={last_round})")
         last_round = max(last_round, rnd)
 
+        if payload_schema_version >= agent_schema.AGENT_PAYLOAD_SCHEMA_VERSION:
+            parse_status = c.get("parse_status")
+            if parse_status not in {"ok", "failed", "schema_failed"}:
+                issues.append(
+                    f"{path.name}: thread[{i}].parse_status invalid: {parse_status!r}")
+            if parse_status == "ok":
+                if c.get("exit_code") != 0:
+                    issues.append(
+                        f"{path.name}: thread[{i}] exit_code!=0 cannot have parse_status='ok'")
+                if c.get("schema_errors"):
+                    issues.append(
+                        f"{path.name}: thread[{i}] parse_status='ok' cannot have schema_errors")
+                # V4.132.0 — round alone no longer identifies the payload: round
+                # 0 side B answers A's opener, and side C arbitrates. One
+                # exception the side cannot express: when A's opener failed, B
+                # fell back to a blind `opening`, which `assessments` tells apart.
+                side = c.get("side")
+                kind = None
+                if side == "B" and rnd == 0 and isinstance(c.get("parsed"), dict) \
+                        and "assessments" not in c["parsed"]:
+                    kind = "opening"
+                for issue in agent_schema.validate_payload(
+                        c.get("parsed"), rnd, side, kind):
+                    issues.append(f"{path.name}: thread[{i}].parsed: {issue}")
+            else:
+                if c.get("parsed") is not None:
+                    issues.append(
+                        f"{path.name}: thread[{i}] parse_status={parse_status!r} "
+                        "must have parsed=null")
+                if not c.get("schema_errors"):
+                    issues.append(
+                        f"{path.name}: thread[{i}] parse_status={parse_status!r} "
+                        "missing schema_errors")
+
     if d.get("state") in ("closed", "partial_closed"):
         summary = d.get("summary")
         if not summary:
@@ -91,20 +194,8 @@ def validate_file(path: Path) -> list[str]:
                 if "final_takes_by_round" not in summary or not isinstance(summary["final_takes_by_round"], list):
                     issues.append(f"{path.name}: strict V2 gate failed: missing or invalid final_takes_by_round in summary")
                 
-                merged_relations = summary.get("merged_relations") or []
-                if not isinstance(merged_relations, list):
-                    issues.append(f"{path.name}: strict V2 gate failed: merged_relations is not a list")
-                else:
-                    for i, rel in enumerate(merged_relations):
-                        if not isinstance(rel, dict):
-                            issues.append(f"{path.name}: merged_relations[{i}] is not a dict")
-                            continue
-                        required_rel_keys = {"support_count", "source_agents", "source_rounds", "evidence_snippets", "provisional"}
-                        miss_rel = required_rel_keys - set(rel.keys())
-                        if miss_rel:
-                            issues.append(f"{path.name}: strict V2 gate failed: merged_relations[{i}] missing keys: {sorted(miss_rel)}")
-                        if "confidence_avg" not in rel:
-                            issues.append(f"{path.name}: strict V2 gate failed: merged_relations[{i}] missing confidence_avg key")
+                issues.extend(_validate_merged_relations(
+                    path, summary.get("merged_relations"), "merged_relations"))
 
     return issues
 

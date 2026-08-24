@@ -55,8 +55,13 @@ VERDICT_DEEP_EXTRA = [
 ]
 
 
-def fail(errors):
-    print(f"[validate_digest_output] ✗ schema drift (expected {EXPECTED_SCHEMA_VER}):", file=sys.stderr)
+def fail(errors, header=None):
+    # The first line is the only one that reliably survives: dashboard_server
+    # joins the first five and the UI shows roughly the first 60 characters, so
+    # a caller whose diagnosis differs from "schema drift" must say so here
+    # rather than in errors[0] (2026-08-14: a missing digest surfaced as
+    # "schema drift (expected V2.3):; - FR").
+    print(header or f"[validate_digest_output] ✗ schema drift (expected {EXPECTED_SCHEMA_VER}):", file=sys.stderr)
     for e in errors:
         print(f"  - {e}", file=sys.stderr)
     print(
@@ -331,6 +336,22 @@ def main(argv=None):
     if not path:
         fail([f"no *_digest.json found under {LOGS_DIR}"])
 
+    # Distinct from schema drift: nothing was written for today at all, so the
+    # glob fell back to an older file. The shape of that file is irrelevant —
+    # the run died upstream, and the message has to point there.
+    today_iso = datetime.now().strftime("%Y-%m-%d")
+    today_path = os.path.join(LOGS_DIR, f"{today_iso}_digest.json")
+    if not args.path and not os.path.exists(today_path):
+        fail(
+            [
+                f"expected news/news_logs/{today_iso}_digest.json — Phase 4 never wrote it.",
+                f"latest digest on disk: {os.path.basename(path)}",
+                "Check news/scan_logs/ for the last non-zero rc — finalize_digest.py "
+                "runs before this validator and refuses to assemble on bad input.",
+            ],
+            header=f"[validate_digest_output] ✗ 今日無 digest（{today_iso}）：Phase 4 未產出",
+        )
+
     with open(path, "r", encoding="utf-8") as fp:
         data = json.load(fp)
 
@@ -344,7 +365,6 @@ def main(argv=None):
     #      Server-triggered runs always use strict mode. Manual invocations
     #      (e.g. post-salvage) use loose mode.
     import os as _os, time as _t
-    today_iso = datetime.now().strftime("%Y-%m-%d")
     ts_str = (data.get("timestamp") or "").strip()
     if not ts_str.startswith(today_iso):
         fail([

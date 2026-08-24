@@ -9,7 +9,7 @@ JSON forces a Sonnet retry), and tangled append + validate into one prompt step.
 Now Phase 5 Step 1 calls this script with the entry JSON, and the script:
   1. Reads stdin / --from-file / --from-arg
   2. Validates basic top-level shape (full schema check is `validate_session_export.py`)
-  3. Acquires an exclusive flock on history.json
+  3. Acquires an exclusive flock on the stable history.json.lock inode
   4. Atomic write: tmp file + rename
   5. Mirrors top-level `ticker` / `final_action` / `export_date` to entry root if missing
 
@@ -23,9 +23,9 @@ Return codes:
     1 — schema error (malformed JSON, missing required top-level keys)
     2 — IO error (history.json unreadable / unwritable / lock failure)
 
-Idempotency: this script does NOT dedupe — protocol must call it exactly once
-per session. `register_thesis.py` runs AFTER this and back-fills `thesis_id` on
-the same (last) entry.
+Idempotency: this script does NOT dedupe — protocol must commit exactly once
+per session. Parallel runs call `register_thesis.py` on the isolated object
+before `--preserve-stamp` commits it.
 
 Fixing a session you already appended: `--replace-last`. It exists because the
 alternative is what actually happened on 2026-08-09 — a run whose validator went
@@ -35,8 +35,15 @@ one session (history already carries five such pairs). `--replace-last` is the
 same operation under the same lock, refusing to touch an entry that is not the
 same (ticker, export_date).
 
-Race safety: `fcntl.flock(LOCK_EX)` held for the full read-modify-write window;
-parallel callers serialize. Atomic rename ensures readers never see a half-write.
+Race safety: `fcntl.flock(LOCK_EX)` is held on `history.json.lock` for the full
+read-modify-write window. The lock must not live on history.json itself because
+the atomic rename replaces that inode; a waiter holding the old inode would then
+enter a second critical section and lose the first append.
+
+Parallel protocol flow uses two explicit modes:
+  * `--stamp-only --stamped-out SESSION.json` prepares one isolated entry.
+  * `--preserve-stamp` verifies that exact entry and commits it under the stable
+    lock after its per-session validators and renderer pass.
 
 V4.117.0 — this script also stamps `export_provenance`, which is what makes it
 the *only* sanctioned writer rather than merely the recommended one. See
@@ -60,7 +67,7 @@ PROVENANCE_SCHEMA = "export_provenance.v1"
 
 #: Keys the sanctioned post-append tools own. The digest must ignore them, or
 #: the approved chain would invalidate its own stamp one step after writing it:
-#:   append_session_export.py → apply_det_shadow.py --inplace → register_thesis.py
+#:   apply_det_shadow.py --inplace → stamp → register_thesis.py → commit
 #: Anything NOT listed here is decision content and freezes at append time.
 DIGEST_SKIP_ENTRY_KEYS = frozenset({"export_provenance"})
 DIGEST_SKIP_TRADE_KEYS = frozenset({
@@ -126,6 +133,17 @@ def _stamp_provenance(entry: dict) -> None:
         "appended_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "entry_digest": entry_digest(entry),
     }
+
+
+def _valid_provenance(entry: dict) -> bool:
+    """Prepared entries may be committed only when their stamp still matches."""
+    prov = entry.get("export_provenance")
+    return (
+        isinstance(prov, dict)
+        and prov.get("schema") == PROVENANCE_SCHEMA
+        and str(prov.get("writer") or "").startswith("append_session_export.py (V")
+        and prov.get("entry_digest") == entry_digest(entry)
+    )
 
 # Minimal top-level shape gate — full schema enforcement is delegated to
 # `validate_session_export.py`, which the protocol runs in Phase 5 Step 2.
@@ -199,25 +217,55 @@ def _same_session(a: dict, b: dict) -> bool:
     return all(ka) and ka == kb
 
 
+def _atomic_write_json(target: Path, payload) -> None:
+    """Atomic JSON write beside target; raises OSError to the caller."""
+    target.parent.mkdir(parents=True, exist_ok=True)
+    tmp = tempfile.NamedTemporaryFile(
+        mode="w", encoding="utf-8", delete=False,
+        dir=str(target.parent), prefix=f".{target.name}.", suffix=".tmp",
+    )
+    try:
+        json.dump(payload, tmp, indent=2, ensure_ascii=False)
+        tmp.write("\n")
+        tmp.flush()
+        os.fsync(tmp.fileno())
+        tmp.close()
+        os.replace(tmp.name, target)
+    except Exception:
+        try:
+            tmp.close()
+        except Exception:
+            pass
+        try:
+            os.unlink(tmp.name)
+        except OSError:
+            pass
+        raise
+
+
 def _atomic_append(entry: dict, history_path: Path | None = None,
                    replace_last: bool = False) -> int:
     target = history_path or HISTORY_JSON
     if not target.exists():
         _err(f"history.json not found at {target}", rc=2)
 
-    # Open for read+write, hold exclusive lock for the whole RMW window so
-    # concurrent appends serialize and register_thesis.py never reads a
-    # half-written file.
+    # The lock is a separate stable inode. Locking `target` itself is incorrect:
+    # `_atomic_write_json` replaces it, allowing a waiter on the old inode to
+    # enter concurrently with a later opener on the new one.
+    lock_path = target.with_name(target.name + ".lock")
     try:
-        fp = target.open("r+", encoding="utf-8")
+        lock_fp = lock_path.open("a+", encoding="utf-8")
     except OSError as e:
-        _err(f"history.json unreadable: {e}", rc=2)
+        _err(f"history lock unavailable: {e}", rc=2)
     try:
-        fcntl.flock(fp.fileno(), fcntl.LOCK_EX)
+        fcntl.flock(lock_fp.fileno(), fcntl.LOCK_EX)
         try:
-            existing = json.load(fp)
+            with target.open("r", encoding="utf-8") as fp:
+                existing = json.load(fp)
         except json.JSONDecodeError as e:
             _err(f"history.json is malformed JSON: {e}", rc=2)
+        except OSError as e:
+            _err(f"history.json unreadable: {e}", rc=2)
         if not isinstance(existing, list):
             _err("history.json must be a JSON array", rc=2)
         if replace_last:
@@ -237,30 +285,16 @@ def _atomic_append(entry: dict, history_path: Path | None = None,
         else:
             existing.append(entry)
 
-        # Atomic write via tempfile in the same directory + rename.
-        tmp = tempfile.NamedTemporaryFile(
-            mode="w", encoding="utf-8", delete=False,
-            dir=str(target.parent), prefix=".history.", suffix=".tmp",
-        )
         try:
-            json.dump(existing, tmp, indent=2, ensure_ascii=False)
-            tmp.write("\n")
-            tmp.flush()
-            os.fsync(tmp.fileno())
-            tmp.close()
-            os.replace(tmp.name, target)
+            _atomic_write_json(target, existing)
         except OSError as e:
-            try:
-                os.unlink(tmp.name)
-            except OSError:
-                pass
             _err(f"atomic write failed: {e}", rc=2)
         return len(existing)
     finally:
         try:
-            fcntl.flock(fp.fileno(), fcntl.LOCK_UN)
+            fcntl.flock(lock_fp.fileno(), fcntl.LOCK_UN)
         finally:
-            fp.close()
+            lock_fp.close()
 
 
 def main() -> int:
@@ -274,14 +308,44 @@ def main() -> int:
     ap.add_argument("--replace-last", action="store_true",
                     help="replace the last entry instead of appending — for fixing "
                          "a session you already appended (same ticker + export_date only)")
+    ap.add_argument("--stamp-only", action="store_true",
+                    help="stamp and write --stamped-out without appending")
+    ap.add_argument("--preserve-stamp", action="store_true",
+                    help="commit an already-stamped entry after verifying its digest")
+    ap.add_argument("--stamped-out", type=str,
+                    help="atomically write the exact stamped entry to this path")
     args = ap.parse_args()
+
+    if args.stamp_only and args.preserve_stamp:
+        _err("--stamp-only and --preserve-stamp are mutually exclusive")
+    if args.stamp_only and not args.stamped_out:
+        _err("--stamp-only requires --stamped-out")
+    if args.stamp_only and args.replace_last:
+        _err("--stamp-only cannot be combined with --replace-last")
 
     entry = _parse_entry(_read_input(args))
     _check_min_shape(entry)
     _mirror_top_level(entry)
-    # After the mirror, so the stamped digest covers the entry as it lands on
-    # disk rather than as it arrived.
-    _stamp_provenance(entry)
+    # After the mirror, so the digest covers the entry as it lands on disk.
+    if args.preserve_stamp:
+        if not _valid_provenance(entry):
+            _err("--preserve-stamp refused: provenance missing or digest mismatch")
+    else:
+        _stamp_provenance(entry)
+
+    if args.stamped_out:
+        stamped_path = Path(args.stamped_out)
+        history_path = Path(args.history) if args.history else HISTORY_JSON
+        if stamped_path.resolve() == history_path.resolve():
+            _err("--stamped-out must not overwrite history.json", rc=2)
+        try:
+            _atomic_write_json(stamped_path, entry)
+        except OSError as e:
+            _err(f"could not write stamped entry: {e}", rc=2)
+
+    if args.stamp_only:
+        print(f"[append_session_export] ✓ stamped only — {args.stamped_out}")
+        return 0
 
     new_len = _atomic_append(entry, Path(args.history) if args.history else None,
                              replace_last=args.replace_last)

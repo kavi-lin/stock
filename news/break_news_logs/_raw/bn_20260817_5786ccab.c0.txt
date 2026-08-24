@@ -1,0 +1,52 @@
+```json
+{
+  "commentary": "波克夏·海瑟威（Berkshire Hathaway）大幅加碼 170 億美元 Alphabet 持股，凸顯價值投資巨頭對其 AI 變現力與搜尋護城河的高度信心。此舉不僅為 GOOGL 估值提供強大支撐，亦可望帶動大型科技股與 Communication Services 板塊的重估行情。儘管司法部反壟斷裁決與 AI 基礎設施 Capex 龐大仍存隱憂，但巴菲特團隊的背書將顯著提振市場情緒。",
+  "bull_points": [
+    "波克夏大額增持確立估值底部，強烈提振市場與機構投資信心。",
+    "驗證 Alphabet 在搜尋護城河與雲端 AI 商業化上的現金流實力。"
+  ],
+  "bear_points": [
+    "龐大 AI Capex 支出短期內恐壓抑營業利益率與利潤成長速度。",
+    "美國司法部反壟斷訴訟與搜尋市場份額遭 AI 侵蝕的潛在風險。"
+  ],
+  "final_take": "波克夏大舉建倉確立底部，看多估值修復但需關注 Capex 回報。",
+  "entities": {
+    "tickers": [
+      "GOOGL",
+      "GOOG",
+      "BRK.A",
+      "BRK.B"
+    ],
+    "sectors": [
+      "Communication Services",
+      "Financials"
+    ],
+    "themes": [
+      "AI capex",
+      "Cloud computing",
+      "Value investing",
+      "Generative AI"
+    ],
+    "tech_keywords": [
+      "Gemini",
+      "TPU",
+      "Search AI"
+    ]
+  },
+  "relations": [
+    {
+      "subject": "ticker:GOOGL",
+      "predicate": "BENEFITS_FROM",
+      "object": "theme:value_investing"
+    },
+    {
+      "subject": "ticker:BRK.B",
+      "predicate": "CATALYST_FOR",
+      "object": "ticker:GOOGL"
+    }
+  ],
+  "done": false,
+  "confidence": 0.88,
+  "rationale_short": "波克夏龐大資金背書顯著降低估值下行風險並提升市場信心。"
+}
+```

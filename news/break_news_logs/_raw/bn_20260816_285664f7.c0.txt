@@ -1,0 +1,62 @@
+```json
+{
+  "commentary": "Workday傳出高達510億美元的收購談判，為近年規模最大的企業級SaaS併購案。此舉有望為受AI排擠效應壓抑的軟體板塊設立估值底部，帶動整體雲端應用族群展開估值修復。然而，龐大交易金額將面臨反壟斷審查與融資結構考驗，若談判破局恐引發短期市場波動。",
+  "bull_points": [
+    "巨額溢價併購為企業軟體板塊確立估值底線，推動整體SaaS評價回升。",
+    "凸顯Workday在HCM與財務ERP領域的深厚護城河與穩定現金流價值。"
+  ],
+  "bear_points": [
+    "510億美元規模極大，面臨反壟斷嚴審與高利率環境下的融資執行風險。",
+    "若收購案最終破局，可能引發短線套利資金退潮與股價大幅回檔。"
+  ],
+  "final_take": "軟體板塊迎來估值重估契機，短線看多但需留意併購審查風險。",
+  "entities": {
+    "tickers": [
+      "WDAY",
+      "CRM",
+      "NOW",
+      "SAP",
+      "ORCL"
+    ],
+    "sectors": [
+      "Information Technology"
+    ],
+    "themes": [
+      "M&A activity",
+      "Enterprise SaaS",
+      "SaaS re-rating",
+      "Private Equity buyout"
+    ],
+    "tech_keywords": [
+      "HCM Cloud",
+      "Enterprise ERP",
+      "AI Agent SaaS"
+    ]
+  },
+  "relations": [
+    {
+      "subject": "ticker:WDAY",
+      "predicate": "BENEFITS_FROM",
+      "object": "theme:ma_activity"
+    },
+    {
+      "subject": "theme:ma_activity",
+      "predicate": "CATALYST_FOR",
+      "object": "theme:saas_re_rating"
+    },
+    {
+      "subject": "ticker:CRM",
+      "predicate": "BENEFITS_FROM",
+      "object": "theme:saas_re_rating"
+    },
+    {
+      "subject": "ticker:WDAY",
+      "predicate": "HEADWIND_FROM",
+      "object": "regulatory:antitrust_scrutiny"
+    }
+  ],
+  "done": false,
+  "confidence": 0.78,
+  "rationale_short": "巨型併購案重塑SaaS估值底線，然巨額交易面臨嚴格監管審查。"
+}
+```

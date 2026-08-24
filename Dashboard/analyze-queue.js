@@ -10,7 +10,7 @@
  *   AnalyzeQueue.startPolling(intervalMs)  begin periodic polling (default 4000ms)
  *
  * State shape:
- *   { active: { ticker, elapsed_sec, started_at } | null,
+ *   { active: { ticker, elapsed_sec, started_at } | null, // invest-only view
  *     queue:  [{ ticker, risk_tolerance, enqueued_at }],
  *     recent: [{ ticker, status, ended_at, error? }] }
  */
@@ -39,13 +39,16 @@
       // v1.61: queue is now unified across all protocols. This widget cares
       // about invest only (ticker analyses on index.html). Filter the rest out.
       const isInvestEntry = q => q && (q.name === 'invest' || !q.name) && (q.ticker || (q.params || {}).ticker);
-      const investActive = next.active && (next.active.name === 'invest' || !next.active.name) && next.active.ticker;
+      const activeRuns = Array.isArray(next.active)
+        ? next.active
+        : (next.active ? [next.active] : []);
+      const investActive = activeRuns.find(a => a && (a.name === 'invest' || !a.name) && a.ticker) || null;
       const investQueue  = (Array.isArray(next.queue) ? next.queue : []).filter(isInvestEntry).map(q => ({
         ...q, ticker: q.ticker || (q.params || {}).ticker,
       }));
       const investRecent = (Array.isArray(next.recent) ? next.recent : []).filter(r => r && r.ticker);
       _state = {
-        active: investActive ? next.active : null,
+        active: investActive,
         queue:  investQueue,
         recent: investRecent,
       };

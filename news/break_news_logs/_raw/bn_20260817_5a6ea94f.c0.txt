@@ -1,0 +1,47 @@
+```json
+{
+  "commentary": "CrowdStrike (CRWD) 股價在 Q2 財報前創 52 週新高，反映市場對 Falcon 平台整合優勢與資安支出韌性具強烈信心。然而在高估值與高預期下，市場對 ARR 成長指引及大客戶模組擴展容錯率極低，需慎防財報公布後的利多出盡與獲利了結賣壓。",
+  "bull_points": [
+    "Falcon 平台模組滲透率提升，推動 ARR 與自由現金流成長。",
+    "企業對於雲端安全與 AI 威脅防禦之預算優先順序穩固。"
+  ],
+  "bear_points": [
+    "股價已達 52 週高點，財報指引若有微幅落差恐引發回檔。",
+    "宏觀環境變數可能拉長大型企業資安採購的審批週期。"
+  ],
+  "final_take": "長期維持看多，但財報前夕高估值使短期風險報酬比偏中性。",
+  "entities": {
+    "tickers": [
+      "CRWD"
+    ],
+    "sectors": [
+      "Information Technology"
+    ],
+    "themes": [
+      "Cybersecurity",
+      "Cloud Security",
+      "AI Security"
+    ],
+    "tech_keywords": [
+      "EDR",
+      "XDR",
+      "Falcon Platform"
+    ]
+  },
+  "relations": [
+    {
+      "subject": "ticker:CRWD",
+      "predicate": "BENEFITS_FROM",
+      "object": "theme:cybersecurity"
+    },
+    {
+      "subject": "ticker:CRWD",
+      "predicate": "CATALYST_FOR",
+      "object": "event:q2_earnings"
+    }
+  ],
+  "done": false,
+  "confidence": 0.75,
+  "rationale_short": "股價創高反映市場預期偏熱，財報前夕宜留意估值修正風險。"
+}
+```

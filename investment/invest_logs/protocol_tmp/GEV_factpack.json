@@ -1,0 +1,499 @@
+{
+  "ticker": "GEV",
+  "generated_at": "2026-08-21T01:10:27",
+  "phase0_source": "SECTOR_CACHE",
+  "phase0_stale_hours": 1.6,
+  "phase0": {
+    "market_regime": "RISK_ON",
+    "exposure_ceiling": "75-90%",
+    "political_risk_summary": {
+      "active_trump_trades": [
+        "伊朗經濟孤立與油價風險",
+        "美國關鍵礦物補助利多"
+      ],
+      "named_targets_today": [
+        "Iran"
+      ],
+      "fear_greed_status": "Greed"
+    },
+    "actionable_themes": [
+      "AI與半導體",
+      "醫療與生技",
+      "黃金與關鍵礦物",
+      "清潔能源"
+    ],
+    "ftd_days_since": 12,
+    "ftd_status_text": "FTD CONFIRMED, day 12 post-confirmation (rally-day 16; FTD originally confirmed on rally-day 4)",
+    "macro_summary": null,
+    "_market_signals": null
+  },
+  "phase0_validator_rc": 1,
+  "bundles": {
+    "ticker_data_bundle": {
+      "status": "ok",
+      "fetched_at": "2026-08-20T17:09:45.624202Z",
+      "scoring": {
+        "_source": "finnhub",
+        "price": 945.12,
+        "previousClose": 987.46,
+        "dayHigh": 986,
+        "dayLow": 942.357,
+        "mktCap": 281575870658.6228,
+        "peRatio": 29.3342,
+        "epsTTM": 34.9802,
+        "dividendYield": null,
+        "priceToBookRatio": 15.8639,
+        "forwardPE": 45.54201,
+        "pegRatio": 0.65507,
+        "roeTTM": 83.39,
+        "debtToEquity": 0.0293,
+        "fcfPerShareTTM": 42.0728,
+        "nextEarningsDate": "2026-10-28"
+      }
+    },
+    "earnings_analyst_bundle": {
+      "status": "ok",
+      "last_earnings_date": "2026-06-30",
+      "next_earnings_est": "2026-10-28",
+      "composite_score": 80,
+      "verdict": "STRONG",
+      "score_components": {
+        "quality": 30,
+        "growth": 25,
+        "valuation": 10,
+        "analyst": 15
+      },
+      "quality_flags": [
+        "cash_conversion_positive_gap_clean"
+      ],
+      "margins_8q": [
+        {
+          "date": "2026-06-30",
+          "period": "Q2",
+          "gross": 0.21262608069164265,
+          "operating": 0.058987752161383286,
+          "net": 0.06015850144092219
+        },
+        {
+          "date": "2026-03-31",
+          "period": "Q1",
+          "gross": 0.1907056430024628,
+          "operating": 0.01916693436128065,
+          "net": 0.5080843773423279
+        },
+        {
+          "date": "2025-12-31",
+          "period": "Q4",
+          "gross": 0.21184738955823293,
+          "operating": 0.054855786783497625,
+          "net": 0.3344286235852501
+        },
+        {
+          "date": "2025-09-30",
+          "period": "Q3",
+          "gross": 0.19039020964991474,
+          "operating": 0.0367138128197412,
+          "net": 0.0453405557227405
+        },
+        {
+          "date": "2025-06-30",
+          "period": "Q2",
+          "gross": 0.20261222697837777,
+          "operating": 0.04148831083305894,
+          "net": 0.056415322138074854
+        },
+        {
+          "date": "2025-03-31",
+          "period": "Q1",
+          "gross": 0.1892799403059321,
+          "operating": 0.009451560751150355,
+          "net": 0.031588110931476183
+        },
+        {
+          "date": "2024-12-31",
+          "period": "Q4",
+          "gross": 0.20107974995264255,
+          "operating": 0.0561659405190377,
+          "net": 0.045842015533244934
+        },
+        {
+          "date": "2024-09-30",
+          "period": "Q3",
+          "gross": 0.12442499719510827,
+          "operating": -0.040278245259732975,
+          "net": -0.010770784247728038
+        }
+      ],
+      "yoy_growth": {
+        "revenue_yoy": 0.2187,
+        "earnings_yoy": 0.2996,
+        "operating_yoy": 0.7328,
+        "revenue_qoq": 0.189,
+        "growth_acceleration": "accelerating"
+      },
+      "balance_health": {
+        "working_capital": -8397000000,
+        "current_ratio": 0.85,
+        "debt_to_equity": 0.302,
+        "net_cash": 9160000000
+      },
+      "cash_flow_quality": {
+        "fcf_margin": 0.4598,
+        "cash_conversion": 1.484,
+        "capex_intensity": 0.0348,
+        "ocf_ttm": 14140000000,
+        "ni_ttm": 9529000000
+      },
+      "valuation": {
+        "dcf_intrinsic": 358.18214023931233,
+        "dcf_levered_intrinsic": 703.1953067382403,
+        "dcf_vs_price_pct": -0.624,
+        "price_target_consensus": 1256.29,
+        "pt_upside_pct": 0.3188,
+        "pt_dispersion_pct": 39.9,
+        "pt_news": [
+          {
+            "date": null,
+            "analystCompany": "Mizuho Securities",
+            "priceTarget": 949,
+            "adjPriceTarget": 949,
+            "publishedDate": "2026-07-24T12:13:00.000Z"
+          },
+          {
+            "date": null,
+            "analystCompany": "RBC Capital",
+            "priceTarget": 1225,
+            "adjPriceTarget": 1225,
+            "publishedDate": "2026-07-23T13:32:47.000Z"
+          },
+          {
+            "date": null,
+            "analystCompany": "Oppenheimer",
+            "priceTarget": 1338,
+            "adjPriceTarget": 1338,
+            "publishedDate": "2026-07-23T12:14:44.000Z"
+          },
+          {
+            "date": null,
+            "analystCompany": "Guggenheim",
+            "priceTarget": 1450,
+            "adjPriceTarget": 1450,
+            "publishedDate": "2026-07-23T11:22:00.000Z"
+          },
+          {
+            "date": null,
+            "analystCompany": "Bernstein",
+            "priceTarget": 1298,
+            "adjPriceTarget": 1298,
+            "publishedDate": "2026-07-23T10:50:36.000Z"
+          },
+          {
+            "date": null,
+            "analystCompany": "Bernstein",
+            "priceTarget": 1206,
+            "adjPriceTarget": 1206,
+            "publishedDate": "2026-06-16T20:23:50.000Z"
+          },
+          {
+            "date": null,
+            "analystCompany": "Bernstein",
+            "priceTarget": 1208,
+            "adjPriceTarget": 1208,
+            "publishedDate": "2026-06-16T20:18:08.000Z"
+          },
+          {
+            "date": null,
+            "analystCompany": "Jefferies",
+            "priceTarget": 1210,
+            "adjPriceTarget": 1210,
+            "publishedDate": "2026-06-11T13:04:00.000Z"
+          }
+        ]
+      },
+      "analyst": {
+        "rating_trend": "insufficient_data",
+        "grades_summary": {
+          "strongBuy": 0,
+          "buy": 0,
+          "hold": 0,
+          "sell": 0,
+          "strongSell": 0,
+          "strong_buy_pct": null,
+          "total_analysts": 0
+        },
+        "grades_news": [
+          {
+            "date": null,
+            "gradingCompany": "BMO Capital",
+            "previousGrade": "Outperform",
+            "newGrade": "Outperform",
+            "action": "hold"
+          },
+          {
+            "date": null,
+            "gradingCompany": "Morgan Stanley",
+            "previousGrade": "Overweight",
+            "newGrade": "Underweight",
+            "action": "downgrade"
+          },
+          {
+            "date": null,
+            "gradingCompany": "William Blair",
+            "previousGrade": "Outperform",
+            "newGrade": "Outperform",
+            "action": "hold"
+          },
+          {
+            "date": null,
+            "gradingCompany": "Jefferies",
+            "previousGrade": "Buy",
+            "newGrade": "Buy",
+            "action": "hold"
+          },
+          {
+            "date": null,
+            "gradingCompany": "RBC Capital",
+            "previousGrade": "Outperform",
+            "newGrade": "Outperform",
+            "action": "hold"
+          },
+          {
+            "date": null,
+            "gradingCompany": "Oppenheimer",
+            "previousGrade": "Outperform",
+            "newGrade": "Outperform",
+            "action": "hold"
+          },
+          {
+            "date": null,
+            "gradingCompany": "Guggenheim",
+            "previousGrade": "Buy",
+            "newGrade": "Buy",
+            "action": "hold"
+          },
+          {
+            "date": null,
+            "gradingCompany": "Bernstein",
+            "previousGrade": "Outperform",
+            "newGrade": "Outperform",
+            "action": "hold"
+          },
+          {
+            "date": null,
+            "gradingCompany": "Bernstein",
+            "previousGrade": null,
+            "newGrade": "Outperform",
+            "action": "initialise"
+          },
+          {
+            "date": null,
+            "gradingCompany": "Jefferies",
+            "previousGrade": "Buy",
+            "newGrade": "Buy",
+            "action": "hold"
+          }
+        ]
+      },
+      "report_path": "GEV_2026-06-30"
+    },
+    "peer_bundle": {
+      "status": "ok",
+      "peers": [
+        "CWEN",
+        "ENLT",
+        "ORA"
+      ],
+      "peer_selector": "exact_industry_business_model_v1",
+      "peer_exclusions": [
+        {
+          "symbol": "AQN",
+          "reason": "industry_mismatch",
+          "subject_industry": "Renewable Utilities",
+          "peer_industry": "Diversified Utilities"
+        },
+        {
+          "symbol": "CEG",
+          "reason": "industry_mismatch",
+          "subject_industry": "Renewable Utilities",
+          "peer_industry": "Independent Power Producers"
+        },
+        {
+          "symbol": "DUK",
+          "reason": "industry_mismatch",
+          "subject_industry": "Renewable Utilities",
+          "peer_industry": "Regulated Electric"
+        },
+        {
+          "symbol": "NEE",
+          "reason": "industry_mismatch",
+          "subject_industry": "Renewable Utilities",
+          "peer_industry": "Regulated Electric"
+        },
+        {
+          "symbol": "SO",
+          "reason": "industry_mismatch",
+          "subject_industry": "Renewable Utilities",
+          "peer_industry": "Regulated Electric"
+        }
+      ],
+      "subject_industry": "Renewable Utilities",
+      "peer_pe_median": 53.0625,
+      "peer_market_cap_median": 6782628865,
+      "peer_beta_median": 0.895,
+      "peer_sector": "Utilities",
+      "peer_ev_ebitda_median": 22.320769066707246,
+      "peer_ev_sales_median": 10.396731521601017,
+      "peer_pb_median": 2.6124283727270665,
+      "peer_ratios_n": 3,
+      "self_ratios_ttm": {
+        "ev_to_ebitda_ttm": 28.007666066481992,
+        "ev_to_sales_ttm": 5.865848452910462,
+        "roe_ttm": 0.8339933921186793,
+        "price_to_book_ttm": 21.192105043071006,
+        "book_value_per_share_ttm": 48.9365671641791,
+        "net_profit_margin_ttm": 0.23034712821504544,
+        "pe_ttm": 26.822695035460992
+      },
+      "range_peer_cohort": {
+        "eligible": false,
+        "reason": "no_curated_peer_cohort",
+        "scope": "range_only",
+        "peer_count": 0,
+        "peers": {}
+      },
+      "range_peer_scenario": {
+        "eligible": false,
+        "reason": "no_curated_peer_cohort",
+        "scope": "range_only",
+        "peer_count": 0,
+        "peers": {},
+        "value": null
+      }
+    },
+    "fmp_supp_bundle": {
+      "ticker": "GEV",
+      "as_of_date": "2026-08-21",
+      "cache_key": "GEV_2026-08-21",
+      "schema_version": "V1.1",
+      "data_source": "FMP HTTP REST (FMP-only; no Finnhub)",
+      "quality_scores": {
+        "altmanZScore": 3.234560522652971,
+        "piotroskiScore": 6,
+        "altman_zone": "safe",
+        "piotroski_strength": "moderate",
+        "workingCapital": -8397000000,
+        "totalAssets": 80800000000,
+        "retainedEarnings": 11296000000,
+        "ebit": 7879000000,
+        "totalLiabilities": 67685000000,
+        "revenue": 41368000000,
+        "_note": "altman: <1.81=danger, 1.81-2.99=grey, >2.99=safe; piotroski: >=7=strong, <=2=weak",
+        "source": "FMP /stable/financial-scores"
+      },
+      "owner_earnings": {
+        "period": "2026-Q2",
+        "as_of_date": "2026-06-30",
+        "ownersEarnings": 5359549460,
+        "ownersEarningsPerShare": 19.85,
+        "maintenanceCapex": -132450540,
+        "growthCapex": -253549460,
+        "averagePPE": 0.12722,
+        "qoq_growth": 0.0814,
+        "history_quarters": 5,
+        "source": "FMP /stable/owner-earnings"
+      },
+      "insider_summary": {
+        "quarters": [
+          {
+            "year": 2026,
+            "quarter": 2,
+            "acquired_disposed_ratio": 1.4,
+            "total_acquired_shares": 59499,
+            "total_disposed_shares": 88027,
+            "acquired_transactions": 21,
+            "disposed_transactions": 15,
+            "total_purchases": 0,
+            "total_sales": 1
+          },
+          {
+            "year": 2026,
+            "quarter": 1,
+            "acquired_disposed_ratio": 0.9574,
+            "total_acquired_shares": 204160,
+            "total_disposed_shares": 227475,
+            "acquired_transactions": 45,
+            "disposed_transactions": 47,
+            "total_purchases": 0,
+            "total_sales": 1
+          },
+          {
+            "year": 2025,
+            "quarter": 4,
+            "acquired_disposed_ratio": 0.5,
+            "total_acquired_shares": 17730,
+            "total_disposed_shares": 26303,
+            "acquired_transactions": 1,
+            "disposed_transactions": 2,
+            "total_purchases": 0,
+            "total_sales": 0
+          },
+          {
+            "year": 2025,
+            "quarter": 3,
+            "acquired_disposed_ratio": 0,
+            "total_acquired_shares": 0,
+            "total_disposed_shares": 3300,
+            "acquired_transactions": 0,
+            "disposed_transactions": 1,
+            "total_purchases": 0,
+            "total_sales": 1
+          }
+        ],
+        "latest_trend": "accumulating",
+        "source": "FMP /stable/insider-trading/statistics"
+      },
+      "institutional": {},
+      "congressional_trades": {
+        "lookback_days": 180,
+        "senate_count": 0,
+        "house_count": 3,
+        "buy_count": 0,
+        "sell_count": 3,
+        "net_signal": "bearish",
+        "most_recent_date": "2026-06-16",
+        "source": "FMP /stable/senate-trades + house-trades"
+      },
+      "ma_events": {
+        "lookback_days": 180,
+        "events": [],
+        "source": "FMP /stable/mergers-acquisitions-latest"
+      },
+      "esg": {},
+      "executive_compensation": {},
+      "comp_benchmark": {},
+      "employee_history": {
+        "latest_period": "2025-12-31",
+        "latest_count": 75000,
+        "one_year_pct": 0.0,
+        "cagr_5y_pct": null,
+        "expansion_signal": false,
+        "layoff_signal": false,
+        "data_points": 2,
+        "source": "FMP /stable/historical-employee-count"
+      },
+      "_fetch_stats": {
+        "fmp_calls": 12,
+        "fmp_failures": 3,
+        "cached": true
+      }
+    }
+  },
+  "bundles_loaded": {
+    "ticker_data_bundle": "ok",
+    "earnings_analyst_bundle": "ok",
+    "peer_bundle": "ok",
+    "fmp_supp_bundle": "ok"
+  },
+  "earnings_prewarm": "ok",
+  "forecaster_prewarm": "unavailable: insufficient PE history from ratios endpoint"
+}

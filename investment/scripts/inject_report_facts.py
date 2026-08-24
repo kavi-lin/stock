@@ -166,6 +166,17 @@ def render_fair_value_anchors(t):
         cagr_s = f"{cagr * 100:.1f}%" if isinstance(cagr, (int, float)) else "N/A"
         out += [f"- 隱含預期 (implied_expectations): 現價隱含 5Y FCF CAGR {cagr_s}"
                 f"（out_of_range: {fmt(ie.get('implied_out_of_range'))}，WACC {fmt(ie.get('wacc_used'))}）"]
+    forward = t.get("forward_validation") or {}
+    if forward:
+        out += [
+            f"- 前瞻驗證 (forward_validation): **{fmt(forward.get('status'))}**；"
+            f"DCF gap {fmt(forward.get('dcf_gap_pct'), pct=True)}；"
+            f"支持 {', '.join(forward.get('supported_checks') or []) or '無'}；"
+            f"失敗 {', '.join(forward.get('failed_checks') or []) or '無'}",
+            f"- Valuation score: {fmt(forward.get('valuation_score_before'))} → "
+            f"{fmt(forward.get('valuation_score_effective'))}；"
+            f"T5 hard downgrade eligible: {fmt(forward.get('t5_hard_downgrade_eligible'))}",
+        ]
     return "\n".join(out)
 
 

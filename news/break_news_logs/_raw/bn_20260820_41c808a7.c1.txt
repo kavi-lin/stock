@@ -1,0 +1,8 @@
+```json
+{
+  "commentary": "CoreWeave 的高速營收成長凸顯專用 AI 算力雲需求爆發，而 Arista Networks (ANET) 雖基期較高，但在後端網路與乙太網 (Ethernet) 轉型中穩健受惠。兩者營收趨勢反映算力部署重心正從純 GPU 堆疊外溢至高速網路架構，長期利好 ANET 等網路硬體龍頭，但短線需防範客戶集中度與資本支出波動風險。",
+  "bull_points": [
+    "AI 算力擴張推升 800G 與乙太網需求，ANET 營收基本面扎實。",
+    "CoreWeave 爆發性增長印證 AI 基礎設施支出力道未減。"
+  ],
+  "bear_points":

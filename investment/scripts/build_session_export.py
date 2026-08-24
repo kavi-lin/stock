@@ -6,7 +6,7 @@ run. Reads the artifacts each earlier phase already left on disk, takes ONE
 model-authored qualitative file for the parts no script can derive, and emits BOTH
 Phase 5 inputs:
 
-  * the session export entry  → stdout (pipe into `append_session_export.py`)
+  * the session export entry  → stdout, or `--session-out` for parallel runs
   * the phase_inputs bundle   → `invest_logs/phase_inputs/<DATE>_<TICKER>.json`
 
 Why this exists
@@ -42,12 +42,15 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
+
+import validate_phase0 as phase0_gate
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 
 SCHEMA = "p5-qualitative/1.0"
 BUNDLE_VERSION = "P5-INPUTS/1.0"
-SESSION_EXPORT_VERSION = "V5.3"
+SESSION_EXPORT_VERSION = "V5.4"
 LANES = ("fundamentals", "sentiment", "news", "technical", "valuation")
 
 # Keys the PM may supply. Anything outside this set is rejected, so the file cannot
@@ -81,7 +84,8 @@ DERIVED_KEYS = {
     "risk_reward_ratio", "position_size_pct", "staged_split", "risk_audit",
     "trade_plan_builder_version", "mandatory_risk_flags", "time_horizon",
     "valuation_pack", "fair_value_summary", "fair_value_range",
-    "implied_expectations", "valuation_archetype_shadow", "valuation_explained_range",
+    "implied_expectations", "valuation_archetype_shadow", "forward_validation",
+    "valuation_explained_range",
     "valuation_reviewer_gate", "analysis_price",
     "consensus_bonus_applied", "transition_data_stale_or_inconsistent",
     "det_shadow", "lane_contract", "provenance", "producer_version",
@@ -96,6 +100,13 @@ LANE_REQUIRED = {"signal", "key_factors", "risk_flags"}
 # score/confidence the decision math consumed. Retyping them is the two-source drift
 # render_investment_report.check_consistency() exists to catch — on 2026-08-10 it did.
 LANE_REJECTED = {"score", "confidence"}
+
+
+def _engine_version_at_least(value, floor):
+    try:
+        return tuple(map(int, str(value).split("."))) >= tuple(map(int, floor.split(".")))
+    except (TypeError, ValueError):
+        return False
 
 
 class BuildError(SystemExit):
@@ -133,13 +144,25 @@ def _run_json(args, what):
         raise BuildError(f"{what} 的輸出不是合法 JSON: {e}")
 
 
+def _resolve_phase0_path(ticker, supplied=None):
+    """Resolve the shared snapshot once; an explicit factpack path always wins."""
+    if supplied:
+        return supplied if os.path.isabs(supplied) else os.path.join(ROOT, supplied)
+    path = phase0_gate.find_latest(
+        ticker, logs_dir=os.path.join(ROOT, "investment/invest_logs"))
+    if not path:
+        raise BuildError(
+            "找不到 shared Phase 0 snapshot。重跑 Phase 0，產生 "
+            "investment/invest_logs/YYYY-MM-DD_phase0.json。")
+    return path
+
+
 def load_artifacts(ticker, date, *, p3_input, p4_input, quant_path=None, phase0_path=None):
     """Collect every deterministic input. Missing artifact → rc=1 naming the file."""
     t = ticker.upper()
     quant_path = quant_path or os.path.join(
         ROOT, f"investment/invest_logs/{date}_{t}_pf_quant.json")
-    phase0_path = phase0_path or os.path.join(
-        ROOT, f"investment/invest_logs/{date}_phase0_{t.lower()}.json")
+    phase0_path = _resolve_phase0_path(t, phase0_path)
     engine_path = os.path.join(
         ROOT, f"investment/invest_logs/decision_engine/{t}_decision_engine.json")
 
@@ -160,15 +183,27 @@ def load_artifacts(ticker, date, *, p3_input, p4_input, quant_path=None, phase0_
                     "phase-3 engine 輸入")
     p4 = _read_json(os.path.join(ROOT, p4_input) if not os.path.isabs(p4_input) else p4_input,
                     "phase-4 trade_plan 輸入")
+    quant = _read_json(quant_path, "pf_quant artifact")
     for f in ("lane_scores", "lane_confidence"):
         if not isinstance(p3.get(f), dict):
             raise BuildError(f"phase-3 engine 輸入缺 {f}（或不是 object）")
+    if _engine_version_at_least(engine.get("decision_engine_version"), "1.1.0"):
+        expected_forward = (quant.get("quant_blocks") or {}).get("forward_validation")
+        if not isinstance(expected_forward, dict):
+            raise BuildError("pf_quant artifact 缺 forward_validation（decision engine 1.1.0 必填）")
+        if p3.get("forward_validation") != expected_forward:
+            raise BuildError(
+                "phase-3 engine 輸入的 forward_validation 不是 pf_quant artifact 原樣副本")
+        if engine.get("forward_validation") != expected_forward:
+            raise BuildError(
+                "decision_engine artifact 的 forward_validation 與 pf_quant artifact 不一致；"
+                "用同一份 p3 input 重跑 decision_engine.py")
 
     return {
         "engine": engine,
         "p3": p3,
         "p4": p4,
-        "quant": _read_json(quant_path, "pf_quant artifact"),
+        "quant": quant,
         "phase0": _read_json(phase0_path, "phase0 artifact"),
         "phase0_path": phase0_path,
         "plan": _run_json(["python3", "investment/scripts/trade_plan_builder.py",
@@ -369,6 +404,9 @@ def build_entry(qual, art, ticker, date):
     cb = dict(qual.get("conflict_bias") or {})
     cb.setdefault("schema", "conflict_bias.v1")
     cb["lane_signals"] = lane_signals
+    if isinstance(cs.get("t5_forward_validation"), dict):
+        cb["t5_detail"] = (cs["t5_forward_validation"]
+                           if "T5" in (cb.get("triggers_fired") or []) else None)
 
     trade = {
         "ticker": ticker,
@@ -429,6 +467,7 @@ def build_entry(qual, art, ticker, date):
         "fair_value_range": qb.get("fair_value_range"),
         "implied_expectations": qb.get("implied_expectations"),
         "valuation_archetype_shadow": qb.get("valuation_archetype_shadow"),
+        "forward_validation": qb.get("forward_validation"),
         "valuation_explained_range": qb.get("valuation_explained_range"),
         "valuation_reviewer_gate": {
             k: art["gate"].get(k)
@@ -494,7 +533,7 @@ def _weights_from_steps(cs):
 # ---------------------------------------------------------------------------
 def main(argv=None):
     ap = argparse.ArgumentParser(
-        description="Phase 5 Step 1 assembler — export entry (stdout) + phase_inputs bundle")
+        description="Phase 5 Step 1 assembler — isolated export entry + phase_inputs bundle")
     ap.add_argument("--ticker", required=True)
     ap.add_argument("--date", required=True, help="YYYY-MM-DD")
     ap.add_argument("--qualitative", required=True, help="PM 寫的質性檔")
@@ -503,6 +542,8 @@ def main(argv=None):
     ap.add_argument("--quant", help="覆寫 pf_quant 路徑")
     ap.add_argument("--phase0", help="覆寫 phase0 路徑")
     ap.add_argument("--bundle-out", help="覆寫 bundle 輸出路徑")
+    ap.add_argument("--session-out",
+                    help="原子寫入獨立 session object（代替 stdout）")
     ap.add_argument("--no-bundle", action="store_true",
                     help="只印 export entry，不寫 bundle（測試用）")
     args = ap.parse_args(argv)
@@ -529,8 +570,36 @@ def main(argv=None):
         print(f"[build_session_export] bundle → {os.path.relpath(out, ROOT)}",
               file=sys.stderr)
 
-    json.dump(entry, sys.stdout, ensure_ascii=False)
-    sys.stdout.write("\n")
+    if args.session_out:
+        out = os.path.abspath(args.session_out)
+        os.makedirs(os.path.dirname(out), exist_ok=True)
+        tmp = tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", delete=False,
+            dir=os.path.dirname(out), prefix=f".{os.path.basename(out)}.", suffix=".tmp",
+        )
+        try:
+            json.dump(entry, tmp, ensure_ascii=False, indent=2)
+            tmp.write("\n")
+            tmp.flush()
+            os.fsync(tmp.fileno())
+            tmp.close()
+            os.replace(tmp.name, out)
+        except Exception:
+            try:
+                tmp.close()
+            except Exception:
+                pass
+            try:
+                os.unlink(tmp.name)
+            except OSError:
+                pass
+            raise
+        print(f"[build_session_export] session → {os.path.relpath(out, ROOT)}",
+              file=sys.stderr)
+
+    if not args.session_out:
+        json.dump(entry, sys.stdout, ensure_ascii=False)
+        sys.stdout.write("\n")
     return 0
 
 

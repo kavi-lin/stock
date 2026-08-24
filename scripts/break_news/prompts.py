@@ -7,9 +7,11 @@ from typing import Iterable
 PREDICATES = ("BENEFITS_FROM, HEADWIND_FROM, COMPETES_WITH, SUPPLIES_TO, "
               "CUSTOMER_OF, CO_DEVELOPS_WITH, MENTIONED_IN, CATALYST_FOR")
 
-SYSTEM_PROMPT = f"""You are an equity analyst giving an INDEPENDENT take on one
-breaking news item. Another analyst (different model) evaluates the same item in
-parallel — you cannot see each other. Disagreement is welcome.
+SYSTEM_PROMPT = f"""You are an equity analyst opening the discussion on one
+breaking news item. You speak FIRST: a second analyst (a different model) will
+read your take and answer it point by point, so state each point in a form that
+can be agreed with or disputed — specific, attributable, no hedging both ways
+inside one bullet.
 
 Reply with a SINGLE fenced ```json``` block, no prose outside. Schema:
 {{
@@ -30,6 +32,74 @@ Reply with a SINGLE fenced ```json``` block, no prose outside. Schema:
 }}
 Rules: 中文欄位必須繁體中文(台灣)；`entities` 與 `relations` 內容維持英文 —
 它們是 knowledge graph canonical ID，混入中文會破壞 dedup。
+Do not add fields outside the schema. Relation subject/object IDs must use a
+whitespace-free canonical `namespace:id` form.
+Predicates must be one of: {PREDICATES}.
+"""
+
+RESPONDER_SYSTEM_PROMPT = f"""You are the SECOND analyst in an equity-news
+debate. The first analyst's opening take is given to you in full. Your job is
+NOT to write a second survey of the same news — it is to adjudicate theirs.
+
+For EVERY bullet they raised, say whether you agree or dispute it, and why. A
+dispute must carry a specific reason (second-order effect, a named supply-chain
+node, contra-evidence, a wrong magnitude) — "too optimistic" is not a reason.
+You are NOT required to be balanced: if their bull case is simply right, agree
+with all of it. Add a point only when they MISSED something material.
+
+Reply with a SINGLE fenced ```json``` block, no prose outside. Schema:
+{{
+  "commentary": str,       // 繁體中文(台灣) 80-150 字，你的整體判讀。專有名詞 (NVDA, HBM3e) 保留英文
+  "assessments": [         // 對方每一條 bull/bear 都要有一則，1-6 則
+    {{"point": "bull:0",   // 對方的第幾條，格式 bull:N / bear:N（N 從 0 起）
+      "verdict": "agree" | "dispute",
+      "reason": str}}      // 繁中 ≤40 字，具體理由；agree 也要寫為什麼站得住
+  ],
+  "added_bull": [str],     // 對方漏掉的利多 0-3 條，每條 ≤30 字繁中（沒有就給 []）
+  "added_bear": [str],     // 對方漏掉的利空 0-3 條，同格式
+  "final_take": str,       // 你的一句話結論，繁中 ≤30 字
+  "entities": {{
+    "tickers": [str],      // US-listed root tickers, UPPERCASE English
+    "sectors": [str],      // GICS-style sector names, English
+    "themes": [str],       // English keys: "AI capex", "GLP-1", "HBM3e"
+    "tech_keywords": [str] // English tech-nodes: HBM3e, N3P, CoWoS-L, Blackwell
+  }},
+  "relations": [{{"subject": "ticker:NVDA", "predicate": "BENEFITS_FROM", "object": "narrative:hbm3e"}}],
+  "done": bool,            // true = 你全部 agree、也無新論點
+  "confidence": float 0-1,
+  "rationale_short": str   // 繁中 ≤40 字
+}}
+Rules: 中文欄位必須繁體中文(台灣)；`entities` 與 `relations` 內容維持英文 —
+它們是 knowledge graph canonical ID，混入中文會破壞 dedup。
+Do not add fields outside the schema. Relation subject/object IDs must use a
+whitespace-free canonical `namespace:id` form — `narrative:uranium_supply_deficit`,
+NOT `narrative:uranium supply deficit`.
+Reuse the first analyst's `namespace:id` spelling for anything they already
+named — inventing `theme:x` for their `narrative:x` hides a real disagreement.
+Predicates must be one of: {PREDICATES}.
+"""
+
+ARBITER_SYSTEM_PROMPT = f"""You are the THIRD analyst, brought in only because
+the first two could not settle it: the second analyst disputed a point and the
+first refused to concede. You see the whole exchange.
+
+Rule on the CONTESTED point specifically — do not re-survey the news, and do not
+split the difference to be diplomatic. `ruling` must name whose reading of the
+contested point holds: `side_a`, `side_b`, or `split` (only when both are right
+about different horizons or different entities — say which in the commentary).
+
+Reply with a SINGLE fenced ```json``` block, no prose outside. Schema:
+{{
+  "commentary": str,       // 繁體中文(台灣) 80-150 字：爭點是什麼、你採信哪一方、依據
+  "ruling": "side_a" | "side_b" | "split",
+  "final_take": str,       // 裁決後的一句話結論，繁中 ≤30 字
+  "relations": [],         // ONLY relations neither side stated; same format
+  "done": true,
+  "confidence": float 0-1, // 對這個裁決的信心
+  "rationale_short": str   // 繁中 ≤40 字
+}}
+Do not add fields outside the schema. Relation subject/object IDs must use a
+whitespace-free canonical `namespace:id` form.
 Predicates must be one of: {PREDICATES}.
 """
 
@@ -49,6 +119,8 @@ Reply with a SINGLE fenced ```json``` block, no prose outside. Schema:
   "confidence": float 0-1, // 對自己整體立場的信心
   "rationale_short": str   // 繁中 ≤20 字
 }}
+Do not add fields outside the schema. Relation subject/object IDs must use a
+whitespace-free canonical `namespace:id` form.
 Predicates must be one of: {PREDICATES}.
 """
 
@@ -190,12 +262,101 @@ Pre-triage signal (keyword classifier, not authoritative):
   bull_case_snap = {triage.get('bull_case')}
   bear_case_snap = {triage.get('bear_case')}
 
-Give your independent take on market / sector / individual-stock implications.
-Identify the tickers, sectors, themes, and specific tech-keywords (e.g. HBM3e,
-N3P, CoWoS-L, GLP-1, Blackwell) that this news touches. Set `done: false`
-(this is the opening round; the other analyst evaluates blind in parallel).
+Give your take on market / sector / individual-stock implications. Identify the
+tickers, sectors, themes, and specific tech-keywords (e.g. HBM3e, N3P, CoWoS-L,
+GLP-1, Blackwell) that this news touches. Set `done: false` (this is the opening
+round; the second analyst will answer each of your bullets in turn).
 
 Respond with the single JSON block as specified in your system prompt.
+"""
+
+
+def _numbered_points(parsed: dict) -> str:
+    """A's bullets as the exact `bull:N` / `bear:N` refs B must answer."""
+    lines = []
+    for kind in ("bull", "bear"):
+        for idx, point in enumerate((parsed.get(f"{kind}_points") or [])[:3]):
+            lines.append(f"  {kind}:{idx}  {str(point).strip()}")
+    return "\n".join(lines) or "  (none)"
+
+
+def responder_user_prompt(item: dict, opener: dict, role) -> str:
+    """Side B's round-0 prompt — the whole opener, with every bullet addressable.
+
+    Deliberately carries the news item too: B has to be able to check A's claims
+    against the source, not only against A's framing of it.
+    """
+    triage = item.get("triage") or {}
+    src = item.get("source") or {}
+    role = _role_text(role)
+    ent = opener.get("entities") or {}
+    return f"""You are {role}.
+
+NEWS ITEM
+---------
+Headline : {item.get('headline')}
+Source   : {src.get('name')} ({src.get('credibility')})
+URL      : {src.get('url')}
+Published: {src.get('published') or '(unknown)'}
+Summary  : {item.get('raw_summary')}
+
+Pre-triage signal (keyword classifier, not authoritative):
+  news_type      = {triage.get('news_type')}
+  shallow_score  = {triage.get('shallow_score')}
+  binary_flag    = {triage.get('binary_flag')}
+
+FIRST ANALYST'S OPENING TAKE
+----------------------------
+commentary  : {(opener.get('commentary') or '').strip()}
+final_take  : {opener.get('final_take')}
+confidence  : {opener.get('confidence')}
+their points (answer EVERY line by its ref):
+{_numbered_points(opener)}
+they named  : tickers={sorted((ent.get('tickers') or []))}; \
+themes={sorted((ent.get('themes') or []))}
+
+Adjudicate each of their points, add anything material they missed, and give
+your own final_take. Respond with the single JSON block as specified in your
+system prompt.
+"""
+
+
+def arbiter_user_prompt(item: dict, thread: list[dict], contested: str) -> str:
+    """Tie-breaker prompt — the contested point plus both sides' own words."""
+    latest = _latest_by_side(thread)
+    opener = (latest.get("A") or {}).get("parsed") or {}
+    response = (latest.get("B") or {}).get("parsed") or {}
+    rebuttals = [c for c in thread if c.get("side") == "A" and (c.get("round") or 0) >= 1
+                 and (c.get("parsed") or {})]
+    reb = (rebuttals[-1].get("parsed") if rebuttals else {}) or {}
+    return f"""You are the arbiter (Analyst-C).
+
+NEWS: {item.get('headline')}
+Summary: {item.get('raw_summary')}
+
+{_known_state_lines(thread)}
+
+CONTESTED POINT(S)
+------------------
+{contested or '(unspecified)'}
+
+ANALYST-A opened with:
+  points:
+{_numbered_points(opener)}
+  final_take = {opener.get('final_take')} (confidence {opener.get('confidence')})
+
+ANALYST-B answered:
+  {json.dumps(response.get('assessments') or [], ensure_ascii=False)}
+  added_bull = {json.dumps(response.get('added_bull') or [], ensure_ascii=False)}
+  added_bear = {json.dumps(response.get('added_bear') or [], ensure_ascii=False)}
+  final_take = {response.get('final_take')} (confidence {response.get('confidence')})
+
+ANALYST-A refused to concede:
+  stance     = {reb.get('stance')}
+  argument   = {(reb.get('commentary') or '').strip() or '(none recorded)'}
+
+Rule on the contested point. Respond with the single JSON block as specified in
+your system prompt.
 """
 
 
@@ -305,6 +466,8 @@ def build_summary_block(thread: list[dict]) -> dict:
     bull_buf: list[str] = []
     bear_buf: list[str] = []
     final_takes_by_round = []
+    point_assessments: list[dict] = []
+    arbiter_ruling: dict | None = None
 
     for c in thread:
         rnd = c.get("round", 0)
@@ -375,6 +538,25 @@ def build_summary_block(thread: list[dict]) -> dict:
 
         bull_buf.extend(bp for bp in (p.get("bull_points") or []) if isinstance(bp, str))
         bear_buf.extend(bp for bp in (p.get("bear_points") or []) if isinstance(bp, str))
+        # V4.132.0 — side B no longer restates a balanced pair; it contributes
+        # only what A missed. Folded into the same buffers so the dedup and the
+        # 6-item cap stay the single place those lists are shaped.
+        bull_buf.extend(bp for bp in (p.get("added_bull") or []) if isinstance(bp, str))
+        bear_buf.extend(bp for bp in (p.get("added_bear") or []) if isinstance(bp, str))
+
+        for a in (p.get("assessments") or []):
+            if isinstance(a, dict) and a.get("point"):
+                point_assessments.append({
+                    "point": a.get("point"),
+                    "verdict": a.get("verdict"),
+                    "reason": a.get("reason"),
+                    "by": agent,
+                })
+        if p.get("ruling") in ("side_a", "side_b", "split"):
+            arbiter_ruling = {"ruling": p.get("ruling"), "by": agent,
+                              "confidence": p.get("confidence"),
+                              "commentary": (p.get("commentary") or "").strip(),
+                              "final_take": (ft.strip() if isinstance(ft, str) else None)}
 
     # 計算 consensus
     consensus = "NEUTRAL"
@@ -398,6 +580,13 @@ def build_summary_block(thread: list[dict]) -> dict:
         best_ft = sorted(final_takes_by_round, key=get_ft_sort_key)[0]
         final_take = best_ft["final_take"]
         final_take_by = best_ft["agent"]
+
+    # The arbiter only ever speaks on a point the first two could not settle, so
+    # its take supersedes the confidence ranking — otherwise the losing side's
+    # self-assessed confidence can outrank the ruling that was called to settle it.
+    if arbiter_ruling and arbiter_ruling.get("final_take"):
+        final_take = arbiter_ruling["final_take"]
+        final_take_by = arbiter_ruling["by"]
 
     # 建立最終 merged_relations 物件陣列
     merged_relations = []
@@ -445,6 +634,7 @@ def build_summary_block(thread: list[dict]) -> dict:
         "bear_summary": _rough_dedup(bear_buf)[:6],
         "final_take":    final_take,
         "final_take_by": final_take_by,
-        "final_takes_by_round": final_takes_by_round
+        "final_takes_by_round": final_takes_by_round,
+        "point_assessments": point_assessments,
+        "arbiter_ruling": arbiter_ruling,
     }
-

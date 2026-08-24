@@ -1,0 +1,43 @@
+```json
+{
+  "commentary": "Centene (CNC) 宣布財務長 Drew Asher 預計於 2026 年底卸任並於 2027 年底退休，同時重申全年度財務指引。過渡期長達一年以上且提供明確交接期，有助於降低財務政策突變的不確定性。重申財測為市場短期信心提供支撐，但在 Medicaid 重新認定與醫療成本波動背景下，市場仍關注新任財務團隊對長期利潤率的掌握度。",
+  "bull_points": [
+    "重申年度財務指引，消除市場對近期獲利下修的疑慮",
+    "長達一年以上的交接過渡期，顯著降低高層更迭營運風險"
+  ],
+  "bear_points": [
+    "核心財務高層即將離任，可能引發長期資本配置政策變動疑慮",
+    "醫療保險管理產業仍面臨醫療成本通膨與政策調整挑戰"
+  ],
+  "final_take": "財測不變且交接平緩，短期展望穩定但需留意長期策略延續性",
+  "entities": {
+    "tickers": [
+      "CNC"
+    ],
+    "sectors": [
+      "Health Care"
+    ],
+    "themes": [
+      "managed care",
+      "executive transition",
+      "medicaid"
+    ],
+    "tech_keywords": []
+  },
+  "relations": [
+    {
+      "subject": "ticker:CNC",
+      "predicate": "MENTIONED_IN",
+      "object": "theme:executive-transition"
+    },
+    {
+      "subject": "ticker:CNC",
+      "predicate": "BENEFITS_FROM",
+      "object": "theme:managed-care"
+    }
+  ],
+  "done": false,
+  "confidence": 0.85,
+  "rationale_short": "重申財測給予市場定心丸，過渡期充裕緩解人事更迭衝擊"
+}
+```

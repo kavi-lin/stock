@@ -422,6 +422,35 @@ def main():
 
     print(json.dumps(payload, indent=2, default=str))
 
+    # V4.128.0 — persist, so the six rubric fields become checkable evidence rather
+    # than something the Fundamentals lane reports about itself.
+    #
+    # Same hole V4.116.3 closed for the Technical lane, one lane over: this script
+    # computes every scalar the rubric scores off (P/E vs sector median, revenue YoY,
+    # FCF margin/yield, D/E, next earnings, analyst consensus), and until now those
+    # numbers lived only in stdout — which ends up inside the lane subagent's
+    # transcript and nowhere a validator can reach. The 2026-08-09 lane-drift
+    # diagnosis listed Fundamentals as the one lane whose anchor was never even
+    # inventoried; this is the cheap half of fixing that.
+    #
+    # NOT a rubric_hint: unlike the Technical stage→band translation, Fundamentals
+    # has no agreed base-score formula (the rubric gives adjustments, not a base),
+    # so inventing one here would be writing a scoring rule. Evidence first.
+    #
+    # Written unconditionally (including under --json-only): the artifact is the
+    # point, and a flag about stdout formatting must not decide whether it exists.
+    try:
+        cache_dir = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "cache")
+        os.makedirs(cache_dir, exist_ok=True)
+        with open(os.path.join(cache_dir, f"{payload['ticker']}_fundamentals_payload.json"),
+                  "w", encoding="utf-8") as fp:
+            json.dump(payload, fp, ensure_ascii=False, indent=1, default=str)
+    except OSError as e:
+        # Never fail the analysis for a cache write; the caller's decision does not
+        # depend on it, and a read-only checkout is a legitimate state.
+        print(f"[us-stock-analysis] cache write skipped: {e}", file=sys.stderr)
+
     if args.json_only:
         return
 

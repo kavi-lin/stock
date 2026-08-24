@@ -1329,7 +1329,7 @@ function renderMoverCard(mover) {
                 </div>
 
                 <details class="text-[10px]">
-                    <summary class="cursor-pointer text-zinc-500 hover:text-zinc-300">
+                    <summary class="cursor-pointer text-zinc-500 hover:opacity-80">
                         ${escapeHtml(t().confidence || 'Confidence')}: <strong>${(h5.confidence ?? 0).toFixed(2)}</strong>
                     </summary>
                     <div class="confidence-breakdown mt-2 pt-2 border-t border-zinc-800">
@@ -1367,8 +1367,8 @@ function renderMoverCard(mover) {
                         <div class="grid grid-cols-2 gap-x-3 gap-y-1 font-mono">
                             <div data-radar-tip="trading_stop">${t().stop_loss || 'Stop'}: <span style="color:#ef4444; font-weight:700">$${(tm.stop_suggestion ?? 0).toFixed(2)}</span></div>
                             <div>${UI.currentLang === 'zh' ? '目標' : 'Target'}: <span style="color:${dirColor}; font-weight:700">$${targetVal.toFixed(2)}</span></div>
-                            <div data-radar-tip="trading_pos">${t().pos_size_hint || 'Pos'}: <span class="text-zinc-200">${(tm.position_size_hint_pct ?? 0).toFixed(1)}%</span></div>
-                            <div data-radar-tip="trading_tx">${t().tx_cost || 'Tx'}: <span class="text-zinc-200">${(tm.tx_cost_estimate_pct ?? 0).toFixed(2)}%</span></div>
+                            <div data-radar-tip="trading_pos">${t().pos_size_hint || 'Pos'}: <span style="color:var(--text-main)">${(tm.position_size_hint_pct ?? 0).toFixed(1)}%</span></div>
+                            <div data-radar-tip="trading_tx">${t().tx_cost || 'Tx'}: <span style="color:var(--text-main)">${(tm.tx_cost_estimate_pct ?? 0).toFixed(2)}%</span></div>
                             <div class="col-span-2" data-radar-tip="trading_exit">${t().exit_trigger || 'Exit'}: <span class="text-zinc-400 truncate">${escapeHtml(((UI.currentLang === 'zh' && tm.exit_trigger_zh) ? tm.exit_trigger_zh : (tm.exit_trigger || '')).slice(0, 80))}…</span></div>
                         </div>
                         <div class="mt-2 pt-1 border-t border-zinc-800/50 text-[9px] text-zinc-600 italic">${escapeHtml(horizonNote)}</div>
@@ -1779,25 +1779,29 @@ function _radarShowTooltip(ticker, event) {
     const tip = document.getElementById('radar-heatmap-tooltip');
     if (!tip) return;
     const pct = ticker.change_pct;
-    const pctColor = pct == null ? '#a1a1aa' : (pct >= 0 ? '#22c55e' : '#ef4444');
+    // Theme tokens, not literals: --status-bullish/bearish already darken in
+    // light mode, and the neutral greys had to stop being near-white.
+    const pctColor = pct == null
+        ? 'var(--text-muted)'
+        : (pct >= 0 ? 'var(--status-bullish)' : 'var(--status-bearish)');
     const pctStr   = pct == null ? '--' : (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
     const priceStr = ticker.price == null ? '--' : '$' + ticker.price.toFixed(2);
     const rangeStr = (ticker.day_low != null && ticker.day_high != null)
         ? `$${ticker.day_low.toFixed(2)} – $${ticker.day_high.toFixed(2)}` : '--';
     // V2.13.10/12 — valuation triplet
     function _peColor(v) {
-        if (v == null) return '#a1a1aa';
-        if (v < 0)        return '#f87171';
-        if (v < 15)       return '#4ade80';
-        if (v > 30)       return '#fbbf24';
-        return '#e4e4e7';
+        if (v == null) return 'var(--text-muted)';
+        if (v < 0)        return 'var(--status-bearish)';
+        if (v < 15)       return 'var(--status-bullish)';
+        if (v > 30)       return 'var(--rht-warn)';
+        return 'var(--text-main)';
     }
     function _evColor(v) {
-        if (v == null) return '#a1a1aa';
-        if (v < 0)        return '#f87171';
-        if (v < 10)       return '#4ade80';
-        if (v > 20)       return '#fbbf24';
-        return '#e4e4e7';
+        if (v == null) return 'var(--text-muted)';
+        if (v < 0)        return 'var(--status-bearish)';
+        if (v < 10)       return 'var(--status-bullish)';
+        if (v > 20)       return 'var(--rht-warn)';
+        return 'var(--text-main)';
     }
     const pe       = ticker.pe;
     const fwdPe    = ticker.forward_pe;
@@ -1806,22 +1810,22 @@ function _radarShowTooltip(ticker, event) {
     const fwdPeStr = fwdPe    != null ? fwdPe.toFixed(1)    : '--';
     const evStr    = evEbitda != null ? evEbitda.toFixed(1) : '--';
     tip.innerHTML = `
-        <div class="text-[10px] text-zinc-500 mb-1">${_radarEsc(ticker.sector)} · ${_radarEsc(ticker.industry)}</div>
+        <div class="text-[10px] rht-label mb-1">${_radarEsc(ticker.sector)} · ${_radarEsc(ticker.industry)}</div>
         <div class="flex items-baseline gap-2 mb-2">
-            <span class="text-base font-black text-white">${_radarEsc(ticker.ticker)}</span>
-            <span class="text-[10px] text-zinc-400 truncate">${_radarEsc(ticker.name || '')}</span>
+            <span class="text-base font-black rht-value">${_radarEsc(ticker.ticker)}</span>
+            <span class="text-[10px] rht-label truncate">${_radarEsc(ticker.name || '')}</span>
         </div>
-        <div class="space-y-1 text-[11px] text-zinc-300">
-            <div class="flex justify-between"><span class="text-zinc-500">現價</span><span class="font-mono font-bold text-white">${priceStr}</span></div>
-            <div class="flex justify-between"><span class="text-zinc-500">漲跌</span><span class="font-mono font-bold" style="color: ${pctColor}">${pctStr}</span></div>
-            <div class="flex justify-between" title="TTM 含一次性項目可能扭曲；負值常為一次性虧損"><span class="text-zinc-500">P/E TTM</span><span class="font-mono font-bold" style="color: ${_peColor(pe)}">${peStr}</span></div>
-            <div class="flex justify-between" title="Forward P/E (next FY consensus EPS)"><span class="text-zinc-500">Fwd P/E</span><span class="font-mono font-bold" style="color: ${_peColor(fwdPe)}">${fwdPeStr}</span></div>
-            <div class="flex justify-between" title="EV/EBITDA TTM — 跨資本結構可比"><span class="text-zinc-500">EV/EBITDA</span><span class="font-mono font-bold" style="color: ${_evColor(evEbitda)}">${evStr}</span></div>
-            <div class="flex justify-between"><span class="text-zinc-500">市值</span><span class="font-mono">${_radarFormatMcap(ticker.market_cap)}</span></div>
-            <div class="flex justify-between"><span class="text-zinc-500">日內區間</span><span class="font-mono">${rangeStr}</span></div>
-            <div class="flex justify-between"><span class="text-zinc-500">成交量</span><span class="font-mono">${_radarFormatVol(ticker.volume)}</span></div>
+        <div class="space-y-1 text-[11px]">
+            <div class="flex justify-between"><span class="rht-label">現價</span><span class="font-mono font-bold rht-value">${priceStr}</span></div>
+            <div class="flex justify-between"><span class="rht-label">漲跌</span><span class="font-mono font-bold" style="color: ${pctColor}">${pctStr}</span></div>
+            <div class="flex justify-between" title="TTM 含一次性項目可能扭曲；負值常為一次性虧損"><span class="rht-label">P/E TTM</span><span class="font-mono font-bold" style="color: ${_peColor(pe)}">${peStr}</span></div>
+            <div class="flex justify-between" title="Forward P/E (next FY consensus EPS)"><span class="rht-label">Fwd P/E</span><span class="font-mono font-bold" style="color: ${_peColor(fwdPe)}">${fwdPeStr}</span></div>
+            <div class="flex justify-between" title="EV/EBITDA TTM — 跨資本結構可比"><span class="rht-label">EV/EBITDA</span><span class="font-mono font-bold" style="color: ${_evColor(evEbitda)}">${evStr}</span></div>
+            <div class="flex justify-between"><span class="rht-label">市值</span><span class="font-mono rht-value">${_radarFormatMcap(ticker.market_cap)}</span></div>
+            <div class="flex justify-between"><span class="rht-label">日內區間</span><span class="font-mono rht-value">${rangeStr}</span></div>
+            <div class="flex justify-between"><span class="rht-label">成交量</span><span class="font-mono rht-value">${_radarFormatVol(ticker.volume)}</span></div>
         </div>
-        <div class="mt-2 pt-2 border-t border-zinc-700/40 text-[10px] text-zinc-400 italic">
+        <div class="mt-2 pt-2 border-t rht-divider rht-label text-[10px] italic">
             點擊看 5min K 線 + 成交量
         </div>`;
     tip.classList.remove('hidden');

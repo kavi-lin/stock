@@ -1,0 +1,173 @@
+{
+ "bundle_version": "P5-INPUTS/1.0",
+ "ticker": "SNDK",
+ "date": "2026-08-16",
+ "phase0": {
+  "regime_confidence": 0.74,
+  "market_top_zone": "Yellow",
+  "ftd_state": "FTD_CONFIRMED",
+  "breadth_composite": 79,
+  "vix": 14.25,
+  "fred_verdict": "Soft Landing",
+  "real_rate_pct": 1.37,
+  "hot_sectors": [
+   "Technology",
+   "Industrials",
+   "Consumer Discretionary"
+  ],
+  "cold_sectors": [
+   "Consumer Staples",
+   "Utilities"
+  ]
+ },
+ "lanes": {
+  "fundamentals": {
+   "signal": "BUY",
+   "score": 4.0,
+   "confidence": 0.88,
+   "key_factors": [
+    "Forward PE 6.5x and PEG 0.14",
+    "Gross margins expanded to 84.6%",
+    "FCF yield 5.1% with low debt"
+   ],
+   "risk_flags": [
+    "Cyclical memory pricing downturn risk",
+    "Elevated Price-to-Book multiple of 16.4x"
+   ],
+   "moat_assessment": {
+    "level": "WIDE",
+    "type": "IP-patent",
+    "evidence_one_line": "Proprietary memory tech yields 84.6% gross margin and 93.1% ROE."
+   },
+   "near_term_catalysts": [
+    {
+     "date": "2026-11-04",
+     "type": "earnings",
+     "description": "Q3 2026 earnings release and hyperscaler demand guidance update",
+     "impact": "high"
+    }
+   ],
+   "bull_thesis_one_line": "Hyper-accelerating gross margins (84.6%) and 5.1% FCF yield at 6.5x forward P/E with 0.14 PEG present deep undervaluation.",
+   "bear_thesis_one_line": "Operating margins at 78.2% may reflect peak cyclicality, exposing high 16.4x P/B valuation if memory pricing abruptly softens."
+  },
+  "sentiment": {
+   "signal": "HOLD",
+   "score": 0.39,
+   "confidence": 0.78,
+   "key_factors": [
+    "Market sentiment in Greed (composite 72.7)",
+    "Insiders distributing with negative MSPR -100",
+    "Net bullish congressional buying reported"
+   ],
+   "risk_flags": [
+    "Heavy insider selling across recent quarters",
+    "Extremely negative MSPR reflects internal distribution"
+   ],
+   "market_sentiment_composite": 72.7,
+   "vix_current": 14.25,
+   "insider_signal": "distributing",
+   "short_pct_float": 7.36,
+   "mspr_latest": -100.0
+  },
+  "news": {
+   "signal": "BUY",
+   "score": 3.8,
+   "confidence": 0.85,
+   "key_factors": [
+    "Investor Day targets 80% GM floor",
+    "$93.9B multi-year NBM contract backlog",
+    "Wall Street rallies behind AI expansion"
+   ],
+   "risk_flags": [
+    "Historical NAND memory boom-bust cyclicality",
+    "Execution risk on long-term margin targets"
+   ],
+   "immediate_catalyst_5d": null,
+   "decision_point_days": 21,
+   "cross_asset_spillover": [
+    {
+     "asset": "SOXX",
+     "direction": "BULLISH",
+     "mechanism": "Sustained high NAND pricing and AI data center demand boost broad semiconductor sector sentiment."
+    },
+    {
+     "asset": "WDC",
+     "direction": "NEUTRAL",
+     "mechanism": "Post-spinoff structural separation isolates NAND margin upside from legacy HDD business cycles."
+    }
+   ],
+   "reasoning_one_line": "Past 48h news flow is decisively bullish post-Investor Day with Tier-1 brokerages praising 80% GM targets, 100% cash return policy, and $93.9B contract visibility.",
+   "pt_revision_momentum": {
+    "direction": "FLAT",
+    "consensus_delta_pct_1m": 0.3,
+    "source": "fmp_price_target_consensus"
+   }
+  },
+  "technical": {
+   "signal": "HOLD",
+   "score": 0.5,
+   "confidence": 0.7,
+   "key_factors": [
+    "Stage 1 basing below 50MA resistance",
+    "RSI 57 with rising MACD histogram",
+    "Recent 20/50 MA death cross resistance"
+   ],
+   "risk_flags": [
+    "Immediate overhead resistance at 50MA ($1655.63)",
+    "Insider distribution trend with zero acquisitions"
+   ],
+   "smart_money_analysis": {
+    "label": "distributing",
+    "narrative": "Insider tracking reflects net distribution in Q3 2026 with zero acquisitions, while volume on the +7.39% bounce is at 1.25x 20D average, reflecting tentative institutional participation."
+   },
+   "pattern_taxonomy": {
+    "pattern": "consolidation",
+    "confirmation_criteria": "Decisive daily close above 50MA ($1655.63) and swing high resistance ($1696.37) on expanding volume."
+   },
+   "market_strength": "NEUTRAL",
+   "key_levels": {
+    "support": 1514.36,
+    "resistance": 1696.37,
+    "pivot": 1624.43
+   },
+   "high_prob_scenario": "Range-bound consolidation between $1514.36 support and $1696.37 resistance as the stock tests its descending 50-day moving average.",
+   "volatility": {
+    "atr_14": 160.36,
+    "hist_vol_20d_daily": 0.09738,
+    "momentum_20d_pct": 21.13
+   }
+  },
+  "valuation": {
+   "signal": "SELL",
+   "score": -1.0,
+   "confidence": 0.5,
+   "key_factors": [
+    "Through-cycle DCF indicates $285.58 fair value",
+    "Current price carries massive speculative premium",
+    "No eligible peer comps for multiple validation"
+   ],
+   "risk_flags": [
+    "Severe divergence between sell-side targets and cashflow DCF",
+    "Single active anchor model yields low confidence rating"
+   ],
+   "valuation_commentary": "The quantitative valuation pack projects a weighted fair value of $285.58 (-82.6% vs current price of $1641.11), placing SNDK in the extreme_overvalued band with a score of -1.0 and low confidence. The sole active anchor is the self-built through-cycle DCF ($285.58, 100% effective weight), which captures normalized capital expenditure and cashflow generation across full semiconductor cycles rather than peak cyclical exuberance. Multiple valuation methods remain inactive: peer comps are ineligible due to fewer than 3 business-similar peers, while standard levered/unlevered DCFs are superseded by the through-cycle model. A massive divergence exists between sell-side price targets ($2024.67 consensus) and intrinsic cashflow anchors ($285.58 DCF, $744.45 owner earnings), underscoring that current trading levels require hyper-growth duration well beyond historical cycle dynamics.",
+   "suppression_proposals": []
+  }
+ },
+ "burry": {
+  "score": 40.4,
+  "narrative": "Burry 評分 40.4 (NEUTRAL) — FCF yield 3.2%，EV/EBIT 19.0x，距52週高點折價 29.7%，但內部人顯著淨賣出，顯示籌碼層面存在獲利了結壓力。"
+ },
+ "phase3": {
+  "final_score": 1.1195,
+  "final_decision": "STAGED_ENTRY",
+  "final_action": "EXECUTE"
+ },
+ "phase4": {
+  "position_size_pct": null,
+  "analysis_price": 1641.11
+ },
+ "red_team": {
+  "verdict": "STRONG_COUNTER"
+ }
+}

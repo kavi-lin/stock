@@ -246,14 +246,18 @@ class YFinanceClient:
 def parse_arguments():
     p = argparse.ArgumentParser(description="Market Top Detector (yfinance adapter)")
     p.add_argument("--breadth-50dma",    type=float, default=None,
-                   help="% S&P 500 above 50DMA (optional, scored if provided)")
+                   # %% not % — Python 3.14's argparse validates help strings at
+                   # add_argument() time, so a bare % now raises ValueError on
+                   # import instead of only when --help is rendered. argparse
+                   # still prints it as a single %.
+                   help="%% S&P 500 above 50DMA (optional, scored if provided)")
     p.add_argument("--put-call",         type=float, default=None,
                    help="CBOE equity put/call ratio (optional, scored if provided)")
     p.add_argument("--vix-term",
                    choices=["steep_contango", "contango", "flat", "backwardation"],
                    default=None, help="VIX term structure override")
     p.add_argument("--margin-debt-yoy",  type=float, default=None,
-                   help="Margin debt YoY change % (optional)")
+                   help="Margin debt YoY change %% (optional)")
     p.add_argument("--no-auto-breadth",  action="store_true",
                    help="Disable auto-fetch of 200DMA breadth from TraderMonty CSV")
     p.add_argument("--static-basket",   action="store_true",

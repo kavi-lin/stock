@@ -22,6 +22,10 @@
     // input listener to morph button + show hint as user types.
     let upcomingEarningsMap = {};
 
+    // Handle for the debate-sourced candidate strip, so a finished run can
+    // refresh it (the card should flip to "已產出分析" without a page reload).
+    let _sqHandle = null;
+
     const VERDICTS = ['STRONG', 'SOLID', 'MIXED', 'WEAK', 'DETERIORATING'];
 
     const filterState = {
@@ -56,6 +60,12 @@
         wirePreviewModal();
         wireEarningsRunBanner();
         resumeEarningsRunBanner();
+
+        // Candidates pushed here by the live-debate room. Mounted before the
+        // grid loads so an empty analysis history still shows what the debates
+        // are suggesting — that is exactly when the hint is most useful.
+        _sqHandle = window.SignalQueue?.mount(
+            document.getElementById('sq-mount'), { lane: 'earnings' }) || null;
 
         await loadAndRender();
 
@@ -579,7 +589,10 @@
 
     async function pollEarningsRunStatus() {
         try {
-            const r = await fetch('/api/run-protocol/status');
+            const suffix = _eaActiveJobId
+                ? `?queue_id=${encodeURIComponent(_eaActiveJobId)}`
+                : `?name=${encodeURIComponent(_eaActiveMode || 'earnings')}`;
+            const r = await fetch('/api/run-protocol/status' + suffix);
             if (!r.ok) return;
             const s = await r.json();
             // Gate: only react when the running protocol is earnings AND it's
@@ -617,6 +630,9 @@
                 } else {
                     eaSetRunBannerError(s.error || s.status);
                 }
+                // Refresh either way: the worker records `consumed` on success
+                // and `failed` on error, and both change what the card shows.
+                setTimeout(() => _sqHandle?.reload(), 1500);
                 _eaActiveJobId  = null;
                 _eaActiveTicker = null;
                 // Don't clear _eaActiveMode here — done banner stays visible until
@@ -638,7 +654,12 @@
             }
         });
         document.getElementById('ea-run-cancel')?.addEventListener('click', async () => {
-            try { await fetch('/api/run-protocol/cancel', { method: 'POST' }); } catch (e) { /* ignore */ }
+            try {
+                await fetch('/api/run-protocol/cancel', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ queue_id: _eaActiveJobId }),
+                });
+            } catch (e) { /* ignore */ }
         });
         document.getElementById('ea-run-dismiss')?.addEventListener('click', () => {
             document.getElementById('ea-run-banner')?.classList.add('hidden');
@@ -660,10 +681,14 @@
                 sessionStorage.removeItem('ea_banner_dismissed');
                 return;
             }
-            const r = await fetch('/api/run-protocol/status');
+            const r = await fetch('/api/protocol-queue');
             if (!r.ok) return;
-            const s = await r.json();
-            if (s.status === 'running' && s.name === 'earnings') {
+            const queueState = await r.json();
+            const s = (Array.isArray(queueState.active) ? queueState.active : [])
+                .find(run => run.name === 'earnings' || run.name === 'earnings_preview');
+            if (s) {
+                _eaActiveJobId = s.queue_id || null;
+                _eaActiveMode = s.name;
                 _eaActiveTicker = s.analyze_ticker || s.ticker || null;
                 eaShowRunBanner(_eaActiveTicker, UI.currentLang === 'zh' ? 'Claude 處理中…' : 'Claude is processing…');
                 if (_eaPollTimer) clearInterval(_eaPollTimer);

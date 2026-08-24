@@ -6,27 +6,27 @@
     "claude": true,
     "gemini": true,
     "codex": true,
-    "grok": true
+    "grok": false
   },
-  "_broker_note": "V4.106.0: the LLM Quota Broker is the quota authority — it sees the Taiwan-stock project's spend on the same subscriptions, which config/llm_usage.json never could. The budgets below are now the FALLBACK, enforced only when the broker cannot answer. degradable_roles are the only roles allowed to take that fallback; every other role stops. A broker that answers 'no capacity' stops all roles, news included, because that answer is about the 20% hard reserve. protocol_tokens is the pre-run estimate for one agentic protocol run — see the note directly above it.",
+  "_broker_note": "Broker-only mode: every LLM process requires a live llm-quota-broker lease. Local counters are telemetry only; there is no local inference fallback. Interactive work waits in the protocol queue, while daemon and cron work defer to the next scheduled cycle.",
   "broker": {
     "enabled": true,
     "base_url": "http://127.0.0.1:8787",
     "timeout_sec": 10,
-    "degradable_roles": ["debate", "brief", "link_digest"],
+    "degradable_roles": [],
     "_protocol_tokens_note": "V4.110.0: keyed by protocol name, because these differ by an order of magnitude and one shared prior can only be right for one end of that range. Each key is reported to the broker as task type `agentic_protocol-<name>`, so `lqb history --stats --task-type agentic_protocol-triage` shows that protocol's own p50 rather than an average of unlike things. `default` covers any protocol without a row. MEASURED means real settled tokens are behind the number; the rest are still the deliberately-generous V4.106.0 prior. (V4.111.4 changed the separator from `:` to `-`: the colon is outside the broker's task_type pattern, so every protocol run was 400'd and blocked. Nothing was recorded under the colon form — there is no history to migrate.)",
     "protocol_tokens": {
       "default": { "input": 200000, "output": 40000 },
       "triage":  { "input": 240000, "output": 32000, "_source": "MEASURED 2026-08-08: 1 run on agy, 233139 in / 28702 out / 143s" }
     }
   },
-  "_protocol_providers_note": "V4.114.0: which CLIs each agentic protocol may run on. The broker picks freely among the listed providers; an unlisted protocol (no key, no _default) is unrestricted. This exists because the broker treats providers as interchangeable and they are not: on 2026-08-09 it sent `分析 NOW` to agy — the first non-Claude invest run in the repo's history — which burned 208K tokens searching the filesystem and produced nothing. invest and sector fan out to parallel lane subagents and assume Claude-shaped semantics throughout; triage/news name every script path inline and have run clean on agy and codex. Add gemini to invest only after a real run proves agy can drive the 5-lane + Red Team fan-out. Empty list = blocked (read as a typo, not as permission). V4.131.12: gemini ADDED to invest — that proof now exists. `invest_agy_SNDK_20260816_192524.log`: 7 conversation_ids (1 PM + 5 lanes + Red Team, roles named in subagent_info), decision_engine.py ran phase 3 and 4.6, validate_session_export.py rc=0 (SNDK / STAGED_ENTRY), Red Team returned STRONG_COUNTER rather than assent, and a sha256 snapshot of every .py under investment/scripts + skills + scripts came back byte-identical — zero files touched. That last one is the load-bearing check: the run BEFORE it passed the validator too, but only after agy edited build_session_export.py to accept its own p3 shape, so its green said nothing. sector is deliberately NOT changed — nothing has been run on it. Revoke if a run edits repo code or collapses the fan-out (count conversation_ids, not invoke_subagent calls: agy batch-dispatches 5 subagents in ONE call).",
+  "_protocol_providers_note": "Compatibility narrowing only. The task registry and certification ledger are authoritative; these lists may further restrict but never expand certified providers. Invest, sector, and news were accepted by the operator on Claude, Agy/Gemini, and Codex on 2026-08-21.",
   "protocol_providers": {
     "invest": ["claude", "codex", "gemini"],
-    "sector": ["claude", "codex"],
+    "sector": ["claude", "codex", "gemini"],
     "_default": null
   },
-  "_budgets_note": "daily_max_calls resets at UTC midnight. window_max_calls/window_hours is an independent rolling window that does NOT reset at midnight — it mirrors the provider's session window. Omit window_max_calls (or set 0) to leave a model uncapped on that axis; gemini/grok are rate-limited per-minute rather than per-session, so only the session-window CLIs carry one.",
+  "_budgets_note": "Legacy local counters retained for telemetry and historical status only. They never authorise inference; every LLM process requires a broker lease.",
   "budgets": {
     "claude": {
       "daily_max_calls": 300,
@@ -46,7 +46,7 @@
     }
   },
   "cooldown_hours": 4,
-  "_break_news_note": "辯手 A / B 的 **fallback**。V4.109.0 起正常情況由 quota broker 指派『目前實際能服務的前兩名』,這裡只在 broker 答不出來(或它能給的不足兩家)時生效。值改回 claude+gemini 以符合 AGENTS.md『Claude×Gemini 刻意分歧是核心設計』——這個檔案從建檔起是 codex/gemini、後來對調成 gemini/codex,與該文件從未一致過。A/B 對稱(round 1 為平行盲開場),順序只決定 transcript 上誰叫 A。",
+  "_break_news_note": "Legacy display preference only. Runtime debate voices always come from quota broker ranking; fewer than two eligible providers defers the daemon cycle and never falls back to this pair.",
   "break_news": {
     "primary": "claude",
     "secondary": "gemini"

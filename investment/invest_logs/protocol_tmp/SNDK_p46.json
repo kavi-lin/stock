@@ -1,0 +1,17 @@
+{
+  "decision_cap": {
+    "anchors_available": 3,
+    "fair_value_confidence": "low",
+    "lane_data_quality_low": true
+  },
+  "final_decision": "STAGED_ENTRY",
+  "avg_confidence": 0.595,
+  "position_size_pct": 0.018068,
+  "final_action": "STAGED",
+  "hot_zone_probe": false,
+  "cap_override_reason": null,
+  "speculative": {
+    "pre_profit_anchor_live": false,
+    "sell_side_only": false
+  }
+}

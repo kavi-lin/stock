@@ -2,11 +2,13 @@
 """Regression contract for Dashboard agentic protocol model routing."""
 from __future__ import annotations
 
+import fnmatch
 import inspect
 import json
 import os
 import sys
 import tempfile
+from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -160,6 +162,17 @@ for _proto, _script in _GATE_DOCUMENTED.items():
           f"CLAUDE.md documents {_script} for `{_proto}` but PROTOCOL_VALIDATORS has "
           f"{_registered or 'nothing'} — the gate exists and never runs")
 
+_invest_validator_args = ds.PROTOCOL_VALIDATOR_ARGS.get("invest") or []
+check("validator_args.invest_isolated_session",
+      _invest_validator_args == [
+          "--history", "investment/invest_logs/session_exports/{today}_{ticker}.json",
+          "--require-committed-to", "investment/invest_logs/history.json"],
+      repr(_invest_validator_args))
+_invest_protocol_text = Path(ds.PROTOCOL_DOC["invest"]).read_text(encoding="utf-8")
+check("validator_args.invest_producer_path_wired",
+      "investment/invest_logs/session_exports/<DATE>_<T>.json" in _invest_protocol_text,
+      "invest protocol does not produce the isolated path family validated by the server")
+
 for _proto, _paths in ds.PROTOCOL_VALIDATORS.items():
     for _p in _paths:
         check(f"validator_exists.{_proto}", os.path.exists(os.path.join(ds.ROOT, _p)), _p)
@@ -174,6 +187,121 @@ for _a in _inv_artifacts:
     check("required_artifact.invest_templated",
           "{ticker}" in _a and "{today_compact}" in _a,
           f"{_a} — a deep-dive report path needs both the ticker and the compact date")
+
+# V4.131.14 — the same inheritance problem applies to every gated protocol, not
+# just invest: sector/news validators read whichever cache is newest, so a run
+# that halted at a HARD gate validates the PREVIOUS day's file and passes. On
+# 2026-08-16 four sector runs died at the Phase 1 valuation gate and every one
+# rendered as a completed scan, because `sector` was never listed in
+# PROTOCOL_REQUIRED_ARTIFACTS — the comment there named the sector/news families
+# from the start, which is exactly why nobody noticed the keys were absent.
+for _proto in _GATE_DOCUMENTED:
+    check(f"required_artifact.{_proto}_present",
+          bool(ds.PROTOCOL_REQUIRED_ARTIFACTS.get(_proto)),
+          f"`{_proto}` has a documented validator gate but no required artifact — "
+          f"a run that halts early exits rc=0 and looks identical to a finished one")
+
+# Producer/consumer agreement (§2c #8): the gate's path and the preflight panel's
+# glob must resolve to the same file. They live ~1300 lines apart in one module
+# and are written by hand twice; when they drift, the gate silently checks a path
+# nothing ever writes and passes forever.
+_PREFLIGHT_PATTERN = {i["key"]: i.get("pattern") for i in ds.PREFLIGHT_ITEMS}
+for _proto in ("sector", "news"):
+    _pat = _PREFLIGHT_PATTERN.get(_proto)
+    for _a in ds.PROTOCOL_REQUIRED_ARTIFACTS.get(_proto) or []:
+        _resolved = _a.replace("{today}", "2026-08-14")
+        check(f"required_artifact.{_proto}_matches_preflight",
+              bool(_pat) and fnmatch.fnmatch(_resolved, _pat),
+              f"gate wants {_resolved!r} but the freshness panel globs {_pat!r}")
+
+# Signal Queue dispatches these two protocols and only marks them consumed when
+# the server reports `done`. Both execution families must therefore prove a
+# fresh report exists; trusting rc=0 recreates the stale-success bug at the card.
+_EARNINGS_ARTIFACTS = {
+    "earnings": "reports/{today}_{ticker}_earnings.md",
+    "earnings_preview": "reports/{today_compact}_{ticker}_pre_earnings.md",
+}
+for _proto, _wanted in _EARNINGS_ARTIFACTS.items():
+    check(f"required_artifact.{_proto}_exact",
+          _wanted in (ds.PROTOCOL_REQUIRED_ARTIFACTS.get(_proto) or []),
+          repr(ds.PROTOCOL_REQUIRED_ARTIFACTS.get(_proto)))
+check("required_artifact.agentic_wired",
+      "_required_artifact_error(" in inspect.getsource(ds.run_protocol),
+      "agentic earnings must run the shared freshness gate")
+check("required_artifact.script_wired",
+      "_required_artifact_error(" in inspect.getsource(ds._run_script_protocol),
+      "earnings_preview bypasses run_protocol, so its script runner needs the gate too")
+
+_old_root = ds.ROOT
+try:
+    with tempfile.TemporaryDirectory(prefix="signal_artifact_gate_") as _tmp:
+        ds.ROOT = _tmp
+        _reports = Path(_tmp) / "reports"
+        _reports.mkdir()
+        _start = datetime(2026, 8, 18, 12, 0, 0)
+        _report = _reports / "2026-08-18_FN_earnings.md"
+        _report.write_text("old", encoding="utf-8")
+        os.utime(_report, (_start.timestamp() - 60, _start.timestamp() - 60))
+        check("required_artifact.stale_rejected",
+              ds._required_artifact_error("earnings", {"ticker": "FN"}, _start) is not None)
+        os.utime(_report, (_start.timestamp() + 1, _start.timestamp() + 1))
+        check("required_artifact.fresh_accepted",
+              ds._required_artifact_error("earnings", {"ticker": "FN"}, _start) is None)
+        check("signal_report.fresh_only",
+              ds._signal_report_path("earnings", "FN", since=_start.isoformat())
+              == "reports/2026-08-18_FN_earnings.md")
+finally:
+    ds.ROOT = _old_root
+
+# Every exit after a Signal Queue accept must hit the same terminal writeback:
+# explicit pending removal, rejection before dispatch, and normal completion.
+_removed_src = inspect.getsource(ds.remove_from_queue)
+_worker_src = inspect.getsource(ds._analyze_worker) + inspect.getsource(ds._finalize_inflight_runs)
+check("signal_delivery.remove_wired", "_record_signal_delivery(" in _removed_src)
+check("signal_delivery.worker_paths_wired", _worker_src.count("_record_signal_delivery(") >= 2,
+      "worker needs both pre-dispatch rejection and normal completion writebacks")
+_old_available = ds.SIGNAL_QUEUE_AVAILABLE
+_old_signal_queue = ds._signal_queue
+_delivery_calls = []
+
+
+class _FakeSignalQueue:
+    @staticmethod
+    def record_delivery(*args, **kwargs):
+        _delivery_calls.append((args, kwargs))
+
+
+try:
+    ds.SIGNAL_QUEUE_AVAILABLE = True
+    ds._signal_queue = _FakeSignalQueue()
+    _signal_entry = {
+        "name": "earnings",
+        "params": {"signal_id": "earnings:FN", "signal_revision": "rev1",
+                   "signal_refs": [], "ticker": "FN"},
+    }
+    check("signal_delivery.helper_success",
+          ds._record_signal_delivery(_signal_entry, status="failed", error="cancelled"))
+    check("signal_delivery.helper_payload",
+          bool(_delivery_calls)
+          and _delivery_calls[0][0][:2] == ("earnings:FN", "rev1")
+          and _delivery_calls[0][1].get("status") == "failed",
+          repr(_delivery_calls))
+    _queued_entry = {**_signal_entry, "id": "signal_contract_cancel"}
+    # Hold the protocol lock so the daemon worker cannot race this direct queue
+    # cancellation check after we append the fixture.
+    with ds._protocol_lock:
+        with ds._protocol_queue_lock:
+            ds._protocol_queue.append(_queued_entry)
+        _removed = ds.remove_from_queue("signal_contract_cancel")
+    check("signal_delivery.pending_remove_returns_true", _removed)
+    check("signal_delivery.pending_remove_writes_failed",
+          len(_delivery_calls) == 2
+          and _delivery_calls[1][1].get("status") == "failed"
+          and "removed" in (_delivery_calls[1][1].get("error") or ""),
+          repr(_delivery_calls))
+finally:
+    ds.SIGNAL_QUEUE_AVAILABLE = _old_available
+    ds._signal_queue = _old_signal_queue
 
 # V4.114.0 — per-protocol provider allowlist. The broker treats providers as
 # interchangeable for protocol runs (that is its documented job), and on
@@ -228,7 +356,7 @@ try:
     _lease, _note, _allowed = _mr._acquire("agentic_protocol", "claude", _cfg_off,
                                            protocol=True, protocol_name="invest")
     check("allowlist.fail_closed", _allowed is False, f"note={_note}")
-    check("allowlist.reason_explains", "protocol_providers" in _mr._blocked_reason(_note), _note)
+    check("allowlist.reason_explains", "certified" in _mr._blocked_reason(_note), _note)
 finally:
     _mr.broker_gate.broker_client = _old_client
 
@@ -262,7 +390,7 @@ check("allowlist.survives_loader",
 # every PROTOCOL_PROMPTS entry was written against.
 check("prompt.claude_unchanged", ds._adapt_protocol_prompt("claude", "BASE", "invest") == "BASE")
 
-for _model, _ctx in (("codex", "AGENTS.md"), ("grok", "AGENTS.md"), ("gemini", "GEMINI.md")):
+for _model, _ctx in (("codex", "AGENTS.md"), ("gemini", "GEMINI.md")):
     adapted = ds._adapt_protocol_prompt(_model, "BASE", "invest")
     check(f"prompt.{_model}.own_context", f"`{_ctx}`" in adapted, adapted)
     # Naming another provider's file would send the agent to rules that are not
@@ -317,10 +445,69 @@ check("plans.codex_model", _plans["codex"].get("current_model") == "gpt-5.6-sol"
       repr(_plans["codex"]))
 
 _utils_source = (ROOT / "Dashboard" / "utils.js").read_text(encoding="utf-8")
+_style_source = (ROOT / "Dashboard" / "style.css").read_text(encoding="utf-8")
 check("plans.ui_uses_public_label", "info.plan_label" in _utils_source)
 check("plans.ui_shows_current_model", "info.current_model" in _utils_source)
 check("plans.ui_hides_raw_code", "String(info.plan)" not in _utils_source,
       "provider-native plan codes must remain diagnostic-only")
+check("broker_handshake.ui_restart_button", "data-broker-restart" in _utils_source)
+check("broker_handshake.ui_calls_owner", "/api/broker/restart" in _utils_source)
+check("broker_active.ui_reads_reservations", "broker.active_reservations" in _utils_source)
+check("broker_active.ui_merges_protocol_and_broker", "UI._llmBrokerRuns" in _utils_source)
+check("broker_active.ui_local_green_external_blue",
+      "run.is_local_project === true ? 'local' : 'external'" in _utils_source
+      and "sidebar-llm-live-local" in _utils_source
+      and "sidebar-llm-live-external" in _utils_source
+      and ".sidebar-llm-live-local { --llm-live-color: #10b981; }" in _style_source
+      and ".sidebar-llm-live-external { --llm-live-color: #3b82f6; }" in _style_source,
+      "the quota panel must not paint shared-broker activity green by default")
+check("broker_active.ui_exclusive_slot_local_wins",
+      "const externalRun = localRun ? null : externalRuns.find(" in _utils_source,
+      "one broker-exclusive provider slot must not render the same local lease green and blue")
+check("protocol_pill.ui_aggregates_active_heading",
+      "activeNames.length === 1" in _utils_source
+      and "activeLabels.join(' / ')" in _utils_source
+      and "AI research'} ×${active.length}" in _utils_source,
+      "the collapsed heading must represent every active run, not only active[0]")
+check("protocol_pill.ui_pending_remove_by_id",
+      'data-proto-queue-remove="${queueId}"' in _utils_source
+      and '/api/protocol-queue/${encodeURIComponent(queueId)}' in _utils_source
+      and "method: 'DELETE'" in _utils_source,
+      "pending removal must use the queue entry id and the dedicated DELETE endpoint")
+check("protocol_pill.ui_pending_remove_styled",
+      ".proto-pill-queue-remove" in _style_source,
+      "the pending remove control must remain visible and clickable")
+check("protocol_pill.ui_premarket_source_label",
+      "run?.source !== 'premarket_chain'" in _utils_source
+      and "news: 'News Digest'" in _utils_source
+      and "sector: 'Sector Scan'" in _utils_source
+      and "protoSourceLabel(q, isZh)" in _utils_source,
+      "pre-market news/sector jobs must carry workflow provenance in the global queue")
+check("protocol_pill.ui_daily_not_a_provider_slot",
+      "daily: '" not in _utils_source
+      and "daily_update remains visible in the pre-market modal" in _utils_source,
+      "daily_update is not broker-governed and must not consume a provider slot")
+
+# The caller-side endpoint owns the restart. Exercise the helper without
+# touching launchd: a successful command must still wait for a matching health
+# handshake before it tells the button to unlock.
+_old_which = ds.shutil.which
+_old_run = ds.subprocess.run
+_old_status = ds._mrouter.model_status
+try:
+    ds.shutil.which = lambda _name: "/usr/local/bin/lqb"
+    ds.subprocess.run = lambda *a, **k: type("Done", (), {"returncode": 0})()
+    ds._mrouter.model_status = lambda: {
+        "broker": {"handshake_status": "compatible", "authority": True}
+    }
+    _restart_code, _restart_payload = ds._restart_broker()
+finally:
+    ds.shutil.which = _old_which
+    ds.subprocess.run = _old_run
+    ds._mrouter.model_status = _old_status
+check("broker_handshake.restart_endpoint_ok", _restart_code == 200, repr(_restart_payload))
+check("broker_handshake.restart_rehandshakes", _restart_payload.get("ok") is True,
+      repr(_restart_payload))
 
 # Every protocol that runs through PROTOCOL_PROMPTS must name a spec document,
 # and that document must exist. A typo'd path reads as a working preamble.

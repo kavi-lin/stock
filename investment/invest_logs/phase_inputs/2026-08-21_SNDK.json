@@ -1,0 +1,220 @@
+{
+ "bundle_version": "P5-INPUTS/1.0",
+ "ticker": "SNDK",
+ "date": "2026-08-21",
+ "phase0": {
+  "regime_confidence": 0.85,
+  "market_top_zone": "Orange (Elevated Risk)",
+  "ftd_state": "FTD_CONFIRMED",
+  "breadth_composite": 79.2,
+  "vix": 15.44,
+  "fred_verdict": "Transitional",
+  "real_rate_pct": 2.4,
+  "hot_sectors": [
+   "Industrials",
+   "Consumer Discretionary",
+   "Financials",
+   "Energy"
+  ],
+  "cold_sectors": [
+   "Technology",
+   "Real Estate",
+   "Consumer Staples",
+   "Utilities"
+  ]
+ },
+ "lanes": {
+  "fundamentals": {
+   "signal": "BUY",
+   "score": 5.0,
+   "confidence": 0.82,
+   "key_factors": [
+    "Revenue growth exceeds 300 percent",
+    "FCF yield exceeds five percent",
+    "Piotroski score signals financial strength"
+   ],
+   "risk_flags": [
+    "Peer valuation benchmark unavailable",
+    "Forward analyst growth estimate unavailable"
+   ],
+   "phase0_alignment": "ALIGNED",
+   "moat_assessment": {
+    "level": "NARROW",
+    "type": "scale_economies",
+    "evidence_one_line": "Exceptional margins and cash conversion suggest differentiated operating execution."
+   },
+   "near_term_catalysts": [
+    {
+     "date": "2026-11-04",
+     "type": "earnings",
+     "description": "Quarterly results test whether extreme revenue growth persists.",
+     "impact": "high"
+    },
+    {
+     "date": "2026-11-04",
+     "type": "earnings",
+     "description": "Updated free cash flow validates current earnings quality.",
+     "impact": "high"
+    },
+    {
+     "date": "2026-11-04",
+     "type": "guidance",
+     "description": "Management outlook may clarify AI memory demand durability.",
+     "impact": "high"
+    }
+   ],
+   "bull_thesis_one_line": "高成長、高現金流與低負債共振",
+   "bear_thesis_one_line": "暴增成長恐難延續且同業估值缺失"
+  },
+  "sentiment": {
+   "signal": "HOLD",
+   "score": -0.105,
+   "confidence": 0.78,
+   "key_factors": [
+    "Risk-on market composite supports sentiment",
+    "Insider selling and MSPR remain bearish",
+    "Congressional trades are net bullish"
+   ],
+   "risk_flags": [
+    "Latest insider ratio is zero",
+    "MSPR is deeply negative"
+   ],
+   "phase0_alignment": "NEUTRAL",
+   "market_sentiment_composite": 62.9,
+   "vix_current": 15.44,
+   "insider_signal": "BEARISH",
+   "short_pct_float": 7.36,
+   "mspr_latest": -100.0
+  },
+  "news": {
+   "signal": "BUY",
+   "score": 1.0,
+   "confidence": 0.78,
+   "key_factors": [
+    "Buy consensus from fourteen analysts",
+    "AI memory demand supports storage outlook",
+    "PT revisions remained flat over one month"
+   ],
+   "risk_flags": [
+    "Memory smart-money momentum appears to be cooling",
+    "Technology remains a cold sector"
+   ],
+   "phase0_alignment": "NEUTRAL",
+   "analyst_consensus": {
+    "strong_buy": 0,
+    "buy": 14,
+    "hold": 2,
+    "sell": 0,
+    "strong_sell": 0,
+    "consensus": "Buy"
+   },
+   "pt_revision_momentum": {
+    "direction": "FLAT",
+    "consensus_delta_pct_1m": 0.3,
+    "consensus_delta_pct_3m": -4.04
+   },
+   "immediate_catalyst_5d": null,
+   "decision_point_days": 21,
+   "cross_asset_spillover": [
+    {
+     "asset": "NAND memory",
+     "direction": "NEUTRAL",
+     "mechanism": "Demand remains constructive while sector momentum cools"
+    },
+    {
+     "asset": "AI infrastructure",
+     "direction": "BULLISH",
+     "mechanism": "AI data growth supports storage demand"
+    },
+    {
+     "asset": "Memory semiconductor peers",
+     "direction": "NEUTRAL",
+     "mechanism": "Mixed peer sentiment limits directional spillover"
+    }
+   ],
+   "reasoning_one_line": "Buy consensus and AI-memory demand support SNDK, while flat revisions and cooling memory momentum limit conviction."
+  },
+  "technical": {
+   "signal": "HOLD",
+   "score": 1.0,
+   "confidence": 0.72,
+   "key_factors": [
+    "Above 20-day and 200-day averages",
+    "Positive MACD histogram with fading momentum",
+    "Volume below its 20-day average"
+   ],
+   "risk_flags": [
+    "Below 50-day average after recent death cross",
+    "Technology weak amid elevated market-top risk"
+   ],
+   "phase0_alignment": "NEUTRAL",
+   "rubric_override_reason": null,
+   "smart_money_analysis": {
+    "label": "mixed",
+    "narrative": "Expanding volume trend suggests interest, but the current rally occurred on only 0.65x average volume."
+   },
+   "pattern_taxonomy": {
+    "pattern": "consolidation",
+    "confirmation_criteria": "Close above 1696.37 with volume above 17606944; invalidate below 1514.36."
+   },
+   "market_strength": "NEUTRAL",
+   "key_levels": {
+    "support": 1514.36,
+    "resistance": 1696.37,
+    "pivot": 1655.12
+   },
+   "high_prob_scenario": "較可能在1514.36至1696.37區間整理；放量突破1696.37才確認續漲，跌破1514.36則轉弱。",
+   "volatility": {
+    "atr_14": null,
+    "hist_vol_20d_daily": null,
+    "momentum_20d_pct": null
+   }
+  },
+  "valuation": {
+   "signal": "SELL",
+   "score": -1.0,
+   "confidence": 0.4,
+   "key_factors": [
+    "DCF anchor implies extreme downside",
+    "Sole effective anchor limits robustness",
+    "Structural transition remains paradigm-only"
+   ],
+   "risk_flags": [
+    "Severe anchor conflict",
+    "No eligible peer cohort"
+   ],
+   "phase0_alignment": "NEUTRAL",
+   "weighted_fair_value": 285.58,
+   "current_price": 1600.62,
+   "vs_current_pct": -82.16,
+   "verdict_band": "extreme_overvalued",
+   "primary_method": "dcf_self_built",
+   "cited_transition_overlay": true,
+   "transition_dissent_basis": "valuation_anchor",
+   "suppression_proposals": [
+    {
+     "anchor": "dcf_self_built",
+     "reason": "Review reliability is weak for a sole effective anchor.",
+     "evidence": "Paradigm-only transition, severe anchor conflict, and unavailable forecaster transition case."
+    }
+   ],
+   "valuation_commentary": "The pack assigns sole effective weight to dcf_self_built at 285.58 versus current price 1600.62, producing -82.16%. Its 274.12-299.61 sensitivity range conflicts with analyst PT 2024.67, owner earnings 744.45, and forward earnings 1961.13."
+  }
+ },
+ "burry": {
+  "score": 49.2,
+  "narrative": "Burry 得分 49.2/100（NEUTRAL）：FCF yield 3.36%、EV/EBIT 18.21、D/E 0.01、距 52 週高點 31.45%，但 insider 維持 SELL；Piotroski 7 顯示財務品質偏強。"
+ },
+ "phase3": {
+  "final_score": 1.0731,
+  "final_decision": "STAGED_ENTRY",
+  "final_action": "EXECUTE"
+ },
+ "phase4": {
+  "position_size_pct": null,
+  "analysis_price": 1600.62
+ },
+ "red_team": {
+  "verdict": "STRONG_COUNTER"
+ }
+}

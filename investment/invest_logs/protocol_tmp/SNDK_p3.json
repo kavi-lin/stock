@@ -1,0 +1,86 @@
+{
+  "ticker": "SNDK",
+  "lane_scores": {
+    "fundamentals": 5.0,
+    "sentiment": -0.105,
+    "news": 1.0,
+    "technical": 1.0,
+    "valuation": -1.0
+  },
+  "lane_confidence": {
+    "fundamentals": 0.82,
+    "sentiment": 0.78,
+    "news": 0.78,
+    "technical": 0.72,
+    "valuation": 0.4
+  },
+  "valuation_lane": {
+    "score": -1.0,
+    "confidence": 0.4
+  },
+  "forward_validation": {
+    "schema": "forward_validation.v1",
+    "status": "STRETCHED",
+    "applies": true,
+    "reason": "at least one credible forward check supports current price",
+    "dcf_value": 285.58,
+    "dcf_gap_pct": -82.16,
+    "extreme_dcf_threshold_pct": -30.0,
+    "checks": [
+      {"name":"archetype_shadow","available":true,"supports_current_price":false,"actual":-23.56,"threshold":">=-10% vs current","detail":{"anchors_used_n":5}},
+      {"name":"forward_earnings","available":true,"supports_current_price":true,"actual":22.52,"threshold":">=-10% vs current","detail":{"analyst_count":3,"horizon_years":2.867}},
+      {"name":"revenue_path","available":true,"supports_current_price":true,"actual":0.235,"threshold":"<= analyst CAGR + 0.05","detail":{"analyst_revenue_cagr":0.2222,"analyst_horizon_years":3.0}}
+    ],
+    "evaluated_count": 3,
+    "support_count": 2,
+    "supported_checks": ["forward_earnings", "revenue_path"],
+    "failed_checks": ["archetype_shadow"],
+    "quality_flags": [],
+    "valuation_score_before": -1.0,
+    "valuation_score_effective": -1.0,
+    "score_adjustment": "none",
+    "t5_hard_downgrade_eligible": false
+  },
+  "weights": null,
+  "structural_shift": {"tier": "CONFIRMED"},
+  "red_team": {
+    "verdict": "STRONG_COUNTER",
+    "counter_thesis": "偏多共識最弱之處，是把AI記憶體需求與已確認的結構轉型直接等同於足以支撐現價的現金流轉化；但DIO由107.1天升至177.5天，顯示庫存與產能投入可能快於客戶消化，形成具體的前瞻機制斷裂風險。當市價要求5年FCF CAGR 20.65%、EV/S收斂路徑要求營收CAGR 23.5%，且FRED實質利率仍為2.4%時，成長稍有失速即可同時觸發盈利與估值下修。",
+    "kill_conditions": [
+      "IF 未來兩季的年化自由現金流成長率低於10% WITHIN 180 days THEN 市價隱含的5年20.65% FCF CAGR失效，基本面BUY論點破局",
+      "IF 客戶庫存消化、擴產吸收不良、需求飽和或替代／市占流失使未來兩季年化營收成長低於23% WITHIN 180 days THEN 由11.49x EV/S向4x收斂所需的23.5%營收CAGR無法成立，AI記憶體成長論點破局",
+      "IF FRED 10年期實質利率DFII10維持在或高於2.4%且SNDK仍無法站回50DMA WITHIN 90 days THEN 高久期科技股估值擴張條件失效，混合偏多共識應轉為防守"
+    ],
+    "basis": null,
+    "counter_evidence_strength": 4,
+    "thesis_break_probability": 0.6
+  },
+  "transition": {
+    "transition_signature": "paradigm_only",
+    "transition_signature_mtime": "2026-08-21T20:53:10+08:00",
+    "forecaster_transition_case": false,
+    "forecaster_transition_case_mtime": null,
+    "valuation_cited_transition_overlay": true,
+    "valuation_transition_dissent_basis": "valuation_anchor"
+  },
+  "macro": {
+    "macro_multiplier": 0.9,
+    "macro_backdrop_score": 0.0,
+    "market_regime": "RISK_ON"
+  },
+  "burry": {"score": 49.2, "veto_flag": false},
+  "gates": {
+    "proceed_to_phase3": true,
+    "risk_reward_ratio": null,
+    "binary_classification": "unknown",
+    "binary_event_within_48h": false,
+    "mandatory_risk_flags": ["valuation_sell"],
+    "phase2_fanout_mode": "PARALLEL_SUBAGENT"
+  },
+  "hot_zone": {"industry_top_30pct": false},
+  "decision_cap": {
+    "anchors_available": 3,
+    "fair_value_confidence": "low",
+    "lane_data_quality_low": true
+  }
+}

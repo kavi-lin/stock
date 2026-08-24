@@ -603,11 +603,15 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('news-run-reload')?.classList.remove('hidden');
   }
 
-  async function pollNewsRunStatus() {
+  async function pollNewsRunStatus(knownState = null) {
     try {
-      const r = await fetch('/api/run-protocol/status');
-      if (!r.ok) return;
-      const s = await r.json();
+      let s = knownState;
+      if (!s) {
+        const suffix = _activeQueueId ? `?queue_id=${encodeURIComponent(_activeQueueId)}` : '?name=news';
+        const r = await fetch('/api/run-protocol/status' + suffix);
+        if (!r.ok) return;
+        s = await r.json();
+      }
       document.getElementById('news-run-elapsed').textContent = formatElapsed(s.elapsed_sec || 0);
 
       // Live log tail — pin-to-bottom unless user scrolled up
@@ -696,7 +700,7 @@ document.addEventListener('DOMContentLoaded', () => {
   async function pollForMyJob(myId, title) {
     if (!myId) return;
     try {
-      const r = await fetch('/api/run-protocol/status');
+      const r = await fetch(`/api/run-protocol/status?queue_id=${encodeURIComponent(myId)}`);
       if (!r.ok) return;
       const s = await r.json();
       const isMine = s.queue_id === myId;
@@ -711,7 +715,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showRunBanner(title, UI.currentLang === 'zh' ? 'Claude 正在處理中...' : 'Claude is processing...');
       }
       // Delegate live status update (elapsed/log/done/error) to existing poller
-      pollNewsRunStatus();
+      pollNewsRunStatus(s);
       if (s.status !== 'running' && s.ended_at) {
         // Finished — stop polling for this job
         clearInterval(_newsPollTimer); _newsPollTimer = null;
@@ -721,7 +725,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   document.getElementById('news-run-cancel')?.addEventListener('click', async () => {
-    try { await fetch('/api/run-protocol/cancel', { method: 'POST' }); } catch (e) { /* ignore */ }
+    try {
+      await fetch('/api/run-protocol/cancel', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ queue_id: _activeQueueId }),
+      });
+    } catch (e) { /* ignore */ }
   });
   document.getElementById('news-run-dismiss')?.addEventListener('click', () => {
     document.getElementById('news-run-banner')?.classList.add('hidden');
@@ -756,7 +765,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // still resumes — user wouldn't expect to lose progress visibility on an active job.
   (async () => {
     try {
-      const r = await fetch('/api/run-protocol/status');
+      const r = await fetch('/api/run-protocol/status?artifact_key=news-global');
       const s = await r.json();
       const isNews = s.name === 'news' || s.name === 'flash' || s.name === 'flash_text' || s.name === 'review' || s.name === 'triage' || s.name === 'link_digest';
       if (!isNews) return;

@@ -3,7 +3,7 @@
 Link Digest — EN → zh-TW translator (V1.0).
 
 Translates the English prose fields of a link-digest judgment into Traditional
-Chinese using the gemini CLI (`agy`), reusing the break-news `run_gemini` driver.
+Chinese through the quota broker's selected certified provider.
 One batched call (JSON in → JSON out) keeps it cheap. Best-effort: on any failure
 (agy missing, timeout, unparseable) returns {} and the caller proceeds untranslated
 (the writer degrades to rc=2, never fatal).
@@ -38,41 +38,9 @@ def translate_to_zh(fields: dict, timeout: int = 120) -> dict:
     payload = {k: v for k, v in (fields or {}).items() if isinstance(v, str) and v.strip()}
     if not payload:
         return {}
-    try:
-        from scripts.break_news.llm_drivers import run_gemini
-    except Exception as e:  # import path / module issues → skip
-        sys.stderr.write(f"[link_digest.translate] cannot import run_gemini: {e}\n")
-        return {}
-
     user = "Translate the values of this JSON object:\n" + json.dumps(payload, ensure_ascii=False)
-
-    # V4.106.0 — reserve the quota before spending it. Routing is still
-    # deliberately NOT changed: translation is cosmetic and pinned to gemini, so
-    # falling back to a pricier model when gemini is exhausted would be the wrong
-    # trade, and the reservation names gemini alone. `link_digest` is on the
-    # news-line allowlist, so an unreachable broker degrades to the local budget
-    # rather than dropping the translation; a broker that answers "no capacity"
-    # still stops it, because that answer is about the hard reserve.
     from scripts._shared import model_router
-    try:
-        with model_router.governed_call("link_digest", "gemini", _SYS, user) as hold:
-            try:
-                res = run_gemini(_SYS, user, timeout=timeout)
-            except Exception as e:
-                sys.stderr.write(f"[link_digest.translate] run_gemini raised: {e}\n")
-                return {}
-            hold.settle(res)
-    except model_router.RunBlocked as blocked:
-        sys.stderr.write(f"[link_digest.translate] {blocked}\n")
-        return {}
-
-    # The local counters keep recording whatever the broker did: they are what
-    # the degraded path runs on, so they must not go blind while it is healthy.
-    try:
-        model_router.note_run("gemini", getattr(res, "exit_code", 1) == 0,
-                              (getattr(res, "error", "") or "")[:200])
-    except Exception:  # noqa: BLE001
-        pass
+    res = model_router.run_role("link_digest", _SYS, user, timeout=timeout)
 
     out = res.parsed if isinstance(getattr(res, "parsed", None), dict) else None
     if out is None:
@@ -85,7 +53,7 @@ def translate_to_zh(fields: dict, timeout: int = 120) -> dict:
             except json.JSONDecodeError:
                 out = None
     if not isinstance(out, dict):
-        sys.stderr.write(f"[link_digest.translate] gemini returned no JSON "
+        sys.stderr.write(f"[link_digest.translate] broker-selected model returned no JSON "
                          f"(exit={getattr(res,'exit_code','?')}, "
                          f"err={getattr(res,'error',None)})\n")
         return {}

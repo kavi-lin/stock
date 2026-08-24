@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""decision_engine.py — V4.80.0 deterministic Phase 3 decision engine (0 LLM arithmetic).
+"""decision_engine.py — deterministic Phase 3 decision engine (0 LLM arithmetic).
 
 Computes the ENTIRE Phase 3 decision stack in one call:
   Step 1   — weighted raw_total with V4.70.0 three-tier C_eff quantisation
@@ -8,6 +8,7 @@ Computes the ENTIRE Phase 3 decision stack in one call:
   Step 2   — Red-Team-gated bonus / 5-level priority penalty cascade (first match wins)
   Step 3   — directional macro multiplier (ALIGNED × mult / CONTRARIAN passthrough)
   Step 4   — V2.20.0 dynamic threshold + decision band
+  T5       — extreme valuation hard downgrade only after forward-validation FAIL
   Rec 11   — hot-zone probe judgment tree + tier split (TODO-001/002/015)
   Gates    — Auto REJECT hard gates, applied above the probe exception
 
@@ -35,6 +36,7 @@ action_label — stay with the PM and are NOT engine inputs):
   "lane_confidence": {"fundamentals": 0.6, "sentiment": 0.55, "news": 0.6,
                       "technical": 0.7, "valuation": 0.62},
   "valuation_lane":  {"score": -1.5, "confidence": 0.62},   # score also accepted here
+  "forward_validation": {"status": "STRETCHED", "applies": true}, # pf_quant verbatim
   "weights": null,                                          # optional override of defaults
   "structural_shift": {"tier": "CONFIRMED"},                # NONE|CANDIDATE|CONFIRMED|INSUFFICIENT_DATA|null
   "red_team": {
@@ -87,8 +89,8 @@ from apply_det_shadow import (  # noqa: E402
     compute_polarization,
 )
 
-ENGINE_VERSION = "1.0.0"
-ENGINE_LABEL = f"decision_engine.py v{ENGINE_VERSION} (V4.80.0)"
+ENGINE_VERSION = "1.1.0"
+ENGINE_LABEL = f"decision_engine.py v{ENGINE_VERSION} (V4.131.13)"
 
 LANE_KEYS = ("fundamentals", "sentiment", "news", "technical", "valuation")
 LANE_LABELS = {"fundamentals": "Fundamentals", "sentiment": "Sentiment",
@@ -712,6 +714,37 @@ def apply_decision_cap(payload: dict) -> dict:
 # Orchestrator
 # ---------------------------------------------------------------------------
 
+def evaluate_t5_forward_validation(decision: str, valuation_score,
+                                   forward_validation: dict | None) -> dict:
+    """Apply the hard T5 consequence only to an evidence-backed FAIL.
+
+    PASS/STRETCHED scores were already softened by the price-framework producer.
+    NO_DATA is deliberately fail-open for the decision: missing forward evidence
+    is not proof that a high-growth stock is overvalued.
+    """
+    fv = forward_validation if isinstance(forward_validation, dict) else {}
+    status = fv.get("status") or "MISSING"
+    score = _f(valuation_score)
+    warning_triggered = bool(
+        status == "FAIL" and score is not None and score <= -2
+        and decision in ("BUY", "STAGED_ENTRY")
+    )
+    hard_eligible = bool(warning_triggered and score <= -3)
+    after = decision
+    if hard_eligible:
+        after = "STAGED_ENTRY" if decision == "BUY" else "HOLD"
+    return {
+        "forward_validation_status": status,
+        "forward_validation_applies": fv.get("applies") is True,
+        "valuation_score": score,
+        "warning_triggered": warning_triggered,
+        "hard_downgrade_eligible": hard_eligible,
+        "downgrade_applied": after != decision,
+        "decision_before": decision,
+        "decision_after": after,
+    }
+
+
 def run_phase3(inp: dict) -> dict:
     warnings: list[str] = []
     lane_scores = inp.get("lane_scores") or {}
@@ -778,6 +811,12 @@ def run_phase3(inp: dict) -> dict:
         decision = "STAGED_ENTRY"
         band_adjustments.append("BIPOLAR: BUY → STAGED_ENTRY 強制降階 (Step 1.7)")
 
+    t5 = evaluate_t5_forward_validation(decision, val_score, inp.get("forward_validation"))
+    decision = t5["decision_after"]
+    if t5["downgrade_applied"]:
+        band_adjustments.append(
+            f"T5 extreme DCF + forward FAIL: {t5['decision_before']} → {decision}")
+
     gates = inp.get("gates") or {}
     auto_reject = evaluate_auto_reject(gates, burry, decision)
     if auto_reject["triggered"] and decision in ("BUY", "STAGED_ENTRY"):
@@ -803,7 +842,8 @@ def run_phase3(inp: dict) -> dict:
     hz = evaluate_hot_zone(final_score, dyn["staged_threshold"], inp.get("hot_zone") or {},
                            regime, cap_trig["decision_cap_active"],
                            gates.get("mandatory_risk_flags") or [],
-                           auto_reject["triggered"] or probe_gate["triggered"])
+                           auto_reject["triggered"] or probe_gate["triggered"]
+                           or t5["downgrade_applied"])
     if hz["hot_zone_probe"]:
         decision = "STAGED_ENTRY"
         band_adjustments.append(
@@ -837,6 +877,7 @@ def run_phase3(inp: dict) -> dict:
         "red_team_auto_downgrade": s2["red_team_auto_downgrade"],
         "cascade_rule_applied": s2["cascade_rule_applied"],
         "dynamic_threshold": dyn,
+        "t5_forward_validation": t5,
         "red_team_verdict": s2["red_team_verdict"],
         "red_team_effective_verdict": s2["effective_verdict"],
         "red_team_counter_evidence_strength": red_team.get("counter_evidence_strength"),
@@ -861,6 +902,8 @@ def run_phase3(inp: dict) -> dict:
         "avg_confidence_raw": round(avg_conf_raw, 4) if avg_conf_raw is not None else None,
         "final_score": final_score,
         "final_decision": decision,
+        "forward_validation": (inp.get("forward_validation")
+                               if isinstance(inp.get("forward_validation"), dict) else None),
         "decision_band_before_adjustments": banded,
         "band_adjustments": band_adjustments,
         "decision_margin": (

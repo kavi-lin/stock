@@ -1,0 +1,16 @@
+{
+  "ticker": "MRVL",
+  "key_levels": {
+    "support": 222.88,
+    "resistance": 251.64,
+    "pivot": 251.64
+  },
+  "pattern_taxonomy": "consolidation",
+  "smart_money_label": "neutral",
+  "immediate_catalyst_5d": {
+    "event": "Q2 earnings announcement",
+    "date": "2026-08-27",
+    "direction_lean": "BULLISH",
+    "expected_move_pct": null
+  }
+}

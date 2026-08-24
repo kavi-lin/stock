@@ -1,0 +1,233 @@
+{
+  "schema": "p5-qualitative/1.0",
+  "ticker": "SNDK",
+  "date": "2026-08-21",
+  "lanes": {
+    "fundamentals": {
+      "signal": "BUY",
+      "key_factors": [
+        "Revenue growth exceeds 300 percent",
+        "FCF yield exceeds five percent",
+        "Piotroski score signals financial strength"
+      ],
+      "risk_flags": [
+        "Peer valuation benchmark unavailable",
+        "Forward analyst growth estimate unavailable"
+      ]
+    },
+    "sentiment": {
+      "signal": "HOLD",
+      "key_factors": [
+        "Risk-on market composite supports sentiment",
+        "Insider selling and MSPR remain bearish",
+        "Congressional trades are net bullish"
+      ],
+      "risk_flags": [
+        "Latest insider ratio is zero",
+        "MSPR is deeply negative"
+      ]
+    },
+    "news": {
+      "signal": "BUY",
+      "key_factors": [
+        "Buy consensus from fourteen analysts",
+        "AI memory demand supports storage outlook",
+        "PT revisions remained flat over one month"
+      ],
+      "risk_flags": [
+        "Memory smart-money momentum appears to be cooling",
+        "Technology remains a cold sector"
+      ]
+    },
+    "technical": {
+      "signal": "HOLD",
+      "key_factors": [
+        "Above 20-day and 200-day averages",
+        "Positive MACD histogram with fading momentum",
+        "Volume below its 20-day average"
+      ],
+      "risk_flags": [
+        "Below 50-day average after recent death cross",
+        "Technology weak amid elevated market-top risk"
+      ]
+    },
+    "valuation": {
+      "signal": "SELL",
+      "key_factors": [
+        "DCF anchor implies extreme downside",
+        "Sole effective anchor limits robustness",
+        "Structural transition remains paradigm-only"
+      ],
+      "risk_flags": [
+        "Severe anchor conflict",
+        "No eligible peer cohort"
+      ]
+    }
+  },
+  "lane_detail": {
+    "fundamentals": {
+      "phase0_alignment": "ALIGNED",
+      "moat_assessment": {
+        "level": "NARROW",
+        "type": "scale_economies",
+        "evidence_one_line": "Exceptional margins and cash conversion suggest differentiated operating execution."
+      },
+      "near_term_catalysts": [
+        {
+          "date": "2026-11-04",
+          "type": "earnings",
+          "description": "Quarterly results test whether extreme revenue growth persists.",
+          "impact": "high"
+        },
+        {
+          "date": "2026-11-04",
+          "type": "earnings",
+          "description": "Updated free cash flow validates current earnings quality.",
+          "impact": "high"
+        },
+        {
+          "date": "2026-11-04",
+          "type": "guidance",
+          "description": "Management outlook may clarify AI memory demand durability.",
+          "impact": "high"
+        }
+      ],
+      "bull_thesis_one_line": "高成長、高現金流與低負債共振",
+      "bear_thesis_one_line": "暴增成長恐難延續且同業估值缺失"
+    },
+    "sentiment": {
+      "phase0_alignment": "NEUTRAL",
+      "market_sentiment_composite": 62.9,
+      "vix_current": 15.44,
+      "insider_signal": "BEARISH",
+      "short_pct_float": 7.36,
+      "mspr_latest": -100.0
+    },
+    "news": {
+      "phase0_alignment": "NEUTRAL",
+      "analyst_consensus": {
+        "strong_buy": 0,
+        "buy": 14,
+        "hold": 2,
+        "sell": 0,
+        "strong_sell": 0,
+        "consensus": "Buy"
+      },
+      "pt_revision_momentum": {
+        "direction": "FLAT",
+        "consensus_delta_pct_1m": 0.3,
+        "consensus_delta_pct_3m": -4.04
+      },
+      "immediate_catalyst_5d": null,
+      "decision_point_days": 21,
+      "cross_asset_spillover": [
+        {
+          "asset": "NAND memory",
+          "direction": "NEUTRAL",
+          "mechanism": "Demand remains constructive while sector momentum cools"
+        },
+        {
+          "asset": "AI infrastructure",
+          "direction": "BULLISH",
+          "mechanism": "AI data growth supports storage demand"
+        },
+        {
+          "asset": "Memory semiconductor peers",
+          "direction": "NEUTRAL",
+          "mechanism": "Mixed peer sentiment limits directional spillover"
+        }
+      ],
+      "reasoning_one_line": "Buy consensus and AI-memory demand support SNDK, while flat revisions and cooling memory momentum limit conviction."
+    },
+    "technical": {
+      "phase0_alignment": "NEUTRAL",
+      "rubric_override_reason": null,
+      "smart_money_analysis": {
+        "label": "mixed",
+        "narrative": "Expanding volume trend suggests interest, but the current rally occurred on only 0.65x average volume."
+      },
+      "pattern_taxonomy": {
+        "pattern": "consolidation",
+        "confirmation_criteria": "Close above 1696.37 with volume above 17606944; invalidate below 1514.36."
+      },
+      "market_strength": "NEUTRAL",
+      "key_levels": {
+        "support": 1514.36,
+        "resistance": 1696.37,
+        "pivot": 1655.12
+      },
+      "high_prob_scenario": "較可能在1514.36至1696.37區間整理；放量突破1696.37才確認續漲，跌破1514.36則轉弱。",
+      "volatility": {
+        "atr_14": null,
+        "hist_vol_20d_daily": null,
+        "momentum_20d_pct": null
+      }
+    },
+    "valuation": {
+      "phase0_alignment": "NEUTRAL",
+      "weighted_fair_value": 285.58,
+      "current_price": 1600.62,
+      "vs_current_pct": -82.16,
+      "verdict_band": "extreme_overvalued",
+      "primary_method": "dcf_self_built",
+      "cited_transition_overlay": true,
+      "transition_dissent_basis": "valuation_anchor",
+      "suppression_proposals": [
+        {
+          "anchor": "dcf_self_built",
+          "reason": "Review reliability is weak for a sole effective anchor.",
+          "evidence": "Paradigm-only transition, severe anchor conflict, and unavailable forecaster transition case."
+        }
+      ],
+      "valuation_commentary": "The pack assigns sole effective weight to dcf_self_built at 285.58 versus current price 1600.62, producing -82.16%. Its 274.12-299.61 sensitivity range conflicts with analyst PT 2024.67, owner earnings 744.45, and forward earnings 1961.13."
+    }
+  },
+  "red_team": {
+    "verdict": "STRONG_COUNTER",
+    "counter_evidence_strength": 4,
+    "thesis_break_probability": 0.6,
+    "counter_thesis": "偏多共識最弱之處，是把AI記憶體需求與已確認的結構轉型直接等同於足以支撐現價的現金流轉化；但DIO由107.1天升至177.5天，顯示庫存與產能投入可能快於客戶消化，形成具體的前瞻機制斷裂風險。當市價要求5年FCF CAGR 20.65%、EV/S收斂路徑要求營收CAGR 23.5%，且FRED實質利率仍為2.4%時，成長稍有失速即可同時觸發盈利與估值下修。",
+    "kill_conditions": [
+      "IF 未來兩季的年化自由現金流成長率低於10% WITHIN 180 days THEN 市價隱含的5年20.65% FCF CAGR失效，基本面BUY論點破局",
+      "IF 客戶庫存消化、擴產吸收不良、需求飽和或替代／市占流失使未來兩季年化營收成長低於23% WITHIN 180 days THEN 由11.49x EV/S向4x收斂所需的23.5%營收CAGR無法成立，AI記憶體成長論點破局",
+      "IF FRED 10年期實質利率DFII10維持在或高於2.4%且SNDK仍無法站回50DMA WITHIN 90 days THEN 高久期科技股估值擴張條件失效，混合偏多共識應轉為防守"
+    ],
+    "execution_failed": false
+  },
+  "burry_narrative": "Burry 得分 49.2/100（NEUTRAL）：FCF yield 3.36%、EV/EBIT 18.21、D/E 0.01、距 52 週高點 31.45%，但 insider 維持 SELL；Piotroski 7 顯示財務品質偏強。",
+  "conflict_bias": {
+    "tentative_decision": "STAGED_ENTRY",
+    "triggers_fired": [],
+    "conflict_summary": "T1–T5 均未觸發；Valuation 是唯一負分離群值，交由 Phase 3 極化與 Red Team 閘處理。",
+    "t4_detail": null,
+    "t5_detail": null,
+    "proceed_to_phase3": true
+  },
+  "macro_context": "大盤為 RISK_ON、廣度 79.2 且 FTD 已確認第 12 天，但 Market Top 升至 Orange 40.4。FRED 為 Transitional，2.4% 實質利率對科技估值形成壓力，宏觀乘數為 0.9。",
+  "watch_conditions": {
+    "support_break": "若收盤跌破 1514.36 且成交量高於 20 日均量，取消分批進場並轉為防守。",
+    "earnings_growth_test": "2026-11-04 財報若年化營收成長低於 23% 或年化 FCF 成長低於 10%，重估結構轉型論點。",
+    "real_rate_pressure": "若 10 年期實質利率維持 2.4% 以上且股價無法站回 50 日均線 1655.12，維持低曝險。",
+    "breakout_confirmation": "只有放量突破 1696.37 才確認整理結束；未確認前不追價。"
+  },
+  "key_risks": [
+    "DIO 升至 177.5 天，庫存消化可能落後產能與需求預期",
+    "估值錨分歧 7.09 倍且主要 DCF 公允價僅 285.58",
+    "內部人買賣比為 0、MSPR 為 -100，籌碼訊號偏空",
+    "2.4% 實質利率與 Technology 冷區對高久期估值不利"
+  ],
+  "bias_notes": "五 lane 呈 OUTLIER，Valuation 為唯一負向離群；Phase 3 已套 0.85 信心乘數與 1.3 動態 BUY 閾值，Red Team strength 4 再套 0.925，並因估值信心 low 啟動 30bps decision cap。",
+  "phase2_fanout_mode": "PARALLEL_SUBAGENT",
+  "degraded_analysts": [],
+  "decision_point_days": 21,
+  "devils_advocate_filed": false,
+  "trade_metadata": {
+    "trade_type": "trend",
+    "event_tag": "none",
+    "institutional_lens": "FTD 已確認第 12 天與議員交易淨多提供市場側支撐，但 insider ratio 0、MSPR -100 且短空比 7.36%，資金面明顯分歧。",
+    "decision_confidence_pct": 60,
+    "scenario_odds": {"bull": 45, "base": 35, "bear": 20},
+    "action_label": "WAIT"
+  },
+  "last_outcome": "UNKNOWN"
+}

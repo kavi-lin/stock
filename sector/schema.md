@@ -125,11 +125,15 @@
   ],
   "hot_sectors": ["sector1", "sector2"],
   "cold_sectors": ["sector1", "sector2"],
-  "rotation_theme": "string — 一句話描述當前輪動方向"
+  "rotation_theme": "string — 一句話描述當前輪動方向",
+  "pe_snapshot_date": "string YYYY-MM-DD — 上表 pe_ttm / pe_zscore_1y 實際取自哪一天",
+  "pe_snapshot_lag_days": "int — pe_snapshot_date 落後 verdict_date 幾天；0 = 當日"
 }
 ```
 
 > ⚠️ V1.4：`sector_valuation` block 為 **hard-required**。由 `sector/scripts/fetch_sector_valuation.py` 產出（FMP HTTP REST，cache 至 `sector/cache/sector_valuation_<DATE>.json`），Phase 1 fetch 失敗 → 中止 protocol（不繼續 Phase 4/5）。
+
+> ⚠️ PE 只有交易日有值。週末／假日跑，`fetch_sector_valuation.py` 會**實際回抓最近一個交易日**（最多回看 5 天）而非沿用舊 cache，並把來源日寫進 `pe_snapshot_date` / `pe_snapshot_lag_days`。`lag > 0` 時報告須註明 PE 為前一收盤，不得當成當日數字。回看 5 天內都無資料 → rc=1 中止（2026-08-16 之前是空資料就直接中止，週末必掛）。
 
 ---
 

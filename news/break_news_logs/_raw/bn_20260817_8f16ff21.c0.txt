@@ -1,0 +1,53 @@
+```json
+{
+  "commentary": "Citius Oncology (CTOR) Q3 營收低於市場預期引發股價重挫，主因新藥 LYMPHIR 商業化初期放量速度不如華爾街預期。儘管上市動能持續且臨床適應症具備利基市場潛力，但生技初期商業化的高行銷支出與收入兌現延遲加劇現金消耗風險，短期內生技板塊對商業化執行力容錯率偏低。",
+  "bull_points": [
+    "LYMPHIR 於利基型皮膚 T 細胞淋巴瘤市場具備上市成長潛力",
+    "產品線商業化已正式啟動，後續醫保覆蓋擴大可望帶動放量"
+  ],
+  "bear_points": [
+    "Q3 營收未達預期顯示新藥初期銷售滲透速度不如預期",
+    "商業化初期推廣費用高昂，短期現金流壓力與再融資風險增"
+  ],
+  "final_take": "短期面臨商業化放量考驗，建議觀望後續季度銷售成長。",
+  "entities": {
+    "tickers": [
+      "CTOR"
+    ],
+    "sectors": [
+      "Health Care"
+    ],
+    "themes": [
+      "Oncology",
+      "Biotech Commercialization",
+      "Earnings Miss"
+    ],
+    "tech_keywords": [
+      "LYMPHIR",
+      "Denileukin Diftitox",
+      "CTCL",
+      "IL-2 Fusion Protein"
+    ]
+  },
+  "relations": [
+    {
+      "subject": "ticker:CTOR",
+      "predicate": "HEADWIND_FROM",
+      "object": "theme:earnings_miss"
+    },
+    {
+      "subject": "ticker:CTOR",
+      "predicate": "BENEFITS_FROM",
+      "object": "drug:lymphir"
+    },
+    {
+      "subject": "drug:lymphir",
+      "predicate": "CATALYST_FOR",
+      "object": "theme:biotech_commercialization"
+    }
+  ],
+  "done": false,
+  "confidence": 0.85,
+  "rationale_short": "Q3 營收不如預期重挫信心，但 LYMPHIR 商業化仍在起步階段。"
+}
+```

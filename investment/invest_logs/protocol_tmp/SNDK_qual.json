@@ -1,0 +1,11 @@
+{
+  "ticker": "SNDK",
+  "key_levels": {
+    "support": 1514.36,
+    "resistance": 1696.37,
+    "pivot": 1655.12
+  },
+  "pattern_taxonomy": "consolidation",
+  "smart_money_label": "mixed",
+  "immediate_catalyst_5d": null
+}

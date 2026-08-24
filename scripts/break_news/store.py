@@ -153,6 +153,68 @@ def append_comment(news_id: str, comment: dict) -> None:
         _atomic_write_json(item_path(news_id), p)
 
 
+_USABLE_STATES_FOR_CONSUMPTION = {"closed", "partial_closed"}
+
+
+def add_consumed_by(news_id: str, record: dict) -> bool:
+    """Record that a downstream page turned this debate into an analysis.
+
+    The mirror of `graph_promoted_at` / `graph_status`: those say the item
+    reached the knowledge graph, this says it reached a protocol run. It exists
+    so the debate card can link forward to what it produced — the delivery
+    ledger in `signals/queue_state.json` remains the authority.
+
+    Terminal states only. Not a correctness nicety: `set_state` / `set_summary`
+    do a full load-modify-write *without* taking the per-id lock, so a debate
+    closing at the instant of a writeback could drop this key. An item still
+    being debated cannot have been consumed anyway, so refusing non-terminal
+    items closes the only window where that race is reachable.
+
+    Returns True if the record was written.
+    """
+    protocol = str(record.get("protocol") or "")
+    ticker = str(record.get("ticker") or "")
+    with get_lock(news_id):
+        p = load_item(news_id)
+        if p is None or p.get("state") not in _USABLE_STATES_FOR_CONSUMPTION:
+            return False
+        prior = [r for r in (p.get("consumed_by") or [])
+                 if isinstance(r, dict)
+                 and (r.get("protocol"), r.get("ticker")) != (protocol, ticker)]
+        p["consumed_by"] = (prior + [record])[-10:]
+        _atomic_write_json(item_path(news_id), p)
+        return True
+
+
+def retire_thread(news_id: str) -> int:
+    """Move an abandoned run's turns out of `thread` before a re-debate.
+
+    Re-debating a `partial_closed` / `failed` item used to append to the existing
+    thread, so the abandoned run's turns stayed in scope: the summary merged two
+    or three openers' bull/bear lists, and `point_assessments` carried
+    adjudications of an opener nobody could see any more. The retired turns are
+    kept under `retired_threads` — they are the evidence for why the earlier
+    attempt failed — but they no longer feed the summary. Returns how many turns
+    were retired.
+    """
+    with get_lock(news_id):
+        p = load_item(news_id)
+        if p is None:
+            return 0
+        thread = p.get("thread") or []
+        if not thread:
+            return 0
+        p.setdefault("retired_threads", []).append({
+            "retired_at": _utc_iso(),
+            "prior_state": p.get("state"),
+            "prior_summary": p.get("summary"),
+            "thread": thread,
+        })
+        p["thread"] = []
+        _atomic_write_json(item_path(news_id), p)
+        return len(thread)
+
+
 def set_summary(news_id: str, summary: dict) -> None:
     p = load_item(news_id)
     if p is None:
@@ -285,6 +347,9 @@ def list_items_by_state(states: list[str] | None = None) -> list[dict]:
             "cluster_id": (d.get("cluster") or {}).get("cluster_id"),
             "echo_count": (d.get("cluster") or {}).get("echo_count"),
             "escalated": (d.get("cluster") or {}).get("escalated"),
+            # Downstream analyses this debate produced — the feed card shows a
+            # badge, so it has to travel with the list, not just the detail.
+            "consumed_by": d.get("consumed_by") or [],
         })
     # Sort newest → oldest by news arrival (fetched_at). Falls back to
     # last_activity_ts only if fetched_at is missing. We deliberately avoid

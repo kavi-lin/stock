@@ -1,0 +1,61 @@
+```json
+{
+  "commentary": "Alphabet 大幅上調資本支出至 2050 億美元，同時 Google Cloud 積壓訂單達 5140 億美元，顯示 AI 基礎設施投入正快速轉化為具約束力的商業合約。這有效緩解市場對過度投資的疑慮，持續帶動 NVDA、AVGO 等 AI 供應鏈需求，但高額 Capex 帶來的折舊壓力恐壓抑短期利潤率擴張。",
+  "bull_points": [
+    "雲端積壓訂單達5140億美元，證明AI商業化變現動能強勁。",
+    "大幅提高資本支出指引，為NVDA與客製化ASIC注入強心針。"
+  ],
+  "bear_points": [
+    "激增的資本支出將使折舊負擔大增，恐壓抑短期營業利益率。"
+  ],
+  "final_take": "看多AI供應鏈，雲端高額在手訂單大幅緩解Capex泡沫疑慮。",
+  "entities": {
+    "tickers": [
+      "GOOGL",
+      "NVDA",
+      "AVGO"
+    ],
+    "sectors": [
+      "Communication Services",
+      "Information Technology"
+    ],
+    "themes": [
+      "AI capex",
+      "Cloud Computing",
+      "AI infrastructure",
+      "Custom ASIC"
+    ],
+    "tech_keywords": [
+      "TPU",
+      "Blackwell",
+      "Liquid Cooling",
+      "HBM3e"
+    ]
+  },
+  "relations": [
+    {
+      "subject": "ticker:GOOGL",
+      "predicate": "CATALYST_FOR",
+      "object": "theme:ai_capex"
+    },
+    {
+      "subject": "ticker:NVDA",
+      "predicate": "BENEFITS_FROM",
+      "object": "ticker:GOOGL"
+    },
+    {
+      "subject": "ticker:AVGO",
+      "predicate": "BENEFITS_FROM",
+      "object": "ticker:GOOGL"
+    },
+    {
+      "subject": "ticker:GOOGL",
+      "predicate": "BENEFITS_FROM",
+      "object": "theme:cloud_computing"
+    }
+  ],
+  "done": false,
+  "confidence": 0.88,
+  "rationale_short": "在手訂單規模遠超資本支出，證實AI基礎建設回報具高可見度。"
+}
+```

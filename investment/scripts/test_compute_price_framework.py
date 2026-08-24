@@ -32,6 +32,7 @@ from compute_price_framework import (  # noqa: E402
     compute_archetype_shadow,
     compute_fair_value_range,
     compute_fair_value_summary,
+    compute_forward_validation,
     compute_implied_expectations,
     compute_mhp,
     load_quant_stage,
@@ -48,6 +49,63 @@ def eq(label, got, want, tol=0.01):
         got is not None and abs(got - want) <= tol)
     if not ok:
         FAILS.append(f"{label}: got {got!r}, want {want!r}")
+
+
+# ── V4.131.13: extreme DCF must be tested against forward evidence ──────────
+FV_PACK = {
+    "current_price": 100.0,
+    "score": -3.0,
+    "anchors": {
+        "dcf_self_built": {"value": 40.0, "status": "eligible"},
+        "fwd_earnings_discounted": {
+            "value": 95.0, "status": "ineligible",
+            "reason": "cashflow_intrinsic_anchors_live:dcf_self_built",
+            "calibration": {"analyst_count": 5, "horizon_years": 2.5},
+        },
+    },
+}
+FV_IMPLIED = {
+    "implied_out_of_range": False,
+    "market_implied_revenue": {
+        "applicable": True, "implied_revenue_cagr": 0.25,
+        "analyst_revenue_cagr": 0.22, "analyst_horizon_years": 3.0,
+    },
+}
+FV_SHADOW = {"vs_current_pct_shadow": -5.0, "anchors_used_n": 3}
+fv_pass = compute_forward_validation(FV_PACK, FV_IMPLIED, FV_SHADOW)
+eq("forward.pass.status", fv_pass["status"], "PASS")
+eq("forward.pass.softens", fv_pass["valuation_score_effective"], -1.0)
+eq("forward.pass.no_t5", fv_pass["t5_hard_downgrade_eligible"], False)
+
+fv_stretched = compute_forward_validation(
+    FV_PACK,
+    {**FV_IMPLIED, "market_implied_revenue": {
+        **FV_IMPLIED["market_implied_revenue"], "implied_revenue_cagr": 0.40}},
+    {"vs_current_pct_shadow": -35.0, "anchors_used_n": 3},
+)
+eq("forward.stretched.status", fv_stretched["status"], "STRETCHED")
+eq("forward.stretched.one_support", fv_stretched["support_count"], 1)
+eq("forward.stretched.softens", fv_stretched["valuation_score_effective"], -1.0)
+
+fv_fail = compute_forward_validation(
+    {**FV_PACK, "anchors": {**FV_PACK["anchors"], "fwd_earnings_discounted": {
+        **FV_PACK["anchors"]["fwd_earnings_discounted"], "value": 60.0}}},
+    {**FV_IMPLIED, "market_implied_revenue": {
+        **FV_IMPLIED["market_implied_revenue"], "implied_revenue_cagr": 0.40}},
+    {"vs_current_pct_shadow": -35.0, "anchors_used_n": 3},
+)
+eq("forward.fail.status", fv_fail["status"], "FAIL")
+eq("forward.fail.keeps_raw", fv_fail["valuation_score_effective"], -3.0)
+eq("forward.fail.t5", fv_fail["t5_hard_downgrade_eligible"], True)
+
+fv_no_data = compute_forward_validation(
+    {**FV_PACK, "anchors": {**FV_PACK["anchors"], "fwd_earnings_discounted": {
+        "value": None, "status": "ineligible", "reason": "missing_or_nonpositive_value"}}},
+    {"market_implied_revenue": {}},
+    {"vs_current_pct_shadow": -35.0, "anchors_used_n": 3},
+)
+eq("forward.no_data.status", fv_no_data["status"], "NO_DATA")
+eq("forward.no_data.no_false_kill", fv_no_data["t5_hard_downgrade_eligible"], False)
 
 
 # ── Fixture 1: hypergrowth（3.46.0 實測 + #8a 折扣後 baseline） ────────────────
@@ -615,7 +673,7 @@ with tempfile.TemporaryDirectory() as tmp:
        single_out["multi_horizon_price_framework"]["convergence"]["mhp_signal"] is not None, True)
     eq("staged.equivalent_bitwise", normalized(staged_out), normalized(single_out))
 
-    # quant artifact：schema / 六個 block / 不含 MHP（結構證明 quant 不吃 lane 輸入）
+    # quant artifact：schema / 七個 block / 不含 MHP（結構證明 quant 不吃 lane 輸入）
     eq("staged.artifact_schema", quant_art["schema"], QUANT_STAGE_SCHEMA)
     eq("staged.artifact_blocks", sorted(quant_art["quant_blocks"]), sorted(QUANT_BLOCK_KEYS))
     eq("staged.artifact_no_mhp", "multi_horizon_price_framework" in quant_art["quant_blocks"],
@@ -688,7 +746,7 @@ with tempfile.TemporaryDirectory() as tmp:
     eq("staged.single_shot_keys", list(single_out),
        ["engine", "ticker", "valuation_pack", "fair_value_summary", "fair_value_range",
         "multi_horizon_price_framework", "implied_expectations",
-        "valuation_archetype_shadow", "valuation_explained_range"])
+        "valuation_archetype_shadow", "forward_validation", "valuation_explained_range"])
 
     # In-process 等價（同一組函式，不經 CLI）：單發 == build_quant_stage → build_full_output
     inproc_single = copy.deepcopy(STAGED_SINGLE_INPUT)

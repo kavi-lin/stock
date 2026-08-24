@@ -56,6 +56,54 @@ BUNDLE = {
 }
 
 
+def _check_payload_persisted():
+    """V4.128.0 — the CLI must leave the payload on disk, not only on stdout.
+
+    Fundamentals was the one lane whose scoring inputs never became checkable
+    evidence: this script computes every scalar the rubric scores off (P/E vs
+    sector median, revenue YoY, FCF margin/yield, D/E, next earnings, analyst
+    consensus), and they lived only in stdout → the lane subagent's transcript →
+    nowhere a validator can reach. Same hole V4.116.3 closed for Technical.
+
+    Two assertions, deliberately different in kind:
+
+    * **Wiring** — the write lives in `main()`, so it is asserted against the
+      source of `main()` itself. Calling `analyze()` and checking the return value
+      would stay green with the persistence deleted (§2c 成員 #7), and "a payload
+      file exists" would stay green on a stale file from an earlier version.
+    * **Shape** — the newest payload on disk must still carry all six rubric
+      blocks, so a producer refactor that drops one shows up here.
+
+    Network-free: it never invokes the CLI, it reads what the CLI left behind.
+    """
+    import glob
+    import json
+
+    here = os.path.dirname(os.path.abspath(__file__))
+
+    # 接線：把落地那段從 main() 拿掉要會紅。
+    src = open(os.path.join(here, "analyze.py"), encoding="utf-8").read()
+    main_src = src.split("def main", 1)[-1]
+    check("main() still writes the payload",
+          "_fundamentals_payload.json" in main_src, True)
+
+    cache_dir = os.path.join(os.path.dirname(here), "cache")
+    found = sorted(glob.glob(os.path.join(cache_dir, "*_fundamentals_payload.json")))
+    if not found:
+        FAILURES.append(
+            "payload.no_sample: skills/us-stock-analysis/cache/ 沒有任何 "
+            "*_fundamentals_payload.json —— 先跑一次 "
+            "`python3 skills/us-stock-analysis/scripts/analyze.py <T> --json-only`")
+        return
+    newest = max(found, key=os.path.getmtime)
+    with open(newest, encoding="utf-8") as fp:
+        payload = json.load(fp)
+    check("payload has ticker", bool(payload.get("ticker")), True)
+    for block in ("valuation", "growth", "margins_cash", "balance_sheet",
+                  "earnings_calendar", "analyst"):
+        check(f"payload has {block}", block in payload, True)
+
+
 def main():
     print("── _derive_from_bundle ──")
     d = analyze._derive_from_bundle(BUNDLE)
@@ -75,6 +123,9 @@ def main():
     check("missing derived → revenue_yoy_pct None",
           analyze._derive_from_bundle(thin)["growth"]["revenue_yoy_pct"], None)
     check("empty bundle → {}", analyze._derive_from_bundle({}), {})
+
+    print("── payload persistence (V4.128.0) ──")
+    _check_payload_persisted()
 
     print("── merge registry covers every emitted block ──")
     # The registry lives inside analyze(); mirror its keys here so a rename on either

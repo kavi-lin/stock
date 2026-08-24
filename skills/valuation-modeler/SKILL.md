@@ -65,8 +65,10 @@ Flags: `--json-only`（stdout JSON，不寫報告）、`--overrides F.json` / `-
 `legacy` 強制 constant-ratio，用於與 structural 模式對照）、`--xlsx`（另出 Excel
 workbook）、`--output-dir`（預設 `reports/`）、`--no-cache`。
 
-Exit codes: `0` 成功；`1` fair value 無法計算（degraded）或 override 鍵錯誤。
-Degraded 時仍會產出報告，但檔頭標 `DEGRADED` + reason，不得當 anchor 用。
+Exit codes: `0` 代表成功產出結構化 payload（包含合法的 model-ineligible / degraded
+結果）；`1` 只代表工具失敗，例如 override 鍵錯誤、抓取失敗或 crash。
+Degraded 時仍會產出報告，檔頭標 `DEGRADED` + reason，且不得當 anchor 用；protocol
+應排除該 anchor 後繼續執行。
 
 ## Method
 

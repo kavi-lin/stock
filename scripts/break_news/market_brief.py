@@ -29,8 +29,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 from scripts.break_news import store, cluster, prompts  # noqa: E402
-from scripts.break_news.llm_drivers import break_news_pair  # noqa: E402
-from scripts._shared.model_router import run_with_fallback  # noqa: E402
+from scripts._shared.model_router import run_role  # noqa: E402
 
 BRIEF_FILE = store.STORE_DIR / "_market_brief.json"
 BRIEF_INTERVAL_SEC = int(os.environ.get("BREAK_NEWS_BRIEF_INTERVAL_SEC", "7200"))
@@ -159,9 +158,8 @@ def generate(force: bool = False) -> dict:
         if not ctx["closed_debate_count"] and not ctx["hot_clusters"]:
             return {"skipped": "no_signal"}
 
-        voice = break_news_pair()[0]
-        res = run_with_fallback(voice, "brief", prompts.BRIEF_SYSTEM_PROMPT,
-                                prompts.brief_user_prompt(ctx))
+        res = run_role("brief", prompts.BRIEF_SYSTEM_PROMPT,
+                       prompts.brief_user_prompt(ctx))
         if res.exit_code != 0 or not res.parsed:
             return {"error": f"llm rc={res.exit_code} parse={res.parse_status}",
                     "agent": res.agent}

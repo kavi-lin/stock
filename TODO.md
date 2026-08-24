@@ -1,6 +1,175 @@
 # INTEL COMMAND — Backlog & Tasks
 
-> **Last Updated**: 2026-08-16 (v4.131.10)
+> **Last Updated**: 2026-08-22 (v4.135.5)
+
+---
+
+## ✅ Done (v4.135.5) — broker 限制窗口顯示對齊
+
+- [x] 三家主卡改畫各自實際限制派選的 bucket，並標示 `週` / `5h`。
+- [x] Agy 限定 routable pool；provider 排序、主條與 tooltip 指示對齊。
+- [x] JS syntax、diff check、live quota fixture 驗算通過；待 Dashboard 下次開啟後目視確認。
+
+## ✅ Done (v4.135.4) — Break News provider-busy 延後重試
+
+- [x] 跨新聞固定單 worker，消除同一 Gemini／Codex provider slot 的內部競爭。
+- [x] broker blocked turn 回 `pending_debate`，保存拒絕原因且不再 terminalize 為 partial/failed。
+- [x] launchd 固定 CLI PATH、orphan debating 自動回 pending；相關回歸、validator 與 broker gate 全綠，歷史 46 筆未自動補跑。
+
+## ✅ Done (v4.135.3) — 盤前 workflow 合併到 global protocol queue
+
+- [x] 移除橘色跨頁 chain pill 與樣式，盤前 modal 仍可啟動流程與查看全部 phase。
+- [x] premarket News/Sector 在紫色 queue 顯示 `盤前檢查 · News Digest/Sector Scan`，active、pending、tooltip 共用同一 source label。
+- [x] `daily_update` 留在 modal，不進 broker provider slots；盤前 UI/routing/JS/diff 驗證全綠。
+
+## ✅ Done (v4.135.2) — 並行 protocol 燈號、標題與等待控制對齊
+
+- [x] 同 provider 有本專案 active run 時只亮綠燈，不再把 broker 缺 `project` 的同一 lease 重複畫成藍燈。
+- [x] 收合標題彙總所有 active ticker；等待列新增以 queue ID 定位的 `×` 移除按鈕。
+- [x] routing/UI 合約、JS syntax 與 diff check 全綠。
+
+## ✅ Done (v4.135.1) — broker 跨專案燈號分流
+
+- [x] 綠燈限 `ai-investment-committee`，其他 project 與缺少 attribution 的 reservation 改亮藍燈。
+- [x] 同 provider 本專案／外部使用可同時顯示兩燈；backend ownership、UI 分流與 CSS 色碼均有合約測試。
+
+## ✅ Done (v4.135.0) — 全專案 broker-only LLM governance
+
+- [x] 24 個 inference task 建 registry + certification ledger；正式模型限定 Claude／Agy／Codex，Grok disabled。
+- [x] 移除 direct SDK/CLI/driver 與 local inference fallback；互動 queue retry、daemon/cron defer。
+- [x] Tier 3 三模型隔離 canary、governance audit、router/queue/Nexus/Wind/JS contracts 全綠；額度燈涵蓋全 broker reservations（v4.135.1 起依 project 分成綠／藍）。
+
+## ✅ Done (v4.134.5) — INTC 選派瞬斷保留與可見重試
+
+- [x] `broker:unavailable` 改為 bounded-backoff requeue，不再 terminalize 尚未啟動模型的 job。
+- [x] panel 顯示 retry reason／attempts，並保留最近 10 分鐘 terminal failure。
+- [x] targeted queue/UI tests + 主測試 402 passed；Claude hard reserve 與 INTC broker failure 已分開判定。
+
+---
+
+## ✅ Done (v4.134.4) — 盤前檢查 compact phase stepper
+
+- [x] 三個 Phase 改為橫向連接進度軌，active / complete / error / waiting 有明確視覺狀態。
+- [x] modal viewport 限高、mobile fallback、task chip 壓縮；執行時隱藏兩個次要更新按鈕。
+- [x] targeted UI/backend 7 passed + 主測試 401 passed；Browser 未連線，待使用者重新整理後目視確認。
+
+---
+
+## ✅ Done (v4.134.3) — Phase 0 shared snapshot 修復
+
+- [x] canonical Phase 0 優先，legacy ticker 檔可跨 ticker 共用；sector-only cache 明確觸發 L3。
+- [x] factpack、validator 與 Phase 5 共用 frozen `phase0_path`；gate 補驗 `macro_summary` / `_market_signals`。
+- [x] GEV 對現有 AAOI-era canonical 實測 rc=0；三支 contract tests + `tests/` 398 passed。
+
+---
+
+## ✅ Done (v4.134.2) — invest per-ticker 三路並行
+
+- [x] scheduler artifact key 改為 `invest:<ticker>`；不同 ticker 可同時佔滿 3 slots，同 ticker 仍互斥。
+- [x] Phase 5 改為 isolated session prepare → validate/render/register → stable-lock history commit。
+- [x] post-run gate 驗本 ticker session + global history digest commit，不讀錯 `history[-1]`。
+- [x] 398 pytest + scheduler／18-writer concurrency／schema／renderer／broker／JS 合約全綠。
+
+---
+
+## ✅ Done (v4.134.1) — AI research 三格 execution-slot UI
+
+- [x] collapsed pill 加入三段 capacity bar，依 Claude／Gemini／Codex／Grok 上色。
+- [x] expanded pill 固定列出三格 active／空閒狀態，pending queue 獨立呈現。
+- [x] live queue fixture、JS syntax、diff check 與 server-served asset 驗證通過；待可用 Browser session 再補視覺截圖。
+
+---
+
+## ✅ Done (v4.134.0) — broker-owned LLM execution slots + 三路 protocol scheduler
+
+- [x] broker 對 Claude／Agy／Codex 各自提供跨專案 exclusive slot；atomic reserve 遇占用回 `provider_busy`。
+- [x] vendored client 15 秒 heartbeat + CLI PID／PGID attach；AIC、Office、Link Digest 與共用 model router 全部接線。
+- [x] watchdog 處理 pending start deadline、owner loss、live/dead child、absolute TTL；含 start 後尚未 attach PID 就 crash 的無死鎖案例。
+- [x] AIC queue 最多三個 active，broker busy 自動重排；invest/news/sector 保持 artifact single-writer，不同 ticker earnings 可並行。
+- [x] queue/status/cancel API 與跨頁 UI 改用 job identity；全域 pill 可見三個 active engine。
+- [x] AIC 398 passed；broker full suite 1063 passed，升級舊 pending 相容清理後 provider-slot 5 passed；Ruff/mypy/JS/Python syntax 全綠。
+- [x] broker 已升 schema 3 並重啟為 0.3.0，遺留 reservation 清為 0；Dashboard 已重啟，queue smoke 回傳 `capacity: 3`。
+
+---
+
+## ✅ Done (v4.133.2) — Signal Queue lifecycle 與 deep-link 收尾
+
+- [x] failed 同 revision 立即恢復重試；consumed 遇新 revision 重開候選。
+- [x] pending remove / pre-dispatch reject / normal completion 三條路徑共用 delivery writeback。
+- [x] earnings / earnings_preview fresh artifact gate，與 run-start report link 新鮮度。
+- [x] `?news_id=` 可開啟 feed 100 張之外的 item；>8 ticker broad event 整筆排除。
+- [x] `tests/test_signal_queue.py` 78 passed + protocol routing contract + 兩支 JS syntax check；`tests/` 全套 398 passed。
+
+---
+
+## ✅ Done (v4.133.1) — LLM quota 每週重置倒數
+
+- [x] provider 小卡顯示 weekly reset 倒數，格式 `3D23H reset`。
+- [x] 支援 broker 的 epoch / 相對秒數 / provider label 三種時間格式，Agy 錯開非路由 pool。
+- [x] `node --check Dashboard/utils.js` + `python3 tests/test_broker_gate.py` + 三組倒數 fixture 全綠。
+- [ ] Browser skill 當時無可用瀏覽器實例，待下次開啟 Dashboard 時目視一次寬度。
+
+---
+
+## ✅ Done (v4.133.0) — Signal Queue：辯論結論流進其他頁面
+
+- [x] `scripts/signal_queue.py`：來源中立契約（`candidate_id` / `source_refs` / `revision`）、日期前綴窗口掃描、cluster 去重、**逐提及**方向判定、agreement/conflict 評分、delivery lifecycle。
+- [x] 4 個端點（GET queue / POST action / DELETE action / GET eligibility）+ TTL 90s 與 `(檔數, max_mtime, ledger_mtime)` 簽章失效。
+- [x] 財報 eligibility 四態閘門，零新增 FMP 呼叫；共用 earnings cache 解析。
+- [x] `Dashboard/signal-queue.js` + `.sq-*` 樣式；掛載 earnings / decisions / momentum（momentum 只顯示）。
+- [x] 反向連動：`store.add_consumed_by()` + break-news `?news_id=` 定位 + 「已產出的分析 →」backlink。
+- [x] `tests/test_signal_queue.py` 初版 74 passed；4.133.2 lifecycle 回歸擴充為 78 passed。
+- [ ] **需重啟 `dashboard_server.py`** 才會載入新端點（目前 8080 上跑的是舊碼）。
+- [ ] **未做瀏覽器視覺確認**（Chrome 擴充功能未連線）：候選卡版面、`?news_id=` 定位是否真的捲到正確卡片、`?ticker=` deep-link 在動能頁的呈現，都還沒用眼睛看過。
+- [ ] **未實跑一次完整 accept → protocol → 回寫鏈**（會真的燒一次 earnings run）。`consumed_by` 寫入與 `failed` 重開按鈕目前只有單元測試覆蓋。
+- [ ] **Radar lane 本輪未做**。它是 sector 形狀而非 ticker 形狀，需要另一種卡片設計。
+- [ ] **觀察門檻是否要調**：目前 `MIN_SCORE=12`、單則需 materiality ≥3.0。實測 3 天窗口 earnings 7 檔 / invest 12 檔 / momentum 20 檔，跑幾天看數量與雜訊比。
+- [ ] **`invest` lane 有 ETF 與微型股**（SCHD、ALH、KLAR 等）。invest protocol 對 ETF 沒有意義，可考慮加一層 universe 過濾。
+
+---
+
+## ✅ Done (v4.132.0) — 即時辯論改一問一答 + 第三方裁決
+
+- [x] round 0 序列化：A 開場 → B 逐點裁決（`assessments` agree/dispute + 理由、`added_bull/bear` 只補漏），B 不再產第二份平衡多空清單。
+- [x] round 1 只有 A 發言，且只回應 B 實際 dispute 的點；A concede → `divergence_resolved`。
+- [x] 僵局判準改 `stated_disputes` + `_deadlock`（B 有 dispute 且 A 未 concede）；`divergence_gate` 降為輔助並改用去 namespace 的 node key。
+- [x] `_roster()` 向 broker 要前三名，第三名任裁決者（`arbiter` payload、side C、`close_reason=arbitrated`），無第三家 → `unresolved_no_arbiter`。
+- [x] schema 版本 1→2；長度上限改由語料分佈定（400/60/60/80），舊 log 全部沿用舊契約，5403 檔 validator rc=0。
+- [x] `store.retire_thread()`：重跑不再把舊 run 的回合混進 summary。
+- [x] 前端 side C 泡泡 + 逐點 agree/dispute 標記 + 補齊 close_reason 中文標籤。
+- [x] 實跑 `bn_20260808_032203ee` 全流程 rc=0（A→B→A→C，裁決 side_a）；tests 42 passed。
+- [ ] **一天後回頭校 `EST_CALLS_PER_DEBATE`**（poller.py:64，現為 2）。新流程 B 全同意=2 calls、A 收尾=3、進裁決=4；等實際 dispute 率出來再決定要不要調，調高會等比縮小每輪 admission 額度。
+- [ ] **觀察 dispute 率是否過高**：若 B 幾乎每條都 dispute（為了看起來有貢獻），裁決會被叫爆。判準看 `summary.stated_dispute_count` 分佈；真的偏高就在 responder prompt 加「agree 是正常結果」的校準句。
+
+---
+
+## ✅ Done (v4.131.15) — broker runtime 版本握手與一鍵重啟
+
+- [x] broker/client wire contract 升到 0.2.0；公開 health 回 `broker_version`，所有新派工 exact-match 才能進 `/v1/recommend`，mismatch 不得走 unavailable fallback。
+- [x] Dashboard 狀態分成 compatible／broker_restart_required／client_update_required／unreachable；只有 compatible + quota snapshot 成功才是 authority。
+- [x] caller-owned `POST /api/broker/restart` 執行 LaunchAgent restart、single-flight、隱藏 subprocess 明細，並等重新 handshake 成功才回 ok；側欄提供按鈕。
+- [ ] **本版部署後需重啟一次 `dashboard_server.py`** 才會載入新 POST endpoint；此後 broker 舊版或沒開可直接按側欄按鈕。broker 較新時按鈕刻意不出現，必須更新 client。
+
+---
+
+## ✅ Done (v4.131.14) — 產業掃描的週末必掛與 smart_money 邊緣 timeout
+
+- [x] `fetch_sector_valuation.py`：snapshot 空資料改為回抓最近交易日（最多 5 天），新增 `pe_snapshot_date` / `pe_snapshot_lag_days` provenance，經 `build_sector_intel.py` 帶進 `_phase1`，schema 已載明。
+- [x] `fetch_smart_money.py`：兩趟 ~131 檔序列呼叫改 `fmp_get_many()` fan-out（新增於 `sector/lib/fmp_client.py`）。241.8s → 67.6s，輸出與序列版逐欄位相同（種回差異驗過 diff 會紅）。
+- [x] 驗收：`phase_prefetch --date 2026-08-16` 從 360s timeout / hard_fail=True → **95s / rc=0，9 個 task 全 rc=0**。既有 sector 測試 4 支全綠。
+- [x] **補上 `test_fetch_sector_valuation.py`**（零網路，6 組 fixture + consumer 接線斷言）並登記進 OPS_COMMANDS §7。同時補一列 `fetch_smart_money.py` / `fmp_get_many` 的對照程序（那支要打 FMP，沒有 fixture 測試，改 fan-out 就跑前後 cache 逐欄位 diff）。
+
+- [x] **`PROTOCOL_REQUIRED_ARTIFACTS` 補上 `sector` / `news`**（`dashboard_server.py:638`）。這兩個 key 從來沒登記過，所以 sector 在 HARD gate 正確中止時 rc=0、閘不觸發、UI 顯示成功——與 preflight 面板的「50.9h stale」互相矛盾。`tests/test_protocol_model_routing.py` 新增兩組斷言（每個有 validator 的 protocol 都要有 artifact；閘路徑與 preflight glob 必須指向同一個檔），兩組都種回突變驗過紅。
+- [x] **`test_fetch_earnings_calendar.py` 登記進 OPS_COMMANDS §7**（`python3 -m pytest -q`，7 passed）。它是 `sector/scripts/` 底下唯一的 pytest 模組、先前完全沒被登記，所以掃測試的人只能自己猜跑法——猜錯的兩條路都會騙人：直接跑 `ModuleNotFoundError`（像壞了，其實是跑法錯），加 `PYTHONPATH=.` 則 rc=0 但跑 0 個測試。**檔案本身沒有缺陷，不需要修**；我在 v4.131.14 初稿把它記成「缺 sys.path 自舉」是誤判，已更正。
+
+---
+
+## ✅ Done (v4.131.13) — Extreme DCF forward validation + conditional T5
+
+- [x] `forward_validation.v1` 以 3 項 forward checks 判定 PASS／STRETCHED／FAIL／NO_DATA；至少 2 項可判讀才允許 FAIL。
+- [x] PASS/STRETCHED 將 valuation score 軟化到 −1；DCF fair value／gap／verdict 不變。
+- [x] decision engine 1.1.0 只對 FAIL + score ≤−3 降一階；export builder／validator／schema／renderer／replay 全接線。
+- [x] 歷史驗算：完整 artifact cohort 0 個 final decision 翻轉；NOW／PLTR 僅分數上修，SNDK 不變。
 
 ---
 

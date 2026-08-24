@@ -1,0 +1,54 @@
+```json
+{
+  "commentary": "伊朗地緣政治升級計畫恐加劇中東原油供應中斷風險，特別是霍爾木茲海峽航運受阻疑慮將推升油價風險溢價。短期直接利多上游能源巨頭如 XOM、CVX 與 OXY 的自由現金流及股利回購預期；然而油價若大幅飆升，恐加劇全球通膨黏性並壓抑終端消費需求，對總體經濟與非能源族群造成估值壓力。",
+  "bull_points": [
+    "原油地緣風險溢價飆升，直接擴大上游油商 XOM 與 CVX 獲利",
+    "避險資金與抗通膨需求將加速流入高自由現金流能源板塊"
+  ],
+  "bear_points": [
+    "能源價格暴漲恐引發二次通膨疑慮並壓抑終端總體經濟需求",
+    "若衝突局勢迅速降溫，油價地緣溢價恐面臨快速回吐壓力"
+  ],
+  "final_take": "短期看多上游能源巨頭，但需提防地緣情緒消退後的回檔風險",
+  "entities": {
+    "tickers": [
+      "XOM",
+      "CVX",
+      "OXY",
+      "SLB"
+    ],
+    "sectors": [
+      "Energy"
+    ],
+    "themes": [
+      "Geopolitical risk",
+      "Crude oil supply shock",
+      "Energy inflation"
+    ],
+    "tech_keywords": [
+      "Upstream E&P",
+      "LNG infrastructure"
+    ]
+  },
+  "relations": [
+    {
+      "subject": "ticker:XOM",
+      "predicate": "BENEFITS_FROM",
+      "object": "theme:crude_oil_supply_shock"
+    },
+    {
+      "subject": "ticker:CVX",
+      "predicate": "BENEFITS_FROM",
+      "object": "theme:geopolitical_risk"
+    },
+    {
+      "subject": "theme:geopolitical_risk",
+      "predicate": "CATALYST_FOR",
+      "object": "sector:energy"
+    }
+  ],
+  "done": false,
+  "confidence": 0.85,
+  "rationale_short": "地緣升級推升原油溢價，短期能源股具防禦與獲利彈性"
+}
+```

@@ -1,6 +1,6 @@
 {
-  "signature": "中性/區間|software_momentum/value_defensive_rotation/event_risk_guard",
-  "ts": "2026-08-10T04:54:13+00:00",
-  "briefing_zh": "Regime 維持中性／區間：盤中分數 32 偏強、市寬 66.5% 上漲，但近 25 日出貨日已達 6 天，曝險上限仍守 40–60%，不因單日反彈放大部位。\n\n主旋律有二：軟體／平台順勢連兩日領先，族群均漲 3.07%，觀察 TEAM、PLTR、NOW、WDAY、EPAM，半導體同向（+2.13%）；其次是資金外溢至 Materials、Industrials、Healthcare，三者市寬皆逾 70%、5 日預估為正，與 Technology 同列 WARM，屬輪動擴散而非單極集中。\n\n風險提醒：VIX 14.9 偏低但 skew 132.6 偏高、Fear&Greed 63.7 已在貪婪區，二元事件前先控部位，出貨日續增則下調曝險。",
-  "model_used": "claude"
+  "signature": "RISK-OFF 偏防禦|defensive_cash/software_momentum/value_defensive_rotation/crypto_fintech_riskon",
+  "ts": "2026-08-21T18:03:48+00:00",
+  "briefing_zh": "目前市場處於 RISK-OFF 偏防禦格局，操作上應嚴守 0-25% 的總曝險上限，以部位防守為主。盤面呈現結構性輪動，資金偏向原物料與醫療保健等抗跌板塊；策略主旋律聚焦相對強勢的軟體平台（如 PLTR、ORCL）及動能回升的加密金融（如 COIN、HOOD）。風險方面，鑑於近 25 日已累積 6 天出貨日且 SKEW 偏高，切忌盲目追高，須隨時提防下行尾端風險。",
+  "model_used": "gemini"
 }

@@ -1,24 +1,18 @@
 #!/usr/bin/env python3
-"""Run one agentic protocol on a chosen provider, outside the allowlist.
+"""Run one broker-governed agentic protocol pinned to a chosen provider.
 
     python3 investment/scripts/run_protocol_manual.py gemini invest NOW
     python3 investment/scripts/run_protocol_manual.py codex  invest PLTR
 
 This exists to answer one question that nothing else can: **can provider X
-actually execute protocol Y?** `config/llm_config.json` forbids gemini for
-`invest` precisely because that is unproven, so the only way to gather the
-evidence is a deliberate run outside the gate.
+actually execute protocol Y?** It pins that provider inside the same task
+registry, quota-broker reservation, prompt, command, timeout, and settlement
+path used by Dashboard launches.
 
 Everything about the launch is taken from `dashboard_server` rather than
 restated — the prompt through `_adapt_protocol_prompt`, the argv through
 `_protocol_command`, the deadline through `PROTOCOL_TIMEOUT_OVERRIDES`. A copy
 would drift, and then the experiment would be measuring the copy.
-
-What it deliberately does NOT reproduce
----------------------------------------
-The quota-broker reservation. This run is ungoverned and its tokens settle
-against nothing. Acceptable for a one-off probe, stated here so it is not
-discovered later from a budget that does not add up.
 
 Safety
 ------
@@ -156,7 +150,8 @@ def server_busy():
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("provider", choices=sorted(ds.PROVIDER_CONTEXT_FILE))
+    ap.add_argument(
+        "provider", choices=sorted(ds._mrouter.llm_task_registry.official_models()))
     ap.add_argument("protocol", choices=sorted(ds.PROTOCOL_PROMPTS))
     ap.add_argument("ticker", nargs="?", help="required by ticker-scoped protocols")
     ap.add_argument("--risk-tolerance", default="MEDIUM",
@@ -186,14 +181,12 @@ def main(argv=None):
     timeout = ds.PROTOCOL_TIMEOUT_OVERRIDES.get(args.protocol, ds.PROTOCOL_TIMEOUT_SEC)
     claude_model = (ds._protocol_model_for(args.protocol)
                     if args.provider == "claude" else None)
-    cmd = ds._protocol_command(args.provider, prompt,
-                               claude_model=claude_model, timeout_sec=timeout)
 
     print(f"▶ {job_id}")
     print(f"  provider={args.provider}  protocol={args.protocol}"
           f"  ticker={args.ticker or '—'}  timeout={timeout}s")
     print(f"  log    : {os.path.relpath(log_path, ROOT)}")
-    print(f"  ⚠ writes to the REAL history.json; this run is NOT quota-governed")
+    print("  broker : required; provider is pinned for this certification run")
     if server_busy():
         sys.exit("✗ the dashboard is running a protocol — wait for it to finish")
     if not args.yes:
@@ -204,6 +197,23 @@ def main(argv=None):
             sys.exit("aborted (no tty; pass --yes)")
 
     acquire_lock()
+    try:
+        selected, lease, broker_note = ds._mrouter.acquire_protocol_lease(
+            "agentic_protocol", args.protocol, pinned_model=args.provider)
+    except ds._mrouter.ProtocolBlocked as exc:
+        release_lock()
+        sys.exit(f"✗ broker blocked certification run: {exc}")
+    if selected != args.provider:
+        lease.cancel("pinned certification provider mismatch")
+        release_lock()
+        sys.exit(f"✗ broker assigned {selected}, expected pinned {args.provider}")
+    agy_model = ds._mrouter.broker_gate.assigned_model(lease)
+    cmd = ds._protocol_command(
+        selected, prompt, claude_model=claude_model, timeout_sec=timeout,
+        agy_model=agy_model,
+    )
+    print(f"  lease  : {broker_note}")
+
     rc = -1
     before = _py_snapshot()
     print(f"  baseline: {len(before)} .py hashed under {', '.join(WATCH)}")
@@ -228,7 +238,8 @@ def main(argv=None):
                       f"manual=1 ===\n")
             proc = subprocess.Popen(cmd, cwd=ROOT, stdout=subprocess.PIPE,
                                     stderr=subprocess.STDOUT, text=True,
-                                    bufsize=1, env=env)
+                                    bufsize=1, env=env, start_new_session=True)
+            lease.attach_process(proc.pid, os.getpgid(proc.pid))
             beat = time.time()
             try:
                 for line in iter(proc.stdout.readline, ""):
@@ -246,8 +257,29 @@ def main(argv=None):
                 rc = -2
             log.write(f"\n=== ended={datetime.now().isoformat(timespec='seconds')} "
                       f"rc={rc} ===\n")
+    except BaseException:
+        try:
+            lease.cancel("manual protocol failed before settlement")
+        except Exception:
+            pass
+        raise
     finally:
         release_lock()
+
+    try:
+        from scripts.break_news.llm_drivers import parse_stream_log_usage
+        tokens = parse_stream_log_usage(log_path) or {}
+    except Exception:
+        tokens = {}
+    try:
+        with open(log_path, encoding="utf-8", errors="ignore") as fp:
+            error_tail = fp.read()[-4000:]
+    except OSError:
+        error_tail = "manual protocol log unavailable"
+    ds._mrouter.note_run(
+        args.provider, rc == 0, "" if rc == 0 else error_tail,
+        tokens=tokens, lease=lease,
+    )
 
     elapsed = int((datetime.now() - started).total_seconds())
     print(f"\n■ rc={rc}  elapsed={elapsed}s ({elapsed // 60}m)")

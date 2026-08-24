@@ -23,6 +23,7 @@ import subprocess
 import sys
 import tempfile
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -179,24 +180,53 @@ def _extract_json(text: str) -> tuple[dict | None, str]:
     return None, "failed"
 
 
-def _run_cli(cmd: list[str], timeout: int) -> tuple[int, str, str, int, str | None]:
+def _run_cli(
+    cmd: list[str],
+    timeout: int,
+    process_callback: Callable[[int, int], None] | None = None,
+) -> tuple[int, str, str, int, str | None]:
     """Returns (rc, stdout, stderr, latency_ms, error)."""
     t0 = time.time()
     try:
-        proc = subprocess.run(
+        proc = subprocess.Popen(
             cmd,
-            capture_output=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             text=True,
-            timeout=timeout,
             cwd=str(ROOT),
             stdin=subprocess.DEVNULL,
-            check=False,
+            start_new_session=True,
         )
+        if process_callback is not None:
+            try:
+                process_callback(proc.pid, os.getpgid(proc.pid))
+            except Exception as exc:
+                try:
+                    os.killpg(os.getpgid(proc.pid), 15)
+                    proc.wait(timeout=5)
+                except (ProcessLookupError, PermissionError, OSError,
+                        subprocess.TimeoutExpired):
+                    try:
+                        os.killpg(os.getpgid(proc.pid), 9)
+                    except (ProcessLookupError, PermissionError, OSError):
+                        pass
+                latency = int((time.time() - t0) * 1000)
+                return -3, "", "", latency, f"broker process attach failed: {exc}"
+        out, err = proc.communicate(timeout=timeout)
         latency = int((time.time() - t0) * 1000)
-        return proc.returncode, proc.stdout or "", proc.stderr or "", latency, None
-    except subprocess.TimeoutExpired:
+        return proc.returncode, out or "", err or "", latency, None
+    except subprocess.TimeoutExpired as exc:
+        if "proc" in locals():
+            try:
+                os.killpg(os.getpgid(proc.pid), 15)
+                proc.wait(timeout=5)
+            except (ProcessLookupError, PermissionError, OSError, subprocess.TimeoutExpired):
+                try:
+                    os.killpg(os.getpgid(proc.pid), 9)
+                except (ProcessLookupError, PermissionError, OSError):
+                    pass
         latency = int((time.time() - t0) * 1000)
-        return -1, "", "", latency, f"timeout after {timeout}s"
+        return -1, exc.stdout or "", exc.stderr or "", latency, f"timeout after {timeout}s"
     except FileNotFoundError as e:
         return -2, "", "", 0, f"binary not found: {e}"
     except OSError as e:
@@ -208,7 +238,8 @@ def run_claude(system_prompt: str, user_prompt: str,
                model: str | None = None,
                max_turns: int | None = None,
                strict_mcp: bool = False,
-               no_tools: bool = False) -> LLMResult:
+               no_tools: bool = False,
+               process_callback: Callable[[int, int], None] | None = None) -> LLMResult:
     """`model` / `max_turns` / `strict_mcp` / `no_tools` let text-only callers
     (AI Office debate turns) pin a model and disable the agentic loop + MCP
     startup + built-in tools — a bare `claude -p` in this repo goes agentic on
@@ -233,7 +264,7 @@ def run_claude(system_prompt: str, user_prompt: str,
         cmd += ["--strict-mcp-config"]
     if no_tools:
         cmd += ["--tools", ""]
-    rc, out, err, latency, error = _run_cli(cmd, timeout)
+    rc, out, err, latency, error = _run_cli(cmd, timeout, process_callback)
     text = ""
     usage: dict = {}
     if rc == 0 and out:
@@ -269,14 +300,23 @@ def run_claude(system_prompt: str, user_prompt: str,
 
 
 def run_gemini(system_prompt: str, user_prompt: str,
-               timeout: int = LLM_TIMEOUT_SEC) -> LLMResult:
+               timeout: int = LLM_TIMEOUT_SEC, model: str = "",
+               process_callback: Callable[[int, int], None] | None = None) -> LLMResult:
     # agy CLI uses --print/-p and --dangerously-skip-permissions.
     full_prompt = f"{system_prompt}\n\n---\n\n{user_prompt}"
     cmd = [
         AGY_BIN, "--print", full_prompt,
         "--dangerously-skip-permissions",
     ]
-    rc, out, err, latency, error = _run_cli(cmd, timeout)
+    # V4.129.0 — `model` is the quota broker's assigned model, and passing it is
+    # what makes the reservation true. Agy meters its Gemini models and its
+    # Claude/GPT models in two pools that refill independently; with no
+    # `--model` the CLI uses whatever is selected in its own TUI, so a hold
+    # taken against the Gemini pool could be spent out of the other one. Left
+    # empty the old behaviour stands, which is what an ungoverned caller wants.
+    if model:
+        cmd += ["--model", model]
+    rc, out, err, latency, error = _run_cli(cmd, timeout, process_callback)
     # agy --print returns the raw agent output directly (no JSON envelope
     # unless specifically requested, but we handle that in _extract_json).
     text = out.strip()
@@ -294,7 +334,8 @@ def run_gemini(system_prompt: str, user_prompt: str,
 
 
 def run_codex(system_prompt: str, user_prompt: str,
-              timeout: int = LLM_TIMEOUT_SEC) -> LLMResult:
+              timeout: int = LLM_TIMEOUT_SEC,
+              process_callback: Callable[[int, int], None] | None = None) -> LLMResult:
     """Run Codex non-interactively and parse its JSONL event stream.
 
     `codex exec --json` emits JSONL events. Recent builds put the final
@@ -321,7 +362,7 @@ def run_codex(system_prompt: str, user_prompt: str,
     if tmp_path:
         cmd.extend(["--output-last-message", tmp_path])
     cmd.append(full_prompt)
-    rc, out, err, latency, error = _run_cli(cmd, timeout)
+    rc, out, err, latency, error = _run_cli(cmd, timeout, process_callback)
     text = ""
     codex_error = ""
     if out:
@@ -392,7 +433,8 @@ def _codex_item_text(item: dict) -> str:
 
 
 def run_grok(system_prompt: str, user_prompt: str,
-             timeout: int = LLM_TIMEOUT_SEC) -> LLMResult:
+             timeout: int = LLM_TIMEOUT_SEC,
+             process_callback: Callable[[int, int], None] | None = None) -> LLMResult:
     """Run the Grok CLI single-turn (`grok -p ... --output-format json`).
 
     Envelope shape: `{"text": "<response>", "usage": {...}, ...}`. Web search
@@ -407,7 +449,7 @@ def run_grok(system_prompt: str, user_prompt: str,
         "--disable-web-search",
         "--no-subagents",
     ]
-    rc, out, err, latency, error = _run_cli(cmd, timeout)
+    rc, out, err, latency, error = _run_cli(cmd, timeout, process_callback)
     text = ""
     usage: dict = {}
     if rc == 0 and out:
@@ -481,10 +523,28 @@ _DEFAULT_CONFIG = {
 
 
 def run_llm(model: str, system_prompt: str, user_prompt: str,
-            timeout: int = LLM_TIMEOUT_SEC) -> LLMResult:
-    """Dispatch to a model runner by name. Unknown name → gemini."""
+            timeout: int = LLM_TIMEOUT_SEC, provider_model: str = "",
+            process_callback: Callable[[int, int], None] | None = None) -> LLMResult:
+    """Dispatch to a model runner by name. Unknown name → gemini.
+
+    `provider_model` is the vendor-native model id the quota broker assigned
+    (`gemini-3.6-flash-medium`), as distinct from `model`, which is this repo's
+    runner name (`gemini`). Only the agy runner can act on it — it is the only
+    provider here whose quota is split into pools that a model selects between
+    — so it is passed on where it means something and dropped where it does not.
+    """
     runner = _RUNNERS.get((model or "").lower().strip(), run_gemini)
-    return runner(system_prompt, user_prompt, timeout=timeout)
+    if provider_model and runner is run_gemini:
+        return runner(
+            system_prompt,
+            user_prompt,
+            timeout=timeout,
+            model=provider_model,
+            process_callback=process_callback,
+        )
+    return runner(
+        system_prompt, user_prompt, timeout=timeout, process_callback=process_callback
+    )
 
 
 def _default_config() -> dict:
@@ -605,14 +665,17 @@ def secondary_model() -> str:
 
 
 def probe(agent: str) -> int:
-    """Quick smoke test. Returns 0 on success."""
+    """Quick broker-pinned smoke test. Returns 0 on success."""
     sys_p = ("Reply with a SINGLE fenced ```json``` block matching: "
              "{\"x\":int, \"ok\":bool}. No prose outside the block.")
     usr_p = "Probe. Return x=4, ok=true."
     if agent not in _RUNNERS:
         print(f"unknown agent: {agent}", file=sys.stderr)
         return 2
-    r = run_llm(agent, sys_p, usr_p, timeout=120)
+    # Lazy import avoids the model_router -> llm_drivers import cycle at module
+    # load time. The probe is not an escape hatch: it takes a real broker lease.
+    from scripts._shared.model_router import run_with_fallback
+    r = run_with_fallback(agent, "capability_probe", sys_p, usr_p, timeout=120)
     print(f"agent={r.agent} rc={r.exit_code} latency_ms={r.latency_ms} "
           f"parse_status={r.parse_status} error={r.error}")
     print(f"raw_text={r.raw_text[:200]!r}")
@@ -623,7 +686,7 @@ def probe(agent: str) -> int:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--probe", action="store_true")
-    ap.add_argument("--agent", choices=list(VALID_MODELS), required=True)
+    ap.add_argument("--agent", choices=["claude", "gemini", "codex"], required=True)
     args = ap.parse_args()
     if args.probe:
         return probe(args.agent)

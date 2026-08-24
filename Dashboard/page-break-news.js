@@ -197,6 +197,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // ── Deep link ────────────────────────────────────────────────────────
+  // `?news_id=<id>` lands here from a signal-queue card on another page, so
+  // "which debate said this?" is one click rather than a manual hunt through
+  // a hundred-card feed. The detail endpoint can load an item even after its
+  // card aged out of that feed, so feed membership must not gate navigation.
+  function openDeepLink() {
+    const wanted = new URLSearchParams(window.location.search).get('news_id');
+    if (!wanted || !/^bn_[0-9]{8}_[a-z0-9]{8}$/i.test(wanted)) return;
+    // Clear the filter first: the target may not be in the active tab, and
+    // selecting a card the user cannot see reads as the link doing nothing.
+    currentFilter = 'all';
+    applyFilter();
+    updateFilterTabs();
+    selectItem(wanted);
+    const card = document.querySelector(`[data-news-id="${CSS.escape(wanted)}"]`);
+    if (card) card.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }
+
   // ── Stale backlog (pending_debate items past PENDING_MAX_AGE_HOURS) ───
   // Listed so user opts-in to spending LLM budget after long idle. Auto-loop
   // skips them.
@@ -463,7 +481,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     try {
-      const item = await fetchJson(`/api/break-news/item/${id}`);
+      const item = await fetchJson(`/api/break-news/item/${encodeURIComponent(id)}`);
       renderDetail(item, opts);
     } catch (e) {
       panel.innerHTML = `<div style="color:#ef4444;padding:14px;">Error: ${e.message}</div>`;
@@ -549,6 +567,25 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>`
         : '';
 
+      // What this debate actually produced downstream. The graph footer above
+      // says where it *will* go; this says what it already caused, which is the
+      // half that was previously invisible from here.
+      const consumed = Array.isArray(item.consumed_by) ? item.consumed_by : [];
+      const consumedFooter = consumed.length
+        ? `<div style="margin-top:10px;padding:10px 12px;border-radius:8px;
+            background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.30);">
+            <div style="font-size:10px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;
+              color:#4ade80;margin-bottom:6px;">✅ ${t('已產出的分析', 'Analyses produced')}</div>
+            ${consumed.map(r => {
+              const label = `${C.escapeHtml(r.ticker || '')} ${C.escapeHtml(r.protocol || '')}`;
+              return r.report_path
+                ? `<a href="/${C.escapeHtml(r.report_path)}" style="display:block;font-size:11.5px;
+                    color:var(--text-main);text-decoration:none;margin:2px 0;">${label} →</a>`
+                : `<div style="font-size:11.5px;color:var(--text-muted);margin:2px 0;">${label}</div>`;
+            }).join('')}
+          </div>`
+        : '';
+
       summaryBlock = `<div class="bn-summary-block" style="margin-top:14px;">
         <div style="font-size:11px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;
           color:#22c55e;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
@@ -579,6 +616,7 @@ document.addEventListener('DOMContentLoaded', () => {
           ${C.renderEntityChipsGrouped(ent) || `<div style="color:var(--text-muted);font-size:11px;">${t('無萃取實體', 'No entities extracted')}</div>`}
         </div>
         ${graphFooter}
+        ${consumedFooter}
       </div>`;
     } else if (item.state === 'debating' || item.state === 'pending_debate') {
       summaryBlock = `<div class="bn-summary-block" style="margin-top:14px;color:var(--text-muted);font-size:12px;
@@ -669,7 +707,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   applyTranslations();
-  loadFeed();
+  loadFeed().then(openDeepLink);
   loadState();
   loadRawStream();
   loadStalePending();

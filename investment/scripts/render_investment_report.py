@@ -4,7 +4,7 @@
 Replaces the Sonnet MD Formatter Agent call. The report is now *rendered* from two
 persisted artifacts rather than *written* by a model:
 
-    1. `investment/invest_logs/history.json` last entry — the decision record. Every
+    1. one session export object (or legacy `history.json` last entry) — the decision record. Every
        decision-critical number comes from here, verbatim (the six `<!--FACTS:*-->`
        blocks are the same renderers `inject_report_facts.py` already used, imported
        rather than copied so the two can never drift).
@@ -168,12 +168,15 @@ def _facts_block(name, trade):
 def load_history(path):
     with open(path, encoding="utf-8") as fp:
         hist = json.load(fp)
-    if not isinstance(hist, list) or not hist:
-        raise SystemExit("[render] ✗ history.json 空或非陣列")
-    entry = hist[-1]
+    if isinstance(hist, dict):
+        entry = hist
+    elif isinstance(hist, list) and hist:
+        entry = hist[-1]
+    else:
+        raise SystemExit("[render] ✗ session export 必須是 object 或非空 history array")
     trades = entry.get("trades_this_session") or []
     if not trades or not isinstance(trades[0], dict):
-        raise SystemExit("[render] ✗ history 末筆無 trades_this_session")
+        raise SystemExit("[render] ✗ session export 無 trades_this_session")
     return entry, trades[0]
 
 
@@ -1029,7 +1032,8 @@ def main(argv=None):
     ap.add_argument("--out", help="輸出路徑（預設 reports/<YYYYMMDD>_<TICKER>.md）")
     ap.add_argument("--polish", action="store_true",
                     help="用一次 governed LLM call 改寫 5 個敘事段（預設關；失敗一律降級不擋）")
-    ap.add_argument("--polish-model", help="偏好的 polish model（claude/codex/gemini/grok）")
+    ap.add_argument("--polish-model", choices=("claude", "codex", "gemini"),
+                    help="認證用固定 polish model；平常由 broker 自動選擇")
     ap.add_argument("--stdout", action="store_true", help="印到 stdout 而不寫檔")
     args = ap.parse_args(argv)
 
@@ -1049,7 +1053,7 @@ def main(argv=None):
         print("[render] ✗ bundle 與 history 決策記錄不一致，拒絕渲染：", file=sys.stderr)
         for e in errors:
             print(f"  - {e}", file=sys.stderr)
-        print("\n修法：以 history.json 末筆為準修正 bundle（決策記錄是權威），"
+        print("\n修法：以本次 session export 為準修正 bundle（決策記錄是權威），"
               "或確認 bundle 抄的是本次 session 的 Phase 2 輸出而非上一次的暫存。",
               file=sys.stderr)
         return 1

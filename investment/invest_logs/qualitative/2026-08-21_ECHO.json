@@ -1,0 +1,185 @@
+{
+  "schema": "p5-qualitative/1.0",
+  "ticker": "ECHO",
+  "date": "2026-08-21",
+  "lanes": {
+    "fundamentals": {
+      "signal": "SELL",
+      "key_factors": [
+        "Contracting revenue YoY and QoQ",
+        "Negative FCF and cash burn",
+        "Altman Z 0.84 distress zone"
+      ],
+      "risk_flags": [
+        "Severe leverage with -$17.06B net cash",
+        "Negative owner earnings and TTM OCF"
+      ]
+    },
+    "sentiment": {
+      "signal": "HOLD",
+      "key_factors": [
+        "High short interest at 24.1% float",
+        "Negative insider MSPR at -44.25",
+        "Supportive risk-on market backdrop at 64.4"
+      ],
+      "risk_flags": [
+        "Crowded short interest exceeding 20% float",
+        "Negative insider disposition momentum in August"
+      ]
+    },
+    "news": {
+      "signal": "BUY",
+      "key_factors": [
+        "Strong Buy consensus with recent upgrades",
+        "30-day PT trend revised upward",
+        "Spectrum sales alleviate debt overhang",
+        "Boost Mobile hybrid lowers capex"
+      ],
+      "risk_flags": [
+        "HughesNet subsidiary Chapter 11 restructuring",
+        "Refinancing execution on remaining debt maturities"
+      ]
+    },
+    "technical": {
+      "signal": "SELL",
+      "key_factors": [
+        "Stage 4 downtrend below 20/50/200 MAs",
+        "Recent 50/200 death cross confirms downtrend",
+        "RSI at 39.4 with contracting volume"
+      ],
+      "risk_flags": [
+        "Breakdown below nearest support at $82.48",
+        "MACD histogram fading near zero line"
+      ]
+    },
+    "valuation": {
+      "signal": "BUY",
+      "key_factors": [
+        "Weighted fair value $105.26 yields +23.2%",
+        "Analyst PT consensus anchor targets $126.00",
+        "Pre-profit discounted earnings anchor $84.52"
+      ],
+      "risk_flags": [
+        "Heavy reliance on sell-side analyst targets",
+        "DCF and comps anchors ineligible"
+      ]
+    }
+  },
+  "lane_detail": {
+    "fundamentals": {
+      "moat_assessment": {
+        "level": "ERODING",
+        "type": "regulation",
+        "evidence_one_line": "Valuable wireless spectrum licenses burdened by high capital intensity and operating deficits."
+      },
+      "near_term_catalysts": [
+        {
+          "date": "2026-11-04",
+          "type": "earnings",
+          "description": "Q3 2026 earnings release and spectrum buildout liquidity update",
+          "impact": "high"
+        }
+      ],
+      "bull_thesis_one_line": "Working capital of $16.04B and unique spectrum holdings offer monetization potential if wireless 5G revenue inflects.",
+      "bear_thesis_one_line": "Persistent cash burn (OCF -$85.3M), -$17.06B net cash, and Altman Z (0.84) drive substantial solvency pressure."
+    },
+    "sentiment": {
+      "insider_signal": "neutral",
+      "short_pct_float": 24.1,
+      "mspr_latest": -44.2537
+    },
+    "news": {
+      "pt_revision_momentum": {
+        "direction": "UP",
+        "consensus_delta_pct_1m": 34.26
+      },
+      "immediate_catalyst_5d": null,
+      "decision_point_days": 21,
+      "cross_asset_spillover": [
+        {
+          "asset": "sector_XLC",
+          "direction": "BULLISH",
+          "mechanism": "5G spectrum monetization aids telecom sentiment"
+        }
+      ],
+      "reasoning_one_line": "Bullish analyst upgrades and massive spectrum asset monetization offset satellite subsidiary restructuring risks."
+    },
+    "technical": {
+      "smart_money_analysis": {
+        "label": "distributing",
+        "narrative": "Sustained price action below MA200 with contracting bounce volume reflects institutional distribution."
+      },
+      "pattern_taxonomy": {
+        "pattern": "downtrend",
+        "confirmation_criteria": "A daily close below $82.48 support confirms continuation toward the $78-$80 zone."
+      },
+      "market_strength": "WEAK",
+      "key_levels": {
+        "support": 82.48,
+        "resistance": 91.86,
+        "pivot": 88.31
+      },
+      "high_prob_scenario": "5-15 day outlook: ECHO is expected to retest support at $82.48; a failure to hold $82.48 opens downside toward $78.00-$80.00, while rallies remain capped near $88.31-$91.86.",
+      "volatility": {
+        "atr_14": 4.0229,
+        "hist_vol_20d_daily": 0.02913,
+        "momentum_20d_pct": -6.66
+      }
+    },
+    "valuation": {
+      "valuation_commentary": "ECHO 模型計算之加權公允價值為 $105.26（相較現價 $85.44 隱含 +23.2% 溢價），落於 undervalued 區間，對應分數 1.0。然而，估值基礎受到大量 anchor 資格限制：自建 DCF 因終值 FCFF 為負無法啟用、owner earnings 為負值、comps 因缺乏可比同業排除。因此現行估值完全依賴賣方分析師目標價共識（$126.00）與獲利前折現盈餘錨點（$84.52），估值品質屬 speculative grade。",
+      "cited_transition_overlay": false,
+      "transition_dissent_basis": null
+    }
+  },
+  "red_team": {
+    "verdict": "STRONG_COUNTER",
+    "counter_evidence_strength": 5,
+    "thesis_break_probability": 0.85,
+    "counter_thesis": "多方過度依賴頻譜資產出售與賣方目標價（$126）的樂觀預期，嚴重忽視公司 Altman Z-Score 僅 0.84 深陷破產警戒區、淨負債高達 -$17.06B 且自由現金流收益率為 -44.1% 的流動性枯竭現實；在實質利率高企的宏觀環境下，資產處分杯水車薪，無法扭轉再融資引爆的結構性債務危機。",
+    "kill_conditions": [
+      "IF real_rate 維持在 2.42% (>2.0%) 且 10Y 殖利率高於 4.71%，導致公司新發債再融資成本突破 9.5% 或利息覆蓋率進一步惡化 WITHIN 90 天 THEN 頻譜資產處分能有效化解債務之多方論點徹底破滅，觸發流動性違約風險。",
+      "IF 季度營運現金流（OCF）與自由現金流（FCF）持續為負且 Altman Z-Score 未能自 0.84 脫離困境區間（< 1.1） WITHIN 60 天 THEN 賣方估值模型（FV $105.26 / PT $126）完全失真，基本面賣出訊號確認並加速下行趨勢。",
+      "IF 頻譜資產處分進度延宕或實際交易金額低於市場預期 20% 以上 WITHIN 120 天 THEN Boost Mobile 擴張資金鏈斷裂，逼使公司進行折價股權融資或債務重組。"
+    ]
+  },
+  "burry_narrative": "Burry 評分 33.2 (WARNING)：FCF yield -44.1%、EV/EBIT 21.5x、D/E 1.24、距 52 週高點回檔 39.8%、內部人呈現淨賣出，資本結構與流動性極其脆弱。",
+  "conflict_bias": {
+    "schema": "conflict_bias.v1",
+    "tentative_decision": "HOLD",
+    "lane_signals": {
+      "fundamentals": "SELL",
+      "sentiment": "HOLD",
+      "news": "BUY",
+      "technical": "SELL",
+      "valuation": "BUY"
+    },
+    "triggers_fired": [],
+    "conflict_summary": "多空維度嚴重分歧（Fundamentals/Technical SELL vs News/Valuation BUY），呈現 BIPOLAR 極化，無單一 T1-T5 規則觸發但透過極化調製壓制倉位與信心",
+    "t4_detail": null,
+    "t5_detail": null,
+    "proceed_to_phase3": true
+  },
+  "macro_context": "大盤處於 RISK_ON 體制（Transitional / Soft Landing），FTD 第 12 天確認，整體市場流動性支持；然而 10 年期實質利率達 2.42% (>2.0%) 且長天期美債殖利率處於 4.71% 高位，對高負債資本密集型電信公司構成重大融資與估值折現壓力。",
+  "watch_conditions": {
+    "spectrum_monetization_and_liquidity": "密切追蹤頻譜資產處分與交易落地金額，確認能否為 2026-2027 到期債務提供足夠流動性緩衝。",
+    "q3_earnings_and_fcf_burn": "2026-11-04 Q3 財報公布，監控 OCF 與 FCF 能否收窄虧損，以及 Altman Z-Score 能否脫離 0.84 破產困境區。",
+    "technical_support_breakdown": "觀察股價能否守穩 $82.48 關鍵支撐，若帶量跌破將下探 $78-$80 區間，確認 Stage 4 下跌趨勢延續。"
+  },
+  "key_risks": [
+    "Altman Z-Score 僅 0.84 深陷破產危險區，淨負債 -$17.06B 帶來沉重再融資負擔",
+    "實質利率 2.42% 與 10Y 殖利率 4.71% 高企，顯著推升債務利息支出與折現率壓力",
+    "空單比例高達流通盤 24.1%，且技術面呈現 50/200MA 死亡交叉與 Stage 4 下跌結構",
+    "估值完全依賴賣方目標價共識，缺乏實質現金流與可比同業支撐（Speculative Grade）"
+  ],
+  "bias_notes": "多空維度劇烈對立（基本面與技術面強烈看空 vs 賣方目標價與新聞利多看多），委員會啟動 BIPOLAR 極化調製將信心乘數砍半 (0.5x)，並嚴格壓制倉位上限至 25%，客觀裁定 HOLD 觀望，規避高槓桿高風險誘多。",
+  "phase2_fanout_mode": "PARALLEL_SUBAGENT",
+  "degraded_analysts": [],
+  "decision_point_days": 21,
+  "devils_advocate_filed": false,
+  "trade_metadata": {
+    "trade_type": "value_contrarian",
+    "event_tag": "debt_restructuring_and_spectrum_sale"
+  },
+  "last_outcome": "UNKNOWN"
+}

@@ -1,28 +1,29 @@
 #!/usr/bin/env python3
 """
-Phase 5.5 — register the latest investment_protocol session into trader-memory-core
-thesis registry, then back-fill `thesis_id` + `thesis_registered_at` into
-`history.json`'s last entry.
+Phase 5.5 — register one investment_protocol session into trader-memory-core,
+then back-fill `thesis_id` + `thesis_registered_at` into that same JSON object.
 
 Wires investment_protocol V5 output into the cross-session thesis lifecycle
 (IDEA → ENTRY_READY → ACTIVE → CLOSED). Read-only on theses state if final_decision
 is HOLD/CANCEL (we still register so the analysis is recoverable for postmortem).
 
 Invocation (from protocol Phase 5.5):
-    python3 investment/scripts/register_thesis.py
+    python3 investment/scripts/register_thesis.py --session <SESSION.json>
         rc=0  → registered (or gracefully skipped — see stdout)
         rc=1  → trader-memory-core unavailable / state corrupt
 
-Idempotent: if last entry already has non-null thesis_id, exits 0 without re-register.
+Idempotent: if the selected entry already has non-null thesis_id, exits 0 without re-register.
 """
 import json
 import os
 import sys
+import argparse
+import fcntl
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT         = Path(__file__).resolve().parents[2]
-HISTORY_JSON = ROOT / "investment" / "invest_logs" / "history.json"
 STATE_DIR    = ROOT / "investment" / "invest_logs" / "theses"
 EARNINGS_CACHE_DIR = ROOT / "skills" / "earnings-analyst" / "cache"
 
@@ -49,16 +50,50 @@ def _read_structural_shift(ticker: str) -> dict | None:
         return None
 
 
-def _load_history():
-    if not HISTORY_JSON.exists():
-        print(f"[register_thesis] history.json not found: {HISTORY_JSON}", file=sys.stderr)
+def _load_payload(path: Path):
+    if not path.exists():
+        print(f"[register_thesis] session not found: {path}", file=sys.stderr)
         sys.exit(1)
-    with HISTORY_JSON.open("r", encoding="utf-8") as fp:
+    with path.open("r", encoding="utf-8") as fp:
         return json.load(fp)
 
 
+def _entry_from_payload(payload):
+    if isinstance(payload, dict):
+        return payload
+    if isinstance(payload, list) and payload:
+        return payload[-1]
+    print("[register_thesis] session must be an object or non-empty history array",
+          file=sys.stderr)
+    sys.exit(1)
+
+
+def _atomic_write(path: Path, payload) -> None:
+    tmp = tempfile.NamedTemporaryFile(
+        mode="w", encoding="utf-8", delete=False,
+        dir=str(path.parent), prefix=f".{path.name}.", suffix=".tmp",
+    )
+    try:
+        json.dump(payload, tmp, indent=2, ensure_ascii=False)
+        tmp.write("\n")
+        tmp.flush()
+        os.fsync(tmp.fileno())
+        tmp.close()
+        os.replace(tmp.name, path)
+    except Exception:
+        try:
+            tmp.close()
+        except Exception:
+            pass
+        try:
+            os.unlink(tmp.name)
+        except OSError:
+            pass
+        raise
+
+
 def _build_thesis_data(entry):
-    """Convert history.json last entry → thesis_data dict for thesis_store.register()."""
+    """Convert the selected session entry → thesis_data for register()."""
     trade = (entry.get("trades_this_session") or [{}])[0]
     ticker = trade.get("ticker") or entry.get("ticker") or "UNKNOWN"
     fvs = trade.get("fair_value_summary") or {}
@@ -82,13 +117,14 @@ def _build_thesis_data(entry):
     }
 
 
-def main():
-    hist = _load_history()
-    if not isinstance(hist, list) or not hist:
-        print("[register_thesis] history.json empty — nothing to register", file=sys.stderr)
-        sys.exit(0)
-
-    entry = hist[-1]
+def main(argv=None):
+    ap = argparse.ArgumentParser(description="Register one investment session thesis")
+    ap.add_argument("--session", required=True,
+                    help="isolated session object (legacy history arrays are read-compatible)")
+    args = ap.parse_args(argv)
+    session_path = Path(args.session)
+    payload = _load_payload(session_path)
+    entry = _entry_from_payload(payload)
     trade = (entry.get("trades_this_session") or [{}])[0]
 
     # Idempotent guard
@@ -105,19 +141,28 @@ def main():
 
     STATE_DIR.mkdir(parents=True, exist_ok=True)
     thesis_data = _build_thesis_data(entry)
+    lock_fp = (STATE_DIR / ".register.lock").open("a+", encoding="utf-8")
     try:
+        fcntl.flock(lock_fp.fileno(), fcntl.LOCK_EX)
         thesis_id = thesis_store.register(str(STATE_DIR), thesis_data)
     except Exception as e:
         print(f"[register_thesis] thesis_store.register failed: {e}", file=sys.stderr)
         sys.exit(1)
+    finally:
+        try:
+            fcntl.flock(lock_fp.fileno(), fcntl.LOCK_UN)
+        finally:
+            lock_fp.close()
 
     now_iso = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     trade["thesis_id"] = thesis_id
     trade["thesis_registered_at"] = now_iso
 
-    with HISTORY_JSON.open("w", encoding="utf-8") as fp:
-        json.dump(hist, fp, indent=2, ensure_ascii=False)
-        fp.write("\n")
+    try:
+        _atomic_write(session_path, payload)
+    except OSError as e:
+        print(f"[register_thesis] session write failed: {e}", file=sys.stderr)
+        sys.exit(1)
 
     print(f"[register_thesis] ✓ registered {thesis_data['ticker']} → thesis_id={thesis_id} "
           f"(state: {STATE_DIR.relative_to(ROOT)})")

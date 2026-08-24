@@ -88,7 +88,19 @@ _TYPE_MATERIALITY = {
 _GENRE_RULES = [
     ("routine_regulatory", re.compile(
         r"\bannounces? approval of the application by\b|"
-        r"\bnotice of (?:filing|effectiveness)\b",
+        r"\bnotice of (?:filing|effectiveness)\b|"
+        # Personnel-level enforcement. Fed/OCC/FDIC publish these continuously
+        # and the subject is one individual's conduct, not the institution —
+        # zero market content, but source_kind=official_macro + monetary_policy
+        # alone clears STAGE2_MATERIALITY_MIN, so without a genre penalty they
+        # advance ahead of real news (2026-08-14: a former Regions Bank employee
+        # notice ranked #1 of the day and stalled the whole digest).
+        # Institution-level actions do NOT match: the subject qualifier is
+        # required, and those headlines carry the entity plus a penalty amount.
+        r"\b(?:issues?|announces?|takes?)\s+(?:an?\s+)?(?:enforcement action|consent order|"
+        r"cease[- ]and[- ]desist(?:\s+order)?|prohibition order|civil money penalt(?:y|ies))\b"
+        r"[^\n]{0,80}\b(?:former|individual|employee|institution-affiliated)\b|"
+        r"\benforcement action\s+(?:with|against)\s+(?:an?\s+|the\s+)?(?:former|individual)\b",
         re.I,
     )),
     ("filing_notice", re.compile(r"^\s*\[?8-k\]?[^:]*:\s*8-k\b|^\s*\[8-k\]", re.I)),

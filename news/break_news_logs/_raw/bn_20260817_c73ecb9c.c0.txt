@@ -1,0 +1,42 @@
+```json
+{
+  "commentary": "BDT Capital 透過包銷公開發行出脫 Alliance Laundry (ALH) 20.5 百萬股，並附帶 3.08 百萬股超額配售權。此舉屬於私募股權大股東的獲利了結減持，短期內將為 ALH 股價帶來二級市場籌碼供給過剩與定價折價壓力，但中長期有助於提升市場自由流通量（Free Float）與流動性。",
+  "bull_points": [
+    "釋出大額持股有助改善股票流動性與機構持股分散度",
+    "屬現有股東老股轉讓，公司每股盈餘未遭實質稀釋"
+  ],
+  "bear_points": [
+    "大股東大舉退場引發二級市場短期龐大拋售與折價壓力",
+    "主要贊助機構減持可能引發市場對後續成長動能疑慮"
+  ],
+  "final_take": "短期面臨大股東拋壓偏空，靜待折價消化與流動性提升",
+  "entities": {
+    "tickers": [
+      "ALH"
+    ],
+    "sectors": [
+      "Industrials"
+    ],
+    "themes": [
+      "Secondary Offering",
+      "Sponsor Exit"
+    ],
+    "tech_keywords": []
+  },
+  "relations": [
+    {
+      "subject": "ticker:ALH",
+      "predicate": "HEADWIND_FROM",
+      "object": "narrative:secondary_offering"
+    },
+    {
+      "subject": "institution:bdt_capital",
+      "predicate": "CATALYST_FOR",
+      "object": "narrative:secondary_offering"
+    }
+  ],
+  "done": false,
+  "confidence": 0.85,
+  "rationale_short": "大股東鉅額拋售短期壓抑股價，但無股權稀釋問題"
+}
+```

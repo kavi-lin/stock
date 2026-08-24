@@ -1,0 +1,181 @@
+{
+ "bundle_version": "P5-INPUTS/1.0",
+ "ticker": "BE",
+ "date": "2026-08-21",
+ "phase0": {
+  "regime_confidence": 0.85,
+  "market_top_zone": "Orange (Elevated Risk)",
+  "ftd_state": "FTD_CONFIRMED",
+  "breadth_composite": 79.2,
+  "vix": 15.44,
+  "fred_verdict": "Transitional",
+  "real_rate_pct": 2.4,
+  "hot_sectors": [
+   "Industrials",
+   "Consumer Discretionary",
+   "Financials",
+   "Energy"
+  ],
+  "cold_sectors": [
+   "Technology",
+   "Real Estate",
+   "Consumer Staples",
+   "Utilities"
+  ]
+ },
+ "lanes": {
+  "fundamentals": {
+   "signal": "BUY",
+   "score": 3.8,
+   "confidence": 0.88,
+   "key_factors": [
+    "Revenue +165.5% YoY with structural shift",
+    "FCF margin 17% and 3.0x cash conversion",
+    "Strong AI power demand accelerating margins"
+   ],
+   "risk_flags": [
+    "Elevated trailing valuation multiples (EV/EBITDA 174x)",
+    "Total debt $2.82B with negative net cash"
+   ],
+   "moat_assessment": {
+    "level": "NARROW",
+    "type": "IP-patent",
+    "evidence_one_line": "Proprietary solid oxide fuel cell patents enable rapid behind-the-meter AI data center power."
+   },
+   "near_term_catalysts": [
+    {
+     "date": "2026-10-27",
+     "type": "earnings",
+     "description": "Q3 2026 earnings release and hyperscaler data center order backlog update",
+     "impact": "high"
+    }
+   ],
+   "bull_thesis_one_line": "Revenue YoY +165.5% and FCF margin 17.1% confirm an accelerating structural turnaround powered by hyperscale AI power demand.",
+   "bear_thesis_one_line": "Rich trailing valuation with EV/EBITDA of 174.7x and $2.82B debt could amplify downside if contract execution stalls."
+  },
+  "sentiment": {
+   "signal": "HOLD",
+   "score": -1.0,
+   "confidence": 0.72,
+   "key_factors": [
+    "Insider distribution with zero recent purchases",
+    "Negative latest MSPR at -29.18",
+    "Constructive macro backdrop with normal VIX"
+   ],
+   "risk_flags": [
+    "Sustained insider selling across multiple quarters",
+    "Moderate short interest of 7.87% float"
+   ],
+   "market_sentiment_composite": 62.9,
+   "vix_current": 15.44,
+   "insider_signal": "distributing",
+   "short_pct_float": 7.87,
+   "mspr_latest": -29.184015
+  },
+  "news": {
+   "signal": "BUY",
+   "score": 2.5,
+   "confidence": 0.75,
+   "key_factors": [
+    "AI data center power demand surging",
+    "Power Connect accelerates backlog delivery",
+    "Strong 1M price target revisions"
+   ],
+   "risk_flags": [
+    "Valuation multiples elevated after run-up",
+    "Class action litigation noise"
+   ],
+   "immediate_catalyst_5d": null,
+   "decision_point_days": 66,
+   "cross_asset_spillover": [
+    {
+     "asset": "Utilities & Independent Power Producers",
+     "direction": "BULLISH",
+     "mechanism": "Grid bottlenecks driving on-site fuel cell and distributed power adoption"
+    }
+   ],
+   "reasoning_one_line": "Robust AI data center power demand and Power Connect launch drive +18.8% 1M PT upgrades despite valuation checks.",
+   "pt_revision_momentum": {
+    "direction": "UP",
+    "consensus_delta_pct_1m": 18.78,
+    "unavailable_reason": null
+   }
+  },
+  "technical": {
+   "signal": "SELL",
+   "score": -2.0,
+   "confidence": 0.65,
+   "key_factors": [
+    "Stage 3 topping with active death cross",
+    "Price trades below 20 and 50MA",
+    "MACD momentum negative with falling histogram"
+   ],
+   "risk_flags": [
+    "Holding above 200-day moving average 186.60",
+    "Proximity to nearest swing support 194.60"
+   ],
+   "smart_money_analysis": {
+    "label": "distributing",
+    "narrative": "Insider summary shows ratio 0.0 disposing with no buys, consistent with post-peak stage 3 distribution below 50MA."
+   },
+   "pattern_taxonomy": {
+    "pattern": "topping_pattern",
+    "confirmation_criteria": "A high-volume close below support at $194.60 confirms breakdown; reclaiming $212.19 pivot negates."
+   },
+   "market_strength": "WEAK",
+   "key_levels": {
+    "support": 194.6,
+    "resistance": 229.9,
+    "pivot": 212.19
+   },
+   "high_prob_scenario": "Expect consolidation with downward drift toward support at $194.60; failure to reclaim $212.19 maintains selling pressure.",
+   "volatility": {
+    "atr_14": 18.8293,
+    "hist_vol_20d_daily": 0.07724,
+    "momentum_20d_pct": 10.74
+   }
+  },
+  "valuation": {
+   "signal": "HOLD",
+   "score": -1.0,
+   "confidence": 0.6,
+   "key_factors": [
+    "Fair value $150.08 implies -26.9% downside",
+    "Extreme anchor dispersion 11.67x across models",
+    "High capex renders DCF models ineligible"
+   ],
+   "risk_flags": [
+    "Severe anchor bifurcation between PT and owner earnings",
+    "Peer cohort scarcity limits relative valuation methods"
+   ],
+   "weighted_fair_value": 150.08,
+   "vs_current_pct": -26.91,
+   "verdict_band": "overvalued",
+   "cited_transition_overlay": true,
+   "transition_dissent_basis": "valuation_anchor",
+   "suppression_proposals": [
+    {
+     "anchor": "owner_earnings_mult",
+     "reason": "Backward-looking owner earnings multiple ($23.70) severely distorts fair value under high-growth paradigm shift into AI data center power demand."
+    }
+   ],
+   "valuation_commentary": "BE valuation pack projects a weighted fair value of $150.08 (-26.91% vs current), resulting in an overvalued verdict and score -1.0. The projection is governed by an extreme 11.67x dispersion between sell-side PT ($276.47, 57.14% weight) and owner earnings multiple ($23.70, 42.86% weight). DCF models are ineligible due to negative terminal FCFF from heavy capital reinvestment, and peer comps lack cohort depth. Given transition_signature = paradigm_only, valuation_anchor dissent is established due to trailing owner earnings failing to capture the forward structural shift in AI datacenter on-site power generation."
+  }
+ },
+ "burry": {
+  "score": 26.3,
+  "narrative": "Burry 得分 26.3/100 處於 WARNING 區間。EV/EBIT 達 142.8x 且負債權益比 1.72 處於高位，內部人淨賣出（Distributing），但股價自 52 週高點回檔 40% 提供部分估值緩衝，未觸發 T4 一票否決。"
+ },
+ "phase3": {
+  "final_score": 0.546,
+  "final_decision": "STAGED_ENTRY",
+  "final_action": "EXECUTE"
+ },
+ "phase4": {
+  "position_size_pct": null,
+  "analysis_price": 205.35
+ },
+ "red_team": {
+  "verdict": "MODERATE_COUNTER"
+ }
+}

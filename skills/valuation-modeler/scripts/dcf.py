@@ -915,7 +915,11 @@ def main():
         print(json.dumps({k: payload[k] for k in
                           ("ticker", "fair_value_per_share", "current_price", "upside_pct", "degraded")},
                          ensure_ascii=False))
-    sys.exit(0 if not payload["degraded"] else 1)
+    # A structured ineligible result is a completed model run, not a tool
+    # failure.  Downstream consumers exclude it via `model_eligibility`; rc=1
+    # is reserved for invocation/fetch/crash paths that did not produce a
+    # usable payload (including the override-error branch above).
+    sys.exit(0)
 
 
 if __name__ == "__main__":

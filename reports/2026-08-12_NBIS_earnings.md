@@ -1,0 +1,130 @@
+# NBIS 財報分析 — Nebius Group N.V.
+
+> Run: 2026-06-16  ·  Last Earnings: 2026-03-31 (2026 Q1)  ·  Next ≈ 2026-08-06
+> Source: FMP HTTP REST  ·  Schema V1.0
+
+## 1. Snapshot
+
+- **Nebius Group N.V.** (NASDAQ Global Select) — Communication Services / Internet Content & Information
+- Price: **$269.36**  ·  Market Cap: $64.65B
+- CEO: Arkady Volozh  ·  Employees: 1371  ·  IPO: 2024-10-21
+
+## 2. Quarterly P&L Trend (last 8 Q)
+
+| Q | Period | Revenue | Gross | Op Inc | Net Inc | EPS | GM | OM | NM |
+|---|---|---|---|---|---|---|---|---|---|
+| 2026-03-31 | 2026 Q1 | $399.0M | $83.2M | $-128.0M | $621.2M | $2.01 | 20.9% | -32.1% | 155.7% |
+| 2025-12-31 | 2025 Q4 | $227.7M | $159.2M | $-234.5M | $-249.6M | $-0.99 | 69.9% | -103.0% | -109.6% |
+| 2025-09-30 | 2025 Q3 | $146.1M | $103.2M | $-130.2M | $-119.6M | $-0.47 | 70.6% | -89.1% | -81.9% |
+| 2025-06-30 | 2025 Q2 | $105.1M | $75.0M | $-111.2M | $584.4M | $2.45 | 71.4% | -105.8% | 556.0% |
+| 2025-03-31 | 2025 Q1 | $55.3M | $25.8M | $-129.5M | $-113.6M | $-0.48 | 46.7% | -234.2% | -205.4% |
+| 2024-12-31 | 2024 Q4 | $37.9M | $10.4M | $-149.3M | $-133.2M | $-0.58 | 27.4% | -393.9% | -351.5% |
+| 2024-09-30 | 2024 Q3 | $43.3M | $24.4M | $-87.0M | $-94.2M | $-0.26 | 56.4% | -200.9% | -217.6% |
+| 2024-06-30 | 2024 Q2 | $12.1M | $8.8M | $-95.8M | $-554.5M | $0.50 | 72.6% | -792.8% | -4588.4% |
+
+**YoY**: revenue +621.5%  ·  operating +1.2%  ·  earnings +646.8%
+**QoQ**: revenue +75.2%  ·  acceleration: **accelerating**
+
+## 3. Balance Sheet Health (latest Q)
+
+- Total Assets: **$22.30B**  ·  Total Liabilities: $15.06B  ·  Total Equity: $7.24B
+- Working Capital: **$9.89B**  ·  Current Ratio: 8.33
+- Total Debt: $9.50B  ·  D/E: **1.31**  ·  Net Cash (cash+ST inv − debt): **$-198.0M**
+- Cash + ST Investments: $9.30B  ·  Inventory: $0.00  ·  Receivables: $1.53B
+
+## 4. Cash Flow Quality
+
+- Latest Q: OpCF $2.26B  ·  FCF **$-214.9M**  ·  CapEx $-2.47B
+- TTM: OpCF $3.01B  ·  NI $836.4M
+- **FCF Margin (latest Q)**: -53.9%  ·  **Cash Conversion (TTM OpCF/NI)**: 3.60  ·  CapEx Intensity: 619.8%
+- Stock Buybacks (latest Q): $0.00  ·  Dividends: $0.00
+- SBC (latest Q): $0.00
+
+## 5. Profitability & Efficiency
+
+8Q margin trend (newest → oldest):
+
+| Q | Gross | Operating | Net |
+|---|---|---|---|
+| 2026-03-31 Q1 | 20.9% | -32.1% | 155.7% |
+| 2025-12-31 Q4 | 69.9% | -103.0% | -109.6% |
+| 2025-09-30 Q3 | 70.6% | -89.1% | -81.9% |
+| 2025-06-30 Q2 | 71.4% | -105.8% | 556.0% |
+| 2025-03-31 Q1 | 46.7% | -234.2% | -205.4% |
+| 2024-12-31 Q4 | 27.4% | -393.9% | -351.5% |
+| 2024-09-30 Q3 | 56.4% | -200.9% | -217.6% |
+| 2024-06-30 Q2 | 72.6% | -792.8% | -4588.4% |
+
+**TTM Ratios** — Gross 47.9%  ·  Operating -68.8%  ·  Net 95.3%  ·  EBIT 97.8%
+**Capital Efficiency** — Income Quality TTM: 3.99  ·  FCF Yield: -3.8%  ·  CapEx/OCF: 182.1%  ·  DSO: 634.5d
+
+## 6. Growth Trajectory
+
+- **Latest YoY**: revenue +621.5%  ·  earnings +646.8%  ·  operating +1.2%
+- Acceleration: **accelerating** (vs prior-Q YoY)
+
+Annual growth rates (newest → oldest):
+
+| FY | Revenue | NetIncome | OpIncome | FCF |
+|---|---|---|---|---|
+| 2025 | +350.9% | +115.9% | -35.3% | -554.9% |
+| 2024 | +462.2% | -365.8% | -34.6% | -175.3% |
+| 2023 | +54.8% | -67.6% | -107.3% | +9.4% |
+| 2022 | -99.7% | +480.4% | +10.9% | +244.0% |
+| 2021 | +61.5% | -158.8% | -183.9% | -537.7% |
+
+**Per-share CAGR** — 3y rev: +5607.2%  ·  5y rev: -75.8%  ·  5y NI: -58.9%
+
+## 7. Valuation
+
+- Price: **$269.36**  ·  PE TTM: 83.09  ·  PB TTM: 9.60
+- EV/EBITDA TTM: 46.28  ·  EV/FCF TTM: -26.20  ·  EV/Sales TTM: 73.78  ·  P/FCF TTM: -26.12  ·  Net Debt/EBITDA TTM: 0.14
+- **DCF Intrinsic**: $-65.00  ·  Upside vs Price: **-124.1%**
+- FCF Yield TTM: -3.8%
+
+**Ratings Snapshot** (FMP composite, 1-5):
+- Overall: **C+** (2/5)
+- DCF: 1/5  ·  PE: 1/5  ·  PB: 2/5  ·  D/E: 1/5  ·  ROE: 4/5  ·  ROA: 4/5
+
+## 8. Analyst Consensus
+
+- Price: $269.36  →  PT consensus **$196.00** (median $199.00, high $255.00, low $129.00)
+- **PT Upside vs Price**: -27.2%
+
+Monthly grades trend (newest → oldest):
+
+| Date | StrongBuy | Buy | Hold | Sell | StrongSell |
+|---|---|---|---|---|---|
+| 2026-06-01 | 1 | 8 | 6 | 1 | 0 |
+| 2026-05-01 | 2 | 9 | 5 | 1 | 1 |
+| 2026-04-01 | 2 | 10 | 4 | 1 | 1 |
+| 2026-03-01 | 2 | 9 | 3 | 0 | 1 |
+| 2026-02-01 | 2 | 7 | 3 | 0 | 1 |
+| 2026-01-01 | 2 | 5 | 3 | 0 | 1 |
+
+> Forward EPS estimate: paid-plan only;use `skills/earnings-valuation-forecaster` 3-method 自算可補(若需)。
+
+## 9. Quality Flags(deterministic)
+
+- 🟢 **Cash conversion positive gap (clean)** — OpCF > NI 且非營運資金驅動(純資訊,不扣分)
+- 🔴 **CapEx outpaces OCF** — 最新 Q OpCF 不夠覆蓋 CapEx(燒錢)
+- 🟠 **Gross margin compression** — 最新 4 季毛利率連續下滑
+- 🔴 **Negative FCF** — 最新 Q 自由現金流為負
+
+## 10. Bottom Line
+
+### 🟠 **WEAK** — Composite Score: **45/100**
+
+| 元件 | 分數 | 滿分 |
+|---|---|---|
+| Quality | 18 | 30 |
+| Growth | 22 | 30 |
+| Valuation | 0 | 25 |
+| Analyst | 5 | 15 |
+| **Total** | **45** | **100** |
+
+> Verdict 對照: 80+ STRONG / 65+ SOLID / 50+ MIXED / 35+ WEAK / <35 DETERIORATING
+
+---
+
+> Generated by `skills/earnings-analyst` from FMP HTTP REST.  Cache: `skills/earnings-analyst/cache/NBIS_2026-03-31.json`

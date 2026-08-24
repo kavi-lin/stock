@@ -9,9 +9,12 @@ contract already declares optional.
 
 Run: python3 investment/scripts/test_phase1_factpack.py   (rc=0 required)
 """
+import json
 import os
 import subprocess
 import sys
+import tempfile
+import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import phase1_factpack as fp  # noqa: E402
@@ -65,6 +68,45 @@ def with_fake(results, fn):
 
 
 def main():
+    print("── shared Phase 0 resolver ──")
+    real_repo = fp.REPO
+    with tempfile.TemporaryDirectory() as d:
+        invest_dir = os.path.join(d, "investment/invest_logs")
+        sector_dir = os.path.join(d, "sector/sector_logs")
+        os.makedirs(invest_dir)
+        os.makedirs(sector_dir)
+        canonical = os.path.join(invest_dir, "2026-08-21_phase0.json")
+        sector = os.path.join(sector_dir, "2026-08-21_sector_intel.json")
+        payload = {
+            "macro_summary": {"market_regime": "Goldilocks"},
+            "_market_signals": {"vix": 14.9},
+            "fred_snapshot": {"regime_label": "Goldilocks"},
+            "fred_available": True,
+            "phase3_macro_multiplier": 1.0,
+            "macro_multiplier_rationale": "FRED benign",
+        }
+        with open(canonical, "w", encoding="utf-8") as f:
+            json.dump(payload, f)
+        with open(sector, "w", encoding="utf-8") as f:
+            json.dump({"market_regime": "risk-on"}, f)
+        now = time.time()
+        os.utime(canonical, (now - 1, now - 1))
+        os.utime(sector, (now, now))  # newer but schema-incomplete
+        fp.REPO = d
+        try:
+            source, _age, core, frozen = fp.load_phase0("GEV")
+            check("canonical beats newer sector context", source, "INVEST_CACHE")
+            check("different ticker reuses shared snapshot",
+                  frozen, "investment/invest_logs/2026-08-21_phase0.json")
+            check("shared macro_summary survives", core.get("macro_summary"),
+                  payload["macro_summary"])
+            os.unlink(canonical)
+            source, _age, _core, frozen = fp.load_phase0("GEV")
+            check("sector-only cache requires L3", source, "INCOMPLETE_NEEDS_L3")
+            check("incomplete sector has no frozen path", frozen, None)
+        finally:
+            fp.REPO = real_repo
+
     print("── prewarm_earnings_cache ──")
 
     # Happy path on a cache hit: both steps run, in order, and refreshed stays False.
@@ -146,7 +188,9 @@ def main():
     fp.prewarm_forecaster_cache = lambda t, r=False: f"fc:{r}"
     try:
         # Everything except the prewarm is stubbed: this asserts wiring, not data.
-        stubs = {"load_phase0": lambda t: ("SECTOR_CACHE", 0.0, {}),
+        stubs = {"load_phase0": lambda t: (
+                    "INVEST_CACHE", 0.0, {}, "investment/invest_logs/phase0.json"),
+                 "validate_phase0_rc": lambda t, p=None: 0,
                  "load_ticker_data_bundle": lambda t: {"status": "ok"},
                  "load_earnings_bundle": lambda t: {"status": "ok"},
                  "load_peer_bundle": lambda t: {"status": "ok"},
@@ -159,6 +203,12 @@ def main():
             check("prewarm runs by default", out.get("earnings_prewarm"), "sentinel")
             check("refreshed flag reaches the forecaster",
                   out.get("forecaster_prewarm"), "fc:True")
+            check("frozen Phase 0 path is exported", out.get("phase0_path"),
+                  "investment/invest_logs/phase0.json")
+            fp.validate_phase0_rc = lambda t, p=None: 1
+            invalid = fp.build("AAOI", run_validator=True, prewarm_earnings=False)
+            check("fresh snapshot failing gate requires L3",
+                  invalid.get("phase0_source"), "INVALID_NEEDS_L3")
             out = fp.build("AAOI", run_validator=False, prewarm_earnings=False)
             check("--no-prewarm → earnings 'disabled'", out.get("earnings_prewarm"), "disabled")
             check("--no-prewarm → forecaster 'disabled'",

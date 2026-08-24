@@ -1,0 +1,495 @@
+{
+  "ticker": "NBIS",
+  "generated_at": "2026-08-16T22:54:00",
+  "phase0_source": "STALE_NEEDS_L3",
+  "phase0_stale_hours": 8.24,
+  "phase0": {
+    "market_regime": "RISK_ON",
+    "exposure_ceiling": "75-90%",
+    "political_risk_summary": {
+      "active_trump_trades": [],
+      "named_targets_today": [],
+      "fear_greed_status": "Greed"
+    },
+    "actionable_themes": [
+      "AI & Semiconductors",
+      "Robotics & Automation",
+      "Cloud Computing & SaaS",
+      "Industrials Sector Concentration"
+    ],
+    "ftd_days_since": 7,
+    "ftd_status_text": "FTD CONFIRMED, day 7 post-confirmation (rally-day 11; FTD originally confirmed on rally-day 4)",
+    "macro_summary": null,
+    "_market_signals": null
+  },
+  "phase0_validator_rc": 1,
+  "bundles": {
+    "ticker_data_bundle": {
+      "status": "ok",
+      "fetched_at": "2026-08-16T14:54:08.505297Z",
+      "scoring": {
+        "_source": "finnhub",
+        "price": 277.68,
+        "previousClose": 255.04,
+        "dayHigh": 278.66,
+        "dayLow": 256.905,
+        "mktCap": 68745867916.26883,
+        "peRatio": 1513.4795,
+        "epsTTM": -0.39560000000000006,
+        "dividendYield": null,
+        "priceToBookRatio": 4.6101,
+        "forwardPE": null,
+        "pegRatio": null,
+        "roeTTM": 0.63,
+        "debtToEquity": 0.8985,
+        "fcfPerShareTTM": 2.6662,
+        "nextEarningsDate": "2026-11-09"
+      }
+    },
+    "earnings_analyst_bundle": {
+      "status": "ok",
+      "last_earnings_date": "2026-06-30",
+      "next_earnings_est": "2026-11-10",
+      "composite_score": 41,
+      "verdict": "WEAK",
+      "score_components": {
+        "quality": 22,
+        "growth": 14,
+        "valuation": 0,
+        "analyst": 5
+      },
+      "quality_flags": [
+        "cash_conversion_positive_gap_clean",
+        "capex_outpaces_ocf",
+        "negative_fcf"
+      ],
+      "margins_8q": [
+        {
+          "date": "2026-06-30",
+          "period": "Q2",
+          "gross": 0.770565000858664,
+          "operating": -0.30207796668383996,
+          "net": -0.3269792203331616
+        },
+        {
+          "date": "2026-03-31",
+          "period": "Q1",
+          "gross": 0.20852130325814536,
+          "operating": -0.3208020050125313,
+          "net": 1.556892230576441
+        },
+        {
+          "date": "2025-12-31",
+          "period": "Q4",
+          "gross": 0.6991655687307862,
+          "operating": -1.0298638559508124,
+          "net": -1.0961791831357048
+        },
+        {
+          "date": "2025-09-30",
+          "period": "Q3",
+          "gross": 0.7063655030800822,
+          "operating": -0.891170424366872,
+          "net": -0.8186173853524983
+        },
+        {
+          "date": "2025-06-30",
+          "period": "Q2",
+          "gross": 0.7136060894386299,
+          "operating": -1.0580399619410086,
+          "net": 5.560418648905804
+        },
+        {
+          "date": "2025-03-31",
+          "period": "Q1",
+          "gross": 0.4665461121157324,
+          "operating": -2.3417721518987342,
+          "net": -2.054249547920434
+        },
+        {
+          "date": "2024-12-31",
+          "period": "Q4",
+          "gross": 0.27440633245382584,
+          "operating": -3.9393139841688654,
+          "net": -3.514511846965699
+        },
+        {
+          "date": "2024-09-30",
+          "period": "Q3",
+          "gross": 0.5635103926096998,
+          "operating": -2.0092378752886835,
+          "net": -2.1755196304849886
+        }
+      ],
+      "yoy_growth": {
+        "revenue_yoy": 4.5404,
+        "earnings_yoy": -1.3258,
+        "operating_yoy": -0.5818,
+        "revenue_qoq": 0.4594,
+        "growth_acceleration": "decelerating"
+      },
+      "balance_health": {
+        "working_capital": 7229500000,
+        "current_ratio": 4.03,
+        "debt_to_equity": 0.972,
+        "net_cash": -2014000000
+      },
+      "cash_flow_quality": {
+        "fcf_margin": -5.8583,
+        "cash_conversion": 85.357,
+        "capex_intensity": 9.7156,
+        "ocf_ttm": 5258000000,
+        "ni_ttm": 61600000
+      },
+      "valuation": {
+        "dcf_intrinsic": -63.0358594689526,
+        "dcf_levered_intrinsic": -12.497185296026116,
+        "dcf_vs_price_pct": -1.227,
+        "price_target_consensus": 228.38,
+        "pt_upside_pct": -0.1775,
+        "pt_dispersion_pct": 123.0,
+        "pt_news": [
+          {
+            "date": null,
+            "analystCompany": "Robert W. Baird",
+            "priceTarget": 340,
+            "adjPriceTarget": 340,
+            "publishedDate": "2026-08-13T10:26:16.000Z"
+          },
+          {
+            "date": null,
+            "analystCompany": "D.A. Davidson",
+            "priceTarget": 175,
+            "adjPriceTarget": 175,
+            "publishedDate": "2026-08-07T13:19:33.000Z"
+          },
+          {
+            "date": null,
+            "analystCompany": "Piper Sandler",
+            "priceTarget": 224,
+            "adjPriceTarget": 224,
+            "publishedDate": "2026-08-03T20:17:06.000Z"
+          },
+          {
+            "date": null,
+            "analystCompany": "Robert W. Baird",
+            "priceTarget": 250,
+            "adjPriceTarget": 250,
+            "publishedDate": "2026-07-21T20:12:40.000Z"
+          },
+          {
+            "date": null,
+            "analystCompany": "Northland Securities",
+            "priceTarget": 410,
+            "adjPriceTarget": 410,
+            "publishedDate": "2026-07-20T13:04:54.000Z"
+          },
+          {
+            "date": null,
+            "analystCompany": "BNP Paribas",
+            "priceTarget": 255,
+            "adjPriceTarget": 255,
+            "publishedDate": "2026-06-02T08:56:13.000Z"
+          },
+          {
+            "date": null,
+            "analystCompany": "Northland Securities",
+            "priceTarget": 248,
+            "adjPriceTarget": 248,
+            "publishedDate": "2026-05-14T12:59:07.000Z"
+          },
+          {
+            "date": null,
+            "analystCompany": "Morgan Stanley",
+            "priceTarget": 144,
+            "adjPriceTarget": 144,
+            "publishedDate": "2026-05-14T12:13:32.000Z"
+          }
+        ]
+      },
+      "analyst": {
+        "rating_trend": "insufficient_data",
+        "grades_summary": {
+          "strongBuy": 0,
+          "buy": 0,
+          "hold": 0,
+          "sell": 0,
+          "strongSell": 0,
+          "strong_buy_pct": null,
+          "total_analysts": 0
+        },
+        "grades_news": [
+          {
+            "date": null,
+            "gradingCompany": "Citigroup",
+            "previousGrade": "Buy",
+            "newGrade": "Buy",
+            "action": "hold"
+          },
+          {
+            "date": null,
+            "gradingCompany": "Piper Sandler",
+            "previousGrade": null,
+            "newGrade": "Neutral",
+            "action": "initialise"
+          },
+          {
+            "date": null,
+            "gradingCompany": "Citigroup",
+            "previousGrade": "Buy",
+            "newGrade": "Buy",
+            "action": "hold"
+          },
+          {
+            "date": null,
+            "gradingCompany": "Exane BNP Paribas",
+            "previousGrade": null,
+            "newGrade": "Neutral",
+            "action": "initialise"
+          },
+          {
+            "date": null,
+            "gradingCompany": "Citigroup",
+            "previousGrade": "Buy",
+            "newGrade": "Buy",
+            "action": "hold"
+          },
+          {
+            "date": null,
+            "gradingCompany": "Citigroup",
+            "previousGrade": "Outperform",
+            "newGrade": "Outperform",
+            "action": "hold"
+          },
+          {
+            "date": null,
+            "gradingCompany": "Wolfe Research",
+            "previousGrade": null,
+            "newGrade": "Peer Perform",
+            "action": "initialise"
+          },
+          {
+            "date": null,
+            "gradingCompany": "Cantor Fitzgerald",
+            "previousGrade": null,
+            "newGrade": "Overweight",
+            "action": "initialise"
+          },
+          {
+            "date": null,
+            "gradingCompany": "Compass Point",
+            "previousGrade": null,
+            "newGrade": "Buy",
+            "action": "initialise"
+          },
+          {
+            "date": null,
+            "gradingCompany": "Citigroup",
+            "previousGrade": null,
+            "newGrade": "Outperform",
+            "action": "initialise"
+          }
+        ]
+      },
+      "report_path": "NBIS_2026-06-30"
+    },
+    "peer_bundle": {
+      "status": "insufficient_peers",
+      "peers": [
+        "TWLO"
+      ],
+      "peer_selector": "exact_industry_business_model_v1",
+      "peer_exclusions": [
+        {
+          "symbol": "CHTR",
+          "reason": "industry_mismatch",
+          "subject_industry": "Software - Infrastructure",
+          "peer_industry": "Telecommunications Services"
+        },
+        {
+          "symbol": "FOXA",
+          "reason": "industry_mismatch",
+          "subject_industry": "Software - Infrastructure",
+          "peer_industry": "Entertainment"
+        },
+        {
+          "symbol": "PINS",
+          "reason": "industry_mismatch",
+          "subject_industry": "Software - Infrastructure",
+          "peer_industry": "Internet Content & Information"
+        },
+        {
+          "symbol": "RDDT",
+          "reason": "industry_mismatch",
+          "subject_industry": "Software - Infrastructure",
+          "peer_industry": "Internet Content & Information"
+        },
+        {
+          "symbol": "TEF",
+          "reason": "industry_mismatch",
+          "subject_industry": "Software - Infrastructure",
+          "peer_industry": "Telecommunications Services"
+        },
+        {
+          "symbol": "TME",
+          "reason": "industry_mismatch",
+          "subject_industry": "Software - Infrastructure",
+          "peer_industry": "Internet Content & Information"
+        },
+        {
+          "symbol": "VOD",
+          "reason": "industry_mismatch",
+          "subject_industry": "Software - Infrastructure",
+          "peer_industry": "Telecommunications Services"
+        },
+        {
+          "symbol": "Z",
+          "reason": "industry_mismatch",
+          "subject_industry": "Software - Infrastructure",
+          "peer_industry": "Internet Content & Information"
+        }
+      ],
+      "reason": "fewer_than_3_business_similar_peers",
+      "range_peer_cohort": {
+        "eligible": false,
+        "reason": "no_curated_peer_cohort",
+        "scope": "range_only",
+        "peer_count": 0,
+        "peers": {}
+      },
+      "range_peer_scenario": {
+        "eligible": false,
+        "reason": "no_curated_peer_cohort",
+        "scope": "range_only",
+        "peer_count": 0,
+        "peers": {},
+        "value": null
+      }
+    },
+    "fmp_supp_bundle": {
+      "ticker": "NBIS",
+      "as_of_date": "2026-08-16",
+      "cache_key": "NBIS_2026-08-16",
+      "schema_version": "V1.1",
+      "data_source": "FMP HTTP REST (FMP-only; no Finnhub)",
+      "quality_scores": {
+        "altmanZScore": 2.835373142189275,
+        "piotroskiScore": 6,
+        "altman_zone": "grey",
+        "piotroski_strength": "moderate",
+        "workingCapital": 7229500000,
+        "totalAssets": 27961500000,
+        "retainedEarnings": 3731300000,
+        "ebit": 174600001,
+        "totalLiabilities": 17621000000,
+        "revenue": 1355100000,
+        "_note": "altman: <1.81=danger, 1.81-2.99=grey, >2.99=safe; piotroski: >=7=strong, <=2=weak",
+        "source": "FMP /stable/financial-scores"
+      },
+      "owner_earnings": {
+        "period": "2026-Q2",
+        "as_of_date": "2026-06-30",
+        "ownersEarnings": -2829116000,
+        "ownersEarningsPerShare": -10.09,
+        "maintenanceCapex": -5075216000,
+        "growthCapex": -582184000,
+        "averagePPE": 1.22,
+        "qoq_growth": -14.8401,
+        "history_quarters": 5,
+        "source": "FMP /stable/owner-earnings"
+      },
+      "insider_summary": {
+        "quarters": [
+          {
+            "year": 2026,
+            "quarter": 3,
+            "acquired_disposed_ratio": 0.0714,
+            "total_acquired_shares": 7793,
+            "total_disposed_shares": 104393,
+            "acquired_transactions": 1,
+            "disposed_transactions": 14,
+            "total_purchases": 0,
+            "total_sales": 14
+          },
+          {
+            "year": 2026,
+            "quarter": 2,
+            "acquired_disposed_ratio": 0.0333,
+            "total_acquired_shares": 500000,
+            "total_disposed_shares": 1160245,
+            "acquired_transactions": 1,
+            "disposed_transactions": 30,
+            "total_purchases": 0,
+            "total_sales": 29
+          },
+          {
+            "year": 2026,
+            "quarter": 1,
+            "acquired_disposed_ratio": 0,
+            "total_acquired_shares": 0,
+            "total_disposed_shares": 43501,
+            "acquired_transactions": 0,
+            "disposed_transactions": 3,
+            "total_purchases": 0,
+            "total_sales": 3
+          },
+          {
+            "year": 2025,
+            "quarter": 1,
+            "acquired_disposed_ratio": 0,
+            "total_acquired_shares": 0,
+            "total_disposed_shares": 0,
+            "acquired_transactions": 0,
+            "disposed_transactions": 0,
+            "total_purchases": 0,
+            "total_sales": 0
+          }
+        ],
+        "latest_trend": "distributing",
+        "source": "FMP /stable/insider-trading/statistics"
+      },
+      "institutional": {},
+      "congressional_trades": {
+        "lookback_days": 180,
+        "senate_count": 0,
+        "house_count": 0,
+        "buy_count": 0,
+        "sell_count": 0,
+        "net_signal": "neutral",
+        "most_recent_date": null,
+        "source": "FMP /stable/senate-trades + house-trades"
+      },
+      "ma_events": {
+        "lookback_days": 180,
+        "events": [],
+        "source": "FMP /stable/mergers-acquisitions-latest"
+      },
+      "esg": {},
+      "executive_compensation": {},
+      "comp_benchmark": {},
+      "employee_history": {
+        "latest_period": "2025-12-31",
+        "latest_count": 1500,
+        "one_year_pct": 9.4,
+        "cagr_5y_pct": -46.3,
+        "expansion_signal": false,
+        "layoff_signal": false,
+        "data_points": 16,
+        "source": "FMP /stable/historical-employee-count"
+      },
+      "_fetch_stats": {
+        "fmp_calls": 12,
+        "fmp_failures": 3,
+        "cached": false
+      }
+    }
+  },
+  "bundles_loaded": {
+    "ticker_data_bundle": "ok",
+    "earnings_analyst_bundle": "ok",
+    "peer_bundle": "insufficient_peers",
+    "fmp_supp_bundle": "ok"
+  },
+  "earnings_prewarm": "ok (refreshed)",
+  "forecaster_prewarm": "unavailable: negative_or_missing_ttm_eps"
+}

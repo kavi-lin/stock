@@ -1,0 +1,230 @@
+{
+ "bundle_version": "P5-INPUTS/1.0",
+ "ticker": "GEV",
+ "date": "2026-08-21",
+ "phase0": {
+  "regime_confidence": 0.85,
+  "market_top_zone": "Yellow (Early Warning)",
+  "ftd_state": "FTD_CONFIRMED",
+  "breadth_composite": 79.2,
+  "vix": 16.01,
+  "fred_verdict": "Transitional",
+  "real_rate_pct": null,
+  "hot_sectors": [
+   "Industrials",
+   "Consumer Discretionary",
+   "Financials",
+   "Energy"
+  ],
+  "cold_sectors": [
+   "Technology",
+   "Real Estate",
+   "Consumer Staples",
+   "Utilities"
+  ]
+ },
+ "lanes": {
+  "fundamentals": {
+   "signal": "BUY",
+   "score": 2.5,
+   "confidence": 0.6,
+   "key_factors": [
+    "Revenue grew 21.87 percent year-over-year",
+    "Peer P/E discount is 44.7 percent",
+    "EPS consensus growth reaches 32.8 percent"
+   ],
+   "risk_flags": [
+    "DCF estimates imply substantial downside",
+    "Current ratio remains below one"
+   ],
+   "phase0_alignment": "ALIGNED",
+   "data_source_timestamp": "2026-08-21T03:25:10+00:00",
+   "subagent_isolated": true,
+   "subagent_validation_failed": true,
+   "skill_execution_failed": false,
+   "moat_assessment": {
+    "level": "NARROW",
+    "type": "scale_economies",
+    "evidence_one_line": "High cash conversion supports durable equipment-service economics."
+   },
+   "near_term_catalysts": [
+    {
+     "date": "2026-10-28",
+     "type": "earnings",
+     "description": "季度財報驗證營收與現金流成長",
+     "impact": "high"
+    },
+    {
+     "date": "2026-10-28",
+     "type": "guidance",
+     "description": "管理層更新全年展望",
+     "impact": "high"
+    },
+    {
+     "date": "2026-Q3",
+     "type": "analyst_day",
+     "description": "INSUFFICIENT_DATA：尚無已確認日期，列為待查事件",
+     "impact": "low"
+    }
+   ],
+   "bull_thesis_one_line": "營收與EPS高速成長，現金轉換強且同業折價明顯",
+   "bear_thesis_one_line": "股價遠高於DCF估值，流動比率偏弱"
+  },
+  "sentiment": {
+   "signal": "HOLD",
+   "score": 0.86,
+   "confidence": 0.74,
+   "key_factors": [
+    "Greed-leaning market sentiment",
+    "Low short float supports shares",
+    "Insider indicators remain mixed"
+   ],
+   "risk_flags": [
+    "MSPR deeply negative",
+    "Congressional trades bearish"
+   ],
+   "phase0_alignment": "ALIGNED",
+   "data_source_timestamp": "2026-08-21T03:25:24.257344+00:00",
+   "subagent_isolated": true,
+   "subagent_validation_failed": false,
+   "skill_execution_failed": false,
+   "market_sentiment_composite": 62.2,
+   "vix_current": 16.01,
+   "insider_signal": "mixed",
+   "short_pct_float": 3.2,
+   "mspr_latest": -100
+  },
+  "news": {
+   "signal": "BUY",
+   "score": 1.0,
+   "confidence": 0.6,
+   "key_factors": [
+    "AI power demand dominates headlines",
+    "Consensus remains Buy-heavy",
+    "PT revisions remain effectively flat"
+   ],
+   "risk_flags": [
+    "Opinion-heavy headline mix",
+    "No hard catalyst inside five days"
+   ],
+   "phase0_alignment": "ALIGNED",
+   "data_source_timestamp": "2026-08-21T03:25:34+00:00",
+   "subagent_isolated": true,
+   "subagent_validation_failed": true,
+   "skill_execution_failed": false,
+   "pt_revision_momentum": {
+    "direction": "FLAT",
+    "consensus_delta_pct_1m": 0.34,
+    "consensus_delta_pct_3m": 1.68,
+    "analysts_last_month": 5,
+    "analysts_last_quarter": 8
+   },
+   "immediate_catalyst_5d": null,
+   "decision_point_days": 21,
+   "cross_asset_spillover": [
+    {
+     "asset": "sector_XLI",
+     "direction": "BULLISH",
+     "mechanism": "AI 資料中心電力缺口擴大，帶動工業電力設備需求預期"
+    }
+   ],
+   "reasoning_one_line": "買方共識與 AI 電力需求新聞支撐 GEV，但目標價修訂平淡且五日內無硬催化。"
+  },
+  "technical": {
+   "signal": "SELL",
+   "score": -2.0,
+   "confidence": 0.58,
+   "key_factors": [
+    "Below 20 and 50-day averages",
+    "Bearish MACD histogram falling",
+    "Death cross remains active"
+   ],
+   "risk_flags": [
+    "Testing 963.54 support",
+    "Still above 200-day average"
+   ],
+   "phase0_alignment": "MISALIGNED",
+   "data_source_timestamp": "2026-08-21T03:26:44+00:00",
+   "subagent_isolated": true,
+   "subagent_validation_failed": true,
+   "skill_execution_failed": false,
+   "smart_money_analysis": {
+    "label": "distributing",
+    "narrative": "股價下跌 2.17% 且成交量為 20 日均量 1.10 倍，呈現溫和出貨而非恐慌殺盤。"
+   },
+   "pattern_taxonomy": {
+    "pattern": "topping_pattern",
+    "confirmation_criteria": "放量跌破 963.54 確認頭部；收復 1002.67 則失效。"
+   },
+   "market_strength": "WEAK",
+   "key_levels": {
+    "support": 963.54,
+    "resistance": 991.49,
+    "pivot": 1002.67
+   },
+   "high_prob_scenario": "未站回 991.49 前先測 963.54；收盤跌破則下看 897.68。",
+   "volatility": {
+    "atr_14": null,
+    "hist_vol_20d_daily": null,
+    "momentum_20d_pct": null
+   },
+   "extension_penalty_note": null,
+   "rubric_override_reason": null
+  },
+  "valuation": {
+   "signal": "HOLD",
+   "score": 0.0,
+   "confidence": 0.55,
+   "key_factors": [
+    "Fair value below market",
+    "Forward checks partly supportive",
+    "Comps anchor remains ineligible"
+   ],
+   "risk_flags": [
+    "no_peer_cohort",
+    "anchor_conflict_severe"
+   ],
+   "phase0_alignment": "NEUTRAL",
+   "data_source_timestamp": "2026-08-21T03:23:09+00:00",
+   "subagent_isolated": true,
+   "subagent_validation_failed": true,
+   "skill_execution_failed": false,
+   "weighted_fair_value": 892.78,
+   "vs_current_pct": -7.58,
+   "current_price": 966.01,
+   "valuation_confidence": "low",
+   "verdict_band": "fairly_valued",
+   "suppression_proposals": [
+    {
+     "anchor": "peer_pe_implied",
+     "reason": "no_peer_cohort",
+     "evidence": "range_peer_cohort ineligible: no_curated_peer_cohort"
+    },
+    {
+     "anchor": "dcf_self_built",
+     "reason": "anchor_conflict_severe",
+     "evidence": "anchor_dispersion_cv=0.7334; dispersion_ratio=9.76; agreement_grade=low"
+    }
+   ],
+   "valuation_commentary": "權威估值包給出公允價 892.78、相對現價 -7.58%，但錨分歧嚴重且信心低；comps 因少於兩個可用指標而合法排除。",
+   "cited_transition_overlay": false,
+   "transition_dissent_basis": null
+  }
+ },
+ "burry": {
+  "score": 47.3,
+  "narrative": "Burry 47.3/100，NEUTRAL。FCF yield 6.3% 與低 D/E 0.28 提供支撐，但 EV/EBIT 63.52 偏高且 insider component 為 SELL；內部人季度趨勢 accumulating 與此形成正向背離。Owner earnings per share 19.85 明顯低於 FCF per share 42.07，且 FCFF/FCFE DCF 358.18/703.20 差距顯著，均列為資本結構與現金品質提醒，不調整分數。"
+ },
+ "phase3": {
+  "final_score": 0.2461,
+  "final_decision": "HOLD",
+  "final_action": "CANCEL"
+ },
+ "phase4": {
+  "position_size_pct": null,
+  "analysis_price": 966.01
+ },
+ "red_team": {
+  "verdict": "STRONG_COUNTER"
+ }
+}

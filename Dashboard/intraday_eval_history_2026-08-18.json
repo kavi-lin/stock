@@ -1,0 +1,426 @@
+{
+  "date": "2026-08-18",
+  "windows": [
+    {
+      "as_of": "2026-08-18T11:22:34+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "avoid_laggards"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T11:47:50+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "avoid_laggards"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T13:37:50+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "avoid_laggards"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T13:48:08+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T13:58:30+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T14:08:46+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T14:18:46+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T14:28:46+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T14:39:11+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T14:49:11+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T14:59:30+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T15:09:30+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T15:19:30+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "value_defensive_rotation",
+        "avoid_laggards"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T15:29:48+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T15:40:07+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T15:50:07+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T16:00:07+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T16:10:24+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T16:20:24+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T16:30:41+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T16:40:41+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T16:50:41+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T17:00:57+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T17:10:57+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T17:20:57+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T17:33:58+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T17:47:00+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T17:57:17+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T18:07:17+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T18:17:17+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T18:27:35+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T18:37:35+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T18:47:35+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T18:57:53+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T19:07:53+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T19:17:53+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T19:28:12+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T19:38:12+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T19:48:12+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T19:58:29+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "value_defensive_rotation",
+        "avoid_laggards"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-18T20:08:49+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "value_defensive_rotation",
+        "avoid_laggards"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    }
+  ]
+}

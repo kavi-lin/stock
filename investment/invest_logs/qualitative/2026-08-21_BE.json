@@ -1,0 +1,188 @@
+{
+  "schema": "p5-qualitative/1.0",
+  "ticker": "BE",
+  "date": "2026-08-21",
+  "lanes": {
+    "fundamentals": {
+      "signal": "BUY",
+      "key_factors": [
+        "Revenue +165.5% YoY with structural shift",
+        "FCF margin 17% and 3.0x cash conversion",
+        "Strong AI power demand accelerating margins"
+      ],
+      "risk_flags": [
+        "Elevated trailing valuation multiples (EV/EBITDA 174x)",
+        "Total debt $2.82B with negative net cash"
+      ]
+    },
+    "sentiment": {
+      "signal": "HOLD",
+      "key_factors": [
+        "Insider distribution with zero recent purchases",
+        "Negative latest MSPR at -29.18",
+        "Constructive macro backdrop with normal VIX"
+      ],
+      "risk_flags": [
+        "Sustained insider selling across multiple quarters",
+        "Moderate short interest of 7.87% float"
+      ]
+    },
+    "news": {
+      "signal": "BUY",
+      "key_factors": [
+        "AI data center power demand surging",
+        "Power Connect accelerates backlog delivery",
+        "Strong 1M price target revisions"
+      ],
+      "risk_flags": [
+        "Valuation multiples elevated after run-up",
+        "Class action litigation noise"
+      ]
+    },
+    "technical": {
+      "signal": "SELL",
+      "key_factors": [
+        "Stage 3 topping with active death cross",
+        "Price trades below 20 and 50MA",
+        "MACD momentum negative with falling histogram"
+      ],
+      "risk_flags": [
+        "Holding above 200-day moving average 186.60",
+        "Proximity to nearest swing support 194.60"
+      ]
+    },
+    "valuation": {
+      "signal": "HOLD",
+      "key_factors": [
+        "Fair value $150.08 implies -26.9% downside",
+        "Extreme anchor dispersion 11.67x across models",
+        "High capex renders DCF models ineligible"
+      ],
+      "risk_flags": [
+        "Severe anchor bifurcation between PT and owner earnings",
+        "Peer cohort scarcity limits relative valuation methods"
+      ]
+    }
+  },
+  "red_team": {
+    "verdict": "MODERATE_COUNTER",
+    "counter_thesis": "雖然 Bloom Energy 受惠於超大規模資料中心（Hyperscaler）的過渡性缺電需求，但在實質利率高達 2.4% 與 D/E 1.72 的重融資壓力下，若公用電網擴容提速或燃氣輪機（Gas Turbines）併網週期縮短，BE 作為高成本過渡方案的訂單將面臨推遲或取消，難以支撐現價隱含的 5 年 60% FCF 複合增長預期。",
+    "kill_conditions": [
+      "IF 未來 2 季 FCF 年化增速 < 30% 或營收年化增速 < 37% WITHIN 180 days THEN 現價隱含的 5 年 60% FCF 高增長估值路徑破滅",
+      "IF 美國 10 年期實質利率維持在 2.0% 以上且高槓桿（D/E 1.72）導致專案融資成本攀升使資料中心客戶簽約交付週期推遲超過 1 季 WITHIN 120 days THEN 資本密集型高估值擴張邏輯破裂",
+      "IF 區域電網（如 PJM/ERCOT）大型資料中心直連併網審批提速或競品燃氣輪機產能開出使 BE 在手訂單轉換率下降超過 15% WITHIN 180 days THEN 燃料電池作為 AI 資料中心供電方案的超額溢價敘事瓦解"
+    ],
+    "counter_evidence_strength": 3,
+    "thesis_break_probability": 0.40
+  },
+  "burry_narrative": "Burry 得分 26.3/100 處於 WARNING 區間。EV/EBIT 達 142.8x 且負債權益比 1.72 處於高位，內部人淨賣出（Distributing），但股價自 52 週高點回檔 40% 提供部分估值緩衝，未觸發 T4 一票否決。",
+  "conflict_bias": {
+    "schema": "conflict_bias.v1",
+    "tentative_decision": "STAGED_ENTRY",
+    "triggers_fired": [],
+    "conflict_summary": "無重大 T1-T5 觸發；基本面與新聞面受 AI 電力結構性需求驅動偏多，技術面頂部震盪與估值歷史錨偏空形成兩極分化（BIPOLAR）。",
+    "t4_detail": null,
+    "t5_detail": null,
+    "proceed_to_phase3": true
+  },
+  "macro_context": "總體經濟處於 RISK_ON 狀態，市場廣度 79.2 維持健康，但實質 10 年期利率 2.4% 處於偏高水準，對高估值長存續期工業/科技股形成估值折現壓力；AI 基礎建設與資料中心用電需求為當前強勢主題。",
+  "watch_conditions": {
+    "fcf_growth_quarterly": "觀察未來 2 季 FCF 年化增速是否維持在 ≥30% 以上，確認現金流轉型可持續性。",
+    "technical_support_194_6": "監控股價是否守穩 $194.60 關鍵支撐區間；跌破則執行嚴格結構停損。",
+    "data_center_order_backlog": "追蹤 2026-10-27 Q3 財報中 Hyperscaler 資料中心大型訂單積壓與 Power Connect 交付進度。"
+  },
+  "key_risks": [
+    "實質利率 2.4% 高企加劇資本密集型高估值回檔壓力",
+    "Stage 3 頂部型態與 20/50MA 死亡交叉下行風險",
+    "高估值倍數（EV/EBITDA 174x）缺乏同業可比防護網",
+    "內部人持股持續處於淨賣出（Distributing）狀態"
+  ],
+  "bias_notes": "本次分析權衡了 BE 在 AI 資料中心電力短缺中的爆發性基本面反轉（營收 +165.5% YoY）與技術面頂部修正、歷史估值偏貴的衝突。透過 BIPOLAR 偏好調節與 Rec 11 熱區 probe 規則，以極小倉位（30 bps）分批試水，嚴格控制下行風險。",
+  "phase2_fanout_mode": "PARALLEL_SUBAGENT",
+  "degraded_analysts": [],
+  "decision_point_days": 66,
+  "devils_advocate_filed": false,
+  "trade_metadata": {
+    "trade_type": "trend",
+    "event_tag": "ai_power_infrastructure_demand"
+  },
+  "lane_detail": {
+    "fundamentals": {
+      "moat_assessment": {
+        "level": "NARROW",
+        "type": "IP-patent",
+        "evidence_one_line": "Proprietary solid oxide fuel cell patents enable rapid behind-the-meter AI data center power."
+      },
+      "near_term_catalysts": [
+        {
+          "date": "2026-10-27",
+          "type": "earnings",
+          "description": "Q3 2026 earnings release and hyperscaler data center order backlog update",
+          "impact": "high"
+        }
+      ],
+      "bull_thesis_one_line": "Revenue YoY +165.5% and FCF margin 17.1% confirm an accelerating structural turnaround powered by hyperscale AI power demand.",
+      "bear_thesis_one_line": "Rich trailing valuation with EV/EBITDA of 174.7x and $2.82B debt could amplify downside if contract execution stalls."
+    },
+    "sentiment": {
+      "market_sentiment_composite": 62.9,
+      "vix_current": 15.44,
+      "insider_signal": "distributing",
+      "short_pct_float": 7.87,
+      "mspr_latest": -29.184015
+    },
+    "news": {
+      "immediate_catalyst_5d": null,
+      "decision_point_days": 66,
+      "cross_asset_spillover": [
+        {
+          "asset": "Utilities & Independent Power Producers",
+          "direction": "BULLISH",
+          "mechanism": "Grid bottlenecks driving on-site fuel cell and distributed power adoption"
+        }
+      ],
+      "reasoning_one_line": "Robust AI data center power demand and Power Connect launch drive +18.8% 1M PT upgrades despite valuation checks.",
+      "pt_revision_momentum": {
+        "direction": "UP",
+        "consensus_delta_pct_1m": 18.78,
+        "unavailable_reason": null
+      }
+    },
+    "technical": {
+      "smart_money_analysis": {
+        "label": "distributing",
+        "narrative": "Insider summary shows ratio 0.0 disposing with no buys, consistent with post-peak stage 3 distribution below 50MA."
+      },
+      "pattern_taxonomy": {
+        "pattern": "topping_pattern",
+        "confirmation_criteria": "A high-volume close below support at $194.60 confirms breakdown; reclaiming $212.19 pivot negates."
+      },
+      "market_strength": "WEAK",
+      "key_levels": {
+        "support": 194.6,
+        "resistance": 229.9,
+        "pivot": 212.19
+      },
+      "high_prob_scenario": "Expect consolidation with downward drift toward support at $194.60; failure to reclaim $212.19 maintains selling pressure.",
+      "volatility": {
+        "atr_14": 18.8293,
+        "hist_vol_20d_daily": 0.07724,
+        "momentum_20d_pct": 10.74
+      }
+    },
+    "valuation": {
+      "weighted_fair_value": 150.08,
+      "vs_current_pct": -26.91,
+      "verdict_band": "overvalued",
+      "cited_transition_overlay": true,
+      "transition_dissent_basis": "valuation_anchor",
+      "suppression_proposals": [
+        {
+          "anchor": "owner_earnings_mult",
+          "reason": "Backward-looking owner earnings multiple ($23.70) severely distorts fair value under high-growth paradigm shift into AI data center power demand."
+        }
+      ],
+      "valuation_commentary": "BE valuation pack projects a weighted fair value of $150.08 (-26.91% vs current), resulting in an overvalued verdict and score -1.0. The projection is governed by an extreme 11.67x dispersion between sell-side PT ($276.47, 57.14% weight) and owner earnings multiple ($23.70, 42.86% weight). DCF models are ineligible due to negative terminal FCFF from heavy capital reinvestment, and peer comps lack cohort depth. Given transition_signature = paradigm_only, valuation_anchor dissent is established due to trailing owner earnings failing to capture the forward structural shift in AI datacenter on-site power generation."
+    }
+  }
+}

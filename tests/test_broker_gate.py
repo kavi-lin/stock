@@ -4,14 +4,9 @@
 What this locks down is the failure policy, because that is where an integration
 like this goes wrong quietly:
 
-  * fail-closed by default — a decision-bearing role does not run when the broker
-    cannot answer;
-  * the news line may degrade to the local budget — but only when the broker
-    could not answer;
-  * **nothing** degrades when the broker answered "no capacity". That answer is
-    about the 20% hard reserve, and falling back from it would spend exactly the
-    quota the broker had just refused. It is the single most important assertion
-    in this file.
+  * every role is fail-closed when the broker cannot answer;
+  * normal calls offer the complete certified set and let the broker choose;
+  * pinned ensemble/certification calls still require a broker lease.
 
 Runs against a stub broker over real HTTP — the client is stdlib urllib, so the
 transport is worth exercising — and never invokes a vendor CLI: `run_llm` is
@@ -68,7 +63,10 @@ class StubBroker(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_GET(self):                  # noqa: N802 - stdlib naming
-        self._send(200, {"status": "healthy"})
+        self._send(200, {
+            "status": "healthy",
+            "broker_version": getattr(self.server, "broker_version", "0.3.0"),
+        })
 
     def do_POST(self):                 # noqa: N802 - stdlib naming
         length = int(self.headers.get("Content-Length") or 0)
@@ -123,7 +121,15 @@ class StubBroker(BaseHTTPRequestHandler):
                 "decision_id": "d-1", "task_id": body["task"]["task_id"],
                 "generated_at": "2026-08-08T00:00:00+00:00",
                 "recommended": self.server.grant_provider,
-                "candidates": [], "fallback_used": False, "override_used": False,
+                # V4.129.0 — the winning candidate carries the model the broker
+                # chose. Only agy ever gets one (two quota pools, and the model
+                # is what decides which is spent), so the stub mirrors that.
+                "candidates": [{
+                    "provider": self.server.grant_provider, "eligible": True, "rank": 1,
+                    "exclusion_reasons": [],
+                    "model": getattr(self.server, "grant_model", None),
+                }],
+                "fallback_used": False, "override_used": False,
                 "reservation": {
                     "reservation_id": "r-1", "task_id": body["task"]["task_id"],
                     "provider": self.server.grant_provider, "state": "pending",
@@ -141,10 +147,13 @@ class StubBroker(BaseHTTPRequestHandler):
         }})
 
 
-def start_stub(mode: str = "grant", grant_provider: str = "agy"):
+def start_stub(mode: str = "grant", grant_provider: str = "agy",
+               grant_model: str | None = None, broker_version: str = "0.3.0"):
     server = HTTPServer(("127.0.0.1", 0), StubBroker)
     server.mode = mode
     server.grant_provider = grant_provider
+    server.grant_model = grant_model
+    server.broker_version = broker_version
     server.requests = []
     server.settlements = []
     thread = threading.Thread(target=server.serve_forever, kwargs={"poll_interval": 0.05})
@@ -179,11 +188,19 @@ class Recorder:
 
     def __init__(self, exit_code: int = 0, parsed=None) -> None:
         self.calls: list[tuple] = []
+        #: `provider_model` per call — the vendor-native model the broker
+        #: assigned. Recorded separately from `calls` so the existing
+        #: assertions on that tuple keep their shape.
+        self.provider_models: list[str] = []
         self.exit_code = exit_code
         self.parsed = parsed if parsed is not None else {"ok": True}
 
-    def __call__(self, model, system_prompt, user_prompt, timeout=0):
+    def __call__(self, model, system_prompt, user_prompt, timeout=0, provider_model="",
+                 process_callback=None):
         self.calls.append((model, system_prompt, user_prompt))
+        self.provider_models.append(provider_model)
+        if process_callback is not None:
+            process_callback(os.getpid(), os.getpgid(0))
         return LLMResult(
             agent=model, parsed=(self.parsed if self.exit_code == 0 else None),
             raw_text="", raw_stdout="", exit_code=self.exit_code, latency_ms=1,
@@ -267,10 +284,14 @@ check("usage.mapped", usage["input_tokens"] == 10 and usage["cache_read_tokens"]
 check("usage.no_cost", "cost_usd" not in usage,
       "TokenUsage forbids extras; a stray key turns settlement into a 4xx")
 check("usage.counts_a_call", usage.get("model_calls") == 1, str(usage))
+check(
+    "usage.preserves_explicit_model_calls",
+    broker_gate.usage_for_broker({"input_tokens": 10, "model_calls": 3}).get("model_calls") == 3,
+)
 check("usage.empty_stays_empty", broker_gate.usage_for_broker(None) == {})
 
 # ───────────────────────── granted: reserve → run → settle ──────────────────
-server, _thread = start_stub("grant", "agy")
+server, _thread = start_stub("grant", "agy", grant_model="gemini-3.6-flash-medium")
 try:
     recorder = Recorder()
     with _Patched(config_for(server), recorder):
@@ -281,12 +302,31 @@ try:
           "agy is this repo's `gemini`")
     check("grant.ok", result.exit_code == 0)
     check("grant.note", "broker:agy" in (result.route_note or ""), result.route_note)
+    # V4.129.0 — the whole point of the assignment is that it reaches the CLI.
+    # agy's two pools refill independently and the hold is against ONE of them,
+    # so a run that ignores this spends a pool nothing is holding. This walks
+    # the real path: stub response → `Lease.model` → `_run_model_for_role`.
+    check("grant.assigned_model_reaches_the_driver",
+          recorder.provider_models == ["gemini-3.6-flash-medium"],
+          str(recorder.provider_models))
+    started = [body for path, body in server.settlements if path.endswith("/start")]
+    check("grant.start_records_the_real_model",
+          started and started[0].get("model") == "gemini-3.6-flash-medium",
+          f"{started} — the ledger calibrates each pool from what it records; "
+          "the `gemini` alias is not a pool")
+    heartbeats = [body for path, body in server.settlements if path.endswith("/heartbeat")]
+    check("grant.heartbeat_records_process_identity",
+          heartbeats and heartbeats[0].get("process_pid") == os.getpid()
+          and heartbeats[0].get("process_pgid") == os.getpgid(0),
+          repr(heartbeats))
 
     reserved = server.requests[0]["task"]
     check("grant.project", reserved["project"] == "ai-investment-committee", str(reserved))
     check("grant.ttl", reserved["reservation_ttl_seconds"] == 1_800, str(reserved))
-    check("grant.pinned", reserved["forbidden_providers"] == ["claude", "codex"],
-          "a single-shot call is pinned to its role's model; the broker may not substitute")
+    check("grant.broker_selects",
+          set(reserved.get("preferred_providers") or []) == {"claude", "agy", "codex"}
+          and not (reserved.get("forbidden_providers") or []),
+          "normal calls offer every certified provider to the broker")
 
     paths = [path for path, _body in server.settlements]
     check("grant.started", any(p.endswith("/start") for p in paths), str(paths))
@@ -295,6 +335,30 @@ try:
     check("grant.real_tokens",
           settled and settled[0]["usage"]["input_tokens"] == 1_200, str(settled))
     check("grant.no_error_class", settled and "error_class" not in settled[0], str(settled))
+finally:
+    server.shutdown()
+
+# Text-output tasks settle successfully without pretending Markdown is JSON.
+class RawRecorder(Recorder):
+    def __call__(self, model, system_prompt, user_prompt, timeout=0, provider_model="",
+                 process_callback=None):
+        self.calls.append((model, system_prompt, user_prompt))
+        return LLMResult(
+            agent=model, parsed=None, raw_text="## Verdict\nApproved", raw_stdout="",
+            exit_code=0, latency_ms=1, parse_status="raw", error=None,
+            input_tokens=100, output_tokens=20,
+        )
+
+
+server, _thread = start_stub("grant", "codex")
+try:
+    recorder = RawRecorder()
+    with _Patched(config_for(server), recorder):
+        result = mr.run_role("office_verdict", "SYS", "USR")
+    check("text_task.route_ok", ":ok(" in (result.route_note or ""), result.route_note)
+    settled = [body for path, body in server.settlements if path.endswith("/complete")]
+    check("text_task.no_invalid_output",
+          settled and "error_class" not in settled[-1], repr(settled))
 finally:
     server.shutdown()
 
@@ -313,7 +377,7 @@ try:
 finally:
     server.shutdown()
 
-# ─────────────────── unreachable: fail-closed, except the news line ─────────
+# ───────────────────── unreachable: every role is fail-closed ───────────────
 recorder = Recorder()
 with _Patched(config_for(None), recorder):     # port 1 — nothing listening
     result = mr.run_role("office", "SYS", "USR")
@@ -324,12 +388,12 @@ check("down.office.explains", "unavailable" in (result.route_note or ""), result
 recorder = Recorder()
 with _Patched(config_for(None), recorder):
     result = mr.run_with_fallback("gemini", "debate", "SYS", "USR")
-check("down.debate.ran", len(recorder.calls) == 1,
-      "the news line may fall back to the local budget when the broker is DOWN")
-check("down.debate.ok", result.exit_code == 0)
-check("down.debate.explains", "degraded" in (result.route_note or ""), result.route_note)
+check("down.debate.did_not_run", recorder.calls == [],
+      "daemon/news work must defer rather than spend from a local fallback")
+check("down.debate.failed", result.exit_code != 0)
+check("down.debate.explains", "unavailable" in (result.route_note or ""), result.route_note)
 
-# The local budget is the only gate on the degraded path, so it must still bite.
+# Local counters are telemetry and can never authorise inference.
 recorder = Recorder()
 exhausted = config_for(None)
 exhausted["budgets"]["gemini"] = {"daily_max_calls": 1}
@@ -345,17 +409,40 @@ try:
         result = mr.run_with_fallback("gemini", "debate", "SYS", "USR")
 finally:
     mr._load_usage = _real_load_usage
-check("down.debate.local_budget_bites", recorder.calls == [],
-      "degrading to the local budget must mean the local budget is enforced")
-check("down.debate.local_budget_explains", "budget" in (result.route_note or ""),
+check("down.debate.local_budget_cannot_authorise", recorder.calls == [],
+      "an available local budget must not bypass an unavailable broker")
+check("down.debate.local_budget_explains", "unavailable" in (result.route_note or ""),
       result.route_note)
+
+# A reachable but stale daemon is not an outage. Even the news line must stop:
+# degrading here would let an old routing policy keep spending after deployment.
+server, _thread = start_stub("grant", broker_version="0.1.0")
+try:
+    status = mr.broker_status(config_for(server))
+    check("version_mismatch.status.reachable", status.get("reachable") is True, repr(status))
+    check("version_mismatch.status.not_authority", status.get("authority") is False, repr(status))
+    check("version_mismatch.status.restart", status.get("restart_required") is True, repr(status))
+    check("version_mismatch.status.versions",
+          status.get("broker_version") == "0.1.0" and status.get("client_version") == "0.3.0",
+          repr(status))
+    recorder = Recorder()
+    with _Patched(config_for(server), recorder):
+        result = mr.run_with_fallback("gemini", "debate", "SYS", "USR")
+    check("version_mismatch.debate.did_not_run", recorder.calls == [],
+          "version mismatch must never take the outage fallback")
+    check("version_mismatch.debate.explains", "version" in (result.route_note or ""),
+          result.route_note)
+    check("version_mismatch.no_reservation", server.requests == [],
+          "handshake must block before POST /v1/recommend")
+finally:
+    server.shutdown()
 
 # ─────────────────────────── protocol path ──────────────────────────────────
 server, _thread = start_stub("refuse")
 try:
     with _Patched(config_for(server), Recorder()):
         try:
-            mr.acquire_protocol_lease()
+            mr.acquire_protocol_lease("agentic_protocol", "invest")
             check("protocol.fail_closed", False, "a refused protocol run was authorised")
         except mr.ProtocolBlocked as blocked:
             check("protocol.fail_closed", True)
@@ -366,15 +453,16 @@ finally:
 server, _thread = start_stub("grant", "codex")
 try:
     with _Patched(config_for(server), Recorder()):
-        model, lease, note = mr.acquire_protocol_lease()
+        model, lease, note = mr.acquire_protocol_lease("agentic_protocol", "invest")
     check("protocol.model", model == "codex", model)
     check("protocol.lease", lease is not None)
     reserved = server.requests[0]["task"]
-    check("protocol.type", reserved["task_type"] == "agentic_protocol", str(reserved))
+    check("protocol.type", reserved["task_type"] == "agentic_protocol-invest", str(reserved))
     check("protocol.ttl", reserved["reservation_ttl_seconds"] == 21_600,
           "a protocol run outliving its TTL cannot be settled at all")
-    check("protocol.whole_chain_offered", reserved["preferred_providers"] == ["agy", "codex", "claude"],
-          "any chain member is acceptable for a protocol run; the broker picks on quota")
+    check("protocol.certified_set_offered",
+          set(reserved["preferred_providers"]) == {"agy", "codex", "claude"},
+          "every certified provider is acceptable; the broker picks on quota")
     check("protocol.estimate_is_not_zero",
           reserved["estimated_input_tokens"] >= 100_000, str(reserved))
 finally:
@@ -471,25 +559,20 @@ try:
 finally:
     server.shutdown()
 
-# Fewer than two able to serve → keep the configured pair rather than silently
-# turning every debate into a monologue.
-# `break_news_pair()` reads the real config file (it calls llm_drivers' own
-# loader, not the patched one), so assert against it rather than a literal —
-# otherwise this passes or fails on what happens to be in config/ today.
-configured_pair = break_news_pair()
+# Fewer than two able to serve → defer the daemon cycle. A configured pair may
+# describe the intended voices but cannot authorise an inference.
 
 server, _thread = start_stub("refuse")
 try:
     with _Patched(config_for(server), Recorder()):
-        check("debate.refused_falls_back_to_pair",
-              debater._turn_order() == configured_pair,
-              "a debate needs two voices; the per-call gate refuses what it must")
+        check("debate.refused_defers", debater._turn_order() == [],
+              "hard-reserve refusal must not fall back to a configured pair")
 finally:
     server.shutdown()
 
 with _Patched(config_for(None), Recorder()):    # broker unreachable
-    check("debate.unreachable_falls_back_to_pair",
-          debater._turn_order() == configured_pair, "config pair is the fallback")
+    check("debate.unreachable_defers", debater._turn_order() == [],
+          "broker outage must defer rather than use a local pair")
 
 check("debate.fallback_pair_matches_agents_md",
       set(broker_gate.MODEL_FOR_PROVIDER.values()) >= {"claude", "gemini"}
@@ -511,6 +594,22 @@ _BUCKET_FIELDS = {"name", "remaining_percent", "used_percent", "label",
 
 _STATUS_FIXTURE = {
     "hard_reserve_percent": 20.0,
+    "active_reservations": [{
+        "task": {"project": "ai-investment-committee",
+                 "task_id": "brief-live", "task_type": "brief"},
+        "reservation": {"reservation_id": "live-1", "provider": "agy",
+                        "state": "active", "created_at": "2026-08-21T08:00:00Z"},
+    }, {
+        "project": "tw-stock-wonwon", "task_id": "screen-live",
+        "task_type": "screen", "reservation_id": "live-2",
+        "provider": "codex", "state": "active",
+        "created_at": "2026-08-21T08:01:00Z",
+    }, {
+        # Missing ownership must never be guessed local/green.
+        "task_id": "unknown-live", "task_type": "unknown",
+        "reservation_id": "live-3", "provider": "claude", "state": "active",
+        "created_at": "2026-08-21T08:02:00Z",
+    }],
     "providers": [
         {"info": {"id": "claude"}, "authenticated": True,
          "snapshot": {"plan": None, "buckets": {
@@ -520,11 +619,17 @@ _STATUS_FIXTURE = {
              "session": {"remaining_percent": 94.0, "used_percent": 6.0,
                          "label": "session", "reset_label": "9:40am(Asia/Taipei)"},
          }}},
-        # agy's shape: what is left is known, what was spent is not.
+        # agy's shape: what is left is known, what was spent is not. Two pools
+        # that refill independently, so the broker sends the headline it will
+        # actually route on plus the pool it came from — here the exhausted
+        # claude_gpt windows must NOT set the number.
         {"info": {"id": "agy"}, "authenticated": True,
+         "remaining_percent": 73.4, "routable_pool": "gemini",
          "snapshot": {"plan": "Google AI Pro", "buckets": {
              "gemini.weekly": {"remaining_percent": 73.4, "used_percent": None,
                                "refresh_in_seconds": 301680},
+             "claude_gpt.five_hour": {"remaining_percent": 0.0, "used_percent": None,
+                                      "reserve_only": True},
          }}},
         {"info": {"id": "codex"}, "authenticated": True,
          "plan_label": "ChatGPT Pro 5x", "current_model": "gpt-5.6-sol",
@@ -556,6 +661,22 @@ finally:
 _provs = _snap.get("providers") or {}
 check("buckets.provider_ids_mapped", set(_provs) == {"claude", "gemini", "codex"},
       f"{sorted(_provs)} — agy must surface under this repo's name")
+check("active_reservations.provider_mapped",
+      (_snap.get("active_reservations") or [{}])[0].get("model") == "gemini",
+      repr(_snap.get("active_reservations")))
+_active_by_id = {row.get("reservation_id"): row
+                 for row in (_snap.get("active_reservations") or [])}
+check("active_reservations.local_project_green",
+      _active_by_id.get("live-1", {}).get("is_local_project") is True,
+      repr(_active_by_id))
+check("active_reservations.external_project_blue",
+      _active_by_id.get("live-2", {}).get("project") == "tw-stock-wonwon"
+      and _active_by_id.get("live-2", {}).get("is_local_project") is False,
+      repr(_active_by_id))
+check("active_reservations.unknown_project_blue",
+      _active_by_id.get("live-3", {}).get("project") is None
+      and _active_by_id.get("live-3", {}).get("is_local_project") is False,
+      repr(_active_by_id))
 
 _claude = {b["name"]: b for b in (_provs.get("claude") or {}).get("buckets", [])}
 _gem = {b["name"]: b for b in (_provs.get("gemini") or {}).get("buckets", [])}
@@ -583,9 +704,138 @@ check("provider.plan_label_carried",
 check("provider.current_model_carried",
       (_provs.get("codex") or {}).get("current_model") == "gpt-5.6-sol",
       "the active model is part of the provider identity shown in the panel")
-check("buckets.remaining_is_worst_bucket",
-      (_provs.get("claude") or {}).get("remaining_percent") == 36.0,
-      "headline stays the tightest window")
+# V4.130.0 — was `== 36.0`, the tightest window. The panel now reads the
+# five-hour one, which claude calls `session`; the weekly pools stay in the
+# hover card. The number a run is dispatched on is still the broker's minimum —
+# that is `reserve_only` / `cooldown_until`, both passed through untouched.
+check("buckets.remaining_is_five_hour_window",
+      (_provs.get("claude") or {}).get("remaining_percent") == 94.0
+      and (_provs.get("claude") or {}).get("headline_bucket") == "session",
+      f"got {(_provs.get('claude') or {}).get('remaining_percent')} from "
+      f"{(_provs.get('claude') or {}).get('headline_bucket')} — expected the session window")
+# The codex entry carries no `remaining_percent` and no five-hour window, so it
+# pins the fallback chain end to end: a broker too old to send the field still
+# gets the local minimum rather than a blank panel.
+check("buckets.legacy_broker_falls_back_to_local_min",
+      (_provs.get("codex") or {}).get("remaining_percent") == 97.0
+      and (_provs.get("codex") or {}).get("headline_bucket") is None,
+      "no headline field and no five-hour window → local minimum, and say it is not five-hour")
+check("buckets.headline_from_broker",
+      (_provs.get("gemini") or {}).get("remaining_percent") == 73.4,
+      "the broker's own headline wins — 0% from a pool it will not route to is "
+      "not this provider's number")
+check("buckets.routable_pool_carried",
+      (_provs.get("gemini") or {}).get("routable_pool") == "gemini",
+      "the panel has to be able to say which pool the figure came from")
+check("buckets.routable_pool_none_for_single_pool",
+      (_provs.get("claude") or {}).get("routable_pool") is None,
+      "one pool means the figure is the provider as a whole")
+
+# V4.130.0 — the panel reads the FIVE-HOUR window for every provider. The
+# broker's headline is the tightest window it can see, so the bars used to change
+# meaning between providers and between days: on 2026-08-14 claude drew 45% from
+# `weekly.fable` — one model's weekly pool — while the five-hour window it was
+# actually spending sat at 8%. The two assertions above are the untouched half:
+# that fixture has no five-hour window, so the broker's figure stands.
+def _snapshot_with(payload, model="claude"):
+    saved = broker_gate.broker_client
+    try:
+        broker_gate.broker_client = lambda cfg=None: _StatusOnlyClient(payload)
+        return (broker_gate.quota_snapshot({}).get("providers") or {}).get(model) or {}
+    finally:
+        broker_gate.broker_client = saved
+
+
+def _claude_fixture(session_remaining: float) -> dict:
+    """claude's real shape: two weekly pools, and a five-hour one called
+    `session` — the name is the only thing marking it as the short window."""
+    return {"hard_reserve_percent": 20.0, "providers": [
+        {"info": {"id": "claude"}, "authenticated": True, "remaining_percent": 55.0,
+         "snapshot": {"plan": None, "buckets": {
+             "weekly.fable": {"remaining_percent": 55.0, "used_percent": 45.0,
+                              "label": "Fable"},
+             "weekly.all_models": {"remaining_percent": 73.0, "used_percent": 27.0,
+                                   "label": "allmodels"},
+             "session": {"remaining_percent": session_remaining,
+                         "used_percent": 100 - session_remaining, "label": "session"},
+         }}},
+    ]}
+
+
+_five_hour = _snapshot_with(_claude_fixture(92.0))
+check("buckets.headline_is_five_hour_window",
+      _five_hour.get("remaining_percent") == 92.0,
+      f"got {_five_hour.get('remaining_percent')} — the bar reads the five-hour "
+      "window, not whichever pool happens to be tightest")
+check("buckets.headline_bucket_named",
+      _five_hour.get("headline_bucket") == "session",
+      "the panel has to be able to say which window the number came from")
+check("buckets.routable_pool_untouched_by_headline",
+      _five_hour.get("headline_bucket") is not None
+      and _five_hour.get("routable_pool") is None,
+      "routable_pool stays the broker's routing fact — the window the panel reads "
+      "is a separate question and has its own field")
+check("buckets.other_windows_still_listed",
+      {"weekly.fable", "weekly.all_models"} <= {b["name"] for b in _five_hour.get("buckets", [])},
+      "the weekly windows belong in the hover card — passed over for the headline, not dropped")
+
+# The five-hour window wins even when a weekly pool is far tighter: this is a
+# fixed window, not a minimum. Without this the rule degenerates back to "worst".
+_tight_weekly = _snapshot_with(_claude_fixture(96.0))
+check("buckets.five_hour_wins_over_tighter_weekly",
+      _tight_weekly.get("remaining_percent") == 96.0,
+      f"got {_tight_weekly.get('remaining_percent')} — weekly.fable at 55 must not "
+      "take the headline back")
+
+# agy meters two independent pools, each with its own five-hour window. The one
+# the broker will not route to must not set the number.
+_agy = _snapshot_with({"hard_reserve_percent": 20.0, "providers": [
+    {"info": {"id": "agy"}, "authenticated": True,
+     "remaining_percent": 12.0, "routable_pool": "gemini",
+     "snapshot": {"plan": None, "buckets": {
+         "gemini.five_hour": {"remaining_percent": 88.0, "used_percent": None},
+         "gemini.weekly": {"remaining_percent": 70.0, "used_percent": None},
+         "claude_gpt.five_hour": {"remaining_percent": 12.0, "used_percent": None},
+     }}},
+]}, model="gemini")
+check("buckets.five_hour_respects_routable_pool",
+      _agy.get("remaining_percent") == 88.0 and _agy.get("headline_bucket") == "gemini.five_hour",
+      f"got {_agy.get('remaining_percent')} from {_agy.get('headline_bucket')} — the "
+      "five-hour window of a pool the broker will not route to is not this provider's number")
+
+# codex reports one weekly bucket and no five-hour window. Inventing one is the
+# failure mode this guards: the panel must keep the broker's figure and say so.
+_codex = _snapshot_with({"hard_reserve_percent": 20.0, "providers": [
+    {"info": {"id": "codex"}, "authenticated": True, "remaining_percent": 81.0,
+     "snapshot": {"plan": None, "buckets": {
+         "primary": {"remaining_percent": 81.0, "used_percent": 19.0,
+                     "window_minutes": 10080, "label": "Weekly limit"},
+     }}},
+]}, model="codex")
+check("buckets.no_five_hour_keeps_broker_headline",
+      _codex.get("remaining_percent") == 81.0 and _codex.get("headline_bucket") is None,
+      f"got {_codex.get('remaining_percent')} / {_codex.get('headline_bucket')} — a weekly "
+      "window must not be relabelled as five-hour; null headline_bucket is how the UI says so")
+
+# --- the panel's reading of what the gate passes through ---------------------
+#
+# `cooldown_until` is transported verbatim on purpose (see above), so whether an
+# expired deadline benches a provider is decided in the JS. It is asserted here
+# because this is the file that documents the pass-through, and the two halves
+# only make sense together.
+#
+# V4.130.2: the broker's `providers` row keeps the last deadline after it lapses.
+# `if (info.cooldown_until)` therefore drew claude as 冷卻中 for six hours past
+# its own reset, through four runs the router had already dispatched to it.
+_utils_source = (ROOT / "Dashboard" / "utils.js").read_text(encoding="utf-8")
+check("ui.cooldown_checked_against_now",
+      "Date.parse(info.cooldown_until" in _utils_source
+      and "Date.now()" in _utils_source,
+      "an expired cooldown must not flag a provider as cooling — compare the "
+      "deadline with now, never test the string for truthiness")
+check("ui.cooldown_not_bare_truthy",
+      "if (info.cooldown_until)" not in _utils_source,
+      "a bare truthiness test on the ISO string is the V4.130.2 regression")
 
 if failures:
     print("✗ broker gate contract violated:")

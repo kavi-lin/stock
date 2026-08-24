@@ -51,17 +51,18 @@ async function runEntry(s, btn) {
             return;
         }
         btn.textContent = '⏳ 執行中…';
-        pollUntilIdle(btn);
+        pollUntilIdle(btn, d.id || null);
     } catch (e) {
         btn.textContent = '⚠ ' + String(e).slice(0, 30);
         btn.disabled = false;
     }
 }
 
-function pollUntilIdle(btn) {
+function pollUntilIdle(btn, queueId) {
     const timer = setInterval(async () => {
         try {
-            const r = await fetch('/api/run-protocol/status');
+            const suffix = queueId ? `?queue_id=${encodeURIComponent(queueId)}` : '';
+            const r = await fetch('/api/run-protocol/status' + suffix);
             const d = await r.json();
             if (!d || d.status !== 'running') {
                 clearInterval(timer);

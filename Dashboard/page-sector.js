@@ -1038,7 +1038,7 @@ function renderScanEvents(events) {
 
 async function pollScanStatus() {
     try {
-        const res = await fetch('/api/run-protocol/status');
+        const res = await fetch('/api/run-protocol/status?name=sector');
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const s = await res.json();
         setBannerStatus(s.status);
@@ -1129,7 +1129,13 @@ async function triggerSectorScan() {
 }
 
 async function cancelSectorScan() {
-    try { await fetch('/api/run-protocol/cancel', { method: 'POST' }); }
+    try {
+        const status = await fetch('/api/run-protocol/status?name=sector').then(r => r.json());
+        await fetch('/api/run-protocol/cancel', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ job_id: status.job_id }),
+        });
+    }
     catch (e) { logToUI('cancel error: ' + e.message, 'error'); }
 }
 
@@ -1159,7 +1165,7 @@ document.getElementById('scan-expand-btn')?.addEventListener('click', toggleScan
 // Rule: always show the banner for running; show done/error if ended in the last 5 min.
 (async () => {
     try {
-        const r = await fetch('/api/run-protocol/status');
+        const r = await fetch('/api/run-protocol/status?name=sector');
         const s = await r.json();
         if (s.name && s.name !== 'sector') return;  // banner belongs to another protocol
         const RESUME_TERMINAL_WINDOW_MS = 5 * 60 * 1000;

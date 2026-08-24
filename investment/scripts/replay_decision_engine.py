@@ -49,6 +49,7 @@ from itertools import product
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from decision_engine import apply_decision_cap, run_phase3  # noqa: E402
+from compute_price_framework import compute_forward_validation  # noqa: E402
 # Schema versions live in the validator — importing keeps replay coverage from silently
 # shrinking to zero the next time the export schema is bumped.
 from validate_session_export import V5_VERSIONS as FIVE_LANE_VERSIONS  # noqa: E402
@@ -88,6 +89,13 @@ def _f(x):
 
 def _num(s: str) -> float:
     return float(s.replace("−", "-").replace("–", "-"))
+
+
+def _engine_version_at_least(value, floor):
+    try:
+        return tuple(map(int, str(value).split("."))) >= tuple(map(int, floor.split(".")))
+    except (TypeError, ValueError):
+        return False
 
 
 # ---------------------------------------------------------------------------
@@ -178,10 +186,27 @@ def build_base_input(entry, trade, decision, lanes):
                      "fair_value_confidence": fvs.get("confidence"),
                      "lane_data_quality_low": bool(trade.get("degraded_analysts"))}
 
+    forward = trade.get("forward_validation")
+    if not isinstance(forward, dict) and isinstance(trade.get("valuation_pack"), dict):
+        raw_pack = dict(trade["valuation_pack"])
+        raw_pack["score"] = raw_pack.get("score_before_forward_validation",
+                                           raw_pack.get("score"))
+        forward = compute_forward_validation(
+            raw_pack,
+            trade.get("implied_expectations") or {},
+            trade.get("valuation_archetype_shadow") or {},
+        )
+    replay_scores = dict(lanes["scores"])
+    old_valuation_score = replay_scores.get("valuation")
+    if isinstance(forward, dict) and _f(forward.get("valuation_score_effective")) is not None:
+        replay_scores["valuation"] = _f(forward["valuation_score_effective"])
+
     return {
         "ticker": trade.get("ticker"),
-        "lane_scores": dict(lanes["scores"]),
+        "lane_scores": replay_scores,
         "lane_confidence": dict(lanes["confidence"]),
+        "forward_validation": forward,
+        "_forward_score_changed": old_valuation_score != replay_scores.get("valuation"),
         "structural_shift": {"tier": (cs.get("structural_shift_modulation") or {}).get("tier")},
         "red_team": {
             "verdict": trade.get("red_team_verdict"),
@@ -305,6 +330,8 @@ def replay_trade(entry, trade, decision, reports_dir, tol):
         return row
 
     base, cap_explicit = build_base_input(entry, trade, decision, lanes)
+    row["forward_validation_status"] = (base.get("forward_validation") or {}).get("status")
+    row["forward_score_changed"] = base.pop("_forward_score_changed", False)
     dims, variants = enumerate_unknowns(base, cap_explicit)
     row["unknown_dimensions"] = dims
 
@@ -356,7 +383,13 @@ def replay_trade(entry, trade, decision, reports_dir, tol):
                score_match=score_match, decision_match=decision_match,
                match=bool(score_match and decision_match))
     if not row["match"]:
-        row["triage"] = "rule_version_drift" if era == "pre_v4_70" else "NEEDS_TRIAGE"
+        if era == "pre_v4_70":
+            row["triage"] = "rule_version_drift"
+        elif row["forward_score_changed"] and not _engine_version_at_least(
+                trade.get("decision_engine_version"), "1.1.0"):
+            row["triage"] = "forward_validation_rule_drift"
+        else:
+            row["triage"] = "NEEDS_TRIAGE"
         row["diff_inputs"] = {
             "lane_scores": base["lane_scores"], "lane_confidence": base["lane_confidence"],
             "red_team": base["red_team"], "macro": base["macro"],
@@ -375,7 +408,9 @@ def build_report(rows, tol, as_of):
     cur = [r for r in replayed if r["rule_era"] == "current"]
     old = [r for r in replayed if r["rule_era"] == "pre_v4_70"]
     cur_ok = [r for r in cur if r["match"]]
-    cur_bad = [r for r in cur if not r["match"]]
+    cur_forward_drift = [r for r in cur if r.get("triage") == "forward_validation_rule_drift"]
+    cur_bad = [r for r in cur if not r["match"]
+               and r.get("triage") != "forward_validation_rule_drift"]
     old_ok = [r for r in old if r["match"]]
     old_bad = [r for r in old if not r["match"]]
 
@@ -415,7 +450,8 @@ def build_report(rows, tol, as_of):
           "本 harness 隨新 session 累積自動變成真實 parity gate。")
     else:
         A(f"- match: **{len(cur_ok)}/{len(cur)}**")
-        A(f"- mismatch: **{len(cur_bad)}** → 需逐筆 triage")
+        A(f"- forward-validation rule drift: **{len(cur_forward_drift)}**（1.0.x 歷史資料，預期差異）")
+        A(f"- unexplained mismatch: **{len(cur_bad)}** → 需逐筆 triage")
     A("")
     if cur:
         A("| date | ticker | lane source | stored score | replay score | Δ | stored decision | replay decision | verdict |")
@@ -579,7 +615,8 @@ def main(argv=None) -> int:
             json.dump(rows, fp, ensure_ascii=False, indent=2)
 
     cur_bad = [r for r in rows if r["status"] == "replayed"
-               and r["rule_era"] == "current" and not r["match"]]
+               and r["rule_era"] == "current" and not r["match"]
+               and r.get("triage") != "forward_validation_rule_drift"]
     cur_n = sum(1 for r in rows if r["status"] == "replayed" and r["rule_era"] == "current")
     old_n = sum(1 for r in rows if r["status"] == "replayed" and r["rule_era"] == "pre_v4_70")
     exc_n = sum(1 for r in rows if r["status"] == "excluded")

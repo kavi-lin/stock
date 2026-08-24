@@ -1,23 +1,34 @@
-"""Break-news debate orchestrator (V6 blind-open + strict divergence gate).
+"""Break-news debate orchestrator (V4.132.0 sequential + third-model tie-break).
 
 State machine per item:
     pending_debate ─► debating ─► closed / partial_closed / failed
 
-Round 1: both debaters (Claude=Analyst-A, Gemini=Analyst-B) evaluate the item
-BLIND in parallel — neither sees the other, so divergence is a genuine signal.
-A deterministic gate (0 LLM) then decides whether ONE rebuttal round is worth
-the tokens. V6 tightening (V5 hit max_rounds on 69% of items): the gate
-re-opens only on a TRUE conflict — opposite verdicts or opposite relation
-polarity on the same pair. A confidence gap alone counts only for
-high-priority items and only when ≥ DIVERGENCE_CONF_GAP (default 0.65).
-Max 2 rounds for everyone (4 calls worst case, 2 typical). Items flagged
-`cluster.escalated` get the prior cluster conclusion in the opener prompt and
-argue only the increment.
+The exchange is a turn-taking one, not two parallel monologues:
+
+    round 0  A opens (`opening`)
+    round 0  B answers A point by point (`response`: agree/dispute + reason)
+    round 1  A replies to what B disputed (`rebuttal`: challenge/concede)
+    ─────── only if A refuses to concede ───────
+             C rules on the contested point (`arbiter`)
+
+2 calls when B agrees, 3 when A settles it, 4 when it goes to the arbiter.
+
+Until V4.132.0 round 0 was two BLIND parallel openers, on the theory that
+independence made divergence a genuine signal. Measured on 2026-08-17 it made
+duplication instead: both sides are required to produce a balanced bull/bear
+pack, so each take was individually four-square and the pair said the same
+thing twice — 56 of 58 debates closed in round 1 without a single exchange. The
+gate could not see the disagreement either: it needed both sides to spell the
+same node identically, and over 260 logged debates 26% shared a subject|object
+pair while only 14% were detectable (`theme:x` vs `narrative:x` was enough to
+miss). B now states its disagreement outright, which is what `stated_disputes`
+reads. Items flagged `cluster.escalated` get the prior cluster conclusion in
+the opener prompt and argue only the increment.
 
 Run modes:
   --news-id <id>     Debate a single item (testing)
   --scan             Loop: find pending_debate items, debate them
-  --workers N        Parallel debates (default 1; bounded by BREAK_NEWS_PARALLEL)
+  --workers N        Compatibility flag; broker-governed debates stay serial
 """
 from __future__ import annotations
 
@@ -26,32 +37,52 @@ import json
 import os
 import re
 import sys
-import threading
 import time
-from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
+from scripts.break_news import schema as agent_schema  # noqa: E402
 from scripts.break_news import store, prompts  # noqa: E402
 from scripts.break_news.llm_drivers import (  # noqa: E402, F401
-    run_llm, load_llm_config, break_news_pair, LLMResult)
+    load_llm_config, LLMResult)
 from scripts._shared import broker_gate  # noqa: E402
 from scripts._shared.model_router import run_with_fallback  # noqa: E402
 
 MAX_ROUNDS = int(os.environ.get("BREAK_NEWS_MAX_ROUNDS", "2"))
 MAX_ROUNDS_FUTU = int(os.environ.get("BREAK_NEWS_MAX_ROUNDS_FUTU", "2"))
 THREAD_TIMEOUT_SEC = int(os.environ.get("BREAK_NEWS_THREAD_TIMEOUT_SEC", "480"))
-PARALLEL = int(os.environ.get("BREAK_NEWS_PARALLEL", "2"))
+# Every debate uses the broker's same top-two provider slots. Running two news
+# items concurrently makes them race for those exclusive slots and turns the
+# loser into a zero-latency provider_busy result. Cross-item execution must
+# therefore remain serial.
+PARALLEL = 1
 # Auto-debate stale-pending guard: items older than this stay in pending_debate
 # state but are skipped by scan_and_debate. Surfaced via list_stale_pending()
 # so the UI can offer per-item manual triggers. Prevents queue-flood after a
 # long idle period (e.g. user opens dashboard 10hr later → no auto burst).
 PENDING_MAX_AGE_HOURS = float(os.environ.get("BREAK_NEWS_PENDING_MAX_AGE_HOURS", "2"))
+ORPHAN_STALE_SEC = THREAD_TIMEOUT_SEC + 120
 
 _MODEL_NAMES = {"claude": "Claude", "gemini": "Gemini", "codex": "Codex"}
+
+
+def _roster() -> tuple[list[str], str | None]:
+    """The two debaters plus the tie-breaker, from the broker's live ranking.
+
+    Top two debate; the third is held back and only called when they deadlock
+    (see `_deadlock`). `None` when the broker names fewer than three — a missing
+    arbiter closes the thread as unresolved rather than inventing a third voice
+    the quota system did not offer.
+    """
+    ranked = broker_gate.ranked_models("debate", count=3, cfg=load_llm_config())
+    if ranked is None:
+        raise RuntimeError("quota broker unavailable; debate deferred")
+    if len(ranked) < 2:
+        raise RuntimeError("fewer than two broker providers available; debate deferred")
+    return ranked[:2], (ranked[2] if len(ranked) > 2 else None)
 
 
 def _turn_order() -> list[str]:
@@ -62,31 +93,31 @@ def _turn_order() -> list[str]:
     actually serve *right now*, across both projects that share these
     subscriptions, so it assigns A and B.
 
-    Falls back to the configured pair when the broker cannot answer, or when it
-    names fewer than two: a debate needs two voices to be a debate, and handing
-    back a one-element list here would quietly turn every debate into a
-    monologue. The per-call gate then refuses whichever voice it must, which
-    lands in the existing `single_voice` / `cli_failures` paths rather than in a
-    new one.
+    Returns an empty list when the broker cannot supply two voices. Callers
+    defer the daemon cycle; no configured/local pair may start unleased.
 
-    A and B are symmetric — round 1 is two blind parallel openers — so the order
-    only decides which model is labelled A in the transcript.
+    Since V4.132.0 the order is NOT cosmetic: A opens and B answers A point by
+    point, so the broker's first choice speaks first.
     """
     # `cfg` is passed explicitly: without it `broker_gate` falls back to its own
     # defaults and silently ignores the `broker` block in llm_config.json —
     # including a base_url or an `enabled: false` the operator set there.
     ranked = broker_gate.ranked_models("debate", count=2, cfg=load_llm_config())
-    if ranked is not None and len(ranked) >= 2:
-        return ranked
-    return break_news_pair()
+    return ranked if ranked is not None and len(ranked) >= 2 else []
+
+
+_SIDES = ("A", "B", "C")
 
 
 def _role_for(idx: int, model: str) -> dict:
-    """Role label for the debater at a turn position. Side (A/B) is positional;
-    the model name is appended so the transcript shows who spoke."""
-    side = "A" if idx == 0 else "B"
+    """Role label for the debater at a turn position. Side is positional
+    (A opens, B answers, C arbitrates); the model name is appended so the
+    transcript shows who spoke."""
+    side = _SIDES[idx] if 0 <= idx < len(_SIDES) else "B"
     name = _MODEL_NAMES.get(model, model.title())
-    return {"en": f"Analyst-{side} ({name})", "zh": f"分析師 {side} ({name})"}
+    zh = "裁決者 C" if side == "C" else f"分析師 {side}"
+    en = "Arbiter-C" if side == "C" else f"Analyst-{side}"
+    return {"en": f"{en} ({name})", "zh": f"{zh} ({name})"}
 
 
 def _utc_iso() -> str:
@@ -102,23 +133,34 @@ def _is_done(parsed: dict | None, raw_text: str) -> bool:
 
 
 def _comment_from_result(res: LLMResult, role: str, side: str, round_idx: int,
-                         news_id: str, comment_id_hint: str) -> dict:
+                         news_id: str, comment_id_hint: str,
+                         kind: str | None = None) -> dict:
     parsed = res.parsed
-    if not parsed:
-        # Build a salvage record so downstream merge still has something to chew.
-        snippet = (res.raw_text or res.raw_stdout or "")[:200]
-        parsed = {
-            "commentary": snippet,
-            "entities": {"tickers": [], "sectors": [], "themes": [], "tech_keywords": []},
-            "relations": [],
-            "done": False,
-            "confidence": 0.0,
-            "rationale_short": "parse_failed",
-        }
+    parse_status = res.parse_status
+    schema_errors: list[str] = []
+
+    # A provider envelope can itself be valid JSON.  A non-zero provider exit
+    # must therefore win over parse_status, or quota/auth errors get mistaken
+    # for an analyst payload and leak into the summary.
+    if res.exit_code != 0:
+        schema_errors.append(f"provider exit_code={res.exit_code}")
+        parse_status = "failed"
+        parsed = None
+    elif parse_status != "ok":
+        schema_errors.append(f"response parse_status={parse_status}")
+        parse_status = "schema_failed" if parsed is not None else "failed"
+        parsed = None
+    else:
+        schema_errors = agent_schema.validate_payload(parsed, round_idx, side, kind)
+        if schema_errors:
+            parse_status = "schema_failed"
+            parsed = None
+
     raw_path = ""
-    if res.parse_status != "ok":
-        raw_path = store.write_raw_stdout(news_id, comment_id_hint, res.raw_stdout)
-    return {
+    if parse_status != "ok":
+        raw_path = store.write_raw_stdout(
+            news_id, comment_id_hint, res.raw_stdout or res.raw_text or "")
+    comment = {
         "agent": res.agent,
         "agent_role_label": role,
         "side": side,
@@ -127,9 +169,34 @@ def _comment_from_result(res: LLMResult, role: str, side: str, round_idx: int,
         "latency_ms": res.latency_ms,
         "raw_stdout_path": raw_path,
         "parsed": parsed,
-        "parse_status": res.parse_status,
+        "parse_status": parse_status,
         "exit_code": res.exit_code,
     }
+    if schema_errors:
+        comment["schema_errors"] = schema_errors
+    error = str(res.error or "").strip()
+    route_note = str(getattr(res, "route_note", "") or "").strip()
+    if error:
+        comment["error"] = error[:500]
+    if route_note:
+        comment["route_note"] = route_note[:500]
+    return comment
+
+
+def _comment_failed(comment: dict) -> bool:
+    """A voice only counts when both its process and round schema pass."""
+    return comment.get("exit_code") != 0 or comment.get("parse_status") != "ok"
+
+
+def _broker_deferred(res: LLMResult) -> bool:
+    """True when no provider process ran and a later cycle should retry."""
+    if res.exit_code != -9:
+        return False
+    if res.parse_status == "blocked":
+        return True
+    route_note = str(getattr(res, "route_note", "") or "")
+    error = str(res.error or "")
+    return "blocked(" in route_note or "LLM call blocked" in error
 
 
 def _load_universe_tickers() -> set[str]:
@@ -234,8 +301,67 @@ def _side_verdict(parsed: dict) -> str:
     return "NEUTRAL"
 
 
+def stated_disputes(thread: list[dict]) -> tuple[list[dict], str]:
+    """The disagreements side B actually declared, and a note naming them.
+
+    This replaces predicate-set inference as the primary gate. The old gate
+    could only see a conflict when both sides happened to spell the same node
+    the same way — measured over 260 logged debates, 26% discussed the same
+    subject|object pair but only 14% were detectable, so nearly half of the
+    candidate conflicts were lost to `theme:` vs `narrative:` alone.
+    """
+    latest_b: dict = {}
+    for c in thread:
+        if c.get("side") == "B" and (c.get("parsed") or {}):
+            latest_b = c["parsed"]
+    disputes = [a for a in (latest_b.get("assessments") or [])
+                if isinstance(a, dict) and a.get("verdict") == "dispute"]
+    if not disputes:
+        return [], ""
+    note = "; ".join(
+        f"B disputes {d.get('point')}: {(d.get('reason') or '').strip()}"
+        for d in disputes)
+    return disputes, note
+
+
+def _deadlock(thread: list[dict]) -> tuple[bool, str]:
+    """True when B disputed a point and A's rebuttal did not concede it.
+
+    A missing or unparsed rebuttal is NOT a deadlock: nobody argued the point,
+    so there is nothing for a third model to rule on — that closes as
+    unresolved instead of spending an arbiter call on a gap in the transcript.
+    """
+    disputes, note = stated_disputes(thread)
+    if not disputes:
+        return False, ""
+    rebuttal = None
+    for c in thread:
+        if c.get("side") == "A" and (c.get("round") or 0) >= 1 and (c.get("parsed") or {}):
+            rebuttal = c["parsed"]
+    if rebuttal is None:
+        return False, note
+    if rebuttal.get("stance") == "concede":
+        return False, note
+    return True, note
+
+
+def _strip_ns(node_id) -> str:
+    """`theme:climate_change` and `narrative:climate-change` → `climate_change`.
+
+    Namespace choice is a labelling accident, not a claim about the world, so it
+    must not decide whether two sides are talking about the same thing.
+    """
+    tail = str(node_id or "").split(":", 1)[-1]
+    return tail.strip().lower().replace("-", "_")
+
+
 def divergence_gate(thread: list[dict], is_high: bool = False) -> tuple[bool, str]:
     """Deterministic (0 LLM) check: is a rebuttal round worth the tokens?
+
+    Secondary since V4.132.0: `stated_disputes` is the primary signal now, and
+    this remains for the relabel pass and for threads whose side B produced no
+    assessments. Node IDs are compared with the namespace stripped, so
+    `theme:x` and `narrative:x` no longer read as two different subjects.
 
     V6 strict mode: divergent ONLY on a true conflict — opposite verdicts, or
     conflicting relation polarity on the same subject|object pair. A
@@ -270,7 +396,8 @@ def divergence_gate(thread: list[dict], is_high: bool = False) -> tuple[bool, st
             pred = r.get("predicate")
             sign = "+" if pred in _POS_PREDS else "-" if pred in _NEG_PREDS else None
             if sign:
-                m.setdefault(f"{r.get('subject')}|{r.get('object')}", set()).add(sign)
+                key = f"{_strip_ns(r.get('subject'))}|{_strip_ns(r.get('object'))}"
+                m.setdefault(key, set()).add(sign)
         return m
 
     pa, pb = _polarity(a), _polarity(b)
@@ -323,6 +450,32 @@ def _low_relation_density(thread: list[dict], item: dict) -> bool:
 def debate_item(news_id: str, max_rounds: int = MAX_ROUNDS,
                 wall_timeout: int = THREAD_TIMEOUT_SEC,
                 verbose: bool = False) -> dict:
+    """Run one debate and fail back to the queue on an unexpected exception."""
+    try:
+        return _debate_item(news_id, max_rounds, wall_timeout, verbose)
+    except Exception as exc:  # noqa: BLE001 - daemon boundary must restore state
+        reason = f"debate worker exception: {type(exc).__name__}: {exc}"
+        try:
+            store.set_state(
+                news_id,
+                "pending_debate",
+                summary=None,
+                deferred_reason=reason[:500],
+                last_deferred_at=_utc_iso(),
+            )
+            store.push_error(news_id, "debate_item", reason)
+        except Exception:
+            pass
+        return {
+            "ok": False,
+            "deferred": True,
+            "news_id": news_id,
+            "error": reason,
+        }
+
+
+def _debate_item(news_id: str, max_rounds: int,
+                 wall_timeout: int, verbose: bool) -> dict:
     item = store.load_item(news_id)
     if item is None:
         return {"ok": False, "error": f"unknown news_id={news_id}"}
@@ -337,123 +490,190 @@ def debate_item(news_id: str, max_rounds: int = MAX_ROUNDS,
     if (item.get("source") or {}).get("name") == "Futu Push" and max_rounds == MAX_ROUNDS:
         max_rounds = min(max_rounds, MAX_ROUNDS_FUTU)
 
+    # A re-debate starts clean: the abandoned run's turns are kept as evidence
+    # under `retired_threads`, but they must not reach this run's summary.
+    retired = store.retire_thread(news_id)
+    if retired:
+        if verbose:
+            print(f"[{news_id}] retired {retired} turn(s) from the previous attempt")
+        # `item` was read before the retirement, so its thread is now stale —
+        # and it is the fallback every `store.load_item(...) or item` falls back to.
+        item = store.load_item(news_id) or item
+
     store.set_state(news_id, "debating")
 
-    turn_order = _turn_order()
+    try:
+        turn_order, arbiter_model = _roster()
+    except RuntimeError as exc:
+        reason = str(exc)
+        store.set_state(
+            news_id,
+            "pending_debate",
+            summary=None,
+            deferred_reason=reason[:500],
+            last_deferred_at=_utc_iso(),
+        )
+        return {"ok": False, "deferred": True, "error": reason}
     t0 = time.time()
-    consecutive_failures = {m: 0 for m in turn_order}
-    last_done = {m: False for m in turn_order}
     close_reason = "max_rounds"
     state_final = "closed"
     div_note = ""
+    a_agent, b_agent = turn_order[0], turn_order[1]
 
-    # ── Round 1: blind parallel openers ─────────────────────────────────
-    def _opener_call(idx_agent: tuple[int, str]):
-        idx, agent = idx_agent
-        usr_p = prompts.opener_user_prompt(item, _role_for(idx, agent))
-        if verbose:
-            print(f"[{news_id}] round=0 agent={agent} (blind) prompt_len={len(usr_p)}")
-        return idx, agent, run_with_fallback(agent, "debate", prompts.SYSTEM_PROMPT, usr_p)
-
-    with ThreadPoolExecutor(max_workers=len(turn_order)) as ex:
-        opener_results = sorted(ex.map(_opener_call, enumerate(turn_order)))
-
-    opener_failures = 0
-    for idx, agent, res in opener_results:
-        actual = getattr(res, "model_used", res.agent) or agent
-        side = "A" if idx == 0 else "B"
-        comment = _comment_from_result(res, _role_for(idx, actual), side, 0,
-                                       news_id, f"c{idx}")
+    def _record(res: LLMResult, idx: int, side: str, round_idx: int, where: str,
+                kind: str | None = None) -> dict:
+        """Append one turn to the thread and report whether it counted."""
+        actual = getattr(res, "model_used", res.agent) or turn_order[min(idx, 1)]
+        thread_len = len((store.load_item(news_id) or {}).get("thread") or [])
+        comment = _comment_from_result(res, _role_for(idx, actual), side, round_idx,
+                                       news_id, f"c{thread_len}", kind)
         store.append_comment(news_id, comment)
-        if res.exit_code != 0:
-            opener_failures += 1
-            consecutive_failures[agent] += 1
-            store.push_error(news_id, f"round0.{agent}",
-                             f"rc={res.exit_code} err={res.error}")
-        last_done[agent] = _is_done(res.parsed, res.raw_text)
+        if _comment_failed(comment):
+            detail = str(getattr(res, "route_note", "") or res.error or "").strip()
+            detail_suffix = f" detail={detail[:300]}" if detail else ""
+            store.push_error(news_id, where,
+                             f"rc={res.exit_code} parse={comment['parse_status']} "
+                             f"schema={'; '.join(comment.get('schema_errors') or [])}"
+                             f"{detail_suffix}")
         if verbose:
-            print(f"  agent={agent} done={last_done[agent]} "
-                  f"parse_status={res.parse_status} rc={res.exit_code}")
+            print(f"  {where} parse_status={comment['parse_status']} rc={res.exit_code}")
+        return comment
+
+    def _defer_if_blocked(res: LLMResult, where: str) -> dict | None:
+        if not _broker_deferred(res):
+            return None
+        reason = str(getattr(res, "route_note", "") or res.error or "broker blocked")
+        store.set_state(
+            news_id,
+            "pending_debate",
+            summary=None,
+            deferred_reason=reason[:500],
+            last_deferred_at=_utc_iso(),
+        )
+        return {
+            "ok": False,
+            "deferred": True,
+            "news_id": news_id,
+            "where": where,
+            "error": reason,
+        }
+
+    # ── Round 0, turn 1: A opens ────────────────────────────────────────
+    usr_p = prompts.opener_user_prompt(item, _role_for(0, a_agent))
+    if verbose:
+        print(f"[{news_id}] round=0 A={a_agent} opener prompt_len={len(usr_p)}")
+    res_a = run_with_fallback(a_agent, "debate", prompts.SYSTEM_PROMPT, usr_p)
+    comment_a = _record(res_a, 0, "A", 0, f"round0.{a_agent}")
+    if deferred := _defer_if_blocked(res_a, f"round0.{a_agent}"):
+        return deferred
+    a_ok = not _comment_failed(comment_a)
+
+    # ── Round 0, turn 2: B answers A point by point ─────────────────────
+    # With A down there is nothing to answer, so B falls back to a blind opener:
+    # a salvaged single take still carries entities for the graph, where a
+    # `response` payload with no opener to reference would be meaningless.
+    if a_ok:
+        usr_p = prompts.responder_user_prompt(item, comment_a["parsed"],
+                                              _role_for(1, b_agent))
+        sys_p, kind_b = prompts.RESPONDER_SYSTEM_PROMPT, "response"
+    else:
+        usr_p = prompts.opener_user_prompt(item, _role_for(1, b_agent))
+        sys_p, kind_b = prompts.SYSTEM_PROMPT, "opening"
+    if verbose:
+        print(f"[{news_id}] round=0 B={b_agent} {kind_b} prompt_len={len(usr_p)}")
+    res_b = run_with_fallback(b_agent, "debate", sys_p, usr_p)
+    comment_b = _record(res_b, 1, "B", 0, f"round0.{b_agent}", kind_b)
+    if deferred := _defer_if_blocked(res_b, f"round0.{b_agent}"):
+        return deferred
+    b_ok = not _comment_failed(comment_b)
     rounds_completed = 1
 
-    if opener_failures == len(turn_order):
+    if not a_ok and not b_ok:
         close_reason = "cli_failures"
         state_final = "failed"
-    elif opener_failures > 0:
-        # One voice down → no real debate possible. Close on the healthy
-        # opener instead of burning rebuttal calls against a salvage record.
+    elif not (a_ok and b_ok):
+        # One voice down → no exchange happened. Close on the healthy turn
+        # instead of burning a rebuttal call against a salvage record.
         close_reason = "single_voice"
         state_final = "partial_closed"
 
-    # ── Rounds 2+: divergence-gated slim rebuttals ──────────────────────
-    for r in range(1, max_rounds):
-        if state_final != "closed":
-            break
-        if all(last_done[m] for m in turn_order):
-            close_reason = "both_done"
-            break
-
+    # ── Round 1: A answers only what B actually disputed ────────────────
+    if state_final == "closed":
         thread = (store.load_item(news_id) or item).get("thread") or []
-        if not is_high and _low_relation_density(thread, item):
-            close_reason = "early_stop_low_relation_density"
-            break
-
-        divergent, div_note = divergence_gate(thread, is_high)
-        if not divergent:
-            close_reason = "converged_round1" if r == 1 else "divergence_resolved"
-            break
-
-        for idx, agent in enumerate(turn_order):
-            if time.time() - t0 > wall_timeout:
+        disputes, div_note = stated_disputes(thread)
+        if _is_done(comment_b.get("parsed"), res_b.raw_text) and not disputes:
+            close_reason = "both_done"
+        elif not disputes:
+            # B agreed with every point and added nothing to argue about. Fall
+            # back to the relation-polarity gate: B may still have contradicted
+            # A in the graph without flagging it as a dispute.
+            divergent, div_note = divergence_gate(thread, is_high)
+            if not divergent:
+                close_reason = "converged_round1"
+        if close_reason == "max_rounds" and max_rounds > 1:
+            if not is_high and _low_relation_density(thread, item):
+                # Noise with no tradeable node — the dispute may be real but
+                # there is nothing to trade on either side of it.
+                close_reason = "early_stop_low_relation_density"
+            elif time.time() - t0 > wall_timeout:
                 close_reason = "timeout"
                 state_final = "partial_closed"
-                break
-            role = _role_for(idx, agent)
-            side = "A" if idx == 0 else "B"
-            thread = (store.load_item(news_id) or item).get("thread") or []
-            usr_p = prompts.rebuttal_user_prompt(item, thread, role, side, div_note)
-            if verbose:
-                print(f"[{news_id}] round={r} agent={agent} rebuttal "
-                      f"prompt_len={len(usr_p)}")
-            res = run_with_fallback(agent, "debate",
-                                    prompts.REBUTTAL_SYSTEM_PROMPT, usr_p)
-            actual = getattr(res, "model_used", res.agent) or agent
-            if actual != agent:
-                role = _role_for(idx, actual)
-            comment = _comment_from_result(res, role, side, r, news_id,
-                                           f"c{len(thread)}")
-            store.append_comment(news_id, comment)
-
-            if res.exit_code != 0:
-                consecutive_failures[agent] += 1
-                store.push_error(news_id, f"round{r}.{agent}",
-                                 f"rc={res.exit_code} err={res.error}")
-                if consecutive_failures[agent] >= 2:
-                    close_reason = "cli_failures"
-                    state_final = "failed"
-                    break
             else:
-                consecutive_failures[agent] = 0
+                role = _role_for(0, a_agent)
+                usr_p = prompts.rebuttal_user_prompt(item, thread, role, "A", div_note)
+                if verbose:
+                    print(f"[{news_id}] round=1 A={a_agent} rebuttal "
+                          f"prompt_len={len(usr_p)}")
+                res = run_with_fallback(a_agent, "debate",
+                                        prompts.REBUTTAL_SYSTEM_PROMPT, usr_p)
+                comment_r = _record(res, 0, "A", 1, f"round1.{a_agent}")
+                if deferred := _defer_if_blocked(res, f"round1.{a_agent}"):
+                    return deferred
+                if _comment_failed(comment_r):
+                    close_reason = "invalid_rebuttal"
+                    state_final = "partial_closed"
+                else:
+                    rounds_completed = 2
+                    if (comment_r.get("parsed") or {}).get("stance") == "concede":
+                        close_reason = "divergence_resolved"
 
-            last_done[agent] = _is_done(res.parsed, res.raw_text)
+    # ── Tie-break: a third model rules on what A would not concede ──────
+    if state_final == "closed" and close_reason in ("max_rounds", "invalid_rebuttal"):
+        thread = (store.load_item(news_id) or item).get("thread") or []
+        deadlocked, contested = _deadlock(thread)
+        if not deadlocked:
+            close_reason = "divergence_resolved"
+        elif arbiter_model is None:
+            close_reason = "unresolved_no_arbiter"
+        elif time.time() - t0 > wall_timeout:
+            close_reason = "unresolved_timeout"
+            state_final = "partial_closed"
+        else:
+            usr_p = prompts.arbiter_user_prompt(item, thread, contested)
             if verbose:
-                print(f"  done={last_done[agent]} parse_status={res.parse_status} "
-                      f"rc={res.exit_code}")
-
-        rounds_completed = r + 1
+                print(f"[{news_id}] arbiter={arbiter_model} prompt_len={len(usr_p)}")
+            res = run_with_fallback(arbiter_model, "debate",
+                                    prompts.ARBITER_SYSTEM_PROMPT, usr_p)
+            comment_c = _record(res, 2, "C", rounds_completed,
+                                f"arbiter.{arbiter_model}", "arbiter")
+            if deferred := _defer_if_blocked(res, f"arbiter.{arbiter_model}"):
+                return deferred
+            if _comment_failed(comment_c):
+                close_reason = "arbiter_failed"
+                state_final = "partial_closed"
+            else:
+                close_reason = "arbitrated"
+            div_note = contested
 
     final_thread = (store.load_item(news_id) or {}).get("thread") or []
 
-    # Relabel when the loop exhausted max_rounds but the last rebuttal round
-    # actually resolved the conflict (concession / convergence).
-    if state_final == "closed" and close_reason == "max_rounds":
-        still_divergent, note = divergence_gate(final_thread, is_high)
-        if not still_divergent:
-            close_reason = "divergence_resolved"
-        div_note = note if still_divergent else div_note
     summary = prompts.build_summary_block(final_thread)
+    summary["blind_openers"] = False
+    summary["arbiter_model"] = arbiter_model
+    summary["stated_dispute_count"] = len(stated_disputes(final_thread)[0])
     summary["rounds_completed"] = rounds_completed
     summary["closed_at"] = _utc_iso()
+    summary["agent_payload_schema_version"] = agent_schema.AGENT_PAYLOAD_SCHEMA_VERSION
     summary["close_reason"] = close_reason
     summary["divergence_note"] = _divergence_note(final_thread)
     summary["divergence_gate_note"] = div_note
@@ -532,6 +752,44 @@ def scan_pending(max_items: int = 100, include_stale: bool = False) -> list[str]
     return out
 
 
+def recover_orphaned_debates(now_utc: datetime | None = None) -> list[str]:
+    """Return abandoned `debating` items to the retry queue.
+
+    The server serializes every debate entry point with one dispatch lock, so a
+    debating item older than the per-thread wall timeout plus a two-minute
+    grace period cannot belong to the scan that is about to start. This catches
+    server restarts and unexpected worker exits without touching terminal
+    partial/failed history.
+    """
+    now_utc = now_utc or datetime.now(timezone.utc)
+    cutoff = now_utc - timedelta(seconds=ORPHAN_STALE_SEC)
+    recovered: list[str] = []
+    for path in sorted(store.STORE_DIR.glob("bn_*.json")):
+        try:
+            with open(path, "r", encoding="utf-8") as handle:
+                item = json.load(handle)
+        except (OSError, json.JSONDecodeError):
+            continue
+        if item.get("state") != "debating":
+            continue
+        activity = _parse_iso_utc(item.get("last_activity_ts") or item.get("fetched_at"))
+        if activity is not None and activity > cutoff:
+            continue
+        news_id = str(item.get("news_id") or "")
+        if not news_id:
+            continue
+        reason = f"orphaned debating state recovered after {ORPHAN_STALE_SEC}s"
+        store.set_state(
+            news_id,
+            "pending_debate",
+            summary=None,
+            deferred_reason=reason,
+            last_deferred_at=_utc_iso(),
+        )
+        recovered.append(news_id)
+    return recovered
+
+
 def list_stale_pending() -> list[dict]:
     """Summaries of pending_debate items past PENDING_MAX_AGE_HOURS.
 
@@ -572,46 +830,50 @@ def list_stale_pending() -> list[dict]:
 
 
 def scan_and_debate(workers: int = PARALLEL, verbose: bool = False) -> dict:
+    recover_orphaned_debates()
     ids = scan_pending()
     if not ids:
         return {"ok": True, "items_processed": 0, "ids": []}
     completed = 0
     failed = 0
+    deferred = 0
     started = _utc_iso()
     store.update_state("debater", {
         "scan_started_at": started, "queue_depth": len(ids), "in_flight": [],
     })
 
-    lock = threading.Lock()
     in_flight: set[str] = set()
 
     def _worker(nid: str) -> dict:
-        with lock:
-            in_flight.add(nid)
-            store.update_state("debater", {"in_flight": sorted(in_flight)})
+        in_flight.add(nid)
+        store.update_state("debater", {"in_flight": sorted(in_flight)})
         try:
             return debate_item(nid, verbose=verbose)
         finally:
-            with lock:
-                in_flight.discard(nid)
-                store.update_state("debater", {"in_flight": sorted(in_flight)})
+            in_flight.discard(nid)
+            store.update_state("debater", {"in_flight": sorted(in_flight)})
 
-    workers = max(1, min(workers, PARALLEL))
-    with ThreadPoolExecutor(max_workers=workers) as ex:
-        for res in ex.map(_worker, ids):
-            if res.get("ok") and res.get("state") in ("closed", "partial_closed"):
-                completed += 1
-            else:
-                failed += 1
+    # `workers` remains in the public CLI/API for compatibility, but exclusive
+    # provider slots make values above one unsafe for a fixed two-model roster.
+    for nid in ids:
+        res = _worker(nid)
+        if res.get("deferred"):
+            deferred += 1
+        elif res.get("ok") and res.get("state") in ("closed", "partial_closed"):
+            completed += 1
+        else:
+            failed += 1
 
     store.update_state("debater", {
         "scan_ended_at": _utc_iso(),
         "completed_in_scan": completed,
         "failed_in_scan": failed,
+        "deferred_in_scan": deferred,
         "queue_depth": 0,
     })
     return {"ok": True, "items_processed": len(ids),
-            "completed": completed, "failed": failed, "ids": ids}
+            "completed": completed, "failed": failed, "deferred": deferred,
+            "ids": ids}
 
 
 def main() -> int:

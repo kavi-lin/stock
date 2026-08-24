@@ -1699,6 +1699,36 @@ def extract_audit_history(positions_by_ticker=None):
                     has_live_position
                 )
 
+                # V5.4 — LLM model provenance extraction
+                llm_model = (
+                    meta.get("llm_model") or meta.get("llm_provider") or meta.get("model") or meta.get("llm")
+                    or item.get("llm_model") or item.get("llm_provider") or item.get("model") or item.get("llm")
+                    or (item.get("export_provenance") or {}).get("llm")
+                )
+                if not llm_model and report_path:
+                    try:
+                        rep_full = os.path.join(BASE_DIR, report_path)
+                        if os.path.exists(rep_full):
+                            with open(rep_full, 'r', errors='ignore') as rf:
+                                rep_head = rf.read(1200)
+                            m_eng = re.search(r'執行引擎[：:]\s*\*\*([^\*]+)\*\*', rep_head)
+                            if m_eng:
+                                llm_model = m_eng.group(1).strip()
+                    except Exception:
+                        pass
+                if not llm_model:
+                    bn = str(item.get("bias_notes") or "").lower()
+                    if "gemini" in bn:
+                        llm_model = "gemini"
+                    elif "codex" in bn:
+                        llm_model = "codex"
+                    elif "gpt" in bn:
+                        llm_model = "gpt-4o"
+                    elif "deepseek" in bn:
+                        llm_model = "deepseek"
+                    else:
+                        llm_model = "claude"
+
                 audits.append({
                     "ticker":           ticker,
                     "decision":         decision,
@@ -1708,6 +1738,7 @@ def extract_audit_history(positions_by_ticker=None):
                     "report_url":       report_path,
                     "profile_image":    _read_logo_url(ticker),
                     "performance":      perf,
+                    "llm_model":        llm_model,
                     "targets":          {
                         "tp": tp, "sl": sl, "watch": watch,
                         "entry": entry_display,

@@ -4,11 +4,14 @@
 純 stdlib、零網路：直接以 fixture inputs dict 呼叫純函數（load_inputs 不碰）。
 Run: python3 skills/valuation-modeler/tests/test_dcf.py   # rc=0 全過 / rc=1 fail
 """
+import contextlib
+import io
 import json
 import os
 import sys
 from copy import deepcopy
 from pathlib import Path
+from unittest import mock
 
 TESTS_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(os.path.dirname(TESTS_DIR), "scripts"))
@@ -140,6 +143,36 @@ eq("dcf.negative_terminal_null", R7["fair_value_per_share"], None)
 eq("dcf.negative_terminal_ineligible", R7["model_eligibility"]["eligible"], False)
 eq("dcf.negative_terminal_reason", R7["model_eligibility"]["reason"],
    "negative_terminal_fcff")
+
+# CLI contract: a completed calculation with an ineligible anchor is rc=0 so
+# the investment protocol can exclude that anchor and continue.  Invalid
+# overrides remain a genuine invocation failure (rc=1).
+CLI_INELIGIBLE = {
+    "ticker": "AAOI",
+    "fair_value_per_share": None,
+    "current_price": 150.28,
+    "upside_pct": None,
+    "model_eligibility": {"eligible": False, "reason": "negative_terminal_fcff"},
+    "override_errors": [],
+    "degraded": True,
+}
+with (mock.patch.object(dcf, "build_payload", return_value=CLI_INELIGIBLE),
+      mock.patch.object(dcf.Path, "write_text", return_value=None),
+      mock.patch.object(sys, "argv", ["dcf.py", "AAOI", "--json-only"]),
+      contextlib.redirect_stdout(io.StringIO())):
+    try:
+        dcf.main()
+    except SystemExit as exc:
+        eq("cli.ineligible_rc", exc.code, 0)
+
+CLI_BAD_OVERRIDE = dict(CLI_INELIGIBLE, override_errors=["unknown override"])
+with (mock.patch.object(dcf, "build_payload", return_value=CLI_BAD_OVERRIDE),
+      mock.patch.object(sys, "argv", ["dcf.py", "AAOI", "--json-only"]),
+      contextlib.redirect_stderr(io.StringIO())):
+    try:
+        dcf.main()
+    except SystemExit as exc:
+        eq("cli.bad_override_rc", exc.code, 1)
 
 # ── sensitivity ───────────────────────────────────────────────────────────
 S = dcf.sensitivity_grid(A, INPUTS, R)

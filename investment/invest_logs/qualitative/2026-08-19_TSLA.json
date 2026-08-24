@@ -1,0 +1,201 @@
+{
+  "schema": "p5-qualitative/1.0",
+  "ticker": "TSLA",
+  "date": "2026-08-19",
+  "lanes": {
+    "fundamentals": {
+      "signal": "HOLD",
+      "key_factors": [
+        "Extreme valuation multiple vs peers",
+        "Pristine balance sheet with B cash",
+        "Revenue accelerating despite margin pressure"
+      ],
+      "risk_flags": [
+        "Negative FCF margin from high CapEx",
+        "Severe valuation premium PEG over 23"
+      ]
+    },
+    "sentiment": {
+      "signal": "HOLD",
+      "key_factors": [
+        "Market sentiment in Greed territory (64.8)",
+        "Low short interest float at 1.94%",
+        "Active insider distribution in recent quarters"
+      ],
+      "risk_flags": [
+        "Persistent insider net selling pressure",
+        "Executive compensation YoY surge flag"
+      ]
+    },
+    "news": {
+      "signal": "HOLD",
+      "key_factors": [
+        "500 Tesla Semi commercial deal with Einride",
+        "Cybercab employee testing underway in Austin",
+        "Sell-side 1-month PT momentum slightly downward"
+      ],
+      "risk_flags": [
+        "High P/E multiple facing bond yield headwinds",
+        "Execution timeline risks on unsupervised robotaxi scaling"
+      ]
+    },
+    "technical": {
+      "signal": "HOLD",
+      "key_factors": [
+        "Reclaimed 20MA in Stage 1 base",
+        "Below 50MA and 200MA overhead resistance",
+        "Light volume with falling MACD histogram"
+      ],
+      "risk_flags": [
+        "Heavy overhead resistance at 50MA (.42)",
+        "Insider distribution trend (ratio 0.20)"
+      ]
+    },
+    "valuation": {
+      "signal": "HOLD",
+      "key_factors": [
+        "extreme backward DCF gap",
+        "sell-side PT at ",
+        "forward revenue path active"
+      ],
+      "risk_flags": [
+        "valuation multiple compression",
+        "high execution expectations"
+      ]
+    }
+  },
+  "lane_detail": {
+    "fundamentals": {
+      "moat_assessment": {
+        "level": "WIDE",
+        "type": "scale_economies",
+        "evidence_one_line": "Leading global EV charging network, manufacturing scale, and proprietary fleet telemetry."
+      },
+      "near_term_catalysts": [
+        {
+          "date": "2026-10-20",
+          "type": "earnings",
+          "description": "Q3 2026 earnings release and automotive gross margin update",
+          "impact": "high"
+        },
+        {
+          "date": "2026-10-02",
+          "type": "guidance",
+          "description": "Q3 2026 vehicle delivery and energy storage deployment numbers",
+          "impact": "high"
+        },
+        {
+          "date": "2026-09-15",
+          "type": "product_launch",
+          "description": "Next-generation FSD rollout and Robotaxi commercialization milestones",
+          "impact": "medium"
+        }
+      ],
+      "bull_thesis_one_line": "Revenue re-accelerated +25.5% YoY supported by .2B net cash and expanding energy storage segment.",
+      "bear_thesis_one_line": "Extreme valuation at 352.8x P/E (peer median 24.4x) alongside -3.87% FCF margin and -56.9% operating YoY."
+    },
+    "sentiment": {
+      "insider_signal": "distributing",
+      "short_pct_float": 1.94,
+      "mspr_latest": -2.8
+    },
+    "news": {
+      "pt_revision_momentum": {
+        "direction": "DOWN",
+        "consensus_delta_pct_1m": -1.62
+      },
+      "immediate_catalyst_5d": {
+        "event": "Austin Cybercab employee fleet pilot milestone updates",
+        "date": "2026-08-24",
+        "direction_lean": "BULLISH",
+        "expected_move_pct": 3.0
+      },
+      "decision_point_days": 21,
+      "cross_asset_spillover": [
+        {
+          "asset": "RIVN",
+          "direction": "BEARISH",
+          "mechanism": "Tesla Semi commercial wins and FSD benchmark lead increase EV competitor market pressure"
+        }
+      ],
+      "reasoning_one_line": "Strong operational momentum from Einride 500-Semi deal and Austin Cybercab rollout is balanced by slight 1-month sell-side PT downward revisions and valuation scrutiny."
+    },
+    "technical": {
+      "smart_money_analysis": {
+        "label": "distributing",
+        "narrative": "Insider selling dominates with a 0.20 acquired/disposed ratio, while institutional volume remains subdued at 0.70x 20D average without accumulation spikes."
+      },
+      "pattern_taxonomy": {
+        "pattern": "consolidation",
+        "confirmation_criteria": "A daily close above .26 swing resistance on >1.5x average volume to confirm breakout towards 50MA (.42)."
+      },
+      "market_strength": "NEUTRAL",
+      "key_levels": {
+        "support": 323.64,
+        "resistance": 351.26,
+        "pivot": 336.17
+      },
+      "high_prob_scenario": "TSLA is likely to range-bind between .64 support and .26 resistance until a high-volume break of .26 tests the 50MA at .42.",
+      "volatility": {
+        "atr_14": 10.86,
+        "hist_vol_20d_daily": 0.0385,
+        "momentum_20d_pct": -11.1
+      }
+    },
+    "valuation": {
+      "valuation_commentary": "TSLA 估值呈現極端二元分歧：歷史現金流折現錨點（.95 - .83）與同業倍數（.83 - .30）大幅落後於現價 .87 與賣方目標價 .08。然而，前瞻驗證機制（forward_validation）確認其營收擴張路徑（CAGR 26.16%）符合賣方前瞻預估範疇（CAGR 23.81% + 5pp），成功將原始 -3.0 估值分數軟化至 -1.0，既反映業務結構性轉型潛力，亦維持對高估值倍數收縮的嚴格警惕。",
+      "cited_transition_overlay": true,
+      "transition_dissent_basis": "valuation_anchor"
+    }
+  },
+  "red_team": {
+    "verdict": "STRONG_COUNTER",
+    "counter_evidence_strength": 5,
+    "thesis_break_probability": 0.85,
+    "counter_thesis": "當前 HOLD 平衡論點嚴重低估了基本面崩化與極端估值之間的結構性矛盾；在 10 年期實質利率高達 2.41% 的高壓環境下，市場定價隱含著無法實現的 60% FCF CAGR 與 26.16% 營收 CAGR，而本業營益年減 56.9%、FCF 利潤率為負 (-3.87%) 的現實將迅速戳破中性觀望的平衡幻覺。",
+    "kill_conditions": [
+      "IF 未來 2 季 (180 天內) FCF 年化增速低於 30% 或營收年化增速低於 26% THEN 現價 .87 內含的 60% FCF CAGR 成長路徑完全破裂，迫使估值向加權公允價值 .95 進行劇烈均值修正",
+      "IF 10年期實質利率 (Real 10Y Rate) 持續維持在 2.41% 以上且 10年期美債殖利率 (10Y Yield) 維持在 4.63% 高位或突破 4.75% WITHIN 90 天 THEN 352.8x P/E 與 121x EV/EBIT 的極端倍數將面臨無可避免的折現率重估，徹底粉碎支撐 HOLD 的估值寬容度",
+      "IF 營業利益年增率 (Operating YoY) 連續 2 季維持負增長或 FCF Margin 無法轉正 WITHIN 180 天 THEN 市場將無法維持 AI/Robotaxi 敘事溢價，本業汽車獲利衰退的事實將直接推翻目前平衡/持有的共識基礎"
+    ]
+  },
+  "burry_narrative": "Burry 評分 33.7 (WARNING)：EV/EBIT 121.2x，FCF 收益率僅 0.4%，距 52 週高點回檔 31.2%，內部人持續淨賣出，估值與現金流表現偏向脆弱。",
+  "conflict_bias": {
+    "schema": "conflict_bias.v1",
+    "tentative_decision": "HOLD",
+    "lane_signals": {
+      "fundamentals": "HOLD",
+      "sentiment": "HOLD",
+      "news": "HOLD",
+      "technical": "HOLD",
+      "valuation": "HOLD"
+    },
+    "triggers_fired": [],
+    "conflict_summary": "五大分析維度全數指向 HOLD 中性觀望，未觸發 T1-T5 衝突仲裁",
+    "t4_detail": null,
+    "t5_detail": null,
+    "proceed_to_phase3": true
+  },
+  "macro_context": "大盤處於 RISK_ON 體制（Soft Landing），寬度健康且 FTD 確認（第 9 天），市場整體風險偏好良好；但 10 年期實質利率達 2.41% 偏高，持續對 TSLA 等超高本益比成長股構成折現率估值壓力。",
+  "watch_conditions": {
+    "q3_earnings_and_auto_margins": "2026-10-20 Q3 財報發布，密切監控汽車毛利率是否止跌回升以及營運利潤率能否由 1.4% 明顯修復。",
+    "robotaxi_and_fsd_rollout": "追蹤奧斯汀 Cybercab 員工測試及次世代 FSD 商業化部署進度，驗證 AI 軟體轉型營收落地時程。",
+    "technical_range_and_breakout": "觀察股價能否守穩 .64 區間支撐並放量突破 .26 阻力位（上探 50MA .42），以確認突破動能。"
+  },
+  "key_risks": [
+    "P/E 高達 352.8x 與 EV/EBIT 121.2x，高實質利率 (2.41%) 環境下面臨劇烈本益比壓縮風險",
+    "本業營益率降至 1.4%（營業利益年減 56.9%），高 CapEx 導致 FCF 利潤率為負 (-3.87%)",
+    "內部人持股持續淨賣出（Q2 獲得/處置比僅 0.20），未見主力積極吸籌",
+    "無人駕駛 Robotaxi 監管與商業化落地時程若遞延，將衝擊市場高成長預期"
+  ],
+  "bias_notes": "多維度委員會全體維持嚴謹紀律，雖有 Cybercab 測試與電動半聯結車大單利多，但在本業獲利下滑與極端估值約束下，不因題材情緒盲目追價，一致給予客觀 HOLD 觀望評級。",
+  "phase2_fanout_mode": "PARALLEL_SUBAGENT",
+  "degraded_analysts": [],
+  "decision_point_days": 21,
+  "devils_advocate_filed": false,
+  "trade_metadata": {
+    "trade_type": "trend",
+    "event_tag": "robotaxi_commercialization"
+  },
+  "last_outcome": "UNKNOWN"
+}

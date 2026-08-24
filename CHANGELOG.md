@@ -8,6 +8,260 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.135.5] — 2026-08-22 — 額度主卡直接顯示 broker 限制窗口
+
+### Changed
+- `Dashboard/utils.js` 的三家 provider 主條改畫 broker 實際派選使用的最緊 bucket，並在百分比前明示 `週` 或 `5h`。
+- Agy/Gemini 先限定在 broker 當前 routable pool 內找限制窗口；provider 排序與 tooltip `▸` 也改用同一 bucket。
+
+### Why
+- 舊主卡固定偏好 5h，卻同時顯示 weekly reset；Claude `5h 2%` 會遮住實際限制派選的 `週 27%`。全部強制改畫 weekly 也會在 Gemini 被 5h 卡住時誤導，因此改為顯示每家當下真正的限制窗口。
+
+## [4.135.4] — 2026-08-22 — 即時辯論不再把 broker busy 當成模型失敗
+
+### Fixed
+- Break News 跨新聞執行固定序列化；即使舊 CLI 傳入 `--workers 2`，也不會讓兩筆新聞同時搶同一組互斥 provider slots。
+- 任一辯論 turn 遇 broker blocked 時回到 `pending_debate` 等下輪重試，不再永久關成 `partial_closed` / `failed`；scan state 另計 `deferred_in_scan`。
+- comment 與 item 保存 bounded `error`、`route_note`、`deferred_reason`，後續可直接看到 `provider_busy` / broker unavailable 原因。
+- restart script 為 launchd 明示 Node／Agy／Codex 所需 PATH；避免互動 shell 正常、daemon 卻回 Codex rc=127／Agy rc=-2。
+- 無活動超過 thread timeout + 120 秒的 `debating` orphan 自動回 pending；不碰既有 partial/failed 歷史。
+- `debate_item` daemon boundary 捕捉 roster／broker malformed response 等未預期例外，寫入原因並還原 pending，不留下空的 `debating`。
+- 新增 opener／responder blocked、跨 item 不重疊、exception safety 與 orphan recovery 回歸；47 項 Break News tests、broker gate、全量 artifact validator 通過。
+
+### Why
+- v4.132.0 已把單場辯論改為循序對話，卻保留兩個跨新聞 workers；兩者會同時向 broker 索取同一 provider，失敗方在 0 ms 收到 `rc=-9`，但 debater 誤判成模型實際執行失敗。2026-08-21 因此只有 10/59 筆完整結案。
+- Dashboard 改由 launchd 常駐後未攜帶互動 PATH，重啟才暴露 CLI wrapper/runtime 無法解析；部署驗證因此納入固定 PATH 與 binary lookup。
+
+## [4.135.3] — 2026-08-21 — 盤前工作與全域任務 queue 整合
+
+### Changed
+- 移除跨頁的橘色 `chain-status-pill` 及整組專用 CSS，不再與紫色 global protocol queue 同時顯示同一個 News/Sector 工作。
+- global queue 依 entry 既有的 `source="premarket_chain"` 加上 workflow provenance：顯示 `盤前檢查 · News Digest` 或 `盤前檢查 · Sector Scan`，收合標題、slot tooltip、active detail 與 pending row 使用同一标籤。
+- `daily_update` 仍只在盤前 modal 的 phase progress 顯示；它不是 broker-governed LLM task，不進 protocol queue、不佔三個 provider slots。
+
+### Why
+- 橘色卡與紫色 queue 原本從兩個 endpoint 重複繪製 News/Sector 狀態，還會互相重疊；任務來源已在 queue payload 裡，直接顯示 provenance 比維護第二個狀態面更清楚。
+
+## [4.135.2] — 2026-08-21 — 併行狀態面板不再重複燈號或隱藏工作
+
+### Fixed
+- quota panel 以 broker 每 provider 單一互斥 execution slot 為準：`/api/protocol-queue` 已證明是本專案的 run 時，同 provider 不再因 broker v0.3 的 flat reservation 缺 `project` 而又亮外部藍燈。
+- 浮動 protocol pill 的收合標題從只取 `active[0]` 改為彙總全部 active runs；同 protocol 顯示如 `invest ×3 · MU / SNDK / NVDA`。
+- 等待區每筆加入 `×`，以 queue entry ID 呼叫專用 `DELETE /api/protocol-queue/<id>`，只移除指定 pending job。
+
+### Why
+- 並行 scheduler 已能佔滿三個 provider slot，但額度燈號、收合標題與 pending controls 仍沿用單工作時期的假設，使同一組真實狀態在不同位置顯示成互相矛盾的資訊。
+
+## [4.135.1] — 2026-08-21 — LLM 燈號區分本專案與外部程式
+
+### Fixed
+- broker active reservation 映射保留 `project` 並由後端產生 `is_local_project`；只有 AI 投資委員會可亮綠燈，其他程式亮藍燈。
+- 同一 provider 同時有本專案與外部使用時同時顯示綠／藍兩燈；缺少 project attribution 的 broker row 保守視為外部。
+
+### Why
+- broker 是跨專案共用權威；全域 reservation 不能全部用綠燈偽裝成 AI 投資委員會正在執行。
+
+## [4.135.0] — 2026-08-21 — 全專案 LLM 統一由 quota broker 分配
+
+### Added
+- 新增 24 個 LLM task 的 registry、capability certification ledger、靜態 governance audit 與分類文件；未註冊或未認證的 inference fail closed。
+- Nexus Tier 3 改用共用 router，Claude／Agy／Codex 各一個隔離 schema canary 均通過，未寫正式 graph/cache。
+
+### Changed
+- 一般 LLM 任務改由 broker 從已認證 provider 集合實際選擇；ensemble／認證才允許 broker-pinned provider，任何失敗都不再跨模型重播。
+- 移除 Tier 3 Anthropic SDK、weekly cron Claude CLI、manual runner 無 lease、driver probe、Office／brief／翻譯固定模型等旁路；Grok 停用。
+- protocol 在 broker busy／無額度／瞬斷時留在 queue 自動重試；daemon/cron defer；額度面板綠燈改讀全專案 active broker reservations。
+- Dashboard restart 改由 launchd submit 持有 process，避免啟動 shell 結束後 server 一併退出。
+
+### Why
+- 同一模型被重複選派、選派中的 ticker 消失與非 broker 呼叫，根因都是多個分配權威並存；現在只有 broker 能授權 LLM process。
+
+## [4.134.5] — 2026-08-21 — Broker 瞬斷不再讓排隊分析消失
+
+### Fixed
+- protocol 派送遇 `broker:unavailable` 改回 queue，以 3 / 6 / 12 / 24 / 30 秒上限退避重試；保留 attempts、等待原因與最後一次錯誤，不再直接把尚未啟動模型的工作標成失敗。
+- 全域 research pill 顯示 retry reason，並保留最近 10 分鐘內最多三筆失敗；即使 active / queue 都歸零，也不會把剛失敗的 ticker 整張隱藏。
+- 新增 broker unavailable retry、hard-reserve 不可重試與 recent-failure UI contract 回歸。
+
+### Why
+- INTC 兩次都在選派階段收到 `broker:unavailable` 後被 terminalize；同時 Claude 23% 因 20% hard reserve 不可選是另一件事，不能把 broker 瞬斷誤當成模型額度耗盡。
+
+## [4.134.4] — 2026-08-21 — 盤前檢查改成真正的三階段進度軌
+
+### Changed
+- 盤前 modal 從三張直向大卡改成橫向連接的 Phase 1 → 2 → 3 stepper；進行中、完成、失敗、等待分別以紫／綠／紅／灰狀態呈現。
+- task row 壓成進度 chip，modal 以 `100dvh` 限高並保留窄螢幕直向 fallback；流程啟動後隱藏兩個 cache 更新按鈕，只留主流程控制。
+- 新增 `test_premarket_chain_ui.py`，鎖住三階段 DOM、連接軌、viewport 限高、mobile fallback 與 runtime state wiring。
+
+### Why
+- 舊版把每個 Phase 畫成獨立 list card，約 548px 高且底部同時顯示三顆按鈕；小 viewport 上下容易被截，也看不出目前走到哪一階段。
+
+## [4.134.3] — 2026-08-21 — Phase 0 改回全市場共用 snapshot
+
+### Fixed
+- `phase1_factpack.py` 先解析 canonical/legacy investment Phase 0；fresh sector cache 若缺完整 schema 會回 `INCOMPLETE_NEEDS_L3`，不再讓新 ticker 卡在 validator rc=1。
+- validator 支援 `--path` 精確驗證 frozen snapshot，並要求 `macro_summary` 與 `_market_signals` 為 object；Phase 5 組裝器沿用同一路徑，避免並行 run 換檔。
+- downstream deep-dive extractor 同樣改為 canonical 優先，避免舊 ticker copy 覆蓋同日 shared snapshot。
+- protocol 明定 L3 只寫 `YYYY-MM-DD_phase0.json`，ticker-scoped 檔僅作 migration fallback；新增 AAOI snapshot 可供 GEV 共用與 sector-only 必重建的回歸。
+
+### Why
+- Phase 0 描述同一時點的市場／FRED 狀態，不是個股 artifact；producer 寫 global canonical，但 resolver、validator 與 builder 各自猜 ticker 路徑，造成 AAOI 成功後 GEV 仍誤判缺檔。
+
+## [4.134.2] — 2026-08-21 — 不同股票的 invest 真正併滿三個 slots
+
+### Changed
+- Dashboard scheduler 的 invest artifact domain 由全域單鎖改為 `invest:<ticker>`；不同 ticker 最多三路並行，同 ticker 仍互斥。
+- Phase 5 先產生 `session_exports/<DATE>_<TICKER>.json`，deterministic shadow、schema validator、renderer 與 thesis register 全部只讀寫本 session；全綠後才 commit 到 history。
+- `history.json` 改用獨立、穩定的 `history.json.lock` 包住 read-modify-write，避免 atomic rename 更換 inode 後兩個 writer 同時進入。
+
+### Fixed
+- server 收尾會驗本 ticker 的 isolated session，並確認它的 digest 已存在 global history；不再錯驗「當下剛好是最後一筆」的其他 ticker。
+- 新增 18 路並行 commit 回歸，並鎖住三個 invest active，第四個才等待的 scheduler 行為。
+
+### Why
+- V4.134.1 只把 UI 畫成三格；backend 仍把所有 invest 標成 `investment-global`，所以實際只會佔一格。
+
+## [4.134.1] — 2026-08-21 — AI research queue 改成三個可見 execution slots
+
+### Changed
+- 全域 protocol pill 固定顯示三段 capacity bar；展開後逐格列出 active job、provider 與時間，未佔用的 slot 明確標示空閒。
+- pending queue 從 execution slots 分離成等待區，不再把一筆 active job 的摘要與明細誤讀為兩個 model，也不再讓 `queue +1` 看起來像已佔用 capacity。
+
+### Why
+- scheduler 已能三路並行，但舊 UI 只突出 primary job，另外把 pending 與 active 混在同一段文字，無法直接看出還有幾個可用 LLM slot。
+
+## [4.134.0] — 2026-08-20 — 三家 LLM 各自開工，鎖由 broker 統一管理
+
+### Added
+- quota broker wire contract 升到 0.3.0：每個 provider 只有一個跨專案 execution slot，reservation start 後由 client 每 15 秒 heartbeat，並把真實 CLI child PID／PGID／UID／start token 登記到 broker。
+- broker watchdog 每 5 秒檢查 orphan：pending 30 秒未 start 會釋放；owner heartbeat 中斷但 child 還活著時繼續鎖住；child 已退出才釋放；絕對 TTL 會終止已驗證的 child process group，確認死亡後才解鎖。
+- protocol status API 支援 `job_id`／`queue_id`／`name`／`artifact_key` 精準查詢，cancel 也可指定 job，不會在多 active 情況誤殺別的工作。
+
+### Changed
+- `dashboard_server.py` 從單一 `_protocol_state`／3 分鐘 invest cooldown 改為最多 3 個 active job 的 registry scheduler；broker 決定可用 LLM，`provider_busy` 保留 pending 並自動重試。
+- 仍是 single-writer 的正式產物按 domain 互斥：invest、news、sector 各自不可重疊；不同 ticker 的 earnings 可並行。全域 queue pill 顯示所有 active job 與各自 broker-assigned engine。
+- `llm_drivers.py` 與 agentic protocol runner 以新 process session 啟動 CLI，attach broker lease；timeout／cancel／attach 失敗會終止整個 process group，不留下失聯子程序。
+
+### Fixed
+- schema 2 升級留下的 pending reservation 沒有 `start_deadline`；watchdog 現在以 `created_at + 30s` 補算，migration 也會讓舊 pending 可立即回收，不再沿用舊 quota TTL 卡住 provider。
+- protocol child 尚在 broker 選擇／Popen 窄窗口時不接受取消，避免先把 queue/artifact slot 標成 terminal，隨後 worker 又啟動一個失去追蹤的 child。
+
+### Why
+- 本機單一 FIFO 讓 Claude、Agy、Codex 即使都可用也只能排隊，且無法和 `tw-stock-wonwon` 協調。broker-owned exclusive slot 加上 heartbeat + process identity，讓兩個專案共享同一組 LLM 時既能最多三路並行，也不會因 caller crash 造成永久死鎖或提早解鎖。
+
+## [4.133.2] — 2026-08-18 — Signal Queue 失敗、新證據與取消都能正確收尾
+
+### Fixed
+- `scripts/signal_queue.py` 的 delivery 狀態改為綁定 evidence revision：失敗執行立即恢復重試，舊 `consumed` 不再壓住新 catalyst，前端也不再把舊 `consumed_by` backlink 當成當前完成狀態。
+- protocol queue 的 pending 移除、dispatch 前拒絕與正常結束共用同一個 Signal Queue writeback，不再永久卡在 `queued`。
+- `earnings` 與 `earnings_preview` 新增 fresh required-artifact gate；連回小卡的報告也必須新於本次 run start，防止 rc=0 但沒產出報告時誤標 `consumed`。
+- Break News `?news_id=` 不再被最新 100 張 feed 卡片限制，可直接透過 item endpoint 開啟較舊證據。
+- 超過 8 檔 ticker 的廣義事件改為整筆排除，不再保留來源排序的任意前 8 檔。
+
+### Why
+- delivery ledger、source backlink 與 protocol queue 各自只掌握一部分狀態；缺少 revision-aware 與共用終止回寫時，失敗、取消或新證據都會在 UI 上安靜地變成永久狀態。
+
+## [4.133.1] — 2026-08-18 — LLM quota 小卡顯示每週重置倒數
+
+### Changed
+- `Dashboard/utils.js` 從 broker 的 weekly bucket 讀取重置時間，在每個 provider 小卡加上 `3D23H reset` 格式的倒數；同時支援 `resets_at` / `refresh_in_seconds` / `reset_label` 三種 broker 欄位。
+
+### Why
+- 使用量百分比只說明還有多少，倒數才能直接回答每週額度何時補回。
+
+## [4.133.0] — 2026-08-18 — 即時辯論的結論會流到其他頁面了
+
+### Added
+- **Signal Queue（`scripts/signal_queue.py`）**：把一個頁面的結論變成另一個頁面的候選。V1 的唯一 collector 是 Break News 辯論，但輸出契約來源中立（`candidate_id` / `source_refs[{source, artifact_id, event_id}]` / `revision`），因為 sector、momentum、radar 之後也要能當 producer。Server 端即時聚合，**不新增批次腳本、不改 `daily_update.sh`、不新建執行佇列**。
+- 端點：`GET /api/signal-queue`（TTL 90s + `(檔數, max_mtime, ledger_mtime)` 簽章失效，新辯論收斂或使用者動作即時可見）、`POST /api/signal-queue/action`、`DELETE /api/signal-queue/action/<candidate_id>`、`GET /api/signal-queue/eligibility`（≤25 檔）。
+- 消費頁：earnings.html（依 eligibility 走既有 `earnings` / `earnings_preview` protocol queue）、decisions.html（既有 invest queue，只帶 lineage 不注入決策欄位）、momentum.html（**只顯示**，卡片給 `?ticker=` deep-link）。Radar 本輪不掛載。
+- `Dashboard/signal-queue.js` — 三頁共用的候選卡元件；`Dashboard/style.css` 新增 `.sq-*`（刻意比宿主頁自己的卡片安靜：這是外來建議，不是該頁的主內容）。
+- 反向連動：`store.add_consumed_by()` 在 `bn_*.json` 加 `consumed_by`（比照 `graph_promoted_at`／`graph_status`），break-news 詳情頁顯示「已產出的分析 →」並連到報告；`page-break-news.js` 新增 `?news_id=` 定位能力（原本沒有 query/hash 定位）。
+- `tests/test_signal_queue.py` — 74 條 deterministic 測試（自建 tmp store、pin `now`）。
+
+### Why
+- 每天約 100 場辯論、97% 帶 ticker、且已有明確多空結論，但這些結論只流向 Nexus 知識圖譜。討論 FN 最新財報且結論看多的辯論，跑完就沉進 log，財報分析頁完全不知道它存在。
+- 三個把「能用」和「誤導」分開的設計決定，都是先量測真實 log 才定的：
+  - **方向必須逐個提及判定**，不能把事件 verdict 套給所有 ticker。多 ticker 提及中 71% 有明確 `BENEFITS_FROM`／`HEADWIND_FROM`，而**其中 24% 與事件 verdict 相反**——油價上漲的 BULLISH 辯論會把 DAL／UAL 一起標成看多。以事件為單位要求全覆蓋只有 32%，所以逐提及判定、無方向者計入 `dropped.ambiguous_ticker_direction`。
+  - **`triage.shallow_score` 不能當品質分數**。實測分佈 −2.0 ~ +5.0，是帶正負的情緒值，拿它做 `clamp(0,1)` 懲罰只會單邊打壓看多事件，且與 verdict 重複計分。
+  - **cluster 去重是必要的**，同一 ticker 一天可出現 13 次（XOM）。以 `cluster_id` 聚合成事件，`agreement` 在各場辯論分歧時砍半分數並標 `conflict`。
+- 財報 lane 的「不符合就不要抓」閘門不新增任何 FMP 呼叫，只讀既有的 earnings cache 與 `data.json → upcoming_events`。
+
+### Fixed
+- eligibility 原本拿 `last_earnings_date` 直接跟 FMP calendar 日期比大小。前者是**財報期間結束日**（`income[0].date`，AMZN 為 2026-06-30），後者是**公布日**（2026-07-31）——公布日必然晚於它所報告的期間，這樣比會讓剛跑完的報告每季都被誤判成 `cache_stale` 而重跑。改成跟 cache 的 `as_of_date` 比：「上次看之後有沒有人公布財報」才是要問的問題。
+- `latest_earnings_cache()` 的 `relative_to(_ROOT)` 未防例外，cache 目錄一旦不在 repo 樹下就拋錯並被上層吞成 `unknown`，等於停用所有按鈕。改為 best-effort。
+
+## [4.132.0] — 2026-08-17 — 即時辯論改一問一答，僵局才叫第三家
+
+### Changed
+- Break News round 0 由「兩邊盲開場並行」改為序列：A 開場，B 拿到 A 的完整開場後**逐點裁決**（`assessments`：每條 `bull:N`／`bear:N` 標 agree／dispute + 具體理由），只補 A 漏掉的點（`added_bull`／`added_bear`），不再產第二份平衡的多空清單。B 不再被要求「偏空也要給 ≥1 條 bull」。
+- round 1 只有 A 發言，且只回應 B 實際 dispute 的點（原本是雙方各再講一輪）。A concede → `divergence_resolved`。
+- 僵局判準改成明說式：`stated_disputes` 取 B 宣告的 dispute，`_deadlock` 再要求 A 的反駁沒有 concede。原本靠「同一個 `subject|object` 上關係極性相反」推斷。
+- `divergence_gate` 降為輔助（B 沒產 assessments 時的後備），並改用去 namespace 的 node key 比對。
+- agent payload schema `1 → 2`（舊 log 因此全部沿用舊契約，5403 檔 validator rc=0）。長度上限改由實測語料定，不再由 prompt 文字定：`commentary` 80–150 → 80–400、`bull/bear_points` ≤30 → ≤60、`final_take` ≤30 → ≤60、`rationale_short` ≤40 → ≤80、rebuttal `commentary` ≤60 → ≤400。上限的職責是攔失控（整篇 essay、把新聞原文吐回來），文風仍由 prompt 要求緊字數。語料分佈記在 `schema.py` 的常數註解裡。
+- `store.retire_thread()`：重跑 `partial_closed` / `failed` 項目時先把上一次的回合搬到 `retired_threads`（保留為失敗證據），再開新 thread。原本是直接 append，於是舊 run 的開場也進 summary —— 實測重跑三次後 summary 併了三份多空清單、`point_assessments` 裡有對「已看不到的開場」的裁決。
+- `_turn_order()` 之外新增 `_roster()`：向 broker 要前三名，前二辯論、第三名留作裁決者。
+
+### Added
+- 第三方裁決：僵局時由 roster 第三名以 `arbiter` payload 裁決（`ruling` = `side_a`／`side_b`／`split`），落在 side `C`、`close_reason=arbitrated`，其 `final_take` 覆蓋信心排序的結果。沒有第三家可用 → `unresolved_no_arbiter`（不虛構第三個聲音）。
+- summary 新增 `point_assessments`／`arbiter_ruling`／`stated_dispute_count`／`arbiter_model`／`blind_openers: false`。
+- 前端：side C 置中紫色 ⚖️ 泡泡、逐點 agree／dispute 標記與 added points 區塊；補上 `converged_round1`／`single_voice`／`early_stop_low_relation_density` 等一直沒有標籤的 close_reason 中文。
+
+### Why
+- 2026-08-17 實測：當天 58 場辯論只有 2 場進到第二輪，其餘收在第一輪；兩邊字面重複度不高（bigram Jaccard 中位數 0.105）但**從未交鋒**。香檳提早採收那條（`bn_20260817_9a0504ac`）兩邊講同一組多空，`divergence_note` 只寫得出 predicate 名稱差異。
+- 極性判準漏抓近半：260 場中 26% 談到同一組 `subject|object`，去掉 namespace 前只有 14% 偵測得到 —— `theme:climate_change` vs `narrative:climate_change` 就足以錯身而過。
+- 長度上限殺掉的是真內容：當天 31% 的場次是 `single_voice`，錯誤幾乎都是 `commentary: length 157 outside 80..150`、`bull_points[0]: length 32 exceeds 30`。語料證實上限訂在模型實際產出的 p50 以下：round-0 `commentary` p50=139／p90=216／p99=467（n=10377），rebuttal p50=192／p90=347（n=5689）。史上第一次 arbiter 呼叫就死在 243 字。
+- 實跑驗證（`bn_20260808_032203ee`，Cameco 財報）：A(Gemini) 開場 → B(Codex) 5 條裡 dispute 3 條 → A 反駁只回應成本一項 → C(Claude) 裁決，並指出 A 對長約量與 Westinghouse 兩點完全未回應等於默認。這種「誰沒回應哪一條」的判讀在盲開場架構下不可能出現。
+- 盲開場原本是為了讓分歧成為訊號，但兩邊都被 schema 要求輸出平衡的多空，於是產出的是重複而非獨立分歧。`blind_openers: false` 明記這件事，避免日後把 divergence 當獨立訊號用。
+
+## [4.131.15] — 2026-08-17 — broker 版本握手與 caller-owned 一鍵重啟
+
+### Added
+- vendored broker client 升到 wire contract `0.2.0`：每次新派工先以公開 `/v1/health` 比對 client／daemon 版本，完全一致才允許 reservation；client 較新、broker 較新、舊 broker 無版本三種狀態分開回報。
+- Dashboard LLM 側欄顯示 client／broker 版本狀態。broker 沒執行或 client 較新時提供「一鍵重啟 broker」；由 caller 的 `dashboard_server.py` 執行 `lqb launchagent restart`，完成後自動重做 handshake，match 才解鎖。
+
+### Changed
+- broker 狀態的 `authority` 只有在 health handshake 與 authenticated quota snapshot 都成功後才為 true；版本 mismatch 是 fail-closed request error，不是 outage，連可降級的新聞線也不能繞過舊 routing policy。
+- broker routing 改由 projected remaining headroom 單獨決定；provider preference 只處理 exact tie，success rate／confidence／latency 不再左右配額 load balance。
+
+### Why
+- 更新檔案不等於長駐 daemon 已載入。SNDK 後的個股分析仍被舊 broker 指派 Codex，就是 client 已更新但記憶體裡仍跑舊 scoring；握手把這種「程式碼新版、runtime 舊版」變成可見且不可派工的狀態。
+
+## [4.131.14] — 2026-08-16 — 產業掃描不再逢週末必掛，smart_money 兩趟掃描改平行
+
+### Fixed
+- `sector/scripts/fetch_sector_valuation.py`：`fetch_pe_snapshot()` 拿到空資料時**實際回抓最近一個交易日**（最多回看 5 天），並回傳來源日。FMP `/stable/sector-pe-snapshot` 只有交易日有值（實測 08-16 日=0、08-15 六=0、08-14 五=11、08-13 四=11），舊版一空就 `sys.exit` → 產業掃描**逢週末／假日 100% 必掛**。2026-07-11（六）與 2026-08-16（日，三次）都是同一錯誤。
+- 新增 provenance 欄位 `pe_snapshot_date` / `pe_snapshot_lag_days`（cache 頂層 + `_phase1`，經 `build_sector_intel.py` 帶出，schema 已載明）。**回抓真資料而非沿用舊 cache**，`lag > 0` 時報告須註明 PE 為前一收盤。回看 5 天內都無資料仍 rc=1 中止。
+- `sector/scripts/fetch_smart_money.py`：insider-stats 與 institutional-ownership 兩趟各 ~131 檔的**序列**呼叫改為單次 fan-out（新增 `sector/lib/fmp_client.py` 的 `fmp_get_many()`，包 `fmp_pool.fetch_many`，`stable=False` / hard_fail 語義不變）。單跑 **241.8s → 67.6s**，輸出與序列版逐欄位相同。
+
+### Added
+- `sector/scripts/test_fetch_sector_valuation.py`（新增，零網路）：鎖住非交易日回退的六個面向 —— 回報實際來源日、交易日不誤觸回退、**單一 exchange 有值不算數**、回看窗口第 5 天過／第 6 天中止、窗口內全空仍 rc≠0、provenance 進 payload。另含 `build_sector_intel.py` passthrough 的 consumer 斷言。**整檔還原到修復前的版本驗過會紅**（吐的正是線上那句 `returned empty for 2026-08-16/NASDAQ`），兩道接線守衛各自種回突變也驗過紅，還原後逐位元 sha256 一致。
+- `docs/agent-ops/OPS_COMMANDS.md` §7 新增三列：上述測試；`fetch_smart_money.py` / `fmp_get_many` 的「沒有 fixture 測試，改 fan-out 就跑前後 cache 逐欄位 diff」對照程序；以及 `test_fetch_earnings_calendar.py` 的正確跑法。這三者從來沒進過回歸表——週末 bug 能活下來正是因為觸發面從沒被走到。
+- §7 那列同時記下一個**跑法陷阱**：`test_fetch_earnings_calendar.py` 是 `sector/scripts/` 底下唯一的 pytest 模組，當腳本跑會 `ModuleNotFoundError`，加 `PYTHONPATH=.` 則 **rc=0 但跑 0 個測試**。判準是「看到 `N passed` 才算跑過」，只看 rc=0 不算（§2c 沉默不是通過）。
+
+- `dashboard_server.py`：`PROTOCOL_REQUIRED_ARTIFACTS` 補上 `sector` → `sector/sector_logs/{today}_sector_intel.json` 與 `news` → `news/news_logs/{today}_digest.json`。這兩個 key **從來沒被登記過**，而該 dict 上方的註解一開始就寫著「dashed for the review/**news**/**sector** families」、日期格式也預留好了 —— 規則寫了但沒接線，缺 key 沒有任何症狀。後果：2026-08-16 四次 sector 跑全部死在 Phase 1 valuation gate，rc=0、閘不觸發，UI 一律顯示成功；只有 preflight 面板（讀 `sector_intel` 的 `generated_at`）說了實話 —— 50.9h stale。只登記產出 digest 的 `news` 模式，`flash` / `flash_text` / `review` / `triage` / `link_digest` 是各自獨立的 protocol name 且數個明文禁止寫 digest.json。
+- `tests/test_protocol_model_routing.py`：把 artifact 閘納入既有的 `_GATE_DOCUMENTED` 紀律 —— 每個有 validator gate 的 protocol 都必須有 required artifact（invest 原本就有斷言，sector/news 沒有）。另加一條 **producer/consumer 跨檢**：閘的路徑與 preflight 面板的 glob 必須解析到同一個檔（兩者在同一個模組裡相隔約 1300 行、各手寫一次，漂移後閘會永遠檢查一個沒人寫的路徑而靜默通過）。兩組斷言各自種回突變驗過紅（拿掉 sector key = 重現今天的實況；把路徑改到 `sector/logs/` = 跨檢報紅），還原後 sha256 一致。
+
+### Changed
+- `sector/scripts/phase_prefetch.py`：更新 `TASK_TIMEOUT_SEC` 註解。舊註解自稱「3-5 min，360s leaves slack」，實測序列版單跑就 242s，九路掃描搶 RPM 時直接超過 360s → `smart_money` rc=-1 spurious hard_fail（2026-08-16 22:45 實錘；同日 22:23 那次僥倖擠過）。
+
+### Why
+- 2026-08-16（日）產業掃描連跑三次全部 `hard_fail=true`，卡在 `valuation` 與 `smart_money` 兩個獨立 HARD task。修完 `phase_prefetch --date 2026-08-16` 從 360s timeout / hard_fail=True 變成 **95s / rc=0，9 個 task 全 rc=0**。
+- 兩者都不是暫時性故障：valuation 是決定性的日曆 bug，smart_money 是邊緣性 flaky。同日 NBIS invest 的三支 lane script 失敗則是**另一回事**——`guce.yahoo.com` / `finnhub.io` 皆 DNS 解析失敗的暫時性斷網，程式無需修改（codex 依閘門紀律停在 Phase 2 是正確行為）。
+
+## [4.131.13] — 2026-08-16 — 極端 DCF 先過前瞻驗證，不再看到 −3 就錯殺
+
+### Added
+- `compute_price_framework.py` 新增 deterministic `forward_validation.v1`：eligible DCF 低於現價 ≥30% 時，交叉檢查 archetype shadow、可信 forward earnings 與營收成長路徑；至少 2 項可判讀才下結論。
+- `decision_engine.py` 1.1.0 實作 T5 後果：只有 `forward_validation=FAIL` 且 valuation score ≤−3 才降一階；`NO_DATA` 不猜 FAIL。
+- Export schema、builder、validator、歷史 replay 與 MD renderer 全部接線；新 engine 缺 block、分數不一致或該降未降皆 rc=1。
+
+### Changed
+- `PASS/STRETCHED` 保留 DCF fair value／gap／verdict 原值，但把極端負 valuation score 軟化到 −1；`FAIL` 保留原分數。歷史 artifact replay：NOW／PLTR 分數改變但 final decision 不變，SNDK 原本已是 −1，仍為 STAGED_ENTRY。
+
+### Why
+- DCF 與現價極端背離可能是模型漏掉 forward regime，而非市場必然錯價。把差距直接轉成硬 HOLD 會錯殺已進入高成長重估的標的；新規則要求前瞻證據全部失敗後才允許硬降級。
+
 ## [4.131.12] — 2026-08-16 — agy 拿到 invest 的執照：三年來第一份未修改機器就通得過閘門的非 Claude 產物
 
 ### Changed

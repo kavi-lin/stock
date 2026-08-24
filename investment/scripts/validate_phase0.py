@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Validate the most recent `invest_logs/YYYY-MM-DD_phase0_TICKER.json` for
-V4.9 FRED compliance — checks that LLM actually fetched FRED Layer E and
-recorded the snapshot, not just skipped.
+Validate the newest shared Phase 0 market snapshot for V4.9 FRED compliance.
+The canonical path is `invest_logs/YYYY-MM-DD_phase0.json`; ticker-scoped files
+remain readable as legacy snapshots, but Phase 0 itself is market-wide.
 
 Invocation (from investment protocol Phase 0 末尾):
     python3 investment/scripts/validate_phase0.py [--ticker TICKER]
@@ -48,6 +48,8 @@ ROOT     = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 LOGS_DIR = os.path.join(ROOT, "investment/invest_logs")
 
 REQUIRED_TOP = [
+    "macro_summary",
+    "_market_signals",
     "fred_available",
     "phase3_macro_multiplier",
     "macro_multiplier_rationale",
@@ -65,13 +67,34 @@ VALID_REGIMES = {
 }
 
 
-def find_latest(ticker=None):
-    if ticker:
-        pattern = f"*_phase0_{ticker.lower()}.json"
-    else:
-        pattern = "*_phase0_*.json"
-    files = sorted(glob.glob(os.path.join(LOGS_DIR, pattern)))
-    return files[-1] if files else None
+def find_latest(ticker=None, logs_dir=None):
+    """Resolve one shared market snapshot, with legacy ticker-file fallback.
+
+    A ticker argument is compatibility context, not an ownership boundary.
+    Canonical and legacy files describe the same market-wide Phase 0 state, so
+    a fresh AAOI-era snapshot is valid input for a later GEV run. Newest mtime
+    wins; on a tie the canonical filename wins.
+    """
+    logs_dir = logs_dir or LOGS_DIR
+    patterns = ["*_phase0.json", "*_phase0_*.json"]
+    files = {
+        os.path.abspath(path)
+        for pattern in patterns
+        for path in glob.glob(os.path.join(logs_dir, pattern))
+    }
+    if not files:
+        return None
+
+    def rank(path):
+        name = os.path.basename(path)
+        canonical = name.endswith("_phase0.json")
+        try:
+            mtime = os.path.getmtime(path)
+        except OSError:
+            mtime = -1
+        return mtime, canonical, name
+
+    return max(files, key=rank)
 
 
 def check_freshness(path, data, max_age_days, today=None):
@@ -154,7 +177,10 @@ def fail(path, errors):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--ticker", help="restrict to a specific ticker's phase0 file")
+    source = ap.add_mutually_exclusive_group()
+    source.add_argument("--ticker",
+                        help="compatibility label; resolves the shared market snapshot")
+    source.add_argument("--path", help="validate this exact frozen Phase 0 snapshot")
     # Default 1, not 0: a run that starts before midnight and validates after it
     # is legitimate, and the date is all this file carries — there is no
     # timestamp to be more precise with. The copy check is what makes the loose
@@ -163,13 +189,16 @@ def main():
                     help="how old scan_date may be, in days (default 1)")
     args = ap.parse_args()
 
-    path = find_latest(args.ticker)
+    path = os.path.abspath(args.path) if args.path else find_latest(args.ticker)
     if not path:
         print(
-            f"[validate_phase0] ✗ no *_phase0_*.json found under {LOGS_DIR}"
-            + (f" for ticker={args.ticker}" if args.ticker else ""),
+            f"[validate_phase0] ✗ no shared *_phase0*.json found under {LOGS_DIR}"
+            + (f" while analysing ticker={args.ticker}" if args.ticker else ""),
             file=sys.stderr,
         )
+        sys.exit(1)
+    if not os.path.exists(path):
+        print(f"[validate_phase0] ✗ snapshot not found: {path}", file=sys.stderr)
         sys.exit(1)
 
     with open(path, "r", encoding="utf-8") as f:
@@ -181,6 +210,9 @@ def main():
     for k in REQUIRED_TOP:
         if k not in data:
             errors.append(f"missing top-level key: {k}")
+    for k in ("macro_summary", "_market_signals"):
+        if k in data and not isinstance(data.get(k), dict):
+            errors.append(f"{k} must be an object (got {type(data.get(k)).__name__})")
 
     fred_avail = data.get("fred_available")
     if fred_avail is True:

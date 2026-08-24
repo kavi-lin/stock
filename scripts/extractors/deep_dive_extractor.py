@@ -409,15 +409,15 @@ def _find_macro_regime(text: str, decision_date: str | None = None,
     # 1) Phase 0 cache lookup (Codex review #4 + #5 — repo-root path + wide fallback)
     if decision_date:
         candidates = []
+        candidates.append(
+            ROOT / "investment/invest_logs"
+                 / f"{decision_date}_phase0.json"
+        )
         if ticker:
             candidates.append(
                 ROOT / "investment/invest_logs"
                      / f"{decision_date}_phase0_{ticker.lower()}.json"
             )
-        candidates.append(
-            ROOT / "investment/invest_logs"
-                 / f"{decision_date}_phase0.json"
-        )
         for p in candidates:
             if not p.exists():
                 continue

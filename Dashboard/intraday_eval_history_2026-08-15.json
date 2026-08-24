@@ -1,0 +1,13 @@
+{
+  "date": "2026-08-15",
+  "windows": [
+    {
+      "as_of": "2026-08-15T11:35:42+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    }
+  ]
+}

@@ -53,6 +53,10 @@ SOURCES = [
     # Manual / protocol-cadence sources (informational only)
     {"name": "theme-detector cache（產業掃描）", "glob": "skills/theme-detector/cache/theme_detector_*.json", "max_age_hours": 168, "kind": "manual"},
     {"name": "news digest（新聞分析）",          "glob": "news/news_logs/*_digest.json",                      "max_age_hours": 72,  "kind": "manual"},
+    # 風向 container. "manual" on purpose: the dispatcher is a resident loop the
+    # user starts, not a daily_update step, so a stale container means "the loop
+    # isn't running" — worth seeing, never a pipeline failure.
+    {"name": "風向 keyword container",          "glob": "news/wind_logs/wind_terms.json",                    "max_age_hours": 24,  "kind": "manual"},
     # economic-calendar-fetcher 無持久 artifact（stdout inline 進 sector prefetch
     # bundle，寫 /tmp）— 沒有可監控的 glob，故不列。2026-08-08 fmp_pool /stable
     # 遷移後上游 403 已解除。

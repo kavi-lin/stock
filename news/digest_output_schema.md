@@ -41,6 +41,7 @@ DIGEST Phase 4 **必須**執行 `finalize_digest.py`；它負責組裝與呼叫 
 | `stage2_count` | integer | DIGEST 限用；FLASH = 1；REVIEW = 1 |
 | `fanout_mode` | `"PER_AGENT_BATCH" \| "PARTIAL_FALLBACK" \| "FULL_FALLBACK" \| "INLINE"` | V2.1 — Stage 2 subagent 執行模式；FLASH 小量時可 `INLINE` |
 | `degraded_agents` | array[string] | V2.1 — fallback 時列出降級的 agent（正常空陣列）|
+| `demoted_stage2` | array[string] | 晉級後被 finalizer 降級為 shallow 的 news_id（Bull/Bear 同 `\|impact\| ≤ 1`）；正常空陣列，該筆 verdict 另標 `demoted_from` |
 | `verdicts` | array | 本次所有分析結果（shallow + deep 混合；至少 1 則）|
 | `session_macro_delta` | float | -1.0 ~ +1.0；所有 deep verdicts 加總後對 phase0 macro 的淨衝擊 |
 | `arbiter_rule_version` | `"V2.3"` | 2026-08-06 起必填；verdict 由 `news/arbiter_rules.py` deterministic 驗證 |
