@@ -1,34 +1,33 @@
 {
-  "date": "2026-08-23",
+  "date": "2026-08-24",
   "models": {
     "claude": {
-      "calls": 9,
+      "calls": 0,
       "cooldown_until": null,
       "last_error": null,
       "tokens": {
-        "input": 18,
-        "output": 4521,
-        "cache_read": 163697,
-        "cache_write": 105770,
-        "cost_usd": 1.268472
+        "input": 0,
+        "output": 0,
+        "cache_read": 0,
+        "cache_write": 0,
+        "cost_usd": 0.0
       },
       "call_timestamps": [
         "2026-08-23T21:59:03.491786+00:00"
       ]
     },
     "gemini": {
-      "calls": 63,
+      "calls": 1,
       "cooldown_until": null,
       "last_error": null,
       "tokens": {
-        "input": 687099,
-        "output": 68455,
-        "cache_read": 242712,
+        "input": 85487,
+        "output": 9731,
+        "cache_read": 37353,
         "cache_write": 0,
         "cost_usd": 0.0
       },
       "call_timestamps": [
-        "2026-08-23T19:26:04.356291+00:00",
         "2026-08-23T19:46:29.276324+00:00",
         "2026-08-23T19:47:25.680879+00:00",
         "2026-08-23T19:47:50.823888+00:00",
@@ -43,11 +42,12 @@
         "2026-08-23T21:47:13.569914+00:00",
         "2026-08-23T21:57:38.811336+00:00",
         "2026-08-23T21:58:44.494251+00:00",
-        "2026-08-23T23:49:50.578156+00:00"
+        "2026-08-23T23:49:50.578156+00:00",
+        "2026-08-24T00:45:25.578731+00:00"
       ]
     },
     "codex": {
-      "calls": 25,
+      "calls": 0,
       "cooldown_until": null,
       "last_error": null,
       "tokens": {
