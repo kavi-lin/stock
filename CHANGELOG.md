@@ -8,6 +8,27 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.135.6] — 2026-08-26 — 讀不到 broker 額度不再顯示成「broker 無 provider」
+
+### Fixed
+- `scripts/_shared/broker_gate.py` 的 `quota_snapshot()` 自己吞掉 `BrokerError` 後回空
+  `providers`，`model_router.broker_status()` 外層那道 `except BrokerError` 因此永遠不會
+  觸發，逾時的輪詢被當成「成功讀到、但一家 provider 都沒有」。現在回傳多帶一個 `error`
+  欄位，成功讀取為 `None`。
+- `broker_status()` 只在真的讀到答案時才宣告 `authority`；讀失敗改回
+  `handshake_status="broker_error"` 並帶原因。
+- `Dashboard/utils.js` 為 `broker_error` 增加獨立提示「讀不到 broker 額度」+ 一鍵重啟；
+  「broker 無 provider」現在只在真的零家時出現。
+
+### Changed
+- broker client 預設 `timeout_sec` 10 → 20 秒。
+
+### Why
+- 2026-08-26 側欄顯示「broker 無 provider」，同時 `lqb status` 三家都健康
+  （agy 71% / claude 43% / codex 98%）。`/v1/status` 在尖峰量到 12.5 秒、超過 10 秒的
+  client timeout，三層各自「合理」地把「沒讀到」變成「沒有」。broker 端的延遲已在
+  llm-quota-broker 修掉；這邊修的是誤報——同樣的誤報以後只會顯示成讀取失敗。
+
 ## [4.135.5] — 2026-08-22 — 額度主卡直接顯示 broker 限制窗口
 
 ### Changed

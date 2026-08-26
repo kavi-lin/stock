@@ -8,7 +8,7 @@
 
   // Semantic release tag shown in sidebar footer. Bump on meaningful releases.
   // Cache-busting is handled separately by dashboard_server.py (mtime injection).
-  const VERSION = 'V4.135.5';
+  const VERSION = 'V4.135.6';
 
   // V1.71.x — group field enables sectioned sidebar layout
   const NAV_ITEMS = [
@@ -1254,6 +1254,13 @@
             main = zh ? 'broker 沒有執行' : 'broker not running';
             sub = zh ? '決策流程停派' : 'decision flows halted';
             canRestart = true;
+          } else if (handshake === 'broker_error') {
+            // Answered the handshake, then could not be read. Said as its own
+            // state because the two neighbouring ones are both wrong here: it
+            // is running, and it has quota — this poll just did not get it.
+            main = zh ? '讀不到 broker 額度' : 'quota unreadable';
+            sub = broker.error || (zh ? '下一次輪詢會再試' : 'the next poll retries');
+            canRestart = true;
           } else {
             main = zh ? 'broker 無法授權' : 'broker cannot authorise';
             sub = broker.error || (zh ? '決策流程停派' : 'decision flows halted');
@@ -1302,6 +1309,10 @@
           }
         });
         if (!names.length) {
+          // Genuinely zero, and only that: a read that failed is reported as
+          // `broker_error` above and never reaches here. Before that split,
+          // this line was what a timed-out poll said, and "check lqb config"
+          // sent the reader to a configuration file with nothing wrong in it.
           hostEl.innerHTML = notice('cool', zh ? 'broker 無 provider' : 'no providers',
                                             zh ? '檢查 lqb 設定' : 'check lqb config');
         } else {

@@ -465,6 +465,15 @@ def broker_status(cfg: dict | None = None) -> dict:
         state["handshake_status"] = "broker_error"
         state["error"] = str(exc)[:300]
         return state
+    # `quota_snapshot` handles its own transport failure and reports it in the
+    # payload, so the `except` above never fired for the case that actually
+    # happens: a status read that timed out came back as a successful call with
+    # zero providers, and the sidebar drew a healthy broker with nothing to
+    # route to. Authority is claimed only over an answer that arrived.
+    if snapshot.get("error"):
+        state["handshake_status"] = "broker_error"
+        state["error"] = str(snapshot["error"])[:300]
+        return state
     state["authority"] = True
     state["providers"] = snapshot["providers"]
     state["active_reservations"] = snapshot.get("active_reservations") or []

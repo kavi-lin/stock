@@ -837,6 +837,63 @@ check("ui.cooldown_not_bare_truthy",
       "if (info.cooldown_until)" not in _utils_source,
       "a bare truthiness test on the ISO string is the V4.130.2 regression")
 
+# --- a broker that cannot be read is not a broker with nothing to route to ---
+#
+# 2026-08-26: the sidebar showed "broker 無 provider" while `lqb status` listed
+# three healthy providers. `quota_snapshot` handles its own transport failure
+# and returns an empty `providers` dict, `broker_status` claimed authority over
+# that empty dict, and the panel rendered the only thing an empty dict can mean
+# to it. Three layers each behaved reasonably; the information that the read
+# had failed was dropped at the first one.
+class _FailingClient:
+    """A reachable broker whose status read does not come back."""
+
+    def status(self):
+        raise broker_gate.BrokerError("cannot reach the broker at http://127.0.0.1:8787: timed out")
+
+
+_old_broker_client = broker_gate.broker_client
+try:
+    broker_gate.broker_client = lambda cfg=None: _FailingClient()
+    _failed = broker_gate.quota_snapshot({})
+finally:
+    broker_gate.broker_client = _old_broker_client
+
+check("snapshot.transport_failure_is_reported",
+      bool(_failed.get("error")) and _failed.get("providers") == {},
+      f"got {_failed!r} — an empty provider set must carry why it is empty")
+check("snapshot.success_carries_no_error", _snap.get("error") is None,
+      f"got {_snap.get('error')!r} — a good read must not look like a failed one")
+
+_old_snapshot = broker_gate.quota_snapshot
+_old_handshake_client = broker_gate.broker_client
+try:
+    broker_gate.quota_snapshot = lambda cfg=None: {
+        "providers": {}, "hard_reserve_percent": None,
+        "active_reservations": [], "error": "timed out",
+    }
+    _server, _thread = start_stub()
+    try:
+        _state = mr.broker_status(config_for(_server))
+    finally:
+        _server.shutdown()
+finally:
+    broker_gate.quota_snapshot = _old_snapshot
+    broker_gate.broker_client = _old_handshake_client
+
+check("status.unreadable_is_not_authoritative", _state.get("authority") is False,
+      f"authority={_state.get('authority')!r} — a poll that failed must not be "
+      "presented as the broker's answer")
+check("status.unreadable_says_so", _state.get("handshake_status") == "broker_error"
+      and bool(_state.get("error")),
+      f"got {_state.get('handshake_status')!r}/{_state.get('error')!r}")
+
+# The panel's half of the same split. Without a branch for it, `broker_error`
+# falls through to "broker 無法授權", which reads as a permissions problem.
+check("ui.unreadable_has_its_own_notice",
+      "handshake === 'broker_error'" in _utils_source,
+      "the sidebar must say a quota read failed, not that the broker refused")
+
 if failures:
     print("✗ broker gate contract violated:")
     for failure in failures:

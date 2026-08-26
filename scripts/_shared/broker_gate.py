@@ -126,7 +126,12 @@ def broker_config(cfg: dict | None = None) -> dict:
     return {
         "enabled": raw.get("enabled", True) is not False,
         "base_url": str(raw.get("base_url") or "").strip() or None,
-        "timeout_sec": _positive_float(raw.get("timeout_sec"), 10.0),
+        # Twenty, not ten. Ten was chosen against how long the broker takes to
+        # answer, which is milliseconds; what actually breached it was the
+        # broker being contended, and the failure that produced — an empty
+        # provider set rendered as "no providers" — looked like a broker with
+        # nothing to route to rather than one that was merely busy.
+        "timeout_sec": _positive_float(raw.get("timeout_sec"), 20.0),
         "degradable_roles": DEFAULT_DEGRADABLE_ROLES,
         "protocol_tokens": _protocol_token_table(raw.get("protocol_tokens")),
     }
@@ -458,16 +463,30 @@ def quota_snapshot(cfg: dict | None = None) -> dict:
 
     The sidebar needs both on every poll and they come from the same `/v1/status`
     response; fetching twice would double the broker traffic for no new
-    information. Shape: `{"providers": {...}, "hard_reserve_percent": float|None}`.
+    information. Shape:
+    `{"providers": {...}, "hard_reserve_percent": float|None, "error": str|None}`.
+
+    **`error` is the difference between "none" and "could not ask".** An empty
+    `providers` dict is returned for both a broker that answered with nothing
+    and a broker that did not answer, and a caller that cannot tell them apart
+    reports a timeout as a broker with no quota anywhere — which is what the
+    sidebar did. Callers that only route (`provider_quota`) may keep treating
+    both as "nothing usable", since fail-closed is the same answer either way;
+    callers that *describe* the broker to a human must check this first.
     """
     client = broker_client(cfg)
-    empty = {"providers": {}, "hard_reserve_percent": None, "active_reservations": []}
+    empty = {
+        "providers": {},
+        "hard_reserve_percent": None,
+        "active_reservations": [],
+        "error": None,
+    }
     if client is None:
-        return empty
+        return {**empty, "error": "no broker client is configured"}
     try:
         status = client.status()
-    except BrokerError:
-        return empty
+    except BrokerError as exc:
+        return {**empty, "error": str(exc)[:300]}
 
     out: dict[str, dict] = {}
     for entry in status.get("providers") or []:
@@ -584,7 +603,7 @@ def quota_snapshot(cfg: dict | None = None) -> dict:
             "created_at": reservation.get("created_at") or row.get("created_at"),
         })
     return {"providers": out, "hard_reserve_percent": reserve,
-            "active_reservations": active}
+            "active_reservations": active, "error": None}
 
 
 def _positive_int(value, default: int) -> int:
