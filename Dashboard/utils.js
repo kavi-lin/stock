@@ -8,7 +8,7 @@
 
   // Semantic release tag shown in sidebar footer. Bump on meaningful releases.
   // Cache-busting is handled separately by dashboard_server.py (mtime injection).
-  const VERSION = 'V4.135.6';
+  const VERSION = 'V4.141.0';
 
   // V1.71.x — group field enables sectioned sidebar layout
   const NAV_ITEMS = [
@@ -720,8 +720,8 @@
                 ? '額度與模型都由 quota broker 分配；只有 task registry 已認證的 Claude、Agy、Codex 能執行。broker 不可用時不啟動 LLM。'
                 : 'The quota broker assigns every model; only task-registry-certified Claude, Agy, and Codex may run. No LLM starts while the broker is unavailable.'}</div>
               <div>${isZh
-                ? '長條 = 該家 <strong>5 小時窗口</strong>已用多少（越長越滿；沒有 5h 窗口的那家會標明退回哪個讀數）；虛線是 broker 的硬保留線，越過它就不再派工——派工看的是全部窗口的最緊值，不是這條長條。滑過任一家可看各窗口（5h / 週）各自的長條、重置時間與今日花費，`▸` 是長條讀的那個窗口。窗口百分比帶虛線底線的，代表該家只回報剩餘量、消費數字是推算的。'
-                : 'Each bar is how much of that provider\'s <strong>five-hour window</strong> is used — longer means fuller; a provider reporting no such window says which reading it fell back to. The dashed line is the broker hard reserve, past which nothing is dispatched — dispatch reads the tightest of all windows, not this bar. Hover a provider for a bar per window (5h / weekly), reset times and spend; `▸` is the window the bar reads. A dotted-underlined percentage means that provider reports only what is left, so consumption was inferred.'}</div>
+                ? '長條 = 該家 <strong>5 小時窗口</strong>已用多少（越長越滿；沒有 5h 窗口的那家會標明退回哪個讀數）；虛線是 broker 的硬保留線，越過它就不再派工——派工看的是全部窗口的最緊值，不是這條長條。滑過任一家可看各窗口（5h / 週）各自的長條、重置時間與今日花費，`▸` 是 broker 派工讀的最緊窗口；它不是 5h 時，「低於保留線」會標出是哪個窗口。窗口百分比帶虛線底線的，代表該家只回報剩餘量、消費數字是推算的。'
+                : 'Each bar is how much of that provider\'s <strong>five-hour window</strong> is used — longer means fuller; a provider reporting no such window says which reading it fell back to. The dashed line is the broker hard reserve, past which nothing is dispatched — dispatch reads the tightest of all windows, not this bar. Hover a provider for a bar per window (5h / weekly), reset times and spend; `▸` is the tightest window dispatch reads; when it is not the 5h one, a "below reserve" flag names it. A dotted-underlined percentage means that provider reports only what is left, so consumption was inferred.'}</div>
               <div>${isZh
                 ? '綠燈＝AI 投資委員會正在使用；藍燈＝其他程式正透過 broker 使用。每家 provider 只有一個互斥執行槽，本專案正在使用時只顯示綠燈。'
                 : 'Green = AI Investment Committee activity; blue = another program using the broker. Each provider has one exclusive execution slot, so local activity shows only green.'}</div>
@@ -849,11 +849,13 @@
           if (seg === 'session')    return '5h';
           if (seg === 'all_models') return '';
           if (seg === 'claude_gpt') return 'gpt';
-          if (seg === 'primary') {
+          if (seg === 'primary' || seg === 'secondary') {
+            const label = String(b.label || '').toLowerCase();
             const w = Number(b.window_minutes);
-            if (w >= 10080) return zh ? '週' : 'wk';
+            if (/five hour|5h|session/.test(label) || (w > 0 && w <= 360)) return '5h';
+            if (/weekly/.test(label) || w >= 10080) return zh ? '週' : 'wk';
             if (w >= 1440)  return zh ? '日' : 'day';
-            return zh ? '主池' : 'main';
+            return seg === 'secondary' ? (zh ? '週' : 'wk') : '5h';
           }
           return seg;
         }).filter(Boolean);
@@ -909,6 +911,24 @@
           !tightest || Number(bucket.remaining_percent) < Number(tightest.remaining_percent)
             ? bucket : tightest
         ), null);
+      };
+
+      // The bar reads the five-hour window for every provider, so the three
+      // rows measure the same thing side by side. Dispatch still follows the
+      // tightest window (bindingBucket); when that is a different, fuller
+      // window the row flags it instead of swapping what the bar means.
+      const headlineBucket = (info) => {
+        const buckets = Array.isArray(info.buckets) ? info.buckets : [];
+        const pool = String(info.routable_pool || '');
+        const routed = pool
+          ? buckets.filter(b => {
+              const name = String(b.name || '');
+              return name === pool || name.startsWith(`${pool}.`);
+            })
+          : buckets;
+        const fiveHour = (routed.length ? routed : buckets).find(b =>
+          Number.isFinite(Number(b.remaining_percent)) && bindingWindowLabel(b, false) === '5h');
+        return fiveHour || bindingBucket(info);
       };
 
       const bindingWindowLabel = (bucket, zh) => {
@@ -1027,11 +1047,15 @@
         // was left, so a long green bar meant "healthy" here and "nearly out"
         // in every other quota UI the operator sees. One direction, everywhere.
         const binding = bindingBucket(info);
-        const remaining = binding ? Number(binding.remaining_percent) : info.remaining_percent;
+        const headline = headlineBucket(info);
+        const remaining = headline ? Number(headline.remaining_percent) : info.remaining_percent;
         const has = remaining !== null && remaining !== undefined;
         const used = has ? 100 - Number(remaining) : null;
         const width = has ? Math.max(0, Math.min(100, used)) : 0;
-        const windowLabel = bindingWindowLabel(binding, zh);
+        const windowLabel = bindingWindowLabel(headline, zh);
+        // The reserve test follows dispatch, i.e. the tightest window.
+        const bindingUsed = binding ? 100 - Number(binding.remaining_percent) : used;
+        const bindingLabel = binding && binding !== headline ? bindingWindowLabel(binding, zh) : '';
         let state = 'ok', flag = '';
         // Only while the deadline is still ahead. The broker's `providers` row
         // keeps the last cooldown after it lapses, so a bare truthiness test
@@ -1041,11 +1065,12 @@
         // the worst mistake this panel can make, so the doubt goes that way.
         const coolUntil = Date.parse(info.cooldown_until || '');
         const cooling = Number.isFinite(coolUntil) && coolUntil > Date.now();
-        const bindingReset = bindingResetCountdown(info, binding);
+        const bindingReset = bindingResetCountdown(info, headline);
         if (cooling)                { state = 'cool'; flag = zh ? '冷卻中' : 'cooldown'; }
         else if (info.reserve_only) { state = 'cool'; flag = zh ? '保留區' : 'reserve'; }
-        else if (has && reserveLine !== null && width >= reserveLine) {
-          state = 'low'; flag = zh ? '低於保留線' : 'below reserve';
+        else if (bindingUsed !== null && reserveLine !== null && bindingUsed >= reserveLine) {
+          state = 'low';
+          flag = `${bindingLabel ? bindingLabel + ' ' : ''}${zh ? '低於保留線' : 'below reserve'}`;
         } else if (info.authenticated === false) {
           state = 'off'; flag = zh ? '未登入' : 'no auth';
         }
@@ -1093,10 +1118,10 @@
         // provider with independent pools (agy) has windows the broker will not
         // route against at all, and they sit in this list looking exactly like
         // the ones that bind.
-        // V4.135.5 — `▸` marks the binding window the sidebar bar is drawing,
-        // falling back to the routing pool only when no measurable bucket was
-        // reported. This list is where that number is checked, so the marker
-        // must identify the same constraint used by providerRow().
+        // `▸` marks the binding window broker dispatch reads (and the row's
+        // reserve flag), falling back to the routing pool only when no
+        // measurable bucket was reported. The sidebar bar itself always reads
+        // the 5h window (headlineBucket), so the two can differ.
         const binding = bindingBucket(info);
         const bindingName = String((binding || {}).name || '');
         const pool = String(info.routable_pool || '');
@@ -1786,6 +1811,7 @@
         const reasons = {
           broker_unavailable: isZh ? 'broker 暫時無回應，自動重試' : 'broker unavailable, retrying',
           quota_wait: isZh ? '等待額度釋放，自動重試' : 'waiting for quota, retrying',
+          stale_snapshot: isZh ? '額度讀數過期，broker 重新偵測中' : 'quota reading stale, re-probing',
           provider_busy: isZh ? '模型忙碌，等候空位' : 'provider busy, waiting',
           artifact_busy: isZh ? '同一產物執行中' : 'output busy, waiting',
         };
