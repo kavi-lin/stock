@@ -10,6 +10,7 @@ same upstream parsing defect.
 
 Public API (no underscore prefix):
 - normalize_screener_tickers(tickers) → list[str]
+- normalize_finvizfinance_user_agent() → None
 """
 
 from __future__ import annotations
@@ -18,7 +19,35 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-__all__ = ["normalize_screener_tickers"]
+__all__ = ["normalize_screener_tickers", "normalize_finvizfinance_user_agent"]
+
+
+def normalize_finvizfinance_user_agent() -> None:
+    """Collapse the whitespace run inside finvizfinance's default User-Agent.
+
+    finvizfinance 1.3.0 writes its User-Agent as a backslash-continued string
+    literal, so the value carries 13 consecutive spaces mid-string. finviz's
+    Cloudflare front answers that header with 403 Forbidden (the same UA with
+    single spaces gets 200), so every screener call failed outright.
+    theme-detector's finviz_performance_client applies the same repair inline.
+
+    Every finvizfinance module reads the module-global ``util.headers`` at
+    request time, so rebinding it once fixes all callers in the process.
+    Idempotent; a no-op when finvizfinance is absent or the UA is already clean.
+    """
+    try:
+        from finvizfinance import util as fvutil
+    except Exception:  # noqa: BLE001 — optional dependency
+        return
+    headers = getattr(fvutil, "headers", None)
+    if not isinstance(headers, dict):
+        return
+    ua = headers.get("User-Agent")
+    if not isinstance(ua, str) or not ua.strip():
+        return
+    clean = " ".join(ua.split())
+    if clean != ua:
+        fvutil.headers = {**headers, "User-Agent": clean}
 
 
 def normalize_screener_tickers(tickers) -> list[str]:

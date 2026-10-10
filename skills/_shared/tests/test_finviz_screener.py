@@ -72,3 +72,26 @@ class TestEdges:
 
     def test_values_are_stripped_of_whitespace(self):
         assert normalize_screener_tickers([" AADI ", "WWOLF"]) == ["ADI", "WOLF"]
+
+
+class TestUserAgentRepair:
+    """finvizfinance 1.3.0's UA carries a 13-space run; finviz answers it with 403."""
+
+    def test_collapses_whitespace_run(self, monkeypatch):
+        from finvizfinance import util as fvutil
+        from skills._shared.finviz_screener import normalize_finvizfinance_user_agent
+        monkeypatch.setattr(fvutil, "headers", {
+            "User-Agent": "Mozilla/5.0 (Macintosh)" + " " * 13 + "AppleWebKit/537.36",
+            "X-Keep": "1",
+        })
+        normalize_finvizfinance_user_agent()
+        assert fvutil.headers == {"User-Agent": "Mozilla/5.0 (Macintosh) AppleWebKit/537.36",
+                                  "X-Keep": "1"}
+
+    def test_clean_ua_is_left_alone(self, monkeypatch):
+        from finvizfinance import util as fvutil
+        from skills._shared.finviz_screener import normalize_finvizfinance_user_agent
+        original = {"User-Agent": "Mozilla/5.0 AppleWebKit/537.36"}
+        monkeypatch.setattr(fvutil, "headers", original)
+        normalize_finvizfinance_user_agent()
+        assert fvutil.headers is original

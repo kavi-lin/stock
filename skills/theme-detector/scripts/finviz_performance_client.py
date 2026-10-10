@@ -9,10 +9,15 @@ Data Source: finvizfinance.group.performance
 """
 
 import math
+import re
 import sys
 from typing import Optional
 
+import requests
+from calculators.industry_ranker import TIMEFRAME_WEIGHTS
+
 try:
+    from finvizfinance import util as fvutil
     from finvizfinance.group import performance as fvperf
 
     HAS_FINVIZFINANCE = True
@@ -50,33 +55,25 @@ def _parse_perf_value(val) -> Optional[float]:
 
     The finvizfinance library may return:
     - float already (e.g., 0.12 for 12%)
-    - string like "0.12%" or "12.34%"
+    - string like "0.12%" or "12.34%" (literal percentage text)
     - None or NaN
     """
-    if val is None:
+    if val is None or isinstance(val, bool):
         return None
-    try:
-        import math
-
-        if isinstance(val, float) and math.isnan(val):
-            return None
-    except (TypeError, ValueError):
-        pass
     if isinstance(val, (int, float)):
-        return float(val)
+        return float(val) if math.isfinite(val) else None
     if isinstance(val, str):
         cleaned = val.strip().rstrip("%")
         if not cleaned:
             return None
         try:
             num = float(cleaned)
-            # If original had % sign but value looks like it's already in
-            # decimal form (e.g., "0.12%"), it's ambiguous.
-            # finvizfinance typically returns decimal (0.12 = 12%).
-            # If string had % and value > 1, it's likely a percentage.
-            if "%" in val and abs(num) > 1:
-                return num / 100.0
-            return num
+            # A percent sign is unambiguous: "0.12%" means 0.0012 in decimal
+            # form. finvizfinance currently leaves Perf Week as percentage
+            # text while converting the other performance columns to floats.
+            if "%" in val:
+                num /= 100.0
+            return num if math.isfinite(num) else None
         except ValueError:
             return None
     return None
@@ -180,7 +177,67 @@ def cap_outlier_performances(industries: list[dict], z_threshold: float = 3.0) -
     return industries
 
 
-def get_sector_performance() -> list[dict]:
+class FinvizDataError(RuntimeError):
+    """FINVIZ could not provide a complete, usable performance table."""
+
+
+def _get_performance(group: str, *, strict: bool) -> list[dict]:
+    try:
+        if not HAS_FINVIZFINANCE:
+            raise FinvizDataError("finvizfinance is not installed; install finvizfinance")
+
+        # v1.3.0's multiline User-Agent contains 13 consecutive spaces. This
+        # triggers a Cloudflare challenge even though the public page is up.
+        # Normalize only whitespace, preserving the caller's other headers.
+        headers = fvutil.headers
+        user_agent = headers.get("User-Agent", "")
+        if not isinstance(user_agent, str) or not user_agent.strip():
+            raise FinvizDataError("FINVIZ User-Agent is missing or invalid")
+        fvutil.headers = {**headers, "User-Agent": " ".join(user_agent.split())}
+
+        df = fvperf.Performance().screener_view(group=group)
+        missing = set(COLUMN_MAP) - set(df.columns)
+        if missing:
+            raise FinvizDataError(f"FINVIZ {group} table missing columns: {', '.join(sorted(missing))}")
+        rows = _dataframe_to_dicts(df)
+        if not rows or len(rows) != len(df) or df["Name"].isna().any():
+            raise FinvizDataError(f"FINVIZ {group} table is empty or has unnamed rows")
+        if len({row["name"] for row in rows}) != len(rows):
+            raise FinvizDataError(f"FINVIZ {group} table contains duplicate names")
+        # Missing momentum inputs would crash the ranker or produce misleading
+        # scores. Optional longer horizons may legitimately be unavailable.
+        invalid = [row["name"] for row in rows
+                   if any(row.get(key) is None for key in TIMEFRAME_WEIGHTS)]
+        if invalid:
+            raise FinvizDataError(
+                f"FINVIZ {group} table missing finite momentum values: {', '.join(invalid[:3])}"
+            )
+        return rows
+    except Exception as exc:
+        if isinstance(exc, FinvizDataError):
+            error = exc
+        elif isinstance(exc, requests.exceptions.HTTPError):
+            # finvizfinance re-wraps HTTPError without retaining its Response.
+            status = getattr(getattr(exc, "response", None), "status_code", None)
+            match = re.search(r"\b([45]\d{2})\b", str(exc))
+            status = status or (match.group(1) if match else "unknown")
+            hint = "; access denied/site verification; check FINVIZ access and User-Agent" if str(status) == "403" else ""
+            error = FinvizDataError(f"FINVIZ {group} HTTP {status}{hint}")
+        elif isinstance(exc, requests.exceptions.Timeout):
+            error = FinvizDataError(f"FINVIZ {group} request timed out")
+        elif isinstance(exc, requests.exceptions.ConnectionError):
+            error = FinvizDataError(f"FINVIZ {group} connection failed; check DNS/network")
+        else:
+            error = FinvizDataError(f"FINVIZ {group} table could not be read ({type(exc).__name__})")
+        if strict:
+            if error is exc:
+                raise
+            raise error from exc
+        print(f"WARNING: {error}", file=sys.stderr)
+        return []
+
+
+def get_sector_performance(*, strict: bool = False) -> list[dict]:
     """Fetch sector-level performance data from FINVIZ.
 
     Returns:
@@ -188,40 +245,14 @@ def get_sector_performance() -> list[dict]:
         perf_6m, perf_1y, perf_ytd. Values are floats in decimal
         form (e.g., 0.05 = 5%).
     """
-    if not HAS_FINVIZFINANCE:
-        print(
-            "WARNING: finvizfinance not installed. Install with: pip install finvizfinance",
-            file=sys.stderr,
-        )
-        return []
-
-    try:
-        perf = fvperf.Performance()
-        df = perf.screener_view(group="Sector")
-        return _dataframe_to_dicts(df)
-    except Exception as e:
-        print(f"WARNING: Failed to fetch sector performance: {e}", file=sys.stderr)
-        return []
+    return _get_performance("Sector", strict=strict)
 
 
-def get_industry_performance() -> list[dict]:
+def get_industry_performance(*, strict: bool = False) -> list[dict]:
     """Fetch industry-level performance data from FINVIZ.
 
     Returns:
         List of dicts with same structure as get_sector_performance().
         Typically 140+ industries.
     """
-    if not HAS_FINVIZFINANCE:
-        print(
-            "WARNING: finvizfinance not installed. Install with: pip install finvizfinance",
-            file=sys.stderr,
-        )
-        return []
-
-    try:
-        perf = fvperf.Performance()
-        df = perf.screener_view(group="Industry")
-        return _dataframe_to_dicts(df)
-    except Exception as e:
-        print(f"WARNING: Failed to fetch industry performance: {e}", file=sys.stderr)
-        return []
+    return _get_performance("Industry", strict=strict)

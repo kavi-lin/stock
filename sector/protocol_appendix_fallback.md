@@ -19,12 +19,12 @@
 
 ### 層 A — market-breadth-analyzer（優先，量化）
 
-取 `./breadth_cache/market_breadth_*.json` 最新檔（FRESH = mtime < 10800s）：
+取 `sector/breadth_cache/market_breadth_*.json` 最新檔（FRESH = mtime < 10800s）：
 - FRESH → 直接讀
 - STALE 或缺失 → 執行（約 5 秒）後讀新檔：
   ```bash
-  python3 ~/.claude/skills/market-breadth-analyzer/scripts/market_breadth_analyzer.py \
-    --output-dir ./breadth_cache/
+  python3 skills/market-breadth-analyzer/scripts/market_breadth_analyzer.py \
+    --output-dir sector/breadth_cache/
   ```
 
 > `uptrend_ratio_overall` 不在此處取得，由 Phase 1 完成後取各產業 `uptrend_ratio` 平均值回填。
@@ -171,7 +171,7 @@ ls -la sector/cache/sector_earnings_pulse_*.json sector/cache/sector_smart_money
 | 1 | `market-sentiment-analyzer` script | ~6s |
 | 2 | `economic-calendar-fetcher` script | ~5s |
 | 3 | `earnings-calendar` script | ~5s |
-| 3b | `fetch_earnings_pulse.py`（含 grades-summary） | ~30s |
+| 3b | `fetch_earnings_pulse.py`（含 grades-consensus） | ~30s |
 | 3c | `fetch_smart_money.py` | ~25s |
 | 3d | `fetch_sector_news.py` | ~10s |
 | 3e | `fetch_general_news.py`（soft） | ~3s |

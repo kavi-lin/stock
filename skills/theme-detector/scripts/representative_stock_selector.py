@@ -33,7 +33,10 @@ _ROOT = Path(__file__).resolve().parents[3]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from skills._shared.finviz_screener import normalize_screener_tickers  # noqa: E402
+from skills._shared.finviz_screener import (  # noqa: E402
+    normalize_finvizfinance_user_agent,
+    normalize_screener_tickers,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -415,6 +418,8 @@ class RepresentativeStockSelector:
         }
 
         try:
+            # finvizfinance's stock UA has a 13-space run that finviz answers with 403.
+            normalize_finvizfinance_user_agent()
             o = Overview()
             o.set_filter(filters_dict=filters_dict)
             df = o.screener_view(order="Market Cap.", limit=limit, verbose=0, ascend=False)

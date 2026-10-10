@@ -17,14 +17,21 @@ Usage:
 import argparse
 import glob
 import json
+import math
 import os
 import sys
 import time
 from datetime import datetime
+from pathlib import Path
 from typing import Optional
 
 # Ensure scripts directory is on the path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
+from scripts._shared.theme_cache import THEME_CACHE_DIR, latest_theme_report
+
+DEFAULT_OUTPUT_DIR = str(THEME_CACHE_DIR)
 
 from calculators.heat_calculator import (
     breadth_signal_score,
@@ -227,21 +234,17 @@ INDUSTRY_TO_SECTOR: dict[str, str] = {
 # ---------------------------------------------------------------------------
 # Cache freshness helper
 # ---------------------------------------------------------------------------
-def _find_latest_cache() -> tuple:
-    """Find the most recent theme_detector_*.json in skills/theme-detector/cache/.
+def _resolve_output_dir(output_dir: str) -> str:
+    return str(Path(__file__).resolve().parents[3] / output_dir)
+
+
+def _find_latest_cache(output_dir: str = DEFAULT_OUTPUT_DIR) -> tuple:
+    """Find the latest readable primary report in the requested output directory.
 
     Returns (path_str_or_None, age_seconds_or_None).
     """
-    import glob as _glob
-
-    cache_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "cache")
-    pattern = os.path.join(cache_dir, "theme_detector_*.json")
-    files = _glob.glob(pattern)
-    if not files:
-        return None, None
-    latest = max(files, key=os.path.getmtime)
-    age = time.time() - os.path.getmtime(latest)
-    return latest, age
+    result = latest_theme_report(Path(_resolve_output_dir(output_dir)))
+    return (str(result[0]), result[2]) if result else (None, None)
 
 
 # ---------------------------------------------------------------------------
@@ -269,7 +272,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--output-dir",
-        default="skills/theme-detector/cache/",
+        default=DEFAULT_OUTPUT_DIR,
         help="Output directory for reports (default: skills/theme-detector/cache/)",
     )
     parser.add_argument(
@@ -510,19 +513,12 @@ def _get_theme_weighted_return(theme: dict) -> float:
 # Main orchestrator
 # ---------------------------------------------------------------------------
 def main():
-    # Lazy imports: these modules depend on pandas/numpy/yfinance/finvizfinance
-    # and are only needed at runtime, not when importing helpers for testing.
-    from calculators.theme_classifier import deduplicate_themes, enrich_vertical_themes
-    from config_loader import load_themes_config
-    from etf_scanner import ETFScanner
-    from finviz_performance_client import cap_outlier_performances, get_industry_performance
-    from uptrend_client import fetch_sector_uptrend_data, is_data_stale
-
     args = parse_args()
+    output_dir = _resolve_output_dir(args.output_dir)
 
     # --skip-if-fresh: script self-manages cache freshness, no external mtime check needed.
     if args.skip_if_fresh is not None:
-        latest_cache, cache_age = _find_latest_cache()
+        latest_cache, cache_age = _find_latest_cache(output_dir)
         if latest_cache is not None and cache_age is not None and cache_age < args.skip_if_fresh:
             print(
                 f"Cache is fresh ({int(cache_age)}s old < {args.skip_if_fresh}s threshold): {latest_cache}",
@@ -538,6 +534,13 @@ def main():
         else:
             print("No cache found. Running fresh...", file=sys.stderr)
 
+    # Fresh-cache exits avoid loading network clients and heavy dependencies.
+    from calculators.theme_classifier import deduplicate_themes, enrich_vertical_themes
+    from config_loader import load_themes_config
+    from etf_scanner import ETFScanner
+    from finviz_performance_client import FinvizDataError, cap_outlier_performances, get_industry_performance
+    from uptrend_client import fetch_sector_uptrend_data, is_data_stale
+
     # -----------------------------------------------------------------------
     # Step 0: Load theme configuration (YAML or inline fallback)
     # -----------------------------------------------------------------------
@@ -552,8 +555,8 @@ def main():
     data_mode = determine_data_mode(fmp_available, finviz_mode == "elite")
 
     print("Theme Detector starting...", file=sys.stderr)
-    print(f"  Data mode: {data_mode}", file=sys.stderr)
-    print(f"  FINVIZ mode: {finviz_mode}", file=sys.stderr)
+    print(f"  Stock data mode: {data_mode}", file=sys.stderr)
+    print(f"  Stock selection FINVIZ mode: {finviz_mode}", file=sys.stderr)
     print(f"  FMP API: {'available' if fmp_available else 'not available'}", file=sys.stderr)
     print(f"  Max themes: {args.max_themes}", file=sys.stderr)
     print(f"  Max stocks/theme: {args.max_stocks_per_theme}", file=sys.stderr)
@@ -572,7 +575,11 @@ def main():
     # Step 1: Fetch FINVIZ industry performance
     # -----------------------------------------------------------------------
     print("Fetching FINVIZ industry performance...", file=sys.stderr)
-    raw_industries = get_industry_performance()
+    try:
+        raw_industries = get_industry_performance(strict=True)
+    except FinvizDataError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        sys.exit(1)
     if not raw_industries:
         print("ERROR: No industry data from FINVIZ. Exiting.", file=sys.stderr)
         sys.exit(1)
@@ -695,7 +702,17 @@ def main():
             stock_metrics_map[m["symbol"]] = m
         # Backward compatible key (1 release coexistence)
         metadata["data_sources"]["yfinance_stocks"] = len(all_metrics)
-        print(f"  Got metrics for {len(all_metrics)} stocks", file=sys.stderr)
+        def has_metric(row, key):
+            value = row.get(key)
+            return isinstance(value, (int, float)) and math.isfinite(value)
+        coverage = {
+            "requested": len(all_symbols_list),
+            "with_any": sum(any(has_metric(row, key) for key in scanner.METRIC_KEYS) for row in all_metrics),
+            "fields": {key: sum(has_metric(row, key) for row in all_metrics) for key in scanner.METRIC_KEYS},
+        }
+        metadata["data_sources"]["stock_metric_coverage"] = coverage
+        print(f"  Usable stock metrics: {coverage['with_any']}/{coverage['requested']}; "
+              f"RSI: {coverage['fields']['rsi_14']}/{coverage['requested']}", file=sys.stderr)
 
     # -----------------------------------------------------------------------
     # Step 6: Fetch ETF volume ratios for each theme's proxy ETFs
@@ -921,15 +938,6 @@ def main():
 
     json_report = generate_json_report(scored_themes, industry_rankings, sector_uptrend, metadata)
     md_report = generate_markdown_report(json_report, top_n_detail=args.top)
-
-    # Resolve output directory relative to repo root if relative
-    output_dir = args.output_dir
-    if not os.path.isabs(output_dir):
-        # Look for reports/ relative to repo root
-        repo_root = os.path.dirname(
-            os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        )
-        output_dir = os.path.join(repo_root, output_dir)
 
     paths = save_reports(json_report, md_report, output_dir)
 

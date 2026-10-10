@@ -81,6 +81,7 @@ _LAST_429_PATH = Path(
 # Intra-process serialization of the lock section (flock alone does not exclude
 # threads of the same process reliably).
 _THREAD_LOCK = threading.Lock()
+_REQUEST_STATS = threading.local()
 
 _AUTH_BLOCK = (401, 402, 403)  # permanent paid/auth block — never retry, return None
 
@@ -237,8 +238,13 @@ def _request(url: str, params: dict, *, retries: int, timeout: int) -> tuple[Any
     return immediately. 429 → exponential backoff + re-acquire. Network/5xx →
     short sleep + retry."""
     last_status: int | None = None
+    _REQUEST_STATS.attempts = 0
+    _REQUEST_STATS.queue_seconds = 0.0
     for attempt in range(retries + 1):
+        waiting = time.monotonic()
         acquire_slot(block=True)
+        _REQUEST_STATS.queue_seconds += time.monotonic() - waiting
+        _REQUEST_STATS.attempts += 1
         try:
             r = requests.get(url, params=params, timeout=timeout)
             last_status = r.status_code
@@ -291,6 +297,29 @@ def get(
         detail = f"; diagnostic={_LAST_429_PATH}" if status == 429 else ""
         sys.exit(f"[ERROR] FMP {path} failed (status={status}{detail})")
     return data
+
+
+def get_with_status(path, params=None, *, stable=True, retries=1, timeout=20):
+    """Structured outcome for callers that must distinguish unavailable sources.
+
+    The transport still uses the same cross-process limiter. Never return URLs,
+    credentials or exception text in the persisted metadata.
+    """
+    key = os.environ.get("FMP_API_KEY")
+    if not key:
+        return {"data": None, "status": "auth_missing", "http_status": None}
+    data, code = _request(build_url(path, stable=stable),
+                          {**(params or {}), "apikey": key}, retries=retries, timeout=timeout)
+    status = ("permission_denied" if code in _AUTH_BLOCK else
+              "rate_limited" if code == 429 else
+              "transport_error" if data is None else
+              "empty" if data in ([], {}) else "ok")
+    if isinstance(data, dict) and any(k in data for k in ("Error Message", "error", "Error")):
+        status = "provider_error"
+        data = None
+    return {"data": data, "status": status, "http_status": code,
+            "http_calls": getattr(_REQUEST_STATS, "attempts", None),
+            "queue_seconds": getattr(_REQUEST_STATS, "queue_seconds", None)}
 
 
 def get_url(

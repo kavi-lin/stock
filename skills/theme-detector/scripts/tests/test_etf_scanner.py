@@ -698,6 +698,56 @@ class TestSymbolLevelFallback:
 # ---------------------------------------------------------------------------
 # TestBackendStats
 # ---------------------------------------------------------------------------
+def test_timeout_retains_completed_chunks_and_cancels_stock_requests(monkeypatch):
+    import threading
+    scanner = ETFScanner(fmp_api_key="test_key", rate_limit_sec=0)
+    scanner.STOCK_CHUNK_SIZE = 1
+    release = threading.Event()
+    finished = threading.Event()
+    calls = []
+
+    def compute(symbols):
+        if symbols == ["AAPL"]:
+            return [{"symbol": "AAPL", "rsi_14": 61.0, "pe_ratio": 30}]
+        scanner._fmp_quote_cache["MSFT"] = {"price": 100, "yearHigh": 125, "yearLow": 50}
+        release.wait(2)
+        try:
+            assert scanner._fmp_request("quote", "CANCELLED") is None
+        finally:
+            finished.set()
+        return []
+
+    def request(*args, **kwargs):
+        calls.append(kwargs.get("params", {}).get("symbol"))
+        return MagicMock(status_code=200, json=lambda: [{"symbol": "ETF"}])
+
+    monkeypatch.setattr(scanner, "_batch_stock_metrics_impl", compute)
+    monkeypatch.setattr("etf_scanner._requests_lib.get", request)
+    try:
+        rows = scanner.batch_stock_metrics(["AAPL", "MSFT", "LATE"], timeout_sec=0.1)
+        assert rows[0]["rsi_14"] == 61.0
+        assert rows[1]["dist_from_52w_high"] == 0.2
+        assert rows[2]["rsi_14"] is None
+        assert scanner.backend_stats()["stock"]["timed_out"] == 1
+        scanner._current_stats_context = "etf"
+        assert scanner._fmp_request("quote", "ETF") is not None
+    finally:
+        release.set()
+    assert finished.wait(1)
+    assert calls == ["ETF"]
+    assert scanner.backend_stats()["etf"]["fmp_calls"] == 1
+
+
+def test_worker_failure_returns_explicit_partial_results(monkeypatch, capsys):
+    scanner = ETFScanner(fmp_api_key="test_key", rate_limit_sec=0)
+    def fail(symbols):
+        raise RuntimeError("do not echo provider internals")
+    monkeypatch.setattr(scanner, "_batch_stock_metrics_impl", fail)
+    rows = scanner.batch_stock_metrics(["AAPL"])
+    assert len(rows) == 1 and rows[0]["rsi_14"] is None
+    assert "stock metric worker failed (RuntimeError)" in capsys.readouterr().err
+
+
 class TestBackendStats:
     """Tests for backend_stats() tracking."""
 

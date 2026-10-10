@@ -336,6 +336,7 @@ def build_payload(ticker: str, *, no_cache: bool = False) -> dict:
     return {
         "ticker": ticker.upper(),
         "asof": dt.date.today().isoformat(),
+        **__import__("fmp_client").source_provenance(ticker),
         "comps_implied_value": anchor,       # ← comps_implied anchor
         "anchor_detail": detail,
         "universe": universe,
@@ -360,7 +361,8 @@ def main():
     # Persist payload for downstream consumers (ic-memo-writer --initiation fact pack)
     payload_cache = SCRIPT_DIR.parent / "cache" / f"{payload['ticker']}_comps_payload.json"
     payload_cache.parent.mkdir(exist_ok=True)
-    payload_cache.write_text(json.dumps(payload, ensure_ascii=False, indent=1))
+    from investment.scripts.run_data import atomic_json
+    atomic_json(payload_cache, payload)
 
     if args.xlsx:
         try:

@@ -11,6 +11,7 @@ FMP API key is optional; without it, yfinance is used exclusively.
 
 import os
 import sys
+import threading
 import time
 from typing import Any, Optional
 
@@ -77,6 +78,8 @@ class ETFScanner:
 
     FMP_HIST_BATCH_SIZE = 1   # stable/historical-price-eod/full: single symbol only (batch = 402)
     FMP_QUOTE_BATCH_SIZE = 1  # stable/quote: single symbol only under current plan (batch = 402)
+    STOCK_CHUNK_SIZE = 10
+    METRIC_KEYS = ("pe_ratio", "rsi_14", "dist_from_52w_high", "dist_from_52w_low")
 
     def __init__(self, fmp_api_key: Optional[str] = None, rate_limit_sec: float = 0.3):
         self._cache: dict[str, pd.DataFrame] = {}
@@ -93,7 +96,20 @@ class ETFScanner:
             "stock": {"fmp_calls": 0, "fmp_failures": 0, "yf_calls": 0, "yf_fallbacks": 0},
             "etf": {"fmp_calls": 0, "fmp_failures": 0, "yf_calls": 0, "yf_fallbacks": 0},
         }
-        self._current_stats_context: str = "stock"
+        self._request_context = threading.local()
+        self._current_stats_context = "stock"
+
+    @property
+    def _current_stats_context(self) -> str:
+        return getattr(self._request_context, "stats_context", "stock")
+
+    @_current_stats_context.setter
+    def _current_stats_context(self, value: str) -> None:
+        self._request_context.stats_context = value
+
+    def _request_cancelled(self) -> bool:
+        event = getattr(self._request_context, "cancel", None)
+        return event is not None and event.is_set()
 
     def backend_stats(self) -> dict[str, Any]:
         """Return backend usage statistics with both flat and nested formats.
@@ -141,7 +157,7 @@ class ETFScanner:
         Returns:
             Parsed JSON or None on all failures.
         """
-        if not HAS_REQUESTS or not self._fmp_api_key:
+        if self._request_cancelled() or not HAS_REQUESTS or not self._fmp_api_key:
             return None
         # Once we've confirmed the account is over quota, skip the HTTP round-trip
         # entirely — every call would return 429 and just waste ~0.7s each. Caller
@@ -157,6 +173,8 @@ class ETFScanner:
         for base_url, url_builder in _FMP_ENDPOINTS[endpoint_key]:
             url, final_params = url_builder(base_url, symbols_str, dict(params))
             self._fmp_rate_limit()
+            if self._request_cancelled():
+                return None
             self._stats[ctx]["fmp_calls"] += 1
             try:
                 resp = _requests_lib.get(
@@ -299,6 +317,10 @@ class ETFScanner:
         """Compute stock metrics using FMP quote + historical data."""
         quotes = self._fetch_fmp_quotes(symbols)
         historical = self._fetch_fmp_historical(symbols, timeseries=20)
+        return self._metrics_from_fmp(symbols, quotes, historical)
+
+    def _metrics_from_fmp(self, symbols: list[str], quotes: dict, historical: dict) -> list[dict]:
+        """Pure assembly also preserves already fetched quotes after a timeout."""
 
         results = []
         for s in symbols:
@@ -396,6 +418,8 @@ class ETFScanner:
 
     def _batch_stock_metrics_yfinance(self, symbols: list[str]) -> list[dict]:
         """Batch-download stock data and compute metrics via yfinance."""
+        if self._request_cancelled():
+            return []
         if not HAS_YFINANCE:
             print("WARNING: yfinance not installed.", file=sys.stderr)
             return [
@@ -428,6 +452,8 @@ class ETFScanner:
 
         results = []
         for symbol in symbols:
+            if self._request_cancelled():
+                break
             entry = {
                 "symbol": symbol,
                 "rsi_14": None,
@@ -462,7 +488,8 @@ class ETFScanner:
                 entry["dist_from_52w_high"] = distances["dist_from_52w_high"]
                 entry["dist_from_52w_low"] = distances["dist_from_52w_low"]
 
-                entry["pe_ratio"] = self._get_pe_ratio(symbol)
+                if not self._request_cancelled():
+                    entry["pe_ratio"] = self._get_pe_ratio(symbol)
 
             except Exception as e:
                 print(f"WARNING: Metrics failed for {symbol}: {e}", file=sys.stderr)
@@ -530,49 +557,71 @@ class ETFScanner:
 
         return result
 
-    def batch_stock_metrics(self, symbols: list[str]) -> list[dict]:
+    def batch_stock_metrics(self, symbols: list[str], *, timeout_sec: Optional[float] = None) -> list[dict]:
         """Batch compute stock metrics with FMP -> yfinance symbol-level fallback.
 
         Wraps the whole compute in a daemon-thread hard timeout because both
         the FMP phase-2 per-symbol retry loop (up to N × 15s) and yfinance's
         threaded download (timeout= ignored when threads=True) can pin the
-        caller for minutes when endpoints are slow. Abandoning returns Nones
-        so downstream scoring degrades gracefully instead of blocking the
-        whole sector protocol.
+        caller for minutes when endpoints are slow. Small chunks publish
+        completed metrics incrementally. On timeout, retain those results and
+        quote-derived fields, and stop the worker from starting more requests.
+        An in-flight third-party request may finish after the deadline.
         """
         if not symbols:
             return []
 
-        import threading
-        result_bucket = {"out": None, "done": False}
+        budget_sec = min(120, max(30, int(len(symbols) * 1.2))) if timeout_sec is None else timeout_sec
+        if budget_sec <= 0:
+            raise ValueError("timeout_sec must be positive")
+        cancel = threading.Event()
+        lock = threading.Lock()
+        completed = {}
+        errors = []
 
         def _compute():
+            self._request_context.cancel = cancel
             try:
-                result_bucket["out"] = self._batch_stock_metrics_impl(symbols)
+                for offset in range(0, len(symbols), self.STOCK_CHUNK_SIZE):
+                    if cancel.is_set():
+                        break
+                    rows = self._batch_stock_metrics_impl(symbols[offset:offset + self.STOCK_CHUNK_SIZE])
+                    with lock:
+                        completed.update({row["symbol"]: row for row in rows})
+            except Exception as exc:
+                errors.append(type(exc).__name__)
             finally:
-                result_bucket["done"] = True
+                self._request_context.cancel = None
 
         # Budget: roughly 1s per symbol (accounting for FMP phase-2 retries) +
         # 30s floor, hard-capped at 120s. 74 symbols → 90s.
-        budget_sec = min(120, max(30, int(len(symbols) * 1.2)))
         worker = threading.Thread(target=_compute, daemon=True)
         worker.start()
         worker.join(timeout=budget_sec)
 
-        if not result_bucket["done"]:
+        timed_out = worker.is_alive()
+        if timed_out:
+            cancel.set()
+        self._stats["stock"]["timed_out"] = int(timed_out)
+        with lock:
+            results = dict(completed)
+        quotes = dict(self._fmp_quote_cache)
+        mapped_quotes = {s: quotes.get(self._normalize_symbol_for_fmp(s), {}) for s in symbols}
+        out = self._metrics_from_fmp(symbols, mapped_quotes, {})
+        for row in out:
+            for key, value in results.get(row["symbol"], {}).items():
+                if value is not None:
+                    row[key] = value
+        if timed_out:
+            covered = sum(any(row.get(key) is not None for key in self.METRIC_KEYS) for row in out)
             print(
                 f"WARNING: batch_stock_metrics exceeded {budget_sec}s budget for "
-                f"{len(symbols)} symbols; abandoning worker (daemon thread will die with process). "
-                f"Downstream scorer will see all-None metrics for these symbols.",
+                f"{len(symbols)} symbols; retaining data for {covered} symbols and cancelling pending requests.",
                 file=sys.stderr,
             )
-            return [
-                {"symbol": s, "rsi_14": None, "dist_from_52w_high": None,
-                 "dist_from_52w_low": None, "pe_ratio": None}
-                for s in symbols
-            ]
-
-        return result_bucket["out"] or []
+        if errors:
+            print(f"WARNING: stock metric worker failed ({errors[0]}); retaining partial data", file=sys.stderr)
+        return out
 
     def _batch_stock_metrics_impl(self, symbols: list[str]) -> list[dict]:
         """Inner impl — the original FMP→yfinance fallback body, now called
@@ -581,7 +630,7 @@ class ETFScanner:
         # Phase 1: FMP results (accept any non-empty result)
         fmp_results: dict[str, dict] = {}
         fmp_attempted = self._fmp_api_key and HAS_REQUESTS
-        metric_keys = ["pe_ratio", "rsi_14", "dist_from_52w_high", "dist_from_52w_low"]
+        metric_keys = self.METRIC_KEYS
         if fmp_attempted:
             fmp_list = self._batch_stock_metrics_fmp(symbols)
             for m in fmp_list:
@@ -595,7 +644,7 @@ class ETFScanner:
             s for s in symbols if s not in fmp_results or fmp_results[s].get("rsi_14") is None
         ]
         yf_results: dict[str, dict] = {}
-        if missing_rsi:
+        if missing_rsi and not self._request_cancelled():
             if fmp_attempted:
                 self._stats["stock"]["yf_fallbacks"] += 1
             yf_list = self._batch_stock_metrics_yfinance(missing_rsi)

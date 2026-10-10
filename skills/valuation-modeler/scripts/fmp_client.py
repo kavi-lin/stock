@@ -7,7 +7,8 @@ this module only adds the skill-local cache layer and the endpoint set the
 DCF / comps engines need. Return contract mirrors company_context: parsed
 JSON on success, None on any failure (caller degrades gracefully).
 
-Cache: skills/valuation-modeler/cache/<TICKER>_<KIND>.json  TTL = 24h
+Source cache: skills/earnings-analyst/cache/sources/{financial,market,quote}/
+Financial 7d, market 24h, quote 5m; payload compatibility files remain skill-local.
 """
 from __future__ import annotations
 
@@ -54,19 +55,37 @@ def _write_cache(ticker: str, kind: str, data: Any) -> None:
         print(f"WARN: cache write failed {ticker}_{kind}: {e}", file=sys.stderr)
 
 
+_SOURCE_CLIENTS = {}
+
+
+def source_client(ticker):
+    from skills._shared.investment_data import SourceCache, active_cache
+    ticker = ticker.upper()
+    if active_cache() is not None:
+        _SOURCE_CLIENTS[ticker] = active_cache()
+        return _SOURCE_CLIENTS[ticker]
+    if ticker not in _SOURCE_CLIENTS:
+        cache = SourceCache(BASE_DIR / "skills/earnings-analyst/cache/sources")
+        income = cache.get("/stable/income-statement", {"symbol": ticker, "period": "quarter", "limit": 8}, refresh=True)
+        cache.period = income[0].get("date") if income else None
+        _SOURCE_CLIENTS[ticker] = cache
+    return _SOURCE_CLIENTS[ticker]
+
+
+def source_provenance(ticker):
+    cache = _SOURCE_CLIENTS.get(ticker.upper())
+    if cache is None:
+        return {"source_fetched_at": None, "financial_period": None, "source_records": {}}
+    # A calculation can be new while its source data is old. Keep the oldest
+    # market retrieval clock, and retain every underlying source separately.
+    times = [r["fetched_at"] for r in cache.sources.values() if r.get("status") == "ok" and r["kind"] != "financial"]
+    return {"source_fetched_at": min(times) if times else None,
+            "financial_period": cache.period, "source_records": dict(cache.sources)}
+
+
 def _fetch(ticker: str, kind: str, path: str, params: dict, *, no_cache: bool = False) -> Any | None:
-    """Cache-aware fetch. Failures are cached as None-marker {} to avoid
-    hammering FMP on repeated degraded runs within the TTL window."""
-    if not no_cache:
-        cached = _read_cache(ticker, kind)
-        if cached is not None:
-            return cached if cached != {} else None
-    data = fmp_pool.get(path, {"symbol": ticker.upper(), **params})
-    if data:
-        _write_cache(ticker, kind, data)
-        return data
-    _write_cache(ticker, kind, {})
-    return None
+    cache = source_client(ticker)
+    return cache.get("/stable/" + path, {"symbol": ticker.upper(), **params}, refresh=no_cache)
 
 
 # ── endpoint set ──────────────────────────────────────────────────────────

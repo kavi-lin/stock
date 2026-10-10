@@ -132,28 +132,19 @@ _CAL_CACHE = {}
 def fetch_fmp(ticker, api_key, session):
     """Audit-only source. Returns (data_dict, status_str)."""
     out = {"_source": "fmp"}
-    base = "https://financialmodelingprep.com/stable"
     status = "ok"
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+    from skills._shared.investment_data import SourceCache, fmp_result
+    period = os.getenv("AIC_INVESTMENT_PERIOD")
+    cache = SourceCache(Path(__file__).resolve().parents[2] / "earnings-analyst/cache/sources", period=period) if period else None
 
     def _get(path, params=None):
         nonlocal status
-        params = dict(params or {})
-        params["apikey"] = api_key
-        try:
-            r = session.get(f"{base}/{path}", params=params, timeout=30)
-            if r.status_code == 402:
-                status = "quota_exceeded"
-                return None
-            if r.status_code in (401, 403):
-                status = "unauthorized"
-                return None
-            if r.status_code != 200:
-                status = f"http_{r.status_code}"
-                return None
-            return r.json()
-        except requests.exceptions.RequestException:
-            status = "network_error"
+        result = fmp_result("/stable/" + path, params, cache=cache, timeout=30)
+        if result["status"] != "ok":
+            status = result["status"]
             return None
+        return result["data"]
 
     q = _get("quote", {"symbol": ticker})
     if isinstance(q, list) and q:
@@ -207,6 +198,9 @@ def fetch_fmp(ticker, api_key, session):
     else:
         status = status_before_cal
 
+    if cache is not None:
+        out["source_records"] = cache.sources
+        out["source_telemetry"] = cache.metrics
     return out, status
 
 
@@ -292,7 +286,8 @@ def main():
         print(f"... {t}", file=sys.stderr)
         bundle = fetch_dual(t, client, fmp_key, fmp_session)
         path = out_dir / f"{t}.json"
-        path.write_text(json.dumps(bundle, indent=2, default=str))
+        from investment.scripts.run_data import atomic_json
+        atomic_json(path, bundle)
 
     print(f"\nWrote {len(tickers)} files to {out_dir}", file=sys.stderr)
     print(f"Finnhub stats: {client.stats()}", file=sys.stderr)

@@ -62,26 +62,22 @@ This skill detects and ranks trending market themes by analyzing cross-sector mo
 Check for required API keys and dependencies:
 
 ```bash
-# Check for FINVIZ Elite API key (optional but recommended)
-echo $FINVIZ_API_KEY
-
-# Check for FMP API key (optional, used for valuation metrics)
-echo $FMP_API_KEY
+# Show presence only; never print API keys.
+python3 -c 'import os; print({k: bool(os.getenv(k)) for k in ("FINVIZ_API_KEY", "FMP_API_KEY")})'
 ```
 
 **Requirements:**
-- **Python 3.7+** with `requests`, `beautifulsoup4`, `lxml`, `pandas`, `numpy`, `yfinance`
+- **Python 3.10+** with `requests`, `beautifulsoup4`, `lxml`, `pandas`, `numpy`, `yfinance`, `finvizfinance`
 - **FINVIZ Elite API key** (recommended for full industry coverage and speed)
 - **FMP API key** (optional, for P/E ratio valuation data)
 - Without FINVIZ Elite, the skill uses public FINVIZ scraping (limited to ~20 stocks per industry, slower rate limits)
 
 **Optional dependencies:**
-- `finvizfinance` (for FINVIZ Elite mode)
 - `PyYAML` (for `--themes-config` custom themes)
 
 **Installation:**
 ```bash
-pip install requests beautifulsoup4 lxml pandas numpy yfinance
+pip install requests beautifulsoup4 lxml pandas numpy yfinance finvizfinance
 ```
 
 ### Step 2: Execute Theme Detection Script
@@ -126,6 +122,20 @@ python3 skills/theme-detector/scripts/theme_detector.py \
 - Public FINVIZ mode: ~5-8 minutes (rate-limited scraping)
 
 ### Step 3: Read and Parse Detection Results
+
+**Integrated cache command**: `python3 skills/theme-detector/scripts/theme_detector.py --skip-if-fresh 10800`.
+Default output is `skills/theme-detector/cache/`; an explicit `--output-dir` is used for both freshness checks and output.
+Only readable primary `theme_detector_<timestamp>.json` reports qualify; narrative sidecars and incomplete JSON never satisfy freshness.
+JSON is published atomically after the Markdown report. A failed refresh does not rewrite the previous cache's date.
+
+Industry performance always uses FINVIZ public group data. `--finviz-mode` applies to optional dynamic stock selection;
+the `Stock data mode` label describes stock metrics, not an alternative industry-performance source.
+The client normalizes User-Agent whitespace (finvizfinance 1.3.0 ships a multiline value that can trigger HTTP 403),
+validates required columns and finite momentum inputs, and emits a specific error before scoring unusable data.
+
+Stock metrics retain the 120-second maximum budget. Completed chunks and already fetched quote fields survive a timeout;
+pending work stops starting new requests, while one in-flight third-party request may still finish.
+`metadata.data_sources.stock_metric_coverage` reports actual coverage; report data-quality flags expose missing RSI and timeouts.
 
 The script generates two output files:
 - `theme_detector_YYYY-MM-DD_HHMMSS.json` - Structured data for programmatic use
@@ -308,7 +318,7 @@ Save the report to `reports/` directory.
 | Stocks per industry | Full universe | ~20 stocks (page 1) |
 | Rate limiting | 0.5s between requests | 2.0s between requests |
 | Data freshness | Real-time | 15-min delayed |
-| API key required | Yes ($39.50/mo) | No |
+| API key required for stock selection | Yes | No |
 | Execution time | ~2-3 minutes | ~5-8 minutes |
 
 ### Direction Detection Logic

@@ -183,13 +183,10 @@ def _fetch_ticker_signals(ticker: str) -> dict:
 
     if not insider_loaded and fmp_key:
         try:
-            r = requests.get(
-                "https://financialmodelingprep.com/stable/insider-trading/statistics",
-                params={"symbol": ticker, "apikey": fmp_key},
-                timeout=TIMEOUT,
-            )
-            if r.status_code == 200:
-                arr = r.json()
+            from skills._shared.investment_data import fmp_result
+            result = fmp_result("/stable/insider-trading/statistics", {"symbol": ticker}, timeout=TIMEOUT)
+            if result["status"] == "ok":
+                arr = result["data"]
                 if isinstance(arr, list) and arr:
                     arr.sort(key=lambda x: (x.get("year", 0), x.get("quarter", 0)), reverse=True)
                     out["insider_stats"] = [{

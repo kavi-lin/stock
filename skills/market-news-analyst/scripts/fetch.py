@@ -22,6 +22,9 @@ import json
 import os
 import sys
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 import yfinance as yf
 
@@ -179,24 +182,24 @@ def _fmp_get(path: str, api_key: str, params: dict | None = None):
     if not HAS_REQUESTS or not api_key:
         return None
     try:
-        p = dict(params or {})
-        p["apikey"] = api_key
-        r = requests.get(f"{FMP_BASE}/stable/{path}", params=p, timeout=8)
-        if r.status_code != 200:
-            return None
-        return r.json()
+        from skills._shared.investment_data import fmp_result
+        result = fmp_result("/stable/" + path, params, retries=0, timeout=8)
+        return result["data"] if result["status"] == "ok" else None
     except Exception:
         return None
 
 
-def _fmp_grades_historical(ticker: str, api_key: str, since: datetime):
+def _fmp_grade_events(ticker: str, api_key: str, since: datetime):
     """Historical analyst grades — upgrades/downgrades/initiations/maintains.
     Returns list of {date, action, firm, new_grade, previous_grade, url}."""
-    data = _fmp_get("grades-historical", api_key, {"symbol": ticker, "limit": 50})
+    # grades-historical is monthly recommendation counts, not event records.
+    data = _fmp_get("grades", api_key, {"symbol": ticker})
     if not isinstance(data, list):
         return []
     rows = []
     for it in data:
+        if not isinstance(it, dict) or not all(it.get(k) for k in ("action", "gradingCompany", "newGrade")):
+            continue
         d = it.get("date")
         if not d:
             continue
@@ -503,7 +506,7 @@ def fetch(ticker: str, hours: int, use_fmp: bool = True):
         fmp_stock_news + fmp_releases + finviz_news + yf_items + fh_news
     )
 
-    # finviz analyst actions kept as fallback when FMP grades-historical empty
+    # Keep finviz actions as fallback when FMP has no usable event records.
     finviz_analyst_actions = _finviz_analyst_actions(ticker, analyst_since)
 
     fmp_calls, fmp_failures = 0, 0
@@ -514,9 +517,9 @@ def fetch(ticker: str, hours: int, use_fmp: bool = True):
     sec_filings = []
     sec_8k_filings = []
     if api_key:
-        # FMP calls: news/stock + press-releases + grades-historical + grades-consensus
+        # FMP calls: news/stock + press-releases + grades + grades-consensus
         # + price-target (2 calls) + grades-news + sec-filings + sec-filings-8k = 9
-        fmp_analyst_grades = _fmp_grades_historical(ticker, api_key, analyst_since)
+        fmp_analyst_grades = _fmp_grade_events(ticker, api_key, analyst_since)
         fmp_consensus      = _fmp_grades_consensus(ticker, api_key)
         fmp_price_target   = _fmp_price_target(ticker, api_key)        # 2 calls
         fmp_grades_news    = _fmp_grades_news(ticker, api_key, news_since)
@@ -526,10 +529,10 @@ def fetch(ticker: str, hours: int, use_fmp: bool = True):
         if failed:
             fmp_failures = 1
 
-    # analyst_actions: prefer FMP grades-historical (structured); fallback finviz
+    # analyst_actions: prefer FMP grade events; fallback finviz
     if fmp_analyst_grades:
         analyst_actions_primary = fmp_analyst_grades
-        analyst_actions_source = "fmp_grades_historical"
+        analyst_actions_source = "fmp_grades"
     else:
         analyst_actions_primary = finviz_analyst_actions
         analyst_actions_source = "finviz_fallback"

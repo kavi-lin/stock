@@ -51,6 +51,9 @@ def _fmp_get(path: str, params: dict, *, timeout: int = 12):
     retried with exponential backoff instead of returning None immediately —
     safe because every _fetch_* consumer already None-tolerates.
     """
+    from skills._shared.investment_data import active_cache
+    if active_cache() is not None:
+        return active_cache().get("/stable/" + path, params, retries=2, timeout=timeout)
     return _fmp_pool.get(path, params, stable=True, retries=2, timeout=timeout)
 
 
@@ -492,9 +495,10 @@ def get_supplementary_bundle(
       - NEVER pass to Technical lane (OHLCV-only, no need).
     """
     ticker = ticker.upper()
+    from skills._shared.investment_data import active_cache
     cache_path = CACHE_DIR / f"{ticker}_{date.today().isoformat()}_supp.json"
 
-    if not force and cache_path.exists():
+    if active_cache() is None and not force and cache_path.exists():
         age = time.time() - cache_path.stat().st_mtime
         if age < CACHE_TTL:
             print(f"[fmp_supp] cache hit: {ticker}", file=sys.stderr)
@@ -579,8 +583,12 @@ def get_supplementary_bundle(
         },
     }
 
-    with open(cache_path, "w") as f:
-        json.dump(bundle, f, indent=2)
+    if active_cache() is not None:
+        bundle["source_records"] = dict(active_cache().sources)
+        bundle["source_telemetry"] = dict(active_cache().metrics)
+    else:
+        with open(cache_path, "w") as f:
+            json.dump(bundle, f, indent=2)
     size = len(json.dumps(bundle))
     print(
         f"[fmp_supp] wrote {cache_path.name} ({size:,} bytes) "

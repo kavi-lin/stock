@@ -16,10 +16,11 @@ Free-tier limitations (HTTP 403 = FinnhubPremiumRequired will be raised):
 - /news-sentiment        → PREMIUM ONLY.
 - /stock/institutional-ownership → PREMIUM ONLY.
 
-Free endpoints: quote, profile2, metric, financials-reported, filings,
+Core endpoints: quote, profile2, metric, financials-reported, filings,
   company-news, calendar/earnings, stock/earnings, insider-transactions,
-  stock/recommendation, stock/price-target, stock/upgrade-downgrade,
-  stock/dividend2, stock/splits, calendar/ipo.
+  stock/recommendation, calendar/ipo.
+Optional price targets, upgrades, dividends and splits require paid access on
+  the account audited 2026-10-04; endpoint availability depends on entitlement.
 """
 import os
 import sys
@@ -347,7 +348,7 @@ class FinnhubClient:
         return self._get(
             "splits",
             f"sp_{ticker}_{start}_{end}",
-            "/stock/splits",
+            "/stock/split",
             {"symbol": ticker, "from": start, "to": end},
         )
 

@@ -134,14 +134,16 @@ def fetch_pt_consensus(ticker: str) -> dict:
 
 def fetch_grades_recent(ticker: str, days_back: int = 30) -> dict:
     """Count recent rating upgrades vs downgrades."""
-    data = _fmp_get("grades-historical", {"symbol": ticker, "limit": 20}) or []
-    if not data:
+    data = _fmp_get("grades", {"symbol": ticker}) or []
+    if not isinstance(data, list) or not data:
         return {"upgrades": 0, "downgrades": 0, "since_days": days_back}
     cutoff = (date.today() - timedelta(days=days_back)).isoformat()
     up = down = 0
     for r in data:
-        d = r.get("date", "")
-        if d < cutoff:
+        if not isinstance(r, dict):
+            continue
+        d = (r.get("date") or "")[:10]
+        if not cutoff <= d <= date.today().isoformat():
             continue
         action = (r.get("action") or "").lower()
         if action == "upgrade":

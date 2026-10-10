@@ -340,6 +340,46 @@ class TestGenerateMarkdownReport:
 
 
 class TestSaveReports:
+    def test_partial_stock_coverage_is_visible_in_report(self):
+        data = generate_json_report([], {"top": [], "bottom": []}, {}, {
+            "data_sources": {"stock_metric_coverage": {"requested": 219, "with_any": 40,
+                                "fields": {"rsi_14": 30}},
+                             "scanner_backend": {"stock": {"timed_out": 1}}},
+        })
+        flags = data["data_quality"]["flags"]
+        assert any("40/219" in flag and "30/219" in flag for flag in flags)
+        assert any("partial data retained" in flag for flag in flags)
+        assert "40/219" in generate_markdown_report(data)
+
+    def test_invalid_numbers_do_not_publish_artifacts(self, tmp_path, sample_json_report):
+        sample_json_report["invalid"] = float("nan")
+        with pytest.raises(ValueError):
+            save_reports(sample_json_report, "report", str(tmp_path))
+        assert list(tmp_path.iterdir()) == []
+
+    def test_interrupted_publish_keeps_existing_json(self, tmp_path, sample_json_report, monkeypatch):
+        import report_generator as generator
+        from datetime import datetime
+        from pathlib import Path
+        class FixedDate:
+            @staticmethod
+            def now():
+                return datetime(2026, 10, 3, 17, 0, 0)
+        monkeypatch.setattr(generator, "datetime", FixedDate)
+        target = tmp_path / "theme_detector_2026-10-03_170000.json"
+        target.write_text('{"previous":true}', encoding="utf-8")
+        original_replace = os.replace
+        def fail_json(source, destination):
+            if str(destination).endswith(".json"):
+                assert json.loads(Path(source).read_text())["report_type"] == "theme_detector"
+                raise OSError("simulated interrupted publish")
+            original_replace(source, destination)
+        monkeypatch.setattr(generator.os, "replace", fail_json)
+        with pytest.raises(OSError, match="interrupted publish"):
+            save_reports(sample_json_report, "report", str(tmp_path))
+        assert json.loads(target.read_text()) == {"previous": True}
+        assert not list(tmp_path.glob("*.tmp"))
+
     def test_save_creates_files(self, sample_json_report):
         """save_reports creates both JSON and MD files."""
         md = generate_markdown_report(sample_json_report)

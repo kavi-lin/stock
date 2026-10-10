@@ -7,6 +7,7 @@ Generates JSON and Markdown reports for detected market themes.
 
 import json
 import os
+import tempfile
 from datetime import datetime
 from typing import Optional
 
@@ -321,16 +322,31 @@ def save_reports(json_data: dict, markdown: str, output_dir: str) -> dict[str, s
     json_path = os.path.join(output_dir, f"theme_detector_{timestamp}.json")
     md_path = os.path.join(output_dir, f"theme_detector_{timestamp}.md")
 
-    with open(json_path, "w") as f:
-        json.dump(json_data, f, indent=2, default=str)
-
-    with open(md_path, "w") as f:
-        f.write(markdown)
+    # Serialize before publishing either file. JSON is the cache completion
+    # marker: publish it last, and never expose partially written JSON.
+    payload = json.dumps(json_data, indent=2, default=str, allow_nan=False)
+    _atomic_write_text(md_path, markdown)
+    _atomic_write_text(json_path, payload)
 
     return {"json": json_path, "markdown": md_path}
 
 
 # --- Private helpers ---
+
+
+def _atomic_write_text(path: str, content: str) -> None:
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=os.path.dirname(path),
+                                         prefix=".theme_detector_", suffix=".tmp", delete=False) as f:
+            temporary = f.name
+            f.write(content)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(temporary, path)
+    finally:
+        if temporary and os.path.exists(temporary):
+            os.unlink(temporary)
 
 
 def _assess_data_quality(
@@ -367,6 +383,14 @@ def _assess_data_quality(
                     pass
 
     sources = metadata.get("data_sources", {})
+    coverage = sources.get("stock_metric_coverage", {})
+    requested = coverage.get("requested", 0)
+    if requested and (coverage.get("with_any", 0) < requested
+                      or coverage.get("fields", {}).get("rsi_14", 0) < requested):
+        flags.append(f"Stock metric coverage: {coverage.get('with_any', 0)}/{requested} have data; "
+                     f"RSI {coverage.get('fields', {}).get('rsi_14', 0)}/{requested}")
+    if sources.get("scanner_backend", {}).get("stock", {}).get("timed_out"):
+        flags.append("Stock metric scan reached its time budget; partial data retained")
     if sources.get("finviz_error"):
         flags.append(f"FINVIZ error: {sources['finviz_error']}")
     if sources.get("uptrend_error"):
@@ -384,17 +408,6 @@ def _assess_data_quality(
                 f"FMP API ({ctx_label}): {ctx_fmp_failures}/{ctx_fmp_calls} "
                 f"calls failed ({pct:.0%})"
             )
-            # FMP uses dual-endpoint fallback (stable → v3); a ~50% failure
-            # rate typically means one endpoint is consistently unavailable
-            # while the other succeeds. Actual data loss is lower than the
-            # failure count suggests.
-            if pct >= 0.4:
-                flags.append(
-                    f"  Note: FMP uses dual-endpoint fallback; "
-                    f"~{pct:.0%} failure rate likely reflects one endpoint "
-                    f"being unavailable, not {pct:.0%} data loss"
-                )
-
     # Flat fallback for backward compat (if nested not available)
     fmp_calls = scanner.get("fmp_calls", 0)
     fmp_failures = scanner.get("fmp_failures", 0)

@@ -38,10 +38,14 @@ Provide a single, consistent client for Finnhub free-tier endpoints with:
 | `price_target(ticker)` | `/stock/price-target` | 1 d | — |
 | `upgrade_downgrade(ticker)` | `/stock/upgrade-downgrade` | 6 h | — |
 | `dividends(ticker, start, end)` | `/stock/dividend2` | 1 d | — |
-| `splits(ticker, start, end)` | `/stock/splits` | 7 d | — |
+| `splits(ticker, start, end)` | `/stock/split` | 7 d | — |
 | `ipo_calendar(start, end)` | `/calendar/ipo` | 6 h | — |
 
 ## Authentication
+
+2026-10-04 帳戶實測：`price_target`、`upgrade_downgrade`、`dividends`、`splits`
+回 HTTP 403，應視為權限不足；不要把它們宣稱為保證免費。核心 quote/profile/metric
+與 earnings calendar 可用。`splits` 修正路徑後仍須對應權限。
 
 Set `FINNHUB_API_KEY` in your environment. Free tier: 60 calls/minute, no documented daily cap.
 

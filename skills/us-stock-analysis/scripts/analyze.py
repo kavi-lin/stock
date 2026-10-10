@@ -17,9 +17,14 @@ Usage:
 """
 import argparse
 import json
+import math
 import os
 import sys
-from datetime import datetime, date, timezone
+from datetime import datetime, date, timedelta, timezone
+from pathlib import Path
+from zoneinfo import ZoneInfo
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 import yfinance as yf
 
@@ -130,23 +135,35 @@ def _derive_from_bundle(bundle: dict) -> dict:
 
 
 # ── FMP supplement (optional) ───────────────────────────────────────────
-def _fmp_sector_pe(sector: str, api_key: str):
+def _fmp_sector_pe(sector: str, api_key: str, *, as_of: date | None = None):
     """Return sector-median trailing P/E via FMP `/stable/sector-pe-snapshot`.
     Short-circuits on 429 so a blown quota doesn't stall the analyst.
     Returns None on any failure (subagent can web-search if it cares)."""
     if not sector or not HAS_REQUESTS or not api_key:
         return None
     try:
-        url = f"{FMP_BASE}/stable/sector-pe-snapshot"
-        r = requests.get(url, params={"apikey": api_key, "sector": sector}, timeout=8)
-        if r.status_code == 429:
-            return None   # short-circuit — caller should treat as missing
-        if r.status_code != 200:
-            return None
-        data = r.json()
-        if isinstance(data, list) and data:
-            pe = data[0].get("pe")
-            return round(float(pe), 2) if pe is not None else None
+        from skills._shared.investment_data import fmp_result
+        as_of = as_of or datetime.now(ZoneInfo("America/New_York")).date()
+        # Snapshot date is required. An empty holiday/pre-close snapshot can
+        # fall back within a bounded week; auth/rate/transport failures cannot.
+        for offset in range(7):
+            candidate = as_of - timedelta(days=offset)
+            if candidate.weekday() >= 5:
+                continue
+            result = fmp_result("/stable/sector-pe-snapshot",
+                                {"sector": sector, "date": candidate.isoformat()}, retries=0, timeout=8)
+            if result["status"] not in ("ok", "empty"):
+                return None
+            data = result.get("data")
+            if not isinstance(data, list):
+                continue
+            values = [float(r["pe"]) for r in data if isinstance(r, dict)
+                      and r.get("sector") == sector and isinstance(r.get("pe"), (int, float))
+                      and not isinstance(r["pe"], bool) and math.isfinite(r["pe"])]
+            if values:
+                # A response can contain multiple exchanges for one sector.
+                from statistics import median
+                return round(median(values), 2)
     except Exception:
         pass
     return None

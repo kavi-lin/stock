@@ -114,6 +114,9 @@ SECTOR_TOP_5: dict[str, list[str]] = {
 # FMP HTTP wrapper (kept local to avoid import coupling with sector scripts).
 # ---------------------------------------------------------------------------
 def _fmp_get(path: str, params: dict, *, retries: int = 2, timeout: int = 20) -> Any:
+    from skills._shared.investment_data import active_cache
+    if active_cache() is not None:
+        return active_cache().get(path, params, retries=retries, timeout=timeout)
     # Pacing/429-backoff governed centrally by scripts/_shared/fmp_pool (shared
     # 250/min budget). Callers pass full ``/stable/...`` paths → stable=False.
     # Missing key still hard-exits (matches sector script pattern); 402 paid
@@ -131,6 +134,9 @@ def _cache_path(ticker: str, kind: str) -> str:
 
 
 def _read_cache(ticker: str, kind: str) -> Any | None:
+    from skills._shared.investment_data import active_cache
+    if active_cache() is not None:
+        return None  # investment uses endpoint source clocks, not composite mtime
     p = _cache_path(ticker, kind)
     if not os.path.exists(p):
         return None
@@ -145,6 +151,9 @@ def _read_cache(ticker: str, kind: str) -> Any | None:
 
 
 def _write_cache(ticker: str, kind: str, payload: Any) -> None:
+    from skills._shared.investment_data import active_cache
+    if active_cache() is not None:
+        return
     if payload is None:
         return
     p = _cache_path(ticker, kind)
@@ -348,6 +357,9 @@ def get_quarterly_income(ticker: str, n: int = 8) -> list[dict]:
     fundamentals (graceful skip rather than abort).
     """
     ticker = ticker.upper()
+    from skills._shared.investment_data import active_cache
+    if active_cache() is not None:
+        return _fmp_get("/stable/income-statement", {"symbol": ticker, "period": "quarter", "limit": n}) or []
     cache_path = os.path.join(QUARTERLY_INCOME_CACHE_DIR, f"{ticker}.json")
     if os.path.exists(cache_path):
         age_h = (time.time() - os.path.getmtime(cache_path)) / 3600

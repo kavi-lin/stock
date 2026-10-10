@@ -1,6 +1,95 @@
-"""Tests for finviz_performance_client outlier winsorization."""
+"""FINVIZ request, source-data validation, and winsorization regressions."""
 
-from finviz_performance_client import HARD_CAPS, _apply_hard_caps, cap_outlier_performances
+import pandas as pd
+import pytest
+import requests
+import finviz_performance_client as client
+
+from finviz_performance_client import (
+    HARD_CAPS,
+    _apply_hard_caps,
+    _parse_perf_value,
+    cap_outlier_performances,
+)
+
+
+class TestParsePerfValue:
+    @pytest.mark.parametrize("value", [float("nan"), float("inf"), "NaN", "inf%", "-inf", True])
+    def test_nonfinite_and_boolean_values_are_missing(self, value):
+        assert _parse_perf_value(value) is None
+
+    def test_sub_one_percent_strings_convert_to_decimal(self):
+        assert _parse_perf_value("0.54%") == 0.0054
+        assert _parse_perf_value("-0.49%") == -0.0049
+
+    def test_multi_percent_string_converts_to_decimal(self):
+        assert _parse_perf_value("12.34%") == 0.1234
+
+
+@pytest.mark.parametrize("group", ["Industry", "Sector"])
+def test_public_entry_normalizes_header_before_real_library_parser(monkeypatch, group):
+    """Removing the fix must reproduce the 403 at the actual HTTP boundary."""
+    old_ua = "Mozilla/5.0 (Macintosh)             AppleWebKit/537.36 Chrome/81.0"
+    original_headers = {"User-Agent": old_ua, "Accept-Language": "en-US"}
+    monkeypatch.setattr(client.fvutil, "headers", original_headers)
+    columns = ["No.", *client.COLUMN_MAP]
+    values = ["1", "Semiconductors", "0.54%", "1%", "2%", "3%", "4%", "5%"]
+    html = ("<table class='groups_table'><tr>" + "".join(f"<th>{x}</th>" for x in columns)
+            + "</tr><tr>" + "".join(f"<td>{x}</td>" for x in values) + "</tr></table>")
+    seen = []
+
+    def get(url, **kwargs):
+        seen.append(kwargs)
+        response = requests.Response()
+        response.url = url
+        response.status_code = 403 if "  " in kwargs["headers"]["User-Agent"] else 200
+        response._content = html.encode()
+        return response
+
+    monkeypatch.setattr(client.fvutil.session, "get", get)
+    fetch = client.get_industry_performance if group == "Industry" else client.get_sector_performance
+    rows = fetch(strict=True)
+    assert rows[0]["perf_1w"] == 0.0054
+    assert rows[0]["perf_1m"] == 0.01
+    assert seen[0]["params"]["g"] == group.lower()
+    assert seen[0]["headers"] == {**original_headers, "User-Agent": " ".join(old_ua.split())}
+    assert original_headers["User-Agent"] == old_ua
+
+
+@pytest.mark.parametrize("fault", ["missing_column", "missing_value", "duplicate", "unnamed", "empty"])
+def test_unusable_table_fails_before_scoring(monkeypatch, fault):
+    frame = pd.DataFrame([{column: "Industry A" if column == "Name" else "1%"
+                           for column in client.COLUMN_MAP}])
+    if fault == "missing_column":
+        frame = frame.drop(columns=["Perf Month"])
+    elif fault == "missing_value":
+        frame.loc[0, "Perf Week"] = "inf%"
+    elif fault == "duplicate":
+        frame = pd.concat([frame, frame])
+    elif fault == "unnamed":
+        frame.loc[0, "Name"] = None
+    else:
+        frame = frame.iloc[:0]
+    monkeypatch.setattr(client.fvperf.Performance, "screener_view", lambda *a, **kw: frame)
+    with pytest.raises(client.FinvizDataError, match="FINVIZ Industry table"):
+        client.get_industry_performance(strict=True)
+
+
+@pytest.mark.parametrize("error, expected", [
+    (requests.HTTPError("HTTP error: 403 Client Error: Forbidden"), "HTTP 403; access denied"),
+    (requests.Timeout("sensitive context"), "request timed out"),
+    (requests.ConnectionError("sensitive context"), "check DNS/network"),
+])
+def test_failure_reason_survives_without_leaking_raw_error(monkeypatch, capsys, error, expected):
+    def fail(*args, **kwargs):
+        raise error
+    monkeypatch.setattr(client.fvperf.Performance, "screener_view", fail)
+    with pytest.raises(client.FinvizDataError, match=expected):
+        client.get_industry_performance(strict=True)
+    assert client.get_industry_performance() == []
+    message = capsys.readouterr().err
+    assert expected in message
+    assert "sensitive context" not in message
 
 
 class TestCapOutlierPerformances:
