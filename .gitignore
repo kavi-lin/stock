@@ -138,3 +138,14 @@ news/wind_logs/
 # Signal queue 的投遞帳本。每台機器各自的執行期狀態（誰接了、誰忽略了、跑出什麼），
 # 不是設定也不是產出——候選本身每次由 bn_*.json 即時重算，這裡只存使用者動作。
 signals/queue_state.json
+
+# Local work copies, daemon logs, and regenerable raw research state
+/tmp/
+/logs/
+/sector_logs/
+news/break_news_logs/_raw/
+news/research_cache/
+investment/invest_logs/protocol_tmp/
+investment/invest_logs/phase_inputs/
+investment/invest_logs/phase0_draft_*.json
+reports/decision_review/llm_review_*.log
