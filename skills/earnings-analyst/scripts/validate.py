@@ -17,6 +17,9 @@ import json
 import os
 import sys
 
+from earnings_history import (find_cache as history_find_cache, validate_comparison,
+                              validate_completion, narrative_path, read_object)
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 CACHE_DIR = os.path.join(BASE_DIR, "skills", "earnings-analyst", "cache")
 EXPECTED_VERSION = "V1.0"
@@ -39,8 +42,7 @@ VALID_VERDICTS = {"STRONG", "SOLID", "MIXED", "WEAK", "DETERIORATING"}
 
 
 def find_cache(ticker: str) -> str | None:
-    files = sorted(glob.glob(os.path.join(CACHE_DIR, f"{ticker}_*.json")))
-    return files[-1] if files else None
+    return history_find_cache(CACHE_DIR, ticker)
 
 
 def fail(errors: list):
@@ -50,24 +52,7 @@ def fail(errors: list):
     sys.exit(1)
 
 
-def main() -> int:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("ticker", nargs="?")
-    ap.add_argument("--json", help="explicit cache path")
-    args = ap.parse_args()
-
-    if args.json:
-        path = args.json
-    else:
-        if not args.ticker:
-            sys.exit("Usage: validate.py <TICKER>  (or --json <path>)")
-        path = find_cache(args.ticker.upper())
-        if not path:
-            fail([f"no cache for {args.ticker} under {CACHE_DIR}"])
-
-    with open(path) as f:
-        d = json.load(f)
-
+def validate_payload(d, base=None):
     errors = []
 
     # 1. Top-level keys
@@ -131,6 +116,39 @@ def main() -> int:
     qf = d.get("quality_flags")
     if not isinstance(qf, list):
         errors.append(f"quality_flags must be list (got {type(qf).__name__})")
+
+    if "comparison" in d:
+        errors.extend(validate_comparison(d["comparison"], d))
+
+    return errors
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("ticker", nargs="?")
+    ap.add_argument("--json", help="explicit cache path")
+    ap.add_argument("--require-history", action="store_true", help="require a committed comparison/report snapshot")
+    args = ap.parse_args()
+
+    if args.json:
+        path = args.json
+    else:
+        if not args.ticker:
+            sys.exit("Usage: validate.py <TICKER>  (or --json <path>)")
+        path = find_cache(args.ticker.upper())
+        if not path:
+            fail([f"no cache for {args.ticker} under {CACHE_DIR}"])
+
+    with open(path) as f:
+        d = json.load(f)
+
+    errors = validate_payload(d)
+    if args.require_history:
+        inf_path = narrative_path(path)
+        inf = read_object(inf_path) if inf_path.exists() else {}
+        errors.extend(validate_completion(d, os.path.dirname(os.path.abspath(path)), inf))
+    qf = d.get("quality_flags") or []
+    cs, verdict = d.get("composite_score"), d.get("verdict")
 
     if errors:
         fail(errors)

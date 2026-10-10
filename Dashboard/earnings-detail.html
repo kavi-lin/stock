@@ -9,6 +9,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { darkMode: 'class' }</script>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="earnings-comparison.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -51,7 +52,7 @@
         <div id="ed-empty-state" class="ed-page" hidden>
             <div class="ed-empty-state">
                 <p class="ed-empty-state-msg" id="ed-empty-msg" data-i18n-key="earnings_detail.empty_state_msg">
-                    尚未生成 Infographic — 需執行一次 LLM Narrate phase
+                    尚無財報資料，完成一次分析後即可查看。
                 </p>
                 <button id="ed-empty-rerun-btn" class="ed-empty-state-btn">
                     <i data-lucide="play" class="w-3 h-3"></i>
@@ -73,11 +74,27 @@
                 </div>
             </section>
 
-            <!-- 4 metric cards -->
-            <section class="ed-section">
+            <div class="ed-tabs" role="tablist" aria-label="財報檢視">
+                <button type="button" id="ed-tab-quarter" class="ed-tab" role="tab"
+                        data-earnings-tab="quarter" aria-controls="ed-quarter-panel" aria-selected="true">
+                    <i data-lucide="chart-no-axes-combined" aria-hidden="true"></i>
+                    <span data-i18n-key="earnings_detail.tab_quarter">本季財報</span>
+                </button>
+                <button type="button" id="ed-tab-compare" class="ed-tab" role="tab" tabindex="-1"
+                        data-earnings-tab="compare" aria-controls="ed-comparison-panel" aria-selected="false">
+                    <i data-lucide="columns-2" aria-hidden="true"></i>
+                    <span data-i18n-key="earnings_detail.tab_compare">跨季比較</span>
+                </button>
+            </div>
+
+            <div id="ed-quarter-panel" class="ed-tab-panel" role="tabpanel" aria-labelledby="ed-tab-quarter">
+            <p id="ed-quarter-notice" class="ed-quarter-notice" hidden></p>
+
+            <!-- Current-quarter consensus surprise, separate from saved expectations. -->
+            <section class="ed-section" id="ed-consensus-section">
                 <div class="ed-section-head">
                     <i data-lucide="zap" class="w-3.5 h-3.5"></i>
-                    <span data-i18n-key="earnings_detail.section_metrics">本季數字 vs 預期</span>
+                    <span data-i18n-key="earnings_detail.section_metrics">本季數字 vs 市場預期</span>
                 </div>
                 <div id="ed-metric-cards" class="ed-metric-grid"></div>
             </section>
@@ -183,9 +200,15 @@
 
             <!-- Detail markdown collapse -->
             <details id="ed-detail-collapse" class="ed-detail-collapse">
-                <summary data-i18n-key="earnings_detail.detail_collapse_label">展開詳細財報報告 (Markdown)</summary>
+                <summary data-i18n-key="earnings_detail.detail_collapse_label">展開完整財報報告</summary>
                 <div id="ed-detail-md-body" class="ed-detail-md"></div>
             </details>
+
+            </div>
+
+            <div id="ed-comparison-panel" class="ed-tab-panel" role="tabpanel" aria-labelledby="ed-tab-compare" hidden>
+                <section id="ed-comparison" aria-label="財報比較"></section>
+            </div>
 
         </div>
 
@@ -197,6 +220,8 @@
     <script src="i18n.js"></script>
     <script src="utils.js"></script>
     <script src="data-store.js"></script>
+    <script src="earnings-comparison.js"></script>
+    <script src="earnings-tabs.js"></script>
     <script src="page-earnings-detail.js"></script>
 </body>
 </html>

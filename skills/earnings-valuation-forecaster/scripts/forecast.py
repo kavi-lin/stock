@@ -35,6 +35,7 @@ except ImportError:
     sys.exit(2)
 
 SCRIPT_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(SCRIPT_DIR.parents[2]))
 CACHE_DIR  = SCRIPT_DIR.parent / "cache"
 CACHE_DIR.mkdir(exist_ok=True)
 DEFAULT_TTL_SEC = 4 * 3600  # 4h
@@ -64,40 +65,51 @@ class FMP:
         self.sess = requests.Session()
         self.last = 0.0
         self.exhausted = False   # set when 429 confirms daily quota is hit
+        self.responses = {}
+        self.sources = {}
+        self.metrics = {"requests": 0, "cache_hits": 0, "http_calls_known": 0, "http_calls_unknown": 0}
 
     def get(self, path, params=None):
-        # Short-circuit once quota is exhausted — daily quota doesn't reset in
-        # 60s. Previous code slept + recursed on 429, which guaranteed an
-        # infinite retry loop when the quota was actually hit.
+        from investment.scripts.run_data import digest, source, utcnow
+        key = digest({"path": path, "params": params})
+        if key in self.responses:
+            self.metrics["cache_hits"] += 1
+            return self.responses[key]
         if self.exhausted:
             return None
-        elapsed = time.time() - self.last
-        if elapsed < RATE_LIMIT:
-            time.sleep(RATE_LIMIT - elapsed)
-        params = dict(params or {})
-        params["apikey"] = self.api_key
-        try:
-            r = self.sess.get(f"{FMP_BASE}{path}", params=params, timeout=30)
-            self.last = time.time()
-            if r.status_code == 429:
-                if not self.exhausted:
-                    print(
-                        "WARN: FMP returned 429 (daily quota reached); skipping all further FMP calls this run",
-                        file=sys.stderr,
-                    )
-                self.exhausted = True
-                return None
-            if r.status_code != 200:
-                return None
-            data = r.json()
-            # Some error responses come back 200 with an error-shaped dict
-            if isinstance(data, dict) and ("Error Message" in data or "Premium" in str(data)[:200]):
-                print(f"WARN: FMP {path} returned error: {str(data)[:150]}", file=sys.stderr)
-                return None
-            return data
-        except (requests.RequestException, ValueError) as e:
-            print(f"WARN: FMP request failed {path}: {e}", file=sys.stderr)
-            return None
+        from skills._shared.investment_data import active_cache, fmp_result
+        shared = active_cache()
+        if shared is not None:
+            from investment.scripts.run_data import timestamp
+            full_path = "/stable" + path
+            result = fmp_result(full_path, params, cache=shared, timeout=30)
+            source_key = digest({"path": full_path, "params": dict(params or {})}).split(":")[1]
+            record = shared.sources[source_key]
+            # Forecaster keeps its existing four-hour input freshness, even
+            # when the endpoint is reusable for 24 hours by other consumers.
+            if record["status"] == "ok" and (timestamp(utcnow()) - timestamp(record["fetched_at"])).total_seconds() > 14400:
+                shared.get(full_path, dict(params or {}), refresh=True, timeout=30)
+                record = shared.sources[source_key]
+                result = {"status": record["status"], "data": record["data"] if record["status"] == "ok" else None}
+            self.exhausted = result["status"] == "rate_limited"
+            self.sources[key] = record
+            self.metrics = shared.metrics
+            self.responses[key] = result["data"] if result["status"] == "ok" else None
+            return self.responses[key]
+        from scripts._shared import fmp_pool
+        result = fmp_pool.get_with_status("/stable" + path, params, stable=False, retries=1, timeout=30)
+        if result["status"] == "rate_limited":
+            self.exhausted = True
+        self.metrics["requests"] += 1
+        calls = result.get("http_calls")
+        self.metrics["http_calls_known" if calls is not None else "http_calls_unknown"] += calls if calls is not None else 1
+        rows = result.get("data")
+        row = rows[0] if isinstance(rows, list) and rows else rows if isinstance(rows, dict) else {}
+        kind = "quote" if path == "/quote" else "financial" if path == "/income-statement" else "market"
+        self.sources[key] = source(rows, kind=kind, fetched_at=utcnow(), data_as_of=row.get("timestamp") or row.get("date"),
+                                   status=result["status"], reason=None if result["status"] == "ok" else result["status"])
+        self.responses[key] = result["data"] if result["status"] == "ok" else None
+        return self.responses[key]
 
     def quote(self, ticker):
         data = self.get("/quote", {"symbol": ticker})
@@ -133,11 +145,15 @@ def load_cache(ticker, max_age):
     p = cache_path(ticker)
     if not p.exists():
         return None
-    age = time.time() - p.stat().st_mtime
-    if age > max_age:
-        return None
     try:
+        from investment.scripts.run_data import timestamp, utcnow
         payload = json.loads(p.read_text())
+        age = (timestamp(utcnow()) - timestamp(payload.get("source_fetched_at"))).total_seconds()
+        if not 0 <= age <= max_age:
+            return None
+        ea = _load_earnings_analyst_bundle(ticker) or {}
+        if not payload.get("financial_period") or payload["financial_period"] != ea.get("last_earnings_date"):
+            return None
         payload["cache_hit"] = True
         payload["cache_age_sec"] = int(age)
         return payload
@@ -147,7 +163,8 @@ def load_cache(ticker, max_age):
 
 def write_cache(ticker, payload):
     try:
-        cache_path(ticker).write_text(json.dumps(payload, ensure_ascii=False, indent=2))
+        from investment.scripts.run_data import atomic_json
+        atomic_json(cache_path(ticker), payload)
     except Exception as e:
         print(f"WARN: cache write failed: {e}", file=sys.stderr)
 
@@ -493,16 +510,19 @@ def _load_earnings_analyst_bundle(ticker: str) -> dict | None:
         candidates.append(fp)
     if not candidates:
         return None
-    candidates.sort(key=os.path.getmtime, reverse=True)
+    candidates.sort(reverse=True)  # financial period, not analysis-file rewrite time
     source_path = candidates[0]
-    source_mtime = dt.datetime.fromtimestamp(
-        os.path.getmtime(source_path)
-    ).isoformat(timespec="seconds")
     try:
         with open(source_path, "r", encoding="utf-8") as f:
             bundle = json.load(f)
     except (OSError, json.JSONDecodeError):
         return None
+    from investment.scripts.run_data import fresh
+    records = [r for r in (bundle.get("source_records") or {}).values()
+               if r.get("kind") == "financial" and r.get("status") == "ok"]
+    if not records or not all(fresh(r, period=bundle.get("last_earnings_date")) for r in records):
+        return None
+    source_mtime = min(r["fetched_at"] for r in records)
     bundle.setdefault("transition_signature_mtime", source_mtime)
     bundle["_source_path"] = source_path
     bundle["_source_mtime"] = source_mtime
@@ -1272,7 +1292,10 @@ def run(ticker, no_cache=False, max_age=DEFAULT_TTL_SEC, pre_earnings=False):
             partial = {
                 "status":        "ok_partial",
                 "ticker":        ticker,
-                "generated_at":  dt.datetime.now().isoformat(timespec="seconds"),
+                "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(),
+                "source_fetched_at": dt.datetime.now(dt.timezone.utc).isoformat(),
+                "financial_period": (income_q[0] if income_q else {}).get("date"),
+                "source_records": client.sources, "source_telemetry": client.metrics,
                 "current_price": round(current_price, 2),
                 "ttm_eps":       ttm,
                 "negative_eps":  True,
@@ -1322,7 +1345,7 @@ def run(ticker, no_cache=False, max_age=DEFAULT_TTL_SEC, pre_earnings=False):
     transition_info = _determine_transition_case(
         ea_bundle, current_price, income_q, ratios_a,
     )
-    now_iso = dt.datetime.now().isoformat(timespec="seconds")
+    now_iso = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
     transition_info["transition_case_mtime"] = now_iso
     if ea_bundle:
         transition_info["transition_signature_mtime"] = ea_bundle.get("transition_signature_mtime")
@@ -1344,6 +1367,9 @@ def run(ticker, no_cache=False, max_age=DEFAULT_TTL_SEC, pre_earnings=False):
         "status":        "ok",
         "ticker":        ticker,
         "generated_at":  now_iso,
+        "source_fetched_at": now_iso,
+        "financial_period": (income_q[0] if income_q else {}).get("date"),
+        "source_records": client.sources, "source_telemetry": client.metrics,
         "current_price": round(current_price, 2),
         "ttm_eps":       ttm,
         "forward_eps": {

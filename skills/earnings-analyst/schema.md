@@ -5,6 +5,10 @@
 
 ## Top-level
 
+V4.138.0 additive fields: `earnings_context` (fiscal period, independently matched release event,
+deterministic `surprise`), `comparison` (`earnings-history/1`), and after successful render
+`comparison_snapshot`. Existing financial schema remains V1.0; old caches remain readable.
+
 ```json
 {
   "ticker":              "string",
@@ -162,9 +166,9 @@
 ```json
 {
   "rating_history": [
-    { "date": "YYYY-MM-DD", "rating": "string — e.g. A+", "ratingScore": "int 1-5" }
+    { "date": "YYYY-MM-DD", "rating": "string — e.g. A+", "ratingScore": "int 1-5 — FMP overallScore, higher is better" }
   ],
-  "rating_trend": "improving | stable | declining | insufficient_data — 3M composite trend",
+  "rating_trend": "improving | stable | declining | insufficient_data — latest 3 vs oldest 3 financial scores among up to 12 daily records",
   "grades_summary": {
     "strongBuy": "int", "buy": "int", "hold": "int", "sell": "int", "strongSell": "int",
     "strong_buy_pct": "float — strongBuy / total × 100",
@@ -183,6 +187,10 @@
 ```
 
 **Protocol 引用規則（Phase 2 News lane）：**
+資料契約：`rating_history` 來自 `/stable/ratings-historical`，是 FMP 財務綜合評級，
+不是券商推薦共識；保留本地欄名 `ratingScore`，映射上游 `overallScore`。
+`grades_summary` 來自 `/stable/grades-consensus`；`grades_news.date` 取 `publishedDate` 的日期。
+
 - `grades_news` 近 10 天升評數 > 降評數 → Bull +1 signal
 - `pt_news` 近 8 筆平均 PT 調整方向 → 輔助 Bull/Bear 論點
 - `pt_dispersion_pct` > 40% → 注記「分析師分歧高，目標價參考度下降」
@@ -351,6 +359,60 @@ as `fiscal_year` are never eligible as segment candidates.
 # Infographic Cache `<TICKER>_<DATE>.infographic.json` (V1.0)
 
 由 LLM narrate phase 在 `fetch + analyze + validate` 後產生（Claude Code in-conversation 讀 cache JSON + transcript.content，Write 寫此檔）。`schema_kind` 必須等於 `"infographic"`，與 V1.0 資料層 cache 區別。
+
+### 跨季追蹤契約（V4.138.0 / earnings-history/1）
+
+新 narrate 必填 `history_schema_version: "earnings-history/1"`、`expectations: []`、
+`observed_metrics: []`。沒有來源使用空陣列。舊 infographic 僅供 preview／歷史補建，
+正式 render 需新契約；`validate_infographic.py --require-history` 另驗 completed snapshot。
+
+`surprise` 直接複製主快取 `earnings_context.surprise`，包含 revenue/eps 的
+`actual`、`estimated`、`beat`、`surprise_pct`。不能選未來事件或讓 LLM 自算；
+actual 或 estimated 缺失時 beat=null，零估值的 surprise_pct=null。
+
+`expectations[]` 範例（僅示意數值）：
+
+```json
+{
+  "statement": "下季營收指引 100–110 百萬美元",
+  "origin": "management",
+  "metric": "revenue",
+  "target_period": {"fiscal_year": 2027, "period": "Q2"},
+  "operator": "range", "low": 100000000, "high": 110000000, "better": "higher",
+  "unit": "currency", "currency": "USD",
+  "accounting_basis": "gaap", "fx_basis": "reported", "segment": "consolidated",
+  "source_ref": "https://example.com/ir/quarterly-release",
+  "source_quote": "We expect next-quarter revenue of $100 million to $110 million.",
+  "published_at": "2026-10-01"
+}
+```
+
+- `origin`: management / consensus / analysis；不得混為同一家公司承諾。
+- `operator`: range（low/high/better=higher|lower|within）、gte/lte（threshold）、qualitative（不判數值達標）。比率存小數，金額存完整原幣單位。
+- `target_period`: fiscal_year 整數、period=Q1/Q2/Q3/Q4/FY。新預期必須指向未來財季／年度；FY 未完整公布前 pending。
+- 口徑鍵：metric、unit=currency/currency_per_share/ratio/number、currency（貨幣指標必填 ISO；比率可 null）、accounting_basis=gaap/non_gaap/operational、fx_basis=reported/constant_currency、segment。全部相容才比較。
+- `source_ref` 必須為不含憑證的公開 HTTP(S) 網址；source_quote 和 published_at 必填，日期不得晚於本次 as_of_date。
+
+`observed_metrics[]` 保存同一組口徑鍵、target_period、來源三欄以及有限數值 `value`；
+省略 expectation 專屬 statement/origin/operator。供 Azure 固定匯率成長、調整後 EPS 等
+三表沒有的指標使用；不得把 FY 分部資料當季度實際值。數字衝突一律 unverifiable。
+
+`comparison` 由 Python 產生，LLM 不得改寫：
+`context`、`previous_analysis`（季度間隔與原紀錄連結）、`financial_changes`、
+`quality_flag_changes`、`expectation_audit`、`watch_audit`、`observed_metrics`、`next_expectations`、
+`next_watchlist`、`warnings`。驗證器重算財務差異與逐項驗收。
+
+`expectation_audit[].status`: exceeded / met / missed / pending / unverifiable，後兩者
+不進命中率。負／零前值不計百分比成長，margin 用百分點；缺季不冒充 QoQ。
+全年營收／FCF／margin 需四季同口徑，年度 EPS 不以四個季度 EPS 相加。
+
+成功 render 才產生不可覆寫、帶 hash 的 completed snapshot 與報告封存；
+recorded_at 和 expectation_id 由程式指定，忽略模型輸入的同名欄位。預期必須早於
+目標財報公布日（只有日級日期時同日保守視為不可驗證）。修訂保留原版本，pending／
+尚無證據的預期延續至後續報告。Legacy 摘要只做歷史補建，不當事前預測命中。
+
+預設 `next_watchlist` 為 5 個財務指標的觀察基準，明標 observation_only，
+不把沒有公司指引的觀察項目變成自造預測。此層不調整 composite_score 或投資決策。
 
 ### 必填頂層 keys
 

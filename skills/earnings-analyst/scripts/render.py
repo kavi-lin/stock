@@ -16,6 +16,11 @@ import json
 import os
 import sys
 from datetime import date
+from pathlib import Path
+
+from earnings_history import (find_cache as history_find_cache, narrative_path, read_object,
+                              build_comparison, validate_comparison, save_snapshot, atomic_json, VERSION as HISTORY_VERSION)
+from render_comparison import render_comparison
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 CACHE_DIR = os.path.join(BASE_DIR, "skills", "earnings-analyst", "cache")
@@ -23,8 +28,7 @@ REPORTS_DIR = os.path.join(BASE_DIR, "reports")
 
 
 def find_cache(ticker: str) -> str | None:
-    files = sorted(glob.glob(os.path.join(CACHE_DIR, f"{ticker}_*.json")))
-    return files[-1] if files else None
+    return history_find_cache(CACHE_DIR, ticker)
 
 
 def fmt_money(v):
@@ -62,7 +66,7 @@ def render_header(d):
     return [
         f"# {d['ticker']} 財報分析 — {snap.get('companyName') or d['ticker']}",
         "",
-        f"> Run: {d['as_of_date']}  ·  Last Earnings: {d['last_earnings_date']} "
+        f"> Run: {d['as_of_date']}  ·  Fiscal Period End: {d['last_earnings_date']} "
         f"({d.get('quarterly_pnl', [{}])[0].get('fiscalYear','?')} "
         f"{d.get('quarterly_pnl', [{}])[0].get('period','?')})  ·  "
         f"Next ≈ {d.get('next_earnings_est','?')}",
@@ -371,6 +375,7 @@ def render_bottom_line(d):
 def render(d):
     blocks = [
         render_header(d),
+        render_comparison(d),
         render_snapshot(d),
         render_pnl(d),
         render_balance(d),
@@ -391,6 +396,7 @@ def main() -> int:
     ap.add_argument("--json", help="explicit cache path")
     ap.add_argument("--out",  help="explicit output md path")
     ap.add_argument("--stdout", action="store_true")
+    ap.add_argument("--preview", action="store_true", help="read-only legacy-compatible comparison; no cache/history writes")
     args = ap.parse_args()
 
     if args.json:
@@ -408,6 +414,24 @@ def main() -> int:
     if "composite_score" not in d:
         sys.exit(f"[ERROR] cache not analyzed yet — run analyze.py first")
 
+    # Validate the real inputs before publishing or freezing any completed analysis.
+    from validate import validate_payload as validate_base
+    from validate_infographic import validate_payload as validate_narrative
+    inf_path = narrative_path(path)
+    inf = read_object(inf_path) if inf_path.exists() else {}
+    preview = args.preview or args.stdout
+    errors = validate_base({k: v for k, v in d.items() if k != "comparison"})
+    if inf:
+        errors.extend(validate_narrative(inf, base=d))
+    if not preview and inf.get("history_schema_version") != HISTORY_VERSION:
+        errors.append("run Narrate with history_schema_version + expectations + observed_metrics first (or use --preview)")
+    if errors:
+        sys.exit("[render] validation failed:\n  - " + "\n  - ".join(errors))
+    d["comparison"] = build_comparison(d, Path(path).resolve().parent, inf)
+    errors = validate_comparison(d["comparison"], d)
+    if errors:
+        sys.exit("[render] comparison validation failed:\n  - " + "\n  - ".join(errors))
+
     md = render(d)
 
     if args.stdout:
@@ -418,6 +442,11 @@ def main() -> int:
     os.makedirs(os.path.dirname(out), exist_ok=True)
     with open(out, "w") as f:
         f.write(md)
+
+    if not preview:
+        snapshot = save_snapshot(d, inf, d["comparison"], Path(path).resolve().parent, out)
+        d["comparison_snapshot"] = str(snapshot)
+        atomic_json(path, d)
 
     print(f"[render] wrote {os.path.relpath(out, BASE_DIR)} "
           f"({len(md):,} bytes, {len(md.splitlines())} lines)", file=sys.stderr)

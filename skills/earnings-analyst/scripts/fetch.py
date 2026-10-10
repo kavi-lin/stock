@@ -5,8 +5,8 @@ Pulls a per-ticker earnings analysis bundle from FMP HTTP REST and writes
 to skills/earnings-analyst/cache/<TICKER>_<LAST_EARNINGS_DATE>.json.
 
 Cache key: (TICKER, last_earnings_date). The latest income-statement.date
-defines last_earnings_date; if the cache already has a file matching that
-key (and it's < 90 days old) we skip all other FMP calls.
+defines last_earnings_date. Endpoint caches retain source clocks: financial
+7 days, market 24 hours, quote 5 minutes. Every run confirms the latest quarter.
 
 Hard-coded paid blockers (gracefully skipped, NOT hard fail):
   - /stable/key-metrics?period=quarter      → 402 (use TTM + derive from raw)
@@ -27,6 +27,7 @@ import time
 from datetime import date, datetime, timedelta
 
 import requests
+from earnings_history import earnings_context
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -38,46 +39,36 @@ os.makedirs(CACHE_DIR, exist_ok=True)
 sys.path.insert(0, BASE_DIR)
 from skills._shared.company_context import get_profile as _shared_get_profile  # noqa: E402
 
-FMP_BASE = "https://financialmodelingprep.com"
-CACHE_TTL_DAYS = 90  # hard upper limit even if last_earnings_date hasn't moved
+from skills._shared.investment_data import SourceCache
+from investment.scripts.run_data import atomic_json, fresh, utcnow
+
+CACHE_TTL_DAYS = 7
+_SOURCE_CACHE = None
 
 
-def _fmp_get(path: str, params: dict, *, retries: int = 2, timeout: int = 20):
-    """GET with retry. Returns parsed JSON. Returns None on 402 paid (graceful)."""
-    api_key = os.environ.get("FMP_API_KEY")
-    if not api_key:
-        sys.exit("[ERROR] FMP_API_KEY not set — earnings-analyst cannot run.")
-    url = f"{FMP_BASE}{path}"
-    full = {**params, "apikey": api_key}
-    last_exc = None
-    for attempt in range(retries + 1):
-        try:
-            r = requests.get(url, params=full, timeout=timeout)
-            if r.status_code == 429:
-                time.sleep(2 ** attempt)
-                continue
-            if r.status_code == 402:
-                return None  # paid blocker — graceful
-            r.raise_for_status()
-            return r.json()
-        except Exception as e:
-            last_exc = e
-            time.sleep(0.5)
-    print(f"[fetch] WARN: FMP {path} failed after {retries+1} tries: {last_exc}", file=sys.stderr)
-    return None
+def _cache():
+    global _SOURCE_CACHE
+    if _SOURCE_CACHE is None:
+        _SOURCE_CACHE = SourceCache(os.path.join(CACHE_DIR, "sources"))
+    return _SOURCE_CACHE
+
+
+def _fmp_get(path: str, params: dict, *, retries: int = 1, timeout: int = 20):
+    return _cache().get(path, params, retries=retries, timeout=timeout)
 
 
 def find_existing_cache(ticker: str, latest_earnings_date: str) -> str | None:
-    """Return cache path if a file matches (TICKER, latest_earnings_date) AND age < TTL."""
+    """Only source timestamps count; analyze.py rewriting the file renews nothing."""
     expected = os.path.join(CACHE_DIR, f"{ticker}_{latest_earnings_date}.json")
-    if not os.path.exists(expected):
-        return None
-    age_days = (time.time() - os.path.getmtime(expected)) / 86400
-    if age_days > CACHE_TTL_DAYS:
-        print(f"[fetch] cache file age {age_days:.1f}d exceeds {CACHE_TTL_DAYS}d TTL — invalidating",
-              file=sys.stderr)
-        return None
-    return expected
+    try:
+        with open(expected) as f:
+            bundle = json.load(f)
+        sources = bundle.get("source_records") or {}
+        if sources and all(fresh(r, period=latest_earnings_date) for r in sources.values()):
+            return expected
+    except (OSError, ValueError):
+        pass
+    return None
 
 
 def slim_income(rows: list) -> list:
@@ -86,7 +77,7 @@ def slim_income(rows: list) -> list:
             "operatingIncome", "netIncome", "eps", "epsDiluted",
             "researchAndDevelopmentExpenses",
             "sellingGeneralAndAdministrativeExpenses", "ebitda", "ebit",
-            "weightedAverageShsOutDil"]
+            "weightedAverageShsOutDil", "reportedCurrency", "acceptedDate", "filingDate", "finalLink", "link"]
     return [{k: r.get(k) for k in keep} for r in rows]
 
 
@@ -99,14 +90,14 @@ def slim_balance(rows: list) -> list:
             "cashAndCashEquivalents", "shortTermInvestments",
             "totalDebt", "longTermDebt", "shortTermDebt",
             "netReceivables", "inventory", "retainedEarnings",
-            "accountsPayable", "otherCurrentLiabilities"]
+            "accountsPayable", "otherCurrentLiabilities", "reportedCurrency", "finalLink", "link"]
     return [{k: r.get(k) for k in keep} for r in rows]
 
 
 def slim_cashflow(rows: list) -> list:
     keep = ["date", "period", "operatingCashFlow", "freeCashFlow", "capitalExpenditure",
             "stockBasedCompensation", "commonStockRepurchased", "commonDividendsPaid",
-            "netIncome"]
+            "netIncome", "reportedCurrency", "finalLink", "link"]
     return [{k: r.get(k) for k in keep} for r in rows]
 
 
@@ -189,19 +180,22 @@ def slim_pt_news(rows: list) -> list:
 
 
 def slim_rating_history(rows: list) -> list:
-    """/stable/rating-historical → composite rating time series (12 months)."""
-    keep = ["date", "rating", "ratingScore"]
-    return [{k: r.get(k) for k in keep} for r in (rows or [])[:12]]
+    """Daily FMP financial ratings; ratingScore retains the local schema name."""
+    return [{"date": r.get("date"), "rating": r.get("rating"),
+             "ratingScore": r.get("overallScore")}
+            for r in (rows or [])[:12]]
 
 
 def compute_rating_trend(history: list) -> str:
-    """improving | stable | declining — ratingScore 1=Strong Buy, 5=Strong Sell (lower=better)."""
-    scored = [r.get("ratingScore") for r in (history or []) if r.get("ratingScore") is not None]
+    """Trend in FMP's financial overallScore (higher=better), not broker grades."""
+    scored = [r["overallScore"] for r in (history or [])
+              if isinstance(r.get("overallScore"), (int, float))
+              and not isinstance(r["overallScore"], bool) and 1 <= r["overallScore"] <= 5]
     if len(scored) < 4:
         return "insufficient_data"
     recent_avg = sum(scored[:3]) / 3
     older_avg  = sum(scored[-3:]) / 3
-    diff = older_avg - recent_avg  # positive → rating improved (older was worse/higher number)
+    diff = recent_avg - older_avg
     if diff > 0.25:
         return "improving"
     if diff < -0.25:
@@ -211,12 +205,14 @@ def compute_rating_trend(history: list) -> str:
 
 def slim_grades_news(rows: list) -> list:
     """/stable/grades-news → event-level upgrade/downgrade records."""
-    keep = ["date", "gradingCompany", "previousGrade", "newGrade", "action"]
-    return [{k: r.get(k) for k in keep} for r in (rows or [])[:10]]
+    keep = ["gradingCompany", "previousGrade", "newGrade", "action"]
+    return [{**{k: r.get(k) for k in keep},
+             "date": (r.get("publishedDate") or r.get("date") or "")[:10] or None}
+            for r in (rows or [])[:10]]
 
 
 def _slim_grades_summary(d: dict) -> dict:
-    """/stable/grades-summary → buy/hold/sell counts + strong_buy_pct."""
+    """/stable/grades-consensus → buy/hold/sell counts + strong_buy_pct."""
     keys = ["strongBuy", "buy", "hold", "sell", "strongSell"]
     out = {k: d.get(k, 0) for k in keys}
     total = sum(v for v in out.values() if v)
@@ -286,7 +282,10 @@ def fetch_bundle(ticker: str, income: list | None = None) -> dict:
     """Run all FMP calls for one ticker (parallel batch). Returns the raw bundle ready to write.
     `income` lets main() pass its pre-fetched quarterly income-statement to avoid a duplicate call."""
     # profile via skills/_shared/company_context (24h cache, shared with sector + protocol PEER_BUNDLE)
-    profile = _shared_get_profile(ticker) or {}
+    profile_rows = _fmp_get("/stable/profile", {"symbol": ticker}) or []
+    profile = profile_rows[0] if profile_rows else {}
+    quote_rows = _fmp_get("/stable/quote", {"symbol": ticker}) or []
+    quote = quote_rows[0] if quote_rows else {}
 
     calls = {
         "income":           ("/stable/income-statement",        {"symbol": ticker, "period": "quarter", "limit": 8}),
@@ -302,8 +301,8 @@ def fetch_bundle(ticker: str, income: list | None = None) -> dict:
         "ratings":          ("/stable/ratings-snapshot",        {"symbol": ticker}),
         "grades":           ("/stable/grades-historical",       {"symbol": ticker, "limit": 6}),
         "pt_news":          ("/stable/price-target-news",       {"symbol": ticker, "limit": 8}),
-        "rating_history":   ("/stable/rating-historical",       {"symbol": ticker, "limit": 12}),
-        "grades_summary":   ("/stable/grades-summary",          {"symbol": ticker}),
+        "rating_history":   ("/stable/ratings-historical",      {"symbol": ticker, "limit": 12}),
+        "grades_summary":   ("/stable/grades-consensus",         {"symbol": ticker}),
         "grades_news":      ("/stable/grades-news",             {"symbol": ticker, "limit": 10}),
         "earn_surprises":   ("/stable/earnings",                {"symbol": ticker, "limit": 8}),
         "seg_product":      ("/stable/revenue-product-segmentation",    {"symbol": ticker}),
@@ -407,7 +406,7 @@ def fetch_bundle(ticker: str, income: list | None = None) -> dict:
             "companyName":       profile.get("companyName"),
             "sector":            profile.get("sector"),
             "industry":          profile.get("industry"),
-            "price":             profile.get("price"),
+            "price":             quote.get("price"),
             "marketCap":         profile.get("marketCap"),
             "ipoDate":           profile.get("ipoDate"),
             "ceo":               profile.get("ceo"),
@@ -471,6 +470,10 @@ def fetch_bundle(ticker: str, income: list | None = None) -> dict:
             "ESG (402)",
         ],
     }
+    bundle["source_records"] = dict(_cache().sources)
+    bundle["source_telemetry"] = dict(_cache().metrics)
+    bundle["assembled_at"] = utcnow()
+    bundle["earnings_context"] = earnings_context(bundle)
     return bundle
 
 
@@ -482,23 +485,20 @@ def main() -> int:
 
     ticker = args.ticker
 
-    # Step 0: discover last_earnings_date. Fetch the full 8Q up front so a cache
-    # miss can reuse it inside fetch_bundle (no duplicate income-statement call).
-    pre = _fmp_get("/stable/income-statement",
-                   {"symbol": ticker, "period": "quarter", "limit": 8})
-    if not pre:
-        sys.exit(f"[ERROR] {ticker}: no income-statement available — invalid ticker?")
-    latest_date = pre[0].get("date")
-    if not latest_date:
-        sys.exit(f"[ERROR] {ticker}: latest income-statement missing 'date'")
-
-    # Step 1: cache check
-    if not args.force:
-        existing = find_existing_cache(ticker, latest_date)
-        if existing:
-            print(f"[fetch] cache hit: {os.path.relpath(existing, BASE_DIR)} "
-                  f"(last_earnings_date={latest_date})", file=sys.stderr)
-            return 0
+    global _SOURCE_CACHE
+    _SOURCE_CACHE = SourceCache(os.path.join(CACHE_DIR, "sources"), force=args.force)
+    pre = _cache().get("/stable/income-statement",
+                       {"symbol": ticker, "period": "quarter", "limit": 8}, refresh=True)
+    if not pre or not pre[0].get("date"):
+        sys.exit(f"[ERROR] {ticker}: latest financial period unavailable")
+    latest_date = pre[0]["date"]
+    _cache().period = latest_date
+    # The discovery request itself belongs to the newly confirmed period.
+    for record in _cache().sources.values():
+        record["financial_period"] = latest_date
+    prior_path = os.path.join(CACHE_DIR, f"{ticker}_{latest_date}.json")
+    if not args.force and os.path.exists(prior_path):
+        print(f"[fetch] cache hit: financial period unchanged; reassemble market sources", file=sys.stderr)
 
     # Step 2: full fetch (reuses pre-fetched income)
     bundle = fetch_bundle(ticker, income=pre)
@@ -523,8 +523,7 @@ def main() -> int:
         except Exception as e:
             print(f"[fetch] WARN: could not read prior cache for merge: {e}", file=sys.stderr)
 
-    with open(out_path, "w") as f:
-        json.dump(bundle, f, indent=2)
+    atomic_json(out_path, bundle)
     print(f"[fetch] wrote {os.path.relpath(out_path, BASE_DIR)} "
           f"({len(json.dumps(bundle)):,} bytes)", file=sys.stderr)
     return 0

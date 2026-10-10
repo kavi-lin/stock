@@ -961,8 +961,10 @@ const i18n = {
 
     // ── Earnings Detail Infographic page (V1.73) ──────────────────
     earnings_detail: {
+      tab_quarter:            "本季財報",
+      tab_compare:            "跨季比較",
       back_btn:               "返回財報列表",
-      section_metrics:        "本季數字 vs 預期",
+      section_metrics:        "本季數字 vs 市場預期",
       section_trends:         "趨勢圖",
       section_trends_hint:    "最近 5 季",
       chart_revenue_ni:       "營收 · 淨利",
@@ -985,8 +987,8 @@ const i18n = {
       section_quote:          "管理層發言",
       section_highlights:     "Key Highlights",
       section_summary:        "重點總結",
-      detail_collapse_label:  "展開詳細財報報告 (Markdown)",
-      empty_state_msg:        "尚未生成 Infographic — 需執行一次 LLM Narrate phase",
+      detail_collapse_label:  "展開完整財報報告",
+      empty_state_msg:        "尚無財報資料，完成一次分析後即可查看。",
       empty_state_btn:        "重跑「財報 {ticker}」",
       metric_revenue:         "營收",
       metric_eps:             "每股盈餘",
@@ -1995,6 +1997,8 @@ const i18n = {
 
     // ── Earnings Detail Infographic page (V1.73) ──────────────────
     earnings_detail: {
+      tab_quarter:            "Quarterly report",
+      tab_compare:            "Quarter comparison",
       back_btn:               "Back to Earnings",
       section_metrics:        "This Quarter vs Estimates",
       section_trends:         "Trend Charts",
@@ -2019,8 +2023,8 @@ const i18n = {
       section_quote:          "Management Commentary",
       section_highlights:     "Key Highlights",
       section_summary:        "Bottom Line",
-      detail_collapse_label:  "Expand full earnings report (Markdown)",
-      empty_state_msg:        "Infographic not yet generated — LLM narrate phase pending",
+      detail_collapse_label:  "Expand full earnings report",
+      empty_state_msg:        "No earnings data yet. Run an analysis to start tracking.",
       empty_state_btn:        "Re-run 財報 {ticker}",
       metric_revenue:         "Revenue",
       metric_eps:             "EPS",

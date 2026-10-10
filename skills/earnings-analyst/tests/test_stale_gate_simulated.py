@@ -18,9 +18,9 @@ deterministically:
   2. forecaster forecast.py emits top-level `transition_case_mtime` AND
      carries `transition_signature_mtime` through `transition_info`
      (Codex round-6 fix).
-  3. forecaster `_load_earnings_analyst_bundle` BACKFILLS
-     `transition_signature_mtime` from cache file mtime when missing
-     from an older cache.
+  3. forecaster `_load_earnings_analyst_bundle` requires fresh financial
+     source_records and derives a missing signature timestamp from them.
+     Rewriting a file cannot renew stale or unproven source data.
   4. Given two synthetic mtime values, the comparison logic in the
      protocol prompt — translated to Python — would correctly fire
      stale > 6h.
@@ -47,6 +47,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent / "scripts"))
@@ -54,6 +55,7 @@ sys.path.insert(0, str(HERE.parent / "scripts"))
 sys.path.insert(0, str(HERE.parents[1] / "earnings-valuation-forecaster" / "scripts"))
 
 from analyze import analyze
+from investment.scripts.run_data import source
 
 
 # ── Constants pulled from protocol Phase 3 Step 2 ────────────────────────
@@ -147,6 +149,12 @@ class TestEarningsAnalystEmitsSignatureMtime(unittest.TestCase):
 
     def test_analyze_emits_mtime_field(self):
         bundle = _minimal_bundle()
+        older = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(hours=2)).isoformat()
+        newer = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(hours=1)).isoformat()
+        bundle["source_records"] = {
+            "income": source([], kind="financial", fetched_at=older),
+            "balance": source([], kind="financial", fetched_at=newer),
+        }
         analyzed = analyze(bundle)
         self.assertIn("transition_signature_mtime", analyzed,
                       "analyze() must emit transition_signature_mtime for stale-gate cross-check")
@@ -155,6 +163,10 @@ class TestEarningsAnalystEmitsSignatureMtime(unittest.TestCase):
         self.assertIsInstance(mtime_str, str)
         # Will raise ValueError if not iso
         dt.datetime.fromisoformat(mtime_str)
+        self.assertEqual(mtime_str, older, "must retain the oldest financial source timestamp")
+
+    def test_missing_sources_cannot_fabricate_signature_timestamp(self):
+        self.assertIsNone(analyze(_minimal_bundle())["transition_signature_mtime"])
 
     def test_analyze_emits_signature_alongside_mtime(self):
         bundle = _minimal_bundle()
@@ -165,68 +177,46 @@ class TestEarningsAnalystEmitsSignatureMtime(unittest.TestCase):
                       {"paradigm_only", "mix_only", "both", "neither"})
 
 
-class TestForecasterBackfillsMtimeFromOldCache(unittest.TestCase):
-    """Contract (Codex round-6): _load_earnings_analyst_bundle MUST
-    backfill `transition_signature_mtime` from cache file mtime when the
-    cache file itself lacks the field (pre-V3.17.1 caches)."""
+class TestForecasterSourceFreshness(unittest.TestCase):
+    """The real cache loader must reject a fresh file containing stale sources."""
 
-    def test_backfill_from_file_mtime(self):
-        from forecast import _load_earnings_analyst_bundle, EA_CACHE_DIR_FC
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(dir=HERE.parents[2] / "tmp")
+        self.addCleanup(self.tmp.cleanup)
+        self.scope = patch("forecast.EA_CACHE_DIR_FC", self.tmp.name)
+        self.scope.start()
+        self.addCleanup(self.scope.stop)
+        self.period = "2026-06-30"
+        self.fetched = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(hours=1)).isoformat()
 
-        # Drop an older-shaped cache (no transition_signature_mtime) into a
-        # temp dir mimicking the EA cache layout. Use a custom ticker so we
-        # don't collide with real cache entries.
-        # Note: _load_earnings_analyst_bundle searches EA_CACHE_DIR_FC; we
-        # write directly there with a synthetic ticker name to avoid mocking.
-        tmp_ticker = "ZZTEST"
-        tmp_file = os.path.join(EA_CACHE_DIR_FC, f"{tmp_ticker}_2024-12-31.json")
-        try:
-            os.makedirs(EA_CACHE_DIR_FC, exist_ok=True)
-            # Legacy-shape cache — has transition_signature but NOT _mtime field
-            legacy = {
-                "ticker": tmp_ticker,
-                "transition_signature": "neither",
-                "business_mix_shift_overlay": {"tier": "STABLE"},
-            }
-            with open(tmp_file, "w", encoding="utf-8") as f:
-                json.dump(legacy, f)
+    def load(self, *, fetched=None, with_source=True, explicit=None):
+        from forecast import _load_earnings_analyst_bundle
+        bundle = {"ticker": "ZZTEST", "last_earnings_date": self.period,
+                  "transition_signature": "neither"}
+        if with_source:
+            bundle["source_records"] = {"income": source([], kind="financial",
+                fetched_at=fetched or self.fetched, period=self.period)}
+        if explicit:
+            bundle["transition_signature_mtime"] = explicit
+        path = Path(self.tmp.name) / f"ZZTEST_{self.period}.json"
+        path.write_text(json.dumps(bundle))  # fresh mtime in every case
+        return _load_earnings_analyst_bundle("ZZTEST")
 
-            loaded = _load_earnings_analyst_bundle(tmp_ticker)
-            self.assertIsNotNone(loaded, "loader must find ZZTEST cache")
-            self.assertIn("transition_signature_mtime", loaded,
-                          "loader must backfill transition_signature_mtime from file mtime")
-            # backfilled mtime should be close to "now" (within this test's runtime)
-            backfilled = dt.datetime.fromisoformat(loaded["transition_signature_mtime"])
-            now = dt.datetime.fromtimestamp(os.path.getmtime(tmp_file))
-            delta = abs((backfilled - now).total_seconds())
-            self.assertLess(delta, 2.0,
-                            "backfilled mtime should match file mtime within 2 seconds")
-        finally:
-            if os.path.exists(tmp_file):
-                os.unlink(tmp_file)
+    def test_backfill_from_source_not_file_mtime(self):
+        loaded = self.load()
+        self.assertEqual(loaded["transition_signature_mtime"], self.fetched)
+        self.assertEqual(loaded["_source_mtime"], self.fetched)
 
-    def test_explicit_mtime_in_cache_wins_over_backfill(self):
-        from forecast import _load_earnings_analyst_bundle, EA_CACHE_DIR_FC
+    def test_explicit_signature_timestamp_is_preserved(self):
+        explicit = "2026-01-15T10:00:00+00:00"
+        self.assertEqual(self.load(explicit=explicit)["transition_signature_mtime"], explicit)
 
-        tmp_ticker = "ZYTEST"
-        tmp_file = os.path.join(EA_CACHE_DIR_FC, f"{tmp_ticker}_2024-12-31.json")
-        try:
-            explicit_mtime = "2026-01-15T10:00:00"
-            cache = {
-                "ticker": tmp_ticker,
-                "transition_signature": "neither",
-                "transition_signature_mtime": explicit_mtime,
-            }
-            with open(tmp_file, "w", encoding="utf-8") as f:
-                json.dump(cache, f)
-            loaded = _load_earnings_analyst_bundle(tmp_ticker)
-            self.assertIsNotNone(loaded)
-            # Explicit value must NOT be overwritten by backfill (setdefault contract)
-            self.assertEqual(loaded["transition_signature_mtime"], explicit_mtime,
-                             "explicit mtime in cache must take precedence over backfill")
-        finally:
-            if os.path.exists(tmp_file):
-                os.unlink(tmp_file)
+    def test_legacy_cache_without_sources_is_rejected(self):
+        self.assertIsNone(self.load(with_source=False))
+
+    def test_rewritten_file_does_not_renew_expired_sources(self):
+        expired = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=30)).isoformat()
+        self.assertIsNone(self.load(fetched=expired))
 
 
 if __name__ == "__main__":

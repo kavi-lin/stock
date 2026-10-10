@@ -41,13 +41,20 @@ Claude 用 Read 工具讀取:
 
 **必抽欄位**(transcript 有時):
 - `headline_oneliner` — 整體一句話摘要
-- `surprise.*` — 從 `cache.earnings_surprises[0]` 計算 beat/miss + surprise_pct
+- `surprise.*` — 直接複製 `cache.earnings_context.surprise`（Python 已挑選同財季、已有實際值的事件並計算；禁止取第一筆）。缺資料時 actual/estimated/beat/surprise_pct 可為 null。
 - `segments_q.items[]` — **從 transcript CFO 段落抽季度數字**(infographic 上的 569.9/309.8 億等),抽不到才退化用 `cache.segments.product_fy[0]` + `is_fy_fallback=true`
 - `geographic_q.items[]` — 同上邏輯
 - `capital_returns.{buyback_authorization_usd, dividend_per_share_*, dividend_hike_pct, announcements[]}` — 從 transcript 抓 "authorized $X buyback"、"raising our dividend by Y% to $Z" 等句子
 - `ceo_quote.{speaker, title, quote, context}` — 挑 1-2 句最能表達本季 narrative 的 CEO 引述
 - `key_highlights[]`(≥3) — icon + title + body,涵蓋成長/產品/區域/資本/風險 等面向
 - `summary[]`(≥2) — tldr 條列
+
+**跨季追蹤必填（earnings-history/1）**：
+- `history_schema_version: "earnings-history/1"`、`expectations: []`、`observed_metrics: []`，詳 `schema.md`「跨季追蹤契約」。
+- 先讀 `cache.comparison.expectation_audit[].expectation` 的前次說法；只補有來源、相同期間與口徑的實際值到 `observed_metrics`。程式已有營收、GAAP 稀釋 EPS、毛利率、營益率、FCF，無須重抄。
+- `expectations` 記本次提出、指向未來期間的公司指引／市場共識／分析預期；數值需原文門檻與來源。沒有可靠指引留 `[]`；模糊觀察用 `qualitative`，不得自行補達標門檻。
+- 每項保存 source_ref（公開可點網址，禁止 API key）、source_quote、published_at、target_period、幣別、會計／匯率／業務口徑。來源是舊季 transcript 或 FY fallback 時，不得當本季季度證據。
+- 舊文字只標「歷史摘要補建」，不計預測命中。下次觀察清單由 Python 產生；預期判定、差額、百分比全部由 Python 計算。只使用既有 narrate turn，不新增模型呼叫。
 
 **transcript=null 時**(fallback):
 - `transcript_used=false`,省略 `ceo_quote`
@@ -56,11 +63,11 @@ Claude 用 Read 工具讀取:
 - `key_highlights` 從 `quarterly_pnl yoy + quality_flags` 合成
 
 ```bash
-# Step 5 — Render:既有 markdown 報告(細節 reference,不變)
+# Step 5 — Render:驗證兩層輸入，產出跨季比較／預期驗收／下次追蹤並保存不可覆寫歷史
 python3 skills/earnings-analyst/scripts/render.py NVDA
 
 # Step 6 — Validate infographic schema(rc=0 才算完成)
-python3 skills/earnings-analyst/scripts/validate_infographic.py NVDA
+python3 skills/earnings-analyst/scripts/validate_infographic.py NVDA --require-history
 ```
 
 ### 一次跑完(`財報 [TICKER]` trigger)
@@ -72,20 +79,20 @@ T=NVDA && \
   python3 skills/earnings-analyst/scripts/validate.py "$T" && \
   echo "→ Step 4: Claude reads cache+transcript, writes infographic.json" && \
   python3 skills/earnings-analyst/scripts/render.py "$T" && \
-  python3 skills/earnings-analyst/scripts/validate_infographic.py "$T"
+  python3 skills/earnings-analyst/scripts/validate_infographic.py "$T" --require-history
 ```
 
 ## Cache 設計
 
-- **Key**: `(TICKER, last_earnings_date)`
-- **檔名**: `skills/earnings-analyst/cache/<TICKER>_<YYYY-MM-DD>.json`(YYYY-MM-DD = 最新季財報日)
-- **TTL 上限**: 90 天(超過硬失效,即使 last_earnings_date 未變)
-- **Invalidation step**: fetch.py 先用最便宜呼叫 (`/income-statement?limit=1`) 拿最新季 date;若 cache 已有同 date 檔且 < 90d → skip 11 個 endpoint
-- **`--force`**: 繞過 cache 強制重 fetch
+- **Key**: `(TICKER, fiscal_period_end)`；相容舊欄位 `last_earnings_date`，它是會計期末而非公布日。
+- **檔名**: `cache/<TICKER>_<YYYY-MM-DD>.json`；公布日另存 `earnings_context.earnings_release_date`，僅在已完成事件可與本季營收對應時填入，無法對應留 null。
+- **來源時鐘**：財務 7 天、market 24 小時、quote 5 分鐘；每次確認最新季度，`--force` 強制刷新來源。快取刷新不改寫歷史紀錄。
+- **歷史**：成功 render 才保存 `cache/history/<TICKER>/<期末>/<hash>.json`，以及 `reports/earnings_history/<TICKER>/<期末>/<hash>.md`。同內容重跑冪等，修訂追加版本；historical lookup 不受最新頁面的 90 天限制。
+- **預覽**：`render.py <TICKER> --preview --out reports/<DATE>_<TICKER>_earnings_comparison_preview.md` 可用舊摘要檢查新報告；不回寫快取、不補造事前預測、不保存已完成歷史。正式六步驟禁止用 preview 取代 render。
 
 ## FMP Endpoints 用量
 
-12 calls/run(完整 fetch),free plan 250/day。Cache hit 只用 1 call。
+實際呼叫數由來源快取是否到期決定；下表為核心 endpoint，完整取材亦包含 infographic 所需 endpoint。
 
 | Endpoint | 用途 |
 |---|---|
@@ -240,4 +247,4 @@ Source: [Q3 2024 10-Q](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompan
 ## 不影響範圍
 
 - **不改 `分析 [TICKER]` Phase 2 流程** — 此 skill 是獨立深度層,不自動掛上 daily protocol(避免 token 浪費)
-- **Cache 與其他 skill 隔離** — 不寫 `data.json`、不影響 Dashboard
+- **Cache 與其他 skill 隔離** — 此 skill 不直接寫 `data.json`；Dashboard 財報入口使用相同完成檢查，專用比較畫面留待第二階段。

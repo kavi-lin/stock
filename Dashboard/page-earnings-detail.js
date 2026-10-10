@@ -9,6 +9,7 @@
 
     let _payload = null;     // last fetched {ticker, infographic, cache}
     let _markdownLoaded = false;
+    let _chartsDirty = true;
 
     // ── i18n helper ──────────────────────────────────────────────────────
     function ed() { return (window.i18n?.[UI.currentLang]?.earnings_detail) || {}; }
@@ -66,8 +67,9 @@
 
         document.getElementById('ed-title-ticker').textContent = payload.ticker;
         const fiscalEl = document.getElementById('ed-fiscal-pill');
-        if (inf.fiscal_label) {
-            fiscalEl.textContent = inf.fiscal_label;
+        const fiscal = payload.comparison?.context?.fiscal_period;
+        if (fiscal || inf.fiscal_label) {
+            fiscalEl.textContent = fiscal ? `FY${fiscal.fiscal_year} ${fiscal.period}` : inf.fiscal_label;
             fiscalEl.hidden = false;
         }
         const asOf = inf.as_of_date || cache.as_of_date || '';
@@ -320,9 +322,10 @@
     function wireDetailCollapse(reportPath) {
         const det = document.getElementById('ed-detail-collapse');
         const body = document.getElementById('ed-detail-md-body');
-        if (!reportPath) { det.hidden = true; return; }
+        det.hidden = !reportPath;
+        if (!reportPath) return;
 
-        det.addEventListener('toggle', async () => {
+        det.ontoggle = async () => {
             if (!det.open || _markdownLoaded) return;
             body.innerHTML = `<p class="text-zinc-500 text-sm">Loading…</p>`;
             try {
@@ -336,7 +339,7 @@
             } catch (e) {
                 body.innerHTML = `<p class="text-red-500 text-sm">Failed: ${UI.escapeHTML(e.message)}</p>`;
             }
-        });
+        };
     }
 
     // ── Empty state ──────────────────────────────────────────────────────
@@ -375,8 +378,20 @@
     function renderAll(payload) {
         renderHero(payload);
         const inf = payload.infographic || {};
-        renderMetricCards(inf.surprise);
-        renderTrendCharts(payload);
+        window.EarningsComparison.render(document.getElementById('ed-comparison'), payload, UI.currentLang);
+        const surprise = payload.comparison?.context?.surprise || null;
+        renderMetricCards(surprise);
+        document.getElementById('ed-consensus-section').hidden = !surprise ||
+            (surprise.revenue_actual == null && surprise.eps_actual == null);
+        const notice = document.getElementById('ed-quarter-notice');
+        const historical = payload.view?.selected_period !== payload.view?.latest_period;
+        const messages = [];
+        if (historical) messages.push(UI.currentLang === 'en' ? 'Viewing a historical quarterly report.' : '目前顯示的是歷史季度財報。');
+        if (payload.view?.narrative_available === false) messages.push(UI.currentLang === 'en' ? 'Financial data is available; the analysis narrative is not yet complete.' : '本季財務數字已更新，分析摘要尚未完成。');
+        notice.textContent = messages.join(' ');
+        notice.hidden = !messages.length;
+        _chartsDirty = true;
+        renderVisibleCharts();
         renderSegments(inf.segments_q);
         renderGeographic(inf.geographic_q);
         renderCapitalReturn(inf.capital_returns, inf.dividends);
@@ -390,6 +405,16 @@
 
     // ── V2.7.15 — Trend infographic charts (Chart.js) ────────────────────
     const _charts = {}; // id → Chart instance, destroyed on re-render
+
+    function renderVisibleCharts() {
+        if (_payload && !document.getElementById('ed-quarter-panel').hidden) {
+            if (_chartsDirty) {
+                renderTrendCharts(_payload);
+                _chartsDirty = false;
+            }
+            requestAnimationFrame(() => Object.values(_charts).forEach(chart => chart.resize()));
+        }
+    }
 
     function chartTheme() {
         const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
@@ -756,6 +781,7 @@
 
     // ── Boot ─────────────────────────────────────────────────────────────
     UI.boot('earnings', { translate: applyTranslations });
+    window.EarningsTabs.init({onChange: renderVisibleCharts});
 
     const ticker = getTicker();
     if (!ticker) {
@@ -768,9 +794,16 @@
 
     document.getElementById('ed-title-ticker').textContent = ticker;
 
-    fetch(`/api/earnings-infographic/${encodeURIComponent(ticker)}`)
+    const selectedPeriod = new URLSearchParams(location.search).get('period');
+    const selectedRevision = new URLSearchParams(location.search).get('revision');
+    const viewParams = new URLSearchParams();
+    if (selectedPeriod !== null) viewParams.set('period', selectedPeriod);
+    if (selectedRevision !== null) viewParams.set('revision', selectedRevision);
+    const periodQuery = viewParams.size ? `?${viewParams}` : '';
+    fetch(`/api/earnings-infographic/${encodeURIComponent(ticker)}${periodQuery}`)
         .then(async r => {
-            if (r.status === 404) { renderEmptyState(ticker); return null; }
+            if (r.status === 404 && selectedPeriod === null && selectedRevision === null) { renderEmptyState(ticker); return null; }
+            if (r.status === 404) throw new Error(UI.currentLang === 'en' ? 'This historical quarter is unavailable. Return to the earnings list.' : '找不到這個歷史季度，請返回財報列表。');
             if (!r.ok) throw new Error(`HTTP ${r.status}`);
             return r.json();
         })
@@ -779,12 +812,12 @@
             _payload = payload;
             document.getElementById('ed-loading').hidden = true;
             document.getElementById('ed-content').hidden = false;
-            renderAll(payload);
             applyTranslations();   // ensure static labels reflect current lang
         })
         .catch(err => {
             document.getElementById('ed-loading').hidden = true;
             document.getElementById('ed-empty-state').hidden = false;
+            document.getElementById('ed-empty-rerun-btn').hidden = true;
             const tr = ed();
             document.getElementById('ed-empty-msg').textContent =
                 `${tr.load_error || 'Load failed'}: ${err.message}`;

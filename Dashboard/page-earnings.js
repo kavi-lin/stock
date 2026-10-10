@@ -1049,7 +1049,7 @@
         // Freshness
         const fresh = renderFreshness(r.cache_age_days, isZh);
         // Buttons (V1.73 — primary now opens infographic page; markdown moved to inline collapse)
-        const reportBtn = `<button class="ea-act-btn ea-act-btn-primary" data-action="infographic" data-ticker="${r.ticker}">📊 ${isZh?'Infographic':'Infographic'}${r.has_infographic === false ? ' *' : ''}</button>`;
+        const reportBtn = `<button class="ea-act-btn ea-act-btn-primary" data-action="infographic" data-ticker="${r.ticker}">📊 ${isZh?'查看財報':'View earnings'}</button>`;
         // V2.15.0 — morph 重跑 → 📋 財報前瞻 when next earnings is fmp_confirmed AND ≤ 7 days
         let actionBtn;
         if (r.next_earnings_source === 'fmp_confirmed' && r.next_earnings_est) {

@@ -25,6 +25,7 @@ import glob
 import json
 import os
 import sys
+from earnings_history import find_cache as history_find_cache, earnings_context, build_comparison
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 CACHE_DIR = os.path.join(BASE_DIR, "skills", "earnings-analyst", "cache")
@@ -47,8 +48,7 @@ def latest_q(rows: list) -> dict:
 
 
 def find_cache(ticker: str) -> str | None:
-    files = sorted(glob.glob(os.path.join(CACHE_DIR, f"{ticker}_*.json")))
-    return files[-1] if files else None
+    return history_find_cache(CACHE_DIR, ticker)
 
 
 def compute_margins_8q(income: list) -> list:
@@ -810,7 +810,9 @@ def analyze(bundle: dict) -> dict:
     # EARNINGS_ANALYST_BUNDLE + forecaster transition cascade.
     bundle["business_mix_shift_overlay"] = mix_overlay
     bundle["transition_signature"]       = transition_signature
-    bundle["transition_signature_mtime"] = dt.datetime.now().isoformat(timespec="seconds")
+    financial_times = [r.get("fetched_at") for r in (bundle.get("source_records") or {}).values()
+                       if r.get("kind") == "financial" and r.get("status") == "ok" and r.get("fetched_at")]
+    bundle["transition_signature_mtime"] = min(financial_times) if financial_times else None
     bundle["cash_conversion_quality"]    = cash_conversion_quality
     bundle["composite_score"]  = composite
     bundle["verdict"]          = verdict_for(composite)
@@ -842,9 +844,16 @@ def main() -> int:
         bundle = json.load(f)
 
     bundle = analyze(bundle)
+    bundle["earnings_context"] = earnings_context(bundle)
+    # Narrator gets prior contracts and deterministic financial changes before extraction.
+    # No history is committed by background prewarming; render commits validated runs.
+    bundle["comparison"] = build_comparison(bundle, os.path.dirname(os.path.abspath(path)))
 
-    with open(path, "w") as f:
-        json.dump(bundle, f, indent=2)
+    # Analysis time never replaces source fetched_at timestamps.
+    sys.path.insert(0, BASE_DIR)
+    from investment.scripts.run_data import atomic_json, utcnow
+    bundle["analyzed_at"] = utcnow()
+    atomic_json(path, bundle)
 
     print(f"[analyze] {bundle['ticker']}: composite={bundle['composite_score']}/100 "
           f"verdict={bundle['verdict']} "
