@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "enabled": true,
+  "service_enabled": true,
+  "service_id": "research-production",
+  "intake": "break_news",
+  "handoff_min_score": 3,
+  "daily_debates": 30,
+  "daily_calls": 60,
+  "model": "gpt-6-luna",
+  "reasoning_effort": "max",
+  "poll_seconds": 600,
+  "scan_seconds": 60,
+  "retention_days": 14,
+  "hourly_debates": 5,
+  "live_debates": 30,
+  "live_calls": 60,
+  "preflight_cases": 12,
+  "preflight_calls": 24,
+  "observation_seconds": 21600,
+  "extra_feeds": [],
+  "company_feeds": []
+}

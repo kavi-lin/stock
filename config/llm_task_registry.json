@@ -42,6 +42,10 @@
     "agentic_protocol-playbook": {"category": "agentic_protocol", "input_tokens": 200000, "output_tokens": 40000, "requires_web": true},
 
     "debate": {"category": "ensemble", "output_tokens": 3000, "requires_web": false},
+    "research-initial-analysis": {"category": "ensemble", "input_tokens": 22000, "output_tokens": 3000, "requires_web": false},
+    "research-initial-challenge": {"category": "ensemble", "input_tokens": 22000, "output_tokens": 3000, "requires_web": false},
+    "research-recheck-analysis": {"category": "ensemble", "input_tokens": 22000, "output_tokens": 3000, "requires_web": false},
+    "research-recheck-challenge": {"category": "ensemble", "input_tokens": 22000, "output_tokens": 3000, "requires_web": false},
     "office": {"category": "ensemble", "output_tokens": 3000, "requires_web": false, "outage_policy": "interactive_queue"},
     "office_verdict": {"category": "ensemble", "output_tokens": 4000, "requires_web": false, "outage_policy": "interactive_queue", "response_format": "text"},
 

@@ -829,7 +829,8 @@ def list_stale_pending() -> list[dict]:
     return out
 
 
-def scan_and_debate(workers: int = PARALLEL, verbose: bool = False) -> dict:
+def scan_and_debate(workers: int = PARALLEL, verbose: bool = False,
+                    stop_event=None) -> dict:
     recover_orphaned_debates()
     ids = scan_pending()
     if not ids:
@@ -843,6 +844,7 @@ def scan_and_debate(workers: int = PARALLEL, verbose: bool = False) -> dict:
     })
 
     in_flight: set[str] = set()
+    processed_ids: list[str] = []
 
     def _worker(nid: str) -> dict:
         in_flight.add(nid)
@@ -856,7 +858,10 @@ def scan_and_debate(workers: int = PARALLEL, verbose: bool = False) -> dict:
     # `workers` remains in the public CLI/API for compatibility, but exclusive
     # provider slots make values above one unsafe for a fixed two-model roster.
     for nid in ids:
+        if stop_event is not None and stop_event.is_set():
+            break
         res = _worker(nid)
+        processed_ids.append(nid)
         if res.get("deferred"):
             deferred += 1
         elif res.get("ok") and res.get("state") in ("closed", "partial_closed"):
@@ -869,11 +874,12 @@ def scan_and_debate(workers: int = PARALLEL, verbose: bool = False) -> dict:
         "completed_in_scan": completed,
         "failed_in_scan": failed,
         "deferred_in_scan": deferred,
-        "queue_depth": 0,
+        "queue_depth": max(0, len(ids) - len(processed_ids)),
     })
-    return {"ok": True, "items_processed": len(ids),
+    return {"ok": True, "items_processed": len(processed_ids),
             "completed": completed, "failed": failed, "deferred": deferred,
-            "ids": ids}
+            "ids": processed_ids,
+            "stopped": bool(stop_event and stop_event.is_set())}
 
 
 def main() -> int:

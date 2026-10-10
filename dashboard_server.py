@@ -18,6 +18,7 @@ import glob
 import json
 import os
 import re
+import signal
 import shutil
 import sys
 import time
@@ -310,7 +311,8 @@ def _protocol_model_for(name):
     return PROTOCOL_MODEL.get(name, PROTOCOL_MODEL_DEFAULT)
 
 
-def _protocol_command(model, prompt, claude_model=None, timeout_sec=None, agy_model=None):
+def _protocol_command(model, prompt, claude_model=None, timeout_sec=None, agy_model=None,
+                      codex_model=None, effort=None):
     """Build the CLI argv for running an agentic protocol on `model`.
     The stdout reader just pipes to the log, so only the command differs.
     `claude_model` (when truthy) pins `claude --model` for tier control.
@@ -351,9 +353,13 @@ def _protocol_command(model, prompt, claude_model=None, timeout_sec=None, agy_mo
             cmd += ["--model", agy_model]
         return cmd
     if model == "codex":
-        return [CODEX_BIN, "exec", "--json", "-C", ROOT,
-                "--dangerously-bypass-approvals-and-sandbox", "--color", "never",
-                "--ephemeral", prompt]
+        cmd = [CODEX_BIN, "exec", "--json", "-C", ROOT,
+               "--dangerously-bypass-approvals-and-sandbox", "--color", "never", "--ephemeral"]
+        if codex_model:
+            cmd += ["--model", codex_model]
+        if effort:
+            cmd += ["-c", 'model_reasoning_effort="' + effort + '"']
+        return cmd + [prompt]
     if model != "claude":
         raise ValueError(f"unsupported protocol model: {model}")
     claude_bin = CLAUDE_BIN if os.path.exists(CLAUDE_BIN) else "claude"
@@ -450,6 +456,9 @@ def _adapt_protocol_prompt(model, prompt, name=None):
     run: given no protocol path, the agent searched `~/Documents`, `~/Stock` and
     `~/.claude` for this project while sitting inside it.
     """
+    if name == "invest":
+        from investment.scripts.run_data import protocol_preamble
+        prompt = protocol_preamble() + prompt
     if model == "claude":
         return prompt
     ctx = PROVIDER_CONTEXT_FILE.get(model)
@@ -467,7 +476,7 @@ def _adapt_protocol_prompt(model, prompt, name=None):
         "工具詞彙對照：protocol 文件用 Claude 的工具名當抽象操作。把 "
         "Read/Write/Edit/Grep/Bash/WebFetch/WebSearch 對應到你自己的檔案、shell、網路工具；"
         "把每個 Agent(...) 需求對應到一個隔離 subagent，protocol 要求平行 fan-out 時"
-        "先把全部 agent 開起來再等待。每一道 validator 與 required-artifact gate 原封不動保留。")
+        "先凍結全部 prompt，再依 min(3, 可用名額) 分批派工；未知名額用 1，後批保持獨立 context。每一道 validator 與 required-artifact gate 原封不動保留。")
     lines.append(
         "作業範圍：一律在目前工作目錄（cwd）這個 repo 內作業。cwd 以外的路徑"
         "（家目錄、~/Documents、~/Stock、其他 CLI 的 state 目錄）都不是本專案，"
@@ -487,6 +496,16 @@ def _adapt_protocol_prompt(model, prompt, name=None):
         "`investment/scripts/`、`skills/`、`scripts/` 等路徑下的所有 `.py` 腳本）皆為只讀基礎建設，"
         "**嚴禁使用檔案編輯/寫入工具修改任何專案程式碼**。若腳本執行報錯或格式不合，"
         "代表你傳入的 JSON 格式或參數有誤，請檢查並修正你的輸入資料，絕對不可修改腳本本體。")
+    if name == "invest" and os.getenv("AIC_INVEST_RUNNER") == "v55":
+        lines.append(
+            "V5.5 有限恢復規則優先於上面的通用停機敘述：schema/參數錯誤可根據同一份真實來源"
+            "修正組裝一次，再走同一道 validator；禁止改來源數值、來源時間、hash 或程式碼。"
+            "來源過期或缺漏必須重新抓取；第二次失敗保存進度並停止；配額/登入錯誤立即停止。"
+            "prepare 自動收集 lane 原始資料與 factpack，不要先逐支執行 Forecaster/DCF/comps。"
+            "選用來源不足（例如 Forecaster PE 歷史不足）由控制器記錄 unavailable/null 與原因，"
+            "沿用降級與 decision cap，不等同 validator 失敗；prepare 自身非 0 才停止準備階段。"
+            "Phase 0 草稿內放實際 FRED fetch 輸出後，使用 investment/scripts/assemble_phase0.py"
+            " --input <DRAFT> --out <NEW_CANONICAL_PATH> 組裝並驗證，保留原始 fetched_at。")
     return "\n".join(lines) + "\n\n" + prompt
 # Global default (25 min); news DIGEST normally finishes in 1-2 min, so give it
 # a tighter ceiling (12 min) — past runs that crossed 10 min have all been
@@ -536,7 +555,7 @@ PROTOCOL_PROMPTS = {
     "review": "非互動模式：一個 turn 跑完擴展辯論 + Arbiter + event append + cache projection + MD。先執行 `python3 news/scripts/news_event_store.py pending` 列出 pending events，再於 JSON 輸出中精確匹配本次 headline，取得唯一 event_id；0 筆或多筆皆停止並清楚回報。禁止把 untrusted headline 拼進 shell command，也不得用 headline 直接覆寫 digest。讀該 event payload，跑四 lane review，寫 `event_payloads/YYYY-MM-DD_HHMM_review.json`（含 lane_scores/lane_confidences 與完整 verdict prose，但禁止自行計算 net score/weights/verdict），再執行 `python3 news/scripts/news_event_store.py review --event-id <EVENT_ID> --payload <payload>`。腳本負責 append REVIEW event、deterministic projection 與 cache patch。禁止直接修改 digest.json、phase0.json 或 sector_intel.json。最後產 REVIEWED Impact Card 並跑 News validator rc=0。\n\n新聞分析 審核 \"{headline}\"",
     "link_digest": "非互動模式：一個 turn 跑完整條 link digest pipeline，不要中途停下等使用者回話。輸入是使用者提供的一條文章 URL：{url}\n依照 `news/link_digest_protocol.md` 規範執行：\n1. WebFetch({url}) 讀完整文章（headline / publisher / 發布時間 ISO / 主體）\n2. WebSearch 找 3-5 則相關報導並 WebFetch 前 3-5 篇讀全文（交叉佐證 + 找上下游/客戶/競品/產業/總經）\n3. 跑 4 視角 inline 辯論（Bull/Bear/Sector/Macro）+ Arbiter（net_impact_score -5~+5、verdict BULLISH/BEARISH/BINARY/NEUTRAL、arbiter_reasoning ≥150 字、debate_note 一行）\n4. 抽 entities（tickers/sectors/themes/tech_keywords）+ supply-chain relations（ticker↔ticker：SUPPLIES_TO/CUSTOMER_OF/CONTRACT_MFG_FOR/CO_DEVELOPS_WITH/COMPETES_WITH，格式 subject/object 用 \"ticker:NVDA\"；ticker→theme：BENEFITS_FROM/HEADWIND_FROM，object 用 \"theme:hbm\"），每條 relation 標 corroborating_sources（**需 ≥2 個 canonical URL 且跨 ≥2 domains，才由 claim ledger 晉升為 KG directed edge；support_count 本身不算 gate**）\n5. **必須產兩個檔（缺一不可）**：\n   (a) `reports/YYYY-MM-DD_HHMM_link_digest.md` — 人讀判斷 digest（來源摘要+原文連結 / 相關新聞綜述（附引用連結）/ 4 視角辯論 / Arbiter 裁決 / KG payload 附錄列出 entities+relations）\n   (b) `news/news_logs/link_digest/<id>.judgment.json` — 機器記錄，schema 見 link_digest_protocol.md（<id> = `ld_YYYYMMDD_<url 的 sha1 前 8 碼>`）\n6. **必須執行**：`python3 scripts/link_digest/build_artifacts.py news/news_logs/link_digest/<id>.judgment.json`（它負責 append LINK_DIGEST event、重建 digest projection、寫 bn_*.json KG payload、驗證與刷新 nexus graph；rc=0 或 rc=2 皆可收尾，rc=1 要修 judgment.json 重跑）\n7. **禁止**：自己手寫 digest.json / news_events.jsonl / bn_*.json（schema 由 build_artifacts 保證）、跳過 WebSearch、跑到一半停下問問題。\n\n連結分析 {url}",
     "triage": "非互動模式：只跑 Stage 1 deterministic triage，**禁止跑 Stage 2 deep debate**，**禁止寫 digest.json**，**禁止 patch sector_intel.json / phase0.json**。流程：\n1. **必須先執行** `python3 news/fetch_all_news.py --hours 24 --output news/news_logs/` 重撈 4 個源（RSS + Finnhub + FMP + SEC EDGAR）合併成 unified raw.json — 不能直接讀現有 raw，避免吃到舊資料\n2. **必須執行** `python3 news/scripts/stage1_triage.py` — script deterministic 寫 `news/news_logs/YYYY-MM-DD_triage.json`（block/dedup/credibility downgrade/news_type/score/4-view snap/晉級 gate 全內建）\n3. **禁止讀 raw.json 全文、禁止 LLM 重新 triage**。讀 triage.json 的 `shallow_verdicts` top-15，對這 15 則補 `headline_zh`（script 留 null），用單次 Edit 寫回 triage.json — 其餘欄位不動\n4. 一個 turn 跑完，不要中途停下等候。\n\n新聞分析 TRIAGE",
-    "earnings": "非互動模式：照 skills/earnings-analyst/SKILL.md 跑完整 6 步驟（含 LLM narrate phase），不要中途停下等使用者確認。**MUST** sequentially run:\n1. `python3 skills/earnings-analyst/scripts/fetch.py {ticker}`（cache hit 也 OK；V1.73 抓 17 endpoints 含 transcript）\n2. `python3 skills/earnings-analyst/scripts/analyze.py {ticker}`\n3. `python3 skills/earnings-analyst/scripts/validate.py {ticker}` — 必須 rc=0\n4. **NARRATE phase（LLM in-conversation, NEW）** — 用 Read 工具讀 `skills/earnings-analyst/cache/{ticker}_<DATE>.json`（含 ~50K 字 transcript.content），用 Write 工具寫 `skills/earnings-analyst/cache/{ticker}_<DATE>.infographic.json`。Schema 見 `skills/earnings-analyst/schema.md` 「Infographic Cache (V1.0)」section。必抽：headline_oneliner / surprise / segments_q（**優先從 transcript CFO 段抽季度數字，無則退化 FY**） / capital_returns（buyback authorization、dividend hike、announcements）/ ceo_quote / key_highlights (≥3) / summary (≥2)\n5. `python3 skills/earnings-analyst/scripts/render.py {ticker}`\n6. `python3 skills/earnings-analyst/scripts/validate_infographic.py {ticker}` — 必須 rc=0\n\n結束條件：reports/<DATE>_{ticker}_earnings.md + cache/<TICKER>_<DATE>.infographic.json 都寫入 + 兩個 validate 都 rc=0。**禁止**：跳步驟、跳 validate、跑到一半停下問問題。\n\n財報 {ticker}",
+    "earnings": "非互動模式：照 skills/earnings-analyst/SKILL.md 跑完整 6 步驟（含 LLM narrate phase），不要中途停下等使用者確認。**MUST** sequentially run:\n1. `python3 skills/earnings-analyst/scripts/fetch.py {ticker}`（cache hit 也 OK；V1.73 抓 17 endpoints 含 transcript）\n2. `python3 skills/earnings-analyst/scripts/analyze.py {ticker}`\n3. `python3 skills/earnings-analyst/scripts/validate.py {ticker}` — 必須 rc=0\n4. **NARRATE phase（LLM in-conversation, NEW）** — 用 Read 工具讀 `skills/earnings-analyst/cache/{ticker}_<DATE>.json`（含 ~50K 字 transcript.content），用 Write 工具寫 `skills/earnings-analyst/cache/{ticker}_<DATE>.infographic.json`。Schema 見 `skills/earnings-analyst/schema.md` 「Infographic Cache (V1.0)」section。必抽：headline_oneliner / surprise / segments_q（**優先從 transcript CFO 段抽季度數字，無則退化 FY**） / capital_returns（buyback authorization、dividend hike、announcements）/ ceo_quote / key_highlights (≥3) / summary (≥2)。新增 `history_schema_version=earnings-history/1`、`expectations=[]`、`observed_metrics=[]`（格式見 schema.md 的跨季追蹤契約）；從 cache.comparison 讀取前次預期，補同期間同口徑的本季證據；無來源留空，不編造門檻。surprise 必須直接複製 cache.earnings_context.surprise，禁止取 earnings_surprises 第一筆。\n5. `python3 skills/earnings-analyst/scripts/render.py {ticker}`（驗證兩層輸入、輸出三個比較區塊並保存不可覆寫歷史）\n6. `python3 skills/earnings-analyst/scripts/validate_infographic.py {ticker} --require-history` — 必須 rc=0\n\n結束條件：reports/<DATE>_{ticker}_earnings.md + cache/<TICKER>_<DATE>.infographic.json 都寫入 + 兩個 validate 都 rc=0。**禁止**：跳步驟、跳 validate、跑到一半停下問問題。\n\n財報 {ticker}",
     "llm_review": "非互動模式：對決策日曆做統計檢討，一個 turn 跑完不要中途停下。流程：\n0. **必須先 rebuild event_index**：`python3 scripts/build_event_index.py` — 此 indexer 掃 reports/ + investment/invest_logs/ + news/news_logs/ + sector/sector_logs/ 重建 `reports/decision_review/event_index_latest.json`（含每筆 decision 的 verdict、新增 `industry_rollup` + `adjustment_ledger_active` 兩個 top-level 欄位）。**rc 必須 0** 才繼續；rc≠0 就 fail 整個 protocol、不要硬跑舊 index。預期 ~30-60 秒。\n1. **Read** `reports/decision_review/REVIEW_PROMPT.md` 拿到完整 prompt 規範（**四步驟**：Step 0 Adjustment Evaluation + Step 1 Pattern + Step 2 Root Cause + Step 3 Recommendations）\n2. **Read** 剛 rebuild 的 `reports/decision_review/event_index_latest.json`（過去決策 + verdict 集合 + industry_rollup + adjustment_ledger_active，可能 300KB+）。確認 `generated_at` 是今天日期，否則 abort\n3. 依 REVIEW_PROMPT 四步驟執行：\n   - **Step 0 — Adjustment Evaluation（先做）**：對 `adjustment_ledger_active` 中每筆 active Rec，從 industry_rollup / decisions / 外部資料拉出 `target_metric` 當週數值，對照 ledger 的 `evaluation_history` 上次值，下 improved / no_change / regressed 判斷。連 3 週 no_change 建議 paused；regressed 建議 rolled-back。完整 ledger 在 `reports/decision_review/ADJUSTMENT_LEDGER.md`，schema 在 `ADJUSTMENT_LEDGER_SCHEMA.md`\n   - Step 1 — Pattern Detection：依 source / verdict / window_complete_pct / decisive_agent / regime / sub_industry_heat 統計顯著 pattern (N≥5 才算 pattern；N=3-4 標 preliminary；N≤2 標 speculation)。**必看 `industry_rollup`** 找 sub-industry / sector 集中性\n   - Step 2 — Root Cause Hypotheses：對每個 pattern 提出 1-2 個假設，引用 specific decision_id 為證據\n   - Step 3 — Adjustment Recommendations：給 protocol/config 具體調整建議（agent 權重、score 閾值、cycle phase 規則等），標 confidence (high/med/low) + 影響範圍\n4. **Write** 結果到 `reports/decision_review/REVIEW_<TODAY>.md`（YYYY-MM-DD 為今天日期）。Markdown 結構：\n```markdown\n# LLM Review · YYYY-MM-DD\n\n_event_index_at: <event_index 的 generated_at>_  \n_decisions_analyzed: <N>_\n\n## 0. Adjustment Evaluation\n| Rec | applied_date | target_metric | last_value | this_week_value | judgement |\n|---|---|---|---|---|---|\n\n## Pattern Detection\n### <Pattern Title> (n=N, N≥5 robust / N=3-4 preliminary / N≤2 speculation)\n- 證據：<引用 specific decisions>\n- 統計：<numbers>\n\n## Industry Rollup\n| industry | sector | n | miss_rate | avg_miss_return | tickers | top_30%? |\n|---|---|---|---|---|---|---|\n\n## Root Cause Hypotheses\n### <Hypothesis>\n- 對應 pattern：<which>\n- 推論：<reasoning>\n\n## Adjustment Recommendations\n### <Recommendation Title>\n- 動作：<concrete config change>\n- Confidence：high|med|low\n- 影響：<scope>\n```\n5. **禁止**：跳過 Step 0 indexer rebuild、跳過 Adjustment Evaluation、跑到一半停下問問題、輸出意見徵詢、未產出 MD 就結束。\n\n決策日曆 LLM Review",
     "playbook": "非互動模式：一個 turn 跑完整條 weekly-tech-playbook 生成流程，不要中途停下等使用者確認，不要輸出「請確認」摘要表。本流程為前瞻探索層，**不**進入也不回寫 investment_protocol 決策。完整規範見 `skills/weekly-tech-playbook/SKILL.md`。流程：\n1. 確定今天日期 DATE（YYYY-MM-DD）。\n2. **執行** `python3 skills/weekly-tech-playbook/scripts/build_pack.py`（即時抓 yfinance 報價）。它會寫 `skills/weekly-tech-playbook/data/pack_<DATE>.json`（含 regime、熱題、候選宇宙行情+動能、近 14 天委員會 verdict）與 `blind_pack_<DATE>.json`。stdout 會印出實際 DATE。\n3. **Read** `skills/weekly-tech-playbook/data/pack_<DATE>.json`。\n4. 依「最夯題材 + 委員會 verdict + 估值/動能紀律」為三個籃子各選 **10 檔**，寫 `skills/weekly-tech-playbook/data/selections_<DATE>.json`（schema 見 SKILL.md「selections JSON schema」）：\n   - 配重鐵律：每籃 tier_weights = 核心 $15k×3 + 標準 $10k×4 + 輕倉 $5k×3，**每籃 sum(weight_usd) 必須 == 100000**，每籃 10 檔，每檔必帶 `price`（直接抄 pack 報價）、`mom_5d`、`mom_1mo`、`theme`、`committee`、`reason`、`data`、`kill`。\n   - 🛡️保險(conservative)：megacap 質地 + 現金流 + 控估值，可較滿配；近月回檔的優質股視為再進場價值。\n   - 🔥激進(aggressive)：押最夯題材高 beta；近月已大漲 / 委員會標 extreme_overvalued / decision_cap 者降級為輕倉並標「等回檔」。\n   - ⚖️混合(hybrid)：保險 sleeve($65k) + 激進 sleeve($35k)，每檔加 `sleeve`(保險/激進) 欄位，整籃加總仍 == 100000。\n   - top-level 另填 `as_of`(=DATE)、`week_label`、`capital_per_basket`(100000)、`tier_weights`、`discipline_note`、`macro`(regime/exposure_ceiling/breadth/market_top/sentiment/real_rate_10y/key_events/playbook_logic — 從 pack 帶入)。\n   - （選配但建議）`codex_review`：第二意見。為求單 turn 穩定，用 `review_mode=\"committee_informed\"`（**不要**用 committee_blind_then_reconcile，那需要另存 blind_artifact 否則 render 會 fatal）。必填 label/reviewed_on/review_mode/committee_dependency/dependency_note/verdict + 至少 3 組 comparison_notes(title/original/note) + recommended_allocation(含現金且 sum(weight_pct)==100、ticker/role/weight_pct 齊全、無重複 ticker) + execution(≥1) + sources(≥2)。\n5. **驗證迴圈**：先跑 `python3 skills/weekly-tech-playbook/scripts/render.py --selections skills/weekly-tech-playbook/data/selections_<DATE>.json --validate-only`。若 rc==1（fatal），依錯誤訊息修 selections_<DATE>.json 再驗，直到 rc==0 或 rc==2。**rc==1 絕不可進下一步。**\n6. **正式渲染**：`python3 skills/weekly-tech-playbook/scripts/render.py --selections skills/weekly-tech-playbook/data/selections_<DATE>.json`。它會寫 `Dashboard/playbook.json`（餵 Dashboard）+ `reports/<DATE>_TECH_PLAYBOOK.md`（人讀）+ dated snapshot `data/playbook_<DATE>.json`。\n7. 結束條件：`Dashboard/playbook.json` + `reports/<DATE>_TECH_PLAYBOOK.md` 都寫入，且最終 render rc∈{0,2}。**禁止**：跳過 build_pack、跳過 validate-only、用假資料、價格欄位留空、跑到一半停下問問題、未產出 playbook.json 就結束。\n\n產生本週投資方案",
 }
@@ -645,6 +664,8 @@ CUSTOM_PROTOCOLS = {
 # protocol artifact incomplete (e.g. sector run halts after Phase 4 without
 # emitting Phase 5 synthesis). If validator rc≠0, status flips to "error".
 PROTOCOL_VALIDATORS = {
+    "earnings": ["skills/earnings-analyst/scripts/validate.py",
+                 "skills/earnings-analyst/scripts/validate_infographic.py"],
     "sector": ["sector/scripts/validate_sector_intel.py"],
     "news":   ["news/scripts/validate_digest_output.py"],
     "flash":  ["news/scripts/validate_digest_output.py"],
@@ -669,11 +690,36 @@ PROTOCOL_VALIDATORS = {
 # a path). Parallel invest runs validate their own immutable session object,
 # never whichever ticker happens to be history.json[-1] at process exit.
 PROTOCOL_VALIDATOR_ARGS = {
+    "earnings": ["{ticker}", "--require-history"],
     "invest": [
         "--history", "investment/invest_logs/session_exports/{today}_{ticker}.json",
         "--require-committed-to", "investment/invest_logs/history.json",
     ],
 }
+
+
+def _run_protocol_validators(name, params, start):
+    """Run each registered script separately; stop at the first failed gate."""
+    substitutions = {
+        "{today}": start.strftime("%Y-%m-%d"),
+        "{today_compact}": start.strftime("%Y%m%d"),
+        "{ticker}": str((params or {}).get("ticker") or "").upper(),
+    }
+    validator_args = []
+    for token in PROTOCOL_VALIDATOR_ARGS.get(name) or []:
+        for key, value in substitutions.items():
+            token = token.replace(key, value)
+        validator_args.append(token)
+    result = None
+    for script in PROTOCOL_VALIDATORS.get(name) or []:
+        result = subprocess.run(
+            [sys.executable, os.path.join(ROOT, script), *validator_args],
+            cwd=ROOT, capture_output=True, text=True, timeout=60,
+        )
+        if result.returncode != 0:
+            break
+    return result
+
 
 # Post-run required-artifact gate. Catches a model returning rc=0 while leaving
 # the expected output file unwritten (e.g. a fallback model timing out without
@@ -1115,6 +1161,48 @@ def _extract_error_from_log(log_path, rc):
         return f"exit code {rc} (log parse failed: {e})"
 
 
+def _protocol_failure_detail(log_path, fallback):
+    """Surface an unresolved required-script failure before a missing artifact.
+
+    Successful retries clear the corresponding failure. Only completed host
+    command events count; quoted errors in prompts/agent prose do not.
+    """
+    required = (
+        "fetch_all_news.py", "stage1_triage.py", "build_digest_packet.py",
+        "theme_detector.py", "finalize_digest.py",
+    )
+    failures = {}
+    try:
+        with open(log_path, encoding="utf-8", errors="replace") as stream:
+            for line in stream:
+                try:
+                    event = json.loads(line)
+                except (ValueError, TypeError):
+                    continue
+                if not isinstance(event, dict) or event.get("type") != "item.completed":
+                    continue
+                item = event.get("item") or {}
+                if item.get("type") != "command_execution":
+                    continue
+                command = str(item.get("command") or "")
+                match = re.search(r"\bpython(?:3(?:\.\d+)?)?\s+(?:[^\s'\"]*/)?(" + "|".join(re.escape(x) for x in required) + r")\b", command)
+                if not match:
+                    continue
+                script = match.group(1)
+                rc = item.get("exit_code")
+                if rc == 0:
+                    failures.pop(script, None)
+                elif isinstance(rc, int):
+                    output = str(item.get("aggregated_output") or "")
+                    errors = [x.strip() for x in output.splitlines() if x.strip().startswith(("ERROR:", "Error:", "Traceback"))]
+                    reason = errors[-1] if errors else "required script failed; see run log"
+                    failures.pop(script, None)
+                    failures[script] = f"{script} rc={rc}: {reason}"[:400]
+    except (OSError, TypeError):
+        return fallback
+    return next(reversed(failures.values())) if failures else fallback
+
+
 def _run_script_protocol(name, params=None):
     """V2.15.0 — dispatch a SCRIPT_PROTOCOLS entry as a plain subprocess.
     Mirrors run_protocol's state machine (status / log / cancel hook) so the
@@ -1396,7 +1484,16 @@ def run_protocol(name, params=None):
         # path is the largest single consumer in the repo, and it is the one the
         # 20% hard reserve exists to keep out of the last fifth of a window.
         proto_lease = None
+        invest_lock = None
         try:
+            if name == "invest":
+                from investment.scripts.run_data import execution_lock
+                invest_lock = execution_lock(params.get("ticker", ""))
+                try:
+                    invest_lock.__enter__()
+                except BlockingIOError:
+                    invest_lock = None
+                    raise RuntimeError("protocol output domain is busy: cross-process ticker lock")
             proto_model, proto_lease = _select_protocol_model(name)
         except Exception as e:
             with _protocol_lock:
@@ -1405,6 +1502,8 @@ def run_protocol(name, params=None):
                 state["ended_at"]    = _now_iso()
                 state["elapsed_sec"] = int((datetime.now() - start).total_seconds())
             proc_holder["p"] = None
+            if invest_lock is not None:
+                invest_lock.__exit__(None, None, None)
             return
         prompt = _adapt_protocol_prompt(proto_model, prompt, name)
         claude_model = (_protocol_model_for(name) if proto_model == "claude" else None)
@@ -1526,7 +1625,7 @@ def run_protocol(name, params=None):
                     except Exception:
                         _tok = None
                     _mrouter.note_run(proto_model, rc == 0, "" if rc == 0 else _tail,
-                                      tokens=_tok, lease=proto_lease)
+                                      tokens=_tok, lease=proto_lease, log_path=log_path)
                     proto_lease = None   # settled; the cleanup below must not cancel it
                 except Exception:
                     pass
@@ -1537,26 +1636,13 @@ def run_protocol(name, params=None):
             validator_err = None
             if rc == 0 and name in PROTOCOL_VALIDATORS:
                 try:
-                    validator_args = list(PROTOCOL_VALIDATOR_ARGS.get(name) or [])
-                    substitutions = {
-                        "{today}": start.strftime("%Y-%m-%d"),
-                        "{today_compact}": start.strftime("%Y%m%d"),
-                        "{ticker}": str((params or {}).get("ticker") or "").upper(),
-                    }
-                    for index, token in enumerate(validator_args):
-                        for key, value in substitutions.items():
-                            token = token.replace(key, value)
-                        validator_args[index] = token
-                    vr = subprocess.run(
-                        [sys.executable,
-                         *[os.path.join(ROOT, p) for p in PROTOCOL_VALIDATORS[name]],
-                         *validator_args],
-                        cwd=ROOT, capture_output=True, text=True, timeout=60,
-                    )
+                    vr = _run_protocol_validators(name, params, start)
                     if vr.returncode != 0:
                         tail = (vr.stdout or vr.stderr or "").strip().splitlines()
                         head_lines = "; ".join(tail[:5])[:400]
-                        validator_err = f"validator rc={vr.returncode}: {head_lines}"
+                        validator_err = _protocol_failure_detail(
+                            log_path, f"validator rc={vr.returncode}: {head_lines}",
+                        )
                         try:
                             with open(log_path, "a") as _lf:
                                 _lf.write(f"\n=== validator FAILED rc={vr.returncode} ===\n")
@@ -1657,6 +1743,8 @@ def run_protocol(name, params=None):
                 state["elapsed_sec"] = int((datetime.now() - start).total_seconds())
                 proc_holder["p"] = None
         finally:
+            if invest_lock is not None:
+                invest_lock.__exit__(None, None, None)
             # A hold that outlives its run makes every other project — and the
             # next protocol launch — see less headroom than really exists. The
             # broker reclaims it at TTL regardless, but six hours is a long time
@@ -2040,6 +2128,14 @@ def _requeue_protocol_entry(entry, reason):
         # Avoid hammering a daemon that is restarting, while still recovering
         # quickly from the 1-2 second localhost timeout seen in production.
         retry_delay = min(30, 3 * (2 ** min(attempts - 1, 3)))
+    elif "stale_snapshot" in reason_text:
+        # Not a quota state at all: the broker's reading of the pools has aged
+        # past its freshness limit, which on a sleeping laptop happens with
+        # every pool nearly full (2026-08-27). The broker re-probes on this
+        # refusal, so the retry is short — it is waiting for a probe of three
+        # CLIs to land, not for a quota window to roll over.
+        waiting_reason = "stale_snapshot"
+        retry_delay = 15
     elif "broker:refused" in reason_text:
         waiting_reason = "quota_wait"
         retry_delay = 30
@@ -2160,7 +2256,7 @@ PREFLIGHT_ITEMS = [
     {"key": "breadth",    "label": "廣度分數",    "label_en": "Breadth Score",
      "pattern": "sector/breadth_cache/market_breadth_*.json",
      "free": True, "cmd": ["market_breadth_analyzer", "python3",
-     os.path.join(os.path.expanduser("~"), ".claude/skills/market-breadth-analyzer/scripts/market_breadth_analyzer.py"),
+     os.path.join(ROOT, "skills/market-breadth-analyzer/scripts/market_breadth_analyzer.py"),
      "--output-dir", "sector/breadth_cache/"]},
     {"key": "ftd",        "label": "FTD 信號",    "label_en": "FTD Signal",
      "free": True, "cmd": ["ftd", "python3", "sector/ftd_yfinance.py",
@@ -2226,7 +2322,15 @@ def preflight_check():
         full_pattern = os.path.join(ROOT, pattern) if pattern else None
         latest = None
         if full_pattern:
-            files = sorted(glob.glob(full_pattern), key=os.path.getmtime, reverse=True)
+            # `*_history.json` sits beside the snapshots and matches the same
+            # glob, but it is an aggregate of past runs — a JSON *list* — and
+            # it is rewritten in the same second as the snapshot. Letting it
+            # win "newest" hands the wrong file to `_content_timestamp_for`,
+            # whose `obj.get` is outside its try. Same fix as `bridge.py`'s
+            # `AGGREGATE_SUFFIXES`, where this cost a whole bridge run.
+            files = sorted((f for f in glob.glob(full_pattern)
+                            if not f.endswith("_history.json")),
+                           key=os.path.getmtime, reverse=True)
             latest = files[0] if files else None
         if latest:
             ref_ts = _content_timestamp_for(item["key"], latest)
@@ -4569,6 +4673,7 @@ try:
     from scripts.break_news import store as _bn_store
     from scripts.break_news import poller as _bn_poller
     from scripts.break_news import debater as _bn_debater
+    from scripts.break_news import llm_drivers as _bn_llm_drivers
     from scripts.break_news import trend_rollup as _bn_trend
     from scripts.break_news import cluster as _bn_cluster
     from scripts.break_news import market_brief as _bn_brief
@@ -4665,7 +4770,10 @@ def _fetch_industry_constituents(name):
         return {"error": f"finvizfinance unavailable: {e}"}
     if ROOT not in sys.path:
         sys.path.insert(0, ROOT)
-    from skills._shared.finviz_screener import normalize_screener_tickers
+    from skills._shared.finviz_screener import (
+        normalize_finvizfinance_user_agent, normalize_screener_tickers)
+    # finvizfinance's stock UA has a 13-space run that finviz answers with 403.
+    normalize_finvizfinance_user_agent()
     try:
         ov = Overview()
         ov.set_filter(filters_dict={"Industry": name})
@@ -4712,6 +4820,8 @@ def break_news_poll_loop():
     if not BREAK_NEWS_AVAILABLE:
         return
     def _one(reason):
+        # Runs alongside the research service: break news is the fast
+        # first-pass layer, research the deep dive on what it surfaces.
         try:
             res = _bn_poller.run_once()
             with _break_news_lock:
@@ -4740,7 +4850,8 @@ def break_news_debate_loop():
     while True:
         try:
             with _break_news_dispatch_lock:
-                res = _bn_debater.scan_and_debate(verbose=False)
+                res = _bn_debater.scan_and_debate(
+                    verbose=False, stop_event=_shutdown)
             with _break_news_lock:
                 _break_news_state["last_debate_scan"] = datetime.now().isoformat(timespec="seconds")
                 _break_news_state["last_error"] = None
@@ -4748,6 +4859,8 @@ def break_news_debate_loop():
             with _break_news_lock:
                 _break_news_state["last_error"] = str(e)[:300]
             sys.stderr.write(f"[break_news] debate scan error: {e}\n")
+        if _shutdown.is_set():
+            return
         # Market brief — TTL-gated inside (1 LLM call per BRIEF_INTERVAL_SEC,
         # default 2h); piggybacks on this loop so no extra thread.
         try:
@@ -4765,7 +4878,11 @@ def _intraday_mood_refresh(reason):
         _intraday_engine._write_atomic(INTRADAY_MOOD_OUTPUT, payload)
         with _intraday_mood_lock:
             _intraday_mood_state["last_poll"] = datetime.now().isoformat(timespec="seconds")
-            _intraday_mood_state["last_error"] = None
+            missing = [symbol for symbol, status in (payload.get("_source_health") or {}).items()
+                       if status in ("missing", "error")]
+            _intraday_mood_state["last_error"] = (
+                "partial data: " + (", ".join(missing) or "aggregate unavailable")
+                if payload.get("_partial") else None)
             _intraday_mood_state["last_score"] = (payload.get("aggregate") or {}).get("score")
     except Exception as e:
         with _intraday_mood_lock:
@@ -5189,6 +5306,18 @@ class Handler(SimpleHTTPRequestHandler):
     def do_GET(self):
         path = urlparse(self.path).path
 
+        if path in {"/api/research", "/api/research/nexus"}:
+            from scripts.research import api as research_api
+            q = parse_qs(urlparse(self.path).query)
+            try:
+                if path.endswith("/nexus"):
+                    return self._json(200, {"candidates": research_api.nexus_candidates()})
+                return self._json(200, research_api.query(
+                    lane=q.get("lane", ["all"])[0], ticker=q.get("ticker", [""])[0],
+                    since=q.get("since", [None])[0], limit=int(q.get("limit", [30])[0])))
+            except ValueError as exc:
+                return self._json(400, {"error": str(exc)})
+
         # ── V4.63.0 quant-backtest read-only artifacts ───────────────────
         if path == "/api/backtest/list":
             data_dir = os.path.join(ROOT, "skills", "quant-backtest", "data")
@@ -5527,6 +5656,13 @@ class Handler(SimpleHTTPRequestHandler):
             d = _bn_store.load_item(tail)
             if d is None:
                 return self._json(404, {"error": "not found"})
+            # Escalated debates get a research deep dive; show its outcome
+            # next to the debate. A research store fault never hides the item.
+            try:
+                from scripts.research import handoff as research_handoff
+                d["research"] = research_handoff.status_for(tail)
+            except Exception as e:
+                d["research"] = {"error": type(e).__name__}
             return self._json(200, d)
         if path == "/api/break-news/stale-pending":
             if not BREAK_NEWS_AVAILABLE:
@@ -5824,69 +5960,19 @@ class Handler(SimpleHTTPRequestHandler):
             })
 
         if path.startswith("/api/earnings-infographic/"):
-            # GET /api/earnings-infographic/<TICKER>  → V1.73 infographic page payload
-            # Returns merged cache (subset) + full infographic.json + report_path
+            from earnings_detail import load_earnings_detail
             ticker = path.split("/api/earnings-infographic/", 1)[1].strip().upper()
-            if not ticker or "/" in ticker:
-                return self._json(400, {"error": "invalid ticker"})
-            cache_dir = os.path.join(ROOT, "skills", "earnings-analyst", "cache")
-            inf_matches = sorted(glob.glob(os.path.join(cache_dir, f"{ticker}_*.infographic.json")))
-            if not inf_matches:
-                return self._json(404, {"ticker": ticker, "error": "infographic not generated"})
-            inf_latest = inf_matches[-1]
-            # Pair with same-date V1.0 data-layer cache
-            base_cache = inf_latest.replace(".infographic.json", ".json")
-            cache_payload = {}
-            if os.path.exists(base_cache):
-                try:
-                    with open(base_cache, "r", encoding="utf-8") as f:
-                        cache_payload = json.load(f)
-                except Exception as e:
-                    print(f"[infographic] base cache read fail: {e}", file=sys.stderr)
+            params = parse_qs(urlparse(self.path).query, keep_blank_values=True)
+            period = params.get("period", [None])[0]
+            revision = params.get("revision", [None])[0]
             try:
-                with open(inf_latest, "r", encoding="utf-8") as f:
-                    inf_payload = json.load(f)
-            except Exception as e:
-                return self._json(500, {"ticker": ticker, "error": f"infographic read fail: {e}"})
-            run_date = cache_payload.get("as_of_date") or inf_payload.get("as_of_date")
-            report_path = None
-            if run_date:
-                cand = os.path.join(ROOT, "reports", f"{run_date}_{ticker}_earnings.md")
-                if os.path.exists(cand):
-                    report_path = os.path.relpath(cand, ROOT)
-            # V2.7.15 — slim trend slices (last 8Q) for infographic chart row
-            qpnl_slim = [
-                {"date": q.get("date"), "period": q.get("period"),
-                 "fiscalYear": q.get("fiscalYear"),
-                 "revenue": q.get("revenue"), "netIncome": q.get("netIncome"),
-                 "eps": q.get("eps"), "epsDiluted": q.get("epsDiluted")}
-                for q in (cache_payload.get("quarterly_pnl") or [])[:8]
-            ]
-            cf_slim = [
-                {"date": q.get("date"), "period": q.get("period"),
-                 "operatingCashFlow": q.get("operatingCashFlow"),
-                 "freeCashFlow": q.get("freeCashFlow")}
-                for q in (cache_payload.get("cash_flow") or [])[:8]
-            ]
-            margins_slim = list((cache_payload.get("derived") or {}).get("margins_8q") or [])[:8]
-            return self._json(200, {
-                "ticker":      ticker,
-                "infographic": inf_payload,
-                "cache": {
-                    "snapshot":           cache_payload.get("snapshot"),
-                    "verdict":            cache_payload.get("verdict"),
-                    "composite_score":    cache_payload.get("composite_score"),
-                    "score_components":   cache_payload.get("score_components"),
-                    "quality_flags":      cache_payload.get("quality_flags"),
-                    "as_of_date":         run_date,
-                    "last_earnings_date": cache_payload.get("last_earnings_date"),
-                    "report_path":        report_path,
-                    # Trend slices for chart row (V2.7.15)
-                    "quarterly_pnl":      qpnl_slim,
-                    "cash_flow":          cf_slim,
-                    "margins_8q":         margins_slim,
-                },
-            })
+                return self._json(200, load_earnings_detail(ticker, period, revision, root=ROOT))
+            except ValueError:
+                return self._json(400, {"error": "invalid ticker, period or earnings data"})
+            except FileNotFoundError:
+                return self._json(404, {"ticker": ticker, "error": "earnings period unavailable"})
+            except (OSError, KeyError, TypeError):
+                return self._json(500, {"ticker": ticker, "error": "earnings data unavailable"})
 
         if path == "/api/futu-notifications":
             try:
@@ -6065,6 +6151,18 @@ class Handler(SimpleHTTPRequestHandler):
 
     def do_POST(self):
         path = urlparse(self.path).path
+
+        if path in {"/api/research/observe", "/api/research/track"}:
+            from scripts.research import api as research_api
+            try:
+                size = int(self.headers.get("Content-Length", "0"))
+                if not 0 < size <= 4096:
+                    return self._json(400, {"error": "invalid research request size"})
+                body = json.loads(self.rfile.read(size))
+                action = research_api.track if path.endswith("/track") else research_api.observe
+                return self._json(200, action(body))
+            except (ValueError, TypeError, AttributeError) as exc:
+                return self._json(409, {"error": str(exc)})
 
         if path == "/api/broker/restart":
             if not MODEL_ROUTER_AVAILABLE:
@@ -6815,7 +6913,13 @@ if __name__ == "__main__":
     # V4.6 — 節奏自動化: due 的 auto:true registry scripts 自動跑（0-LLM 白名單）
     threading.Thread(target=ops_auto_loop, daemon=True, name="ops_auto").start()
 
+    # Shares the host environment and lifetime; a cross-process lock prevents
+    # overlap with a separately launched research worker or an experiment.
+    from scripts.research.service import start_background as start_research_service
+    research_thread = start_research_service(_shutdown)
+
     # Break News (RSS poller + Claude/Gemini debate scanner)
+    bn_debate_thread = None
     if BREAK_NEWS_AVAILABLE:
         try:
             reset = _bn_store.sweep_stuck_debating()
@@ -6870,9 +6974,21 @@ if __name__ == "__main__":
     else:
         sys.stderr.write("[office] disabled (module not loaded)\n")
 
+    def _handle_shutdown_signal(signum, frame):
+        raise KeyboardInterrupt
+
+    signal.signal(signal.SIGTERM, _handle_shutdown_signal)
+    signal.signal(signal.SIGHUP, _handle_shutdown_signal)
     try:
         srv.serve_forever()
     except KeyboardInterrupt:
         print("\nshutdown")
+    finally:
         _shutdown.set()
+        if BREAK_NEWS_AVAILABLE:
+            _bn_llm_drivers.shutdown_active_cli_runs()
+        if bn_debate_thread is not None:
+            bn_debate_thread.join(timeout=2)
+        if research_thread is not None:
+            research_thread.join(timeout=2)
         srv.server_close()

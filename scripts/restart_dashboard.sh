@@ -17,13 +17,18 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 PORT="${DASHBOARD_PORT:-8080}"
-LOG="${DASHBOARD_LOG:-/tmp/dashboard_server.log}"
+LOG="${DASHBOARD_LOG:-$PWD/logs/dashboard_server.log}"
 LABEL="${DASHBOARD_LAUNCH_LABEL:-com.kavi.aicommittee.dashboard}"
 # `launchctl submit` does not inherit the interactive shell's PATH. Codex is a
 # `/usr/bin/env node` wrapper and Agy lives in ~/.local/bin, so omitting these
 # directories makes every daemon inference fail before a provider process can
 # start (Codex rc=127, Agy rc=-2).
 LAUNCH_PATH="/Users/kavi/.local/bin:/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+
+# Validate before stopping the existing server. The launchd handoff below
+# carries credentials in memory, never in launchctl argv or an env file.
+python3 scripts/dashboard_launcher.py --check-env
+mkdir -p "$(dirname "$LOG")"
 
 # A launchd-submitted process survives the terminal/session that ran this
 # script. Remove the previous submitted job first; killing only its child PID
@@ -33,19 +38,21 @@ if command -v launchctl >/dev/null 2>&1 && launchctl list "$LABEL" >/dev/null 2>
     sleep 0.5
 fi
 
-pids=$(lsof -ti:"$PORT" 2>/dev/null || true)
+pids=$(lsof -nP -t -iTCP:"$PORT" -sTCP:LISTEN 2>/dev/null || true)
 if [ -n "$pids" ]; then
     echo "Stopping server on port $PORT (PID $(echo "$pids" | tr '\n' ' '))"
     # TERM first so the handler can close the listening socket; KILL only for
-    # what is still there after the grace period. `open_dashboard.sh` goes
-    # straight to -9, which can leave the port in TIME_WAIT and make the
-    # restart below fail for a reason that has nothing to do with the code.
+    # what is still there after the grace period. Either way, wait until the
+    # port is actually free before binding — kill returns before the process
+    # dies, and binding into that gap fails with [Errno 48] for a reason that
+    # has nothing to do with the code. `open_dashboard.sh` does the same since
+    # V4.135.11 (it used to go straight to -9 and bind immediately).
     echo "$pids" | xargs kill 2>/dev/null || true
     for _ in 1 2 3 4 5 6 7 8 9 10; do
         sleep 0.3
-        [ -z "$(lsof -ti:"$PORT" 2>/dev/null || true)" ] && break
+        [ -z "$(lsof -nP -t -iTCP:"$PORT" -sTCP:LISTEN 2>/dev/null || true)" ] && break
     done
-    remaining=$(lsof -ti:"$PORT" 2>/dev/null || true)
+    remaining=$(lsof -nP -t -iTCP:"$PORT" -sTCP:LISTEN 2>/dev/null || true)
     if [ -n "$remaining" ]; then
         echo "Still listening after TERM; sending KILL"
         echo "$remaining" | xargs kill -9 2>/dev/null || true
@@ -57,11 +64,8 @@ fi
 # suspends long analysis runs mid-stream (see open_dashboard.sh).
 echo "Starting dashboard_server.py on port $PORT (log: $LOG)"
 if command -v launchctl >/dev/null 2>&1; then
-    PYTHON_BIN="$(command -v python3)"
-    launchctl submit -l "$LABEL" -o "$LOG" -e "$LOG" -- \
-        /usr/bin/env "DASHBOARD_PORT=$PORT" "PATH=$LAUNCH_PATH" \
-        /usr/bin/caffeinate -i \
-        "$PYTHON_BIN" "$PWD/dashboard_server.py"
+    python3 scripts/dashboard_launcher.py --label "$LABEL" --log "$LOG" \
+        --port "$PORT" --path "$LAUNCH_PATH"
 else
     PATH="$LAUNCH_PATH" DASHBOARD_PORT="$PORT" \
         nohup caffeinate -i python3 dashboard_server.py >"$LOG" 2>&1 &
