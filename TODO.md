@@ -1,8 +1,111 @@
 # INTEL COMMAND — Backlog & Tasks
 
-> **Last Updated**: 2026-08-22 (v4.135.5)
+> **Last Updated**: 2026-10-10 (v4.141.1)
 
 ---
+
+## V4.141.1 — Codex 配額重置倒數
+
+- [x] 浮動卡片支援 `resets_at`，恢復 Codex 週／5h 倒數；12 個倒數案例、正控制、JS 語法與 broker gate 回歸通過。
+- [ ] 預推檢查：研究面板頁面接線缺漏；`tests/test_research_boundary.py::test_http_research_route_and_stale_observation` 取得 decisions.html 後找不到 research-panel.js。
+- [ ] 預推檢查：`investment/scripts/test_run_investment.py::test_lane_fmp_helpers_share_cache_limiter_and_classified_status` 的 sector PE fixture 補上真實 `sector` 欄位，維持正式來源過濾規則。
+
+## V4.141.0 — 正式常駐研究
+
+- [x] 四類research改25k預估；Dashboard常駐啟停、獨立service狀態與跨重啟滾動額度。
+- [x] 冷卻等待、失敗結算恢復邊界、停止與局部結果恢復；61 Python／3 Node、真實acquire正控制通過。
+- [x] 正式Dashboard已啟用，保留歷史試驗報告；Broker現有Codex冷卻期間維持取材，模型須等Broker解除限制並通過預檢。部署證據見 `reports/research_production_20261005.json`。
+
+## V4.140.0 — 事件研究與六小時觀察
+
+- [x] 事件／主張／反證／版本／來源健康與四種觸發；六頁研究卡、探索邊界與治理測試。
+- [x] LQB schema v8 TaskContext、冪等結算、延遲 usage、統計；正式帳本備份／migration 與第一筆精確補送。
+- [x] Luna/max 12組初步覆蓋、24呼叫全部對帳；11完整A/B，首例復原與1錯引文失敗均如實保留。
+- [x] 六小時觀察完成（02:07–08:07，complete_with_gaps）：正式28呼叫／15嘗試／13完整A/B／19卡；含初測52筆Broker對帳一致。正式26筆已知平均20496.15 tokens、2筆未知；quota後停止。結論見 `reports/research_observation_research-20261005_conclusion.md`。
+
+## V4.139.4 — Skills endpoint 與精簡方向
+
+- [x] 修復六組接線問題、launchd 環境與 listener-only restart；source_records 舊測試對齊、HTTP contract／直接腳本／實際供應商驗證。
+- [x] 完成26 skills 生命週期評估（`skills/MARKET_INDEX.md`）；本次未移除任何 skill。
+- [ ] 後續整併候選：economic calendar 共用 service、retail 併入 sentiment 資料層；先保留 CLI／payload／Dashboard 相容。此為建議，尚未執行。
+- [ ] dual-axis／weekly playbook 可降選配；若要下架，先遷移 registry／UI。前瞻估值仍有正式決策依賴，不直接刪除。
+
+## V4.138.0 — 財報跨季追蹤
+
+- [x] 第一階段：跨季差異、結構化預期驗收、觀察清單回訪、不可覆寫歷史與 Markdown 三區塊。
+- [x] 同季事件配對／口徑與事前時鐘檢查；CLI／後端 completed gate、37 新測試與 MSFT／PLTR／NKE 預覽。
+- [x] 第二階段 UI（v4.139.0）：Dashboard 三區比較、季度導覽／當時版本連結、首次／缺摘要／五態呈現；54 ticker／72 季度確認可讀。
+- [x] v4.139.1 UI 修訂與實機驗收：預設本季財報／独立跨季比較 tab、緊湊表格；Chrome 桌機及 400px 手機畫面確認，16 項前端測試與五種 DOM 案例通過。
+- [x] v4.139.2 比較 UX 對齊本季：共用區塊／卡片／展開元件、數字字型與狀態色；季度操作集中，手機指標欄固定，桌機／手機驗收通過。
+- [x] v4.139.3 收尾 validator 修復：多支腳本分開執行、兩入口共用、第一錯誤中止；MU／DDOG 現有產物重驗通過，真實 subprocess 回歸與 mutation 驗證。
+- [ ] 視需要補齊舊預期原始來源；舊文字目前明示待補證據，不回填猜測數值。
+- [x] Dashboard 於 v4.139.0 閒置時重啟，載入 earnings completed validators 與比較 API。
+- [x] v4.139.4 對齊 stale-gate 舊測試與來源 fetched_at 政策；新增缺來源／過期來源拒絕案例，完整 earnings suite 通過，未恢復 file-mtime fallback。
+
+## V4.137.4 — News 選稿與 Luna 實跑
+
+- [x] 例行公告／人物背景辨識；低影響與分析缺漏分流；UI 優先呈現必跑腳本失敗。
+- [x] 129 項 News 測試、routing／scheduler／broker contract、JS syntax 與 mutation 驗證。
+- [x] gpt-6-luna／medium 4 lane 實跑；補標題翻譯後 validator rc=0，2 deep + 10 shallow；原五則逐項比較已產出。
+
+- [x] v4.139.0 閒置重啟 Dashboard，已載入新的根因訊息 helper。
+
+## ✅ Done (v4.137.3) — Theme Detector 403 與資料可靠性
+
+- [x] FINVIZ UA 空白正規化、來源資料驗證、具體錯誤；共用主快取讀取與原子輸出。
+- [x] 代表股分批保留成果、逾時取消待執行請求，報告揭露實際覆蓋率。
+- [x] 491 項測試與 UA mutation 回歸；實跑 144 產業／18 主題、52/219 檔可用行情（RSI 50/219）。
+
+## V4.137.2 — Broker 用量證據
+
+- [x] 常規／Dashboard／manual／Wind 結算接通明細；同步 vendored client 並驗證 fixture payload。
+- [ ] 常駐程序安全重載後核對正式新 execution 的明細覆蓋率；不因尚未重載而宣稱全部流量已採用新規範。
+- [ ] timeout／取消尚未保留的 stdout、Codex／Agy request 級 completeness 仍需補足；跨專案 API 用量與每日 learner 由 broker 後續階段處理。
+
+## ✅ Done (v4.137.1) — V5.5 Dashboard 版本標籤
+
+- [x] V5.5 卡片顯示正確版本與說明；未列入配色表的有效版本不再誤標 ARCHIVE。
+- [x] 使用者指定 HPE 重跑通過全部提交驗收；三股正式成功 1／3，成功試行累積 1／5。
+
+## V4.137.0 — 個股分析流程更新
+
+- [x] 來源時間快取、凍結快照、指定 Phase 0、共用 FMP 限流與統一價格。
+- [x] 控制器、隔離批次、驗收／續跑／配額停機、跨入口鎖、V5.5 原子且可重複提交。
+- [x] 程式 shadow／lane provenance／遙測、權威 JSON 索引、穩定 ID、歷史分類、RT 群組校準與策略重播。
+- [x] HPE／NVDA／BE：gpt-6-luna／max 正式入口試跑完成觀察，0／3 完整驗收成功。NVDA／BE 缺陷修正後保存輸入重播通過；HPE hash 閘攔下模型修改 prompt，控制器已補齊封存前背景。詳見 reports/decision_review/investment_v55_acceptance.md。
+- [ ] 累積前 5 場試行、前 20 場觀測；情緒及 RT 策略變更另行核准。既有 11 筆歷史決策 mismatch 與 News parenthetical parser 回歸失敗另案處理。
+
+## ✅ Done (v4.136.1) — Dashboard 關閉時清理自動辯論
+
+- [x] `open_dashboard.sh` 改為追蹤 Python server PID；退出時送 SIGTERM 並等待清理。
+- [x] Server shutdown 終止正在執行的辯論 CLI process group、封鎖新呼叫，並停止後續佇列項目與 market brief。
+- [x] 新增不呼叫模型的 shutdown 回歸測試。
+
+## ✅ Done (v4.136.0) — 盤前 brief 事件日曆四類錯誤
+
+- [x] FMP/sector-protocol 事件時間 UTC→ET 真轉換（DST-aware），archive 146 筆一次性遷移。
+- [x] 事件標題改詞界截斷；`_slugify` 保留 CJK，切長度後再 strip。
+- [x] 跨來源／跨語言同一發布合併（`_CANONICAL_RELEASES` + Pass 1b/1c），複合標題只在完全被涵蓋時吸收。
+- [x] `_merge_two(pin_primary=True)` —— fresh feed 不再被同 impact 的 archive 舊版本蓋掉。
+- [x] morning_brief §10 不再吐 dict、FDX 不再重複、§5 補上 AMC/BMO、表頭在盤後重跑時誠實標示。
+- [x] Universe 除鏽：移除 ANSS/WBA/ABMD，`BRK.B`/`BF.B` → dash 拼法；earnings universe 兩種拼法都收。
+- [x] 新增 `tests/test_event_calendar_hygiene.py` 40 項；bridge 實跑 rc=0 並重生成 9/17 報告驗證。
+
+### 待辦（本輪未處理）
+- [ ] sector-protocol 自產的裸 `HH:MM` 時間欄缺時區依據，目前只轉換可確認為 FMP 轉手的那批；要根治得讓 phase3 直接吐帶時區的時間。
+- [ ] `_CANONICAL_RELEASES` 只涵蓋 16 個常見系列，其餘跨語言重複仍會漏併（安全方向的漏，不會誤刪）。
+
+## ✅ Done (v4.135.9) — 修正 FINVIZ 一週產業報酬單位
+
+- [x] 百分比字串一律除以 100，修正 `<1%` 被放大 100 倍後截成 `±30%`。
+- [x] 新增正負小數百分比回歸，完成種錯驗紅、還原驗綠與 462 項 theme-detector 測試。
+- [x] 重建 theme-detector 快取與 Dashboard 投影；新增 FinancialJuice RSS。
+
+## ✅ Done (v4.135.7) — 過期讀數與額度用完分開講
+
+- [x] `_blocked_reason()` 依 broker code 分流 `stale_snapshot` / `not_authenticated`，只有真容量不足才提 hard reserve。
+- [x] 佇列新增 `stale_snapshot` waiting reason（15 秒重試）與對應中英文案。
+- [x] routing contract、protocol queue、broker gate、model router window、governance audit 與 5 支 Dashboard JS check 全綠。
 
 ## ✅ Done (v4.135.5) — broker 限制窗口顯示對齊
 
@@ -532,7 +635,7 @@
 - [x] 曝險卡在 xl 斷點放大 `col-span-2` + 72px 圓環 + tier tag,與其他撈數據卡區隔。
 
 - [ ] **面板未做瀏覽器視覺驗證**:本輪 Chrome 擴充未連線,改用 DOM stub 對實際 broker payload 驗證四種狀態與中英雙語。實際版面(sidebar 寬 256px、三家 provider 的高度)需下次開頁時目視確認,特別是 provider 家數增加時 footer 會不會擠壓 nav。
-- [ ] **`window_minutes` 只有 codex 有**:bucket 標籤對 `primary` 靠它判斷是週池還日池,其他 provider 全走名稱推斷。若日後有 provider 只給 `primary` 又不給 window,會顯示成「主池」而看不出窗長。
+- [x] **`window_minutes` 只有 codex 有**:bucket 標籤對 `primary` 與 `secondary` 結合 `label` 與 `window_minutes`（<=360 為 `5h`、>=10080 為 `週`），fallback 亦依 provider 語意預設為 `5h` 與 `週`，不再顯示「主池」與「secondary」。
 
 ## ✅ Done (v4.109.0) — LLM Quota Broker 接管額度
 

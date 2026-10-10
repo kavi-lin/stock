@@ -107,6 +107,20 @@ python3 scripts/wind/budget.py --status                          # 掃描花費 
 
 **環境相依（全 repo 通用）**：`python3` 必須 import 得到 `requests` / `pandas` / `numpy` / `yfinance` / `yaml` / `lxml` / `bs4` / `openpyxl` / `anthropic`。這些裝在**該直譯器的 user-site**，不是系統層——2026-08-16 Homebrew 把預設 `python3` 換成 3.14（user-site 全空），整條 pipeline 在 import 層靜默斷了兩天。健檢：`python3 -c "import requests, pandas, yfinance"`。**每次 `brew upgrade python` 後都要重跑一次這個檢查**。
 
+## 5b. 事件研究常駐／實驗（探索層）
+
+```bash
+python3 -m scripts.research.experiment status research-20261005
+python3 -m scripts.research.experiment report research-20261005
+python3 -m scripts.research.service status
+python3 -m pytest -q tests/test_research_service.py tests/test_research_system.py tests/test_research_boundary.py tests/test_research_sources.py
+node --test tests/test_research_panel.js
+```
+
+先完成確定性驗證與 `preflight <id>`，再 `start <id>`；正式長跑 `run <id>` 由既有私有環境 launcher 執行。初步≤24 calls；live六小時≤30辯論／60 calls。`report` 未到deadline只產進度報告。停止新呼叫與實際用量對帳先於結論；細節見 `docs/event_research.md`。
+
+v4.141.0 正式常駐由 Dashboard 啟動，`service_enabled` 控制，與實驗共用程序鎖；狀態獨立保留。每次22k input＋3k output，滾動24h≤30組／60calls、1h≤5組，含先前真實試驗呼叫。Broker cooldown解除＋無預約預檢通過才恢復；實際模型quota/auth/未知用量不自動重试，操作與恢復方式見 `docs/event_research.md`。
+
 ## 6. Break News 手動
 
 ```bash
@@ -122,6 +136,8 @@ python3 scripts/_shared/model_router.py --status        # 多模型預算/cooldo
 
 | 你改了什麼 | 必跑 |
 |---|---|
+| 事件研究 intake／evidence／trigger／experiment／service／accounting／共用研究面板 | `python3 -m pytest -q tests/test_research_service.py tests/test_research_system.py tests/test_research_boundary.py tests/test_research_sources.py` + `node --test tests/test_research_panel.js`（rc=0）；真實實驗以 `report` 的 Broker 逐筆對帳、已知／未知用量、呼叫上限、觸發覆蓋及來源錯誤為準。未到六小時不得宣稱 final；修改共用 News parser 另跑 News 組。常駐需驗證實際25k acquire、滾動額度跨重啟、保留trial、停止／恢復與來源持續取材。 |
+| Theme Detector 抓取／scanner／快取／報告，或 News packet 的主題快取讀取 | `python3 -m pytest -q skills/theme-detector/scripts/tests/ tests/news/test_build_digest_packet.py`（rc=0）；連網驗收用 `python3 skills/theme-detector/scripts/theme_detector.py --skip-if-fresh 0`。檢查產業數、`stock_metric_coverage`、逾時旗標與最新主 JSON／Markdown；rc=0 不代表行情覆蓋完整。User-Agent 回歸須走真實 finvizfinance parser 的 HTTP 邊界。 |
 | Nexus claim ledger / topic discovery / evidence drafts / graph projection / Radar UI | `python3 -m pytest -q tests/test_nexus_claim_ledger.py tests/test_nexus_topic_discovery.py tests/test_nexus_evidence_drafts.py tests/test_nexus_frontend_contract.py tests/test_break_news_v4.py tests/test_supply_chain_enrichment.py` + `node --check Dashboard/page-graph.js` + `python3 scripts/nexus/build_graph.py --tier 1,2 --dry-run` + claim/topic/draft 三支 `python3 -m scripts.nexus.<module> --check` validator（全部 rc=0）。source_count 必須按 canonical URL；draft node 只能來自 source topic，且永遠 decision-ineligible。|
 | Nexus source packet / bounded gap-fill runner / proposal ledger | `python3 -m pytest -q tests/test_nexus_source_packets.py tests/test_nexus_gap_fill.py` + `python3 tests/test_broker_gate.py` + source packet / gap-fill 兩支 `python3 -m scripts.nexus.<module> --check` + `node --check Dashboard/page-graph.js`。測試必證明：source/excerpt hash 與 ownership 錯會紅、每項需 fetched-page text、外加 URL 會紅、一 topic 最多一個 spent turn、blocked turns=0 可再選、base + packet digest drift 會紅、proposal 不得改 immutable edge；Claude profile 必為 Sonnet / max-turns 1 / no-tools / strict-MCP，且仍走 governed chain、不 fallback。|
 | `compute_price_framework.py` / valuation projection validator | `python3 investment/scripts/test_compute_price_framework.py` + `python3 investment/scripts/test_valuation_pack_consistency.py`（兩者 rc=0；後者含故意 drift 的 rc=1 fixture）。前者含 V4.88.0 staged regression：`--stage quant` + `--stage mhp` 合併輸出必須與單發模式逐位元一致（只豁免 `valuation_pack.built_at`），改到分段/合併路徑必紅。另含 V4.116.0 `script_not_run` 判別（`mark_unrun_anchor_scripts`）：artifact 缺／過期 → `script_not_run`，artifact 新鮮 → 維持原 reason，anchor 有值 → 完全不碰 |
@@ -134,6 +150,8 @@ python3 scripts/_shared/model_router.py --status        # 多模型預算/cooldo
 | `fwd_earnings_discounted` 的四個 clamp 常數（`FWD_PE_CLAMP` / `FWD_DISCOUNT_CLAMP` / `FWD_MIN_ANALYSTS` / `FWD_MAX_HORIZON_YEARS`）| `python3 investment/scripts/test_compute_price_framework.py` + `python3 investment/scripts/test_shadow_report.py`（兩者 rc=0）。**改 clamp 值之前先跑 `python3 investment/scripts/shadow_report.py` 看校準區塊**：判準是 live cohort 的市場隱含 PE P33–P66 有沒有包住現行上限。live cohort 不足 `FWD_PE_CALIB_MIN_N` 時判準會回 `accumulating`——那是「還不知道」，不是「沒問題」。**不可自動跟隨中位數**（泡沫期會讓上限一路上移），改值一律 user 核准 |
 | `valuation_reviewer_gate.py` / `peer_cohorts.py` 的 discovery cache | `python3 investment/scripts/test_valuation_reviewer_gate.py`（rc=0）+ `python3 skills/valuation-modeler/tests/test_comps.py`。鎖住「5 條 trigger 各自獨立命中、`transition_case_active` 是唯一 mandatory、TTL 30d 邊界、discovered 永不覆寫人工核准的 `config/peer_cohorts.json`、artifact 不可用 rc=1」 |
 | earnings valuation forecaster | `python3 skills/earnings-valuation-forecaster/tests/test_forecaster_v3_17.py` |
+| 財報比較 UI／歷史季度 API | `python3 -m pytest -q -p no:cacheprovider tests/test_earnings_detail.py` + `node --test tests/test_earnings_comparison.js tests/test_earnings_tabs.js`；確認最新季缺摘要不退回舊季、period/revision 選擇、唯讀與五態呈現；預設本季 tab、比較連結、上一頁與鍵盤切換。API 接線另跑 `python3 tests/test_protocol_model_routing.py`。 |
+| earnings-analyst 跨季比較／預期契約／歷史保存／render | `python3 skills/earnings-analyst/tests/test_earnings_history.py` + `python3 -m pytest -q -p no:cacheprovider skills/earnings-analyst/tests/test_fetch_schema_contract.py skills/earnings-analyst/tests/test_earnings_analyst_v3_17.py`；修改 prewarm 入口加跑 `python3 investment/scripts/test_phase1_factpack.py`，後端 validator 接線加跑 `python3 tests/test_protocol_model_routing.py`（含逐支 subprocess argv、任一閘失敗、第一失敗不被掩蓋、手動與 UI 共用入口）。正式完成需 `validate.py <T> --require-history` 與 `validate_infographic.py <T> --require-history` rc=0；舊資料預覽：`python3 skills/earnings-analyst/scripts/render.py MSFT --preview --out reports/2026-10-04_MSFT_earnings_comparison_preview.md`（已實跑，不回寫 cache/history）。 |
 | `forward_expectations.py` 核心 | `python3 investment/scripts/test_forward_expectations.py`（rc=0 為準） |
 | `inject_report_facts.py` | `python3 investment/scripts/test_inject_report_facts.py` |
 | `decision_engine.py` / Phase 3 決策數學 / `validate_session_export.py` §13 | `python3 investment/scripts/test_decision_engine.py` + `python3 investment/scripts/validate_session_export.py`（兩者 rc=0）；改到 cascade/threshold 再跑 `replay_decision_engine.py` 看 replay 是否仍 rc=0 |
@@ -162,7 +180,7 @@ python3 scripts/_shared/model_router.py --status        # 多模型預算/cooldo
 | `dashboard_server` agentic protocol 模型路由 / Codex JSONL 解析 / `PROTOCOL_DOC` / `PROVIDER_CONTEXT_FILE` / `protocol_providers` 白名單 | `python3 tests/test_protocol_model_routing.py`（rc=0）。鎖住 primary 選擇、Codex CLI 寫入權限、tool/subagent 語意映射、進度/錯誤/token usage 解析，以及 V4.114.0 三件事：(a) 每個非 claude provider 的 prompt 前導只提**自己**那個 context 檔、且必帶本次 protocol 的規範路徑；(b) `PROTOCOL_PROMPTS` 每個 key 都要有存在的 `PROTOCOL_DOC` 檔；(c) 白名單必須落到 `forbidden_providers`——只放 `preferred_providers` 是**不會生效的**（broker 只把它當評分），且白名單空/壞掉一律 fail closed。**V4.131.14 起同時鎖 `PROTOCOL_REQUIRED_ARTIFACTS`**：每個有 validator gate 的 protocol（news/sector/invest）都必須有 required artifact，且閘的路徑與 `PREFLIGHT_ITEMS` 的 glob 必須解析到**同一個檔**。前者是因為 sector/news 兩個 key 從來沒被登記，HARD gate 正確中止的跑會 rc=0 顯示成功；後者是因為兩處在同一模組相隔約 1300 行、各手寫一次，漂移後閘會永遠檢查一個沒人寫的路徑而靜默通過。**注意這支是腳本不是 pytest 模組**，`python3 -m pytest` 跑它會 `no tests ran` |
 | `investment/scripts/run_protocol_manual.py`（手動跨 provider 執行） | `python3 investment/scripts/run_protocol_manual.py <provider> <protocol> [TICKER]`。**用途只有一個**：驗證某個正式 provider 到底跑不跑得動某支 protocol。prompt / argv / timeout 全部複用 `dashboard_server`；啟動前向 quota broker 取得該 provider 的 pinned lease，process attach 後以實際 tokens settle，broker 不授權就不執行。會寫正式 `history.json`，因此保留原子鎖、獨立 log/backup/job_id、validator 失敗報告隔離，以及 `protocol code untouched` / `contexts` 兩項證據。|
 | `CLAUDE.md` 的 Protocol Triggers / 自動層 / Validator Gates / Workflow Rules 四節 | `python3 scripts/sync_agent_context.py --check`（rc=0）。這四節是 `GEMINI.md` / `AGENTS.md` generated 區塊的來源，改完沒重生成 = 非 Claude 的 CLI 讀到舊路由 |
-| News event store / finalizer / projection / migration | `python3 -m pytest tests/news -q`（rc=0）後跑 `python3 news/scripts/validate_digest_output.py`。鎖住 append-only replay、event-id REVIEW、cache idempotency、rollback 與 JSONL→digest exact projection |
+| News triage / event store / finalizer / projection / migration | `python3 -m pytest tests/news -q`（rc=0；129+ cases）後跑 `python3 news/scripts/validate_digest_output.py`。鎖住例行公告／背景報導入口篩選、完整低影響降級與缺漏拒絕、binary／Sector／Macro deep 保留、append-only replay、event-id REVIEW、cache idempotency、rollback 與 JSONL→digest exact projection |
 | `sector_score_calculator.py` / `build_sector_intel.py` 的 shadow 段 | `python3 sector/scripts/test_sector_score_calculator.py`（rc=0）。鎖住「Step 5 乘數**偵測不重算**（重算 = 雙重計分，含 2026-07-31 Energy 真實回歸樣本）、half-up 捨入（**不可換回內建 `round()`**，也**不可在乘法後補 `round(x,2)`** —— 那是銀行家捨入會造成雙重捨入；`_ROUND_EPS` 不可移除，浮點雜訊會讓真值 `.5` 少 1 分）、**逐欄位**守衛（單一分項 null 被當 0 = 假 hard diff，累計上限 0 會永久擋死 SE2）、算不出 ≠ 算錯、割接統計只數 `sample_valid` 場次、歷史 audit 與**回填舊日期**都不得混進 live 分母、shadow 落盤失敗不得中斷 build」。改完順手跑 `--audit-decisions` 對照 43 場基線（38 clean / 4 hard / 33 soft / 1 drift）沒退 |
 | `da_pretrigger.py` / `phase_4-5.md` 的 R4–R7 門檻 | `python3 sector/scripts/test_da_pretrigger.py`（rc=0）。鎖住「四條規則各自的 sample-size / 方向性 gate、R4 邊界是 `>` 不是 `>=`、**資料缺席 ≠ 沒觸發**（FRED 缺席標 unavailable、HARD cache 缺席 rc=1、**逐板塊缺席標 `uncovered`**）、null 欄位不得被當 0 誤觸發、R5 豁免三條件皆須有值、錯誤走 stderr（stdout 是逐字 paste 契約）」 |
 | `fetch_sector_valuation.py` 的 PE snapshot 取得／回退、`build_sector_intel.py` 的 provenance passthrough | `python3 sector/scripts/test_fetch_sector_valuation.py`（rc=0，零網路）。鎖住「非交易日回退到最近**有資料**的交易日並回報**實際來源日**、交易日不誤觸回退（多探 = 白花額度）、**單一 exchange 有值不算數**（半套資料湊出的 snapshot 是靜默半真相）、回看窗口第 5 天過第 6 天中止、窗口內全空仍 rc≠0、provenance 欄位有進 payload 與 `_phase1`」。**這支存在的理由是觸發面**：FMP `sector-pe-snapshot` 只有交易日有值，舊版一拿到空就 `sys.exit`，於是產業掃描逢週末必掛——而今年 sector 幾乎只在平日跑，唯一的週末（2026-07-11）就掛了同一個錯，沒人發現。日曆形狀的盲區不會被任何既有測試碰到。整檔還原到修復前的版本驗過會紅（吐的正是線上那句 `returned empty for .../NASDAQ`），兩道接線守衛也各自種回突變驗過紅 |
@@ -175,8 +193,15 @@ python3 scripts/_shared/model_router.py --status        # 多模型預算/cooldo
 | `skills/_shared/finviz_screener.py`（FINVIZ public screener 的 ticker 修復）或任一 `Overview().screener_view()` 呼叫點 | `python3 -m pytest -q skills/_shared/tests/test_finviz_screener.py skills/theme-detector/scripts/tests/`（rc=0）+ `python3 tests/test_heatmap_pe_retry.py`。finviz 的 ticker `<td>` 內含一個 logo 載入失敗用的替代字母 `<span>`，finvizfinance 1.3.0 用 `col.text` 把它跟 ticker 連在一起讀，**每個 ticker 首字都被複製**（NVDA→NNVDA、AAPL→AAAPL）。偵測必須是**整批簽名**而非逐檔 `t[0]==t[1]`——AAPL/DDOG/LLY/FFIV/WWD 本來就是雙字母開頭，逐檔判斷會把它們砍成 APL。**不受影響、不要順手改**：Elite CSV export（`export.ashx`，真 CSV 無 HTML）與 `finviz_performance_client.py` 的 group view（Sector/Industry 聚合，無 Ticker 欄）|
 | 任何 skill 的 SKILL.md / 結構 | `python3 scripts/check_skills.py`（warnings only；`--strict` 才 rc=1） |
 | Finnhub/FMP 資料層 | `python3 skills/finnhub-client/scripts/audit_drift_check.py` |
+| Skills endpoint／Dashboard launchd 環境／breadth preflight | `python3 -m pytest -q -p no:cacheprovider skills/earnings-analyst/tests/ tests/test_skill_endpoint_contracts.py tests/test_dashboard_launcher.py tests/test_thematic_enrich.py`（111 passed + 8 subtests）；`python3 skills/us-stock-analysis/scripts/test_bundle_merge.py` + `python3 tests/test_protocol_model_routing.py` + `python3 skills/market-sentiment-analyzer/scripts/test_intraday.py`。Endpoint 測試需驗事件 vs 月度快照、實際欄位與評等方向、日期回溯／權限不重試；launchd 測試須走空環境真 subprocess，並驗缺 key 不停舊服務、LISTEN PID 與 timeout 清理。|
 
 ## 8. Validator gates（protocol 收尾必過，rc=0）
+
+V5.5 場次控制器與來源／續跑／提交／索引合約：
+`python3 -m pytest -q investment/scripts/test_run_investment.py`（必須看到實際 passed 數；含完整入口與斷線閘門突變測試）。
+Phase 0 草稿組裝與既有 validator：`python3 investment/scripts/assemble_phase0.py --input <DRAFT> --out <NEW_CANONICAL_PATH>`（拒絕覆寫及過期來源）。
+流程健康與 shadow-only 策略提案：`python3 investment/scripts/run_observability.py`。
+試行操作見 `investment/run_workflow_v55.md`；沿用既有 broker，不自動切換策略。
 
 ```bash
 python3 news/scripts/validate_digest_output.py        # News（schema: news/digest_output_schema.md）

@@ -1,18 +1,31 @@
 # 踩坑教訓（格式見 MAINTENANCE.md §4；>150 行時精簡）
 
+已回寫規則的歷史條目：[完整封存](../../archive/lessons_already_integrated_20261005.md)。
+
+## 2026-10-05 ｜取得網頁與主張實際引用是兩個指標
+- 情境：六小時研究卡品質稽核，19張卡中兩張的證據包有原始網頁。
+- 坑：其中一張只引用feed標題，若把兩張都算原網頁引用，會高估證據深度；provider ticker tag亦曾把無關新聞誤標CHCO。
+- 修法：以主張evidence_refs對應evidence ID計實際引用，另列網頁取得率；provider提示與文字識別分開，提示不得單独通過研究門檻。
+- 已回寫規則？：否（已寫入intake／packet、回歸測試與完成稽核；不需新增全域規則）。
+
+## 2026-10-05 ｜Broker health 與資料庫 ready 必須分開確認
+- 情境：研究實驗新增 TaskContext／冪等結算後重啟 Broker；第一筆模型已完成，但 complete 回傳500。
+- 坑：health 宣告 binary capabilities，不代表帳本已 migration；實際DB仍v7。回覆也必須在送結算前持久保存，否則失去ACK會一起失去可恢復的研究結果。
+- 修法：先備份、`lqb db migrate`、GET `/v1/ready` 確認schema一致；AIC先原子保存parsed result和完整settlement，再送complete。晚到usage不重開reservation，不重跑模型。 失敗／未知用量的ACK補送成功只代表帳務交付，不能解除quota/auth等推論停止；測試需涵蓋pending失敗結算轉ACK後仍停止。
+- 已回寫規則？：否（已加入runtime ready gate、持久結果、positive-control與文件，不需新增全域規則）。
+
+## 2026-10-01 ｜版本配色缺席不等於歷史歸檔
+- 情境：HPE 的 export 與 Dashboard 投影均為 V5.5，畫面卻顯示 ARCHIVE。
+- 坑：page-decisions.js 的版本配色表只列到 V5.4，未知版本直接套用 LEGACY 標籤。
+- 修法：有效版本保留原版本號；用真實 HPE 投影驗證新標籤，並用修正前程式證明可重現 ARCHIVE。
+- 已回寫規則？：否（前端顯示修正；沿用 MAINTENANCE §2c 的已知錯誤對照驗證）。
+
 ## 2026-08-21｜同檔重複 anchor 的 patch 必立刻驗證落點
 
 - 情境：在 `model_router.py` 的 protocol lease 入口加入「protocol name 必填」檢查。
 - 坑：patch 只用 `cfg = load_llm_config()` 當 anchor，先命中上方 `governed_call()`，把不存在的 `protocol` 變數插錯函式；若只跑語法檢查不走該分支，會到 runtime 才 NameError。
 - 修法：同檔有重複 anchor 時，patch 必同時帶函式宣告；落地後立刻 `rg` 新字串並 `sed` 看上下文，再跑入口 contract。
 - 已回寫規則？：否（MAINTENANCE §2c 已要求獨立驗證落地；本條是同型實例）。
-
-## 2026-08-10｜落地的 artifact 是子集卻長得像全集，就是在等一個長 run 來踩
-
-- 情境：META invest run 兩次失敗，UI 報 `rc=0 but required artifact missing/stale`。使用者初判是 codex 的硬傷。
-- 坑：兩個。(a) `decision_engine.py:_persist_artifact` 只寫 6/24 欄，但檔名、路徑、內容、protocol 文字四項都在宣稱它是完整的 phase-3 輸出——長 run 的 stdout 一被擠出 context，模型就會去讀它，然後 `KeyError`。(b) `comps.py:918` 把「同業不足」（一個正確答案）映射成 rc=1，撞上 V4.116.1 的 rc≠0 停機規則，PM 只好自行裁量，同一天裁了四次兩種結果。
-- 修法：(a) 落地完整輸出——**裁剪的理由若來自寫入端的方便，就不該變成讀取端的契約**；(b) **修訊號不修規則**——V4.116.1 一個字不改，改的是「這件事不該回 rc≠0」。判斷句：**script 跑完了、答案是 null，那是答案；script 沒跑完，那才是失敗。**
-- 已回寫規則？：是（`investment_protocol_v5_0.md` 估值錨表補明文；`MAINTENANCE.md` §2b 殘留掃描再次證明有效——掃到 `dcf.py:918` 同型缺陷，因語意不同刻意未動並記 TODO）。
 
 ## 2026-08-10｜先證明假設錯了再開修，不要照著使用者的歸因走
 
@@ -29,53 +42,17 @@
 - 已回寫規則？：否（先觀察是否常態；若再發生就寫進 `MAINTENANCE.md` §2）。
 
 
-## 2026-08-10 ｜zsh 把 `--include=*.md` 吃掉，殘留掃描整個沒跑卻看起來像「已清乾淨」
-- 情境：V4.122.0 收尾做 §2b 殘留掃描，一次跑四條 `grep -rn "..." --include=*.md --include=*.py .`。
-- 坑：zsh 對未加引號的 `*.md` 做 globbing，CWD 沒有 `.md` 檔就直接 `no matches found` 並**中止整條命令**——四條全部 0 命中。輸出長得跟「掃過了，沒有殘留」一模一樣。這是 §2c 成員 #5 的近親（pattern 自己壞掉），但機制不同：不是 pattern 比對失敗，是**命令根本沒執行**。加引號重跑後，同樣四條抓到 2 處實施表沒列到的規則鏡像（`investment/README.md` 的 OVERRIDE_BURRY 三項成本、OPS §7 的「五道紀律閘」）。
-- 修法：(1) `--include` 的值一律加引號 `--include="*.md"`；(2) **殘留掃描第一條永遠是 sanity check**——先 grep 一個「已知一定存在」的字串並確認命中數 > 0，再信任後面那幾條的 0 命中。MAINTENANCE §2b 的成員 #5 已寫「驗證命令自己也要先確認 pattern 抓得到已知存在的東西」，我這次是隔了一輪才想起來套用。
-- 已回寫規則？：是 —— 本條即為 §2c 成員 #5 補上 zsh 這個具體形態；掃描腳本的 sanity-check-first 慣例同時寫進 `MAINTENANCE.md` §2b。
-
 ## 2026-08-09 ｜我做了一支稽核工具，然後沒驗它就拿它下結論——五個偽陽性全指控引擎違規
 - 情境：V4.117.0 三道閘上線後，寫 `audit_gate_compliance.py` 判讀 agy／codex 的 invest run 是否還在手寫 `history.json`。
 - 坑：它把整份 log 當 haystack，而 log 裡有引擎 `sed`／`Read` 出來的**檔案內容**。於是 (a) protocol 裡我自己寫的那句「不得用 `h.pop()`」被算成一次違規——**引擎讀了規則反而被記一筆**；(b) 寫 `/tmp/<T>_session.json` 這個正確做法被 `json\.dump\([^)]*history` 的貪婪 `[^)]*` 跨行吃到後面 log 文字的「(history len=188)」而誤報；(c) `--replace-last`／`schema drift` 次數同理灌水；(d) 「同 ticker+date 重複筆數」把同日跑兩次誤判成修法留下的重複；(e) 讀 `hist[-1]` 而非本次 run 蓋章那筆，第二個引擎跑完後，第一份報告的欄位全變成別人的。**第一份輸出若直接轉述，我會告訴使用者兩家都還在手寫決策紀錄——結論完全相反。**
 - 修法：(a) 命中的必須是**引擎做了什麼**，不是它看了什麼——只掃 tool-call 的 command 欄位（gemini `step_update.tool_info.parameters.CommandLine`／codex `item.command`），輸出欄位一律不取；(b) 認不得的 log 形狀要**印警告**再退回全文，否則偽陽會被當成乾淨讀數；(c) 時間窗要**兩端都封**（log 檔名起、log mtime 迄），開放式 `>= start` 會把後續 run 算進來；(d) 單槽 artifact 被後續 run 覆蓋時要明說「無法回溯比對」，不要印 diff。
 - 已回寫規則？：通則已在 `MAINTENANCE.md` §2c（「先讓它在已知有差異的輸入上證明會報非零」）——**這次是我知道規則卻沒套用在自己新做的工具上**。判準補一句：新做的量測工具，第一次使用前先餵一組已知答案的輸入（此處＝閘前那份 run，答案是「確實手寫過」）。
 
-## 2026-08-09 ｜「怕誤殺」把 cutoff 推遲一天，代價是讓真話晚一天說
-- 情境：V4.117.0 三道 export 閘要挑生效日。我選了次日（2026-08-10），理由寫成「已在磁碟上的 entry 拿不到 stamp，同日 cutoff 會讓最新那筆永久紅，而紅了修不好的閘教出無視」。
-- 坑：那個「永久」是我沒查證就寫下的。validator **只讀最後一筆**——下一次 run 一 append 就換掉了，紅期是一次 run 的時間。而且它**不是誤判**：當天那筆 BAC entry 確實是手寫的（7 次 `json.dump` + 6 次 `open(w)`）、`pt_revision_momentum` 確實是 null。我等於為了迴避一個一跑就好、而且說的是實話的紅，讓使用者多等一天才能驗證。使用者一句「為什麼要測隔天，是單天報告看不出來嗎」才把它問出來。
-- 修法：**寫「這樣會永久壞掉」之前先把它跑出來**——我後來一行 sed 改常數就量到了真實代價，那件事在下判斷之前就做得到。通則：防禦性的預設值要標明代價量測過沒有，沒量過就不算理由。另一半教訓是連帶影響——cutoff 一改，舊閘（`valuation_reviewer_gate`，同日）的 fixture 立刻為了新閘的原因紅，**同日生效的閘彼此的 fixture 要互相滿足**。
-- 已回寫規則？：是——cutoff 改回 2026-08-09，CHANGELOG／SESSION_NOTES 的原理由段一併更正（不留錯誤考據，見 2026-08-08 那條）。
-
-## 2026-08-09 ｜靜默綠第七種：測試**繞過呼叫點**，於是「閘沒接線」測不出來
-- 情境：V4.117.0 三道 export 閘。前兩道的合約走真 validator subprocess，第三道（`calculation_steps` parity）為了餵 artifact 方便，全部改成直接呼叫 `V._check_calculation_steps_parity(...)`。
-- 坑：種回 bug 時把該 check 從 `main()` 拆成 `pass`——**閘完全不生效，測試十項全綠**。這與 §2c 既有五個成員不同：那些是「操作寬容失敗」，這個是**測試自己選了一條不經過真實呼叫點的路**。形狀與 V4.116.2「`invest` 從沒進 `PROTOCOL_VALIDATORS`」完全一致：沒接線的閘沒有症狀，而直呼式測試把「函式行為對」誤當成「閘生效」。
-- 修法：任何閘的合約**至少要有一個案例走完整入口**（此處是 validator subprocess），哪怕為此得多準備 fixture（我為它造了 `ZZWIRED` ticker + 臨時 artifact）。判準：**問自己「把這個 check 從 main() 刪掉，測試會紅嗎」**——答不出來就是還沒測到接線。
-- 已回寫規則？：是——`OPS_COMMANDS.md` §7 新增該測試列並寫明含接線斷言；`MAINTENANCE.md` §2c 家族第 7 項。
-
 ## 2026-08-09 ｜同一個常數寫兩份，失效方式是「永久靜音」而不是「報錯」
 - 情境：同上。`decision_engine.py` 寫 artifact 的路徑與 `validate_session_export.py` 讀 artifact 的路徑，各自定義了一份字串。
 - 坑：兩份一致時完全正常，所有測試綠。但只要**任一方改路徑**，validator 會讀到不存在的檔 → 走「artifact 缺席則靜默」分支 → **rc=0**。閘從此永遠不生效，而且沒有任何症狀。這是實施表看不出來的（兩處都「照計畫寫了」），靠 §2b 殘留掃描 `grep "decision_engine/"` 才浮現。
 - 修法：**producer 與 consumer 共用的路徑／欄位名／魔術字串一律 import，不得各寫一份**——validator 檔頭本來就有這條註解（「reason string 與 command table 用 import 不用重述」），我卻在新增程式碼時沒套用。特徵辨識：當 consumer 對「找不到」的處理是靜默時，重複定義的代價從「報錯」升級成「靜音」。
 - 已回寫規則？：部分——已改成 `from decision_engine import ENGINE_ARTIFACT`；通則寫在此處，未另立規則檔條目。
-
-## 2026-08-09 ｜共用假設在「換執行者」時才會現形，而它挑最貴的那支現形
-- 情境：`invest_20260809_000447` rc=1，208K token 零產出。V4.106.0 起 quota broker 為 protocol run 指派 provider；這是 invest 15 次歷史裡**第一次**跑到非 Claude（前 14 次全是 `claude:opus`）。
-- 坑：invest 的 prompt 是裸觸發詞 `分析 {ticker}`，語意完全靠 agent 自動載入 CLAUDE.md 的觸發表——**這個假設從沒被寫下來，因為在單一 agent 時代它永遠成立**。`agy --print` 不載入任何專案 context 檔，於是 agent 從頭到尾沒 list 過自己的 cwd，循 `~/.gemini/projects.json` 的過期路徑跑去舊鏡像目錄亂找。同天同 provider 的 `triage` 兩跑 rc=0——那支 prompt 把每條 script 路徑寫死，**可攜性差異一直存在，只是之前沒抽到那支籤**。
-- 修法：(a) 診斷看「agent 沒做什麼」——沒進 cwd 比任何錯誤訊息資訊量大，最後那句 `Agent execution terminated due to error.` 什麼也沒說；(b) **CLI 行為用探針測，不要讀它二進位裡的說明文字**——agy 內含 directory-based rules 的完整描述，照讀會得出「它會載入」的錯誤結論，兩題禁用工具的探針才問出 `NONE`；(c) 把假設寫進 prompt：每個非 claude provider 的前導點名自己的 context 檔 + 本次 protocol 規範路徑 + cwd 邊界；(d) 可攜性用 `protocol_providers` 白名單顯式編碼，別讓 broker 靠運氣。
-- 已回寫規則？：是——`CLAUDE.md` 檔頭「唯一手寫來源 + 生成」、`MAINTENANCE.md` §2 加 `sync_agent_context.py --check`、`OPS_COMMANDS.md` §7 兩列、`tests/test_protocol_model_routing.py` 擴充。
-
-## 2026-08-09 ｜「單一真相來源」在多 CLI 下會反轉成 bug
-- 情境：同上。CLAUDE.md 原本明文「觸發表是唯一 source of truth，AGENTS.md 只引用不複製」。
-- 坑：這條規則在單一 agent 下正確，在四個**各自只自動載入自己那一個檔**的 CLI 下，「引用」等於要求它們先去讀別人的 context 檔。順手驗出 codex 與 grok 也是壞的——兩者都確實自動載入 `AGENTS.md`（grok 讀的也是這個檔，不是 GROK.md），但那個檔當時就寫著「表在 CLAUDE.md，不要複製」，所以問它們 `分析 TICKER` 讀哪個檔一樣答 UNKNOWN。**只有 gemini 炸掉，是因為只有它連自己的檔都沒載入**；另外兩家的殘缺沒被觸發過，也就沒人知道。
-- 修法：改成「唯一**手寫**來源 + `scripts/sync_agent_context.py` 生成另兩檔的 delimited 區塊」，`--check` 進收尾 checklist。要避免的是**複製造成的漂移**，不是複製本身——當消費者彼此隔離時，生成比引用正確。
-- 已回寫規則？：是（同上）。
-
-## 2026-08-08 ｜結論對、但支撐結論的事實錯了——錯誤考據會被後人當事實引用
-- 情境：風控三支 Batch B 決策備忘（v4.112.0），三處被 review 抓到考據不實。
-- 坑：(a)「兩年來沒人依它決策」——專案只有幾個月歷史，修辭失控；(b)「33/47 **精確**落在格點」——±0.0005 其實只有 13/47，±0.005 才 33/47，而該容差的 8 個 bin 覆蓋了觀測區間 42%，所以 70% 是支持性不是決定性；(c)「fragility_downgrade 兩次都 ROBUST」——實際是三列 FRAGILE/FRAGILE/ROBUST。**三處的結論都成立**（該刪的還是該刪），但寫進 CHANGELOG 的理由段會被後人當事實引用，錯的考據比沒有考據更糟。
-- 修法：(a) 涉及時間跨度、次數、比例的斷言，先跑一次確認再寫，不要憑印象修辭；(b) 「精確／完全／全部」這類詞出現時，回頭確認容差是多少、分母是什麼——本例正確寫法是「精確簇 0.140 出現 8 次」（那才是決定性證據），而非籠統的 70%；(c) 引用歷史產物的統計（出現幾次、每次什麼值）要逐列印出來看，`grep -l` 只給檔數不給列數。
-- 已回寫規則？：**是（2026-08-08 補）——家族湊滿五個後固化為 `MAINTENANCE.md` §2c「靜默綠」防線。** 後續三個成員：③shadow 猜錯被測介面回空 dict，空結果被讀成「零差異」；④`str.replace` 錨點打錯**原樣返回**，寫回去等於沒改而回報說已更新（就發生在回報 ③ 的那個 commit 裡）；⑤驗證用的 grep pattern 自己漏了反引號，回 0 命中。五個共同的成因是 **API 為了方便而選擇寬容失敗**，而寬容失敗在寫入路徑上讓「沒做到」和「做到了」產生相同的觀測結果。
 
 ## 2026-08-08 ｜綠燈的測試可能一行都沒執行到目標——patch 到不存在的名字不會報錯
 - 情境：風控三支補測試（v4.111.7）。要鎖 tail-risk 的分級門檻與權重，寫了 `monkeypatch.setattr(tr, "clamp", fake, raising=False)`。
@@ -107,29 +84,11 @@
 - 修法：(a) 效能歸因**一律先量再修**，缺 Safari profiler 不等於量不到——`Chrome --headless=new --remote-debugging-port` + CDP，node 22 內建 `WebSocket` 直接講 protocol，不必裝 puppeteer；`Performance.getMetrics` 拆 Script/Layout/RecalcStyle，`Tracing` 數 Paint/Commit。(b) **鎖定元凶要找差異項，不是共通項**：56 個 timer 每頁都有，但 index 0.6 Paint/s、decisions 110 Paint/s——差 100 倍的東西不可能由共通項解釋。(c) 結案必須做 A/B（只關那一行 → 56 fps 掉到 1.1 fps）才算證明，不是「疑似相關」。(d) 掃永久動畫用 `document.getAnimations()`，**不要用 `getComputedStyle().animationIterationCount === 'infinite'`**——後者看不見 transition，而本案元凶正是 transition；三個頁面都掃到同一個隱形旋轉圖示，但只有一頁在燒。
 - 已回寫規則？：否（本條是診斷紀律，非流程規則）。同批修復見 CHANGELOG v4.111.3；`intraday-eval.html` 的 `box-shadow` 動畫（241 Paint/s）已知未修，屬視覺設計決定。
 
-## 2026-08-06 ｜Projection metadata 不能取代 record contract
-- 情境：同日 append-only News projection 同時包含 DIGEST 與 FLASH。
-- 坑：validator 用頂層 DIGEST/PER_AGENT_BATCH 規則檢查所有 deep records，把合法 pending/INLINE FLASH 誤判失敗；artifact 已存在但 Dashboard 任務顯示消失。
-- 修法：混合 projection 的 review/cache/isolation/算分一律按每筆 `event_type` 與 `fanout_mode` 驗證，頂層 mode 只描述 anchor；回歸測試必含異質 records。
-- 已回寫規則？：是（v4.99.1 record-level validator 與 mixed DIGEST+FLASH test）。
-
-## 2026-08-06 ｜對抗 lane 的分數距離不是事件狀態
-- 情境：News Arbiter 用四 lane 最大分差判定 BINARY，而 Bull 契約限定 +1..+5、Bear 限定 -5..-1
-- 坑：拿刻意設計成異號的對抗分數做 max-min≥4，幾乎必然觸發；連續五份 digest 25/25 全成 BINARY，測試仍綠，因為只驗 enum/shape、不驗分布與事件語意
-- 修法：事件狀態（binary/pending/date）與方向強度（net score/debate spread）分欄；validator 由共用 deterministic 規則重算。任何分類規則上線前，用至少數日真實 artifact 檢查 label distribution，不能只測單筆 fixture
-- 已回寫規則？：是（News Protocol V2.3、`arbiter_rules.py`、semantic validator 與 distribution 觀察 TODO）
-
 ## 2026-08-06 ｜檢查 env 名稱也要用 parser，不要用只涵蓋裸賦值的 regex
 - 情境：review `daily_update.sh` 的 launchd 環境能力，只想列出 cron env 的變數名稱並遮罩值
 - 坑：遮罩式只匹配行首 `KEY=...`，實檔使用 `export KEY=...`，導致工具輸出意外帶出本機 secret。即使檔案 git-ignored、目的只是讀名稱，輸出仍會進 session transcript
 - 修法：任何 env inventory 一律只輸出 parser 取得的 key 名；shell 檔先移除可選 `export` 再解析，或以不回顯內容的檢查逐一測 key 是否存在。禁止先整檔讀出再靠顯示端 regex 遮罩；已曝光的 credential 立即輪替
 - 已回寫規則？：否（本條保留可執行的診斷紀律；未記錄任何 key 值）
-
-## 2026-08-06 ｜API 回 200 不代表區間資料完整，enrichment 前要先縮 universe
-- 情境：修 sector prefetch 的 earnings calendar 360 秒 timeout；中央 limiter 已把流量壓在 220 RPM，仍跑不完
-- 坑：未來 7 日 calendar 回 2,837 symbols，程式對每支逐一打 `/profile` 才篩 market cap；同時過去 30 日 calendar 回剛好 4,000 rows、HTTP 200，實際日期卻只覆蓋最後 8–9 天。前者是 filter-after-fetch 的 2,837-call fan-out，後者是無錯誤訊息的 response cap 截斷
-- 修法：enrichment 前先用一次 bulk/screener snapshot 本機交集，禁止把「篩選所需 metadata」做成逐 symbol 請求；範圍 API 若筆數碰到已知 cap，必須切段、去重並在單日仍飽和時 fail closed，不能把 HTTP 200 當 completeness 證明
-- 已回寫規則？：是（4.95.7：`sector/lib/earnings_calendar.py` 分段完整性；Step 3 改 cached company-screener join；`sector/scripts/README.md` 記錄契約）
 
 ## 2026-08-03 ｜修 bug class 的那輪，要拿修法判準回頭掃自己新增的程式碼
 - 情境：4.95.2 對 4.95.1（「韌性從檔案層下沉到欄位層」的 review 修正輪）做第二輪 review
@@ -148,12 +107,6 @@
 - 坑：`MU_20260801T230255Z.json` 生成於兩個 commit 之間（07:02，scope fix 07:04 才進），base_rate_lane 帶著被自動晉升的 -9% cohort median 與錯誤 note，成為 archive 最新 MU snapshot——任何讀 latest snapshot 的報表都會拿到 fix 前的數值。程式碼與測試全對，壞的是資料層
 - 修法：引擎行為修正的收尾 checklist 加一步：受影響 ticker 重跑一次 snapshot（ledger 不可變，用新檔蓋 latest 而非刪舊檔）；review 引擎變更時，除了 diff 與測試，一定抽 archive 最新 snapshot 核對關鍵欄位是否已是 post-fix 行為
 - 已回寫規則？：否（先記 LESSONS；若再犯考慮寫進 MAINTENANCE §2 收尾 checklist）
-
-## 2026-08-02 ｜估值引擎驗收只驗 happy path，等於沒驗
-- 情境：4.76.0 交付 MU structural-shift DCF + range-only peer fallback，驗收是「MU 跑出 $762.13、測試 rc=0、validator rc=0」，看起來很完整
-- 坑：後續 review 找到 12 項問題，**全部**在 degraded / fallback 分支，happy path 一項都沒錯——因為 MU 剛好是「3 季已公布 + 有 next-quarter estimate + estimates 有 ebitAvg」的最順情境。實際踩到的：2 季 ticker 會拿已公布季度獲利除全年營收估計（`dcf.py` start EBIT margin）；缺年度估計時整條成長路徑直接套成長上限表 45/30/20/12/8（把「證據上界」當「預設值」）；confirmed shift 建不起來時靜默退回 legacy 而 legacy 對該股會算出負 terminal FCFF；資料缺失的 ticker 在非 `--json-only` 模式直接 TypeError 而不是 degraded
-- 修法：引擎類交付的 DoD 加一條——**每個 early-return / fallback / except 分支都要有一條 regression test**，且測試 fixture 不能只有一個「資料齊全」版本。寫 fallback 時問一句「這個預設值是保守還是最寬鬆？」缺資料一律往保守 + 出聲（寫 reason 進 payload + warnings），不准往上界靠
-- 已回寫規則？：是（`skills/valuation-modeler/SKILL.md` 新增「缺資料時的紀律（degraded path）」段；本條記通則，其他引擎同樣適用）
 
 ## 2026-07-03 ｜檔名帶版號的 protocol 換版時要清引用
 - 情境：v4_8 歸檔
@@ -254,9 +207,3 @@
 - 坑：那條 regex 有兩個 alternation，我只把**第二個**換成永不匹配的字串，測試 56 passed。當下差點讀成「規則不生效也綠 → 測試沒接線」，但真相是**種的 bug 根本沒破壞被測行為**——兩個測試用的標題都由第一個 alternation 匹配。錯誤的種法會同時產生「假的靜默綠警訊」與「真的覆蓋盲點」。
 - 修法：種回 bug 的目標是**被測行為**，不是原始碼的某一行。多分支結構（regex alternation、`or` 條件、多個 early return）要嘛整塊拿掉，要嘛一次只留一個分支並確認**每個分支都有專屬案例**。這次的副產品是補了一個只有第二分支會匹配的案例（沒有它，刪掉那半永遠是綠的）。
 - 已回寫規則？：否（先記中繼站；再犯就進 MAINTENANCE §2c 規則 1 的說明文字）
-
-## 2026-08-14 ｜報錯的閘不是壞掉的閘：UI 只截得到第一行
-- 情境：使用者貼 `validator rc=1: [validate_digest_output] ✗ schema drift (expected V2.3):; - FR` 問為什麼。
-- 坑：validator 完全正常。當天沒產出 digest，它退回抓兩天前那份 → freshness fail，而 `dashboard_server` 把前 5 行用 `"; "` 接起來、UI 再截到約 60 字元，於是**只有標題行倖存**，標題行說的是 schema drift。真正的 rc=1 在 `news/scan_logs/` 的 `finalize_digest.py`。
-- 修法：(a) 診斷從 `news/scan_logs/<protocol>_*.log` 的**最後一個非 0 rc** 開始，不要從 validator 訊息往回推；(b) 寫 gate 的失敗輸出時，**第一行就要是結論**——後面的 bullet 在這條管線上等於不存在。`validate_digest_output.fail()` 因此加了 header 參數。
-- 已回寫規則？：是（`news/scripts/validate_digest_output.py` 的 `fail()` 註解寫明第一行是唯一倖存的行）

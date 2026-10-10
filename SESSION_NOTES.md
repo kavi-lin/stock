@@ -1,98 +1,118 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-08-22 (v4.135.5)
+> **Last Updated**: 2026-10-10 (v4.141.1)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
 
-## 🟢 Session Note (v4.135.5) — 額度主卡要畫出派選原因
+## 🟢 Session Note (v4.141.1) — Codex 配額重置倒數
 
-- 主條原本固定畫 5h 消耗，但 broker 以會被任務碰到的最緊 bucket 派選；因此 Claude `5h 2%` 會遮住實際限制它的 `weekly 27%`。
-- 主卡現在從 routable pool 取最緊 bucket，直接標 `週` / `5h`；排序與 tooltip 箭頭共用同一個決定。不強制全畫 weekly，避免 Gemini 真正被 5h 限制時反而顯示錯的派選理由。
-- JS 語法、diff check 與 live broker payload 驗算通過；Dashboard server 當時未在 8080 埠執行，Browser 也無連線實例，未假稱已目視驗收。
+- Broker 與 `/api/llm-config` 已傳送 Codex `resets_at`，浮動卡片 `resetHint()` 只讀相對秒數／文字標籤才是倒數空白原因。
+- 浮動卡片優先支援秒／毫秒／ISO 絕對時間，保留 Claude/Agy 備援；實際週窗口 `1791960087` 對應台北 2026-10-14 14:41:27，重現由空白恢復 `4d`。
+- 12 個 Node 倒數案例、移除修正必失敗的正控制、`node --check Dashboard/utils.js` 與 `python3 tests/test_broker_gate.py` 通過；後者需允許本機臨時 HTTP 埠。
+- 使用者要求將累積工作分類提交並 push；依資料來源、新聞、投資、signals、財報、broker、研究、quota、文件與產出拆分。新增 ignore 排除本機 tmp／日誌／原始研究快取，保留正式分析快照與報告。
+- 預推驗證：959 項 Python、20 項 Node 通過，另 9 支契約腳本通過。兩項既有失敗單獨重跑仍失敗：`test_research_boundary.py::test_http_research_route_and_stale_observation` 缺研究面板頁面接線；`test_run_investment.py::test_lane_fmp_helpers_share_cache_limiter_and_classified_status` 的 sector PE fixture 缺 `sector` 欄位，被新版過濾規則排除。追蹤於 TODO，分類整理未修改功能。
 
-## 🟢 Session Note (v4.135.4) — broker 拒絕是等待，不是殘缺辯論
+## 🟢 Session Note (v4.141.0) — 正式常駐研究與 25k 預估
 
-- 2026-08-21 共 59 筆 Break News，僅 10 closed；Codex 28、Gemini 27、Claude 1 次 `rc=-9 / 0 ms`。這不是 CLI timeout，而是兩個 item workers 同時搶 broker exclusive slots。
-- Break News 現固定跨 item 序列執行；turn 若被 broker 擋下，item 回到 `pending_debate` 並保存 route/error，scan 另計 deferred，不進 partial/failed terminal state。
-- 部署時另抓到 launchd PATH 缺 Node/Agy：restart script 現明示 CLI/runtime 目錄；未預期 worker 例外立即回 pending，超時 orphan `debating` 也會復原。
-- 未補跑 2026-08-21 的 46 筆 partial/failed，避免未經確認消耗額度。47 項 Break News tests、broker gate 與全量既有 artifact validator 全綠；本輪未主動發起 LLM inference。
+- 使用者核准正式模式與25,000／呼叫；四類research送件22k input＋3k output、Luna/max。Broker仍按真實用量結算，未改Broker校準、額度或冷卻。
+- `scripts/research/service.py` 隨Dashboard啟動，共用跨程序鎖；獨立service狀態與research-production ID，保留trial／四份報告。滾動24h≤30組／60calls、1h≤5組，重啟不重置，包含先前試驗live calls。
+- Broker未啟動模型前的cooldown可等狀態解除＋無預約預檢通過再續跑；實際推論quota/auth/未知用量要人工處理。ACK補送不再錯誤解除推論停止；有效部分結果可續發布，已審閱中斷失敗不重跑。
+- 61 Python＋3 Node通過；最後恢复修正18專項通過。36k正控制會被真實acquire測試攔下；governance/window/broker/protocol routing通過。Dashboard閒置後已重啟，新服務PID3837、mode=production、25k；Broker標記cooldown至2026-10-11T16:39:13Z（台北10/12 00:39），因此持續取材、暫停模型推論。
+- 啟用證據：`reports/research_production_20261005.json`；工作副本備份 `tmp/research-production-before-20261005/`。版本4.141.0。未改正式投資決策、未額外發模型驗證呼叫。
 
-## 🟢 Session Note (v4.135.3) — 一個任務只在一個跨頁狀態面出現
+## 🟢 Session Note (v4.140.0) — 事件研究／Broker 六小時實驗完成
 
-- 橘色盤前 chain pill 與紫色 protocol pill 重複顯示 News/Sector，並在同時存在時互相堆疊。橘色跨頁 pill 與 CSS 已移除；盤前 modal 本身保留。
-- queue payload 早已保留 `source="premarket_chain"`，前端現在把 News/Sector 顯示為 `盤前檢查 · <task>`，不改變 server orchestrator 與 phase order。
-- `daily_update` 只留在 modal progress，沒有加進 `PREMARKET_PROTOCOL_LABELS`，因此不會被當成 provider slot。5 個盤前 UI tests、routing contract、JS syntax 與 diff check 已通過。
+- 使用者授權 AIC 與 sibling llm-quota-broker 完整實作；新研究卡供個股／財報／動能／Nexus，原始證據＋反證保留，無持倉／watchlist 依賴。既有投資決策／圖譜晉升閘保留。
+- 四種研究角色走 ensemble registry，gpt-6-luna/max；Broker TaskContext、schema v8 冪等 complete／late usage／history 過濾與平均數落地。canonical vendored client 未因本任務改動。
+- 初測24 calls／487172已知tokens，平均20298.83；11完整A/B、首例僅analysis＋結算復原、1錯引文失敗如實保留。首例v7帳本complete500，備份+migrate v8後精確補送；後續結果先持久保存再結算。正式六小時台北10/5 02:07:31–08:07:31，08:07:42自動結束，worker已退出，狀態complete_with_gaps。
+- 正式28 calls／15 attempts（13完整A/B）、19卡；26筆已知532900 tokens，平均20496.15／call，2筆native schema／quota失敗未知。含初測52 calls與52 Broker execution逐欄位一致，另1筆未執行expired reservation；滾動一小時峰值5辯論。07:24:41 quota後不重試，來源觀察持續，沒有截止後呼叫。初期453秒心跳間隔保留；Futu／社群逾時隔離、ticker提示與識別分開、低增量篩選、逐階段deadline、busy恢復與已完成結果優先發布均已修。
+- Broker1237 tests/ruff/mypy；AIC245 News/research/signal、91 Break News/Nexus/launcher，最後修正後38研究測試及2 Node面板契約通過。四lane收尾HTTP200；無視覺驗收。32輪取材、19卡中18張實際只引feed；真實filing/calendar/followup零樣本。完整結論 `reports/research_observation_research-20261005_conclusion.md`，同名前綴MD/JSON/audit含逐筆證據；既有DIGEST缺席／3筆Nexus digest stale未降閘。
 
-## 🟢 Session Note (v4.135.2) — 三個並行工作在每個狀態表面都是同一件事
+## 🟢 Session Note (v4.139.4) — Skills 接線與保留／整併評估
 
-- broker v0.3 的 live `active_reservations` 是 flat rows，沒有 `project`；同一個 local lease 因此曾被 protocol queue 畫綠燈、quota snapshot 又畫藍燈。每 provider 實際仍只有一個互斥 slot，未重複執行。
-- UI 現在以 local run 作為該 provider 的所有權證據，壓掉同一 slot 的 unknown/external 重複燈；收合標題同時列出全部 active tickers。
-- pending 列以 queue ID 刪除，不用 ticker 猜測，不會碰執行中的 jobs。目標 routing test、JS syntax 與 diff check 已通過。
+- 使用者 OK 後修復稽核 F01–F06：安全交付 launchd 環境、評等 endpoint／欄位與方向、事件／快照區分、sector PE 日期、repo breadth 路徑、Finnhub singular split。重啟腳本只停止 LISTEN PID，盤中 partial 顯示錯誤。
+- 111 pytest + 8 subtests、四支直接腳本、MU cache／infographic 雙閘通過；新增測試修正前會紅。既有 stale-gate 三個舊斷言已改成來源 fetched_at 規則，未降級 production gate。
+- Live FMP 評等／共識／事件有效；AAPL 365 天升6降4、Technology PE48.8。服務閒置預檢後正式 8080 重啟，五項 data credential 的存在性驗證通過；詳細 final health 見 `reports/SKILLS_ENDPOINT_FIX_2026-10-04.json`。
+- 26 skills 評估寫入 `skills/MARKET_INDEX.md`：dual-axis／weekly playbook 降選配，calendar／retail 優先整併，其餘22保留；前瞻仍為價格框架依賴。未刪 skill、未改探索層邊界／權重，沒有主動呼叫額外模型。
+- 原稽核 `reports/SKILLS_ENDPOINT_AUDIT_2026-10-04.json` 保留為修正前證據；本輪前副本位於 `tmp/skills-endpoint-fix-20261004/before/`。FMP／Finnhub 權限與 CNN／CBOE 缺資料仍列限制。
 
-## 🟢 Session Note (v4.135.1) — 跨專案 broker 使用不再假冒本專案綠燈
+## 🟢 Session Note (v4.139.3) — MU 收尾 validator argv 修復
 
-- quota panel 現在綠燈只代表 `ai-investment-committee`，藍燈代表 `tw-stock-wonwon` 等其他 broker project；同 provider 雙邊使用時可同時亮兩燈。
-- ownership 由 `broker_gate.quota_snapshot()` 輸出 `is_local_project`，前端不複製 project ID；缺少 attribution 時 fail-safe 為外部藍燈。
-- Browser 未連線，未假稱目視驗收；後端 local/external/unknown fixtures、UI/CSS 合約、JS 語法與 402 項主測試均通過。
+- 根因：V4.138 新增 earnings 第二支 validator 後，host 仍把 registry 全部腳本塞進單一 argv，變成 `python validate.py validate_infographic.py MU --require-history`。MU log `earnings_20261004_102135_e381` 分析 rc=0、host gate rc=2；不是使用者操作或模型未產出。
+- Server 與 manual runner 共用逐支驗證入口，保留 ticker／日期替換、60 秒限制、第一錯誤即停止及產物 freshness gate。Routing 增加實際 subprocess 的 success／各閘失敗／單腳本參數案例；合併 argv mutation 會紅，恢復全綠，scheduler／broker contracts 通過。
+- MU 兩閘與原場次 freshness 重驗 rc=0；等待中的 DDOG 完成後確認同一 host 錯誤，現有報告兩閘重驗 rc=0。原失敗 log 保留，未重跑或新增 LLM 推論。
+- DDOG 結束後確認 protocol queue／Break News in-flight 為空且只有 caffeinate 子程序，正式 8080 已安全重啟載入 v4.139.3；MU／DDOG API 都回傳最新季度、摘要可用且無 warnings。原失敗 log 保留。本輪前副本：`tmp/earnings-validator-before-20261004/`。
 
-## 🟢 Session Note (v4.135.0) — LLM 只有一個分配權威
+## 🟢 Session Note (v4.139.2) — 比較 UX 對齊本季
 
-- 24 個 LLM task 已按 agentic / ensemble / structured / narrative / external-tool 分類；正式 provider 僅 Claude、Agy、Codex，Grok 停用。
-- 全部 inference 必須先取得 broker lease；一般任務由 broker 選模型，ensemble/認證可 pinned，但失敗不跨模型重播。互動 protocol 留 queue 重試，daemon/cron defer。
-- Tier 3 三家隔離 canary 均通過（各 2 entities / 1 triple），正式 graph/cache 未寫入；audit 與 402 項主測試、targeted router/queue/Nexus/Wind/JS tests 全綠。
+- 使用者接受獨立 tab，要求 UX 接近本季財報；比较 renderer 直接沿用 `ed-section`／`ed-section-head`／`ed-chart-card`／`ed-detail-collapse`，數字字型、主題狀態色、欄寬與間距同步。
+- 重複大標題移除；季度、日期、前次入口收進財務表格卡片。手機橫滑固定指標欄，原文證據改為和完整報告一致的展開列。
+- 16 Node tests、五種真實 API／頁面 DOM 案例通過；隔離移除原文轉義 mutation 被攔下。Chrome 桌機／400px 手機目視確認，含原文展開及橫滑至年比欄。
+- 僅比較 JS／CSS 與例行版本紀錄更新，本季內容及預設分頁保留。工作副本備份 `tmp/earnings-ux-before-20261004/`；未重啟 server、未呼叫其他模型。
 
-## 🟢 Session Note (v4.134.5) — 派送層的暫時失聯不能變成 ticker 消失
+## 🟢 Session Note (v4.139.1) — 本季優先與跨季比較分頁
 
-- live queue recent 明確記錄 INTC 兩次 `broker:unavailable`；不是 Claude 額度錯誤。Claude 當時剩 23%、hard reserve 20%，broker preview 的確把 Claude 排除，但 Agy／Codex 仍可在 slot 釋放後接手。
-- `broker:unavailable` 現在回 queue 並 bounded exponential backoff；panel 顯示等待原因、attempts 與最近 10 分鐘失敗，派送尚未開始 inference 時不再靜默消失。
-- 驗證：`tests/` 402 passed、queue/UI targeted tests、JS syntax、diff check 全綠。Browser skill 無已連線 browser，未假稱目視通過。
+- 使用者偏好：點入財報首先看本季，跨季比較另放 tab。`earnings-tabs.js` 管理本季／比較兩面板，預設不記憶舊 tab；明確 `tab=compare` 可分享與保留歷季選擇，支援上一頁與鍵盤。
+- 比較頁改為緊湊五指標表格、預期驗收主欄與下季追蹤側欄；小螢幕堆疊、表格局部橫捲。主列表按鈕恢復「查看財報」，季度圖表僅在可见面板繪製與 resize。
+- 16 項 Node 測試、五種正式 API／完整頁面 DOM 案例通過；預設比較的隔離 mutation 會紅，正式程式重跑全綠。Chrome 桌機與 400px 手機版已目視驗收，補完上一輪無法取圖的項目。
+- 僅前端及版本紀錄更新，正式 8080 靜態資源已載入；無需重啟 server。`tmp/earnings-tabs-before-20261004/` 保存本輪前狀態，無額外 LLM 呼叫。
 
-## 🟢 Session Note (v4.134.4) — Phase UI 要表達順序，不是把 list 換三張卡
+## 🟢 Session Note (v4.139.0) — 財報比較 UI 與季度導覽
 
-- 盤前檢查改成緊湊橫向三階段進度軌；Phase node、connector 與 task progress chip 同時表達 active / complete / error / waiting。
-- modal 以 viewport 動態限高，小螢幕才退回直向；chain 啟動後只留主按鈕，移除底部三顆按鈕同時撐高的情況。
-- Browser skill 無已連線 browser，未假稱目視通過；改以 live-served DOM/CSS/JS、viewport contract、JS syntax 與 401 項主測試驗收。
+- 專用 `earnings-comparison.js/css` 已接入財報詳情，列表主鈕改為「財報比較」。前置五指標季比／年比、原文預期與實際值／五態結果、財務警訊差異、下季基準；季度選單、中英文、明暗及窄版樣式。
+- 唯讀 `scripts/earnings_detail.py` + 原 API 加 period/revision：最新主資料不因缺 infographic 而回退舊季；歷史優先完成快照，前次連結可固定當時 revision。沒有改評分或回寫舊 cache。
+- Python 173 passed + 24 subtests、Node 11 tests、routing 通過；54 ticker／72 季度讀取通過，選錯最舊季度的隔離 mutation 能被攔下。正式 API + 完整頁面 JS 的 DOM 驗收通過 MSFT／PLTR／NKE／ARM／MSFT 舊季度，含語言切換、證據展開、完整報告和主題樣式狀態；實機視窗控制不可用（cgWindowNotFound／browser provider unavailable），桌機／手機截圖待使用者恢復視窗連線。
+- 正式 localhost:8080 已重啟載入 UI API 與 v4.138.0 completed gates；MSFT 待補證據／PLTR 全年未到期／NKE 首次分析／ARM 最新季缺摘要均以正式 API 驗證。重啟前無 protocol job／子程序；用 tmp 隔離腳本僅停止監聽 PID，保留 FTNN 連線端。
+- `tmp/earnings-ui-before-20261004/` 保存本輪前工作狀態；未動無關髒檔，未主動呼叫額外 LLM。
 
-## 🟢 Session Note (v4.134.3) — 全市場資料不能用 ticker 檔名當 ownership boundary
+## 🟢 Session Note (v4.138.0) — 財報跨季比較與預期驗收
 
-- GEV 失敗時，當日 canonical `2026-08-21_phase0.json` 已存在且與 AAOI snapshot 完整一致；真正缺陷是 factpack 優先讀 schema 不完整的 sector cache，validator/builder 又只猜 `phase0_<ticker>.json`。
-- resolver 現在先取 shared investment snapshot；legacy ticker 檔只作 migration fallback。sector cache 只供 L3 重建，不能直接通過 gate。
-- factpack 輸出 frozen `phase0_path`，validator 用 `--path` 驗同一檔，Phase 5 也明確接收同一路徑；並行 ticker 不會在中途換 snapshot。
-- 實測 GEV 解析 canonical、`macro_summary` / `_market_signals` 均存在、validator rc=0；三支 Phase 0 / factpack / builder contract 與 `tests/` 398 項全綠。
+- 第一階段完成：`earnings_history.py` 以財季對齊比較，結構化預期五態驗收、待到期延續、觀察清單回訪；raw event 需同季營收匹配，不能用 earnings 第一筆。財報／投資計分公式未改。
+- `analyze` 提供前次預期給既有 narrate；新 infographic 需 `history_schema_version=earnings-history/1`、expectations、observed_metrics。`render` 先驗兩層输入，再寫 MD／不可覆寫快照及報告封存；`--preview` 可唯讀重播舊摘要。
+- 37 新測試；相關套件 163 passed + 8 subtests，forecaster 13 tests、prewarm／routing 通過，CLI gate 隔離 mutation 會紅。完整 EA suite 3 個 stale-gate 舊斷言失敗已用動工前 analyze working copy 重現；沒有改回既有來源時間政策。
+- 預覽：`reports/2026-10-04_{MSFT,PLTR,NKE}_earnings_comparison_preview.md`。舊摘要缺數值契約／原始來源時明示不可驗證；PLTR 全年指引待到期，NKE 無前次分析仍可季比。
+- Dashboard 新完成 validator 登記已寫入程式，常駐 server 下次正常重啟載入；此輪未重啟服務或呼叫模型。第二階段專用 UI／完整舊資料補建尚未實作。
 
-## 🟢 Session Note (v4.134.2) — UI 有三格之後，backend 也必須有三條獨立寫入路徑
+## 🟢 Session Note (v4.137.4) — News 選稿與低影響判準
 
-- 先前只修 UI，`_protocol_artifact_key("invest")` 仍回傳 `investment-global`，所以不同 ticker 還是全排在一個 active 後面。現改為 `invest:<ticker>`，同 ticker 才互斥。
-- 不能只改 scheduler key：validator、renderer、thesis register 原本都抓 `history[-1]`，而 history 的 flock 還鎖在會被 rename 掉的 inode。新流程先處理 per-ticker isolated session，最後用 stable lock commit。
-- server post-run gate 除了驗 isolated session，還會確認同一 digest 已進 global history，不會把「報告寫了但沒 commit」靜默標成 done。
-- 驗證：398 pytest passed；scheduler 3 active + 1 waiting；18 路並行 history commit 無遺失；Phase 5 schema、renderer、broker、JS 合約全綠。
+- 原 10/3 run 的 Theme cache rc=0，真正失敗為 finalizer 多數低影響 guard。原始 raw/triage/debate 已保留於 `news/news_logs/audits/2026-10-03_news_repair/`。
+- 例行監管與背景報導辨識修復；完整四 lane 低影響允許降級，缺漏／無效數值／binary guard 仍驗證。原輸入唯讀重播得 2 deep + 3 demoted；同一 351 則重新分類得 4 個候選（就業、紅海、柴油出口、LNG）。
+- 驗證：News 129 passed；routing、scheduler、broker contract 通過，5 支 Dashboard JS syntax 通過；記憶體 mutation 確認省略-the 回歸確實能抓到 bug。
+- Luna 共 2 次協調推論：首次 effort=default 被 host 拒絕，第二次明確 medium 完成 4 lane，345 則取材／3 個候選。主代理補 3 個缺漏翻譯，lane hash 不變；finalizer／validator rc=0，2 deep + 10 shallow、2 個 cache updates。394 個受監測 Python 檔未被實跑改動。比較報告 `reports/2026-10-04_news_selection_comparison.md`：原五則為 3 低增量、2 有影響；另補理財教學辨識。
 
-## 🟢 Session Note (v4.134.1) — capacity 要畫成 slot，pending 不能偽裝成佔用
+- Dashboard/data.json 已由 bridge 更新為 10/4、12 則；背景 Break News 仍有活動中的 CLI，因此長駐 server 的根因訊息 helper 尚待下次正常重啟載入。既有 10/3 失敗歷史未改寫。
 
-- 全域 protocol pill 現在固定畫出三格 execution slots：active 依 broker provider 上色並顯示 job／時間／model，空位用虛線「空閒」呈現。
-- pending queue 移到獨立「等待中」區塊；摘要只顯示 `active/capacity` 與 waiting 數量，不再重複 primary model。
-- live API fixture 為 `ECHO / Gemini active + AAOI waiting + capacity 3`；JS syntax、diff check、server-served asset 均通過。Browser skill 無可用瀏覽器實例，因此未產出視覺截圖。
+## 🟢 Session Note (v4.137.3) — Theme Detector 403 修復與可靠性
 
-## 🟢 Session Note (v4.134.0) — quota 與 execution slot 都只能有一個跨專案權威
+- finvizfinance 預設 UA 的 13 空白觸發驗證頁；正規化後取得 144 產業。抓取端驗欄位／finite momentum／重複列，錯誤分類保留 HTTP／DNS／timeout 原因。
+- Theme Detector 與 News packet 共用 `scripts/_shared/theme_cache.py` 排除 sidecar／壞檔；freshness 遵守 output-dir，主 JSON 原子發布。Scanner 分批保留成果、逾時停止後续請求、隔離執行緒的統計 context。
+- 驗證：491 passed；UA 修正移除的記憶體 mutation 2 failed，恢復入口 2 passed。完整實跑 rc=0，213.8s、144 產業／18 主題；`theme_detector_2026-10-03_215131.json` 與 MD 已產出。行情受既有 120 秒預算限制，保留 52/219 檔（RSI 50/219），metadata／data-quality 明示不足；尚未重跑 DIGEST 辯論。
 
-- AIC 不再用本機單一 active state 或 invest cooldown 決定哪家 LLM 可以工作；broker 的 Claude／Agy／Codex exclusive slot 才是跨 `ai-investment-committee` 與 `tw-stock-wonwon` 的權威，AIC scheduler 最多同派三件。
-- execution lock 不能只靠 TTL：owner heartbeat 失聯時先看已登記的 PID／PGID／UID／start token。child 還活著就保留鎖；退出才釋放；TTL 到期則終止 process group 並確認死亡後解鎖。
-- start→attach 的窄窗口也要收尾：active reservation 尚無 PID 且 heartbeat 逾時時必須 expire，否則 caller 在 Popen 前 crash 會永久卡死。
-- 並行不等於允許 artifact race：invest/news/sector 是 global single-writer domain，不同 ticker earnings 才可同時跑。status 與 cancel 必須帶 job/queue identity，不能再拿一個全域 current job 猜。
-- 升級相容：schema 2 的舊 pending row 沒有 `start_deadline`，0.3.0 會按 `created_at + 30s` 回收；migration 也把舊 pending 標成可立即回收，避免升級後沿用舊 30 分鐘 TTL。
-- 驗證／部署：AIC 398 pytest passed + routing/broker/scheduler contracts；broker 1063 full-suite passed，補升級相容後 5 provider-slot regressions passed，Ruff/mypy 全綠。broker 0.3.0/schema 3 與 Dashboard 已重啟；active reservation 0、queue capacity 3。
+## 🟢 Session Note (v4.137.2) — Broker 用量證據
 
-## 🟢 Session Note (v4.133.2) — backlink 不是狀態，每條終止路徑都必須收尾
+- 已接通常規 router、Dashboard protocol、manual protocol、Wind 推論的 usage_details；只傳 metadata。Claude 包含 modelUsage 全模型，Wind 的多次推論分開記帳。
+- 離線檢查：router rolling-window、broker gate、Wind 19 cases、governance audit 24 tasks／3 providers 通過；fixture 經真實結算入口的 payload 經 broker schema 驗證。
+- 正式啟用與覆蓋率詳 `../llm-quota-broker/reports/project-accounting-2026-10-02/`；既有常駐 process 須安全重載才會 import 新入口。未啟用每日 learner。
 
-- Signal Queue 的 `consumed_by` 只是來源頁 backlink，不能當 delivery authority；否則新 revision 即使已重開，前端仍會被舊 backlink 壓成「已產出分析」。
-- `failed` 的意義是「本次沒消耗掉候選」，所以同 evidence revision 必須立即可重試；`consumed` 只對完成分析時的 revision 有效。
-- 一個 queue job 不只有「跑完」一種終點：pending remove 與 dispatch 前拒絕也必須走同一個 terminal writeback，否則 UI 會永久卡 `queued`。
-- rc=0 不代表報告存在。`earnings` 與 script-family `earnings_preview` 各自要在真實執行入口接 fresh artifact gate，報告連結也要限定 mtime 新於 run start。
-- 列表分頁不是詳情頁的存取邊界；`?news_id=` 可直接取 item。同理，ticker cap 若說「超過就排除」，實作必須 `continue`，不能安靜地截前 8 檔。
+## 🟢 Session Note (v4.137.1) — 修正 V5.5 卡片誤標 ARCHIVE
 
-## 🟢 Session Note (v4.133.1) — quota 有百分比還不夠，小卡直接說還要等多久
+- HPE 場次與 Dashboard/data.json 均正確標為 V5.5；page-decisions.js 的 VERSION_COLOR／tooltip 表只到 V5.4，未知版本落入 LEGACY。補 V5.5 與通用版本標籤 fallback，保留真正 ARCHIVE 行為。
+- 驗證：JS syntax、真實 HPE 投影的修正前／後標籤對照、新版本／legacy／無效標籤檢查、三處版號同步與 live server JS 逐位元一致均通過；無可用瀏覽器，未做 GUI 目視驗收。
+- 使用者另行指定的 HPE 重跑已完成：`HPE_20261001T223002_25eeeee46b`，Luna/max、2040 秒、JSON／MD／provenance 通過，380 個受監測 Python 檔未變。正式三股成功 1／3，成功試行 1／5；細節見工程驗收報告，前次失敗證據保留。
 
-- 側欄現在為每個 provider 選擇 weekly bucket：Agy 優先用 broker 正在路由的 pool，Claude 優先 `weekly.all_models`，Codex 用 `primary` 的 10080 分鐘窗口。倒數統一顯示成 `3D23H reset`；滿額但 broker 沒給時間時不虛構倒數。
-- 實際 broker payload 三種時間形狀並存：Codex `resets_at`、Agy `refresh_in_seconds`、Claude `reset_label`，前端三者都有 fallback。驗證為 JS 語法、broker gate 合約、三組倒數 fixture；Browser skill 當時沒有可用瀏覽器實例，未做視覺截圖。
+## 🟢 Session Note (v4.137.0) — 個股 V5.5 工程更新與試行
+
+- 使用者授權五批工程並要求完成後用 gpt-6-luna／max 試跑 HPE、NVDA、BE。入口 `run_protocol_manual.py codex invest <T> --yes --v55 --codex-model gpt-6-luna --effort max`；broker／registry 不變。
+- 正式評分與部位公式未改。新控制器及操作契約在 `investment/run_workflow_v55.md`；固定來源快照、獨立 prompt、有限派工、即時 schema、quota/auth 停機、原子提交、V5.5 evidence gate。
+- 檢討改讀已提交且 provenance 正確的 JSON；歷史分類保留，探索層熱度只進評估 sidecar；synthetic RT 與不完整窗口不進正式校準。
+- 驗收報告：`reports/decision_review/investment_v55_acceptance.md`；新測試 48 passed。Luna/max 三股均已試跑，0／3 完整驗收成功；NVDA／BE 修正後保存輸入重播 JSON／MD 皆過，HPE 五線過但模型修改已封存 RT prompt 被 hash 閘攔下。控制器已在封存前補齊 Phase 0／FRED；停止額外模型重跑，保留全部失敗證據。
+- 歷史重播 201 筆數字與修改前一致，11 筆歷史 mismatch 為既存。News parenthetical parser 的 extractor 測試為既存失敗，未混入本次修正。最終 cap／部位、finalize 失敗遙測與策略最終決策重播已補接。
+- 試行前 5 場／觀測前 20 場仍需實際累積；情緒切換、RT 懲罰／權重／門檻只出提案，不能自動啟用。
+
+## 🟢 Session Note (v4.136.1) — Dashboard 關閉即停止自動辯論
+
+- 根因：`open_dashboard.sh` 把 `caffeinate` wrapper 當 server PID；關閉 wrapper 不會連帶結束 Python server。辯論 CLI 又以獨立 process group 啟動，因此 server 殘留時會繼續吃 quota。
+- 現在啟動器直接追蹤 Python PID；SIGTERM／SIGHUP／Ctrl+C 會設定 shutdown event、終止已啟動的 CLI process group、禁止新 CLI 啟動，並在掃描佇列項目間停止。shutdown 期間也不會再產生 market brief。
+- 回歸測試不呼叫任何模型：直接啟動無害的 sleep 子程序驗證清理，再確認 stop event 不會讓掃描進入下一個新聞項目。
 
 <!-- 批次輪替制：主檔超過 20 個 Session Note 時跑 `python3 scripts/rotate_session_notes.py`，最舊 10 個自動切成 archive/session_notes_v<A>_to_v<B>.md。查舊版本：Grep 版號於 archive/session_notes_v*.md（規則：docs/agent-ops/MAINTENANCE.md §3） -->
 
