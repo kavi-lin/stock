@@ -8,7 +8,7 @@
 
   // Semantic release tag shown in sidebar footer. Bump on meaningful releases.
   // Cache-busting is handled separately by dashboard_server.py (mtime injection).
-  const VERSION = 'V4.141.0';
+  const VERSION = 'V4.141.1';
 
   // V1.71.x — group field enables sectioned sidebar layout
   const NAV_ITEMS = [
@@ -986,6 +986,17 @@
       };
 
       const resetHint = (b) => {
+        // Codex reports only an absolute reset timestamp; Claude/Agy may
+        // instead supply a relative duration or a CLI label.
+        if (b.resets_at !== null && b.resets_at !== undefined
+            && String(b.resets_at).trim() !== '') {
+          const numeric = Number(b.resets_at);
+          const resetMs = Number.isFinite(numeric)
+            ? numeric * (numeric < 1e12 ? 1000 : 1)
+            : Date.parse(String(b.resets_at));
+          const rel = shortDuration((resetMs - Date.now()) / 1000);
+          if (rel) return rel;
+        }
         const d = shortDuration(b.refresh_in_seconds);
         if (d) return d;
         const at = parseResetLabel(b.reset_label);
