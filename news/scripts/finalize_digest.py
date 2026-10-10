@@ -199,6 +199,7 @@ def assemble_digest(date: str, debate: dict, root: Path = ROOT, now: str | None 
         raise DebateInputError("arbiter.per_item must be an object")
     deep = []
     demoted = []
+    demoted_analysis = {}
     macro_deltas = []
     expected_ids = {item.get("news_id") for item in stage2}
     for item in stage2:
@@ -216,23 +217,17 @@ def assemble_digest(date: str, debate: dict, root: Path = ROOT, now: str | None 
                 f"{news_id} degraded lane confidence exceeds 0.5: {sorted(too_confident)}"
             )
         for lane in ("bull", "bear"):
-            if not str(lane_items[lane].get("interpretation") or "").strip():
+            interpretation = lane_items[lane].get("interpretation")
+            if not isinstance(interpretation, str) or not interpretation.strip():
                 raise DebateInputError(f"{news_id} {lane}.interpretation must be non-empty")
-        # Non-substantive debate → demote this one item to shallow rather than
-        # kill the run. news_protocol_v2.md states the rule per item ("退回該
-        # 則"); the fatal version meant a single immaterial headline that Stage 1
-        # advanced discarded a finished four-lane debate (2026-08-14 n0376, a Fed
-        # notice about one former bank employee). Laziness is still caught: both
-        # interpretations are required above, and a debate where most items come
-        # back flat fails at the majority guard after this loop.
-        if abs(scores["bull"]) <= 1 and abs(scores["bear"]) <= 1:
-            demoted.append(item)
-            print(
-                f"WARN: {news_id} demoted to shallow — Bull/Bear both have "
-                "|impact|<=1; debate is not substantive",
-                file=sys.stderr,
-            )
-            continue
+        for lane, fields in {
+            "sector": ("supply_chain_impact",),
+            "macro": ("fed_path_delta", "yield_curve_impact", "fx_commodity_impact", "historical_analogue"),
+        }.items():
+            for field in fields:
+                value = lane_items[lane].get(field)
+                if not isinstance(value, str) or not value.strip():
+                    raise DebateInputError(f"{news_id} {lane}.{field} must be non-empty")
         net, weights = compute_net_impact(
             scores,
             item.get("news_type"),
@@ -258,7 +253,6 @@ def assemble_digest(date: str, debate: dict, root: Path = ROOT, now: str | None 
         if isinstance(macro_delta, bool) or not isinstance(macro_delta, (int, float)) or not math.isfinite(float(macro_delta)):
             raise DebateInputError(f"{news_id} macro_backdrop_delta must be finite numeric")
         macro_delta = max(-1.0, min(1.0, float(macro_delta)))
-        macro_deltas.append(macro_delta)
         spread = max(scores.values()) - min(scores.values())
         reasoning_note = str(meta.get("reasoning_note") or "").strip()
         calc = " + ".join(f"{scores[k]:g}×{weights[k]:.2f}" for k in LANES)
@@ -269,6 +263,22 @@ def assemble_digest(date: str, debate: dict, root: Path = ROOT, now: str | None 
         evidence = meta.get("evidence_urls") or []
         if not isinstance(evidence, list):
             raise DebateInputError(f"{news_id} evidence_urls must be an array")
+
+        # Validate every lane and Arbiter field before demotion. Low assessed
+        # impact is a legitimate conclusion, independent of analysis coverage.
+        # Binary events and material Sector/Macro views retain deep review.
+        if not binary and all(abs(score) <= 1 for score in scores.values()):
+            demoted.append(item)
+            demoted_analysis[news_id] = {
+                "bull_case": lane_items["bull"]["interpretation"].strip(),
+                "bear_case": lane_items["bear"]["interpretation"].strip(),
+                "sector_view": sector_text, "macro_view": _macro_text(lane_items["macro"]),
+                "lane_scores": scores, "lane_confidences": confidences,
+                "evidence_urls": [str(x) for x in evidence if str(x).strip()],
+            }
+            print(f"WARN: {news_id} demoted to shallow — all four lanes assess low impact", file=sys.stderr)
+            continue
+        macro_deltas.append(macro_delta)
 
         deep.append({
             "news_id": news_id,
@@ -297,16 +307,6 @@ def assemble_digest(date: str, debate: dict, root: Path = ROOT, now: str | None 
     if extra_ids:
         raise DebateInputError(f"arbiter contains unknown news_ids: {sorted(extra_ids)}")
 
-    # One flat item is an immaterial news story; most of them flat is a debate
-    # that never happened. The second case must not be able to buy a passing
-    # digest by demoting its way to an empty deep section.
-    if demoted and len(demoted) * 2 > len(stage2):
-        raise DebateInputError(
-            f"{len(demoted)}/{len(stage2)} stage2 items have Bull/Bear both |impact|<=1: "
-            f"{[x['news_id'] for x in demoted]} — that is an absent debate, not an "
-            "immaterial news day"
-        )
-
     demoted_ids = {item["news_id"] for item in demoted}
     # Demoted items take slots from the shallow tail instead of being appended.
     # The projection caps shallow at 10 by materiality (news_event_store.
@@ -334,7 +334,8 @@ def assemble_digest(date: str, debate: dict, root: Path = ROOT, now: str | None 
             "binary_risk": bool(item.get("binary_flag")), "binary_event_date": None,
             "within_48h": False, "cache_updated": False,
             "affected_sectors": [], "tickers_mentioned": [], "subagent_isolated": None,
-            "demoted_from": ("stage2_non_substantive" if item["news_id"] in demoted_ids else None),
+            "demoted_from": ("stage2_low_impact" if item["news_id"] in demoted_ids else None),
+            **demoted_analysis.get(item["news_id"], {}),
         })
 
     session_delta = max(-1.0, min(1.0, round(sum(macro_deltas), 2)))
@@ -362,7 +363,7 @@ def render_markdown(data: dict) -> str:
     ]
     if data.get("demoted_stage2"):
         lines += [
-            "> 降級為 shallow（Bull/Bear 皆 |impact| ≤ 1，無實質辯論）："
+            "> 已完成四視角分析，評估新增影響有限，降級為 shallow："
             + "、".join(data["demoted_stage2"]),
             "",
         ]

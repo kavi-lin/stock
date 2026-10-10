@@ -87,7 +87,9 @@ _TYPE_MATERIALITY = {
 
 _GENRE_RULES = [
     ("routine_regulatory", re.compile(
-        r"\bannounces? approval of the application by\b|"
+        r"\bannounces? approval of (?:the )?application by\b|"
+        r"\b(?:extend\w*|reopen\w*)\b[^\n]{0,70}\bcomment period\b|"
+        r"\bcomment period\b[^\n]{0,40}\b(?:extend\w*|reopen\w*)\b|"
         r"\bnotice of (?:filing|effectiveness)\b|"
         # Personnel-level enforcement. Fed/OCC/FDIC publish these continuously
         # and the subject is one individual's conduct, not the institution —
@@ -101,6 +103,17 @@ _GENRE_RULES = [
         r"cease[- ]and[- ]desist(?:\s+order)?|prohibition order|civil money penalt(?:y|ies))\b"
         r"[^\n]{0,80}\b(?:former|individual|employee|institution-affiliated)\b|"
         r"\benforcement action\s+(?:with|against)\s+(?:an?\s+|the\s+)?(?:former|individual)\b",
+        re.I,
+    )),
+    ("background_feature", re.compile(
+        r"\b(?:sailors?|soldiers?|troops?|families|residents)\b[^\n]{0,45}"
+        r"\b(?:adjust to|cope with|daily life|life (?:aboard|amid|during))\b|"
+        r"\b(?:life aboard|a day in the life|behind the scenes)\b",
+        re.I,
+    )),
+    ("personal_finance_guide", re.compile(
+        r"\b(?:how to|ways to|a guide to)\s+(?:protect|position|build|manage|"
+        r"rebalance|diversify)\b[^\n]{0,40}\b(?:portfolio|investments|savings)\b",
         re.I,
     )),
     ("filing_notice", re.compile(r"^\s*\[?8-k\]?[^:]*:\s*8-k\b|^\s*\[8-k\]", re.I)),
@@ -144,6 +157,8 @@ _GENRE_PENALTY = {
     "research_commentary": 1.75,
     "filing_notice": 2.0,
     "routine_regulatory": 3.0,
+    "background_feature": 2.0,
+    "personal_finance_guide": 3.0,
 }
 
 _COMMENTARY_SOURCES = {
@@ -551,6 +566,15 @@ def _build_verdict(idx: int, item: dict) -> dict:
     bull, bear, sector_view, macro_view = gen_4view_snaps(headline, news_type)
     cred_eff = effective_credibility(item, headline, summary)
     genre = classify_content_genre(item, headline, summary)
+    if genre == "routine_regulatory":
+        # An agency's name does not turn an administrative notice into a
+        # monetary-policy decision. Preserve the article as corporate news.
+        news_type = "corporate"
+        shallow_score = calc_shallow_score(headline, summary, news_type)
+        bull, bear, sector_view, macro_view = (
+            "例行監管程序進展", "個別機構執行風險待確認",
+            "影響限於相關機構", "未確認貨幣政策變化",
+        )
     materiality_score = calc_materiality_score(
         item, headline, summary, news_type, shallow_score, cred_eff, genre,
     )

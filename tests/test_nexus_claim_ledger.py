@@ -167,7 +167,9 @@ def test_tier2_ticker_co_mentions_do_not_become_peer_edges(tmp_path):
         {"ticker": "LOW", "sector": "Consumer Cyclical"},
         {"ticker": "PEG", "sector": "Utilities"},
     ]}), encoding="utf-8")
-    (reports / "20260808_NVDA.md").write_text(
+    from datetime import datetime, timezone
+    current_report = datetime.now(timezone.utc).strftime("%Y%m%d") + "_NVDA.md"
+    (reports / current_report).write_text(
         "NVDA valuation table also mentions LOW and PEG as unrelated row tokens.",
         encoding="utf-8",
     )

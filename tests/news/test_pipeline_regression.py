@@ -27,6 +27,31 @@ from news.scripts import stage1_triage                     # noqa: E402
 RAW_FIXTURE = PROJECT_ROOT / "news/news_logs/2026-05-20_raw.json"
 
 
+def test_routine_and_background_filter_at_real_entry(tmp_path, monkeypatch):
+    headlines = [
+        "Federal Reserve Board announces approval of application by Fleur Capital Corporation",
+        "Federal Reserve Board announces it will extend, until November 4, the comment period on its proposal to modernize Regulation O",
+        "Aboard the USS George Washington, young sailors adjust to war with Iran - Reuters",
+        "Fed cuts interest rates by 25 bps",
+        "Saudis plan assault on Houthis to break Red Sea chokehold - Reuters",
+        "How to Protect Your Portfolio as the Fed Raises Interest Rates",
+    ]
+    items = [{"headline": h, "source": "Fed Press" if i in (0, 1, 3) else "Reuters",
+              "source_kind": "official_macro" if i in (0, 1, 3) else "wire",
+              "source_credibility": "HIGH"} for i, h in enumerate(headlines)]
+    (tmp_path / "news_logs").mkdir()
+    raw = tmp_path / "news_logs/raw.json"
+    raw.write_text(json.dumps({"items": items}))
+    monkeypatch.setattr(stage1_triage, "RAW_FILE", raw)
+    monkeypatch.setattr(stage1_triage, "HERE", tmp_path)
+    assert stage1_triage.main() == 0
+    outputs = list((tmp_path / "news_logs").glob("*_triage.json"))
+    assert len(outputs) == 1
+    data = json.loads(outputs[0].read_text())
+    assert {x["news_id"] for x in data["stage2_items"]} == {"n0004", "n0005"}
+    assert len(data["shallow_verdicts"]) == 6
+
+
 @pytest.mark.skipif(not RAW_FIXTURE.exists(),
                     reason="2026-05-20_raw.json fixture not present")
 def test_regression_against_real_raw(tmp_path, monkeypatch):

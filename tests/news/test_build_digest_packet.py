@@ -1,4 +1,6 @@
 import json
+import os
+import time
 from pathlib import Path
 
 from news.scripts.build_digest_packet import build_packet
@@ -50,3 +52,23 @@ def test_packet_tolerates_missing_optional_context(tmp_path):
     packet = build_packet("2026-08-06", tmp_path)
     assert packet["macro_context"]["macro_summary"] is None
     assert packet["theme_context"] == {"available": False, "themes": []}
+
+
+def test_packet_reads_primary_theme_report_despite_newer_sidecar_and_broken_json(tmp_path):
+    _write(tmp_path / "news/news_logs/2026-10-03_triage.json", {
+        "shallow_verdicts": [], "stage2_items": [],
+    })
+    cache = tmp_path / "skills/theme-detector/cache"
+    primary = cache / "theme_detector_2026-10-03_170000.json"
+    _write(primary, {"report_type": "theme_detector", "themes": {"all": [
+        {"name": "Semiconductors", "heat": 65, "private_extra": "omit"},
+    ]}})
+    stamp = time.time() - 300
+    os.utime(primary, (stamp, stamp))
+    _write(cache / "theme_detector_2026-10-03_170000.narrative.json", {"confirmations": []})
+    (cache / "theme_detector_2026-10-03_170001.json").write_text('{"themes":', encoding="utf-8")
+    context = build_packet("2026-10-03", tmp_path)["theme_context"]
+    assert context["available"] is True
+    assert context["source"] == primary.name
+    assert context["themes"] == [{"name": "Semiconductors", "direction": None,
+                                   "heat": 65, "stage": None, "confidence": None}]

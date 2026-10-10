@@ -38,6 +38,7 @@ FEEDS = [
     ("CNBC Economy",   "https://www.cnbc.com/id/20910258/device/rss/rss.html",    "HIGH"),
     ("Seeking Alpha",  "https://seekingalpha.com/market_currents.xml",             "MEDIUM"),
     ("Investing.com",  "https://www.investing.com/rss/news_25.rss",                "MEDIUM"),
+    ("FinancialJuice", "https://www.financialjuice.com/feed.ashx?xy=rss",          "MEDIUM"),
     # PR Newswire financial press releases — typical latency 5-15 min from
     # company release, much fresher than wire RSS index polls.
     ("PR Newswire",    "https://www.prnewswire.com/rss/financial-services-latest-news/financial-services-latest-news-list.rss", "MEDIUM"),
@@ -49,6 +50,10 @@ FEEDS = [
     ("FTC Competition","https://www.ftc.gov/feeds/press-release-competition.xml",  "HIGH"),
     ("Census Indicators", "https://www.census.gov/economic-indicators/indicator.xml", "HIGH"),
     ("EIA Press",      "https://www.eia.gov/rss/press_rss.xml",                    "HIGH"),
+    ("BLS CPI", "https://www.bls.gov/feed/cpi.rss", "HIGH"),
+    ("BLS Employment", "https://www.bls.gov/feed/empsit.rss", "HIGH"),
+    ("BEA Releases", "https://apps.bea.gov/rss/rss.xml", "HIGH"),
+    ("NVIDIA IR", "https://nvidianews.nvidia.com/cats/press_release.xml", "HIGH"),
     # Nasdaq + Benzinga US-markets feeds — fresh retail/trader coverage to widen
     # break-news intake after dropping the StockTwits social source (V3.40.7).
     ("Nasdaq Markets", "https://www.nasdaq.com/feed/rssoutbound?category=Markets", "MEDIUM"),
@@ -110,23 +115,44 @@ def headline_fingerprint(title: str) -> str:
     return " ".join(tokens)
 
 
-def fetch_feed(name: str, url: str, credibility: str):
+def fetch_feed(name: str, url: str, credibility: str, *, health=None,
+               conditional=None, summary_limit=500):
     """Fetch one feed, return list of normalized items (dicts)."""
+    status = health if health is not None else {}
+    headers = {"User-Agent": USER_AGENT}
+    conditional = conditional or {}
+    if conditional.get("etag"):
+        headers["If-None-Match"] = conditional["etag"]
+    if conditional.get("last_modified"):
+        headers["If-Modified-Since"] = conditional["last_modified"]
     try:
-        r = requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=TIMEOUT)
+        r = requests.get(url, headers=headers, timeout=TIMEOUT)
+        status.update(http_status=r.status_code, etag=r.headers.get("ETag"),
+                      last_modified=r.headers.get("Last-Modified"))
+        if r.status_code == 304:
+            status["etag"] = status.get("etag") or conditional.get("etag")
+            status["last_modified"] = status.get("last_modified") or conditional.get("last_modified")
+            status.update(status="not_modified", fetched=0)
+            return []
         r.raise_for_status()
     except Exception as e:
-        print(f"  [WARN] {name}: {e}", file=sys.stderr)
+        status.update(status="error", error=type(e).__name__, fetched=0)
+        print(f"  [WARN] {name}: {type(e).__name__}", file=sys.stderr)
         return []
 
     try:
         # recover=True tolerates minor malformations common in real-world RSS
         root = etree.fromstring(r.content, parser=etree.XMLParser(recover=True))
     except Exception as e:
+        status.update(status="error", error="invalid_xml", fetched=0)
         print(f"  [WARN] {name}: parse failed: {e}", file=sys.stderr)
         return []
 
     if root is None:
+        status.update(status="error", error="empty_xml", fetched=0)
+        return []
+    if etree.QName(root).localname.lower() not in {"rss", "feed", "rdf", "RDF"}:
+        status.update(status="error", error="not_a_feed", fetched=0)
         return []
 
     # Support RSS 2.0 (<item>) and Atom (<entry>)
@@ -158,7 +184,7 @@ def fetch_feed(name: str, url: str, credibility: str):
         out.append({
             "headline": title,
             "url": link,
-            "raw_summary": desc[:500],
+            "raw_summary": desc[:summary_limit],
             "source": name,
             "source_credibility": credibility,
             "source_kind": infer_source_kind(name),
@@ -166,6 +192,7 @@ def fetch_feed(name: str, url: str, credibility: str):
             "_fp": headline_fingerprint(title),
             "_dt": pub_dt,
         })
+    status.update(status="ok", fetched=len(out))
     return out
 
 

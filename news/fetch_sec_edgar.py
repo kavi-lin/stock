@@ -23,6 +23,8 @@ import json
 import os
 import re
 import sys
+import time
+import tempfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -39,6 +41,12 @@ def _parse_dt(s: str):
     if not s:
         return None
     s = s.strip()
+    try:
+        parsed = datetime.fromisoformat(s.replace("Z", "+00:00"))
+        return (parsed.replace(tzinfo=timezone.utc) if parsed.tzinfo is None
+                else parsed.astimezone(timezone.utc))
+    except ValueError:
+        pass
     for fmt in ("%Y-%m-%dT%H:%M:%S%z", "%Y-%m-%dT%H:%M:%SZ", "%Y-%m-%dT%H:%M:%S"):
         try:
             dt = datetime.strptime(s, fmt)
@@ -57,12 +65,38 @@ def _extract_ticker_from_title(title: str):
     return m.group(1).strip() if m else title.strip()
 
 
+def company_tickers(headers):
+    """SEC CIK→ticker map, cached for seven days. A failed refresh stays unknown."""
+    path = Path(__file__).parent / "research_cache" / "sec_company_tickers.json"
+    try:
+        if path.exists() and time.time() - path.stat().st_mtime < 7 * 86400:
+            return json.loads(path.read_text())
+        response = requests.get("https://www.sec.gov/files/company_tickers.json",
+                                headers=headers, timeout=TIMEOUT)
+        response.raise_for_status()
+        rows = response.json()
+        mapping = {str(row["cik_str"]).zfill(10): row["ticker"] for row in rows.values()
+                   if isinstance(row, dict) and row.get("ticker") and row.get("cik_str")}
+        if not mapping:
+            raise ValueError("empty SEC ticker map")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with tempfile.NamedTemporaryFile(mode="w", dir=path.parent, delete=False) as stream:
+            json.dump(mapping, stream)
+            temporary = stream.name
+        os.replace(temporary, path)
+        return mapping
+    except (requests.RequestException, OSError, ValueError, KeyError, AttributeError) as exc:
+        print(f"[WARN] SEC ticker map: {type(exc).__name__}", file=sys.stderr)
+        return {}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--hours", type=int, default=24)
     ap.add_argument("--output", default="news/news_logs/")
     ap.add_argument("--form", default="8-K")
     ap.add_argument("--count", type=int, default=100, help="Max filings to pull (EDGAR cap ~100/page)")
+    ap.add_argument("--pages", type=int, default=3, help="Bounded pagination; max 5 pages")
     args = ap.parse_args()
 
     ua = os.getenv("EDGAR_UA") or DEFAULT_UA
@@ -97,6 +131,27 @@ def main():
         sys.exit(1)
 
     entries = root.findall(".//a:entry", ATOM_NS)
+    page_count = 1
+    coverage_complete = len(entries) < args.count
+    for page in range(1, max(1, min(args.pages, 5))):
+        dates = [_parse_dt(e.findtext("a:updated", namespaces=ATOM_NS)) for e in entries]
+        if coverage_complete or any(d and d < cutoff for d in dates):
+            coverage_complete = True
+            break
+        time.sleep(1)  # At most one SEC page request per second.
+        try:
+            response = requests.get(EDGAR_URL, params={**params, "start": page * args.count},
+                                    headers=headers, timeout=TIMEOUT)
+            response.raise_for_status()
+            page_root = etree.fromstring(response.content, parser=etree.XMLParser(recover=True))
+            batch = page_root.findall(".//a:entry", ATOM_NS) if page_root is not None else []
+            entries.extend(batch)
+            page_count += 1
+            coverage_complete = len(batch) < args.count
+        except (requests.RequestException, etree.XMLSyntaxError) as exc:
+            print(f"[WARN] EDGAR pagination: {type(exc).__name__}", file=sys.stderr)
+            break
+    ticker_map = company_tickers(headers) if entries else {}
     items_out = []
     for i, e in enumerate(entries, start=1):
         title_el   = e.find("a:title",   ATOM_NS)
@@ -114,12 +169,14 @@ def main():
             continue
         link     = link_el.get("href", "") if link_el is not None else ""
         summary  = (summary_el.text or "").strip() if summary_el is not None else ""
+        cik_match = re.search(r"\((\d{10})\)", title)
+        cik = cik_match.group(1) if cik_match else None
 
         items_out.append({
             "news_id": f"sec{i:04d}",
             # Headline format makes downstream LLM triage trivially understand
             # this is a regulatory filing, not a press article.
-            "headline": f"[8-K] {company}: {title}",
+            "headline": f"[{args.form}] {company}: {title}",
             "url": link,
             "raw_summary": summary[:500],
             "source": "SEC EDGAR",
@@ -127,6 +184,8 @@ def main():
             "published": dt.isoformat(),
             "form": args.form,
             "company": company,
+            "cik": cik,
+            "symbol": ticker_map.get(cik, ""),
         })
 
     payload = {
@@ -135,6 +194,8 @@ def main():
         "provider": "sec_edgar",
         "form": args.form,
         "raw_count": len(entries),
+        "pages_fetched": page_count,
+        "coverage_complete": coverage_complete,
         "after_time_filter": len(items_out),
         "items": items_out,
     }

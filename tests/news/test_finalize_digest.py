@@ -142,9 +142,11 @@ def test_finalize_output_passes_real_validator(tmp_path):
 
 
 def _flatten(debate: dict, news_id: str):
-    """Make one item's Bull/Bear come back inside the non-substantive band."""
+    """Make all four views assess low incremental impact."""
     debate["lanes"]["bull"]["per_item"][news_id]["impact_score"] = 1
     debate["lanes"]["bear"]["per_item"][news_id]["impact_score"] = -1
+    for lane in ("sector", "macro"):
+        debate["lanes"][lane]["per_item"][news_id]["impact_score"] = 0
 
 
 def test_flat_item_is_demoted_to_shallow_not_fatal(tmp_path):
@@ -169,27 +171,65 @@ def test_flat_item_is_demoted_to_shallow_not_fatal(tmp_path):
     assert len(shallow) == 10
     demoted_rows = [v for v in shallow if v["news_id"] == "n0000"]
     assert len(demoted_rows) == 1
-    assert demoted_rows[0]["demoted_from"] == "stage2_non_substantive"
+    assert demoted_rows[0]["demoted_from"] == "stage2_low_impact"
+    assert demoted_rows[0]["bull_case"] == "需求與財測改善"
+    assert demoted_rows[0]["cache_updated"] is False
     assert demoted_rows[0]["verdict"] is None
     assert "n0000" in Path(result["report"]).read_text()
 
 
-def test_majority_flat_debate_still_fails(tmp_path):
+def test_all_low_impact_complete_debates_produce_shallow_digest(tmp_path):
     debate_path = _setup(tmp_path)
     debate = json.loads(debate_path.read_text())
     _flatten(debate, "n0000")
     _flatten(debate, "n0001")
+    triage_path = tmp_path / f"news/news_logs/{DATE}_triage.json"
+    triage = json.loads(triage_path.read_text())
+    for item in triage["stage2_items"]:
+        item["binary_flag"] = False
+    _write(triage_path, triage)
+    debate["arbiter"]["per_item"]["n0001"]["binary_risk"] = False
     _write(debate_path, debate)
-    with pytest.raises(DebateInputError, match="absent debate"):
-        finalize(DATE, debate_path, root=tmp_path, now=f"{DATE} 10:30", validate=False)
+    result = finalize(DATE, debate_path, root=tmp_path, now=f"{DATE} 10:30", validate=True, patch_caches=False)
+    digest = json.loads(Path(result["digest"]).read_text())
+    assert digest["stage2_count"] == 0
+    assert len(digest["verdicts"]) == 10
+    assert all(not row["cache_updated"] for row in digest["verdicts"])
+    assert set(digest["demoted_stage2"]) == {"n0000", "n0001"}
 
 
-def test_flat_item_with_empty_interpretation_still_fails(tmp_path):
+@pytest.mark.parametrize("lane,field", [("sector", "supply_chain_impact"), ("macro", "fed_path_delta")])
+def test_low_impact_cannot_hide_missing_lane_analysis(tmp_path, lane, field):
+    debate_path = _setup(tmp_path)
+    debate = json.loads(debate_path.read_text())
+    _flatten(debate, "n0000")
+    del debate["lanes"][lane]["per_item"]["n0000"][field]
+    _write(debate_path, debate)
+    with pytest.raises(DebateInputError, match=field):
+        finalize(DATE, debate_path, root=tmp_path, validate=True)
+    assert not (tmp_path / f"news/news_logs/{DATE}_digest.json").exists()
+
+
+def test_flat_bull_bear_retains_material_macro_and_binary(tmp_path):
+    debate_path = _setup(tmp_path)
+    debate = json.loads(debate_path.read_text())
+    for news_id in ("n0000", "n0001"):
+        _flatten(debate, news_id)
+    debate["lanes"]["macro"]["per_item"]["n0000"]["impact_score"] = -3
+    _write(debate_path, debate)
+    result = finalize(DATE, debate_path, root=tmp_path, validate=True, patch_caches=False)
+    digest = json.loads(Path(result["digest"]).read_text())
+    assert digest["stage2_count"] == 2
+    assert digest["demoted_stage2"] == []
+
+
+@pytest.mark.parametrize("invalid", ["   ", None, True, {}])
+def test_flat_item_with_empty_interpretation_still_fails(tmp_path, invalid):
     """Demotion must not become the cheap exit for a lane that wrote nothing."""
     debate_path = _setup(tmp_path)
     debate = json.loads(debate_path.read_text())
     _flatten(debate, "n0000")
-    debate["lanes"]["bear"]["per_item"]["n0000"]["interpretation"] = "   "
+    debate["lanes"]["bear"]["per_item"]["n0000"]["interpretation"] = invalid
     _write(debate_path, debate)
     with pytest.raises(DebateInputError, match="interpretation must be non-empty"):
         finalize(DATE, debate_path, root=tmp_path, now=f"{DATE} 10:30", validate=False)

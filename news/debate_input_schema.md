@@ -73,7 +73,7 @@
 
 - IDs 必須完整覆蓋 compact packet 的 Stage 2；`translations` 另須覆蓋 shallow top 10。
 - Bull score `1..5`；Bear `-5..-1`；Sector/Macro `-5..5`；confidence `0..1`。
-- LOW credibility 每 lane confidence ≤0.5；Bull/Bear 不得同時 `|score|≤1`。
+- LOW credibility 每 lane confidence ≤0.5。非 binary 且四 lane 皆 `|score|≤1` 時降級為 shallow；低影響不是分析缺漏，仍須完整四視角與 Arbiter metadata。Sector/Macro 有實質影響或 binary 事件保留 deep。
 - Binary 事件須有日期，且 Bear、Macro 都標 `binary_risk=true`。
 - `PER_AGENT_BATCH` 時四 lane 的 `subagent_isolated` 全為 true。
 - `PARTIAL_FALLBACK` 時 1–2 個 `degraded_agents` lane 必為 false 且 confidence ≤0.5；`FULL_FALLBACK` 時 3–4 個 degraded、四 lane 全為 false。

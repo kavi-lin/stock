@@ -9,6 +9,7 @@ Covers:
   see test_pipeline_regression.py for the loop-level assertions)
 """
 import sys
+import pytest
 from pathlib import Path
 
 # Make the project root importable so `news.scripts.stage1_triage` resolves
@@ -337,6 +338,30 @@ class TestBuildVerdict:
 
 
 class TestMaterialitySelection:
+    def test_portfolio_guide_does_not_advance_as_a_new_rate_event(self):
+        row = _build_verdict(0, {"headline": "How to Protect Your Portfolio as the Fed Raises Interest Rates", "source": "Nasdaq", "source_kind": "wire", "source_credibility": "HIGH"})
+        assert row["content_genre"] == "personal_finance_guide"
+        assert select_stage2_items([row]) == []
+
+    @pytest.mark.parametrize("article", [
+        "Federal Reserve Board announces approval of application by Fleur Capital Corporation",
+        "Federal Reserve Board announces approval of the application by Another Bank",
+        "Federal Reserve Board announces it will extend, until November 4, the comment period on its proposal to modernize Regulation O",
+        "Federal Reserve Board reopens the comment period on proposed bank rules",
+    ])
+    def test_routine_notices_are_not_monetary_policy(self, article):
+        row = _build_verdict(0, {"headline": article, "source": "Fed Press", "source_kind": "official_macro", "source_credibility": "HIGH"})
+        assert row["content_genre"] == "routine_regulatory"
+        assert row["news_type"] == "corporate"
+        assert select_stage2_items([row]) == []
+
+    def test_background_feature_does_not_displace_new_deployment(self):
+        base = {"source": "Reuters", "source_kind": "wire", "source_credibility": "HIGH"}
+        background = _build_verdict(0, {**base, "headline": "Aboard the USS George Washington, young sailors adjust to war with Iran - Reuters"})
+        event = _build_verdict(1, {**base, "headline": "US deploys aircraft carrier to Red Sea after new Iran attack"})
+        assert background["content_genre"] == "background_feature"
+        assert select_stage2_items([background, event]) == [event]
+
     def test_rating_article_does_not_advance_on_sentiment_words(self):
         v = _build_verdict(0, {
             "headline": "Cinemark upgraded to Strong Buy: Here's What You Should Know",

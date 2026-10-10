@@ -9,7 +9,6 @@ only the selected URLs.
 from __future__ import annotations
 
 import argparse
-import glob
 import json
 import os
 import sys
@@ -17,6 +16,9 @@ from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+
+from scripts._shared.theme_cache import THEME_CACHE_DIR, latest_theme_report
 
 TRIAGE_FIELDS = (
     "news_id", "headline", "headline_zh", "source", "source_kind",
@@ -46,15 +48,10 @@ def _slim_item(item: dict) -> dict:
 
 
 def _theme_context(root: Path) -> dict:
-    pattern = root / "skills/theme-detector/cache/theme_detector_*.json"
-    files = [Path(p) for p in glob.glob(str(pattern))]
-    if not files:
+    latest = latest_theme_report(root / THEME_CACHE_DIR)
+    if not latest:
         return {"available": False, "themes": []}
-    latest = max(files, key=lambda p: p.stat().st_mtime)
-    try:
-        data = _load_json(latest)
-    except ValueError:
-        return {"available": False, "themes": []}
+    path, data, _age = latest
     raw_themes = ((data.get("themes") or {}).get("all") or [])
     themes = []
     for theme in raw_themes[:10]:
@@ -63,7 +60,7 @@ def _theme_context(root: Path) -> dict:
                 key: theme.get(key)
                 for key in ("name", "direction", "heat", "stage", "confidence")
             })
-    return {"available": True, "source": latest.name, "themes": themes}
+    return {"available": True, "source": path.name, "themes": themes}
 
 
 def build_packet(date: str, root: Path = ROOT) -> dict:
