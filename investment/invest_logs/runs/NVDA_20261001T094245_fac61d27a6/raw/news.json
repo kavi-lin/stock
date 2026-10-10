@@ -1,0 +1,496 @@
+{
+  "ticker": "NVDA",
+  "generated_at": "2026-10-01T01:43:07+00:00",
+  "window_hours": 48,
+  "headlines": [
+    {
+      "date": "2026-10-01T00:14:38+00:00",
+      "title": "Trend vs. Hype",
+      "source": "Yahoo",
+      "url": "https://finnhub.io/api/news?id=d7c4a53bcaa40d5f5cfd919bc15bd033ad552f7889f0e5fc52405e163383713f",
+      "category": "company"
+    },
+    {
+      "date": "2026-09-30T23:50:00+00:00",
+      "title": "Warren Buffett's Record: $1,000 Became About $61 Million. Can Greg Abel Keep Compounding It?",
+      "source": "Yahoo",
+      "url": "https://finnhub.io/api/news?id=f64cf8d0bfe65ab93a4ead735ee19ec12352ebade3499f14b6d76e7e942b0c07",
+      "category": "company"
+    },
+    {
+      "date": "2026-09-30T23:30:00+00:00",
+      "title": "Novo Is Open to Acquisitions. Here Are 2 Companies That Would Be Great Candidates to Buy",
+      "source": "Yahoo",
+      "url": "https://finnhub.io/api/news?id=88b7df9c9d61e720043af10293f6dff5981ba23098b746adcd33aa8c361ae5f2",
+      "category": "company"
+    },
+    {
+      "date": "2026-09-30T23:19:10+00:00",
+      "title": "Why Synopsys Stock Soared Nearly 5% Higher Today",
+      "source": "Yahoo",
+      "url": "https://finnhub.io/api/news?id=1b2bd181aec3441518397bd1259c3041b6cbdc56fb2a4d6b3dc4ae8db09b6cc6",
+      "category": "company"
+    },
+    {
+      "date": "2026-09-30T23:14:01+00:00",
+      "title": "Micron’s Revenue More Than Quadrupled. Here’s What Comes Next for the AI Chipmaker.",
+      "source": "Yahoo",
+      "url": "https://finnhub.io/api/news?id=f44b47335c1166f97f5a80826ad4aee231198581f39f1c005d754e956aa4f302",
+      "category": "company"
+    },
+    {
+      "date": "2026-09-30T23:06:29+00:00",
+      "title": "Forget Waiting Three Months for SPY’s Dividend. Invesco’s High-Dividend Fund Pays Every Month",
+      "source": "24/7 Wall St.",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/forget-waiting-three-months-spy-230629592.html"
+    },
+    {
+      "date": "2026-09-30T23:04:00+00:00",
+      "title": "Nvidia, Broadcom, and AMD Investors Need to Have Oct. 15 Circled on Their Calendars",
+      "source": "Yahoo",
+      "url": "https://finnhub.io/api/news?id=4a438b5d0e95cb6bd7403fa88539f5348b58651232f9615f1d3f5d35a122dbaa",
+      "category": "company"
+    },
+    {
+      "date": "2026-09-30T22:38:00+00:00",
+      "title": "Tech CEOs Privately Questioned Amodei for Sounding AI Alarm Bells",
+      "source": "The Wall Street Journal",
+      "url": "https://www.wsj.com/tech/ai/tech-ceos-privately-questioned-amodei-for-sounding-ai-alarm-bells-aaa47df3?siteid=yhoof2&yptr=yahoo"
+    },
+    {
+      "date": "2026-09-30T22:33:21+00:00",
+      "title": "Tech CEOs questioned Anthropic leader over AI safety warnings, WSJ reports",
+      "source": "Yahoo",
+      "url": "https://finnhub.io/api/news?id=2e7c30b64a15bca359cc262d3161efd378f87d094791c9aa2fa423cbb8138cad",
+      "category": "company"
+    },
+    {
+      "date": "2026-09-30T22:32:00+00:00",
+      "title": "Nvidia's record buyback exposes strange Wall Street gap",
+      "source": "Yahoo",
+      "url": "https://finnhub.io/api/news?id=cd0265d251859d4240e24219a4fb34340f41c5b484d860418f4c6718ac7f5b8f",
+      "category": "company"
+    },
+    {
+      "date": "2026-09-30T22:13:09+00:00",
+      "title": "Why Peoples Bancorp Stock Tanked Today",
+      "source": "Yahoo",
+      "url": "https://finnhub.io/api/news?id=27b66fccd8cc044b6c6450db6779ddf6b5b2e3ce6d75499848b3d840503ee28c",
+      "category": "company"
+    },
+    {
+      "date": "2026-09-30T22:05:00+00:00",
+      "title": "In AI Race, Software Is Now Winning Alongside Chips",
+      "source": "Barrons.com",
+      "url": "https://www.barrons.com/articles/ai-agents-meta-muse-stocks-chips-cb06386a?siteid=yhoof2&yptr=yahoo"
+    },
+    {
+      "date": "2026-09-30T21:50:00+00:00",
+      "title": "Rivian Stock Is Going to $19 According to This Wall Street Analyst. Here's Why They May Be Right.",
+      "source": "Yahoo",
+      "url": "https://finnhub.io/api/news?id=045c60443fe3b8f884485ad1e8d11c5564f1e11aaabbae519d1b9fa8ea8f1113",
+      "category": "company"
+    },
+    {
+      "date": "2026-09-30T21:41:35+00:00",
+      "title": "Why Celcuity Stock Was a Winner on Wednesday",
+      "source": "Yahoo",
+      "url": "https://finnhub.io/api/news?id=23ed0e5f27ccccbbdfc78b83c146e8e4830a97a281a0740bc213e1d7284445a4",
+      "category": "company"
+    },
+    {
+      "date": "2026-09-30T21:33:00+00:00",
+      "title": "JPMorgan sends a strong message to Mag-7 stock investors",
+      "source": "Yahoo",
+      "url": "https://finnhub.io/api/news?id=5d3c1a924a076dd4a318800346bb7a073aa74b0c7fb9e2beed62fe6dc73e49f5",
+      "category": "company"
+    },
+    {
+      "date": "2026-09-30T21:32:03+00:00",
+      "title": "NVIDIA Is World's Largest Stock Yet Still Undervalued",
+      "source": "Yahoo",
+      "url": "https://finnhub.io/api/news?id=c85317ba82e5a7559eafed079255445fb4f6fccb74453227dfb85414759aac24",
+      "category": "company"
+    },
+    {
+      "date": "2026-09-30T21:25:13+00:00",
+      "title": "FormFactor (FORM) Shares Skyrocket, What You Need To Know",
+      "source": "Yahoo",
+      "url": "https://finnhub.io/api/news?id=1db6d561a5b371190771a7223ca91e37ddbeeb18c5643287b72ee06ec4ab1534",
+      "category": "company"
+    },
+    {
+      "date": "2026-09-30T21:20:00+00:00",
+      "title": "Viking Therapeutics Stock Soars 36% on Weight-Loss Drug Data. Why It's Not Too Late to Buy the Stock.",
+      "source": "Yahoo",
+      "url": "https://finnhub.io/api/news?id=c681ecd51bebed5e433958435348512ebe4ab762fa43fe4f97f4feed2da35df2",
+      "category": "company"
+    },
+    {
+      "date": "2026-09-30T21:16:36+00:00",
+      "title": "Robinhood Wants Your AI Agent to Trade 24/7",
+      "source": "Yahoo",
+      "url": "https://finnhub.io/api/news?id=4bf6bec6e1a06755490854b99333d5db50db7c851519827c006d62a54ccb0046",
+      "category": "company"
+    },
+    {
+      "date": "2026-09-30T21:13:01+00:00",
+      "title": "Netflix Stock Has Turned $1,000 Into About $654,000 Since Its IPO. It Has Gone Nowhere Since 2021.",
+      "source": "Yahoo",
+      "url": "https://finnhub.io/api/news?id=23cbe95678f0acda1356afbb16829aa632fcbdd39b9a2c7168a3b5c8d0e5dc45",
+      "category": "company"
+    },
+    {
+      "date": "2026-09-30T21:09:02+00:00",
+      "title": "FormFactor Stock Jumps As Chip-Gear Firm Gets Fresh Buy Rating",
+      "source": "Yahoo",
+      "url": "https://finnhub.io/api/news?id=078aab24977e8769f18e8cb8c5828ee89d22a6a779b5d978dbdd355b589ab464",
+      "category": "company"
+    },
+    {
+      "date": "2026-09-30T21:07:54+00:00",
+      "title": "Why Cal-Maine Foods Stock Dipped on Wednesday",
+      "source": "Yahoo",
+      "url": "https://finnhub.io/api/news?id=e93191dfa4b0f07dd72930f7a4cbbc5c89cb12db53552d30e18f1915c43bbc36",
+      "category": "company"
+    },
+    {
+      "date": "2026-09-30T21:05:00+00:00",
+      "title": "Is Cameco Stock a Buy Now?",
+      "source": "Yahoo",
+      "url": "https://finnhub.io/api/news?id=d54ca28f2663126132ac70d387f50e56ba96994a34acd48af3607d9dff1cbbf0",
+      "category": "company"
+    },
+    {
+      "date": "2026-09-30T20:54:22+00:00",
+      "title": "Stock Market Today: Dow Knocked Down, Nasdaq Pares Gain; Micron Holds Firm After Earnings Soar",
+      "source": "Investor's Business Daily",
+      "url": "https://www.investors.com/market-trend/stock-market-today/dow-jones-sp500-nasdaq-inflation-data-micron-earnings-mu-stock/?src=A00220&yptr=yahoo"
+    },
+    {
+      "date": "2026-09-30T20:52:26+00:00",
+      "title": "What Changed In Marvell's Story?",
+      "source": "Trefis",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/changed-marvells-story-205226599.html"
+    },
+    {
+      "date": "2026-09-30T20:19:14+00:00",
+      "title": "Nvidia, AMD Collaborator Teases Breakout To Record High. These Clues Bode Well.",
+      "source": "Investor's Business Daily",
+      "url": "https://www.investors.com/research/breakout-stocks-technical-analysis/semtech-stock-teases-record-high-nvidia-amd-enter-buy-range/?src=A00220&yptr=yahoo"
+    },
+    {
+      "date": "2026-09-30T19:47:00+00:00",
+      "title": "FTC Reportedly Probes OpenAI and Anthropic as Trump Backs AI Self-Regulation",
+      "source": "Barrons.com",
+      "url": "https://www.barrons.com/articles/ftc-openai-anthropic-ai-safety-investigation-8eb4be96?siteid=yhoof2&yptr=yahoo"
+    },
+    {
+      "date": "2026-09-30T19:15:32+00:00",
+      "title": "Is Cerebras' Next Big Thing Already Here?",
+      "source": "Trefis",
+      "url": "https://finance.yahoo.com/technology/ai/articles/cerebras-next-big-thing-already-191532128.html"
+    },
+    {
+      "date": "2026-09-30T18:51:54+00:00",
+      "title": "What Is The Case For Waiting On Qualcomm Stock?",
+      "source": "Trefis",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/case-waiting-qualcomm-stock-185154269.html"
+    },
+    {
+      "date": "2026-09-30T14:10:14+00:00",
+      "title": "Breaking down Jensen Huang's biggest moves of Q3 2026",
+      "source": "Yahoo Finance Video",
+      "url": "https://finance.yahoo.com/video/breaking-down-jensen-huangs-biggest-141014414.html"
+    },
+    {
+      "date": "2026-09-30 20:03:00",
+      "title": "Nvidia Could Have a Monster October. Here's Why.",
+      "source": "fool.com",
+      "url": "https://www.fool.com/investing/2026/09/30/nvidia-could-have-a-monster-october-heres-why/",
+      "summary": "AI hyperscalers releasing their capital expenditure projections early could kick-start a rally for Nvidia. The chipmaker's stock is priced at a dirt-cheap level.",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 18:40:58",
+      "title": "Q3 Earnings on Track for 8th Consecutive Quarter of Double-Digit Growth",
+      "source": "zacks.com",
+      "url": "https://www.zacks.com/commentary/2998480/q3-earnings-on-track-for-8th-consecutive-quarter-of-double-digit-growth?cid=CS-STOCKNEWSAPI-FT-earnings_trends-2998480",
+      "summary": "The Q3 earnings season is shaping up to be the most broad-based growth performance in recent times, with 14 of the 16 Zacks sectors expected to enjoy higher earnings and six sectors producing double-digit growth.",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 18:17:01",
+      "title": "Nvidia Stock Can Top $400 in 5 Years If One Assumption Holds Up",
+      "source": "fool.com",
+      "url": "https://www.fool.com/investing/2026/09/30/nvidia-stock-can-top-usd400-in-5-years-if-one-assumption-holds-up/",
+      "summary": "Nvidia's adjusted earnings per share rose 120% year over year in the fiscal second quarter. The chipmaker's newly expanded buyback could retire around 4% of its shares at today's price.",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 17:20:01",
+      "title": "Stock Market Today, Sept. 30: Nvidia Authorizes $150B Buyback, Lifting Total to $235B",
+      "source": "fool.com",
+      "url": "https://www.fool.com/coverage/stock-market-today/2026/09/30/stock-market-today-sept-30-nvidia-authorizes-usd150b-buyback-lifting-total-to-usd235b/",
+      "summary": "Today, Sept. 30, 2026, the AI chip giant reinforced management confidence with an expanded repurchase program through 2028.",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 16:18:43",
+      "title": "Nvidia's Demand Outlook Still Supports The Bull Case",
+      "source": "seekingalpha.com",
+      "url": "https://seekingalpha.com/article/4951149-nvidia-demand-outlook-still-supports-bull-case",
+      "summary": "Nvidia remains a Buy, supported by robust Q2 FY27 results and bullish management guidance for continued AI-driven growth. Data center revenue surged 117% YoY to $89 billion, with strong gains across hyperscale and ACIE customers, reinforcing NVDA's full-stack AI platform dominanc",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 13:30:00",
+      "title": "Michael Burry Buys Put Options on Nvidia, Micron, and Palantir as \"The Big Short\" Investor Predicts a 1987-Style Market Crash",
+      "source": "fool.com",
+      "url": "https://www.fool.com/investing/2026/09/30/michael-burry-buys-put-options-on-nvidia-micron-an/",
+      "summary": "Michael Burry thinks AI stocks are overvalued and at risk of fueling a widespread market crash. While some of Burry's arguments are valid, he has a clear incentive to publish his trades.",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 13:12:11",
+      "title": "Where AI Competitive Moats Are Evaporating & Being Built",
+      "source": "etftrends.com",
+      "url": "https://www.etftrends.com/artificial-intelligence-content-hub/where-ai-competitive-moats-are-evaporating-being-built/",
+      "summary": "Artificial intelligence (AI) is dismantling the competitive advantages that entire market segments have relied on for decades. Understanding where competitive moats are disappearing versus where they are being reinforced due to AI may be one of the most important questions that i",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 13:00:12",
+      "title": "The Big 3: NVDA, BE, SPCX",
+      "source": "youtube.com",
+      "url": "https://www.youtube.com/watch?v=kDFWSH3hd1o",
+      "summary": "High concentration in tech stocks isn't a bad thing for short-term traders, according to Tim Bohen (@Stockstotrade) who points to trading opportunities it presents across Wall Street. He names Nvidia (NVDA) as the long-standing AI giant with plenty of value, Bloom Energy (BE) as ",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 12:30:53",
+      "title": "After Massive 2026 Gains, Can NVIDIA, Micron, and SanDisk Keep Climbing in 2027?",
+      "source": "247wallst.com",
+      "url": "https://247wallst.com/investing/2026/09/30/after-massive-2026-gains-can-nvidia-micron-and-sandisk-keep-climbing-in-2027/",
+      "summary": "NVIDIA is up 23% this year, but Micron and SanDisk have left it in the dust with gains that few analysts thought possible.",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 12:01:39",
+      "title": "Nvidia Looks Criminally Cheap",
+      "source": "seekingalpha.com",
+      "url": "https://seekingalpha.com/article/4951069-nvidia-looks-criminally-cheap",
+      "summary": "Nvidia Corporation remains a Buy, with a 12–16 month price target of $352, implying 55% upside as AI-driven growth and platform dominance persist. Full-stack architecture complexity increases revenue generation toward $40 billion per gigawatt across new scale-up NVLink, CPU, and ",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 11:59:01",
+      "title": "QUICK SPARK: Meta Could Be the AI Trade's Come-From-Behind Winner, Says Strategist",
+      "source": "benzinga.com",
+      "url": "https://www.benzinga.com/trading-ideas/long-ideas/26/09/62084801/meta-ai-trade-winner",
+      "summary": "NVIDIA Corp (NASDAQ:NVDA) has captured the financial spotlight from the AI boom, but the next phase of the trade could favor companies that are already turning AI into revenue. WisdomTree Macro Strategist Sam Rines sees Meta Platforms Inc (NASDAQ:META) as an overlooked beneficiar",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 11:58:00",
+      "title": "JPMorgan Stocks Edge Lower as Bank Joins Open Agent-Safety Project",
+      "source": "gurufocus.com",
+      "url": "https://www.gurufocus.com/news/9103675/jpmorgan-stocks-edge-lower-as-bank-joins-open-agentsafety-project",
+      "summary": "JPMorgan Chase (JPM), the global banking and financial-services company, joined Nvidia's (NVDA) open-source agent-safety collaboration announced September 28, w",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 11:48:48",
+      "title": "EXCLUSIVE: If AI Capex Cracks, Nvidia Could Feel It Before Meta Does",
+      "source": "benzinga.com",
+      "url": "https://www.benzinga.com/trading-ideas/long-ideas/26/09/62084519/nvidia-ai-capex-meta",
+      "summary": "The next crack in the AI trade may show up in spending before it appears in revenue. Sam Rines, Macro Strategist at WisdomTree, says a slowdown in hyperscaler capital spending would likely hit semiconductors and infrastructure providers hardest, while companies using AI to improv",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 11:41:53",
+      "title": "Why is Nvidia stock rising on Wednesday?",
+      "source": "invezz.com",
+      "url": "https://invezz.com/news/2026/09/30/why-is-nvidia-stock-rising-on-wednesday/",
+      "summary": "Nvidia shares NVDA rose more than 1.6% on Wednesday as softer-than-expected US inflation boosted hopes that the Federal Reserve may hold off on another interest rate increase as soon as next month, benefiting most mega-cap and growth stocks. The Commerce Department reported that ",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 11:02:33",
+      "title": "AI Uncertainty Is Rising, But These 3 Chip ETFs Still Have Momentum",
+      "source": "marketbeat.com",
+      "url": "https://www.marketbeat.com/articles/ai-uncertainty-is-rising-but-these-3-chip-etfs-still-have-momentum/",
+      "summary": "It's easy to get skittish about the tech sector amid recent talk of slowing AI development and OpenAI scrapping the launch of its latest model due to safety concerns. AI demand has driven much of the sector's growth in recent years, after all.",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 10:30:02",
+      "title": "Price Prediction: 5 Years From Now, This Could Be Nvidia Stock's Price",
+      "source": "247wallst.com",
+      "url": "https://247wallst.com/investing/2026/09/30/price-prediction-5-years-from-now-this-could-be-nvidia-stocks-price/",
+      "summary": "Nvidia just doubled its revenue while its stock barely moved, and Wall Street is split on what comes next. The math behind a $500 price target by 2031 is tighter than it looks, and one overlooked number changes everything.",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 09:47:00",
+      "title": "CoreWeave Stock Rises After Debuting Nvidia Vera Rubin, New Software",
+      "source": "gurufocus.com",
+      "url": "https://www.gurufocus.com/news/9103510/coreweave-stock-rises-after-debuting-nvidia-vera-rubin-new-software",
+      "summary": "CoreWeave (CRWV) unveiled a batch of products and customer wins at its Fully Connected conference, led by the availability of Nvidia's (NVDA) Vera Rubin NVL72 s",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 09:28:00",
+      "title": "Cathie Wood Just Dropped $78 Million on This Red-Hot Chip Stock",
+      "source": "gurufocus.com",
+      "url": "https://www.gurufocus.com/news/9103273/cathie-wood-just-dropped-78-million-on-this-redhot-chip-stock",
+      "summary": "Cathie Wood increased her exposure to Nvidia (NVDA) while trimming Advanced Micro Devices (AMD) on Tuesday, shifting some AI-chip allocation after a sharp diver",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 09:27:00",
+      "title": "DeepSeek and Huawei Just Took Aim at Nvidia's Biggest Software Advantage",
+      "source": "gurufocus.com",
+      "url": "https://www.gurufocus.com/news/9103272/deepseek-and-huawei-just-took-aim-at-nvidias-biggest-software-advantage",
+      "summary": "Another Chinese threat is targeting Nvidia (NVDA, Financials) beyond its AI chips. According to DeepSeek's official WeChat account, Huawei Technologies and Deep",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 09:24:00",
+      "title": "Cathie Wood Just Dumped $110 Million of AMD--and Bought Nvidia and Broadcom",
+      "source": "gurufocus.com",
+      "url": "https://www.gurufocus.com/news/9103189/cathie-wood-just-dumped-110-million-of-amdand-bought-nvidia-and-broadcom",
+      "summary": "Advanced Micro Devices (AMD, Financials) just lost another sizable chunk of Cathie Wood's backing as ARK Invest shifted money toward two of its biggest AI-chip",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 09:17:00",
+      "title": "Nvidia Stocks Rise After Signing White House AI Safety Accord",
+      "source": "gurufocus.com",
+      "url": "https://www.gurufocus.com/news/9103152/nvidia-stocks-rise-after-signing-white-house-ai-safety-accord",
+      "summary": "Nvidia (NVDA), the AI-chip and data-center platform company, signed the White House's voluntary AI accord on September 29, with shares up approximately 0.3% dur",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 09:16:39",
+      "title": "Cathie Wood Sold $110 Million of AMD and Bought Nvidia Instead",
+      "source": "247wallst.com",
+      "url": "https://247wallst.com/investing/2026/09/30/cathie-wood-sold-110-million-of-amd-and-bought-nvidia-instead/",
+      "summary": "Cathie Wood just dumped one of this year's biggest AI winners to load up on a stock that has barely moved, and the reasoning behind that swap reveals a lot about where she thinks the real opportunity still sits.",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 09:05:00",
+      "title": "Cathie Wood Goes Bargain Hunting: 3 Stocks She Just Bought",
+      "source": "fool.com",
+      "url": "https://www.fool.com/investing/2026/09/30/cathie-wood-goes-bargain-hunting-3-stocks-she-just/",
+      "summary": "The widely followed growth investor made some big market purchases on Tuesday.",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 09:00:00",
+      "title": "CoreWeave Delivers NVIDIA Vera Rubin NVL72 Performance at Production Scale, Starting With Cognition",
+      "source": "businesswire.com",
+      "url": "https://www.businesswire.com/news/home/20260930041932/en/CoreWeave-Delivers-NVIDIA-Vera-Rubin-NVL72-Performance-at-Production-Scale-Starting-With-Cognition/",
+      "summary": "SAN FRANCISCO--(BUSINESS WIRE)--CoreWeave Inc. (Nasdaq: CRWV), The Essential Cloud for AI™, today announced the availability of NVIDIA Vera Rubin NVL72 on CoreWeave, with Cognition as the first customer anywhere running production workloads on the system. Customers, like Cognitio",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 08:59:01",
+      "title": "Broadcom vs. NVIDIA: Which Technology Stock Is a Better Buy in 2026?",
+      "source": "fool.com",
+      "url": "https://www.fool.com/coverage/better-buy/2026/09/30/broadcom-vs-nvidia-which-technology-stock-is-a-better-buy-in-2026/",
+      "summary": "Broadcom's 36% net margin and $27B free cash flow offer stability, while NVIDIA's 56% margin and $97B cash generation power explosive growth.",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 08:50:00",
+      "title": "Silo Pharma's QwikAgents Expands AI Agent Platform with NVIDIA Model Support and New Runtime Flexibility",
+      "source": "globenewswire.com",
+      "url": "https://www.globenewswire.com/news-release/2026/09/30/3371897/0/en/silo-pharma-s-qwikagents-expands-ai-agent-platform-with-nvidia-model-support-and-new-runtime-flexibility.html",
+      "summary": "Addition of NVIDIA Nemotron models and Hermes runtime expands customer choice across both AI models and agent software SARASOTA, FLA., Sept. 30, 2026 (GLOBE NEWSWIRE) -- Silo Pharma (Nasdaq: SILO) (“Silo” or “the Company”), a developmental-stage biopharmaceutical company focused ",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 08:00:01",
+      "title": "3 Tech Stocks That Could Be in Trouble if There's an Artificial Intelligence (AI) Slowdown",
+      "source": "fool.com",
+      "url": "https://www.fool.com/investing/2026/09/30/3-tech-stocks-that-could-be-in-trouble-if-there-s-an-artificial-intelligence-ai-slowdown/",
+      "summary": "These stocks have been hot buys in large part due to expectations of continued strong growth driven by artificial intelligence (AI).",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 07:30:00",
+      "title": "Meet the Low-Cost Vanguard ETF With 51.8% Invested in Nvidia, Apple, Alphabet, Microsoft, and Amazon While VOO Has Just 30%",
+      "source": "fool.com",
+      "url": "https://www.fool.com/investing/2026/09/30/mega-cap-growth-stocks-mgk-voo-nvidia-apple/",
+      "summary": "The Vanguard Mega Cap Growth ETF is a bet that today's leading companies will continue driving broader market gains. Mega-cap growth stock valuations have come down as investors question the payoff of capital-intensive AI investments.",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 07:20:58",
+      "title": "Should WisdomTree U.S. LargeCap ETF (EPS) Be on Your Investing Radar?",
+      "source": "zacks.com",
+      "url": "https://www.zacks.com/stock/news/2997888/should-wisdomtree-u-s-largecap-etf-eps-be-on-your-investing-radar?cid=CS-STOCKNEWSAPI-FT-style_box_etf-2997888",
+      "summary": "Designed to provide broad exposure to the Large Cap Value segment of the US equity market, the WisdomTree U.S. LargeCap ETF (EPS) is a passively managed exchange traded fund launched on February 23, 2007.",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 07:15:56",
+      "title": "Jim Cramer's Nvidia Take is Surprisngly Sound For Once",
+      "source": "247wallst.com",
+      "url": "https://247wallst.com/investing/2026/09/30/jim-cramers-nvidia-take-is-surprisngly-sound-for-once/",
+      "summary": "Jim Cramer called for a $500 billion buyback and named Nvidia the single best investment Jensen Huang can make. The math behind that argument is harder to argue with than you might expect.",
+      "_provider": "fmp_news_stock"
+    }
+  ],
+  "analyst_actions": [],
+  "analyst_actions_source": "finviz_fallback",
+  "analyst_consensus": {
+    "strong_buy": 2,
+    "buy": 58,
+    "hold": 16,
+    "sell": 3,
+    "strong_sell": 0,
+    "consensus": "Buy"
+  },
+  "pt_revision_momentum": {
+    "direction": "UP",
+    "consensus_delta_pct_1m": 15.07,
+    "consensus_delta_pct_3m": 1.11,
+    "analysts_last_month": 1,
+    "analysts_last_quarter": 23,
+    "note": "PT revision direction only — absolute levels stripped (V3.45.4 anti cross-lane anchoring)"
+  },
+  "analyst_news": [],
+  "sec_filings_recent": [],
+  "sec_8k_filings": [
+    {
+      "filing_date": "2026-09-03 00:00:00",
+      "accepted_date": "2026-09-03 08:03:56",
+      "form_type": "8-K",
+      "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000078/nvda-20260902.htm",
+      "_provider": "fmp_sec_8k"
+    }
+  ],
+  "warnings": [
+    "no_analyst_actions_in_30d"
+  ],
+  "data_quality": {
+    "fmp_stock_news_count": 30,
+    "fmp_press_release_count": 0,
+    "finviz_news_count": 0,
+    "finviz_analyst_count": 0,
+    "yf_news_count": 10,
+    "finnhub_news_count": 25,
+    "fmp_grades_count": 0,
+    "fmp_grades_news_count": 0,
+    "fmp_sec_8k_count": 1,
+    "headlines_total_dedup": 60,
+    "headlines_primary_source": "fmp_news_stock",
+    "fmp_calls": 9,
+    "fmp_failures": 0,
+    "sparse": false,
+    "recommendation": "ok"
+  }
+}

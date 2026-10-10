@@ -1,0 +1,26 @@
+{
+  "phase": 2,
+  "agent": "Sentiment_Analyst",
+  "ticker": "NVDA",
+  "signal": "HOLD",
+  "score": -0.4,
+  "confidence": 0.72,
+  "key_factors": [
+    "Recent insider sales exceed acquisitions",
+    "Low short interest provides modest support",
+    "Fear and weakening breadth temper market tone"
+  ],
+  "risk_flags": [
+    "Persistent insider distribution",
+    "Elevated rates and credit stress"
+  ],
+  "phase0_alignment": "ALIGNED",
+  "data_source_timestamp": "2026-09-30 16:34",
+  "subagent_isolated": true,
+  "skill_execution_failed": false,
+  "market_sentiment_composite": 57.9,
+  "vix_current": 15.91,
+  "insider_signal": -2.0,
+  "short_pct_float": 1.27,
+  "mspr_latest": -93.08281
+}

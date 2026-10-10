@@ -1,0 +1,16 @@
+{
+  "command": [
+    "skills/market-news-analyst/scripts/fetch.py",
+    "BE",
+    "--hours",
+    "48",
+    "--json-only"
+  ],
+  "started_at": "2026-10-01T00:38:57.442359+00:00",
+  "finished_at": "2026-10-01T00:39:08.428777+00:00",
+  "elapsed_seconds": 10.986315000336617,
+  "returncode": 0,
+  "status": "ok",
+  "reason": null,
+  "content_hash": "sha256:5ffd40e7b69f92cd05693a7df1494d7ed820370ac857d16d3a90a6ddba55e026"
+}

@@ -1,0 +1,13 @@
+{
+  "ticker": "NVDA",
+  "verdict": "STRONG_COUNTER",
+  "counter_thesis": "At $230.24, the underwriting margin is thin: the frozen valuation pack puts fair value at $220.12 (-4.39%) while implied expectations require 60% five-year FCF CAGR, with actual and lane FCF-growth estimates unavailable to corroborate that hurdle. The frozen FRED input shows a 2.86% 10-year real yield, adding a material discount-rate headwind to a growth-dependent valuation.",
+  "kill_conditions": [
+    "IF annualized FCF growth is below 30% across the next two reported quarters (within 180 days) THEN the 60% five-year FCF CAGR embedded in the price is not credible and the cash-flow thesis breaks.",
+    "IF annualized revenue growth falls below 35% across the next two reported quarters (within 180 days) THEN the frozen market-implied revenue path is missed and the growth justification breaks.",
+    "IF the 10-year real yield remains at or above its frozen FRED reading of 2.86% for 30 trading days within the next 90 days THEN persistent high discount rates undermine the staged-entry risk/reward thesis."
+  ],
+  "counter_evidence_strength": 4,
+  "thesis_break_probability": 0.36,
+  "subagent_isolated": true
+}

@@ -1,0 +1,151 @@
+{
+  "ticker": "BE",
+  "lane_scores": {
+    "fundamentals": 0.0,
+    "sentiment": -0.03,
+    "news": 1.0,
+    "technical": 1.5,
+    "valuation": -1.0
+  },
+  "lane_confidence": {
+    "fundamentals": 0.68,
+    "sentiment": 0.62,
+    "news": 0.58,
+    "technical": 0.69,
+    "valuation": 0.45
+  },
+  "valuation_lane": {
+    "score": -1.0,
+    "confidence": 0.45
+  },
+  "forward_validation": {
+    "schema": "forward_validation.v1",
+    "status": "STRETCHED",
+    "applies": true,
+    "reason": "at least one credible forward check supports current price",
+    "dcf_value": 45.27,
+    "dcf_gap_pct": -83.66,
+    "extreme_dcf_threshold_pct": -30.0,
+    "checks": [
+      {
+        "name": "archetype_shadow",
+        "available": true,
+        "supports_current_price": false,
+        "actual": -26.82,
+        "threshold": ">=-10% vs current",
+        "detail": {
+          "anchors_used_n": 3
+        }
+      },
+      {
+        "name": "forward_earnings",
+        "available": true,
+        "supports_current_price": false,
+        "actual": -29.87,
+        "threshold": ">=-10% vs current",
+        "detail": {
+          "analyst_count": 7,
+          "horizon_years": 3.25
+        }
+      },
+      {
+        "name": "revenue_path",
+        "available": true,
+        "supports_current_price": true,
+        "actual": 0.4569,
+        "threshold": "<= analyst CAGR + 0.05",
+        "detail": {
+          "analyst_revenue_cagr": 0.5123,
+          "analyst_horizon_years": 5.0
+        }
+      }
+    ],
+    "evaluated_count": 3,
+    "support_count": 1,
+    "supported_checks": [
+      "revenue_path"
+    ],
+    "failed_checks": [
+      "archetype_shadow",
+      "forward_earnings"
+    ],
+    "quality_flags": [
+      "reverse_dcf_growth_out_of_range"
+    ],
+    "valuation_score_before": -1.0,
+    "valuation_score_effective": -1.0,
+    "score_adjustment": "none",
+    "t5_hard_downgrade_eligible": false
+  },
+  "structural_shift": {
+    "tier": "INSUFFICIENT_DATA"
+  },
+  "red_team": {
+    "verdict": "STRONG_COUNTER",
+    "counter_thesis": "The HOLD consensus underweights the execution hurdle embedded in BE's price: the frozen packet shows $276.98 current price versus a $45.27 DCF anchor and a 60% implied 5-year FCF CAGR, while actual and lane FCF growth estimates are unavailable. A 2.88% 10-year real yield and 8.17% one-month downward consensus price-target revisions add independent pressure if growth fails to convert into cash flow.",
+    "kill_conditions": [
+      "IF within 180 days the next two quarters' FCF annualized growth is below 30% (half the packet's 60% implied 5-year FCF CAGR) THEN the current-price valuation thesis is broken.",
+      "IF within 180 days either of the next two quarterly reports shows revenue growth below 46% year over year THEN the market-implied revenue path in the frozen packet is broken.",
+      "IF within 90 days the FRED 10-year real Treasury yield remains above 2.0% (frozen reading: 2.88%) THEN the elevated discount-rate hurdle persists and the HOLD thesis that growth can validate the current multiple is broken."
+    ],
+    "counter_evidence_strength": 5,
+    "thesis_break_probability": 0.62
+  },
+  "transition": {
+    "transition_signature": null,
+    "transition_signature_mtime": null,
+    "forecaster_transition_case": null,
+    "forecaster_transition_case_mtime": null,
+    "valuation_cited_transition_overlay": null,
+    "valuation_transition_dissent_basis": null
+  },
+  "macro": {
+    "macro_multiplier": 0.75,
+    "macro_backdrop_score": -2.0,
+    "market_regime": "VOLATILE"
+  },
+  "burry": {
+    "ticker": "BE",
+    "generated_at": "2026-10-01T00:52:49.435239+00:00",
+    "burry_score": 21.3,
+    "verdict": "WARNING",
+    "components": {
+      "fcf_yield_pct": 0.65,
+      "ev_ebit": 195.24,
+      "debt_to_equity": 1.72,
+      "pct_below_52w_high": 19.91,
+      "insider_net": "SELL"
+    },
+    "component_scores": {
+      "fcf_yield": 13.3,
+      "ev_ebit": 10.0,
+      "debt_to_equity": 21.4,
+      "pct_below_52w_high": 59.8,
+      "insider": 20
+    },
+    "weights_active": [
+      "fcf_yield",
+      "ev_ebit",
+      "debt_to_equity",
+      "pct_below_52w_high",
+      "insider"
+    ],
+    "reasoning": "FCF yield 0.7% │ EV/EBITDA 195.2 │ D/E 1.72 │ 20% below 52wH │ insider=SELL",
+    "score": 21.3,
+    "veto_flag": false,
+    "label": "WARNING"
+  },
+  "gates": {
+    "proceed_to_phase3": true,
+    "binary_classification": "unknown",
+    "binary_event_within_48h": false,
+    "mandatory_risk_flags": [],
+    "phase2_fanout_mode": "PARALLEL_SUBAGENT"
+  },
+  "hot_zone": {},
+  "decision_cap": {
+    "anchors_available": 3,
+    "fair_value_confidence": "low",
+    "lane_data_quality_low": false
+  }
+}

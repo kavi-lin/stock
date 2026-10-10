@@ -1,0 +1,148 @@
+{
+  "phase": 3,
+  "engine": "decision_engine.py v1.1.0 (V4.131.13)",
+  "decision_engine_version": "1.1.0",
+  "ticker": "NVDA",
+  "calculation_steps": {
+    "fund": "0.25 × 2.5 × 0.72 = 0.4500",
+    "sent": "0.15 × -0.4 × 0.72 = -0.0432",
+    "news": "0.20 × 1 × 0.60 = 0.1200",
+    "tech": "0.25 × 1.5 × 0.72 = 0.2700",
+    "val": "0.15 × 0 × 0.60 = 0.0000",
+    "raw_total": 0.7968,
+    "structural_shift_modulation": {
+      "tier": "NONE",
+      "applied_adjustments": [
+        "no modulation — standard rules apply"
+      ],
+      "shift_macro_floor": 0.0,
+      "position_size_cap_pct": 100,
+      "red_team_mean_reversion_blocked": false
+    },
+    "polarization_modulation": {
+      "label": "ALIGNED",
+      "lane_range": 2.9,
+      "pos_strong": 3,
+      "neg_strong": 0,
+      "outlier_lane_id": null,
+      "applied_adjustments": [
+        "no modulation"
+      ],
+      "confidence_multiplier": 1.0,
+      "position_cap_after": 100
+    },
+    "red_team_basis": "unclassified",
+    "red_team_auto_downgrade": false,
+    "cascade_rule_applied": "rule_5_default_strong_counter",
+    "dynamic_threshold": {
+      "buy_threshold": 1.2,
+      "staged_threshold": 0.8,
+      "rationale": "default 1.2 (tier=NONE, polarization=ALIGNED)"
+    },
+    "t5_forward_validation": {
+      "forward_validation_status": "STRETCHED",
+      "forward_validation_applies": true,
+      "valuation_score": 0.0,
+      "warning_triggered": false,
+      "hard_downgrade_eligible": false,
+      "downgrade_applied": false,
+      "decision_before": "HOLD",
+      "decision_after": "HOLD"
+    },
+    "red_team_verdict": "STRONG_COUNTER",
+    "red_team_effective_verdict": "STRONG_COUNTER",
+    "red_team_counter_evidence_strength": 4,
+    "red_team_thesis_break_probability": 0.36,
+    "bonus_applied": false,
+    "penalty_applied": true,
+    "penalty_value": 0.95,
+    "raw_after_bonus": 0.75696,
+    "macro_multiplier": 0.75,
+    "macro_alignment": "CONTRARIAN",
+    "effective_macro_mult": 0.75,
+    "final_score": 0.757
+  },
+  "avg_confidence": 0.66,
+  "avg_confidence_raw": 0.66,
+  "final_score": 0.757,
+  "final_decision": "HOLD",
+  "forward_validation": {
+    "schema": "forward_validation.v1",
+    "status": "STRETCHED",
+    "applies": true,
+    "reason": "at least one credible forward check supports current price",
+    "dcf_value": 95.04,
+    "dcf_gap_pct": -58.72,
+    "extreme_dcf_threshold_pct": -30.0,
+    "checks": [
+      {
+        "name": "archetype_shadow",
+        "available": true,
+        "supports_current_price": true,
+        "actual": 4.78,
+        "threshold": ">=-10% vs current",
+        "detail": {
+          "anchors_used_n": 5
+        }
+      },
+      {
+        "name": "forward_earnings",
+        "available": true,
+        "supports_current_price": true,
+        "actual": -6.35,
+        "threshold": ">=-10% vs current",
+        "detail": {
+          "analyst_count": 9,
+          "horizon_years": 3.318
+        }
+      },
+      {
+        "name": "revenue_path",
+        "available": true,
+        "supports_current_price": true,
+        "actual": 0.3543,
+        "threshold": "<= analyst CAGR + 0.05",
+        "detail": {
+          "analyst_revenue_cagr": 0.3928,
+          "analyst_horizon_years": 5.0
+        }
+      }
+    ],
+    "evaluated_count": 3,
+    "support_count": 3,
+    "supported_checks": [
+      "archetype_shadow",
+      "forward_earnings",
+      "revenue_path"
+    ],
+    "failed_checks": [],
+    "quality_flags": [
+      "reverse_dcf_growth_out_of_range"
+    ],
+    "valuation_score_before": 0.0,
+    "valuation_score_effective": 0.0,
+    "score_adjustment": "none",
+    "t5_hard_downgrade_eligible": false
+  },
+  "decision_band_before_adjustments": "HOLD",
+  "band_adjustments": [],
+  "decision_margin": "final_score +0.7570 vs buy 1.2 / staged 0.8 → HOLD (margin_to_buy -0.4430)",
+  "hot_zone_probe": false,
+  "hot_zone_probe_tier": null,
+  "hot_zone_eval": "not_qualifying",
+  "hot_zone_position_size_cap": null,
+  "auto_reject": {
+    "triggered": false,
+    "reasons": [],
+    "forced_decision": null,
+    "probe_prospective_triggered": false,
+    "probe_prospective_reasons": []
+  },
+  "decision_cap_active": false,
+  "decision_cap_reason": null,
+  "position_size_cap_pct": 100,
+  "polar_position_cap_pct": 100,
+  "transition_data_stale_or_inconsistent": false,
+  "alerts": [],
+  "warnings": []
+}

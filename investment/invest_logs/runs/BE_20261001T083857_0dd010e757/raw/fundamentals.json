@@ -1,0 +1,65 @@
+{
+  "ticker": "BE",
+  "generated_at": "2026-10-01T00:38:59+00:00",
+  "data_source": "bundle+yfinance",
+  "price": {
+    "current": 276.98,
+    "market_cap": 81578188800.0,
+    "52w_high": 351.28,
+    "52w_low": 75.7
+  },
+  "valuation": {
+    "pe_ratio": 331.39507059105046,
+    "pe_forward": 56.19726,
+    "pe_sector_median": null,
+    "peg_ratio": 0.66,
+    "ev_ebitda": 233.64608219068424,
+    "pb_ratio": 49.36298322950773
+  },
+  "growth": {
+    "revenue_yoy_pct": 165.52,
+    "revenue_trailing_3y_cagr_pct": 19.06,
+    "eps_growth_forward_consensus_pct": null
+  },
+  "margins_cash": {
+    "gross_margin_pct": 31.24,
+    "operating_margin_pct": 11.24,
+    "fcf_margin_pct": 17.08,
+    "fcf_yield_pct": 0.77,
+    "net_margin_pct": 7.87
+  },
+  "balance_sheet": {
+    "debt_to_equity": 1.7441882682236578,
+    "net_cash_positive": false,
+    "cash_and_equivalents": 2716858880,
+    "total_debt": 2815023104
+  },
+  "earnings_calendar": {
+    "next_earnings_date": "2026-10-27",
+    "days_until_earnings": 27
+  },
+  "analyst": {
+    "consensus_rating": "BUY",
+    "analyst_count": 26,
+    "price_target_mean": 281.58,
+    "price_target_upside_pct": 1.66
+  },
+  "warnings": [
+    "extreme_pe_above_80"
+  ],
+  "data_quality": {
+    "fmp_calls": 1,
+    "fmp_failures": 1,
+    "yf_fallbacks": 1,
+    "bundle_used": true,
+    "bundle_meta": {
+      "source": "EARNINGS_ANALYST_BUNDLE",
+      "as_of": "2026-10-01",
+      "ticker": "BE"
+    },
+    "missing_fields": [
+      "pe_sector_median",
+      "eps_growth_forward_consensus_pct"
+    ]
+  }
+}

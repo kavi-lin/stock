@@ -1,0 +1,14 @@
+{
+  "command": [
+    "skills/earnings-valuation-forecaster/scripts/forecast.py",
+    "BE",
+    "--json-only"
+  ],
+  "started_at": "2026-10-01T00:39:02.892321+00:00",
+  "finished_at": "2026-10-01T00:39:07.385495+00:00",
+  "elapsed_seconds": 4.4931609579361975,
+  "returncode": 1,
+  "status": "unavailable",
+  "reason": "insufficient PE history from ratios endpoint",
+  "content_hash": "sha256:5e047b54f3dd5a2d254a7121f78c236af128467ce9458578df8d021c2149a442"
+}

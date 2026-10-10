@@ -1,0 +1,28 @@
+{
+  "ticker": "BE",
+  "generated_at": "2026-10-01T00:52:49.435239+00:00",
+  "burry_score": 21.3,
+  "verdict": "WARNING",
+  "components": {
+    "fcf_yield_pct": 0.65,
+    "ev_ebit": 195.24,
+    "debt_to_equity": 1.72,
+    "pct_below_52w_high": 19.91,
+    "insider_net": "SELL"
+  },
+  "component_scores": {
+    "fcf_yield": 13.3,
+    "ev_ebit": 10.0,
+    "debt_to_equity": 21.4,
+    "pct_below_52w_high": 59.8,
+    "insider": 20
+  },
+  "weights_active": [
+    "fcf_yield",
+    "ev_ebit",
+    "debt_to_equity",
+    "pct_below_52w_high",
+    "insider"
+  ],
+  "reasoning": "FCF yield 0.7% │ EV/EBITDA 195.2 │ D/E 1.72 │ 20% below 52wH │ insider=SELL"
+}

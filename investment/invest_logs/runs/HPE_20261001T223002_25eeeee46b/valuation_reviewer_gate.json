@@ -1,0 +1,82 @@
+{
+  "schema": "valuation_reviewer_gate.v1",
+  "engine": "valuation_reviewer_gate.py v1.0 (V4.89.0)",
+  "ticker": "HPE",
+  "evaluated_at": "2026-10-01",
+  "shadow_only": true,
+  "would_invoke": true,
+  "mandatory_fired": true,
+  "triggers_fired": [
+    "transition_case_active",
+    "no_peer_cohort"
+  ],
+  "triggers": [
+    {
+      "trigger": "transition_case_active",
+      "mandatory": true,
+      "fired": true,
+      "why": "decision_engine 的 valuation_confirmed_transition 吃 lane 的 cited_transition_overlay / transition_dissent_basis；lane 不跑會讓 cascade rule #2 的 ×0.95 軟化失效（落回 ×0.85）",
+      "evidence": {
+        "transition_signature": "paradigm_only",
+        "forecaster_transition_case": true
+      }
+    },
+    {
+      "trigger": "no_peer_cohort",
+      "mandatory": false,
+      "fired": true,
+      "why": "無 curated 也無未過期 discovered cohort → 需要 reviewer 提 peers",
+      "evidence": {
+        "available": false,
+        "provenance": null,
+        "peer_count": 0,
+        "expires_on": null,
+        "reason": "no_curated_peer_cohort"
+      }
+    },
+    {
+      "trigger": "structural_shift_typed",
+      "mandatory": false,
+      "fired": false,
+      "why": "typed shift 齊備時估值敘事會壓過歷史錨，需要人看解釋",
+      "evidence": {
+        "confirmed": false,
+        "evidence_date": null,
+        "provenance": null
+      }
+    },
+    {
+      "trigger": "anchor_conflict_severe",
+      "mandatory": false,
+      "fired": false,
+      "why": "cv≥0.6 / span≥5.0x / agreement_grade=low",
+      "evidence": {
+        "anchor_dispersion_cv": 0.3312,
+        "dispersion_ratio": 4.33,
+        "agreement_grade": "high"
+      }
+    },
+    {
+      "trigger": "low_quality_possible_buy",
+      "mandatory": false,
+      "fired": false,
+      "why": "資料品質低卻不在高估側 → 誤判成本不對稱；possible_buy 是 pack proxy，Phase 2 時點尚無 tentative decision",
+      "evidence": {
+        "confidence": "high",
+        "anchors_available": 5,
+        "verdict_band": "extreme_overvalued",
+        "vs_current_pct": -40.72,
+        "low_quality": false,
+        "possible_buy": false
+      }
+    }
+  ],
+  "inputs_used": {
+    "quant_artifact_engine": "compute_price_framework.py v2.4 (V4.131.13)",
+    "quant_artifact_persisted_to": null,
+    "peer_cohort_provenance": null,
+    "earnings_cache_found": true,
+    "forecaster_cache_found": true
+  },
+  "note": "shadow-only — PM 照跑 Valuation Specialist；本紀錄不改任何決策數字。翻預設需使用者拍板（見 protocol §PHASE 2 Valuation Specialist）"
+}

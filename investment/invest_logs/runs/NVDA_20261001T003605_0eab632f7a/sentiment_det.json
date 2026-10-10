@@ -1,0 +1,42 @@
+{
+  "producer_version": "sentiment_score.py v1.1 (L5 / V4.95.3)",
+  "shadow_only": true,
+  "ticker": "NVDA",
+  "score": -0.36,
+  "market_layer": 0.78,
+  "market_composite": 57.8,
+  "stock_specific": -1.5,
+  "stock_detail": {
+    "raw_sum": -1.5,
+    "clamped": false,
+    "rules_fired": [
+      {
+        "rule": "insider_ratio_low",
+        "points": -1.0,
+        "detail": "acquired_disposed_ratio 0.0882 < 0.3"
+      },
+      {
+        "rule": "mspr_negative",
+        "points": -1.0,
+        "detail": "latest_mspr -93.08281 < -30.0"
+      },
+      {
+        "rule": "short_low",
+        "points": 1.0,
+        "detail": "short_pct_float 1.27% < 5.0%"
+      },
+      {
+        "rule": "congress_bearish",
+        "points": -0.5,
+        "detail": "congressional_trades.net_signal=bearish"
+      }
+    ]
+  },
+  "missing_inputs": [
+    "institutional.accumulation_signal",
+    "stock_based_compensation_pct_revenue"
+  ],
+  "degraded_reason": null,
+  "input_hash": "sha256:aa322b08d8aa0455b56d8e6ad7a613a4",
+  "note": "shadow-only — LLM 照跑 Sentiment lane，本紀錄不改任何決策數字。翻預設需使用者拍板（見 protocol §PHASE 2 Sentiment Subagent）"
+}

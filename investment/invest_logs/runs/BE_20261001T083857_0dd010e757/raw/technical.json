@@ -1,0 +1,79 @@
+{
+  "ticker": "BE",
+  "generated_at": "2026-10-01T00:39:01+00:00",
+  "price": {
+    "current": 276.98,
+    "change_pct": -4.9,
+    "52w_high": 351.28,
+    "52w_low": 66.62
+  },
+  "ma_structure": {
+    "ma_20": 266.52,
+    "ma_50": 233.53,
+    "ma_200": 205.51,
+    "stage": "Stage 2 uptrend",
+    "above_ma20_pct": 3.93,
+    "above_ma50_pct": 18.6,
+    "above_ma200_pct": 34.78,
+    "recent_crosses": [
+      {
+        "type": "golden_cross_20_50",
+        "date": "2026-09-11",
+        "days_ago": 13
+      }
+    ]
+  },
+  "rsi_14": {
+    "rsi_14": 55.5,
+    "zone": "bullish"
+  },
+  "macd": {
+    "macd_line": 12.827,
+    "signal_line": 12.682,
+    "histogram": 0.145,
+    "histogram_trend": "falling",
+    "bullish_cross": false,
+    "bearish_cross": false
+  },
+  "volume": {
+    "today": 14584593,
+    "today_effective": 14584593,
+    "avg_20d": 17585134,
+    "avg_50d": 16267042,
+    "ratio_20d": 0.83,
+    "spike_label": "NORMAL",
+    "spike_days_last_10": 1,
+    "volume_trend": "contracting",
+    "intraday_state": "complete",
+    "elapsed_min": 390
+  },
+  "support_resistance": {
+    "recent_swing_highs": [
+      288.0,
+      283.83,
+      227.99,
+      249.45,
+      252.0
+    ],
+    "recent_swing_lows": [
+      249.05,
+      197.5,
+      185.93,
+      210.02,
+      157.33
+    ],
+    "nearest_resistance": 283.83,
+    "nearest_support": 249.05,
+    "pct_to_resistance": 2.47,
+    "pct_to_support": 10.08
+  },
+  "signal_hints": {
+    "stage_2_complete": false,
+    "bearish_breakdown": false,
+    "parabolic_risk": false,
+    "macd_bullish_cross": false,
+    "macd_bearish_cross": false,
+    "rubric_hint": "+1 to +2"
+  },
+  "warnings": []
+}

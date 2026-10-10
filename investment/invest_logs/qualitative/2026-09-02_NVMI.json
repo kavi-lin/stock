@@ -1,0 +1,227 @@
+{
+  "schema": "p5-qualitative/1.0",
+  "ticker": "NVMI",
+  "date": "2026-09-02",
+  "lanes": {
+    "fundamentals": {
+      "signal": "BUY",
+      "key_factors": [
+        "Accelerating 15.9% YoY revenue growth",
+        "Robust 56.5% gross margin profile",
+        "Zero-debt net cash $217.5M balance"
+      ],
+      "risk_flags": [
+        "Premium valuation at 48.6x P/E",
+        "Receivables DSO slowdown flag"
+      ]
+    },
+    "sentiment": {
+      "signal": "BUY",
+      "key_factors": [
+        "Insider Q3 buy ratio 3.0x",
+        "Market sentiment composite at 56.6",
+        "Neutral congressional trading activity"
+      ],
+      "risk_flags": [
+        "Script execution failed fallback data used",
+        "Fear & Greed index low at 32.9"
+      ]
+    },
+    "news": {
+      "signal": "BUY",
+      "key_factors": [
+        "$200M share buyback authorized",
+        "Strong cash flow confidence",
+        "Zero analyst downgrades in 30d"
+      ],
+      "risk_flags": [
+        "Sparse 30d sell-side revisions",
+        "Semi equipment capex cyclicality"
+      ]
+    },
+    "technical": {
+      "signal": "HOLD",
+      "key_factors": [
+        "OHLCV data retrieval timed out",
+        "Technical indicators unavailable",
+        "Chart history unreachable"
+      ],
+      "risk_flags": [
+        "Network timeout blocked OHLCV retrieval",
+        "Do not infer technical indicators"
+      ]
+    },
+    "valuation": {
+      "signal": "HOLD",
+      "key_factors": [
+        "Fair value near current price",
+        "Extreme dispersion across valuation anchors",
+        "Analyst target heavily elevates blend"
+      ],
+      "risk_flags": [
+        "Outlier divergence in analyst PT versus DCF",
+        "Owner earnings model understates true cash generation"
+      ]
+    }
+  },
+  "lane_detail": {
+    "fundamentals": {
+      "phase0_alignment": "ALIGNED",
+      "subagent_isolated": true,
+      "skill_execution_failed": false,
+      "moat_assessment": {
+        "level": "NARROW",
+        "type": "IP-patent",
+        "evidence_one_line": "Proprietary optical metrology IP and high foundry switching costs."
+      },
+      "near_term_catalysts": [
+        {
+          "date": "2026-11-04",
+          "type": "earnings",
+          "description": "Q3 2026 earnings release and Q4 guidance",
+          "impact": "high"
+        },
+        {
+          "date": "2026-10-15",
+          "type": "product_launch",
+          "description": "Metrology tool adoption in advanced packaging",
+          "impact": "medium"
+        },
+        {
+          "date": "2026-09-24",
+          "type": "macro_event",
+          "description": "Global semicap equipment capex forecast updates",
+          "impact": "medium"
+        }
+      ],
+      "bull_thesis_one_line": "GAA & packaging drive metrology demand",
+      "bear_thesis_one_line": "Rich 48x P/E vulnerable to WFE slowdown"
+    },
+    "sentiment": {
+      "phase0_alignment": "ALIGNED",
+      "subagent_isolated": true,
+      "skill_execution_failed": true,
+      "market_sentiment_composite": 56.6,
+      "vix_current": 15.98,
+      "insider_signal": "accumulating",
+      "short_pct_float": null,
+      "mspr_latest": null
+    },
+    "news": {
+      "phase0_alignment": "ALIGNED",
+      "subagent_isolated": true,
+      "skill_execution_failed": false,
+      "immediate_catalyst_5d": {
+        "event": "Post-$200M buyback market reaction and capital deployment",
+        "date": "2026-09-02",
+        "direction_lean": "BULLISH",
+        "expected_move_pct": 2.0
+      },
+      "decision_point_days": 5,
+      "cross_asset_spillover": [
+        {
+          "asset": "SMH / Semiconductor Equipment",
+          "direction": "BULLISH",
+          "mechanism": "Corporate cash return and metrology demand validate ongoing semi cycle strength"
+        }
+      ],
+      "reasoning_one_line": "$200M share repurchase authorization reinforces management confidence in cash generation and provides liquidity support in a Risk-On tech environment.",
+      "pt_revision_momentum": {
+        "direction": "UNKNOWN",
+        "consensus_delta_pct_1m": null,
+        "unavailable_reason": "No sell-side price target revisions recorded in 30-day window"
+      }
+    },
+    "technical": {
+      "phase0_alignment": "NEUTRAL",
+      "subagent_isolated": true,
+      "skill_execution_failed": true,
+      "rubric_override_reason": "Skill execution failed due to network timeout retrieving OHLCV data; score defaulted to 0.",
+      "smart_money_analysis": {
+        "label": "accumulating",
+        "narrative": "FMP supplementary insider data indicates 2026 Q3 acquired/disposed ratio of 3.0 with accumulating trend."
+      },
+      "pattern_taxonomy": {
+        "pattern": "consolidation",
+        "confirmation_criteria": "Requires OHLCV data recovery to confirm chart structure."
+      },
+      "market_strength": "NEUTRAL",
+      "key_levels": {
+        "support": null,
+        "resistance": null,
+        "pivot": null
+      },
+      "high_prob_scenario": "Indeterminate pending OHLCV chart data recovery.",
+      "volatility": {
+        "atr_14": null,
+        "hist_vol_20d_daily": null,
+        "momentum_20d_pct": null
+      }
+    },
+    "valuation": {
+      "phase0_alignment": "NEUTRAL",
+      "subagent_isolated": true,
+      "skill_execution_failed": false,
+      "weighted_fair_value": 316.2,
+      "vs_current_pct": -8.62,
+      "verdict_band": "fairly_valued",
+      "suppression_proposals": [
+        {
+          "anchor": "analyst_pt_consensus",
+          "reason": "Value 556.5 is an extreme upper outlier compared to fundamental DCFs",
+          "suggested_action": "review_weight"
+        },
+        {
+          "anchor": "owner_earnings_mult",
+          "reason": "Value 19.65 is an extreme lower outlier outside credible bounds",
+          "suggested_action": "suppress"
+        }
+      ],
+      "valuation_commentary": "NVMI shows a weighted fair value of $316.20 (-8.62% vs current price of $346.01), placing it in the fairly_valued band with a score of 0.0. The valuation aggregate exhibits significant anchor dispersion: fundamental DCF anchors range between $111.35 and $152.93, while analyst consensus PT sits at an elevated $556.50 and owner earnings multiple drops to an anomalous $19.65. This heavy dispersion triggered outlier diagnostics and degraded aggregation to equal family votes with low confidence."
+    }
+  },
+  "red_team": {
+    "verdict": "STRONG_COUNTER",
+    "counter_thesis": "市場現價隱含 26% 營收與 60% FCF 之 5 年超高複合成長預期，但當前實際營收增速僅 15.9% 且出現 DSO 放緩跡象；在實質利率高達 2.4% 的高壓環境下，1.07% 的極低 FCF 殖利率與 48.6 倍本益比將面臨嚴重的估值下修風險。",
+    "kill_conditions": [
+      "IF 未來 2 季營收年化增速低於 26% 或 FCF 年化增速低於 30% WITHIN 180 天 THEN 現價內含之高成長定價路徑破裂並引發估值戴維斯雙殺",
+      "IF 10年期實質利率 (DFII10) 維持在 2.2% 以上且半導體資本支出週期放緩致使 DSO 惡化超過 10% WITHIN 90 天 THEN 1.07% 極低 FCF 殖利率與 35.5 倍 EV/EBIT 無法維持並向 DCF 估值區間 ($111-$153) 均值回歸"
+    ],
+    "counter_evidence_strength": 5,
+    "thesis_break_probability": 0.75
+  },
+  "burry_narrative": "Burry score 34.7 (WARNING) 提示 FCF 殖利率僅 1.07% 且 EV/EBIT 高達 35.5 倍，內部人有淨減持紀錄，整體估值安全邊際不足。",
+  "conflict_bias": {
+    "schema": "conflict_bias.v1",
+    "tentative_decision": "HOLD",
+    "triggers_fired": [],
+    "conflict_summary": "無衝突觸發，基本面與新聞偏多但估值與技術面維持中性觀望。",
+    "t4_detail": null,
+    "t5_detail": null,
+    "proceed_to_phase3": true
+  },
+  "macro_context": "全市場處於 FTD 確認後第 20 天之 RISK_ON 環境，市場寬度指標健康 (63.0)；但實質利率維持在 2.4% 高檔且頭部偵測指標呈現黃色預警 (35.7)，對高估值半導體設備股帶來長端折現壓力。",
+  "watch_conditions": {
+    "earnings_growth_acceleration": "觀察 2026-11-04 Q3 財報營收與 FCF 增速是否能加速至 25% 以上以支撐現行估值。",
+    "wfe_capex_cycle": "監控全球晶圓代工與記憶體大廠先進封裝與 GAA 資本支出是否持續擴張。",
+    "dso_receivables_health": "追蹤應收帳款天數 (DSO) 是否持續放緩或出現認列鬆綁跡象。"
+  },
+  "key_risks": [
+    "估值溢價過高：現行 48.6 倍 P/E 與 1.07% FCF 殖利率在 2.4% 高實質利率下缺乏估值緩衝空間",
+    "半導體設備資本支出週期下修或先進製程導入進度遞延導致營收成長不如預期"
+  ],
+  "bias_notes": "分析過程嚴格遵守隔離協議，無跨 Lane 錨定或確認偏差。",
+  "phase2_fanout_mode": "PARTIAL_FALLBACK",
+  "degraded_analysts": [
+    "Sentiment (skill execution failed fallback data used)",
+    "Technical (network timeout on OHLCV fetch)"
+  ],
+  "decision_point_days": 5,
+  "devils_advocate_filed": false,
+  "trade_metadata": {
+    "sector": "Technology",
+    "industry": "Semiconductors - Equipment & Materials",
+    "session_risk_tolerance": "MEDIUM"
+  },
+  "last_outcome": "UNKNOWN"
+}

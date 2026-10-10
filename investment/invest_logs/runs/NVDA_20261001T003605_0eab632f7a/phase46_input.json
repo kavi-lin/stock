@@ -1,0 +1,17 @@
+{
+  "decision_cap": {
+    "anchors_available": 5,
+    "fair_value_confidence": "medium",
+    "lane_data_quality_low": false
+  },
+  "final_decision": "HOLD",
+  "avg_confidence": 0.66,
+  "position_size_pct": 0.0,
+  "final_action": "CANCEL",
+  "hot_zone_probe": false,
+  "cap_override_reason": null,
+  "speculative": {
+    "pre_profit_anchor_live": false,
+    "sell_side_only": false
+  }
+}

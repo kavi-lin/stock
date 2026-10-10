@@ -1,0 +1,341 @@
+{
+  "schema": "investment-run/1.0",
+  "run_id": "BE_20261001T083857_0dd010e757",
+  "ticker": "BE",
+  "analysis_at": "2026-10-01T00:39:35.799551+00:00",
+  "snapshot_hash": "sha256:61fbb448c0aac800f335ca0f794f83833ab6e8c4b9f78e9e0e53611241dab047",
+  "producer_version": "sha256:4249b851ccc0e38aae32bcafde44d27cc8588f45ee7f31271ba77509baf23321",
+  "protocol_version": "V5.5",
+  "prompts": {
+    "fundamentals": "sha256:060ed198a244807986f9bca6cdcf2beacd8f0081e66422fa6fb2d0687012e390",
+    "sentiment": "sha256:913f10219d1ec80bcc722f90ba49c13bbe6e1e811b5e3c4ca2b5e0d7ae611c6a",
+    "news": "sha256:1d2e83429495da05542c6a4ab750e7adf66f16b81332e4d4f4df110d1637130e",
+    "technical": "sha256:e5d518dd4402b3291c0dfb4e8a6c3cd146b2de3810d736aad430938768ca5a99",
+    "valuation": "sha256:8e7b82e1e9fb1c14c22490464920922a177da66b51db55abc43dd2e0eaf1ef0b",
+    "red_team": "sha256:8c91c1af91948446fe8bb3bec3515d252848c514631a3636343e394b79828ecc"
+  },
+  "status": "ready",
+  "created_at": "2026-10-01T00:39:35.877856+00:00",
+  "offline_fixture": false,
+  "host_job_id": "invest_manual_codex_BE_20261001_083740",
+  "telemetry": {
+    "prepare_seconds": 38.6234872918576,
+    "fmp": {
+      "preparation": {
+        "requests": 3,
+        "cache_hits": 2,
+        "http_calls_known": 3,
+        "http_calls_unknown": 0,
+        "outcomes": {
+          "ok": 5
+        }
+      },
+      "earnings": {
+        "requests": 7,
+        "cache_hits": 18,
+        "http_calls_known": 7,
+        "http_calls_unknown": 0,
+        "outcomes": {
+          "ok": 19,
+          "empty": 2,
+          "transport_error": 2,
+          "permission_denied": 2
+        }
+      },
+      "factpack": {
+        "requests": 10,
+        "cache_hits": 21,
+        "http_calls_known": 10,
+        "http_calls_unknown": 0,
+        "outcomes": {
+          "ok": 21,
+          "permission_denied": 9,
+          "empty": 1
+        }
+      }
+    },
+    "raw_scripts": {
+      "fundamentals": {
+        "command": [
+          "skills/us-stock-analysis/scripts/analyze.py",
+          "BE",
+          "--json-only"
+        ],
+        "started_at": "2026-10-01T00:38:57.442189+00:00",
+        "finished_at": "2026-10-01T00:39:00.033825+00:00",
+        "elapsed_seconds": 2.5916790422052145,
+        "returncode": 0,
+        "status": "ok",
+        "reason": null,
+        "content_hash": "sha256:8cc97912fa1b0d1c8cba73769eb641160c4f656356e86336aa0b52e7d9be8120"
+      },
+      "sentiment": {
+        "command": [
+          "skills/market-sentiment-analyzer/scripts/sentiment.py",
+          "--ticker",
+          "BE",
+          "--json-only"
+        ],
+        "started_at": "2026-10-01T00:38:57.442287+00:00",
+        "finished_at": "2026-10-01T00:39:00.876430+00:00",
+        "elapsed_seconds": 3.4341667499393225,
+        "returncode": 0,
+        "status": "ok",
+        "reason": null,
+        "content_hash": "sha256:e9e50653ce96ceea12df6cc65f7cc89f378f0f62feb37b8515f1d6852593658d"
+      },
+      "news": {
+        "command": [
+          "skills/market-news-analyst/scripts/fetch.py",
+          "BE",
+          "--hours",
+          "48",
+          "--json-only"
+        ],
+        "started_at": "2026-10-01T00:38:57.442359+00:00",
+        "finished_at": "2026-10-01T00:39:08.428777+00:00",
+        "elapsed_seconds": 10.986315000336617,
+        "returncode": 0,
+        "status": "ok",
+        "reason": null,
+        "content_hash": "sha256:5ffd40e7b69f92cd05693a7df1494d7ed820370ac857d16d3a90a6ddba55e026"
+      },
+      "technical": {
+        "command": [
+          "skills/technical-analyst/scripts/analyze.py",
+          "BE",
+          "--json-only"
+        ],
+        "started_at": "2026-10-01T00:39:00.035366+00:00",
+        "finished_at": "2026-10-01T00:39:01.661235+00:00",
+        "elapsed_seconds": 1.6258926670998335,
+        "returncode": 0,
+        "status": "ok",
+        "reason": null,
+        "content_hash": "sha256:3729498bee1d10300fbcd2e3cf8defabf5431ed3ea951f4822396c73df9dc17c"
+      },
+      "dcf": {
+        "command": [
+          "skills/valuation-modeler/scripts/dcf.py",
+          "BE",
+          "--json-only"
+        ],
+        "started_at": "2026-10-01T00:39:00.878468+00:00",
+        "finished_at": "2026-10-01T00:39:02.890569+00:00",
+        "elapsed_seconds": 2.0121099576354027,
+        "returncode": 0,
+        "status": "ok",
+        "reason": null,
+        "content_hash": "sha256:3f1c97cc0e6d149ff18a6d66616902ec6969ee8c9286807bd19e4a402f68c20c"
+      },
+      "comps": {
+        "command": [
+          "skills/valuation-modeler/scripts/comps.py",
+          "BE",
+          "--json-only"
+        ],
+        "started_at": "2026-10-01T00:39:01.662637+00:00",
+        "finished_at": "2026-10-01T00:39:03.911696+00:00",
+        "elapsed_seconds": 2.2490487499162555,
+        "returncode": 0,
+        "status": "ok",
+        "reason": null,
+        "content_hash": "sha256:87fd31841876b09e70d8735b17bd71b48d8af85dbb5f720d5611d3eeb75cc64b"
+      },
+      "forecaster": {
+        "command": [
+          "skills/earnings-valuation-forecaster/scripts/forecast.py",
+          "BE",
+          "--json-only"
+        ],
+        "started_at": "2026-10-01T00:39:02.892321+00:00",
+        "finished_at": "2026-10-01T00:39:07.385495+00:00",
+        "elapsed_seconds": 4.4931609579361975,
+        "returncode": 1,
+        "status": "unavailable",
+        "reason": "insufficient PE history from ratios endpoint",
+        "content_hash": "sha256:5e047b54f3dd5a2d254a7121f78c236af128467ce9458578df8d021c2149a442"
+      }
+    },
+    "tokens": {
+      "input": null,
+      "output": null,
+      "cached": null
+    }
+  },
+  "stages": {
+    "quant": {
+      "status": "complete",
+      "attempts": 0,
+      "artifact": "quant.json",
+      "output_hash": "sha256:b55802116a7842197fddb9b22177828242cb3a4c7bf593d7bc9a70cbaba0bd72",
+      "dependency_hash": "sha256:722f645893bba27adbc2a531caa881d330dfcef5971a2988277d93910afd1bc7",
+      "finished_at": "2026-10-01T00:39:35.879979+00:00"
+    },
+    "fundamentals": {
+      "status": "complete",
+      "attempts": 1,
+      "fallback": false,
+      "started_at": "2026-10-01T00:40:07.052023+00:00",
+      "model": "gpt-6-luna",
+      "effort": "max",
+      "input_hash": "sha256:060ed198a244807986f9bca6cdcf2beacd8f0081e66422fa6fb2d0687012e390",
+      "queued_seconds": 31.174177,
+      "tokens": {
+        "input": null,
+        "output": null,
+        "cached": null
+      },
+      "artifact": "fundamentals.json",
+      "output_hash": "sha256:2c80cbf3007f415cd3d002c918b4dec2144150fd0bd3fb344430135f59a1cf3d",
+      "dependency_hash": "sha256:2f833398d0e3cb0928e9ae30c0c81f18dae9b42d23c9824863933333bc300dcc",
+      "finished_at": "2026-10-01T00:44:55.777815+00:00",
+      "elapsed_seconds": 288.725792
+    },
+    "sentiment": {
+      "status": "complete",
+      "attempts": 1,
+      "fallback": false,
+      "started_at": "2026-10-01T00:40:07.052043+00:00",
+      "model": "gpt-6-luna",
+      "effort": "max",
+      "input_hash": "sha256:913f10219d1ec80bcc722f90ba49c13bbe6e1e811b5e3c4ca2b5e0d7ae611c6a",
+      "queued_seconds": 31.174189,
+      "tokens": {
+        "input": null,
+        "output": null,
+        "cached": null
+      },
+      "artifact": "sentiment.json",
+      "output_hash": "sha256:cee586281939198ad76ac2b379cd9bd0cb4abd6a19529d225c17bf616cadf982",
+      "dependency_hash": "sha256:2f833398d0e3cb0928e9ae30c0c81f18dae9b42d23c9824863933333bc300dcc",
+      "finished_at": "2026-10-01T00:43:36.652267+00:00",
+      "elapsed_seconds": 209.600224
+    },
+    "news": {
+      "status": "complete",
+      "attempts": 2,
+      "fallback": false,
+      "started_at": "2026-10-01T00:46:07.793798+00:00",
+      "model": "gpt-6-luna",
+      "effort": "max",
+      "input_hash": "sha256:1d2e83429495da05542c6a4ab750e7adf66f16b81332e4d4f4df110d1637130e",
+      "queued_seconds": 391.91595,
+      "tokens": {
+        "input": null,
+        "output": null,
+        "cached": null
+      },
+      "failure_kind": "schema",
+      "artifact": "news.json",
+      "output_hash": "sha256:4a56ca8f1e93df1c02106e133257bafee4642fe6876ee55bd1b8fbaab2539a35",
+      "dependency_hash": "sha256:2f833398d0e3cb0928e9ae30c0c81f18dae9b42d23c9824863933333bc300dcc",
+      "finished_at": "2026-10-01T00:46:20.721727+00:00",
+      "elapsed_seconds": 12.927929
+    },
+    "technical": {
+      "status": "complete",
+      "attempts": 1,
+      "fallback": false,
+      "started_at": "2026-10-01T00:44:00.594877+00:00",
+      "model": "gpt-6-luna",
+      "effort": "max",
+      "input_hash": "sha256:e5d518dd4402b3291c0dfb4e8a6c3cd146b2de3810d736aad430938768ca5a99",
+      "queued_seconds": 264.717028,
+      "tokens": {
+        "input": null,
+        "output": null,
+        "cached": null
+      },
+      "artifact": "technical.json",
+      "output_hash": "sha256:6327eee93de53695a4a1197731e5cb348ca29de9e223daac42a0da5fdba471ff",
+      "dependency_hash": "sha256:2f833398d0e3cb0928e9ae30c0c81f18dae9b42d23c9824863933333bc300dcc",
+      "finished_at": "2026-10-01T00:48:24.868484+00:00",
+      "elapsed_seconds": 264.273607
+    },
+    "valuation": {
+      "status": "complete",
+      "attempts": 1,
+      "fallback": false,
+      "started_at": "2026-10-01T00:46:26.085670+00:00",
+      "model": "gpt-6-luna",
+      "effort": "max",
+      "input_hash": "sha256:8e7b82e1e9fb1c14c22490464920922a177da66b51db55abc43dd2e0eaf1ef0b",
+      "queued_seconds": 410.207822,
+      "tokens": {
+        "input": null,
+        "output": null,
+        "cached": null
+      },
+      "artifact": "valuation.json",
+      "output_hash": "sha256:01277120bc24e95adbb35e58392ad3728f3d6b3c981a43ebc07ea0e006585d6b",
+      "dependency_hash": "sha256:2f833398d0e3cb0928e9ae30c0c81f18dae9b42d23c9824863933333bc300dcc",
+      "finished_at": "2026-10-01T00:52:19.397139+00:00",
+      "elapsed_seconds": 353.311469
+    },
+    "red_team": {
+      "status": "complete",
+      "attempts": 1,
+      "fallback": false,
+      "started_at": "2026-10-01T00:55:22.249253+00:00",
+      "model": "gpt-6-luna",
+      "effort": "max",
+      "input_hash": "sha256:8c91c1af91948446fe8bb3bec3515d252848c514631a3636343e394b79828ecc",
+      "queued_seconds": 946.371406,
+      "tokens": {
+        "input": null,
+        "output": null,
+        "cached": null
+      },
+      "artifact": "red_team.json",
+      "output_hash": "sha256:3c19dcf9a9d01cce63bb993154ed8ad914230c2683eb97a29ae509e4f42a6aff",
+      "dependency_hash": "sha256:01607d48076246b3073cd9cb3424ad134258ac6a09d8696fba9b7bbe5a94baee",
+      "finished_at": "2026-10-01T00:59:48.824543+00:00",
+      "elapsed_seconds": 266.57529
+    },
+    "decision": {
+      "status": "complete",
+      "attempts": 0,
+      "started_at": "2026-10-01T01:00:57.713120+00:00",
+      "input_artifact": "p3_input.json",
+      "input_hash": "sha256:d3b7e85492458fe8f7b5998c24992a479f826bcd35c21e78f79bcfed6d1cfdf2",
+      "artifact": "decision.json",
+      "output_hash": "sha256:2be993013058cbffafd8fd49f2bb0a3a3a1983b0874458a02e6a9f77768bfd67",
+      "dependency_hash": "sha256:99fe09663f1fe9ce339daae82c37a2adbb6cb7751362f10ae9a37f3fc86714a7",
+      "finished_at": "2026-10-01T01:00:57.714356+00:00",
+      "elapsed_seconds": 0.001236
+    },
+    "mhp": {
+      "status": "complete",
+      "attempts": 0,
+      "started_at": "2026-10-01T01:01:59.606818+00:00",
+      "input_artifact": "mhp_input.json",
+      "input_hash": "sha256:350d152a157b1194c0440545ee6d5d0d74d33d05732581a76a870b16ca72a664",
+      "artifact": "mhp.json",
+      "output_hash": "sha256:4f861bc15ef7262e861264231222e576d4f8153a63bbfb5126756836fff52776",
+      "dependency_hash": "sha256:01607d48076246b3073cd9cb3424ad134258ac6a09d8696fba9b7bbe5a94baee",
+      "finished_at": "2026-10-01T01:01:59.609142+00:00",
+      "elapsed_seconds": 0.002324
+    },
+    "risk": {
+      "status": "complete",
+      "attempts": 0,
+      "started_at": "2026-10-01T01:01:59.610105+00:00",
+      "input_artifact": "p4_input.json",
+      "input_hash": "sha256:c98a82bcaf8cbcfd5efc0266fa3fa18033803c4177440ab746ccffe77383f0aa",
+      "artifact": "risk.json",
+      "output_hash": "sha256:e462f9664e3b3815c405c0b5d052ba311ec0bc9ba7ea663c0d71586471b69fdb",
+      "dependency_hash": "sha256:70de976631dfe985c139cfb541f6ffeb131238849f86734fda65f5d70a6964b8",
+      "finished_at": "2026-10-01T01:02:04.944666+00:00",
+      "elapsed_seconds": 5.334561
+    },
+    "finalize": {
+      "status": "pending",
+      "attempts": 0,
+      "started_at": "2026-10-01T01:06:30.266483+00:00",
+      "input_artifact": "qualitative.json",
+      "input_hash": "sha256:6224ecf313f0093f4d7303b6969355c251c7d5d1f6576a33f4726b2905ff3d74"
+    }
+  },
+  "qualitative_hash": "sha256:6224ecf313f0093f4d7303b6969355c251c7d5d1f6576a33f4726b2905ff3d74"
+}

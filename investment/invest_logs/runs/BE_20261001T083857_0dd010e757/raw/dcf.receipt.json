@@ -1,0 +1,14 @@
+{
+  "command": [
+    "skills/valuation-modeler/scripts/dcf.py",
+    "BE",
+    "--json-only"
+  ],
+  "started_at": "2026-10-01T00:39:00.878468+00:00",
+  "finished_at": "2026-10-01T00:39:02.890569+00:00",
+  "elapsed_seconds": 2.0121099576354027,
+  "returncode": 0,
+  "status": "ok",
+  "reason": null,
+  "content_hash": "sha256:3f1c97cc0e6d149ff18a6d66616902ec6969ee8c9286807bd19e4a402f68c20c"
+}

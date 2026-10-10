@@ -1,0 +1,8 @@
+{
+  "accepted_for_pilot": false,
+  "reason": "Burry raw burry_score was not mapped to engine score/veto_flag",
+  "source_score": 27.8,
+  "recorded_engine_score": null,
+  "corrected_engine_outputs_identical": true,
+  "history_preserved": true
+}

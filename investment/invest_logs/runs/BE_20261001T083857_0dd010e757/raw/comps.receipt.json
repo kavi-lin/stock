@@ -1,0 +1,14 @@
+{
+  "command": [
+    "skills/valuation-modeler/scripts/comps.py",
+    "BE",
+    "--json-only"
+  ],
+  "started_at": "2026-10-01T00:39:01.662637+00:00",
+  "finished_at": "2026-10-01T00:39:03.911696+00:00",
+  "elapsed_seconds": 2.2490487499162555,
+  "returncode": 0,
+  "status": "ok",
+  "reason": null,
+  "content_hash": "sha256:87fd31841876b09e70d8735b17bd71b48d8af85dbb5f720d5611d3eeb75cc64b"
+}

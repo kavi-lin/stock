@@ -1,0 +1,107 @@
+{
+  "generated_at": "2026-10-01T00:38:59.669830+00:00",
+  "composite_score": 54.9,
+  "label": "Neutral",
+  "vix": {
+    "current": 16.34,
+    "percentile_1y": 31.9,
+    "regime": "NORMAL"
+  },
+  "spy_momentum": {
+    "rsi_14": 50.2,
+    "pct_above_ma50": 0.44,
+    "pct_above_ma200": 6.78
+  },
+  "put_call_ratio": null,
+  "fear_greed_index": 30.8,
+  "components_used": [
+    "vix",
+    "spy_rsi",
+    "pct_above_ma",
+    "fg"
+  ],
+  "extreme_sentiment_triggered": false,
+  "cache_hit": false,
+  "cache_age_sec": 0,
+  "ticker_signals": {
+    "ticker": "BE",
+    "insider_stats": [
+      {
+        "year": 2028,
+        "quarter": 3,
+        "acquired_disposed_ratio": 0,
+        "total_acquired_shares": 510994,
+        "total_disposed_shares": 0,
+        "acquired_transactions": 10,
+        "disposed_transactions": 0,
+        "total_purchases": 0,
+        "total_sales": 0
+      },
+      {
+        "year": 2027,
+        "quarter": 1,
+        "acquired_disposed_ratio": 0,
+        "total_acquired_shares": 0,
+        "total_disposed_shares": 110000,
+        "acquired_transactions": 0,
+        "disposed_transactions": 1,
+        "total_purchases": 0,
+        "total_sales": 0
+      },
+      {
+        "year": 2026,
+        "quarter": 3,
+        "acquired_disposed_ratio": 0.1538,
+        "total_acquired_shares": 24688,
+        "total_disposed_shares": 399292,
+        "acquired_transactions": 2,
+        "disposed_transactions": 13,
+        "total_purchases": 0,
+        "total_sales": 11
+      },
+      {
+        "year": 2026,
+        "quarter": 2,
+        "acquired_disposed_ratio": 0.7222,
+        "total_acquired_shares": 100082,
+        "total_disposed_shares": 313774,
+        "acquired_transactions": 13,
+        "disposed_transactions": 18,
+        "total_purchases": 0,
+        "total_sales": 16
+      }
+    ],
+    "insider_sentiment": {
+      "monthly_mspr": [
+        {
+          "year": 2026,
+          "month": 2,
+          "mspr": 11.904326,
+          "change_shares": 78130
+        },
+        {
+          "year": 2026,
+          "month": 3,
+          "mspr": 47.616398,
+          "change_shares": 190887
+        },
+        {
+          "year": 2026,
+          "month": 4,
+          "mspr": -100,
+          "change_shares": -120000
+        },
+        {
+          "year": 2026,
+          "month": 5,
+          "mspr": -29.184015,
+          "change_shares": -82357
+        }
+      ],
+      "latest_mspr": -29.184015
+    },
+    "short_pct_float": 7.34,
+    "short_pct_float_source": "yfinance.info (FINRA bi-monthly)",
+    "insider_stats_source": "FMP_SUPP_BUNDLE"
+  }
+}

@@ -1,0 +1,244 @@
+{
+  "schema": "investment-run/1.0",
+  "run_id": "NVDA_20261001T003605_0eab632f7a",
+  "ticker": "NVDA",
+  "analysis_at": "2026-09-30T16:36:11.248079+00:00",
+  "snapshot_hash": "sha256:1f1ba017c5f4b3c7abbddb37a4f67de365624c60c2e57e9bc893c07ffa67dea0",
+  "producer_version": "sha256:a697ee0deea480ee7d35438ae12641433b970f6ead1acc9d537352c3d8ac16f9",
+  "protocol_version": "V5.5",
+  "prompts": {
+    "fundamentals": "sha256:57d0ee54c0b14ad6954ab2f0b254297212823a032770d848cbd751b414782d45",
+    "sentiment": "sha256:2779f01d37b223ddc872ea1afa8cdd9070cec29169f0f706da49f82ca34df5f2",
+    "news": "sha256:36cab34fc2bb88c875117d26c2f2873dce0fbe0298ff231a1fbadcbc5d8313bb",
+    "technical": "sha256:f08538e00a6358f3d6ffb53f73f06dd3677059f787afba1a1ddcef676499f68f",
+    "valuation": "sha256:272fb6e7963a544a145809e9f4bb1741f503ccacad2168cbf0d573381615305d",
+    "red_team": "sha256:4a2d329628916963dac0694bf7a44df95901ae71031b3c5308ba9689311565dc"
+  },
+  "status": "committed",
+  "created_at": "2026-09-30T16:36:11.467980+00:00",
+  "offline_fixture": false,
+  "host_job_id": "invest_manual_codex_NVDA_20261001_003028",
+  "telemetry": {
+    "prepare_seconds": 5.559345833025873,
+    "fmp": {
+      "preparation": {
+        "requests": 3,
+        "cache_hits": 2,
+        "http_calls_known": 3,
+        "http_calls_unknown": 0,
+        "outcomes": {
+          "ok": 5
+        }
+      },
+      "earnings": {
+        "requests": 27,
+        "cache_hits": 0,
+        "http_calls_known": 27,
+        "http_calls_unknown": 0,
+        "outcomes": {
+          "ok": 21,
+          "transport_error": 2,
+          "permission_denied": 4
+        }
+      },
+      "factpack": {
+        "requests": 26,
+        "cache_hits": 4,
+        "http_calls_known": 26,
+        "http_calls_unknown": 0,
+        "outcomes": {
+          "ok": 22,
+          "permission_denied": 8
+        }
+      }
+    },
+    "tokens": {
+      "input": null,
+      "output": null,
+      "cached": null
+    }
+  },
+  "stages": {
+    "quant": {
+      "status": "complete",
+      "attempts": 0,
+      "artifact": "quant.json",
+      "output_hash": "sha256:c7b6fb2fc1ba8778071d87acaa5088dff5265fde8751a4621a69028d698228e2",
+      "dependency_hash": "sha256:3e3b773c4ff2e1267b5474303d71d7313945817f51e848c0895da12e38ab3ac8",
+      "finished_at": "2026-09-30T16:36:11.471463+00:00"
+    },
+    "fundamentals": {
+      "status": "complete",
+      "attempts": 1,
+      "fallback": false,
+      "started_at": "2026-09-30T16:36:30.693150+00:00",
+      "model": "gpt-6-luna",
+      "effort": "max",
+      "input_hash": "sha256:57d0ee54c0b14ad6954ab2f0b254297212823a032770d848cbd751b414782d45",
+      "queued_seconds": 19.225187,
+      "tokens": {
+        "input": null,
+        "output": null,
+        "cached": null
+      },
+      "artifact": "fundamentals.json",
+      "output_hash": "sha256:fff6ce49e752ae36c05189049bcab6ce9d0a02de9a5092bd1be3dd6d01280b01",
+      "dependency_hash": "sha256:aa31e10f40550e39e76f2fbd68102d0817ca39119db701dbfcedc92482caa62f",
+      "finished_at": "2026-09-30T16:39:16.854826+00:00",
+      "elapsed_seconds": 166.161676
+    },
+    "sentiment": {
+      "status": "complete",
+      "attempts": 1,
+      "fallback": false,
+      "started_at": "2026-09-30T16:36:30.693187+00:00",
+      "model": "gpt-6-luna",
+      "effort": "max",
+      "input_hash": "sha256:2779f01d37b223ddc872ea1afa8cdd9070cec29169f0f706da49f82ca34df5f2",
+      "queued_seconds": 19.225212,
+      "tokens": {
+        "input": null,
+        "output": null,
+        "cached": null
+      },
+      "artifact": "sentiment.json",
+      "output_hash": "sha256:299a2a3e0543a35f814da6da10b0e639d9850ea1d257986c0d65f4906e327724",
+      "dependency_hash": "sha256:aa31e10f40550e39e76f2fbd68102d0817ca39119db701dbfcedc92482caa62f",
+      "finished_at": "2026-09-30T16:38:16.789984+00:00",
+      "elapsed_seconds": 106.096797
+    },
+    "news": {
+      "status": "complete",
+      "attempts": 1,
+      "fallback": false,
+      "started_at": "2026-09-30T16:36:30.693202+00:00",
+      "model": "gpt-6-luna",
+      "effort": "max",
+      "input_hash": "sha256:36cab34fc2bb88c875117d26c2f2873dce0fbe0298ff231a1fbadcbc5d8313bb",
+      "queued_seconds": 19.225226,
+      "tokens": {
+        "input": null,
+        "output": null,
+        "cached": null
+      },
+      "artifact": "news.json",
+      "output_hash": "sha256:3249766f7fa5a1819c10b6a1b61805ede2ba9202dae48819087eb4ce824c27fb",
+      "dependency_hash": "sha256:aa31e10f40550e39e76f2fbd68102d0817ca39119db701dbfcedc92482caa62f",
+      "finished_at": "2026-09-30T16:39:56.954338+00:00",
+      "elapsed_seconds": 206.261136
+    },
+    "technical": {
+      "status": "complete",
+      "attempts": 1,
+      "fallback": false,
+      "started_at": "2026-09-30T16:40:05.310529+00:00",
+      "model": "gpt-6-luna",
+      "effort": "max",
+      "input_hash": "sha256:f08538e00a6358f3d6ffb53f73f06dd3677059f787afba1a1ddcef676499f68f",
+      "queued_seconds": 233.842585,
+      "tokens": {
+        "input": null,
+        "output": null,
+        "cached": null
+      },
+      "artifact": "technical.json",
+      "output_hash": "sha256:2d6ad133261c6f226a30edc35c06b4e5548ddb6a96c100b68602a4376bb27048",
+      "dependency_hash": "sha256:aa31e10f40550e39e76f2fbd68102d0817ca39119db701dbfcedc92482caa62f",
+      "finished_at": "2026-09-30T16:41:33.094448+00:00",
+      "elapsed_seconds": 87.783919
+    },
+    "valuation": {
+      "status": "complete",
+      "attempts": 1,
+      "fallback": false,
+      "started_at": "2026-09-30T16:40:05.310607+00:00",
+      "model": "gpt-6-luna",
+      "effort": "max",
+      "input_hash": "sha256:272fb6e7963a544a145809e9f4bb1741f503ccacad2168cbf0d573381615305d",
+      "queued_seconds": 233.842634,
+      "tokens": {
+        "input": null,
+        "output": null,
+        "cached": null
+      },
+      "artifact": "valuation.json",
+      "output_hash": "sha256:f007aa0d616466a089f73342eb809653418c5bd89bee0097b56c295a426fb926",
+      "dependency_hash": "sha256:aa31e10f40550e39e76f2fbd68102d0817ca39119db701dbfcedc92482caa62f",
+      "finished_at": "2026-09-30T16:43:12.581092+00:00",
+      "elapsed_seconds": 187.270485
+    },
+    "red_team": {
+      "status": "complete",
+      "attempts": 1,
+      "fallback": false,
+      "started_at": "2026-09-30T16:46:41.093528+00:00",
+      "model": "gpt-6-luna",
+      "effort": "max",
+      "input_hash": "sha256:4a2d329628916963dac0694bf7a44df95901ae71031b3c5308ba9689311565dc",
+      "queued_seconds": 629.625555,
+      "tokens": {
+        "input": null,
+        "output": null,
+        "cached": null
+      },
+      "artifact": "red_team.json",
+      "output_hash": "sha256:833645923ab211b7ff50867d2fe871b6083bfac026ada6d2a5d80e36f8134bd3",
+      "dependency_hash": "sha256:fbe4a87a2216b20b45aa8606a6b93d37a26b0dd00a96ca15958da7a89ad03b82",
+      "finished_at": "2026-09-30T16:48:58.122643+00:00",
+      "elapsed_seconds": 137.029115
+    },
+    "decision": {
+      "status": "complete",
+      "attempts": 0,
+      "started_at": "2026-09-30T16:53:45.402952+00:00",
+      "input_artifact": "p3_input.json",
+      "input_hash": "sha256:48210b98c5d0e5b24456c707dcbc069402b795b5fa0bba9ea4db8fc5996ede46",
+      "artifact": "decision.json",
+      "output_hash": "sha256:4280860bf1f65d0da9966dc0c9dcce77c52d03ff245f82e377a9f19887d578b6",
+      "dependency_hash": "sha256:397dcc6d01661e5fefa2c35b3b27984ecb60bf4ae34e294a5aed6dd2677d1cb2",
+      "finished_at": "2026-09-30T16:53:45.410022+00:00",
+      "elapsed_seconds": 0.00707
+    },
+    "mhp": {
+      "status": "complete",
+      "attempts": 0,
+      "started_at": "2026-09-30T16:54:38.603502+00:00",
+      "input_artifact": "mhp_input.json",
+      "input_hash": "sha256:f3f365d21480e0fae29003262e1a009f3211bb7ef3f35b708da728e8a4cd551d",
+      "artifact": "mhp.json",
+      "output_hash": "sha256:b207fb94f7a129d12bf41c00dd5ebbd852507bc480155022d847e725c277e252",
+      "dependency_hash": "sha256:fbe4a87a2216b20b45aa8606a6b93d37a26b0dd00a96ca15958da7a89ad03b82",
+      "finished_at": "2026-09-30T16:54:38.607192+00:00",
+      "elapsed_seconds": 0.00369
+    },
+    "risk": {
+      "status": "complete",
+      "attempts": 0,
+      "started_at": "2026-09-30T16:54:38.608358+00:00",
+      "input_artifact": "p4_input.json",
+      "input_hash": "sha256:b49e3b9a512f5dc5a00096f80b4f374f6013b4ffa2304130fb4f5f6406f20718",
+      "artifact": "risk.json",
+      "output_hash": "sha256:b053db48b06dd7ac23ca1e817faf242dc595c8842fa48cbf8d558cd00b33a617",
+      "dependency_hash": "sha256:fc4a0c9730489580cc790b30e640052d7e25ed3a2fd543abbca04a12e1d9fbf1",
+      "finished_at": "2026-09-30T16:54:43.130688+00:00",
+      "elapsed_seconds": 4.52233
+    },
+    "finalize": {
+      "status": "complete",
+      "attempts": 0,
+      "started_at": "2026-09-30T17:02:30.350815+00:00",
+      "input_artifact": "qualitative.json",
+      "input_hash": "sha256:c84bd92a697cdd855669a170fbdfad3cb92ef7bed9efca8602ba503fb0c42177",
+      "artifact": "finalize.json",
+      "output_hash": "sha256:e0ebf3d4214aade762fd2ab2e3083bf5c15b2c34704e2f653ec9699f128c2b5a",
+      "dependency_hash": "sha256:6ad6b010b85e4432447019a8b42c354dc478d60fd6294f000a04b23daa01d40d",
+      "finished_at": "2026-09-30T17:02:58.838941+00:00",
+      "elapsed_seconds": 28.488126
+    }
+  },
+  "qualitative_hash": "sha256:c84bd92a697cdd855669a170fbdfad3cb92ef7bed9efca8602ba503fb0c42177",
+  "thesis_registration": {
+    "returncode": 0,
+    "status": "unavailable"
+  }
+}

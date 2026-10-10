@@ -1,0 +1,29 @@
+{
+  "ticker": "HPE",
+  "generated_at": "2026-10-01T13:04:24.828219+00:00",
+  "burry_score": 44.7,
+  "verdict": "NEUTRAL",
+  "components": {
+    "fcf_yield_pct": 4.79,
+    "ev_ebit": 14.37,
+    "debt_to_equity": 0.76,
+    "pct_below_52w_high": 0.0,
+    "insider_net": "SELL"
+  },
+  "component_scores": {
+    "fcf_yield": 47.9,
+    "ev_ebit": 53.6,
+    "debt_to_equity": 63.4,
+    "pct_below_52w_high": 20.0,
+    "insider": 20
+  },
+  "weights_active": [
+    "fcf_yield",
+    "ev_ebit",
+    "debt_to_equity",
+    "pct_below_52w_high",
+    "insider"
+  ],
+  "reasoning": "FCF yield 4.8% │ EV/EBITDA 14.4 │ D/E 0.76 │ 0% below 52wH │ insider=SELL",
+  "veto_flag": false
+}

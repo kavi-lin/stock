@@ -1,0 +1,121 @@
+{
+  "schema": "p5-qualitative/1.0",
+  "ticker": "NVDA",
+  "date": "2026-10-01",
+  "lanes": {
+    "fundamentals": {
+      "signal": "BUY",
+      "key_factors": [
+        "Revenue up 106% YoY",
+        "Operating margin above 65%",
+        "Net cash and low leverage"
+      ],
+      "risk_flags": [
+        "Negative accruals quality flag",
+        "FCF yield only 2.28%"
+      ]
+    },
+    "sentiment": {
+      "signal": "HOLD",
+      "key_factors": [
+        "Recent insider selling; MSPR deeply negative",
+        "Weak breadth; VIX remains normal",
+        "Low short interest cushions sentiment"
+      ],
+      "risk_flags": [
+        "Insider and congressional selling signals",
+        "Weakening market breadth"
+      ]
+    },
+    "news": {
+      "signal": "BUY",
+      "key_factors": [
+        "Buyback expansion signals management confidence",
+        "Vera Rubin reaches production workloads",
+        "Upward PT revisions support momentum"
+      ],
+      "risk_flags": [
+        "No rating changes reported in 30 days",
+        "Macro yields, capex scrutiny, China competition"
+      ]
+    },
+    "technical": {
+      "signal": "HOLD",
+      "key_factors": [
+        "Price above 20/50/200-day averages",
+        "RSI bullish; MACD positive but flat",
+        "Normal volume; resistance near $230"
+      ],
+      "risk_flags": [
+        "Resistance near $229.98",
+        "Insider transactions show net distribution"
+      ]
+    },
+    "valuation": {
+      "signal": "HOLD",
+      "key_factors": [
+        "Fair-value blend is near the current price",
+        "Two correlated DCF anchors share one group",
+        "No business-similar peer cohort is available"
+      ],
+      "risk_flags": [
+        "Outlier owner-earnings anchor weakens robustness",
+        "Fundamental and analyst anchors diverge widely"
+      ]
+    }
+  },
+  "red_team": {
+    "verdict": "STRONG_COUNTER",
+    "counter_thesis": "NVDA’s mixed HOLD is vulnerable because the $228.38 price implies a 60% five-year FCF CAGR, while the frozen inputs provide no actual or lane FCF growth estimate; the weighted fair value is $220.12, and the 10-year real yield is 2.88%. The analyst revenue path of 39.28% CAGR does not establish that FCF can meet the higher implied hurdle.",
+    "kill_conditions": [
+      "IF FCF growth is below 30% annualized across the next two reported quarters WITHIN 180 days THEN the price-implied 60% five-year FCF growth case breaks.",
+      "IF year-over-year revenue growth falls below 36% in either of the next two quarterly reports WITHIN 180 days THEN the price-implied revenue path breaks.",
+      "IF the FRED 10-year real Treasury yield remains at or above 2.88% for the next 90 days THEN persistent discount-rate pressure and the $220.12 weighted fair value leave the $228.38 price without a rate-supported valuation cushion."
+    ],
+    "counter_evidence_strength": 4,
+    "thesis_break_probability": 0.42,
+    "execution_failed": false
+  },
+  "burry_narrative": "FCF yield 0.8% │ EV/EBITDA 27.2 │ D/E 0.17 │ 3% below 52wH │ insider=SELL",
+  "conflict_bias": {
+    "schema": "conflict_bias.v1",
+    "tentative_decision": "HOLD",
+    "lane_signals": {
+      "fundamentals": "BUY",
+      "sentiment": "HOLD",
+      "news": "BUY",
+      "technical": "HOLD",
+      "valuation": "HOLD"
+    },
+    "triggers_fired": [],
+    "conflict_summary": "No T1–T5 triggers fired; lane signals are mixed.",
+    "t4_detail": null,
+    "t5_detail": null,
+    "proceed_to_phase3": true
+  },
+  "macro_context": "Phase 0 為波動市況；高長端與實質利率、信用壓力及偏弱市場參與使科技股估值承壓，較溫和的通膨與韌性活動構成抵銷。FTD 為 NO_SIGNAL，宏觀環境對估值擴張的支持有限。",
+  "watch_conditions": {
+    "fcf_growth": "接下來兩次財報若年化 FCF 增速低於 30%，重新檢視現價隱含的長期現金流成長要求。",
+    "revenue_growth": "接下來兩次財報任一次營收年增低於 36%，重新評估目前營收路徑是否仍能支持估值。",
+    "real_yield": "若美國 10 年期實質殖利率連續 90 天維持在 2.88% 或以上，重新評估折現率壓力與估值折價。",
+    "range_support": "若收盤跌破 221.09 美元，視為目前整理區間失效並重新評估風險。",
+    "breakout_confirmation": "只有收盤站上 229.98 美元且成交量高於 20 日均量，才確認向上突破情境。"
+  },
+  "key_risks": [
+    "現價隱含五年 FCF CAGR 約 60%，但凍結資料沒有實際或 lane 預估的 FCF 成長率可確認此門檻。",
+    "Fundamentals 與 Burry 輸入的 FCF yield 分別為 2.28% 與 0.76%；口徑與期間未在本次輸入中調和。",
+    "估值僅有 5/9 錨點、同業群不足，Forecaster 因預測信心低而排除；估值結論受資料覆蓋限制。",
+    "內部人交易偏向賣出、廣度轉弱，且高實質利率可能壓抑高估值科技股。",
+    "forecaster transition source 與來源 bundle 的 mtime 相差約 9.2 小時，Phase 3 發出 transition_mtime_skew 高度警示。"
+  ],
+  "bias_notes": "五個 lane 訊號混合，Phase 2.5 未觸發 T1–T5；同業與預測資料缺口使估值證據偏薄。過渡資料有 mtime skew 警示，對 transition 相關推論保留。",
+  "phase2_fanout_mode": "PARALLEL_SUBAGENT",
+  "degraded_analysts": [],
+  "decision_point_days": 21,
+  "devils_advocate_filed": false,
+  "trade_metadata": {
+    "trade_type": "trend",
+    "event_tag": "earnings"
+  },
+  "last_outcome": "UNKNOWN"
+}

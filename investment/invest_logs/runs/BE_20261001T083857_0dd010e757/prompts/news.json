@@ -1,0 +1,797 @@
+{
+  "run_id": "BE_20261001T083857_0dd010e757",
+  "lane": "news",
+  "ticker": "BE",
+  "snapshot_hash": "sha256:61fbb448c0aac800f335ca0f794f83833ab6e8c4b9f78e9e0e53611241dab047",
+  "input": {
+    "factpack": {
+      "ticker": "BE",
+      "bundles": {
+        "ticker_data_bundle": {
+          "status": "ok",
+          "fetched_at": "2026-10-01T00:39:12.261880Z",
+          "scoring": {
+            "_source": "finnhub",
+            "price": 276.98,
+            "previousClose": 291.25,
+            "dayHigh": 300.46,
+            "dayLow": 276.9,
+            "mktCap": 81578183671.69669,
+            "peRatio": 333.9228,
+            "epsTTM": 0.7339,
+            "dividendYield": null,
+            "priceToBookRatio": 26.736,
+            "forwardPE": 102.63083690189599,
+            "pegRatio": 0.025578804599477825,
+            "roeTTM": 24.77,
+            "debtToEquity": 3.7298,
+            "fcfPerShareTTM": 2.1155,
+            "nextEarningsDate": "2026-10-26"
+          }
+        },
+        "fmp_supp_bundle": {
+          "ma_events": {
+            "lookback_days": 180,
+            "events": [],
+            "source": "FMP /stable/mergers-acquisitions-latest"
+          }
+        }
+      }
+    },
+    "script_output": {
+      "ticker": "BE",
+      "generated_at": "2026-10-01T00:38:58+00:00",
+      "window_hours": 48,
+      "headlines": [
+        {
+          "date": "2026-09-30T19:38:50+00:00",
+          "title": "Should Bloom Energy Stock Investors Worry About Its Record Quarter?",
+          "source": "Trefis",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/bloom-energy-stock-investors-worry-193850175.html"
+        },
+        {
+          "date": "2026-09-30T19:05:02+00:00",
+          "title": "Top S&P500 movers in Wednesday's session",
+          "source": "ChartMill",
+          "url": "https://finnhub.io/api/news?id=1910164d8b1d9fd9033a60bb0ef8f5ad9e51cda65b366ab301802bffa86d1535",
+          "category": "company"
+        },
+        {
+          "date": "2026-09-30T18:47:00+00:00",
+          "title": "Bloom Energy CEO delivers stark warning on America's power demand",
+          "source": "Yahoo",
+          "url": "https://finnhub.io/api/news?id=22e7407d204b2a78cc6f590200a790e8102371a7423399e8ae262bd7387b4a48",
+          "category": "company"
+        },
+        {
+          "date": "2026-09-30T17:49:13+00:00",
+          "title": "2 Growth Stocks to Stash and 1 We Turn Down",
+          "source": "StockStory",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/2-growth-stocks-stash-1-174913767.html"
+        },
+        {
+          "date": "2026-09-30T16:35:02+00:00",
+          "title": "Uncover the latest developments among S&P500 stocks in today's session.",
+          "source": "ChartMill",
+          "url": "https://finnhub.io/api/news?id=a1d687bb68e5ab3a14c7763cfe0a634749ff03bce370bf705b046929109ce482",
+          "category": "company"
+        },
+        {
+          "date": "2026-09-30T15:16:03+00:00",
+          "title": "Plug Power Advances 4% on Electrolyzer Supply Agreement; Bloom Energy Sinks 3%, FuelCell Energy Treads Water",
+          "source": "24/7 Wall St.",
+          "url": "https://finance.yahoo.com/energy/articles/plug-power-advances-4-electrolyzer-151603724.html"
+        },
+        {
+          "date": "2026-09-30T12:30:26+00:00",
+          "title": "Jefferies Just Raised Its Bloom Energy Price Target -- Stock Jumps 10%",
+          "source": "GuruFocus.com",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/jefferies-just-raised-bloom-energy-123026496.html"
+        },
+        {
+          "date": "2026-09-30T12:07:00+00:00",
+          "title": "Dow Jones Futures Fall; Inflation Data, Micron Earnings Due Bloom Energy, AI Stocks Shrug Off Yields",
+          "source": "Investor's Business Daily",
+          "url": "https://www.investors.com/market-trend/stock-market-today/dow-jones-futures-treasury-yields-rise-bloom-energy-soars-micron-inflation-data/?src=A00220&yptr=yahoo"
+        },
+        {
+          "date": "2026-09-30T11:32:00+00:00",
+          "title": "FRVO Stock Hits Its Lowest Valuation: Is It Time to Buy?",
+          "source": "Zacks",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/frvo-stock-hits-lowest-valuation-113200713.html"
+        },
+        {
+          "date": "2026-09-30T11:10:56+00:00",
+          "title": "Bloom Energy (NYSE:BE) Stock Screens Well on High Growth and Improving Fundamentals",
+          "source": "ChartMill",
+          "url": "https://finnhub.io/api/news?id=b34c1efdc053a335eb3afb4d314b518acc0916ec9559e6f1015a35f57a8b8d92",
+          "category": "company"
+        },
+        {
+          "date": "2026-09-30T11:02:15+00:00",
+          "title": "Brookfield Infrastructure Targets 10% FFO Growth as AI Investments Accelerate",
+          "source": "MarketBeat",
+          "url": "https://finance.yahoo.com/technology/ai/articles/brookfield-infrastructure-targets-10-ffo-110215795.html"
+        },
+        {
+          "date": "2026-09-30T08:12:52+00:00",
+          "title": "US Stock Market Today: S&P 500 Futures Inch Higher As Rate Pressures Linger",
+          "source": "Simply Wall St.",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/us-stock-market-today-p-081252937.html"
+        },
+        {
+          "date": "2026-09-30T03:09:00+00:00",
+          "title": "Bloom Energy (BE) Stock Still Looks Undervalued After a 24x Run",
+          "source": "Simply Wall St.",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/bloom-energy-stock-still-looks-030900510.html"
+        },
+        {
+          "date": "2026-09-30 13:00:12",
+          "title": "The Big 3: NVDA, BE, SPCX",
+          "source": "youtube.com",
+          "url": "https://www.youtube.com/watch?v=kDFWSH3hd1o",
+          "summary": "High concentration in tech stocks isn't a bad thing for short-term traders, according to Tim Bohen (@Stockstotrade) who points to trading opportunities it presents across Wall Street. He names Nvidia (NVDA) as the long-standing AI giant with plenty of value, Bloom Energy (BE) as ",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-30 10:21:58",
+          "title": "Bloom Energy: Why I'm Letting My Winner Ride",
+          "source": "seekingalpha.com",
+          "url": "https://seekingalpha.com/article/4951031-bloom-energy-why-im-letting-my-winner-ride",
+          "summary": "Bloom Energy addresses the AI data center power bottleneck with on-site fuel cell solutions, enabling rapid deployment and strong revenue growth. BE delivered Q2 revenue of $1.06B (up 166% YoY), achieved a 17.1% operating margin, and generated $175M in free cash flow. Management ",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-29T21:44:30+00:00",
+          "title": "Dow Jones Futures Rise With Micron, Inflation Data Due; Yields Pressure Stocks But Bloom Energy Soars",
+          "source": "Yahoo",
+          "url": "https://finnhub.io/api/news?id=562d01644a0bf5aa0af47f62ee8dd8fba809d9aa78f4acf6a72b8da63259898a",
+          "category": "company"
+        },
+        {
+          "date": "2026-09-29T21:29:25+00:00",
+          "title": "Bloom Energy CEO: Power Demand Is Coming From All Angles",
+          "source": "Yahoo",
+          "url": "https://finnhub.io/api/news?id=59ba94d8f0564454b9b6e9965925a2c2f8827b22465cd06e951ed3f01225618e",
+          "category": "company"
+        },
+        {
+          "date": "2026-09-29T20:49:02+00:00",
+          "title": "Stock Market Today: Dow, Nasdaq Finish In The Red; AI Play Offers Entry",
+          "source": "Yahoo",
+          "url": "https://finnhub.io/api/news?id=79c7a893ec5daed7c98543b5c5124ecded32b84776e595d9a6c888023d0cd856",
+          "category": "company"
+        },
+        {
+          "date": "2026-09-29T20:40:47+00:00",
+          "title": "BE Stock Recovers After Monday Slide On Analyst Support: Peers FCEL, PLUG Edge Higher",
+          "source": "Yahoo",
+          "url": "https://finnhub.io/api/news?id=5dea249fcdb71dbcde67c40998e918fb6f69e6873f8dc1f5c914a9807e671261",
+          "category": "company"
+        },
+        {
+          "date": "2026-09-29T20:18:43+00:00",
+          "title": "Bloom Energy Is Up More Than 200% So Far This Year. What Comes Next for BE Stock.",
+          "source": "Yahoo",
+          "url": "https://finnhub.io/api/news?id=ae8bbb108ec595ccaa028cecb0759b5152fe6431b3695c34536e791283208193",
+          "category": "company"
+        },
+        {
+          "date": "2026-09-29T20:07:00+00:00",
+          "title": "How the Midterms Could Break the AI Trade",
+          "source": "Yahoo",
+          "url": "https://finnhub.io/api/news?id=11ba7104e4fe19c404494b93ba7b1b4c6d7021f9ea7fb241a24a4b23197a6583",
+          "category": "company"
+        },
+        {
+          "date": "2026-09-29T19:22:19+00:00",
+          "title": "Stock Market Today: Dow Dips, But Nasdaq Turns Green; AI Stock, Energy Play Test These Entries (Live Coverage)",
+          "source": "Yahoo",
+          "url": "https://finnhub.io/api/news?id=e570742dde964085813a411711a0c25d2345706adb3681f6d551833a5e85778d",
+          "category": "company"
+        },
+        {
+          "date": "2026-09-29T19:05:01+00:00",
+          "title": "These S&P500 stocks are moving in today's session",
+          "source": "ChartMill",
+          "url": "https://finnhub.io/api/news?id=315e57ce622f8cc62888c5533b64c07666c88222f0472c993343a6500fe225eb",
+          "category": "company"
+        },
+        {
+          "date": "2026-09-29 22:51:01",
+          "title": "Bloom Energy Stock Rose 16-Fold in 5 Years. All of the Gain Came in the Last 2.",
+          "source": "fool.com",
+          "url": "https://www.fool.com/investing/2026/09/29/bloom-energy-stock-rose-16-fold-in-5-years-all-of-the-gain-came-in-the-last-2/",
+          "summary": "A $10,000 stake in Bloom Energy at the end of September 2021 had dropped to under half its value by early 2024. Bloom's revenue growth sped up to 37% in 2025 as demand from artificial intelligence data centers surged.",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-29 21:35:50",
+          "title": "This Zacks Screen Finds Strong Growth Stocks Like Bloom Energy",
+          "source": "zacks.com",
+          "url": "https://www.zacks.com/stock/news/2997845/this-zacks-screen-finds-strong-growth-stocks-like-bloom-energy?cid=CS-STOCKNEWSAPI-FT-stocks_in_the_news-2997845",
+          "summary": "Zacks has many pre-built screens tailored toward common strategies, a list that includes growth, value, momentum, and income.",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-29 14:19:00",
+          "title": "Jefferies Lifts Bloom Energy Target but Flags Project Risks",
+          "source": "gurufocus.com",
+          "url": "https://www.gurufocus.com/news/9101949/jefferies-lifts-bloom-energy-target-but-flags-project-risks",
+          "summary": "Jefferies raised its price target on Bloom Energy (BE), the fuel cell maker, to $264 from $229 while keeping a Hold rating, saying its behind-the-meter power th",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-29 13:11:17",
+          "title": "Why Bloom Energy Stock Is Powering Higher Today",
+          "source": "fool.com",
+          "url": "https://www.fool.com/investing/2026/09/29/why-bloom-energy-stock-is-powering-higher-today/",
+          "summary": "RBC Capital reaffirmed its rating and price target on Bloom Energy stock. Investors should wait for confirmation from Bloom Energy when it reports financial results, in light of RBC Capital's speculation about the company's backlog.",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-29 12:09:02",
+          "title": "Bloom Energy stock is poised for recovery, RBC analyst says",
+          "source": "invezz.com",
+          "url": "https://invezz.com/news/2026/09/29/bloom-energy-stock-is-poised-for-recovery-rbc-analyst-says/",
+          "summary": "RBC Capital Markets' senior analyst Chris Dendrinos says Bloom Energy (BE) stock is poised for a meaningful recovery in the final quarter of 2026. In a research note, Dendrinos maintained his Outperform rating on the fuel cells firm, with a $335 price target indicating potential ",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-29 10:04:05",
+          "title": "Bloom Energy Rallies 11% as Fuel Cell Selloff Reverses; FuelCell Surges 7%, Plug Power Rises 3%",
+          "source": "247wallst.com",
+          "url": "https://247wallst.com/investing/2026/09/29/bloom-energy-rallies-11-as-fuel-cell-selloff-reverses-fuelcell-surges-7-plug-power-rises-3/",
+          "summary": "The fuel cell trade is snapping back, and Bloom Energy (NYSE:BE) is recovering a portion of its sharp prior-session decline as buyers return to the whole group. Bloom Energy stock is up 11% to $290.",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-29 08:55:00",
+          "title": "Oracle Unveils Fusion Claw + Expands Agentic Applications: NYSE Content Update",
+          "source": "prnewswire.com",
+          "url": "https://www.prnewswire.com/news-releases/oracle-unveils-fusion-claw--expands-agentic-applications-nyse-content-update-302892899.html",
+          "summary": "NYSE issues a pre-market daily advisory direct from the trading floor. NEW YORK, Sept.",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-29 04:48:03",
+          "title": "Bloom Energy: The Power Bottleneck Was Just The Beginning",
+          "source": "seekingalpha.com",
+          "url": "https://seekingalpha.com/article/4950569-bloom-energy-the-power-bottleneck-was-just-the-beginning",
+          "summary": "Bloom Energy remains a Buy, with Q2 delivering record revenue, improved margins, and strong operating cash flow, validating its AI power infrastructure thesis. BE's new 800V DC architecture positions it to capitalize on next-gen AI data center demand, potentially reducing custome",
+          "_provider": "fmp_news_stock"
+        }
+      ],
+      "analyst_actions": [],
+      "analyst_actions_source": "finviz_fallback",
+      "analyst_consensus": {
+        "strong_buy": 0,
+        "buy": 17,
+        "hold": 12,
+        "sell": 3,
+        "strong_sell": 0,
+        "consensus": "Buy"
+      },
+      "pt_revision_momentum": {
+        "direction": "DOWN",
+        "consensus_delta_pct_1m": -8.17,
+        "consensus_delta_pct_3m": 6.78,
+        "analysts_last_month": 3,
+        "analysts_last_quarter": 17,
+        "note": "PT revision direction only — absolute levels stripped (V3.45.4 anti cross-lane anchoring)"
+      },
+      "analyst_news": [
+        {
+          "date": "2026-09-29T11:55:32+00:00",
+          "title": "Bloom Energy price target raised to $264 from $229 at Jefferies",
+          "publisher": "",
+          "url": "https://thefly.com/ajax/news_get.php?id=4432263"
+        }
+      ],
+      "sec_filings_recent": [],
+      "sec_8k_filings": [],
+      "warnings": [
+        "no_analyst_actions_in_30d"
+      ],
+      "data_quality": {
+        "fmp_stock_news_count": 10,
+        "fmp_press_release_count": 0,
+        "finviz_news_count": 0,
+        "finviz_analyst_count": 0,
+        "yf_news_count": 10,
+        "finnhub_news_count": 25,
+        "fmp_grades_count": 0,
+        "fmp_grades_news_count": 1,
+        "fmp_sec_8k_count": 0,
+        "headlines_total_dedup": 31,
+        "headlines_primary_source": "fmp_news_stock",
+        "fmp_calls": 9,
+        "fmp_failures": 0,
+        "sparse": false,
+        "recommendation": "ok"
+      }
+    },
+    "script_status": "ok",
+    "missing_reason": null
+  },
+  "phase0": {
+    "phase": 0,
+    "scan_date": "2026-10-01",
+    "fetched_at": "2026-09-30T23:58:46+00:00",
+    "phase0_source": "SKILL_CHAIN",
+    "macro_summary": {
+      "macro_backdrop_score": -2.0,
+      "market_regime": "VOLATILE",
+      "regime_confidence": 0.62,
+      "key_themes": [
+        "High Treasury yields pressure equity valuations",
+        "Softer inflation offset by resilient activity",
+        "Elevated credit stress and weak participation",
+        "Iran-linked oil volatility adds inflation risk"
+      ],
+      "hot_sectors": [],
+      "cold_sectors": []
+    },
+    "_market_signals": {
+      "fear_greed_index": 30.8,
+      "market_sentiment_composite": 54.4,
+      "vix_current": 16.34,
+      "vix_regime": "NORMAL",
+      "spy_rsi_14": 48.8,
+      "spy_pct_above_ma50": 0.19,
+      "spy_pct_above_ma200": 6.5,
+      "breadth_composite": 28.6,
+      "breadth_zone": "Weakening",
+      "breadth_trend": "deteriorating",
+      "breadth_data_date": "2026-09-24",
+      "ftd_status": "NO_SIGNAL",
+      "ftd_status_text": "FTD_INVALIDATED",
+      "ftd_days_since": null,
+      "ftd_quality_score": 0,
+      "market_top_score": 40.0,
+      "market_top_zone": "Yellow",
+      "market_top_zone_label": "Yellow (Early Warning)",
+      "top_catalysts": [
+        {
+          "date": "2026-09-30",
+          "ticker": null,
+          "headline": "Most U.S. stocks fell as stronger growth data kept Treasury yields high despite softer inflation",
+          "source": "AP: https://apnews.com/article/1ee73f14dc23f6139eeb12c7397f543e"
+        },
+        {
+          "date": "2026-09-29",
+          "ticker": null,
+          "headline": "Rising Treasury yields weighed on equities as long bond yields reached multi-decade highs",
+          "source": "Reuters: https://www.investing.com/news/economy-news/equities-dip-as-bond-yields-hold-near-multidecade-highs-4923360"
+        },
+        {
+          "date": "2026-09-29",
+          "ticker": null,
+          "headline": "Oil volatility tied to the U.S.-Iran conflict sustained inflation and rate concerns",
+          "source": "AP: https://apnews.com/article/269abea6fd8ea7f314a8c34152788e0c"
+        }
+      ]
+    },
+    "fred_available": true,
+    "fred_snapshot": {
+      "generated_at": "2026-09-30T23:07:47+00:00",
+      "asof": null,
+      "cache_hit": true,
+      "cache_age_sec": 3042,
+      "series": {
+        "DFF": {
+          "value": 3.88,
+          "value_smooth_3d": 3.88,
+          "date": "2026-09-29",
+          "data_freshness_days": 2,
+          "delta_bps_1m": 25.0,
+          "delta_bps_3m": 25.0,
+          "delta_bps_1y": -21.0,
+          "percentile_1y": 80,
+          "trend_30d": "rising",
+          "trend_90d": "rising"
+        },
+        "T10Y3M": {
+          "value": 1.09,
+          "value_smooth_3d": 1.02,
+          "date": "2026-09-30",
+          "data_freshness_days": 1,
+          "delta_bps_1m": 25.0,
+          "delta_bps_3m": 42.0,
+          "delta_bps_1y": 95.0,
+          "percentile_1y": 100,
+          "trend_30d": "rising",
+          "trend_90d": "rising"
+        },
+        "DGS2": {
+          "value": 4.89,
+          "value_smooth_3d": 4.8733,
+          "date": "2026-09-29",
+          "data_freshness_days": 2,
+          "delta_bps_1m": 55.0,
+          "delta_bps_3m": 72.0,
+          "delta_bps_1y": 126.0,
+          "percentile_1y": 99,
+          "trend_30d": "rising",
+          "trend_90d": "rising"
+        },
+        "T10Y2Y": {
+          "value": 0.41,
+          "value_smooth_3d": 0.3667,
+          "date": "2026-09-30",
+          "data_freshness_days": 1,
+          "delta_bps_1m": 0.0,
+          "delta_bps_3m": 6.0,
+          "delta_bps_1y": -15.0,
+          "percentile_1y": 20,
+          "trend_30d": "stable",
+          "trend_90d": "stable"
+        },
+        "DGS10": {
+          "value": 5.26,
+          "value_smooth_3d": 5.2233,
+          "date": "2026-09-29",
+          "data_freshness_days": 2,
+          "delta_bps_1m": 51.0,
+          "delta_bps_3m": 78.0,
+          "delta_bps_1y": 111.0,
+          "percentile_1y": 100,
+          "trend_30d": "rising",
+          "trend_90d": "rising"
+        },
+        "DFII10": {
+          "value": 2.91,
+          "value_smooth_3d": 2.88,
+          "date": "2026-09-29",
+          "data_freshness_days": 2,
+          "delta_bps_1m": 47.0,
+          "delta_bps_3m": 66.0,
+          "delta_bps_1y": 111.0,
+          "percentile_1y": 100,
+          "trend_30d": "rising",
+          "trend_90d": "rising"
+        },
+        "CPILFESL": {
+          "value": 337.765,
+          "date": "2026-08-01",
+          "data_freshness_days": 61,
+          "yoy_change_pct": 2.45,
+          "mom_change_pct": 0.29,
+          "wow_change": 0.0,
+          "percentile_1y": 92,
+          "trend_30d": "stable",
+          "trend_90d": "stable"
+        },
+        "CPIAUCSL": {
+          "value": 334.131,
+          "date": "2026-08-01",
+          "data_freshness_days": 61,
+          "yoy_change_pct": 3.35,
+          "mom_change_pct": 0.4,
+          "wow_change": 0.0,
+          "percentile_1y": 92,
+          "trend_30d": "stable",
+          "trend_90d": "stable"
+        },
+        "UNRATE": {
+          "value": 4.1,
+          "date": "2026-08-01",
+          "data_freshness_days": 61,
+          "yoy_change_pct": -4.65,
+          "mom_change_pct": 0.0,
+          "wow_change": 0.0,
+          "percentile_1y": 0,
+          "trend_30d": "stable",
+          "trend_90d": "falling"
+        },
+        "ICSA": {
+          "value": 197000.0,
+          "date": "2026-09-19",
+          "data_freshness_days": 12,
+          "yoy_change_pct": -10.05,
+          "mom_change_pct": -3.43,
+          "wow_change": -1000.0,
+          "percentile_1y": 4,
+          "trend_30d": "falling",
+          "trend_90d": "falling"
+        },
+        "PAYEMS": {
+          "value": 159075.0,
+          "date": "2026-08-01",
+          "data_freshness_days": 61,
+          "yoy_change_pct": 0.38,
+          "mom_change_pct": 0.1,
+          "wow_change": 0.0,
+          "percentile_1y": 92,
+          "trend_30d": "stable",
+          "trend_90d": "stable"
+        },
+        "PCEPILFE": {
+          "value": 130.455,
+          "date": "2026-08-01",
+          "data_freshness_days": 61,
+          "yoy_change_pct": 3.01,
+          "mom_change_pct": 0.25,
+          "wow_change": 0.0,
+          "percentile_1y": 92,
+          "trend_30d": "stable",
+          "trend_90d": "stable"
+        },
+        "SAHMREALTIME": {
+          "value": -0.07,
+          "date": "2026-08-01",
+          "data_freshness_days": 61,
+          "yoy_change_pct": -153.85,
+          "mom_change_pct": -133.33,
+          "wow_change": 0.0,
+          "percentile_1y": 0,
+          "trend_30d": "stable",
+          "trend_90d": "falling"
+        },
+        "RSXFS": {
+          "value": 646347.0,
+          "date": "2026-08-01",
+          "data_freshness_days": 61,
+          "yoy_change_pct": 5.36,
+          "mom_change_pct": 1.14,
+          "wow_change": 0.0,
+          "percentile_1y": 92,
+          "trend_30d": "stable",
+          "trend_90d": "stable"
+        },
+        "NFCI": {
+          "value": -0.548,
+          "date": "2026-09-25",
+          "data_freshness_days": 6,
+          "yoy_change_pct": -4.18,
+          "mom_change_pct": 1.97,
+          "wow_change": 0.005,
+          "percentile_1y": 23,
+          "trend_30d": "stable",
+          "trend_90d": "falling"
+        },
+        "DCOILWTICO": {
+          "value": 96.16,
+          "date": "2026-09-29",
+          "data_freshness_days": 2,
+          "yoy_change_pct": 49.62,
+          "mom_change_pct": 10.49,
+          "wow_change": -0.25,
+          "percentile_1y": 79,
+          "trend_30d": "rising",
+          "trend_90d": "rising"
+        },
+        "BAMLH0A0HYM2": {
+          "value": 3.08,
+          "value_smooth_3d": 3.01,
+          "date": "2026-09-29",
+          "data_freshness_days": 2,
+          "delta_bps_1m": 45.0,
+          "delta_bps_3m": 34.0,
+          "delta_bps_1y": 34.0,
+          "percentile_1y": 85,
+          "trend_30d": "rising",
+          "trend_90d": "rising"
+        }
+      },
+      "regime_signals": {
+        "yield_curve_inverted": false,
+        "yield_curve_steep": true,
+        "yield_curve_value": 1.02,
+        "yield_curve_10y2y": 0.37,
+        "yield_curve_10y3m": 1.02,
+        "yield_curve_10y3m_inverted": false,
+        "yield_curve_10y2y_inverted": false,
+        "credit_stress_elevated": true,
+        "credit_spread_pctile_1y": 85,
+        "financial_stress_above_avg": false,
+        "nfci_wow_change": 0.005,
+        "nfci_deteriorating_fast": false,
+        "sahm_value": -0.07,
+        "sahm_triggered": false,
+        "retail_contracting": false,
+        "retail_sales_mom_pct": 1.14,
+        "fed_rate_direction": "flat",
+        "fed_funds_current": 3.88,
+        "real_rate_10y_estimate": 1.87,
+        "real_rate_dfii10": 2.88,
+        "real_rate_preferred": 2.88
+      },
+      "macro_scores": {
+        "rates": 55,
+        "inflation": 50,
+        "employment": 75,
+        "credit": 20,
+        "financial_conditions": 85,
+        "composite": 57,
+        "_weights": {
+          "rates": 1.0,
+          "credit": 1.0,
+          "financial_conditions": 1.0,
+          "employment": 0.7,
+          "inflation": 0.5
+        }
+      },
+      "regime_label": "Late Cycle Tightening",
+      "regime_confidence": 0.31,
+      "market_implications": [
+        "🔴 Late Cycle — 實質利率偏高，防禦股 / 現金為王",
+        "📉 實質利率 2.9% 偏高 → 成長股估值壓力，價值股 / 金融股相對佔優",
+        "📈 殖利率曲線陡峭 → 早期復甦訊號，銀行 / 週期股受惠",
+        "🔴 高收益債利差壓力 (1y pctile 85) → 信用市場緊張，避開高槓桿公司"
+      ],
+      "macro_posture_guidance": {
+        "equity_exposure": 0.25,
+        "bond_duration": "short",
+        "cash_level": 0.35,
+        "note": "macro-only — calibrate with valuation (Shiller PE) and momentum before execution"
+      },
+      "top_risks": [
+        "Credit stress elevated — HY spread at 85th pctile; systemic contagion risk rising",
+        "Growth derating — real rate 2.9% compresses long-duration equity valuations",
+        "Recession onset risk — tightening cycle historically ends in slowdown within 12-18 months"
+      ],
+      "change_velocity": {
+        "T10Y2Y": {
+          "trend_30d": "stable",
+          "delta_bps_1m": 0.0,
+          "monthly_baseline_bps": -1.2,
+          "velocity": "stable",
+          "data_freshness_days": 1
+        },
+        "DGS10": {
+          "trend_30d": "rising",
+          "delta_bps_1m": 51.0,
+          "monthly_baseline_bps": 9.2,
+          "velocity": "accelerating",
+          "data_freshness_days": 2
+        },
+        "DFF": {
+          "trend_30d": "rising",
+          "delta_bps_1m": 25.0,
+          "monthly_baseline_bps": -1.8,
+          "velocity": "accelerating",
+          "data_freshness_days": 2
+        },
+        "CPIAUCSL": {
+          "trend_30d": "stable",
+          "mom_change_pct": 0.4,
+          "monthly_baseline": 0.2792,
+          "velocity": "accelerating",
+          "data_freshness_days": 61,
+          "stale": true
+        },
+        "CPILFESL": {
+          "trend_30d": "stable",
+          "mom_change_pct": 0.29,
+          "monthly_baseline": 0.2042,
+          "velocity": "accelerating",
+          "data_freshness_days": 61,
+          "stale": true
+        },
+        "UNRATE": {
+          "trend_30d": "stable",
+          "mom_change_pct": 0.0,
+          "monthly_baseline": -0.3875,
+          "velocity": "decelerating",
+          "data_freshness_days": 61,
+          "stale": true
+        },
+        "ICSA": {
+          "trend_30d": "falling",
+          "mom_change_pct": -3.43,
+          "monthly_baseline": -0.8375,
+          "velocity": "accelerating",
+          "data_freshness_days": 12,
+          "stale": false
+        },
+        "BAMLH0A0HYM2": {
+          "trend_30d": "rising",
+          "delta_bps_1m": 45.0,
+          "monthly_baseline_bps": 2.8,
+          "velocity": "accelerating",
+          "data_freshness_days": 2
+        },
+        "NFCI": {
+          "trend_30d": "stable",
+          "mom_change_pct": 1.97,
+          "monthly_baseline": -0.3483,
+          "velocity": "decelerating",
+          "data_freshness_days": 6,
+          "stale": false
+        }
+      },
+      "sector_rotation": {
+        "_guide": "⚠️ 使用前必讀 skills/fred-macro/SECTOR_ROTATION_GUIDE.md — 說明 favor（base）vs adjustments（overlay）差異、衝突處理規則與使用時機",
+        "regime": "Late Cycle Tightening",
+        "favor": [
+          "Energy",
+          "Consumer Staples",
+          "Health Care",
+          "Utilities"
+        ],
+        "avoid": [
+          "Technology",
+          "Consumer Discretionary",
+          "Real Estate"
+        ],
+        "rationale": "實質利率高 / 曲線倒掛 → 防禦股 + 現金，避開高負債 / 高估值",
+        "adjustments": [
+          {
+            "factor": "real_rate_high",
+            "value": 2.88,
+            "lower": [
+              "Technology",
+              "Real Estate"
+            ],
+            "raise": [
+              "Financials",
+              "Energy"
+            ],
+            "note": "實質利率 2.9% > 2% — 科技 / REIT 長存續期 DCF 折現率壓升；銀行 NIM 擴大、能源現金流不受影響"
+          },
+          {
+            "factor": "credit_stress_elevated",
+            "value": 85,
+            "lower": [
+              "Financials",
+              "Consumer Discretionary",
+              "Industrials"
+            ],
+            "raise": [
+              "Consumer Staples",
+              "Health Care",
+              "Utilities"
+            ],
+            "note": "HY 利差 >75th pctile — 信用市場壓力傳導至高槓桿行業；防禦三角（必需消費 / 醫療 / 公用）抗跌"
+          },
+          {
+            "factor": "yield_curve_steep",
+            "value": 1.02,
+            "lower": [
+              "Utilities"
+            ],
+            "raise": [
+              "Financials",
+              "Industrials"
+            ],
+            "note": "曲線陡峭（>1.0%）— 銀行借短貸長利差最大化；景氣擴張預期升溫有利工業，長債利率上升壓制公用"
+          }
+        ]
+      },
+      "data_quality": {
+        "series_fetched": 17,
+        "series_failed": 0,
+        "missing": [],
+        "errors": []
+      },
+      "macro_scores_composite": 57,
+      "yield_curve_value": 1.02,
+      "yield_curve_inverted": false,
+      "credit_stress_elevated": true,
+      "financial_stress_above_avg": false,
+      "fed_rate_direction": "flat",
+      "real_rate_preferred": 2.88,
+      "sector_rotation_favor": [
+        "Energy",
+        "Consumer Staples",
+        "Health Care",
+        "Utilities"
+      ],
+      "sector_rotation_avoid": [
+        "Technology",
+        "Consumer Discretionary",
+        "Real Estate"
+      ],
+      "velocity_highlights": [
+        "DGS10:accelerating",
+        "DFF:accelerating",
+        "CPIAUCSL:accelerating"
+      ]
+    },
+    "phase3_macro_multiplier": 0.75,
+    "macro_multiplier_rationale": "score=-2.0 consistency_cap=none → baseline=0.75 fred_caps: credit_stress_elevated=0.85 → final=0.75"
+  },
+  "protocol": "# Multi-Agent Investment Protocol (V5.0)\n\n> US equity single-ticker analysis. **Execution-only file** — historical changelog/rationale see `CHANGELOG.md`. Bundle schemas see `protocol_appendix_fmp_bundles.md`. Session export schema see `phase5_export_schema.md`.\n\n---\n\n## SESSION STARTUP\n\n```\nSESSION CONFIG\nRISK_TOLERANCE : LOW | MEDIUM | HIGH   (預設 MEDIUM)\n```\n\nTicker 由 user 指定。**非互動模式**（Dashboard reverse-call via `claude -p`）：所有需要 user input 的點皆採 protocol 預設，不停下等候。\n\n---\n\n## GLOBAL RULES (PM cheatsheet)\n\n### MUST\n1. **Phase order**: 0 → 1 → 2 → 2.4 → 2.5 → 2.8 → 3 → 4 → 4.5 → 5。不跳過。（2.4 = price framework engine，V3.45.3）\n2. **Skill execution (NO SIMULATION)**: 凡標 **MUST run** 的 skill 指令必須實際執行 Bash 呼叫並解析 JSON 輸出，**禁止** LLM 估算 / 模擬數值。受規則約束的 skill：\n   - `market-sentiment-analyzer`, `us-stock-analysis`, `market-news-analyst`, `technical-analyst`, `short-contrarian-analyst`, `portfolio-risk-manager`, `tail-risk-analyzer`, `fred-macro`\n   - 失敗時必須在 final report 標 `skill_execution_failed: true` + stderr，禁止靜默用估算值補上。\n3. **Isolated subagent (Phase 2)**: 五份 prompt 必須在收到任何 lane 結果之前全部凍結。五條 lane 各自在獨立 context 執行；同時執行數為 min(3, 環境可用名額)，未知名額採 1。後續批次不得注入先前 lane 結論。每個 subagent JSON 必須含 `subagent_isolated: true`；缺則 confidence cap 0.6 + `subagent_validation_failed: true`。V5.5 試行路徑見 `investment/run_workflow_v55.md`。\n4. **Red Team (Phase 2.8)**: 必須以 Agent tool 呼叫 subagent 執行，**禁止 inline 推理代替**。\n5. **MD Report (Phase 5)**: 存 `reports/YYYYMMDD_TICKER.md`。**不得省略**。\n6. **Phase 0 cache**: Phase 0 是全市場 snapshot，不屬於 ticker。FRESH = 真實來源 `fetched_at` 距凍結時間 <3h；缺可靠時間必須重建，不得用 mtime 或補現在時間延長期限。優先讀 canonical `invest_logs/YYYY-MM-DD_phase0.json`（舊 ticker-scoped 檔只作相容 fallback）。sector_intel 只能當 L3 重建素材，不能通過 Phase 0 gate。\n7. **Validate gates rc=0**:\n   - Phase 0: `validate_phase0.py --path <factpack.phase0_path>`\n   - Phase 5: `validate_session_export.py` + `validate_markdown_export.py`\n\n### MUST NOT\n- ❌ Phase 2 subagent prompt 含其他 lane 的 score / signal / reasoning\n- ❌ Phase 2 subagent prompt 含 PM 的 historical_bias / active_weights / prior session\n- ❌ 跨 lane 引用 PEER_BUNDLE / EARNINGS_ANALYST_BUNDLE / FMP_SUPP_BUNDLE 的數字推測對方結論\n- ❌ 手抄數字進 Phase 5 MD 報告（V4.87.0 起全篇由 `render_investment_report.py` 渲染；`--polish` 只准動五段純敘事，且數字須通過事實集合圍堵）\n- ❌ Final Score 用 `/5.0` 或 `/10` scale（V1.88 統一 `/3.0`）\n- ❌ 為了補 cache 自動 enqueue `財報` protocol（user 主動觸發層）\n\n### Output rules\n- 邏輯輸出 JSON；Markdown 僅用於 Final Viz Table + Phase 5 MD report\n- `key_factors`：最多 3 條，每條 ≤ 8 英文字\n\n```\nYou are the <LANE> analyst for ticker <TICKER>.\n\nISOLATION CONTRACT:\n  - 你與其他 4 個 analyst 以獨立 context 平行執行。\n  - 你看不到其他 analyst 的 score / signal / reasoning。\n  - 禁止推測其他 lane 的結論。\n  - 禁止為了「與共識一致」調整自己的 score。\n  - 禁止考慮 PM 的 historical_bias / active_weights / prior session。\n  - score -5..+5 僅依據你本 lane 收集的證據。\n\nTICKER: <TICKER>\n\nPHASE 0 MACRO CONTEXT (read-only):\n<paste Phase 0 macro_summary + _market_signals>\n\nTICKER DATA BUNDLE (read-only, all 5 lanes):\n<paste TICKER_DATA_BUNDLE.scoring; if unavailable 標 \"TICKER_DATA_BUNDLE: unavailable\">\n\n[CONDITIONAL BUNDLES — 依 lane 注入規則; 見 protocol_appendix_fmp_bundles.md]\n\nDATA SOURCE DISCIPLINE (STRICT):\n  ❌ FORBIDDEN web search for: Quote/Valuation scalar (price/peRatio/forwardPE/peg/eps/mktCap/divYield/PB/D-E/FCF/ROE), Market signals (VIX/F&G/RSI/breadth/FTD/top score), Insider/short, Analyst rating/PT, Filings, OHLCV, news headlines (skill 已抓三來源)\n  ✅ ALLOWED web search (≤ 1 call, narrative tone only): Reddit/X tone, transcript quotes, supply chain rumors, competitive narrative\n  違規處理：subagent 引用 web search 的數字 → PM 自動扣 confidence 0.2；連 3 次 → 該 lane 視為 degraded\n  ⚠️ V4.124.0 現況：上面這條扣分**沒有產生器**（「連 3 次」是跨 session 狀態，從沒有東西保存過）。\n     本版只做 shadow —— `investment/scripts/websearch_shadow.py` 從 run log 讀每個 lane 的實際\n     web call 數（走 `parent_tool_use_id` 歸屬），寫進 ledger，**不扣分、不進決策**。\n     補實作或刪宣稱都會改變行為，需使用者拍板；證據見 docs/plan_invest_stale_stages.md T2。\n\nYOUR LANE RUBRIC:\n<RUBRIC_LANE>\n\nMANDATORY DATA COLLECTION:\n<SKILL_CMD — MUST run, do NOT simulate>\n\nOUTPUT (strict JSON):\n{\n  \"phase\": 2,\n  \"agent\": \"<LANE>_Analyst\",\n  \"ticker\": \"<TICKER>\",\n  \"signal\": \"BUY | SELL | HOLD\",\n  \"score\": \"-5 to +5\",\n  \"confidence\": \"0.0 to 1.0\",\n  \"key_factors\": [\"max 3 items, ≤ 8 words each\"],\n  \"risk_flags\": [\"max 2 items\"],\n  \"phase0_alignment\": \"ALIGNED | MISALIGNED | NEUTRAL\",\n  \"data_source_timestamp\": \"YYYY-MM-DD HH:MM\",\n  \"subagent_isolated\": true,\n  \"skill_execution_failed\": \"true | false\"\n}\n```\n\n> **V4.125.0 — 本 shape 對 C1 lane_contract（V4.90）與各道閘核對過的結果**（模板寫於 2026-05-04，\n> 契約與閘是 8 月的；以下是核完的四條，不是新規則）：\n>\n> - **`signal` 自 V4.122.0 起是決策軌的輸入，不再只是敘述**：PM 必須把五個 lane 的 `signal`\n>   原樣填進 export 的 `conflict_bias.lane_signals`（validator §16 用它重算 T2/T3，且會擋\n>   「signal 與同 lane score 反向」）。lane 漏填 `signal` = PM 填不出那一格。\n> - **`score` 的 −5..+5 只適用四個 LLM lane**（fundamentals / sentiment / news / technical）。\n>   **Valuation lane 不自填分數**——它 verbatim 抄 `valuation_pack.score`（Phase 1.5 engine\n>   產出，validator 強制兩者相等）。歷史上唯一一筆 −4.0（2026-06-14 RGTI）正是在 pack\n>   成為必填之前自由填出來的，之後不可能再發生。\n> - **`skill_execution_failed` 是 skill script 真的會吐的欄位**（`momentum.py` /\n>   `technical-analyst/analyze.py` 失敗時輸出），不是模板自創；照填。\n> - **不要產 lane_contract 的欄位**（`provenance` / `producer_version` / `input_hash` /\n>   `shadow_score`）：那四個由 Phase 5 Step 1.5 的 `apply_det_shadow.py` 寫入，**LLM 手寫\n>   等於偽造 provenance**（§15 會擋）。subagent 只出上面這個 shape。\n\n### Lane Rubrics\n\n\n- **Rubric**: 過去 48h company news + analyst rating changes + PT trend + cross-ref Phase 0 themes\n- **Skill**: `python3 skills/market-news-analyst/scripts/fetch.py <TICKER> --hours 48 --json-only`\n- 結構化欄位（**禁止** web search 重抓 analyst rating / target 數字）：\n  - `analyst_actions[]` (FMP `/grades-historical` 過去 30d)\n  - `analyst_consensus`: Strong Buy +1.5 / Buy +1 / Hold 0 / Sell -1 / Strong Sell -2\n  - `pt_revision_momentum` (V3.45.4 — 取代舊「PT vs price 折溢價 ±1」項): 30d consensus PT\n    **變動方向**。`direction=UP` 且 `delta_1m > +3%` → bullish sell-side flow（同 rating change 性質，+0.5~+1）；\n    `DOWN` 且 `delta_1m < -3%` → bearish（-0.5~-1）；`FLAT/UNKNOWN` → 0\n    - **V4.117.0 起必須寫進 export 的結構化欄位，不能只寫在散文裡**（`export_date >= 2026-08-09`\n      缺欄 → validator rc=1）。`UP`/`DOWN` 要帶數值 `consensus_delta_pct_1m`（否則 ±3% 門檻無從套用）；\n      抓不到資料就明寫 `{\"direction\": \"UNKNOWN\", \"unavailable_reason\": \"<為什麼>\"}`。\n      由來：2026-08-09 一份 export 在 risk flag 散文寫了 `-2.94% 1m`，結構化欄位卻是 null——\n      分數剛好沒受影響，所以斷掉的稽核鏈沒人發現。\n  - `analyst_news[]` (FMP `/grades-news`)\n  - `headlines[]` (finviz + yfinance + Finnhub deduped)\n  - `sec_filings_recent[]` + `sec_8k_filings[]` (30d)\n- **優先檢查 Phase 0 `_market_signals.top_catalysts[]`** 避免重抓\n- `FMP_SUPP_BUNDLE.ma_events.events[]` 非空 → 強訊號（target 通常 +1）\n\n> **V3.45.4 — PT 注入層剝離（去三重計分）**：PT consensus **level** 已在 Valuation anchor\n> (0.20) + MHP 60d `pt_60d` (0.35) 計分兩次；News lane 再比 level vs price 是第三次（cross-lane\n> anchoring，共識牛市系統性放大多頭）。`fetch.py` V3.45.4 起 payload **不含任何絕對 PT level**\n> （`price_target` block 已移除，只給 `pt_revision_momentum` 方向+幅度%）。**禁止**：在 News lane\n> prompt 額外注入 PT level、或 reasoning 中以「PT 折價/溢價 X%」「目標價 vs 現價」計分 —\n> 後驗由 `apply_det_shadow.py` `news_pt_leakage` keyword classifier 抓（warning 級，累積統計）。\n\n##### V2.13.0 News lane 額外輸出（必填，不影響 score 公式）\n\n對應外部模板「利多 / 利空 / 下一步」三段時間軸 + 跨資產溢出：\n\n1. **`immediate_catalyst_5d`**（必填）：物件或 null\n   - 5 天內 binary 事件（earnings / FOMC / FDA / 重大公告）\n   - shape: `{event: str, date: ISO, direction_lean: BULLISH|BEARISH|NEUTRAL, expected_move_pct: float|null}`\n   - 例：`{\"event\":\"Q2 earnings\", \"date\":\"2026-08-13\", \"direction_lean\":\"BULLISH\", \"expected_move_pct\": 5.5}`\n   - 無 5d 內 binary 事件 → null\n\n2. ~~`medium_term_shift_20d`~~（V4.71.0 P1-6 移除）：無渲染/決策消費者（AUDIT F5），\n   且「無顯著拐點 → no significant shift expected」的 default 輸出佔多數 = 模板白產。不再產出。\n\n3. **`decision_point_days`**（必填）：int\n   - 下次該重新評估的天數（用於 watch_conditions 的 review trigger）\n   - 通常 = 最近 binary 事件距今天數；若無 binary，預設 21\n   - 例：14（下次財報）、5（下次 FOMC）、21（無 binary，例行 review）\n\n4. **`cross_asset_spillover[]`**（必填）：受影響的非個股市場\n   - shape: `[{asset: str, direction: BULLISH|BEARISH|NEUTRAL, mechanism: str}]`\n   - asset 例：`treasury_10y / DXY / oil_WTI / gold / copper / sector_XLK / VIX`\n   - mechanism 1 句話解釋傳導路徑\n   - 至少 1 筆；若該股新聞純個股無溢出，明示 `[{\"asset\":\"none\",\"direction\":\"NEUTRAL\",\"mechanism\":\"news 純個股財務，無跨資產傳導\"}]`\n   - 例：`[{\"asset\":\"treasury_10y\", \"direction\":\"BEARISH\", \"mechanism\":\"AI capex 預期 → cyclical 通膨壓力 → 殖利率上行\"}]`\n\n5. **`reasoning_one_line`** + **`key_factors[]`**（V3.45.4 必填，持久化進 export）：\n   - `reasoning_one_line`: 1 句 — News score 的核心依據\n   - `key_factors[]`: 2-4 條短語 — 計分主因（與 Final Visualization Table 的 Key Factors 同源）\n   - **用途**：history.json 持久化後供 `apply_det_shadow.py` `news_pt_leakage` classifier 掃描\n     （V2.19 red_team_basis 同模式 — 沒有落地文字，後驗防線就沒有 haystack）\n\n> 以上 5 個欄位**必填**；缺資料寫 `INSUFFICIENT_DATA`（陣列用 `[]` + 註記）。\n",
+  "instruction": "Execute only your assigned Phase 2 lane in a fresh isolated context. Use frozen inputs. Do not read other lane outputs or mutable caches. Return protocol lane JSON; no provenance fields. No other phases or history writes."
+}

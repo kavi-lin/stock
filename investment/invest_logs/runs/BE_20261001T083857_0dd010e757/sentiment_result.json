@@ -1,0 +1,26 @@
+{
+  "phase": 2,
+  "agent": "sentiment_Analyst",
+  "ticker": "BE",
+  "signal": "HOLD",
+  "score": -0.03,
+  "confidence": 0.62,
+  "key_factors": [
+    "Recent insider ratio below threshold",
+    "Congressional trades show bullish net flow",
+    "Market composite near neutral; breadth weak"
+  ],
+  "risk_flags": [
+    "Insider feed has future-dated quarters",
+    "Elevated yields and weak breadth weigh on risk"
+  ],
+  "phase0_alignment": "NEUTRAL",
+  "data_source_timestamp": "2026-10-01 00:41",
+  "subagent_isolated": true,
+  "skill_execution_failed": false,
+  "market_sentiment_composite": 54.4,
+  "vix_current": 16.34,
+  "insider_signal": -1,
+  "short_pct_float": 7.34,
+  "mspr_latest": -29.184015
+}

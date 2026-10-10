@@ -1,0 +1,62 @@
+{
+  "ticker": "HPE",
+  "generated_at": "2026-10-01T14:30:22+00:00",
+  "data_source": "bundle+yfinance",
+  "price": {
+    "current": 63.1,
+    "market_cap": 83763027968.0,
+    "52w_high": 67.101,
+    "52w_low": 19.84
+  },
+  "valuation": {
+    "pe_ratio": 32.38308457711443,
+    "pe_forward": 13.449053,
+    "pe_sector_median": null,
+    "peg_ratio": 0.49,
+    "ev_ebitda": 17.69740461469186,
+    "pb_ratio": 3.2797857735535945
+  },
+  "growth": {
+    "revenue_yoy_pct": 32.72,
+    "revenue_trailing_3y_cagr_pct": 6.37,
+    "eps_growth_forward_consensus_pct": 410.2
+  },
+  "margins_cash": {
+    "gross_margin_pct": 36.02,
+    "operating_margin_pct": 8.27,
+    "fcf_margin_pct": 11.32,
+    "fcf_yield_pct": 4.82,
+    "net_margin_pct": 6.57
+  },
+  "balance_sheet": {
+    "debt_to_equity": 0.7635211586331749,
+    "net_cash_positive": false,
+    "cash_and_equivalents": 6216000000,
+    "total_debt": 20320999424
+  },
+  "earnings_calendar": {
+    "next_earnings_date": "2026-12-03",
+    "days_until_earnings": -28
+  },
+  "analyst": {
+    "consensus_rating": "BUY",
+    "analyst_count": 20,
+    "price_target_mean": 71.13,
+    "price_target_upside_pct": 12.73
+  },
+  "warnings": [],
+  "data_quality": {
+    "fmp_calls": 1,
+    "fmp_failures": 1,
+    "yf_fallbacks": 1,
+    "bundle_used": true,
+    "bundle_meta": {
+      "source": "EARNINGS_ANALYST_BUNDLE",
+      "as_of": "2026-10-01",
+      "ticker": "HPE"
+    },
+    "missing_fields": [
+      "pe_sector_median"
+    ]
+  }
+}

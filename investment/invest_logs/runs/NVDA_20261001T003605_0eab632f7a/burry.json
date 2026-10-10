@@ -1,0 +1,28 @@
+{
+  "ticker": "NVDA",
+  "generated_at": "2026-09-30T16:43:34.519737+00:00",
+  "burry_score": 27.8,
+  "verdict": "WARNING",
+  "components": {
+    "fcf_yield_pct": 0.77,
+    "ev_ebit": 27.09,
+    "debt_to_equity": 0.17,
+    "pct_below_52w_high": 2.09,
+    "insider_net": "SELL"
+  },
+  "component_scores": {
+    "fcf_yield": 13.8,
+    "ev_ebit": 17.8,
+    "debt_to_equity": 90.0,
+    "pct_below_52w_high": 20.0,
+    "insider": 20
+  },
+  "weights_active": [
+    "fcf_yield",
+    "ev_ebit",
+    "debt_to_equity",
+    "pct_below_52w_high",
+    "insider"
+  ],
+  "reasoning": "FCF yield 0.8% │ EV/EBITDA 27.1 │ D/E 0.17 │ 2% below 52wH │ insider=SELL"
+}

@@ -1,0 +1,1325 @@
+{
+  "session_export_version": "V5.5",
+  "export_date": "2026-10-01",
+  "date": "2026-10-01",
+  "ticker": "BE",
+  "final_action": "CANCEL",
+  "phase0_file": "./invest_logs/runs/BE_20261001T083857_0dd010e757/phase0.json",
+  "phase0_macro_snapshot": {
+    "market_regime": "VOLATILE",
+    "macro_backdrop_score": -2.0,
+    "macro_multiplier": 0.75,
+    "key_themes": [
+      "High Treasury yields pressure equity valuations",
+      "Softer inflation offset by resilient activity",
+      "Elevated credit stress and weak participation",
+      "Iran-linked oil volatility adds inflation risk"
+    ]
+  },
+  "trades_this_session": [
+    {
+      "ticker": "BE",
+      "final_action": "CANCEL",
+      "final_score": 0.2824,
+      "final_decision": "HOLD",
+      "decision_engine_version": "1.1.0",
+      "calculation_steps": {
+        "fund": "0.25 × 0 × 0.72 = 0.0000",
+        "sent": "0.15 × -0.03 × 0.60 = -0.0027",
+        "news": "0.20 × 1 × 0.60 = 0.1200",
+        "tech": "0.25 × 1.5 × 0.72 = 0.2700",
+        "val": "0.15 × -1 × 0.60 = -0.0900",
+        "raw_total": 0.2973,
+        "structural_shift_modulation": {
+          "tier": "INSUFFICIENT_DATA",
+          "applied_adjustments": [
+            "no modulation — standard rules apply"
+          ],
+          "shift_macro_floor": 0.0,
+          "position_size_cap_pct": 100,
+          "red_team_mean_reversion_blocked": false
+        },
+        "polarization_modulation": {
+          "label": "ALIGNED",
+          "lane_range": 2.5,
+          "pos_strong": 2,
+          "neg_strong": 1,
+          "outlier_lane_id": null,
+          "applied_adjustments": [
+            "no modulation"
+          ],
+          "confidence_multiplier": 1.0,
+          "position_cap_after": 100
+        },
+        "red_team_basis": "unclassified",
+        "red_team_auto_downgrade": false,
+        "cascade_rule_applied": "rule_5_default_strong_counter",
+        "dynamic_threshold": {
+          "buy_threshold": 1.2,
+          "staged_threshold": 0.8,
+          "rationale": "default 1.2 (tier=INSUFFICIENT_DATA, polarization=ALIGNED)"
+        },
+        "t5_forward_validation": {
+          "forward_validation_status": "STRETCHED",
+          "forward_validation_applies": true,
+          "valuation_score": -1.0,
+          "warning_triggered": false,
+          "hard_downgrade_eligible": false,
+          "downgrade_applied": false,
+          "decision_before": "HOLD",
+          "decision_after": "HOLD"
+        },
+        "red_team_verdict": "STRONG_COUNTER",
+        "red_team_effective_verdict": "STRONG_COUNTER",
+        "red_team_counter_evidence_strength": 5,
+        "red_team_thesis_break_probability": 0.62,
+        "bonus_applied": false,
+        "penalty_applied": true,
+        "penalty_value": 0.95,
+        "raw_after_bonus": 0.28243,
+        "macro_multiplier": 0.75,
+        "macro_alignment": "CONTRARIAN",
+        "effective_macro_mult": 0.75,
+        "final_score": 0.2824
+      },
+      "avg_confidence": 0.604,
+      "consensus_bonus_applied": false,
+      "macro_alignment": "CONTRARIAN",
+      "hot_zone_probe": false,
+      "hot_zone_probe_tier": null,
+      "hot_zone_eval": "not_qualifying",
+      "decision_cap_active": true,
+      "decision_cap_reason": "low_valuation_confidence",
+      "transition_data_stale_or_inconsistent": false,
+      "red_team_verdict": "STRONG_COUNTER",
+      "red_team_counter_thesis": "The HOLD consensus underweights the execution hurdle embedded in BE's price: the frozen packet shows $276.98 current price versus a $45.27 DCF anchor and a 60% implied 5-year FCF CAGR, while actual and lane FCF growth estimates are unavailable. A 2.88% 10-year real yield and 8.17% one-month downward consensus price-target revisions add independent pressure if growth fails to convert into cash flow.",
+      "red_team_kill_conditions": [
+        "IF within 180 days the next two quarters' FCF annualized growth is below 30% (half the packet's 60% implied 5-year FCF CAGR) THEN the current-price valuation thesis is broken.",
+        "IF within 180 days either of the next two quarterly reports shows revenue growth below 46% year over year THEN the market-implied revenue path in the frozen packet is broken.",
+        "IF within 90 days the FRED 10-year real Treasury yield remains above 2.0% (frozen reading: 2.88%) THEN the elevated discount-rate hurdle persists and the HOLD thesis that growth can validate the current multiple is broken."
+      ],
+      "red_team_execution_failed": false,
+      "red_team_counter_evidence_strength": 5,
+      "red_team_thesis_break_probability": 0.62,
+      "phase2_fanout_mode": "PARALLEL_SUBAGENT",
+      "degraded_analysts": [],
+      "lane_scores": {
+        "fundamentals": 0.0,
+        "sentiment": -0.03,
+        "news": 1.0,
+        "technical": 1.5,
+        "valuation": -1.0
+      },
+      "conflict_bias": {
+        "schema": "conflict_bias.v1",
+        "tentative_decision": "HOLD",
+        "lane_signals": {
+          "fundamentals": "HOLD",
+          "sentiment": "HOLD",
+          "news": "BUY",
+          "technical": "HOLD",
+          "valuation": "SELL"
+        },
+        "triggers_fired": [],
+        "conflict_summary": "T1–T5 未觸發；五線訊號為 HOLD、HOLD、BUY、HOLD、SELL，暫定 HOLD，進入 Phase 3。",
+        "t4_detail": null,
+        "t5_detail": null,
+        "proceed_to_phase3": true
+      },
+      "burry_score": 21.3,
+      "burry_override_active": false,
+      "burry_override_recheck_date": null,
+      "trade_plan_builder_version": "1.0.0",
+      "mandatory_risk_flags": [],
+      "entry_aggressive": [
+        280.54,
+        283.83
+      ],
+      "entry_conservative": [
+        249.05,
+        280.54
+      ],
+      "take_profit": 283.83,
+      "stop_loss": 246.56,
+      "risk_reward_ratio": 13.97,
+      "position_size_pct": null,
+      "risk_audit": {
+        "risk_level": "HIGH",
+        "sized_for_decision": "HOLD",
+        "vol_adjusted_limit_pct": 8.32,
+        "position_size_method": "VOL_ADJUSTED",
+        "tail_risk": {
+          "fragility_label": "FRAGILE",
+          "tail_risk_score": 81.2,
+          "fragility_adjustment": "× 0.5",
+          "degraded": false
+        },
+        "binary_classification": "unknown",
+        "binary_event_within_48h": false,
+        "burry_override_active": false,
+        "burry_override_multiplier": 1.0,
+        "ftd_timeline_gate": {
+          "applied": false,
+          "days_since_ftd": null,
+          "stage": "n/a",
+          "sector_class": "cyclical",
+          "multiplier": 1.0,
+          "stop_loss_adjustment_pp": 0,
+          "rejection_triggered": false
+        },
+        "sector_concentration_f1": {
+          "applied": false,
+          "multiplier": 1.0,
+          "sector": "Industrials",
+          "active_same_sector_confirmed": null,
+          "source": "registry_unavailable",
+          "note": "concentration 輸入不可得（registry_unavailable）— F1 未評估，不當作 0 部位"
+        },
+        "sizing_chain": {
+          "base": 0.0832,
+          "tail_adj": 0.0416,
+          "macro_cap": 0.0416,
+          "binary_adj": 0.0416,
+          "binary_multiplier": 1.0,
+          "burry_override_adj": 0.0416,
+          "burry_override_multiplier": 1.0,
+          "ftd_adj": 0.0416,
+          "f1_adj": 0.0416,
+          "f1_multiplier": 1.0,
+          "shift_adj": 0.0416,
+          "polar_adj": 0.0416,
+          "final_position_size": 0.0416,
+          "steps": [
+            "base 0.083200 × fragility 0.5 = 0.041600",
+            "macro_backdrop -2.0 ≥ -3.0 → macro cap 不觸發 = 0.041600",
+            "binary unknown (event<48h=False) → × 1.0 = 0.041600",
+            "burry_override False → × 1.0 = 0.041600",
+            "ftd_timeline × 1.0 = 0.041600",
+            "V20-F1 sector concentration × 1.0 = 0.041600",
+            "structural_shift cap 100.0% → × 1.0 = 0.041600",
+            "polarization cap 100.0% → × 1.0 = 0.041600",
+            "decision HOLD → 不折半 = 0.041600"
+          ]
+        },
+        "position_size_pct": 0.0,
+        "final_stop_loss_pct": -1.0,
+        "stop_loss_derivation": {
+          "base_stop_pct": -1.0,
+          "ftd_stop_adjustment_pp": 0,
+          "floored_at_limit": false,
+          "structural_stop_price": 246.56,
+          "pct_based_stop_price": 246.56,
+          "selected": "structural",
+          "note": "base -1.00% + FTD 0pp = -1.00%"
+        },
+        "staged_entry_split": null,
+        "hot_zone_probe_capped": false,
+        "approval": "APPROVED",
+        "rejection_reason": null
+      },
+      "time_horizon": "mid",
+      "analysis_price": 276.98,
+      "staged_split": null,
+      "position_size_method": "VOL_ADJUSTED",
+      "final_stop_loss_pct": -1.0,
+      "fragility_label": "FRAGILE",
+      "binary_classification": "unknown",
+      "ftd_timeline_gate": {
+        "applied": false,
+        "days_since_ftd": null,
+        "stage": "n/a",
+        "sector_class": "cyclical",
+        "multiplier": 1.0,
+        "stop_loss_adjustment_pp": 0,
+        "rejection_triggered": false
+      },
+      "valuation_pack": {
+        "schema": "valuation_pack.v1",
+        "engine": "compute_price_framework.py v2.4 (V4.131.13)",
+        "built_at": "2026-10-01T00:39:35+00:00",
+        "current_price": 276.98,
+        "anchors": {
+          "dcf_unlevered": {
+            "value": null,
+            "family": "fundamental",
+            "correlation_group": "cashflow_intrinsic:earnings_analyst:BE:2026-06-30",
+            "assumption_set_id": "ca552fbed0155e62",
+            "provenance": "earnings_analyst_bundle",
+            "as_of": "2026-10-01",
+            "input_lineage_ids": [
+              "earnings_analyst:BE:2026-06-30"
+            ],
+            "status": "ineligible",
+            "reason": "superseded_by_auditable_through_cycle_dcf",
+            "weight_raw": 0.2,
+            "weight_effective": 0.0,
+            "projection_mode": null,
+            "sensitivity_low": null,
+            "sensitivity_high": null,
+            "calibration": null
+          },
+          "dcf_levered": {
+            "value": null,
+            "family": "fundamental",
+            "correlation_group": "cashflow_intrinsic:earnings_analyst:BE:2026-06-30",
+            "assumption_set_id": "ca552fbed0155e62",
+            "provenance": "earnings_analyst_bundle",
+            "as_of": "2026-10-01",
+            "input_lineage_ids": [
+              "earnings_analyst:BE:2026-06-30"
+            ],
+            "status": "ineligible",
+            "reason": "superseded_by_auditable_through_cycle_dcf",
+            "weight_raw": 0.1,
+            "weight_effective": 0.0,
+            "projection_mode": null,
+            "sensitivity_low": null,
+            "sensitivity_high": null,
+            "calibration": null
+          },
+          "dcf_self_built": {
+            "value": 45.27,
+            "family": "fundamental",
+            "correlation_group": "cashflow_intrinsic:dcf_self:BE:2026-10-01",
+            "assumption_set_id": "d6c2ec0b367e6e9c",
+            "provenance": "valuation_modeler.dcf",
+            "as_of": "2026-10-01",
+            "input_lineage_ids": [
+              "skills/valuation-modeler/cache/BE_dcf_payload.json"
+            ],
+            "status": "eligible",
+            "reason": null,
+            "weight_raw": 0.15,
+            "weight_effective": 1.0,
+            "projection_mode": "structural_shift_through_cycle",
+            "sensitivity_low": 40.36,
+            "sensitivity_high": 51.53,
+            "calibration": null
+          },
+          "analyst_pt_consensus": {
+            "value": 287.73,
+            "family": "external_expectations",
+            "correlation_group": "external_pt:analyst_pt:BE:2026-10-01",
+            "assumption_set_id": "ad655719a264eb9b",
+            "provenance": "earnings_analyst_bundle.pt_news",
+            "as_of": "2026-10-01",
+            "input_lineage_ids": [
+              "analyst_pt:BE:2026-10-01"
+            ],
+            "status": "eligible",
+            "reason": null,
+            "weight_raw": 0.2,
+            "weight_effective": 0.0,
+            "projection_mode": null,
+            "sensitivity_low": null,
+            "sensitivity_high": null,
+            "calibration": null
+          },
+          "peer_pe_implied": {
+            "value": null,
+            "family": "relative",
+            "correlation_group": "peer_relative:b81d9f8561c6da0a",
+            "assumption_set_id": "b81d9f8561c6da0a",
+            "provenance": null,
+            "as_of": null,
+            "input_lineage_ids": [],
+            "status": "ineligible",
+            "reason": "missing_or_nonpositive_value",
+            "weight_raw": 0.15,
+            "weight_effective": 0.0,
+            "projection_mode": null,
+            "sensitivity_low": null,
+            "sensitivity_high": null,
+            "calibration": null
+          },
+          "comps_implied": {
+            "value": null,
+            "family": "relative",
+            "correlation_group": "peer_relative:peers:02b81966c091b72e:2026-10-01",
+            "assumption_set_id": "fc6070b8d0015531",
+            "provenance": "valuation_modeler.comps",
+            "as_of": "2026-10-01",
+            "input_lineage_ids": [
+              "skills/valuation-modeler/cache/BE_comps_payload.json",
+              "HUBB"
+            ],
+            "status": "ineligible",
+            "reason": "fewer_than_3_business_similar_peers",
+            "weight_raw": 0.1,
+            "weight_effective": 0.0,
+            "projection_mode": null,
+            "sensitivity_low": null,
+            "sensitivity_high": null,
+            "calibration": null
+          },
+          "owner_earnings_mult": {
+            "value": 23.7,
+            "family": "fundamental",
+            "correlation_group": "cashflow_intrinsic:owner_earnings:BE:2026-10-01",
+            "assumption_set_id": "bf5b9c6049ae854a",
+            "provenance": "fmp_supplementary.owner_earnings",
+            "as_of": "2026-10-01",
+            "input_lineage_ids": [
+              "owner_earnings:BE:2026-10-01"
+            ],
+            "status": "eligible",
+            "reason": null,
+            "weight_raw": 0.05,
+            "weight_effective": 0.0,
+            "projection_mode": null,
+            "sensitivity_low": null,
+            "sensitivity_high": null,
+            "calibration": null
+          },
+          "forecaster_blend": {
+            "value": null,
+            "family": "fundamental",
+            "correlation_group": "earnings_projection:b81d9f8561c6da0a",
+            "assumption_set_id": "b81d9f8561c6da0a",
+            "provenance": null,
+            "as_of": null,
+            "input_lineage_ids": [],
+            "status": "ineligible",
+            "reason": "missing_or_nonpositive_value",
+            "weight_raw": 0.05,
+            "weight_effective": 0.0,
+            "projection_mode": null,
+            "sensitivity_low": null,
+            "sensitivity_high": null,
+            "calibration": null
+          },
+          "fwd_earnings_discounted": {
+            "value": 194.25,
+            "family": "fundamental",
+            "correlation_group": "earnings_projection:analyst_estimates:BE:2029-12-31",
+            "assumption_set_id": "c0b5e8c6c7c5b0cb",
+            "provenance": "fmp_analyst_estimates.annual",
+            "as_of": "2026-10-01",
+            "input_lineage_ids": [
+              "analyst_estimates:BE:2029-12-31"
+            ],
+            "status": "ineligible",
+            "reason": "cashflow_intrinsic_anchors_live:dcf_self_built,owner_earnings_mult",
+            "weight_raw": 0.15,
+            "weight_effective": 0.0,
+            "projection_mode": null,
+            "sensitivity_low": null,
+            "sensitivity_high": null,
+            "calibration": {
+              "target_fiscal_year": "2029-12-31",
+              "target_eps": 10.7666,
+              "analyst_count": 7,
+              "discount_rate": 0.2241,
+              "horizon_years": 3.25,
+              "justified_pe": 34.81,
+              "justified_pe_raw": 34.81,
+              "pe_clamp_binding": null,
+              "growth_source": "eps_cagr",
+              "beta_used": 3.811,
+              "beta_source": "profile",
+              "discount_clamp_binding": null
+            }
+          }
+        },
+        "families": {
+          "fundamental": {
+            "groups": {
+              "cashflow_intrinsic:dcf_self:BE:2026-10-01": {
+                "value": 45.27,
+                "members": [
+                  "dcf_self_built"
+                ]
+              },
+              "cashflow_intrinsic:owner_earnings:BE:2026-10-01": {
+                "value": 23.7,
+                "members": [
+                  "owner_earnings_mult"
+                ]
+              }
+            },
+            "representative": 34.485,
+            "weight_raw": 0.55,
+            "weight_effective": 0.5
+          },
+          "external_expectations": {
+            "groups": {
+              "external_pt:analyst_pt:BE:2026-10-01": {
+                "value": 287.73,
+                "members": [
+                  "analyst_pt_consensus"
+                ]
+              }
+            },
+            "representative": 287.73,
+            "weight_raw": 0.2,
+            "weight_effective": 0.5
+          }
+        },
+        "families_present": [
+          "external_expectations",
+          "fundamental"
+        ],
+        "family_coverage_weight": 0.75,
+        "aggregation_mode": "dcf_primary_anchor_range",
+        "primary_method": "dcf_self_built",
+        "family_blended_fair_value": 161.11,
+        "weighted_fair_value": 45.27,
+        "vs_current_pct": -83.66,
+        "verdict_band": "extreme_overvalued",
+        "score": -1.0,
+        "confidence": "low",
+        "evidence_independence": {
+          "eligible_anchors": [
+            "analyst_pt_consensus",
+            "dcf_self_built",
+            "owner_earnings_mult"
+          ],
+          "sell_side_anchors": [
+            "analyst_pt_consensus"
+          ],
+          "sell_side_only": false,
+          "note": "至少一根合格錨獨立於賣方預估"
+        },
+        "structural_shift": {},
+        "outlier_diagnostics": [
+          {
+            "anchor": "owner_earnings_mult",
+            "value": 23.7,
+            "reason": "outside [39.92, 359.28] (median 119.76 × 1/3..3)"
+          }
+        ],
+        "score_before_forward_validation": -1.0,
+        "forward_validation_status": "STRETCHED"
+      },
+      "fair_value_summary": {
+        "anchors": {
+          "dcf_unlevered": null,
+          "dcf_levered": null,
+          "dcf_self_built": 45.27,
+          "analyst_pt_consensus": 287.73,
+          "peer_pe_implied": null,
+          "comps_implied": null,
+          "owner_earnings_mult": 23.7,
+          "forecaster_blend": null,
+          "fwd_earnings_discounted": 194.25
+        },
+        "anchors_effective": {
+          "dcf_unlevered": null,
+          "dcf_levered": null,
+          "dcf_self_built": 45.27,
+          "analyst_pt_consensus": 287.73,
+          "peer_pe_implied": null,
+          "comps_implied": null,
+          "owner_earnings_mult": 23.7,
+          "forecaster_blend": null,
+          "fwd_earnings_discounted": null
+        },
+        "weights_used": {
+          "dcf_self_built": 1.0,
+          "analyst_pt_consensus": 0.0,
+          "owner_earnings_mult": 0.0
+        },
+        "weighted_fair_value": 45.27,
+        "current_price": 276.98,
+        "vs_current_pct": -83.66,
+        "verdict_band": "extreme_overvalued",
+        "score": -1.0,
+        "confidence": "low",
+        "anchors_available": 3,
+        "families_present": [
+          "external_expectations",
+          "fundamental"
+        ],
+        "family_coverage_weight": 0.75,
+        "excluded_anchors": {
+          "dcf_unlevered": "superseded_by_auditable_through_cycle_dcf",
+          "dcf_levered": "superseded_by_auditable_through_cycle_dcf",
+          "peer_pe_implied": "missing_or_nonpositive_value",
+          "comps_implied": "fewer_than_3_business_similar_peers",
+          "forecaster_blend": "missing_or_nonpositive_value",
+          "fwd_earnings_discounted": "cashflow_intrinsic_anchors_live:dcf_self_built,owner_earnings_mult"
+        },
+        "valuation_pack_schema": "valuation_pack.v1",
+        "primary_method": "dcf_self_built",
+        "family_blended_fair_value": 161.11,
+        "sell_side_only": false,
+        "pre_profit_anchor_live": false,
+        "methodology_note": "DCF primary with anchor range; mode=dcf_primary_anchor_range; 3/9 anchors; families=external_expectations,fundamental",
+        "confidence_count_based": "medium",
+        "confidence_capped_by": "anchor_dispersion cv=0.7576 (>= 0.6) -> low; span=12.14x",
+        "outlier_diagnostics": [
+          {
+            "anchor": "owner_earnings_mult",
+            "value": 23.7,
+            "reason": "outside [39.92, 359.28] (median 119.76 × 1/3..3)"
+          }
+        ],
+        "score_before_forward_validation": -1.0,
+        "forward_validation_status": "STRETCHED"
+      },
+      "fair_value_range": {
+        "range_method": "minmax_fallback",
+        "p25": 23.7,
+        "p50": 45.27,
+        "p75": 287.73,
+        "min_anchor": 23.7,
+        "max_anchor": 287.73,
+        "dispersion_ratio": 12.14,
+        "range_verdict": "fair_zone",
+        "anchor_dispersion_cv": 0.7576,
+        "agreement_grade": "low",
+        "anchors_used_n": 3,
+        "owner_earnings_multiple_shadow": {
+          "oe_mult_static": 15.0,
+          "oe_mult_rate_linked": 14.53,
+          "required_yield": 0.0688
+        }
+      },
+      "implied_expectations": {
+        "implied_5y_fcf_cagr": 0.6,
+        "implied_out_of_range": true,
+        "wacc_used": 0.0976,
+        "wacc_source": "fred_10y",
+        "fcf_base": 1.58,
+        "fcf_base_source": "owner_earnings",
+        "terminal_growth": 0.025,
+        "actual_3y_fcf_cagr": null,
+        "lane_fcf_estimate": null,
+        "sanity_note": "現價 $276.98 隱含 5Y FCF CAGR 60%",
+        "red_team_kill_seed": "IF 未來 2 季 FCF 年化增速 < 30%（隱含值一半）THEN 現價估值論點破滅",
+        "market_implied_revenue": {
+          "applicable": true,
+          "reason": null,
+          "ev_to_sales_ttm": 26.250857639368487,
+          "terminal_ev_to_sales": 4.0,
+          "terminal_ev_to_sales_sector_typical": 8.0,
+          "horizon_years": 5.0,
+          "required_revenue_multiple": 6.56,
+          "implied_revenue_cagr": 0.4569,
+          "required_revenue_multiple_sector": 3.28,
+          "implied_revenue_cagr_sector": 0.2683,
+          "analyst_revenue_cagr": 0.5123,
+          "analyst_horizon_years": 5.0,
+          "verdict": "aligned_with_sell_side",
+          "note": "EV/S 26.25x → 收斂到 4x 需營收 ×6.56（5Y CAGR 46%，且 EV 原地不動）；若倍數只收斂到科技中樞 8x 則需 27%；分析師路徑 51%；→ 與賣方預估大致一致",
+          "red_team_kill_seed": "IF 未來 2 季營收年化增速 < 46% THEN 現價內含的營收路徑破裂"
+        }
+      },
+      "valuation_archetype_shadow": {
+        "archetype": "hypergrowth",
+        "rule_hit": "rev_yoy=1.6552 / eps_ttm=None",
+        "missing_inputs": [
+          "eps_ttm"
+        ],
+        "new_anchors": {
+          "peer_ev_ebitda_implied": null,
+          "peer_ev_sales_implied": null,
+          "pb_roe_justified": null
+        },
+        "anchors_used_n": 3,
+        "weights_used": {
+          "dcf_self_built": 0.2222,
+          "analyst_pt_consensus": 0.4444,
+          "fwd_earnings_discounted": 0.3333
+        },
+        "weighted_fair_value_shadow": 202.69,
+        "vs_current_pct_shadow": -26.82,
+        "verdict_band_shadow": "overvalued",
+        "flip_vs_live": true,
+        "note": "shadow-only — live fair_value_summary 權重/verdict 不受影響（#3b 切換待 ≥20 session 翻轉率報告）"
+      },
+      "forward_validation": {
+        "schema": "forward_validation.v1",
+        "status": "STRETCHED",
+        "applies": true,
+        "reason": "at least one credible forward check supports current price",
+        "dcf_value": 45.27,
+        "dcf_gap_pct": -83.66,
+        "extreme_dcf_threshold_pct": -30.0,
+        "checks": [
+          {
+            "name": "archetype_shadow",
+            "available": true,
+            "supports_current_price": false,
+            "actual": -26.82,
+            "threshold": ">=-10% vs current",
+            "detail": {
+              "anchors_used_n": 3
+            }
+          },
+          {
+            "name": "forward_earnings",
+            "available": true,
+            "supports_current_price": false,
+            "actual": -29.87,
+            "threshold": ">=-10% vs current",
+            "detail": {
+              "analyst_count": 7,
+              "horizon_years": 3.25
+            }
+          },
+          {
+            "name": "revenue_path",
+            "available": true,
+            "supports_current_price": true,
+            "actual": 0.4569,
+            "threshold": "<= analyst CAGR + 0.05",
+            "detail": {
+              "analyst_revenue_cagr": 0.5123,
+              "analyst_horizon_years": 5.0
+            }
+          }
+        ],
+        "evaluated_count": 3,
+        "support_count": 1,
+        "supported_checks": [
+          "revenue_path"
+        ],
+        "failed_checks": [
+          "archetype_shadow",
+          "forward_earnings"
+        ],
+        "quality_flags": [
+          "reverse_dcf_growth_out_of_range"
+        ],
+        "valuation_score_before": -1.0,
+        "valuation_score_effective": -1.0,
+        "score_adjustment": "none",
+        "t5_hard_downgrade_eligible": false
+      },
+      "valuation_explained_range": {
+        "available": true,
+        "primary_fv": 45.27,
+        "primary_method": "structural_shift_through_cycle_dcf",
+        "primary_sensitivity": {
+          "low": 40.36,
+          "high": 51.53
+        },
+        "scenario_without_peer": 34.48,
+        "scenario_with_peer": null,
+        "peer_pe_range_anchor": null,
+        "range_low": 23.7,
+        "range_high": 287.73,
+        "range_low_driver": "anchor:owner_earnings_mult",
+        "range_high_driver": "anchor:analyst_pt_consensus",
+        "peer_scope": null,
+        "peer_count": 0,
+        "peer_symbols": [],
+        "other_eligible_anchors": {
+          "analyst_pt_consensus": 287.73,
+          "owner_earnings_mult": 23.7
+        },
+        "interpretation": "DCF is the primary FV; low=anchor:owner_earnings_mult; high=anchor:analyst_pt_consensus. Range-only peers explain a scenario and never replace the primary.",
+        "limitations": []
+      },
+      "valuation_reviewer_gate": {
+        "schema": "valuation_reviewer_gate.v1",
+        "ticker": "BE",
+        "would_invoke": true,
+        "mandatory_fired": true,
+        "triggers_fired": [
+          "transition_case_active",
+          "no_peer_cohort",
+          "anchor_conflict_severe"
+        ],
+        "shadow_only": true
+      },
+      "valuation_lane": {
+        "signal": "SELL",
+        "score": -1.0,
+        "confidence": 0.45,
+        "key_factors": [
+          "DCF primary anchor: $45.27",
+          "Analyst consensus PT has zero effective weight",
+          "Comparable peer cohort is insufficient"
+        ],
+        "risk_flags": [
+          "Low confidence: DCF carries all effective weight",
+          "Peer and forecast anchors are unavailable"
+        ],
+        "phase0_alignment": "ALIGNED",
+        "data_source_timestamp": "2026-10-01 08:39",
+        "weighted_fair_value": 45.27,
+        "vs_current_pct": -83.66,
+        "valuation_commentary": "The frozen pack records weighted fair value $45.27 versus current price $276.98 (vs_current_pct -83.66), with score -1.0 and low confidence. Its dcf_primary_anchor_range mode uses dcf_self_built as the primary anchor with effective weight 1.0. The analyst PT consensus at $287.73 is eligible but has zero effective weight; owner_earnings_mult at $23.70 is also zero-weighted and flagged as an outlier. The peer P/E anchor is missing, comps are ineligible because fewer than three business-similar peers were available, forecaster_blend has no value, and fwd_earnings_discounted is ineligible because cashflow-intrinsic anchors are live. This supports a negative valuation signal while keeping confidence low given the pack's recorded anchor dispersion and STRETCHED forward validation. No suppression proposal is warranted: the primary DCF is dated 2026-10-01, while the other anchors are already superseded, ineligible, or zero-weighted. The phase 0 volatile backdrop and high Treasury yields align with valuation pressure.",
+        "suppression_proposals": []
+      },
+      "fundamentals_lane": {
+        "signal": "HOLD",
+        "score": 0.0,
+        "confidence": 0.68,
+        "key_factors": [
+          "Revenue +165.5% YoY; accelerating",
+          "FCF margin 16.4%; cash conversion 3.03x",
+          "P/E 333.9x; FCF yield 0.77%"
+        ],
+        "risk_flags": [
+          "Debt/equity 3.73x; net debt",
+          "No valid peer median; PT dispersion 60.8%"
+        ],
+        "phase0_alignment": "MISALIGNED",
+        "data_source_timestamp": "2026-10-01 08:39",
+        "moat_assessment": {
+          "level": "NONE",
+          "type": "無",
+          "evidence_one_line": "INSUFFICIENT_DATA — only one eligible peer; ROIC, moat, and FCF-margin trend evidence are absent."
+        },
+        "near_term_catalysts": [
+          {
+            "date": "2026-10-26",
+            "type": "earnings",
+            "description": "Q3 earnings; canonical date, while analyst bundle estimates Oct 27.",
+            "impact": "high"
+          },
+          {
+            "date": "2026-10-26",
+            "type": "guidance",
+            "description": "Potential FY26 outlook update with Q3 results; no separate date or detail in inputs.",
+            "impact": "medium"
+          },
+          {
+            "date": "2026-Q4",
+            "type": "macro_event",
+            "description": "INSUFFICIENT_DATA: no dated macro calendar; monitor high rates and credit stress.",
+            "impact": "medium"
+          }
+        ],
+        "bull_thesis_one_line": "Q2 revenue grew 166% YoY; FCF margin was 16.4%.",
+        "bear_thesis_one_line": "P/E is 334x and FCF yield is only 0.77%."
+      },
+      "sentiment_lane": {
+        "signal": "HOLD",
+        "score": -0.03,
+        "confidence": 0.62,
+        "key_factors": [
+          "Recent insider ratio below threshold",
+          "Congressional trades show bullish net flow",
+          "Market composite near neutral; breadth weak"
+        ],
+        "risk_flags": [
+          "Insider feed has future-dated quarters",
+          "Elevated yields and weak breadth weigh on risk"
+        ],
+        "phase0_alignment": "NEUTRAL",
+        "data_source_timestamp": "2026-10-01 00:41",
+        "market_sentiment_composite": 54.4,
+        "vix_current": 16.34,
+        "insider_signal": -1,
+        "short_pct_float": 7.34,
+        "mspr_latest": -29.184015
+      },
+      "news_lane": {
+        "signal": "BUY",
+        "score": 1.0,
+        "confidence": 0.58,
+        "key_factors": [
+          "AI power demand headlines remain supportive",
+          "Buy consensus, but PT revisions trend down",
+          "Macro yields and credit stress weigh"
+        ],
+        "risk_flags": [
+          "30d PT revisions down; no fresh grade actions",
+          "High yields and credit stress oppose growth trade"
+        ],
+        "phase0_alignment": "MISALIGNED",
+        "data_source_timestamp": "2026-10-01 00:41",
+        "immediate_catalyst_5d": null,
+        "decision_point_days": 25,
+        "cross_asset_spillover": [
+          {
+            "asset": "sector_utilities",
+            "direction": "BULLISH",
+            "mechanism": "AI data-center demand can shift utilities toward onsite generation and grid-capacity investment."
+          }
+        ],
+        "reasoning_one_line": "AI demand and supportive coverage offset declining one-month PT momentum and an adverse macro backdrop.",
+        "pt_revision_momentum": {
+          "direction": "DOWN",
+          "consensus_delta_pct_1m": -8.17,
+          "consensus_delta_pct_3m": 6.78,
+          "analysts_last_month": 3,
+          "analysts_last_quarter": 17,
+          "note": "PT revision direction only — absolute levels stripped (V3.45.4 anti cross-lane anchoring)"
+        }
+      },
+      "technical_lane": {
+        "signal": "HOLD",
+        "score": 1.5,
+        "confidence": 0.69,
+        "key_factors": [
+          "Price holds above rising 20/50/200-day averages",
+          "Recent 20/50 golden cross; RSI remains bullish",
+          "Resistance $283.83 sits only 2.47% overhead"
+        ],
+        "risk_flags": [
+          "MACD histogram falling; volume at 0.83x 20-day average",
+          "Insider feed conflicts with reported share totals"
+        ],
+        "phase0_alignment": "MISALIGNED",
+        "data_source_timestamp": "2026-10-01 00:39",
+        "smart_money_analysis": {
+          "label": "mixed",
+          "narrative": "FMP marks the latest trend as distributing and reports an acquired/disposed ratio of 0.0, but that quarter lists 510,994 acquired shares and zero disposed; the down day also had only 0.83x average volume, so price-volume confirmation is limited."
+        },
+        "pattern_taxonomy": "pullback_in_uptrend",
+        "confirmation_criteria": "Holding $266.52 (20-day average) and reclaiming $283.83 on above-average volume confirms continuation; a close below $249.05 invalidates the setup.",
+        "market_strength": "NEUTRAL",
+        "key_levels": {
+          "support": 249.05,
+          "resistance": 283.83,
+          "pivot": 266.52
+        },
+        "high_prob_scenario": "Over the next 5–15 days, holding the $266.52 pivot could keep the pullback constructive; a high-volume reclaim of $283.83 opens $288, while a close below $249.05 invalidates the setup.",
+        "volatility": {
+          "atr_14": null,
+          "hist_vol_20d_daily": null,
+          "momentum_20d_pct": null
+        }
+      },
+      "multi_horizon_price_framework": {
+        "short_term_5d": {
+          "band": [
+            234.91,
+            280.54,
+            326.18
+          ],
+          "band_capped": [
+            249.05,
+            280.54,
+            283.83
+          ],
+          "drift_sigma": 0.1,
+          "sigma_daily": 0.05756,
+          "atr_14": 21.4714,
+          "confidence": "high",
+          "catalyst_widened": false,
+          "key_level_note": "下界受 support $249.05 撐住（原始 $234.91）；上界受 resistance $283.83 壓制（原始 $326.18）"
+        },
+        "mid_term_60d": {
+          "momentum_target": 318.04,
+          "pt_60d": 278.75,
+          "earnings_revision": null,
+          "weights_used": {
+            "momentum": 0.5333,
+            "pt_60d": 0.4667
+          },
+          "mid_target": 299.7,
+          "reality_check_note": "需突破 $283.83 才成立"
+        },
+        "long_term_ref": {
+          "weighted_fair_value": 45.27,
+          "verdict_band": "extreme_overvalued",
+          "confidence": "low"
+        },
+        "convergence": {
+          "mhp_signal": "wait_for_pullback",
+          "signal_note": "5d 帶下界 $249.05 > 長期FV $45.27 → 短期超漲、長期偏貴，等回檔（長期FV 信心 low，訊號僅供參考）"
+        },
+        "engine": "compute_price_framework.py v2.4 (V4.131.13)"
+      },
+      "macro_context": "Phase 0 顯示 VOLATILE regime、macro backdrop score −2.0、macro multiplier 0.75；breadth 28.6 且趨勢轉弱，VIX 16.34 為 NORMAL，FTD 未確認。高美債殖利率與信用壓力構成估值逆風；forward validation 為 STRETCHED。",
+      "watch_conditions": {
+        "support_break": "若收盤跌破 $249.05 技術支撐，重新評估上升趨勢是否失效。",
+        "resistance_reclaim": "若放量站上 $283.83 阻力，重新評估短中期動能；未突破前維持觀望。",
+        "q3_earnings": "追蹤 2026-10-26 Q3 財報與指引，檢查營收與自由現金流能否支持成長路徑。",
+        "fcf_growth_validation": "未來兩季 FCF 年化增速若低於 30%，依 Red Team kill condition 重估估值論點。"
+      },
+      "key_risks": [
+        "主要 DCF anchor 為 $45.27，現價 $276.98，fair-value confidence 為 low，錨點分散度高。",
+        "價格隱含 5 年 FCF CAGR 60%，但 actual 與 lane FCF 增長估計不可用。",
+        "30 日分析師目標價共識下修 8.17%；forward earnings 與 archetype shadow 未支持現價。",
+        "實質利率 2.88%、macro score −2.0、breadth 28.6，宏觀折現率與市場參與度形成壓力。",
+        "Tail risk 為 FRAGILE（score 81.2）；Phase 4 risk level 為 HIGH。"
+      ],
+      "devils_advocate_filed": false,
+      "decision_point_days": 25,
+      "trade_metadata": {
+        "trade_type": "trend",
+        "event_tag": "earnings"
+      },
+      "sentiment_det": {
+        "producer_version": "sentiment_score.py v1.1 (L5 / V4.95.3)",
+        "shadow_only": true,
+        "ticker": "BE",
+        "score": -0.005,
+        "market_layer": 0.49,
+        "market_composite": 54.9,
+        "stock_specific": -0.5,
+        "stock_detail": {
+          "raw_sum": -0.5,
+          "clamped": false,
+          "rules_fired": [
+            {
+              "rule": "insider_ratio_low",
+              "points": -1.0,
+              "detail": "acquired_disposed_ratio 0.0 < 0.3"
+            },
+            {
+              "rule": "congress_bullish",
+              "points": 0.5,
+              "detail": "congressional_trades.net_signal=bullish"
+            }
+          ]
+        },
+        "missing_inputs": [
+          "institutional.accumulation_signal",
+          "stock_based_compensation_pct_revenue"
+        ],
+        "degraded_reason": null,
+        "input_hash": "sha256:594bf69fe1a32c75e76fce4871d88c9c",
+        "note": "shadow-only — LLM 照跑 Sentiment lane，本紀錄不改任何決策數字。翻預設需使用者拍板（見 protocol §PHASE 2 Sentiment Subagent）"
+      },
+      "det_inputs": {
+        "altman_z": 12.815388769796435,
+        "debt_to_equity": 1.7441882682236578,
+        "fcf_yield": 0.0077001559102234446,
+        "insider_ratio_q": 0,
+        "short_interest_pct": 7.34,
+        "fred_in_sector_avoid": null
+      },
+      "det_inputs_metadata": {
+        "producer_version": "run_exports/1.0",
+        "shadow_only": true,
+        "input_hash": "sha256:d687ab741b413e1401dd32ee999efbc151509ac1351f09f602fad1401eed0994",
+        "missing_reasons": {
+          "fred_in_sector_avoid": "not available in frozen source"
+        }
+      },
+      "price_sources": [
+        {
+          "source": "FMP frozen quote",
+          "price": 276.98,
+          "fetched_at": "2026-10-01T00:39:35.657837+00:00",
+          "data_as_of": 1790798403,
+          "difference_from_frozen": 0.0,
+          "status": "ok"
+        },
+        {
+          "source": "Finnhub scoring",
+          "price": 276.98,
+          "fetched_at": "2026-10-01T00:39:12.261880Z",
+          "data_as_of": null,
+          "difference_from_frozen": 0.0,
+          "status": "ok"
+        },
+        {
+          "source": "FMP audit",
+          "price": 276.98,
+          "fetched_at": "2026-10-01T00:39:12.261880Z",
+          "data_as_of": null,
+          "difference_from_frozen": 0.0,
+          "status": "ok"
+        }
+      ],
+      "_as_of_date_inherited": "2026-10-01",
+      "det_shadow": {
+        "version": "V3.45.4",
+        "signal_polarization": "ALIGNED",
+        "polarization_detail": {
+          "label": "ALIGNED",
+          "range": 2.5,
+          "max": 1.5,
+          "min": -1.0,
+          "pos_strong": 2,
+          "neg_strong": 1,
+          "missing_lanes": []
+        },
+        "valuation_score_det": -1.0,
+        "val_agreement": "AGREE",
+        "valuation_source": "valuation_pack",
+        "red_team_verdict_det": "NO_VIABLE_COUNTER",
+        "red_team_detail": {
+          "verdict": "NO_VIABLE_COUNTER",
+          "kill_count": 1,
+          "triggered": [
+            "insider_ratio_q"
+          ],
+          "missing": [
+            "fred_in_sector_avoid"
+          ]
+        },
+        "red_team_agreement": "DISAGREE",
+        "red_team_basis": "unclassified",
+        "red_team_basis_detail": {
+          "mr_hits": 0,
+          "fw_hits": 0,
+          "mr_keywords": [],
+          "fw_keywords": [],
+          "haystack_chars": 975,
+          "mr_density": 0.0,
+          "fw_density": 0.0
+        },
+        "lane_freshness": {
+          "version": "V2.20.0",
+          "as_of": "2026-10-01",
+          "lane_multipliers": {
+            "news": 1.0,
+            "sentiment": 1.0,
+            "technical": 1.0,
+            "fundamentals": 1.0,
+            "valuation": 1.0
+          },
+          "stalest_lane": null,
+          "stalest_age_days": null,
+          "applied": false
+        },
+        "news_pt_leakage": false,
+        "news_pt_leakage_detail": {
+          "flag": false,
+          "hits": [],
+          "scanned": true
+        }
+      },
+      "lane_contract": {
+        "contract_version": "C1/1.0",
+        "analysis_mode": "FULL_IC",
+        "llm_invoked_lanes": [
+          "fundamentals",
+          "sentiment",
+          "news",
+          "technical",
+          "valuation",
+          "red_team"
+        ],
+        "llm_skipped_lanes": [],
+        "lanes": {
+          "fundamentals": {
+            "provenance": "llm",
+            "llm_invoked": true,
+            "producer_version": "sha256:4249b851ccc0e38aae32bcafde44d27cc8588f45ee7f31271ba77509baf23321",
+            "input_hash": "sha256:060ed198a244807986f9bca6cdcf2beacd8f0081e66422fa6fb2d0687012e390",
+            "shadow_score": null,
+            "model": "gpt-6-luna",
+            "execution_status": "complete"
+          },
+          "sentiment": {
+            "provenance": "llm",
+            "llm_invoked": true,
+            "producer_version": "sha256:4249b851ccc0e38aae32bcafde44d27cc8588f45ee7f31271ba77509baf23321",
+            "input_hash": "sha256:913f10219d1ec80bcc722f90ba49c13bbe6e1e811b5e3c4ca2b5e0d7ae611c6a",
+            "shadow_score": -0.005,
+            "model": "gpt-6-luna",
+            "execution_status": "complete"
+          },
+          "news": {
+            "provenance": "llm",
+            "llm_invoked": true,
+            "producer_version": "sha256:4249b851ccc0e38aae32bcafde44d27cc8588f45ee7f31271ba77509baf23321",
+            "input_hash": "sha256:1d2e83429495da05542c6a4ab750e7adf66f16b81332e4d4f4df110d1637130e",
+            "shadow_score": null,
+            "model": "gpt-6-luna",
+            "execution_status": "complete"
+          },
+          "technical": {
+            "provenance": "llm",
+            "llm_invoked": true,
+            "producer_version": "sha256:4249b851ccc0e38aae32bcafde44d27cc8588f45ee7f31271ba77509baf23321",
+            "input_hash": "sha256:e5d518dd4402b3291c0dfb4e8a6c3cd146b2de3810d736aad430938768ca5a99",
+            "shadow_score": null,
+            "model": "gpt-6-luna",
+            "execution_status": "complete"
+          },
+          "valuation": {
+            "provenance": "llm",
+            "llm_invoked": true,
+            "producer_version": "sha256:4249b851ccc0e38aae32bcafde44d27cc8588f45ee7f31271ba77509baf23321",
+            "input_hash": "sha256:8e7b82e1e9fb1c14c22490464920922a177da66b51db55abc43dd2e0eaf1ef0b",
+            "shadow_score": -1.0,
+            "model": "gpt-6-luna",
+            "execution_status": "complete"
+          },
+          "red_team": {
+            "provenance": "llm",
+            "llm_invoked": true,
+            "producer_version": "sha256:4249b851ccc0e38aae32bcafde44d27cc8588f45ee7f31271ba77509baf23321",
+            "input_hash": "sha256:8c91c1af91948446fe8bb3bec3515d252848c514631a3636343e394b79828ecc",
+            "shadow_score": null,
+            "model": "gpt-6-luna",
+            "execution_status": "complete"
+          }
+        }
+      },
+      "execution_quality": "complete",
+      "red_team_synthetic": false,
+      "kill_condition_evaluation": {
+        "status": "unknown",
+        "event_evidence": [],
+        "reason": "requires subsequent event evidence; price return is not thesis proof"
+      }
+    }
+  ],
+  "active_weights_end_of_session": {
+    "Fundamentals": 0.25,
+    "Sentiment": 0.15,
+    "News": 0.2,
+    "Technical": 0.25,
+    "Valuation": 0.15
+  },
+  "bias_notes": "Forecaster 因 ratios endpoint 的 PE 歷史不足而 unavailable；相關 anchor 保持 null。估值錨分散、fair-value confidence low，decision cap 已按 quant 啟動。五線訊號混合，Red Team 對執行與現金流兌現路徑提出強反方。",
+  "last_outcome": "UNKNOWN",
+  "run_context": {
+    "run_id": "BE_20261001T083857_0dd010e757",
+    "snapshot_hash": "sha256:61fbb448c0aac800f335ca0f794f83833ab6e8c4b9f78e9e0e53611241dab047",
+    "analysis_at": "2026-10-01T00:39:35.799551+00:00",
+    "protocol_version": "V5.5",
+    "producer_version": "sha256:4249b851ccc0e38aae32bcafde44d27cc8588f45ee7f31271ba77509baf23321",
+    "classification": {
+      "sector": "Industrials",
+      "industry": "Electrical Equipment & Parts",
+      "regime": "VOLATILE",
+      "data_as_of": "2026-09-30T23:58:46+00:00"
+    },
+    "stages": {
+      "quant": {
+        "input_hash": null,
+        "output_hash": "sha256:b55802116a7842197fddb9b22177828242cb3a4c7bf593d7bc9a70cbaba0bd72",
+        "model": null,
+        "effort": null,
+        "status": "complete",
+        "dependency_hash": "sha256:722f645893bba27adbc2a531caa881d330dfcef5971a2988277d93910afd1bc7",
+        "attempts": 0,
+        "tokens": null,
+        "elapsed_seconds": null,
+        "queued_seconds": null
+      },
+      "fundamentals": {
+        "input_hash": "sha256:060ed198a244807986f9bca6cdcf2beacd8f0081e66422fa6fb2d0687012e390",
+        "output_hash": "sha256:2c80cbf3007f415cd3d002c918b4dec2144150fd0bd3fb344430135f59a1cf3d",
+        "model": "gpt-6-luna",
+        "effort": "max",
+        "status": "complete",
+        "dependency_hash": "sha256:2f833398d0e3cb0928e9ae30c0c81f18dae9b42d23c9824863933333bc300dcc",
+        "attempts": 1,
+        "tokens": {
+          "input": null,
+          "output": null,
+          "cached": null
+        },
+        "elapsed_seconds": 288.725792,
+        "queued_seconds": 31.174177
+      },
+      "sentiment": {
+        "input_hash": "sha256:913f10219d1ec80bcc722f90ba49c13bbe6e1e811b5e3c4ca2b5e0d7ae611c6a",
+        "output_hash": "sha256:cee586281939198ad76ac2b379cd9bd0cb4abd6a19529d225c17bf616cadf982",
+        "model": "gpt-6-luna",
+        "effort": "max",
+        "status": "complete",
+        "dependency_hash": "sha256:2f833398d0e3cb0928e9ae30c0c81f18dae9b42d23c9824863933333bc300dcc",
+        "attempts": 1,
+        "tokens": {
+          "input": null,
+          "output": null,
+          "cached": null
+        },
+        "elapsed_seconds": 209.600224,
+        "queued_seconds": 31.174189
+      },
+      "news": {
+        "input_hash": "sha256:1d2e83429495da05542c6a4ab750e7adf66f16b81332e4d4f4df110d1637130e",
+        "output_hash": "sha256:4a56ca8f1e93df1c02106e133257bafee4642fe6876ee55bd1b8fbaab2539a35",
+        "model": "gpt-6-luna",
+        "effort": "max",
+        "status": "complete",
+        "dependency_hash": "sha256:2f833398d0e3cb0928e9ae30c0c81f18dae9b42d23c9824863933333bc300dcc",
+        "attempts": 2,
+        "tokens": {
+          "input": null,
+          "output": null,
+          "cached": null
+        },
+        "elapsed_seconds": 12.927929,
+        "queued_seconds": 391.91595
+      },
+      "technical": {
+        "input_hash": "sha256:e5d518dd4402b3291c0dfb4e8a6c3cd146b2de3810d736aad430938768ca5a99",
+        "output_hash": "sha256:6327eee93de53695a4a1197731e5cb348ca29de9e223daac42a0da5fdba471ff",
+        "model": "gpt-6-luna",
+        "effort": "max",
+        "status": "complete",
+        "dependency_hash": "sha256:2f833398d0e3cb0928e9ae30c0c81f18dae9b42d23c9824863933333bc300dcc",
+        "attempts": 1,
+        "tokens": {
+          "input": null,
+          "output": null,
+          "cached": null
+        },
+        "elapsed_seconds": 264.273607,
+        "queued_seconds": 264.717028
+      },
+      "valuation": {
+        "input_hash": "sha256:8e7b82e1e9fb1c14c22490464920922a177da66b51db55abc43dd2e0eaf1ef0b",
+        "output_hash": "sha256:01277120bc24e95adbb35e58392ad3728f3d6b3c981a43ebc07ea0e006585d6b",
+        "model": "gpt-6-luna",
+        "effort": "max",
+        "status": "complete",
+        "dependency_hash": "sha256:2f833398d0e3cb0928e9ae30c0c81f18dae9b42d23c9824863933333bc300dcc",
+        "attempts": 1,
+        "tokens": {
+          "input": null,
+          "output": null,
+          "cached": null
+        },
+        "elapsed_seconds": 353.311469,
+        "queued_seconds": 410.207822
+      },
+      "red_team": {
+        "input_hash": "sha256:8c91c1af91948446fe8bb3bec3515d252848c514631a3636343e394b79828ecc",
+        "output_hash": "sha256:3c19dcf9a9d01cce63bb993154ed8ad914230c2683eb97a29ae509e4f42a6aff",
+        "model": "gpt-6-luna",
+        "effort": "max",
+        "status": "complete",
+        "dependency_hash": "sha256:01607d48076246b3073cd9cb3424ad134258ac6a09d8696fba9b7bbe5a94baee",
+        "attempts": 1,
+        "tokens": {
+          "input": null,
+          "output": null,
+          "cached": null
+        },
+        "elapsed_seconds": 266.57529,
+        "queued_seconds": 946.371406
+      },
+      "decision": {
+        "input_hash": "sha256:d3b7e85492458fe8f7b5998c24992a479f826bcd35c21e78f79bcfed6d1cfdf2",
+        "output_hash": "sha256:2be993013058cbffafd8fd49f2bb0a3a3a1983b0874458a02e6a9f77768bfd67",
+        "model": null,
+        "effort": null,
+        "status": "complete",
+        "dependency_hash": "sha256:99fe09663f1fe9ce339daae82c37a2adbb6cb7751362f10ae9a37f3fc86714a7",
+        "attempts": 0,
+        "tokens": null,
+        "elapsed_seconds": 0.001236,
+        "queued_seconds": null
+      },
+      "mhp": {
+        "input_hash": "sha256:350d152a157b1194c0440545ee6d5d0d74d33d05732581a76a870b16ca72a664",
+        "output_hash": "sha256:4f861bc15ef7262e861264231222e576d4f8153a63bbfb5126756836fff52776",
+        "model": null,
+        "effort": null,
+        "status": "complete",
+        "dependency_hash": "sha256:01607d48076246b3073cd9cb3424ad134258ac6a09d8696fba9b7bbe5a94baee",
+        "attempts": 0,
+        "tokens": null,
+        "elapsed_seconds": 0.002324,
+        "queued_seconds": null
+      },
+      "risk": {
+        "input_hash": "sha256:c98a82bcaf8cbcfd5efc0266fa3fa18033803c4177440ab746ccffe77383f0aa",
+        "output_hash": "sha256:e462f9664e3b3815c405c0b5d052ba311ec0bc9ba7ea663c0d71586471b69fdb",
+        "model": null,
+        "effort": null,
+        "status": "complete",
+        "dependency_hash": "sha256:70de976631dfe985c139cfb541f6ffeb131238849f86734fda65f5d70a6964b8",
+        "attempts": 0,
+        "tokens": null,
+        "elapsed_seconds": 5.334561,
+        "queued_seconds": null
+      }
+    }
+  },
+  "export_provenance": {
+    "schema": "export_provenance.v1",
+    "writer": "append_session_export.py (V4.137.0)",
+    "appended_at": "2026-10-01T01:06:36Z",
+    "entry_digest": "sha256:4144e50142c4830f0e6335df6be85ce99abef0147dd8ab573b91f40c93469e5c"
+  }
+}

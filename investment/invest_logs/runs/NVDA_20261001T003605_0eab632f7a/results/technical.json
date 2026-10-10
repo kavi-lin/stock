@@ -1,0 +1,41 @@
+{
+  "phase": 2,
+  "agent": "technical_Analyst",
+  "ticker": "NVDA",
+  "signal": "BUY",
+  "score": 1.5,
+  "confidence": 0.72,
+  "key_factors": [
+    "Stage 2 price above all major averages",
+    "Bullish RSI and rising MACD histogram",
+    "Resistance at $233.21 limits near-term upside"
+  ],
+  "risk_flags": [
+    "Elevated yields and credit stress pressure technology",
+    "Insider transactions indicate distribution"
+  ],
+  "phase0_alignment": "MISALIGNED",
+  "data_source_timestamp": "2026-09-30 16:34",
+  "subagent_isolated": true,
+  "skill_execution_failed": false,
+  "smart_money_analysis": {
+    "label": "distributing",
+    "narrative": "Q3 acquired/disposed ratio is 0.0882, with 3 acquired versus 34 disposed transactions. Effective volume is 94.3M versus the 112.3M 20-day average, so current price-volume data does not confirm accumulation."
+  },
+  "pattern_taxonomy": {
+    "pattern": "uptrend_continuation",
+    "confirmation_criteria": "A close above $233.21 with volume at or above the 20-day average confirms continuation; a close below $221.09 weakens the setup."
+  },
+  "market_strength": "STRONG",
+  "key_levels": {
+    "support": 221.09,
+    "resistance": 233.21,
+    "pivot": 229.98
+  },
+  "high_prob_scenario": "A hold above $229.98 and close above $233.21 with volume at or above 112.3M would favor a test of $236.00; a break below $221.09 risks a pullback toward $217.27.",
+  "volatility": {
+    "atr_14": null,
+    "hist_vol_20d_daily": null,
+    "momentum_20d_pct": null
+  }
+}

@@ -1,0 +1,153 @@
+{
+  "ticker": "NVDA",
+  "lane_scores": {
+    "fundamentals": 2,
+    "sentiment": -0.53,
+    "news": 1.5,
+    "technical": 1.5,
+    "valuation": 0.0
+  },
+  "lane_confidence": {
+    "fundamentals": 0.79,
+    "sentiment": 0.72,
+    "news": 0.62,
+    "technical": 0.74,
+    "valuation": 0.6
+  },
+  "valuation_lane": {
+    "score": 0.0,
+    "confidence": 0.6
+  },
+  "forward_validation": {
+    "schema": "forward_validation.v1",
+    "status": "STRETCHED",
+    "applies": true,
+    "reason": "at least one credible forward check supports current price",
+    "dcf_value": 95.04,
+    "dcf_gap_pct": -58.39,
+    "extreme_dcf_threshold_pct": -30.0,
+    "checks": [
+      {
+        "name": "archetype_shadow",
+        "available": true,
+        "supports_current_price": true,
+        "actual": 5.62,
+        "threshold": ">=-10% vs current",
+        "detail": {
+          "anchors_used_n": 5
+        }
+      },
+      {
+        "name": "forward_earnings",
+        "available": true,
+        "supports_current_price": true,
+        "actual": -5.64,
+        "threshold": ">=-10% vs current",
+        "detail": {
+          "analyst_count": 9,
+          "horizon_years": 3.318
+        }
+      },
+      {
+        "name": "revenue_path",
+        "available": true,
+        "supports_current_price": true,
+        "actual": 0.3579,
+        "threshold": "<= analyst CAGR + 0.05",
+        "detail": {
+          "analyst_revenue_cagr": 0.3928,
+          "analyst_horizon_years": 5.0
+        }
+      }
+    ],
+    "evaluated_count": 3,
+    "support_count": 3,
+    "supported_checks": [
+      "archetype_shadow",
+      "forward_earnings",
+      "revenue_path"
+    ],
+    "failed_checks": [],
+    "quality_flags": [
+      "reverse_dcf_growth_out_of_range"
+    ],
+    "valuation_score_before": 0.0,
+    "valuation_score_effective": 0.0,
+    "score_adjustment": "none",
+    "t5_hard_downgrade_eligible": false
+  },
+  "structural_shift": {
+    "tier": "NONE"
+  },
+  "red_team": {
+    "verdict": "STRONG_COUNTER",
+    "counter_thesis": "NVDA’s mixed HOLD is vulnerable because the $228.38 price implies a 60% five-year FCF CAGR, while the frozen inputs provide no actual or lane FCF growth estimate; the weighted fair value is $220.12, and the 10-year real yield is 2.88%. The analyst revenue path of 39.28% CAGR does not establish that FCF can meet the higher implied hurdle.",
+    "kill_conditions": [
+      "IF FCF growth is below 30% annualized across the next two reported quarters WITHIN 180 days THEN the price-implied 60% five-year FCF growth case breaks.",
+      "IF year-over-year revenue growth falls below 36% in either of the next two quarterly reports WITHIN 180 days THEN the price-implied revenue path breaks.",
+      "IF the FRED 10-year real Treasury yield remains at or above 2.88% for the next 90 days THEN persistent discount-rate pressure and the $220.12 weighted fair value leave the $228.38 price without a rate-supported valuation cushion."
+    ],
+    "counter_evidence_strength": 4,
+    "thesis_break_probability": 0.42
+  },
+  "transition": {
+    "transition_signature": "none",
+    "transition_signature_mtime": "2026-09-30T16:32:48.513865+00:00",
+    "forecaster_transition_case": false,
+    "forecaster_transition_case_mtime": "2026-10-01T01:43:17+00:00",
+    "valuation_cited_transition_overlay": false,
+    "valuation_transition_dissent_basis": null
+  },
+  "macro": {
+    "macro_multiplier": 0.75,
+    "macro_backdrop_score": -2.0,
+    "market_regime": "VOLATILE"
+  },
+  "burry": {
+    "ticker": "NVDA",
+    "generated_at": "2026-10-01T01:52:37.768354+00:00",
+    "burry_score": 27.7,
+    "verdict": "WARNING",
+    "components": {
+      "fcf_yield_pct": 0.76,
+      "ev_ebit": 27.23,
+      "debt_to_equity": 0.17,
+      "pct_below_52w_high": 2.9,
+      "insider_net": "SELL"
+    },
+    "component_scores": {
+      "fcf_yield": 13.8,
+      "ev_ebit": 17.4,
+      "debt_to_equity": 90.0,
+      "pct_below_52w_high": 20.0,
+      "insider": 20
+    },
+    "weights_active": [
+      "fcf_yield",
+      "ev_ebit",
+      "debt_to_equity",
+      "pct_below_52w_high",
+      "insider"
+    ],
+    "reasoning": "FCF yield 0.8% │ EV/EBITDA 27.2 │ D/E 0.17 │ 3% below 52wH │ insider=SELL",
+    "score": 27.7,
+    "veto_flag": false,
+    "label": "WARNING"
+  },
+  "gates": {
+    "proceed_to_phase3": true,
+    "risk_reward_ratio": null,
+    "binary_classification": "unknown",
+    "binary_event_within_48h": false,
+    "mandatory_risk_flags": [],
+    "phase2_fanout_mode": "PARALLEL_SUBAGENT"
+  },
+  "hot_zone": {
+    "industry_top_30pct": null
+  },
+  "decision_cap": {
+    "anchors_available": 5,
+    "fair_value_confidence": "medium",
+    "lane_data_quality_low": true
+  }
+}

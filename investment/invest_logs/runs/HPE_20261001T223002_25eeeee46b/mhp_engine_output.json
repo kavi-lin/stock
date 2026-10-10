@@ -1,0 +1,560 @@
+{
+  "engine": "compute_price_framework.py v2.4 (V4.131.13)",
+  "ticker": "HPE",
+  "valuation_pack": {
+    "schema": "valuation_pack.v1",
+    "engine": "compute_price_framework.py v2.4 (V4.131.13)",
+    "built_at": "2026-10-01T14:30:37+00:00",
+    "current_price": 62.99,
+    "anchors": {
+      "dcf_unlevered": {
+        "value": 6.722758268720117,
+        "family": "fundamental",
+        "correlation_group": "cashflow_intrinsic:earnings_analyst:HPE:2026-07-31",
+        "assumption_set_id": "abc31c27892f5902",
+        "provenance": "earnings_analyst_bundle",
+        "as_of": "2026-09-30",
+        "input_lineage_ids": [
+          "earnings_analyst:HPE:2026-07-31"
+        ],
+        "status": "ineligible",
+        "reason": "superseded_by_auditable_through_cycle_dcf",
+        "weight_raw": 0.2,
+        "weight_effective": 0.0,
+        "projection_mode": null,
+        "sensitivity_low": null,
+        "sensitivity_high": null,
+        "calibration": null
+      },
+      "dcf_levered": {
+        "value": 12.539122078382844,
+        "family": "fundamental",
+        "correlation_group": "cashflow_intrinsic:earnings_analyst:HPE:2026-07-31",
+        "assumption_set_id": "abc31c27892f5902",
+        "provenance": "earnings_analyst_bundle",
+        "as_of": "2026-09-30",
+        "input_lineage_ids": [
+          "earnings_analyst:HPE:2026-07-31"
+        ],
+        "status": "ineligible",
+        "reason": "superseded_by_auditable_through_cycle_dcf",
+        "weight_raw": 0.1,
+        "weight_effective": 0.0,
+        "projection_mode": null,
+        "sensitivity_low": null,
+        "sensitivity_high": null,
+        "calibration": null
+      },
+      "dcf_self_built": {
+        "value": 37.34,
+        "family": "fundamental",
+        "correlation_group": "cashflow_intrinsic:dcf_self:HPE:2026-10-01",
+        "assumption_set_id": "d6c2ec0b367e6e9c",
+        "provenance": "valuation_modeler.dcf",
+        "as_of": "2026-10-01",
+        "input_lineage_ids": [
+          "skills/valuation-modeler/cache/HPE_dcf_payload.json"
+        ],
+        "status": "eligible",
+        "reason": null,
+        "weight_raw": 0.15,
+        "weight_effective": 1.0,
+        "projection_mode": "structural_shift_through_cycle",
+        "sensitivity_low": 30.07,
+        "sensitivity_high": 48.35,
+        "calibration": null
+      },
+      "analyst_pt_consensus": {
+        "value": 67.75,
+        "family": "external_expectations",
+        "correlation_group": "external_pt:analyst_pt:HPE:2026-09-30",
+        "assumption_set_id": "d4f9e641c23ca7a5",
+        "provenance": "earnings_analyst_bundle.pt_news",
+        "as_of": "2026-09-30",
+        "input_lineage_ids": [
+          "analyst_pt:HPE:2026-09-30"
+        ],
+        "status": "eligible",
+        "reason": null,
+        "weight_raw": 0.2,
+        "weight_effective": 0.0,
+        "projection_mode": null,
+        "sensitivity_low": null,
+        "sensitivity_high": null,
+        "calibration": null
+      },
+      "peer_pe_implied": {
+        "value": 43.54,
+        "family": "relative",
+        "correlation_group": "peer_relative:peers:5260695a7f56e9a2:2026-10-01",
+        "assumption_set_id": "d4da842dde958dd9",
+        "provenance": "exact_industry_business_model_v1",
+        "as_of": "2026-10-01",
+        "input_lineage_ids": [
+          "PSTG",
+          "SMCI",
+          "SNDK"
+        ],
+        "status": "eligible",
+        "reason": null,
+        "weight_raw": 0.15,
+        "weight_effective": 0.0,
+        "projection_mode": null,
+        "sensitivity_low": null,
+        "sensitivity_high": null,
+        "calibration": null
+      },
+      "comps_implied": {
+        "value": 70.16,
+        "family": "relative",
+        "correlation_group": "peer_relative:peers:5260695a7f56e9a2:2026-10-01",
+        "assumption_set_id": "fc6070b8d0015531",
+        "provenance": "valuation_modeler.comps",
+        "as_of": "2026-10-01",
+        "input_lineage_ids": [
+          "skills/valuation-modeler/cache/HPE_comps_payload.json",
+          "PSTG",
+          "SMCI",
+          "SNDK"
+        ],
+        "status": "eligible",
+        "reason": null,
+        "weight_raw": 0.1,
+        "weight_effective": 0.0,
+        "projection_mode": null,
+        "sensitivity_low": null,
+        "sensitivity_high": null,
+        "calibration": null
+      },
+      "owner_earnings_mult": {
+        "value": 16.2,
+        "family": "fundamental",
+        "correlation_group": "cashflow_intrinsic:owner_earnings:HPE:2026-10-01",
+        "assumption_set_id": "bf5b9c6049ae854a",
+        "provenance": "fmp_supplementary.owner_earnings",
+        "as_of": "2026-10-01",
+        "input_lineage_ids": [
+          "owner_earnings:HPE:2026-10-01"
+        ],
+        "status": "eligible",
+        "reason": null,
+        "weight_raw": 0.05,
+        "weight_effective": 0.0,
+        "projection_mode": null,
+        "sensitivity_low": null,
+        "sensitivity_high": null,
+        "calibration": null
+      },
+      "forecaster_blend": {
+        "value": null,
+        "family": "fundamental",
+        "correlation_group": "earnings_projection:forecaster:HPE:2026-10-01",
+        "assumption_set_id": "be21c7b9689ac3bd",
+        "provenance": "earnings_valuation_forecaster",
+        "as_of": "2026-10-01",
+        "input_lineage_ids": [
+          "skills/earnings-valuation-forecaster/cache/HPE.json"
+        ],
+        "status": "ineligible",
+        "reason": "low_forecast_confidence,transition_without_safe_model",
+        "weight_raw": 0.05,
+        "weight_effective": 0.0,
+        "projection_mode": null,
+        "sensitivity_low": null,
+        "sensitivity_high": null,
+        "calibration": null
+      },
+      "fwd_earnings_discounted": {
+        "value": 60.48,
+        "family": "fundamental",
+        "correlation_group": "earnings_projection:analyst_estimates:HPE:2028-10-31",
+        "assumption_set_id": "c0b5e8c6c7c5b0cb",
+        "provenance": "fmp_analyst_estimates.annual",
+        "as_of": "2026-10-01",
+        "input_lineage_ids": [
+          "analyst_estimates:HPE:2028-10-31"
+        ],
+        "status": "ineligible",
+        "reason": "cashflow_intrinsic_anchors_live:dcf_self_built,owner_earnings_mult",
+        "weight_raw": 0.15,
+        "weight_effective": 0.0,
+        "projection_mode": null,
+        "sensitivity_low": null,
+        "sensitivity_high": null,
+        "calibration": {
+          "target_fiscal_year": "2028-10-31",
+          "target_eps": 5.0817,
+          "analyst_count": 6,
+          "discount_rate": 0.1175,
+          "horizon_years": 2.084,
+          "justified_pe": 15.0,
+          "justified_pe_raw": 10.53,
+          "pe_clamp_binding": "lower",
+          "growth_source": "eps_cagr",
+          "beta_used": 1.442,
+          "beta_source": "profile",
+          "discount_clamp_binding": null
+        }
+      }
+    },
+    "families": {
+      "fundamental": {
+        "groups": {
+          "cashflow_intrinsic:dcf_self:HPE:2026-10-01": {
+            "value": 37.34,
+            "members": [
+              "dcf_self_built"
+            ]
+          },
+          "cashflow_intrinsic:owner_earnings:HPE:2026-10-01": {
+            "value": 16.2,
+            "members": [
+              "owner_earnings_mult"
+            ]
+          }
+        },
+        "representative": 26.770000000000003,
+        "weight_raw": 0.55,
+        "weight_effective": 0.55
+      },
+      "external_expectations": {
+        "groups": {
+          "external_pt:analyst_pt:HPE:2026-09-30": {
+            "value": 67.75,
+            "members": [
+              "analyst_pt_consensus"
+            ]
+          }
+        },
+        "representative": 67.75,
+        "weight_raw": 0.2,
+        "weight_effective": 0.2
+      },
+      "relative": {
+        "groups": {
+          "peer_relative:peers:5260695a7f56e9a2:2026-10-01": {
+            "value": 56.85,
+            "members": [
+              "peer_pe_implied",
+              "comps_implied"
+            ]
+          }
+        },
+        "representative": 56.849999999999994,
+        "weight_raw": 0.25,
+        "weight_effective": 0.25
+      }
+    },
+    "families_present": [
+      "external_expectations",
+      "fundamental",
+      "relative"
+    ],
+    "family_coverage_weight": 1.0,
+    "aggregation_mode": "dcf_primary_anchor_range",
+    "primary_method": "dcf_self_built",
+    "family_blended_fair_value": 42.49,
+    "weighted_fair_value": 37.34,
+    "vs_current_pct": -40.72,
+    "verdict_band": "extreme_overvalued",
+    "score": -1.0,
+    "confidence": "high",
+    "evidence_independence": {
+      "eligible_anchors": [
+        "analyst_pt_consensus",
+        "comps_implied",
+        "dcf_self_built",
+        "owner_earnings_mult",
+        "peer_pe_implied"
+      ],
+      "sell_side_anchors": [
+        "analyst_pt_consensus"
+      ],
+      "sell_side_only": false,
+      "note": "至少一根合格錨獨立於賣方預估"
+    },
+    "structural_shift": {},
+    "outlier_diagnostics": [
+      {
+        "anchor": "dcf_unlevered",
+        "value": 6.722758268720117,
+        "reason": "outside [13.48, 121.32] (median 40.44 × 1/3..3)"
+      },
+      {
+        "anchor": "dcf_levered",
+        "value": 12.539122078382844,
+        "reason": "outside [13.48, 121.32] (median 40.44 × 1/3..3)"
+      }
+    ],
+    "score_before_forward_validation": -1.0,
+    "forward_validation_status": "PASS"
+  },
+  "fair_value_summary": {
+    "anchors": {
+      "dcf_unlevered": 6.722758268720117,
+      "dcf_levered": 12.539122078382844,
+      "dcf_self_built": 37.34,
+      "analyst_pt_consensus": 67.75,
+      "peer_pe_implied": 43.54,
+      "comps_implied": 70.16,
+      "owner_earnings_mult": 16.2,
+      "forecaster_blend": null,
+      "fwd_earnings_discounted": 60.48
+    },
+    "anchors_effective": {
+      "dcf_unlevered": null,
+      "dcf_levered": null,
+      "dcf_self_built": 37.34,
+      "analyst_pt_consensus": 67.75,
+      "peer_pe_implied": 43.54,
+      "comps_implied": 70.16,
+      "owner_earnings_mult": 16.2,
+      "forecaster_blend": null,
+      "fwd_earnings_discounted": null
+    },
+    "weights_used": {
+      "dcf_self_built": 1.0,
+      "analyst_pt_consensus": 0.0,
+      "peer_pe_implied": 0.0,
+      "comps_implied": 0.0,
+      "owner_earnings_mult": 0.0
+    },
+    "weighted_fair_value": 37.34,
+    "current_price": 62.99,
+    "vs_current_pct": -40.72,
+    "verdict_band": "extreme_overvalued",
+    "score": -1.0,
+    "confidence": "high",
+    "anchors_available": 5,
+    "families_present": [
+      "external_expectations",
+      "fundamental",
+      "relative"
+    ],
+    "family_coverage_weight": 1.0,
+    "excluded_anchors": {
+      "dcf_unlevered": "superseded_by_auditable_through_cycle_dcf",
+      "dcf_levered": "superseded_by_auditable_through_cycle_dcf",
+      "forecaster_blend": "low_forecast_confidence,transition_without_safe_model",
+      "fwd_earnings_discounted": "cashflow_intrinsic_anchors_live:dcf_self_built,owner_earnings_mult"
+    },
+    "valuation_pack_schema": "valuation_pack.v1",
+    "primary_method": "dcf_self_built",
+    "family_blended_fair_value": 42.49,
+    "sell_side_only": false,
+    "pre_profit_anchor_live": false,
+    "methodology_note": "DCF primary with anchor range; mode=dcf_primary_anchor_range; 5/9 anchors; families=external_expectations,fundamental,relative",
+    "outlier_diagnostics": [
+      {
+        "anchor": "dcf_unlevered",
+        "value": 6.722758268720117,
+        "reason": "outside [13.48, 121.32] (median 40.44 × 1/3..3)"
+      },
+      {
+        "anchor": "dcf_levered",
+        "value": 12.539122078382844,
+        "reason": "outside [13.48, 121.32] (median 40.44 × 1/3..3)"
+      }
+    ],
+    "score_before_forward_validation": -1.0,
+    "forward_validation_status": "PASS"
+  },
+  "fair_value_range": {
+    "range_method": "weighted_percentile",
+    "p25": 38.89,
+    "p50": 50.46,
+    "p75": 68.35,
+    "min_anchor": 16.2,
+    "max_anchor": 70.16,
+    "dispersion_ratio": 4.33,
+    "range_verdict": "fair_zone",
+    "anchor_dispersion_cv": 0.3312,
+    "agreement_grade": "high",
+    "anchors_used_n": 5,
+    "owner_earnings_multiple_shadow": {
+      "oe_mult_static": 15.0,
+      "oe_mult_rate_linked": 14.53,
+      "required_yield": 0.0688
+    }
+  },
+  "multi_horizon_price_framework": {
+    "short_term_5d": {
+      "band": [
+        53.79,
+        62.99,
+        72.19
+      ],
+      "band_capped": [
+        60.68,
+        62.99,
+        65.65
+      ],
+      "drift_sigma": 0.0,
+      "sigma_daily": 0.05102,
+      "atr_14": 3.8608,
+      "confidence": "high",
+      "catalyst_widened": false,
+      "key_level_note": "下界受 support $60.68 撐住（原始 $53.79）；上界受 resistance $65.65 壓制（原始 $72.19）"
+    },
+    "mid_term_60d": {
+      "momentum_target": 71.8,
+      "pt_60d": 63.77,
+      "earnings_revision": null,
+      "weights_used": {
+        "momentum": 0.5333,
+        "pt_60d": 0.4667
+      },
+      "mid_target": 68.05,
+      "reality_check_note": "需突破 $65.65 才成立"
+    },
+    "long_term_ref": {
+      "weighted_fair_value": 37.34,
+      "verdict_band": "extreme_overvalued",
+      "confidence": "high"
+    },
+    "convergence": {
+      "mhp_signal": "wait_for_pullback",
+      "signal_note": "5d 帶下界 $60.68 > 長期FV $37.34 → 短期超漲、長期偏貴，等回檔"
+    },
+    "engine": "compute_price_framework.py v2.4 (V4.131.13)"
+  },
+  "implied_expectations": {
+    "implied_5y_fcf_cagr": 0.3983,
+    "implied_out_of_range": false,
+    "wacc_used": 0.0976,
+    "wacc_source": "fred_10y",
+    "fcf_base": 1.08,
+    "fcf_base_source": "owner_earnings",
+    "terminal_growth": 0.025,
+    "actual_3y_fcf_cagr": null,
+    "lane_fcf_estimate": null,
+    "sanity_note": "現價 $62.99 隱含 5Y FCF CAGR 40%",
+    "red_team_kill_seed": "IF 未來 2 季 FCF 年化增速 < 20%（隱含值一半）THEN 現價估值論點破滅",
+    "market_implied_revenue": {
+      "applicable": true,
+      "reason": null,
+      "ev_to_sales_ttm": 2.3925802695998852,
+      "terminal_ev_to_sales": 4.0,
+      "terminal_ev_to_sales_sector_typical": 8.0,
+      "horizon_years": 5.0,
+      "required_revenue_multiple": 1.0,
+      "implied_revenue_cagr": 0.0,
+      "required_revenue_multiple_sector": null,
+      "implied_revenue_cagr_sector": null,
+      "analyst_revenue_cagr": 0.1629,
+      "analyst_horizon_years": 5.0,
+      "verdict": null,
+      "note": "EV/S 2.39x 已在成熟中樞 4x 之下——現價未內含營收擴張要求",
+      "red_team_kill_seed": ""
+    }
+  },
+  "valuation_archetype_shadow": {
+    "archetype": "hypergrowth",
+    "rule_hit": "rev_yoy=0.3272 / eps_ttm=1.9452",
+    "missing_inputs": [],
+    "new_anchors": {
+      "peer_ev_ebitda_implied": 53.4,
+      "peer_ev_sales_implied": 163.06,
+      "pb_roe_justified": 17.97
+    },
+    "anchors_used_n": 8,
+    "weights_used": {
+      "dcf_unlevered": 0.0952,
+      "dcf_levered": 0.0476,
+      "dcf_self_built": 0.0952,
+      "analyst_pt_consensus": 0.1905,
+      "comps_implied": 0.0952,
+      "fwd_earnings_discounted": 0.1429,
+      "peer_ev_ebitda_implied": 0.1429,
+      "peer_ev_sales_implied": 0.1905
+    },
+    "weighted_fair_value_shadow": 71.71,
+    "vs_current_pct_shadow": 13.84,
+    "verdict_band_shadow": "undervalued",
+    "flip_vs_live": true,
+    "note": "shadow-only — live fair_value_summary 權重/verdict 不受影響（#3b 切換待 ≥20 session 翻轉率報告）"
+  },
+  "forward_validation": {
+    "schema": "forward_validation.v1",
+    "status": "PASS",
+    "applies": true,
+    "reason": "all evaluable forward checks support current price",
+    "dcf_value": 37.34,
+    "dcf_gap_pct": -40.72,
+    "extreme_dcf_threshold_pct": -30.0,
+    "checks": [
+      {
+        "name": "archetype_shadow",
+        "available": true,
+        "supports_current_price": true,
+        "actual": 13.84,
+        "threshold": ">=-10% vs current",
+        "detail": {
+          "anchors_used_n": 8
+        }
+      },
+      {
+        "name": "forward_earnings",
+        "available": true,
+        "supports_current_price": true,
+        "actual": -3.98,
+        "threshold": ">=-10% vs current",
+        "detail": {
+          "analyst_count": 6,
+          "horizon_years": 2.084
+        }
+      },
+      {
+        "name": "revenue_path",
+        "available": true,
+        "supports_current_price": true,
+        "actual": 0.0,
+        "threshold": "<= analyst CAGR + 0.05",
+        "detail": {
+          "analyst_revenue_cagr": 0.1629,
+          "analyst_horizon_years": 5.0
+        }
+      }
+    ],
+    "evaluated_count": 3,
+    "support_count": 3,
+    "supported_checks": [
+      "archetype_shadow",
+      "forward_earnings",
+      "revenue_path"
+    ],
+    "failed_checks": [],
+    "quality_flags": [],
+    "valuation_score_before": -1.0,
+    "valuation_score_effective": -1.0,
+    "score_adjustment": "none",
+    "t5_hard_downgrade_eligible": false
+  },
+  "valuation_explained_range": {
+    "available": true,
+    "primary_fv": 37.34,
+    "primary_method": "structural_shift_through_cycle_dcf",
+    "primary_sensitivity": {
+      "low": 30.07,
+      "high": 48.35
+    },
+    "scenario_without_peer": 26.77,
+    "scenario_with_peer": null,
+    "peer_pe_range_anchor": null,
+    "range_low": 16.2,
+    "range_high": 70.16,
+    "range_low_driver": "anchor:owner_earnings_mult",
+    "range_high_driver": "anchor:comps_implied",
+    "peer_scope": null,
+    "peer_count": 0,
+    "peer_symbols": [],
+    "other_eligible_anchors": {
+      "analyst_pt_consensus": 67.75,
+      "peer_pe_implied": 43.54,
+      "comps_implied": 70.16,
+      "owner_earnings_mult": 16.2
+    },
+    "interpretation": "DCF is the primary FV; low=anchor:owner_earnings_mult; high=anchor:comps_implied. Range-only peers explain a scenario and never replace the primary.",
+    "limitations": []
+  }
+}

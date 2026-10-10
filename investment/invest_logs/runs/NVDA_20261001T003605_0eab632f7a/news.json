@@ -1,0 +1,47 @@
+{
+  "phase": 2,
+  "agent": "news_Analyst",
+  "ticker": "NVDA",
+  "signal": "BUY",
+  "score": 1.0,
+  "confidence": 0.58,
+  "key_factors": [
+    "Production Vera Rubin rollout",
+    "Upward PT revisions, low sample",
+    "DeepSeek-Huawei software challenge"
+  ],
+  "risk_flags": [
+    "PT revision reflects one analyst",
+    "AI capex and software competition"
+  ],
+  "phase0_alignment": "MISALIGNED",
+  "data_source_timestamp": "2026-09-30 16:34",
+  "subagent_isolated": true,
+  "skill_execution_failed": false,
+  "immediate_catalyst_5d": null,
+  "decision_point_days": 21,
+  "cross_asset_spillover": [
+    {
+      "asset": "sector_XLK",
+      "direction": "BULLISH",
+      "mechanism": "CoreWeave's production Vera Rubin rollout supports AI infrastructure demand expectations across technology suppliers."
+    }
+  ],
+  "reasoning_one_line": "Production deployment and upward revisions support a modest bullish news read, tempered by software competition, a thin revision sample, and risk-off Phase 0 conditions.",
+  "analyst_consensus": {
+    "strong_buy": 2,
+    "buy": 58,
+    "hold": 16,
+    "sell": 3,
+    "strong_sell": 0,
+    "consensus": "Buy"
+  },
+  "pt_revision_momentum": {
+    "direction": "UP",
+    "consensus_delta_pct_1m": 15.07,
+    "consensus_delta_pct_3m": 1.11,
+    "analysts_last_month": 1,
+    "analysts_last_quarter": 23,
+    "note": "PT revision direction only; absolute levels excluded."
+  }
+}

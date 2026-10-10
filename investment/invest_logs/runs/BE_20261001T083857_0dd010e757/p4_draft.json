@@ -1,0 +1,73 @@
+{
+  "ticker": "BE",
+  "final_decision": "HOLD",
+  "analysis_price": 276.98,
+  "time_horizon": "mid",
+  "sector": "Industrials",
+  "multi_horizon_price_framework": {
+    "short_term_5d": {
+      "band": [
+        234.91,
+        280.54,
+        326.18
+      ],
+      "band_capped": [
+        249.05,
+        280.54,
+        283.83
+      ],
+      "drift_sigma": 0.1,
+      "sigma_daily": 0.05756,
+      "atr_14": 21.4714,
+      "confidence": "high",
+      "catalyst_widened": false,
+      "key_level_note": "下界受 support $249.05 撐住（原始 $234.91）；上界受 resistance $283.83 壓制（原始 $326.18）"
+    },
+    "mid_term_60d": {
+      "momentum_target": 318.04,
+      "pt_60d": 278.75,
+      "earnings_revision": null,
+      "weights_used": {
+        "momentum": 0.5333,
+        "pt_60d": 0.4667
+      },
+      "mid_target": 299.7,
+      "reality_check_note": "需突破 $283.83 才成立"
+    },
+    "long_term_ref": {
+      "weighted_fair_value": 45.27,
+      "verdict_band": "extreme_overvalued",
+      "confidence": "low"
+    },
+    "convergence": {
+      "mhp_signal": "wait_for_pullback",
+      "signal_note": "5d 帶下界 $249.05 > 長期FV $45.27 → 短期超漲、長期偏貴，等回檔（長期FV 信心 low，訊號僅供參考）"
+    },
+    "engine": "compute_price_framework.py v2.4 (V4.131.13)"
+  },
+  "technical": {
+    "key_levels": {
+      "support": 249.05,
+      "resistance": 283.83,
+      "pivot": 266.52
+    },
+    "pattern": "pullback_in_uptrend"
+  },
+  "phase0": {
+    "ftd": {
+      "state": "NO_SIGNAL",
+      "days_since_ftd": null
+    },
+    "macro_backdrop_score": -2.0
+  },
+  "phase3": {
+    "position_size_cap_pct": 100,
+    "polar_position_cap_pct": 100,
+    "hot_zone_probe": false,
+    "hot_zone_position_size_cap": null,
+    "t4_resolution": "NONE",
+    "binary_classification": "unknown",
+    "binary_event_within_48h": false
+  },
+  "mandatory_risk_flags": []
+}

@@ -1,0 +1,119 @@
+{
+  "generated_at": "2026-10-01T14:30:22.741075+00:00",
+  "composite_score": 51.7,
+  "label": "Neutral",
+  "vix": {
+    "current": 17.32,
+    "percentile_1y": 52.8,
+    "regime": "NORMAL"
+  },
+  "spy_momentum": {
+    "rsi_14": 46.9,
+    "pct_above_ma50": -0.11,
+    "pct_above_ma200": 6.15
+  },
+  "put_call_ratio": null,
+  "fear_greed_index": 27.9,
+  "components_used": [
+    "vix",
+    "spy_rsi",
+    "pct_above_ma",
+    "fg"
+  ],
+  "extreme_sentiment_triggered": false,
+  "cache_hit": false,
+  "cache_age_sec": 0,
+  "ticker_signals": {
+    "ticker": "HPE",
+    "insider_stats": [
+      {
+        "year": 2026,
+        "quarter": 3,
+        "acquired_disposed_ratio": 1,
+        "total_acquired_shares": 1732621.8599999999,
+        "total_disposed_shares": 1914292,
+        "acquired_transactions": 13,
+        "disposed_transactions": 13,
+        "total_purchases": 0,
+        "total_sales": 3
+      },
+      {
+        "year": 2026,
+        "quarter": 2,
+        "acquired_disposed_ratio": 1.6957,
+        "total_acquired_shares": 2016015.2053,
+        "total_disposed_shares": 2225305.2072,
+        "acquired_transactions": 39,
+        "disposed_transactions": 23,
+        "total_purchases": 0,
+        "total_sales": 7
+      },
+      {
+        "year": 2026,
+        "quarter": 1,
+        "acquired_disposed_ratio": 1.9286,
+        "total_acquired_shares": 447162.81070000003,
+        "total_disposed_shares": 898364,
+        "acquired_transactions": 27,
+        "disposed_transactions": 14,
+        "total_purchases": 0,
+        "total_sales": 6
+      },
+      {
+        "year": 2025,
+        "quarter": 4,
+        "acquired_disposed_ratio": 0.8676,
+        "total_acquired_shares": 3736449.3115000003,
+        "total_disposed_shares": 2901597,
+        "acquired_transactions": 59,
+        "disposed_transactions": 68,
+        "total_purchases": 0,
+        "total_sales": 11
+      }
+    ],
+    "insider_sentiment": {
+      "monthly_mspr": [
+        {
+          "year": 2026,
+          "month": 3,
+          "mspr": -97.50076,
+          "change_shares": -405883
+        },
+        {
+          "year": 2026,
+          "month": 4,
+          "mspr": -35.720203,
+          "change_shares": -188842
+        },
+        {
+          "year": 2026,
+          "month": 5,
+          "mspr": -5.946986,
+          "change_shares": -16129
+        },
+        {
+          "year": 2026,
+          "month": 6,
+          "mspr": -22.661375,
+          "change_shares": -14959
+        },
+        {
+          "year": 2026,
+          "month": 7,
+          "mspr": -14.606092,
+          "change_shares": -592699
+        },
+        {
+          "year": 2026,
+          "month": 9,
+          "mspr": -100,
+          "change_shares": -267000
+        }
+      ],
+      "latest_mspr": -100
+    },
+    "short_pct_float": 4.8,
+    "short_pct_float_source": "yfinance.info (FINRA bi-monthly)",
+    "insider_stats_source": "FMP_SUPP_BUNDLE"
+  }
+}

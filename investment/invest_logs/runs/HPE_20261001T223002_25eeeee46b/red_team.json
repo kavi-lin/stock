@@ -1,0 +1,13 @@
+{
+  "ticker": "HPE",
+  "verdict": "STRONG_COUNTER",
+  "counter_thesis": "The staged-entry bull case depends on a 39.83% five-year FCF CAGR implied by $62.99, while the frozen packet supplies no actual three-year or lane FCF growth estimate to corroborate it; the primary auditable DCF is $37.34, 40.72% below price. The fundamentals lane flags working-capital-driven cash conversion and about $14B net debt, while FRED's 2.91% 10-year real yield and high-yield spreads at the 85th percentile raise the hurdle for a technology rerating.",
+  "kill_conditions": [
+    "IF HPE's FCF growth annualizes below 20% over the next two reported fiscal quarters (within 180 days) THEN the $62.99 price case premised on an implied 39.83% five-year FCF CAGR fails.",
+    "IF within 90 days DFII10 remains above 2.0% and BAMLH0A0HYM2 remains above its 75th percentile for 20 of 30 trading sessions (latest: 2.91% real yield on 2026-09-29, +47 bps over one month; 3.08% HY spread, 85th percentile, +45 bps over one month) THEN the technology and networking rerating case fails under persistent discount-rate and credit stress.",
+    "IF within 15 trading days HPE closes below $60.68 before clearing the $63.28 pivot on volume at least 1.5 times the 20-day average THEN the staged-entry technical setup is invalidated."
+  ],
+  "counter_evidence_strength": 5,
+  "thesis_break_probability": 0.66,
+  "subagent_isolated": true
+}

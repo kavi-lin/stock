@@ -1,0 +1,1393 @@
+{
+  "engine": "forward_expectations.py v1.14 (point-in-time forward curve + calibrated horizon labels)",
+  "ticker": "NVMI",
+  "run_id": "20260916T203213584730Z",
+  "generated_at": "2026-09-16T20:32:13.584730+00:00",
+  "as_of_earnings_date": "2026-09-02",
+  "current_price": 346.1313,
+  "shadow_only": true,
+  "consensus_lane": {
+    "available": true,
+    "revenue_cagr": 0.094,
+    "eps_cagr": 0.0679,
+    "window_from": "2026-12-31",
+    "window_to": "2029-12-31",
+    "window_years": 3.0,
+    "eps_spread_pct": 6.5,
+    "num_analysts_eps": 1,
+    "num_analysts_revenue": 2,
+    "analyst_rating_direction": "FLAT",
+    "estimate_cutoff_date": "2026-09-02",
+    "excluded_nonforward_rows": 2,
+    "note": "future-only estimate-window CAGR（2026-12→2029-12）；排除 cutoff 前資料，非 trailing-base"
+  },
+  "market_implied_lane": {
+    "available": false,
+    "required_fcf_cagr": null,
+    "out_of_range": false,
+    "fcf_base_per_share": null,
+    "wacc_used": 0.095,
+    "note": "FCF base ≤ 0 或缺，reverse DCF 不適用；改用營收路徑：EV/S 12.54x → 收斂到 4x 需營收 ×3.13（5Y CAGR 26%，且 EV 原地不動）；若倍數只收斂到科技中樞 8x 則需 9%"
+  },
+  "base_rate_lane": {
+    "available": false,
+    "peer_rev_cagr_median": null,
+    "peer_rev_cagr_p25": null,
+    "peer_rev_cagr_p75": null,
+    "peers_used": [],
+    "self_revenue_yoy": 0.159,
+    "growth_acceleration": "accelerating",
+    "cohort": {
+      "engine": "forward_expectations_cohort.py v1.0",
+      "available": false,
+      "subject_classification": {
+        "sector": "Technology",
+        "growth_stage": "growth",
+        "margin_tier": "mid",
+        "size_tier": "large"
+      },
+      "rationale": {
+        "criteria": [
+          "sector(exact)",
+          "growth_stage(+/-1)",
+          "margin_tier(+/-1)",
+          "size_tier(+/-1)"
+        ],
+        "rule": "sector must match and >=3 members each matching >=2/3 graded dims",
+        "subject_classification": {
+          "sector": "Technology",
+          "growth_stage": "growth",
+          "margin_tier": "mid",
+          "size_tier": "large"
+        },
+        "tolerances": {
+          "dim_adjacency": 1,
+          "min_dim_matches": 2
+        },
+        "anti_cherry_pick": "Criteria and tolerances are fixed before selection; every member records its match reasons."
+      },
+      "candidates_considered": 0,
+      "members": [],
+      "member_count": 0,
+      "distribution": {
+        "median": null,
+        "p25": null,
+        "p75": null
+      },
+      "status": "insufficient_cohort",
+      "note": "only 0 matched members (<3); caller should fall back to raw peers"
+    },
+    "basis": null,
+    "peer_universe_source": "provider_peer_endpoint",
+    "raw_peer_distribution": null,
+    "note": "可用 peer <3（0），base_rate 跳過"
+  },
+  "independent_lane": {
+    "available": false,
+    "revenue_cagr": null,
+    "reason": "no_matched_adapter"
+  },
+  "adapter_evaluation": {
+    "selected_adapter": {
+      "adapter_id": null,
+      "adapter_version": null,
+      "match": {
+        "status": "unknown",
+        "score": 0,
+        "reasons": [
+          "no_fully_matched_adapter"
+        ]
+      },
+      "independent_lane": {
+        "available": false,
+        "revenue_cagr": null,
+        "reason": "no_matched_adapter"
+      }
+    },
+    "candidates": [
+      {
+        "adapter_id": "royalty_ip",
+        "match": {
+          "status": "generic",
+          "score": 0,
+          "reasons": [
+            "no_royalty_or_license_segment"
+          ]
+        }
+      },
+      {
+        "adapter_id": "semiconductor",
+        "match": {
+          "status": "generic",
+          "score": 0,
+          "reasons": [
+            "no_semiconductor_end_market_segments"
+          ]
+        }
+      }
+    ]
+  },
+  "evidence_inventory": {
+    "ticker": "NVMI",
+    "generated_at": "2026-09-16T20:32:13.584730+00:00",
+    "adapter_id": null,
+    "summary": {
+      "accepted_count": 12,
+      "provisional_count": 2,
+      "missing_source_count": 1,
+      "missing_driver_count": 0,
+      "numeric_transmission_evidence_count": 0
+    },
+    "accepted": [
+      {
+        "evidence_id": "company_segment:NVMI:product:2025-12-31",
+        "metric": "segment_revenue:product",
+        "value": 705598000,
+        "unit": "currency",
+        "source_type": "structured_company_segment",
+        "source_ref": "earnings-analyst cache segments.product_fy",
+        "as_of": "2025-12-31",
+        "status": "accepted",
+        "numeric_eligible": true,
+        "reason": "company segment value from structured provider",
+        "confidence": "high",
+        "metadata": {
+          "product": "Product"
+        }
+      },
+      {
+        "evidence_id": "company_derived:NVMI:revenue_yoy:2026-09-02",
+        "metric": "revenue_yoy",
+        "value": 0.159,
+        "unit": "ratio",
+        "source_type": "structured_company_financials",
+        "source_ref": "earnings-analyst cache derived",
+        "as_of": "2026-09-02",
+        "status": "accepted",
+        "numeric_eligible": true,
+        "reason": "deterministic calculation from structured financial statements",
+        "confidence": "medium",
+        "metadata": {}
+      },
+      {
+        "evidence_id": "company_derived:NVMI:gross_margin_latest:2026-09-02",
+        "metric": "gross_margin_latest",
+        "value": 0.5654303846123675,
+        "unit": "ratio",
+        "source_type": "structured_company_financials",
+        "source_ref": "earnings-analyst cache derived",
+        "as_of": "2026-09-02",
+        "status": "accepted",
+        "numeric_eligible": true,
+        "reason": "deterministic calculation from structured financial statements",
+        "confidence": "medium",
+        "metadata": {}
+      },
+      {
+        "evidence_id": "consensus:NVMI:revenue:2029-12-31",
+        "metric": "consensus_revenue",
+        "value": 1411000000,
+        "unit": "currency",
+        "source_type": "analyst_consensus",
+        "source_ref": "earnings-analyst cache annual_estimates",
+        "as_of": "2029-12-31",
+        "status": "accepted",
+        "numeric_eligible": true,
+        "reason": "analyst consensus is an independent lane input",
+        "confidence": "medium",
+        "metadata": {}
+      },
+      {
+        "evidence_id": "consensus:NVMI:revenue:2028-12-31",
+        "metric": "consensus_revenue",
+        "value": 1597451394,
+        "unit": "currency",
+        "source_type": "analyst_consensus",
+        "source_ref": "earnings-analyst cache annual_estimates",
+        "as_of": "2028-12-31",
+        "status": "accepted",
+        "numeric_eligible": true,
+        "reason": "analyst consensus is an independent lane input",
+        "confidence": "medium",
+        "metadata": {}
+      },
+      {
+        "evidence_id": "consensus:NVMI:revenue:2027-12-31",
+        "metric": "consensus_revenue",
+        "value": 1360196694,
+        "unit": "currency",
+        "source_type": "analyst_consensus",
+        "source_ref": "earnings-analyst cache annual_estimates",
+        "as_of": "2027-12-31",
+        "status": "accepted",
+        "numeric_eligible": true,
+        "reason": "analyst consensus is an independent lane input",
+        "confidence": "medium",
+        "metadata": {}
+      },
+      {
+        "evidence_id": "consensus:NVMI:revenue:2026-12-31",
+        "metric": "consensus_revenue",
+        "value": 1077701395,
+        "unit": "currency",
+        "source_type": "analyst_consensus",
+        "source_ref": "earnings-analyst cache annual_estimates",
+        "as_of": "2026-12-31",
+        "status": "accepted",
+        "numeric_eligible": true,
+        "reason": "analyst consensus is an independent lane input",
+        "confidence": "medium",
+        "metadata": {}
+      },
+      {
+        "evidence_id": "consensus:NVMI:revenue:2025-12-31",
+        "metric": "consensus_revenue",
+        "value": 878739082,
+        "unit": "currency",
+        "source_type": "analyst_consensus",
+        "source_ref": "earnings-analyst cache annual_estimates",
+        "as_of": "2025-12-31",
+        "status": "accepted",
+        "numeric_eligible": true,
+        "reason": "analyst consensus is an independent lane input",
+        "confidence": "medium",
+        "metadata": {}
+      },
+      {
+        "evidence_id": "consensus:NVMI:revenue:2024-12-31",
+        "metric": "consensus_revenue",
+        "value": 664217679,
+        "unit": "currency",
+        "source_type": "analyst_consensus",
+        "source_ref": "earnings-analyst cache annual_estimates",
+        "as_of": "2024-12-31",
+        "status": "accepted",
+        "numeric_eligible": true,
+        "reason": "analyst consensus is an independent lane input",
+        "confidence": "medium",
+        "metadata": {}
+      },
+      {
+        "evidence_id": "revision:NVMI:revenue:2026-12-31",
+        "metric": "consensus_revision:revenue",
+        "value": {
+          "avg": 1077701395,
+          "low": 1047270861,
+          "high": 1100998953,
+          "spread_pct": 4.99
+        },
+        "unit": "currency",
+        "source_type": "analyst_consensus",
+        "source_ref": "earnings-analyst cache annual_estimates",
+        "as_of": "2026-12-31",
+        "status": "accepted",
+        "numeric_eligible": true,
+        "reason": "point-in-time analyst consensus estimate snapshot; revision delta requires future snapshots",
+        "confidence": "medium",
+        "metadata": {
+          "value_type": "consensus",
+          "estimate_revision_delta_available": false,
+          "estimate_revision_delta_reason": "annual_estimates cache has latest forward curve only; compare future ledger snapshots for deltas",
+          "num_analysts": 5
+        }
+      },
+      {
+        "evidence_id": "revision:NVMI:eps:2026-12-31",
+        "metric": "consensus_revision:eps",
+        "value": {
+          "avg": 10.67346,
+          "low": 10.62311,
+          "high": 10.73388,
+          "spread_pct": 1.04
+        },
+        "unit": "currency_per_share",
+        "source_type": "analyst_consensus",
+        "source_ref": "earnings-analyst cache annual_estimates",
+        "as_of": "2026-12-31",
+        "status": "accepted",
+        "numeric_eligible": true,
+        "reason": "point-in-time analyst consensus estimate snapshot; revision delta requires future snapshots",
+        "confidence": "medium",
+        "metadata": {
+          "value_type": "consensus",
+          "estimate_revision_delta_available": false,
+          "estimate_revision_delta_reason": "annual_estimates cache has latest forward curve only; compare future ledger snapshots for deltas",
+          "num_analysts": 5
+        }
+      },
+      {
+        "evidence_id": "revision:NVMI:rating_momentum:2026-09-01",
+        "metric": "consensus_revision:rating_momentum",
+        "value": {
+          "direction": "FLAT",
+          "delta": 0.0,
+          "net_bull_from": 0.875,
+          "net_bull_to": 0.875
+        },
+        "unit": "score_delta",
+        "source_type": "analyst_consensus",
+        "source_ref": "earnings-analyst cache analyst_grades",
+        "as_of": "2026-09-01",
+        "status": "accepted",
+        "numeric_eligible": true,
+        "reason": "analyst rating momentum from dated analyst_grades snapshots",
+        "confidence": "medium",
+        "metadata": {
+          "value_type": "consensus",
+          "from": "2026-04-01",
+          "to": "2026-09-01"
+        }
+      }
+    ],
+    "provisional": [
+      {
+        "evidence_id": "discovered:website:NVMI",
+        "metric": "primary_source_candidate",
+        "value": null,
+        "unit": null,
+        "source_type": "company_ir",
+        "source_ref": "https://www.novami.com",
+        "as_of": "unknown",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "Company website is a discovery root, not a verified IR document.",
+        "confidence": "medium",
+        "metadata": {
+          "channel": "company_website_root",
+          "form": null,
+          "filing_family": null,
+          "period": null,
+          "discovery_status": "metadata_only",
+          "discovery_origin": "company_profile"
+        }
+      },
+      {
+        "evidence_id": "discovered:sec-submissions:NVMI",
+        "metric": "primary_source_candidate",
+        "value": null,
+        "unit": null,
+        "source_type": "company_filing",
+        "source_ref": "https://data.sec.gov/submissions/CIK0001109345.json",
+        "as_of": "unknown",
+        "status": "provisional",
+        "numeric_eligible": false,
+        "reason": "SEC submissions manifest can enumerate filings; it contains no driver evidence.",
+        "confidence": "medium",
+        "metadata": {
+          "channel": "sec_submissions_manifest",
+          "form": null,
+          "filing_family": null,
+          "period": null,
+          "discovery_status": "metadata_only",
+          "discovery_origin": "company_profile_cik"
+        }
+      }
+    ],
+    "missing_sources": [
+      {
+        "evidence_id": "missing_source:NVMI:transcript:2026-09-02",
+        "metric": "earnings_transcript",
+        "value": null,
+        "unit": null,
+        "source_type": "company_transcript",
+        "source_ref": "earnings-analyst cache transcript",
+        "as_of": "2026-09-02",
+        "status": "missing",
+        "numeric_eligible": false,
+        "reason": "transcript unavailable",
+        "confidence": "unknown",
+        "metadata": {}
+      }
+    ],
+    "missing_drivers": [],
+    "primary_acquisition_summary": {
+      "candidate_count": 0,
+      "promoted_count": 0,
+      "provisional_count": 0,
+      "driver_candidate_count": 0,
+      "guidance_candidate_count": 0,
+      "guidance_promoted_count": 0
+    },
+    "source_discovery_summary": {
+      "candidate_count": 2,
+      "filing_family_counts": {}
+    },
+    "revision_snapshot_summary": {
+      "available": true,
+      "estimate_revision_delta_available": false,
+      "rating_momentum_direction": "FLAT"
+    },
+    "promotion_policy": "Association, narrative, or uncorroborated relation evidence remains provisional. Numeric drivers require point-in-time primary evidence."
+  },
+  "source_discovery": {
+    "ticker": "NVMI",
+    "profile_origin": "profile_cache",
+    "filing_metadata_origin": "fmp_sec_filings_financials",
+    "network_fetch_used": true,
+    "candidate_count": 2,
+    "filing_family_counts": {},
+    "candidates": [
+      {
+        "source_id": "website:NVMI",
+        "source_type": "company_ir",
+        "channel": "company_website_root",
+        "form": null,
+        "filing_family": null,
+        "published_at": null,
+        "period": null,
+        "source_url": "https://www.novami.com",
+        "source_ref": "https://www.novami.com",
+        "status": "metadata_only",
+        "numeric_eligible": false,
+        "discovery_origin": "company_profile",
+        "reason": "Company website is a discovery root, not a verified IR document."
+      },
+      {
+        "source_id": "sec-submissions:NVMI",
+        "source_type": "company_filing",
+        "channel": "sec_submissions_manifest",
+        "form": null,
+        "filing_family": null,
+        "published_at": null,
+        "period": null,
+        "source_url": "https://data.sec.gov/submissions/CIK0001109345.json",
+        "source_ref": "https://data.sec.gov/submissions/CIK0001109345.json",
+        "status": "metadata_only",
+        "numeric_eligible": false,
+        "discovery_origin": "company_profile_cik",
+        "reason": "SEC submissions manifest can enumerate filings; it contains no driver evidence."
+      }
+    ],
+    "policy": "Ticker-neutral discovery classifies observed metadata only. No document text, driver value, or numeric evidence is promoted."
+  },
+  "document_acquisition": {
+    "ticker": "NVMI",
+    "cache_first": true,
+    "network_fetch_used": false,
+    "summary": {
+      "document_count": 0,
+      "skipped_count": 2,
+      "cache_hit_count": 0,
+      "network_fetch_count": 0
+    },
+    "documents": [],
+    "skipped": [
+      {
+        "source_id": "website:NVMI",
+        "source_url": "https://www.novami.com",
+        "reason": "host_not_allowlisted"
+      },
+      {
+        "source_id": "sec-submissions:NVMI",
+        "source_url": "https://data.sec.gov/submissions/CIK0001109345.json",
+        "reason": "sec_manifest_metadata_only"
+      }
+    ],
+    "policy": "Only allowlisted SEC filing document URLs are fetched. Normalized text is not evidence until promotion gates pass."
+  },
+  "primary_source_acquisition": {
+    "ticker": "NVMI",
+    "cache_first": true,
+    "network_fetch_used": false,
+    "document_count": 0,
+    "summary": {
+      "candidate_count": 0,
+      "promoted_count": 0,
+      "provisional_count": 0,
+      "driver_candidate_count": 0,
+      "guidance_candidate_count": 0,
+      "guidance_promoted_count": 0
+    },
+    "promoted": [],
+    "provisional": [],
+    "guidance_promoted": [],
+    "guidance_provisional": [],
+    "documents": [],
+    "policy": "No web fetch; no narrative inference; incomplete candidates remain provisional. Driver and guidance candidates are separate evidence types."
+  },
+  "guidance_extraction": {
+    "summary": {
+      "candidate_count": 0,
+      "promoted_count": 0,
+      "provisional_count": 0
+    },
+    "promoted": [],
+    "provisional": [],
+    "policy": "Management guidance is structured evidence; ranges remain ranges."
+  },
+  "estimate_revision_snapshot": {
+    "ticker": "NVMI",
+    "generated_at": "2026-09-16T20:32:13.584730+00:00",
+    "available": true,
+    "estimate_revision_delta_available": false,
+    "estimate_revision_delta_reason": "annual_estimates cache has latest forward curve only; compare future ledger snapshots for deltas",
+    "annual_estimate_snapshot": {
+      "available": true,
+      "window_from": "2026-12-31",
+      "window_to": "2029-12-31",
+      "entries": [
+        {
+          "date": "2026-12-31",
+          "revenue_avg": 1077701395,
+          "revenue_low": 1047270861,
+          "revenue_high": 1100998953,
+          "revenue_spread_pct": 4.99,
+          "eps_avg": 10.67346,
+          "eps_low": 10.62311,
+          "eps_high": 10.73388,
+          "eps_spread_pct": 1.04,
+          "num_analysts_revenue": 5,
+          "num_analysts_eps": 5
+        },
+        {
+          "date": "2027-12-31",
+          "revenue_avg": 1360196694,
+          "revenue_low": 1321789477,
+          "revenue_high": 1389601186,
+          "revenue_spread_pct": 4.99,
+          "eps_avg": 13.6602,
+          "eps_low": 13.29887,
+          "eps_high": 14.18212,
+          "eps_spread_pct": 6.47,
+          "num_analysts_revenue": 5,
+          "num_analysts_eps": 5
+        },
+        {
+          "date": "2028-12-31",
+          "revenue_avg": 1597451394,
+          "revenue_low": 1466652607,
+          "revenue_high": 1658573223,
+          "revenue_spread_pct": 12.01,
+          "eps_avg": 16.58736,
+          "eps_low": 15.97848,
+          "eps_high": 17.05352,
+          "eps_spread_pct": 6.48,
+          "num_analysts_revenue": 4,
+          "num_analysts_eps": 1
+        },
+        {
+          "date": "2029-12-31",
+          "revenue_avg": 1411000000,
+          "revenue_low": 1371158274,
+          "revenue_high": 1441502749,
+          "revenue_spread_pct": 4.99,
+          "eps_avg": 13,
+          "eps_low": 12.5228,
+          "eps_high": 13.36534,
+          "eps_spread_pct": 6.48,
+          "num_analysts_revenue": 2,
+          "num_analysts_eps": 1
+        }
+      ]
+    },
+    "latest_year": {
+      "date": "2026-12-31",
+      "revenue_avg": 1077701395,
+      "revenue_low": 1047270861,
+      "revenue_high": 1100998953,
+      "revenue_spread_pct": 4.99,
+      "eps_avg": 10.67346,
+      "eps_low": 10.62311,
+      "eps_high": 10.73388,
+      "eps_spread_pct": 1.04,
+      "num_analysts_revenue": 5,
+      "num_analysts_eps": 5
+    },
+    "rating_momentum": {
+      "available": true,
+      "from": "2026-04-01",
+      "to": "2026-09-01",
+      "net_bull_from": 0.875,
+      "net_bull_to": 0.875,
+      "delta": 0.0,
+      "direction": "FLAT"
+    },
+    "policy": "This is a point-in-time market-expectations snapshot, not a live valuation input."
+  },
+  "forward_financial_bridge": {
+    "available": true,
+    "status": "available",
+    "generated_at": "2026-09-16T20:32:13.584730+00:00",
+    "forecast_basis": "consensus_annual_estimates_plus_historical_conversion",
+    "estimate_cutoff_date": "2026-09-02",
+    "excluded_nonforward_estimate_rows": 2,
+    "assumption_basis": "historical_ratios_held_constant",
+    "held_constant_assumptions": [
+      {
+        "driver": "gross_margin",
+        "held_constant_value": 0.5716,
+        "basis": "derived.margins_8q_latest4_median",
+        "assumption": "held_constant_at_historical_value"
+      },
+      {
+        "driver": "operating_margin",
+        "held_constant_value": 0.2916,
+        "basis": "derived.margins_8q_latest4_median",
+        "assumption": "held_constant_at_historical_value"
+      },
+      {
+        "driver": "net_margin",
+        "held_constant_value": 0.2924,
+        "basis": "derived.margins_8q_latest4_median",
+        "assumption": "held_constant_at_historical_value"
+      },
+      {
+        "driver": "fcf_margin",
+        "held_constant_value": 0.1507,
+        "basis": "historical",
+        "assumption": "held_constant_at_historical_value"
+      },
+      {
+        "driver": "capex_intensity",
+        "held_constant_value": 0.0098,
+        "basis": "historical",
+        "assumption": "held_constant_at_historical_value"
+      },
+      {
+        "driver": "diluted_share_count",
+        "held_constant_value": 34450000,
+        "basis": "historical_latest",
+        "assumption": "held_constant_at_historical_value"
+      },
+      {
+        "driver": "tax_and_other_rate",
+        "held_constant_value": -0.0028,
+        "basis": "observed_net_to_operating_bridge",
+        "assumption": "held_constant_at_historical_value"
+      }
+    ],
+    "terminal_sensitivity": {
+      "horizon_date": "2029-12-31",
+      "basis": "illustrative_elasticity_not_a_scenario",
+      "net_margin_sensitivity": {
+        "minus_20pct_relative": {
+          "net_margin": 0.2339,
+          "net_income": 330047557.0,
+          "eps_implied": 9.5805
+        },
+        "held_constant": {
+          "net_margin": 0.2924,
+          "net_income": 412559446.0,
+          "eps_implied": 11.9756
+        },
+        "plus_20pct_relative": {
+          "net_margin": 0.3509,
+          "net_income": 495071335.0,
+          "eps_implied": 14.3707
+        }
+      },
+      "share_count_sensitivity": {
+        "minus_10pct_buyback": {
+          "diluted_share_count": 31005000.0,
+          "eps_implied": 13.3062
+        },
+        "held_constant": {
+          "diluted_share_count": 34450000.0,
+          "eps_implied": 11.9756
+        },
+        "plus_10pct_dilution": {
+          "diluted_share_count": 37895000.0,
+          "eps_implied": 10.8869
+        }
+      },
+      "policy": "Shows how much forward net income / EPS move with the held-constant net margin and share-count assumptions. This is a sensitivity probe, not a bear/base/bull scenario, and produces no fair value, target price, or verdict."
+    },
+    "historical_conversion": {
+      "gross_margin": 0.5716,
+      "operating_margin": 0.2916,
+      "net_margin": 0.2924,
+      "source": "derived.margins_8q_latest4_median",
+      "fcf_margin": 0.1507,
+      "fcf_margin_source": "derived.cash_flow_quality.fcf_margin",
+      "capex_intensity": 0.0098,
+      "capex_intensity_source": "derived.cash_flow_quality.capex_intensity",
+      "diluted_share_count": 34450000,
+      "diluted_share_count_source": "quarterly_pnl.weightedAverageShsOutDil",
+      "tax_and_other_rate": -0.0028,
+      "tax_and_other_rate_source": "observed_net_to_operating_bridge"
+    },
+    "rows": [
+      {
+        "date": "2026-12-31",
+        "forecast_basis": "consensus_annual_estimates",
+        "revenue": {
+          "point": 1077701395,
+          "low": 1047270861,
+          "high": 1100998953,
+          "source": "annual_estimates"
+        },
+        "gross_profit": {
+          "point": 616066735.0,
+          "low": 598671156.0,
+          "high": 629384757.0
+        },
+        "operating_income": {
+          "point": 314220810.0,
+          "low": 305348308.0,
+          "high": 321013579.0
+        },
+        "tax_and_other_rate": {
+          "point": -0.0028,
+          "source": "observed_net_to_operating_bridge",
+          "note": "Includes tax plus below-operating items because cache provides net margin, not a clean tax schedule."
+        },
+        "net_income_from_margin": {
+          "point": 315106938.0,
+          "low": 306209416.0,
+          "high": 321918864.0
+        },
+        "eps_consensus": {
+          "point": 10.6735,
+          "low": 10.6231,
+          "high": 10.7339,
+          "source": "annual_estimates"
+        },
+        "eps_implied_net_income": {
+          "point": 367700697.0,
+          "low": 365966140.0,
+          "high": 369782166.0
+        },
+        "free_cash_flow": {
+          "point": 162409600.0,
+          "low": 157823719.0,
+          "high": 165920542.0
+        },
+        "capex": {
+          "point": 10561474.0,
+          "low": 10263254.0,
+          "high": 10789790.0
+        },
+        "guidance_overlay": {},
+        "coverage": {
+          "num_analysts_revenue": 5,
+          "num_analysts_eps": 5
+        },
+        "consistency_checks": [
+          {
+            "check": "eps_vs_margin_net_income",
+            "gap_pct": 0.1669,
+            "status": "ok",
+            "note": "Compares consensus EPS implied net income with historical-margin implied net income."
+          },
+          {
+            "check": "fcf_margin_sign",
+            "status": "ok",
+            "fcf_margin": 0.1507
+          }
+        ]
+      },
+      {
+        "date": "2027-12-31",
+        "forecast_basis": "consensus_annual_estimates",
+        "revenue": {
+          "point": 1360196694,
+          "low": 1321789477,
+          "high": 1389601186,
+          "source": "annual_estimates"
+        },
+        "gross_profit": {
+          "point": 777554840.0,
+          "low": 755599400.0,
+          "high": 794363884.0
+        },
+        "operating_income": {
+          "point": 396586762.0,
+          "low": 385388533.0,
+          "high": 405160104.0
+        },
+        "tax_and_other_rate": {
+          "point": -0.0028,
+          "source": "observed_net_to_operating_bridge",
+          "note": "Includes tax plus below-operating items because cache provides net margin, not a clean tax schedule."
+        },
+        "net_income_from_margin": {
+          "point": 397705169.0,
+          "low": 386475361.0,
+          "high": 406302690.0
+        },
+        "eps_consensus": {
+          "point": 13.6602,
+          "low": 13.2989,
+          "high": 14.1821,
+          "source": "annual_estimates"
+        },
+        "eps_implied_net_income": {
+          "point": 470593890.0,
+          "low": 458146072.0,
+          "high": 488574034.0
+        },
+        "free_cash_flow": {
+          "point": 204981642.0,
+          "low": 199193674.0,
+          "high": 209412899.0
+        },
+        "capex": {
+          "point": 13329928.0,
+          "low": 12953537.0,
+          "high": 13618092.0
+        },
+        "guidance_overlay": {},
+        "coverage": {
+          "num_analysts_revenue": 5,
+          "num_analysts_eps": 5
+        },
+        "consistency_checks": [
+          {
+            "check": "eps_vs_margin_net_income",
+            "gap_pct": 0.1833,
+            "status": "ok",
+            "note": "Compares consensus EPS implied net income with historical-margin implied net income."
+          },
+          {
+            "check": "fcf_margin_sign",
+            "status": "ok",
+            "fcf_margin": 0.1507
+          }
+        ]
+      },
+      {
+        "date": "2028-12-31",
+        "forecast_basis": "consensus_annual_estimates",
+        "revenue": {
+          "point": 1597451394,
+          "low": 1466652607,
+          "high": 1658573223,
+          "source": "annual_estimates"
+        },
+        "gross_profit": {
+          "point": 913181211.0,
+          "low": 838410238.0,
+          "high": 948121432.0
+        },
+        "operating_income": {
+          "point": 465762105.0,
+          "low": 427625659.0,
+          "high": 483583136.0
+        },
+        "tax_and_other_rate": {
+          "point": -0.0028,
+          "source": "observed_net_to_operating_bridge",
+          "note": "Includes tax plus below-operating items because cache provides net margin, not a clean tax schedule."
+        },
+        "net_income_from_margin": {
+          "point": 467075593.0,
+          "low": 428831599.0,
+          "high": 484946881.0
+        },
+        "eps_consensus": {
+          "point": 16.5874,
+          "low": 15.9785,
+          "high": 17.0535,
+          "source": "annual_estimates"
+        },
+        "eps_implied_net_income": {
+          "point": 571434552.0,
+          "low": 550458636.0,
+          "high": 587493764.0
+        },
+        "free_cash_flow": {
+          "point": 240735925.0,
+          "low": 221024548.0,
+          "high": 249946985.0
+        },
+        "capex": {
+          "point": 15655024.0,
+          "low": 14373196.0,
+          "high": 16254018.0
+        },
+        "guidance_overlay": {},
+        "coverage": {
+          "num_analysts_revenue": 4,
+          "num_analysts_eps": 1
+        },
+        "consistency_checks": [
+          {
+            "check": "eps_vs_margin_net_income",
+            "gap_pct": 0.2234,
+            "status": "ok",
+            "note": "Compares consensus EPS implied net income with historical-margin implied net income."
+          },
+          {
+            "check": "fcf_margin_sign",
+            "status": "ok",
+            "fcf_margin": 0.1507
+          }
+        ]
+      },
+      {
+        "date": "2029-12-31",
+        "forecast_basis": "consensus_annual_estimates",
+        "revenue": {
+          "point": 1411000000,
+          "low": 1371158274,
+          "high": 1441502749,
+          "source": "annual_estimates"
+        },
+        "gross_profit": {
+          "point": 806596490.0,
+          "low": 783821015.0,
+          "high": 824033351.0
+        },
+        "operating_income": {
+          "point": 411399265.0,
+          "low": 399782783.0,
+          "high": 420292822.0
+        },
+        "tax_and_other_rate": {
+          "point": -0.0028,
+          "source": "observed_net_to_operating_bridge",
+          "note": "Includes tax plus below-operating items because cache provides net margin, not a clean tax schedule."
+        },
+        "net_income_from_margin": {
+          "point": 412559446.0,
+          "low": 400910204.0,
+          "high": 421478083.0
+        },
+        "eps_consensus": {
+          "point": 13,
+          "low": 12.5228,
+          "high": 13.3653,
+          "source": "annual_estimates"
+        },
+        "eps_implied_net_income": {
+          "point": 447850000,
+          "low": 431410460.0,
+          "high": 460435963.0
+        },
+        "free_cash_flow": {
+          "point": 212637700.0,
+          "low": 206633552.0,
+          "high": 217234464.0
+        },
+        "capex": {
+          "point": 13827800.0,
+          "low": 13437351.0,
+          "high": 14126727.0
+        },
+        "guidance_overlay": {},
+        "coverage": {
+          "num_analysts_revenue": 2,
+          "num_analysts_eps": 1
+        },
+        "consistency_checks": [
+          {
+            "check": "eps_vs_margin_net_income",
+            "gap_pct": 0.0855,
+            "status": "ok",
+            "note": "Compares consensus EPS implied net income with historical-margin implied net income."
+          },
+          {
+            "check": "fcf_margin_sign",
+            "status": "ok",
+            "fcf_margin": 0.1507
+          }
+        ]
+      }
+    ],
+    "missing_inputs": [],
+    "warnings": [
+      "negative_observed_tax_and_other_rate_non_operating_items_or_timing_effects"
+    ],
+    "policy": "Shadow-only financial bridge. It maps sourced forward estimates through observed historical conversion ratios; it is not a valuation model and must not alter live decisions."
+  },
+  "multiple_anchor": {
+    "engine": "forward_expectations_multiple_anchor.py v1.0",
+    "ticker": "NVMI",
+    "available": false,
+    "anchor_independent_of_current_price": true,
+    "source": null,
+    "history_points": 0,
+    "by_metric": {},
+    "warnings": [
+      "historical_ratios_unavailable"
+    ],
+    "policy": "Historical valuation regime; shadow-only multiple anchor.",
+    "compression": {
+      "engine": "forward_expectations_multiple_compression.py v1.1 (PEG terminal P/E)",
+      "applied": false,
+      "growth_signals": {
+        "eps": 0.0679,
+        "revenue": 0.094
+      },
+      "terminal_growth": -0.1167,
+      "terminal_growth_basis": "terminal_year_yoy",
+      "terminal_pe_peg": 20.0,
+      "peg_policy": "terminal_pe = clamp(2.2 * terminal_growth_pct, 20.0, 60.0); bound to terminal growth, not year.",
+      "policy": "Historical multiple compressed toward forward-growth-justified level; shadow only."
+    }
+  },
+  "margin_normalization": {
+    "engine": "forward_expectations_margin_normalization.py v1.0",
+    "applied": false,
+    "shadow_only": true,
+    "held_net_margin": 0.2924,
+    "elevated_threshold": 0.4,
+    "value_currency_basis": "reporting_currency",
+    "policy": "Durable-platform retention margin path; NOT sector mean reversion; shadow only.",
+    "reason": "margin_not_supernormal_no_normalization"
+  },
+  "currency_normalization": {
+    "fx": 1.0,
+    "source": "assumed_parity",
+    "reporting_currency": null,
+    "statement_ttm_eps": 8.05,
+    "trading_eps": null,
+    "shadow_only": true,
+    "policy": "Converts reporting-currency EPS/revenue to the trading currency for the shadow future price range; does not alter live decisions."
+  },
+  "expectations_gap": {
+    "available": true,
+    "summary": {
+      "status": "bridge_risk_only",
+      "same_metric_gap_count": 0,
+      "unavailable_metric_count": 3,
+      "bridge_risk_count": 1
+    },
+    "metrics": {
+      "revenue_cagr": {
+        "market_implied": null,
+        "consensus": 0.094,
+        "independent": null,
+        "base_rate": null
+      },
+      "eps_cagr": {
+        "market_implied": null,
+        "consensus": 0.0679,
+        "independent": null,
+        "base_rate": null
+      },
+      "fcf_cagr": {
+        "market_implied": null,
+        "consensus": null,
+        "independent": null,
+        "base_rate": null
+      }
+    },
+    "same_metric_gaps": [],
+    "unavailable_same_metric": [
+      {
+        "metric": "revenue_cagr",
+        "available_sources": [
+          "consensus"
+        ],
+        "status": "no_same_metric_comparator"
+      },
+      {
+        "metric": "eps_cagr",
+        "available_sources": [
+          "consensus"
+        ],
+        "status": "no_same_metric_comparator"
+      },
+      {
+        "metric": "fcf_cagr",
+        "available_sources": [],
+        "status": "no_metric_values"
+      }
+    ],
+    "cross_metric_observations": [],
+    "financial_bridge_risks": [
+      {
+        "source": "forward_financial_bridge",
+        "risk": "negative_observed_tax_and_other_rate_non_operating_items_or_timing_effects",
+        "severity": "medium",
+        "policy": "Bridge warning is a financial narrative risk, not a valuation verdict."
+      }
+    ],
+    "policy": "Expectations Gap is shadow-only. Numeric gaps require the same metric; bridge risks do not alter fair value, decisions, thresholds, or sizing."
+  },
+  "scenario_policy": {
+    "available": true,
+    "status": "range_or_overlay_only",
+    "gates": {
+      "base_metric": {
+        "status": "pass",
+        "reason": "consensus_growth_available"
+      },
+      "driver_evidence": {
+        "status": "fail",
+        "reason": "no_matched_adapter",
+        "missing": []
+      },
+      "conversion_method": {
+        "status": "fail",
+        "reason": "no_numeric_transmission_conversion",
+        "numeric_transmission_paths": 0
+      },
+      "bridge": {
+        "status": "pass",
+        "reason": "forward_bridge_available"
+      },
+      "range_discipline": {
+        "status": "pass",
+        "reason": "ranges_must_remain_ranges",
+        "range_guidance_present": false
+      }
+    },
+    "allowed_modes": [
+      {
+        "mode": "qualitative_driver_watchlist",
+        "status": "allowed",
+        "reason": "Always allowed when clearly marked qualitative-only."
+      },
+      {
+        "mode": "consensus_range_bridge",
+        "status": "allowed",
+        "reason": "Consensus annual estimates can be rendered through financial bridge ranges."
+      }
+    ],
+    "forbidden_methods": [
+      "fixed_pct_eps_pe_haircut",
+      "fixed_pct_revenue_haircut_without_driver",
+      "llm_invented_tam_or_penetration",
+      "cross_metric_gap_as_numeric_driver",
+      "single_point_guidance_range_collapse"
+    ],
+    "scenario_requirements": [
+      "Bear/base/bull numeric scenarios must change explicit operating drivers.",
+      "Driver values require point-in-time evidence and source lineage.",
+      "Transmission from external trend to company revenue requires lag, exposure, and conversion method.",
+      "Guidance ranges must remain ranges; midpoint is only a derived helper.",
+      "Scenarios must not alter live fair value, verdict, thresholds, or sizing."
+    ],
+    "policy": "Scenario policy is shadow-only. It authorizes scenario modes but does not generate valuation outputs or live decisions."
+  },
+  "operating_driver_scenarios": {
+    "builder": "forward_expectations_scenario_builder.py v2.0 (evidence-dispersion spread)",
+    "available": false,
+    "status": "range_or_overlay_only",
+    "mode": "range_or_overlay_only",
+    "shadow_only": true,
+    "valuation_output": false,
+    "changes_live_decision": false,
+    "cases": [],
+    "guidance_overlays": [],
+    "qualitative_watchlist": [
+      {
+        "item": "numeric_transmission_conversion",
+        "reason": "no_numeric_transmission_conversion",
+        "needed_for": "driver_numeric_bear_base_bull"
+      }
+    ],
+    "policy": "Operating-driver scenarios are advisory shadow output only. They do not alter fair value, verdict, decision lock, thresholds, or sizing."
+  },
+  "future_price_range": {
+    "engine": "forward_expectations_price_range.py v1.3 (explicit terminal horizon + annualized return)",
+    "ticker": "NVMI",
+    "available": true,
+    "status": "advisory_band_only",
+    "shadow_only": true,
+    "valuation_output": "future_price_range_shadow",
+    "changes_live_decision": false,
+    "horizon_date": "2029-12-31",
+    "horizon_basis": "terminal_margin_normalized",
+    "horizon_years": 3.29,
+    "horizon_coverage": 1,
+    "horizon_interpretation": "multi_year_terminal_value_not_12m_price_target",
+    "horizon_coverage_quality": "thin",
+    "reporting_to_trading_fx": 1.0,
+    "method": "eps_x_pe",
+    "multiple_quality": "derived",
+    "cases": {
+      "bear": {
+        "case": "bear",
+        "target_price": 283.41,
+        "upside_pct": -18.1,
+        "metric": "eps_consensus",
+        "metric_value": 12.5228,
+        "multiple": 22.6317,
+        "annualized_pct": -5.9
+      },
+      "base": {
+        "case": "base",
+        "target_price": 346.13,
+        "upside_pct": 0.0,
+        "metric": "eps_consensus",
+        "metric_value": 13,
+        "multiple": 26.6255,
+        "annualized_pct": -0.0
+      },
+      "bull": {
+        "case": "bull",
+        "target_price": 409.24,
+        "upside_pct": 18.2,
+        "metric": "eps_consensus",
+        "metric_value": 13.3653,
+        "multiple": 30.6193,
+        "annualized_pct": 5.2
+      }
+    },
+    "range": {
+      "low": 283.41,
+      "base": 346.13,
+      "high": 409.24
+    },
+    "multiple_range": {
+      "p25": 22.6317,
+      "p50": 26.6255,
+      "p75": 30.6193,
+      "source": "current_price / horizon_eps_consensus",
+      "method": "current_market_multiple_band",
+      "band_policy": "p25/p75 are +/-15% around current implied forward multiple; shadow only."
+    },
+    "trajectory": [
+      {
+        "date": "2026-12-31",
+        "years_out": 0.29,
+        "coverage": 5,
+        "thin_coverage": true,
+        "consensus_eps": 10.67,
+        "is_terminal": false,
+        "targets": {
+          "bear": 340.08,
+          "base": 346.13,
+          "bull": 351.28
+        },
+        "cumulative_upside_pct": {
+          "bear": -1.7,
+          "base": -0.0,
+          "bull": 1.5
+        },
+        "annualized_pct": {
+          "bear": -5.9,
+          "base": -0.0,
+          "bull": 5.2
+        }
+      },
+      {
+        "date": "2027-12-31",
+        "years_out": 1.29,
+        "coverage": 5,
+        "thin_coverage": true,
+        "consensus_eps": 13.66,
+        "is_terminal": false,
+        "targets": {
+          "bear": 320.05,
+          "base": 346.13,
+          "bull": 369.61
+        },
+        "cumulative_upside_pct": {
+          "bear": -7.5,
+          "base": -0.0,
+          "bull": 6.8
+        },
+        "annualized_pct": {
+          "bear": -5.9,
+          "base": -0.0,
+          "bull": 5.2
+        }
+      },
+      {
+        "date": "2028-12-31",
+        "years_out": 2.29,
+        "coverage": 1,
+        "thin_coverage": true,
+        "consensus_eps": 16.59,
+        "is_terminal": false,
+        "targets": {
+          "bear": 301.15,
+          "base": 346.13,
+          "bull": 388.95
+        },
+        "cumulative_upside_pct": {
+          "bear": -13.0,
+          "base": -0.0,
+          "bull": 12.4
+        },
+        "annualized_pct": {
+          "bear": -5.9,
+          "base": -0.0,
+          "bull": 5.2
+        }
+      },
+      {
+        "date": "2029-12-31",
+        "years_out": 3.29,
+        "coverage": 1,
+        "thin_coverage": true,
+        "consensus_eps": 13,
+        "is_terminal": true,
+        "targets": {
+          "bear": 283.41,
+          "base": 346.13,
+          "bull": 409.24
+        },
+        "cumulative_upside_pct": {
+          "bear": -18.1,
+          "base": -0.0,
+          "bull": 18.2
+        },
+        "annualized_pct": {
+          "bear": -5.9,
+          "base": -0.0,
+          "bull": 5.2
+        }
+      }
+    ],
+    "warnings": [
+      "derived_current_market_multiple_used",
+      "current_price_volatility_band_not_forecast",
+      "historical_ratios_unavailable",
+      "multi_year_terminal_range_not_12m_target",
+      "thin_terminal_analyst_coverage"
+    ],
+    "policy": "Future price range is shadow-only and must not alter live fair_value_summary, decision_lock, thresholds, or sizing without explicit user approval.",
+    "eps_basis": "consensus"
+  },
+  "expectations_matrix": {
+    "metrics": {
+      "revenue_cagr": {
+        "market_implied": null,
+        "consensus": 0.094,
+        "independent": null,
+        "base_rate": null
+      },
+      "eps_cagr": {
+        "market_implied": null,
+        "consensus": 0.0679,
+        "independent": null,
+        "base_rate": null
+      },
+      "fcf_cagr": {
+        "market_implied": null,
+        "consensus": null,
+        "independent": null,
+        "base_rate": null
+      }
+    },
+    "same_metric_comparisons": [],
+    "verdict": "comparison_unavailable",
+    "assessment": "分析師共識 EPS CAGR 7%；分析師共識營收 CAGR 9%",
+    "cross_metric_policy": "FCF、EPS、營收 CAGR 不互減、不產生跨口徑 verdict。"
+  },
+  "evidence_contract": {
+    "status": "pass",
+    "accepted_count": 2,
+    "rejected_count": 0,
+    "accepted": [
+      {
+        "metric": "consensus_revenue_cagr",
+        "value": 0.094,
+        "unit": "ratio",
+        "value_type": "consensus",
+        "source_type": "fmp_analyst_estimates",
+        "source_ref": "earnings-analyst cache annual_estimates",
+        "published_at": "2026-09-02",
+        "retrieved_at": "2026-09-16T20:32:13.584730+00:00",
+        "confidence": "medium"
+      },
+      {
+        "metric": "consensus_eps_cagr",
+        "value": 0.0679,
+        "unit": "ratio",
+        "value_type": "consensus",
+        "source_type": "fmp_analyst_estimates",
+        "source_ref": "earnings-analyst cache annual_estimates",
+        "published_at": "2026-09-02",
+        "retrieved_at": "2026-09-16T20:32:13.584730+00:00",
+        "confidence": "medium"
+      }
+    ],
+    "rejected": []
+  }
+}

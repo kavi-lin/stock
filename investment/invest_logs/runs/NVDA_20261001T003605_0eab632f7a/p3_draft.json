@@ -1,0 +1,150 @@
+{
+  "ticker": "NVDA",
+  "lane_scores": {
+    "fundamentals": 2.5,
+    "sentiment": -0.4,
+    "news": 1.0,
+    "technical": 1.5,
+    "valuation": 0.0
+  },
+  "lane_confidence": {
+    "fundamentals": 0.68,
+    "sentiment": 0.72,
+    "news": 0.58,
+    "technical": 0.72,
+    "valuation": 0.6
+  },
+  "valuation_lane": {
+    "score": 0.0,
+    "confidence": 0.6
+  },
+  "structural_shift": {
+    "tier": "NONE"
+  },
+  "red_team": {
+    "verdict": "STRONG_COUNTER",
+    "counter_thesis": "At $230.24, the underwriting margin is thin: the frozen valuation pack puts fair value at $220.12 (-4.39%) while implied expectations require 60% five-year FCF CAGR, with actual and lane FCF-growth estimates unavailable to corroborate that hurdle. The frozen FRED input shows a 2.86% 10-year real yield, adding a material discount-rate headwind to a growth-dependent valuation.",
+    "kill_conditions": [
+      "IF annualized FCF growth is below 30% across the next two reported quarters (within 180 days) THEN the 60% five-year FCF CAGR embedded in the price is not credible and the cash-flow thesis breaks.",
+      "IF annualized revenue growth falls below 35% across the next two reported quarters (within 180 days) THEN the frozen market-implied revenue path is missed and the growth justification breaks.",
+      "IF the 10-year real yield remains at or above its frozen FRED reading of 2.86% for 30 trading days within the next 90 days THEN persistent high discount rates undermine the staged-entry risk/reward thesis."
+    ],
+    "counter_evidence_strength": 4,
+    "thesis_break_probability": 0.36
+  },
+  "transition": {
+    "transition_signature": null,
+    "transition_signature_mtime": "2026-09-30T16:32:43.565853+00:00",
+    "forecaster_transition_case": false,
+    "forecaster_transition_case_mtime": "2026-09-30T16:33:15+00:00",
+    "valuation_cited_transition_overlay": null,
+    "valuation_transition_dissent_basis": null
+  },
+  "macro": {
+    "macro_multiplier": 0.75,
+    "macro_backdrop_score": -2.0,
+    "market_regime": "VOLATILE"
+  },
+  "burry": {
+    "ticker": "NVDA",
+    "generated_at": "2026-09-30T16:43:34.519737+00:00",
+    "burry_score": 27.8,
+    "verdict": "WARNING",
+    "components": {
+      "fcf_yield_pct": 0.77,
+      "ev_ebit": 27.09,
+      "debt_to_equity": 0.17,
+      "pct_below_52w_high": 2.09,
+      "insider_net": "SELL"
+    },
+    "component_scores": {
+      "fcf_yield": 13.8,
+      "ev_ebit": 17.8,
+      "debt_to_equity": 90.0,
+      "pct_below_52w_high": 20.0,
+      "insider": 20
+    },
+    "weights_active": [
+      "fcf_yield",
+      "ev_ebit",
+      "debt_to_equity",
+      "pct_below_52w_high",
+      "insider"
+    ],
+    "reasoning": "FCF yield 0.8% │ EV/EBITDA 27.1 │ D/E 0.17 │ 2% below 52wH │ insider=SELL"
+  },
+  "gates": {
+    "proceed_to_phase3": true,
+    "risk_reward_ratio": null,
+    "binary_classification": "unknown",
+    "binary_event_within_48h": false,
+    "mandatory_risk_flags": [],
+    "phase2_fanout_mode": "PARALLEL_SUBAGENT"
+  },
+  "hot_zone": {
+    "industry_top_30pct": false
+  },
+  "forward_validation": {
+    "schema": "forward_validation.v1",
+    "status": "STRETCHED",
+    "applies": true,
+    "reason": "at least one credible forward check supports current price",
+    "dcf_value": 95.04,
+    "dcf_gap_pct": -58.72,
+    "extreme_dcf_threshold_pct": -30.0,
+    "checks": [
+      {
+        "name": "archetype_shadow",
+        "available": true,
+        "supports_current_price": true,
+        "actual": 4.78,
+        "threshold": ">=-10% vs current",
+        "detail": {
+          "anchors_used_n": 5
+        }
+      },
+      {
+        "name": "forward_earnings",
+        "available": true,
+        "supports_current_price": true,
+        "actual": -6.35,
+        "threshold": ">=-10% vs current",
+        "detail": {
+          "analyst_count": 9,
+          "horizon_years": 3.318
+        }
+      },
+      {
+        "name": "revenue_path",
+        "available": true,
+        "supports_current_price": true,
+        "actual": 0.3543,
+        "threshold": "<= analyst CAGR + 0.05",
+        "detail": {
+          "analyst_revenue_cagr": 0.3928,
+          "analyst_horizon_years": 5.0
+        }
+      }
+    ],
+    "evaluated_count": 3,
+    "support_count": 3,
+    "supported_checks": [
+      "archetype_shadow",
+      "forward_earnings",
+      "revenue_path"
+    ],
+    "failed_checks": [],
+    "quality_flags": [
+      "reverse_dcf_growth_out_of_range"
+    ],
+    "valuation_score_before": 0.0,
+    "valuation_score_effective": 0.0,
+    "score_adjustment": "none",
+    "t5_hard_downgrade_eligible": false
+  },
+  "decision_cap": {
+    "anchors_available": 5,
+    "fair_value_confidence": "medium",
+    "lane_data_quality_low": false
+  }
+}

@@ -1,0 +1,343 @@
+{
+  "ticker": "HPE",
+  "generated_at": "2026-10-01T14:30:21+00:00",
+  "window_hours": 48,
+  "headlines": [
+    {
+      "date": "2026-10-01T14:00:26+00:00",
+      "title": "The Boring Tech Stock With an AI Tailwind Has 17% Upside",
+      "source": "24/7 Wall St.",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/boring-tech-stock-ai-tailwind-140026115.html"
+    },
+    {
+      "date": "2026-10-01T12:32:17+00:00",
+      "title": "HPE raises networking outlook, lands $1.2 billion Vultr AI order",
+      "source": "Yahoo",
+      "url": "https://finnhub.io/api/news?id=8f5023a4ea849136789b047f614fb26d651e212abdfa026c95648c357c16b471",
+      "category": "company"
+    },
+    {
+      "date": "2026-10-01T12:16:26+00:00",
+      "title": "Dow Jones Futures Rise, S&P 500 Finds Key Support As Micron Earnings Crush Views; Oil Prices, Treasury Yields In Focus",
+      "source": "Investor's Business Daily",
+      "url": "https://www.investors.com/market-trend/stock-market-today/dow-jones-futures-micron-rises-earnings-treasury-yields/?src=A00220&yptr=yahoo"
+    },
+    {
+      "date": "2026-10-01T11:52:00+00:00",
+      "title": "Micron Q4 Earnings Beat Estimates on Strong Pricing and AI Demand",
+      "source": "Zacks",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/micron-q4-earnings-beat-estimates-115200228.html"
+    },
+    {
+      "date": "2026-10-01T10:12:41+00:00",
+      "title": "HPE Stock Price Target Hiked By Barclays On Networking Growth Outlook Jump – Analyst Sees 23% Upside Potential",
+      "source": "Yahoo",
+      "url": "https://finnhub.io/api/news?id=0d7d40a42e586d99059f6401de5febb4ecdf77006555557e3092e97bb6d6a99c",
+      "category": "company"
+    },
+    {
+      "date": "2026-10-01T09:25:07+00:00",
+      "title": "2 Services Stocks with Impressive Fundamentals and 1 Facing Challenges",
+      "source": "StockStory",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/2-services-stocks-impressive-fundamentals-092507082.html"
+    },
+    {
+      "date": "2026-10-01T09:05:00+00:00",
+      "title": "Softer Inflation Takes the Edge Off Hike Fears, Then Micron Raises the Bar Again",
+      "source": "ChartMill",
+      "url": "https://finnhub.io/api/news?id=686bb10bbe6618ce3d7e4527ac38df030a70e4d3f931bceb5621e9bca9137a32",
+      "category": "company"
+    },
+    {
+      "date": "2026-10-01T09:03:00+00:00",
+      "title": "Data Center IT Asset Disposition Market Outlook 2026-2035 - Featuring Profiles of 3 of the Leading Companies: Arrow Electronics, Hewlett Packard Enterprise, and Iron Mountain",
+      "source": "Yahoo",
+      "url": "https://finnhub.io/api/news?id=0f1e89bb02a3833ea8d81cf34ea7ed57ed824afa13b3b55a6412a1b5ae058fd2",
+      "category": "company"
+    },
+    {
+      "date": "2026-10-01T07:43:00+00:00",
+      "title": "Company News for Oct 1, 2026",
+      "source": "Zacks",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/company-news-oct-1-2026-074300950.html"
+    },
+    {
+      "date": "2026-10-01T03:26:17+00:00",
+      "title": "Why Did WBD, HPE, CRWD Stocks Rise To 52-Week Highs Today?",
+      "source": "Yahoo",
+      "url": "https://finnhub.io/api/news?id=5af5de4ec8eacbac67605a851e4dbaad3c71c98131f5dd265576df70b06ee560",
+      "category": "company"
+    },
+    {
+      "date": "2026-09-30T21:55:37+00:00",
+      "title": "Dow Jones Futures: Micron Earnings Crush Views, S&P 500 At Critical Level As Treasury Yields Rise",
+      "source": "Yahoo",
+      "url": "https://finnhub.io/api/news?id=70621d3264f819ce191cd5084fd2f0e9b0b998cdc1a56523ec51421ff4fec6c5",
+      "category": "company"
+    },
+    {
+      "date": "2026-09-30T21:33:13+00:00",
+      "title": "Why Hewlett Packard Enterprise (HPE) Stock Is Up Today",
+      "source": "StockStory",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/why-hewlett-packard-enterprise-hpe-213313395.html"
+    },
+    {
+      "date": "2026-09-30T21:22:12+00:00",
+      "title": "HPE Boosts Forecast on Positive Networking Outlook",
+      "source": "Yahoo",
+      "url": "https://finnhub.io/api/news?id=73080cd9d59b3b2dae2333d42149c56c99aa87e1c301d03d55e4312b1b798dfb",
+      "category": "company"
+    },
+    {
+      "date": "2026-09-30T21:12:04+00:00",
+      "title": "HPE stock closes at record high on growing networking orders, $1.2 billion AMD Helios order",
+      "source": "Yahoo",
+      "url": "https://finnhub.io/api/news?id=f7748e5f82f498372eeda35a253874989625d4a0efcd9e359fcc787c989c3608",
+      "category": "company"
+    },
+    {
+      "date": "2026-09-30T21:09:00+00:00",
+      "title": "Moderna, Cerebras, Jabil, HPE, Cal-Maine, Mattel, and More Stocks That Explain Today’s Market",
+      "source": "Barrons.com",
+      "url": "https://www.barrons.com/articles/stock-movers-81984569?siteid=yhoof2&yptr=yahoo"
+    },
+    {
+      "date": "2026-09-30T20:48:55+00:00",
+      "title": "HPE, IBD Stock Of The Day, Breaks Out On Hiked Guidance, AI Momentum",
+      "source": "Investor's Business Daily",
+      "url": "https://www.investors.com/research/ibd-stock-of-the-day/hpe-stock-juniper-amd-oracle-investor-day/?src=A00220&yptr=yahoo"
+    },
+    {
+      "date": "2026-09-30T20:30:00+00:00",
+      "title": "AI demand is still outpacing supply, HPE CFO explains",
+      "source": "Yahoo",
+      "url": "https://finnhub.io/api/news?id=8d0f50b838ae9c9b1c53b6c0efbdfbc592162da308cad910d366e1d6c64284d7",
+      "category": "company"
+    },
+    {
+      "date": "2026-09-30T19:56:11+00:00",
+      "title": "Sector Update: Tech Stocks Higher Late Afternoon",
+      "source": "Yahoo",
+      "url": "https://finnhub.io/api/news?id=2b7c7c16a265951f57ddea7d32d248c6c8d82ed73dcd488c53ced9dd8048984c",
+      "category": "company"
+    },
+    {
+      "date": "2026-09-30T19:42:17+00:00",
+      "title": "HPE CFO discusses $1.2B deal with Vultr to deploy AMD Helios AI racks",
+      "source": "Yahoo",
+      "url": "https://finnhub.io/api/news?id=530663342e79870a433bfa5b2de632a6ee2af5b4f85b406b5ab140f497de6ff1",
+      "category": "company"
+    },
+    {
+      "date": "2026-09-30T19:05:02+00:00",
+      "title": "Top S&P500 movers in Wednesday's session",
+      "source": "ChartMill",
+      "url": "https://finnhub.io/api/news?id=1910164d8b1d9fd9033a60bb0ef8f5ad9e51cda65b366ab301802bffa86d1535",
+      "category": "company"
+    },
+    {
+      "date": "2026-09-30T19:03:42+00:00",
+      "title": "Hewlett Packard Stock Just Got a Big Boost Powered by AMD",
+      "source": "Yahoo",
+      "url": "https://finnhub.io/api/news?id=be32e95a536cda948723fcc48ddcd94af6464308ce176e59b58c742a40d5354c",
+      "category": "company"
+    },
+    {
+      "date": "2026-09-30T18:23:30+00:00",
+      "title": "Bank of America backs HPE stock before crucial investor day",
+      "source": "Yahoo",
+      "url": "https://finnhub.io/api/news?id=cda9a502c0a294ab4531a4c8938c2229983dad544cbf1902e3b1daf5e604eace",
+      "category": "company"
+    },
+    {
+      "date": "2026-09-30T18:08:08+00:00",
+      "title": "HPE Shares Jump on $1.2 Billion AMD AI Deal",
+      "source": "GuruFocus.com",
+      "url": "https://finance.yahoo.com/technology/ai/articles/hpe-shares-jump-1-2-180808900.html"
+    },
+    {
+      "date": "2026-09-30T18:05:00+00:00",
+      "title": "Curious about the most active S&P500 stocks in today's session?",
+      "source": "ChartMill",
+      "url": "https://finnhub.io/api/news?id=e70f88b3c9685f1d5e57cdb7cdaac66aa38560af27558b6c776f00999d8d1cdb",
+      "category": "company"
+    },
+    {
+      "date": "2026-09-30T17:53:18+00:00",
+      "title": "The One Number Cisco Stock Investors Should Watch",
+      "source": "Yahoo",
+      "url": "https://finnhub.io/api/news?id=7e61dd3ad67dea09ab3d1376d25119677be3b696e39c2f4f60c959939f566822",
+      "category": "company"
+    },
+    {
+      "date": "2026-09-30 17:32:56",
+      "title": "Hewlett Packard Enterprise Company (HPE) Analyst/Investor Day Transcript",
+      "source": "seekingalpha.com",
+      "url": "https://seekingalpha.com/article/4951168-hewlett-packard-enterprise-company-hpe-analyst-investor-day-transcript",
+      "summary": "Hewlett Packard Enterprise Company (HPE) Analyst/Investor Day Transcript",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 16:02:42",
+      "title": "Hewlett Packard Enterprise Raises AI Networking Outlook, Targets $800M in Juniper Synergies",
+      "source": "marketbeat.com",
+      "url": "https://www.marketbeat.com/instant-alerts/event-hewlett-packard-enterprise-raises-ai-networking-outlook-targets-800m-in-juniper-synergies-2026-09-30/",
+      "summary": "Hewlett Packard Enterprise NYSE: HPE outlined an expanded growth strategy for its networking segment, citing AI-driven demand, progress integrating Juniper Networks and higher expected cost savings as key drivers of its outlook.",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 16:02:01",
+      "title": "Hewlett Packard Enterprise Stock Soars to Fresh Record on Raised Revenue Targets, $1.2B Server Deal",
+      "source": "investopedia.com",
+      "url": "https://www.investopedia.com/market-update-hewlett-packard-enterprise-stock-soars-to-fresh-record-hpe-12149869",
+      "summary": "Hewlett Packard Enterprise shares rallied to a record high after the networking hardware maker raised its growth targets and said it struck a big server deal.",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 14:14:00",
+      "title": "Hewlett Packard Enterprise (HPE) Reaches All-Time High with Strong Networking Outlook",
+      "source": "gurufocus.com",
+      "url": "https://www.gurufocus.com/news/9104006/hewlett-packard-enterprise-hpe-reaches-alltime-high-with-strong-networking-outlook",
+      "summary": "Hewlett Packard Enterprise (HPE) has seen a significant increase in its stock price, achieving a new all-time high. This surge follows the company's raised outl",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 11:50:28",
+      "title": "Why is HPE stock gaining today?",
+      "source": "invezz.com",
+      "url": "https://invezz.com/news/2026/09/30/why-is-hpe-stock-gaining-today/",
+      "summary": "HPE stock gained 5% on Wednesday after Hewlett Packard Enterprise announced a $1.2 billion order from Vultr for AMD Helios AI Rack systems across Vultr's US data centers. The order marks HPE's first for the new AMD Helios system and gives the company a major customer for AMD's la",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 10:42:28",
+      "title": "HPE stock climbs after landing $1.2 billion AI infrastructure order from Vultr",
+      "source": "proactiveinvestors.com",
+      "url": "https://www.proactiveinvestors.com/companies/news/1099388",
+      "summary": "Hewlett Packard Enterprise Co (NYSE:HPE, XETRA:2HP) shares rose nearly 5% Wednesday after the company announced a $1.2 billion order from cloud infrastructure provider Vultr for its new AMD Helios AI Rack systems.  Vultr, the world's largest privately held cloud infrastructure co",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 10:41:33",
+      "title": "Hewlett Packard Enterprise Jumps 5% on AMD Order; Dell and Super Micro Barely Move",
+      "source": "247wallst.com",
+      "url": "https://247wallst.com/investing/2026/09/30/hewlett-packard-enterprise-jumps-5-on-amd-order-dell-and-super-micro-barely-move/",
+      "summary": "Hewlett Packard Enterprise (NYSE:HPE | HPE Price Prediction) stock jumped 5% to $64.55 on Wednesday after the company secured its first order for Advanced Micro Devices (NASDAQ:AMD) Helios AI Rack systems. The $1.",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 09:55:38",
+      "title": "Hewlett Packard Enterprise, Capital Bancorp, FormFactor And Other Big Stocks Moving Higher On Wednesday",
+      "source": "benzinga.com",
+      "url": "https://www.benzinga.com/markets/market-summary/26/09/62079790/hewlett-packard-enterprise-capital-bancorp-formfactor-and-other-big-stocks-moving-higher-on-wednesday",
+      "summary": "U.S. stocks were higher, with the Nasdaq Composite gaining over 100 points on Wednesday.",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 09:17:07",
+      "title": "HPE boosts networking growth outlook, gets $1.2 billion AI order from cloud firm Vultr",
+      "source": "reuters.com",
+      "url": "https://www.reuters.com/business/hpe-boosts-networking-growth-outlook-gets-12-billion-ai-order-cloud-firm-vultr-2026-09-30/",
+      "summary": "Hewlett Packard Enterprise on Wednesday raised its long-term revenue growth forecast for its networking business, driven by the AI boom and ​announced a $1.2 billion order to provide AMD server racks ‌to cloud firm Vultr.",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 07:46:00",
+      "title": "HPE Secures Its First AMD Helios Order in $1.2 Billion Deal With Vultr",
+      "source": "businesswire.com",
+      "url": "https://www.businesswire.com/news/home/20260930335555/en/HPE-Secures-Its-First-AMD-Helios-Order-in-1.2-Billion-Deal-With-Vultr/",
+      "summary": "SUNNYVALE, Calif.--(BUSINESS WIRE)--HPE (NYSE: HPE) today announced a $1.2 billion order from Vultr, the world's largest privately-held cloud infrastructure company, to deploy AMD Helios™ AI Rack by HPE systems at Vultr's cloud data center locations in the United States. It is HP",
+      "_provider": "fmp_news_stock"
+    },
+    {
+      "date": "2026-09-30 07:45:00",
+      "title": "HPE to Outline Networking Priorities for Long-term Value Creation",
+      "source": "businesswire.com",
+      "url": "https://www.businesswire.com/news/home/20260930414405/en/HPE-to-Outline-Networking-Priorities-for-Long-term-Value-Creation/",
+      "summary": "SUNNYVALE, Calif.--(BUSINESS WIRE)--HPE (NYSE: HPE) today is hosting HPE Networking Investor Day, where Networking business leaders will outline a strategy designed to accelerate profitable growth and long-term shareholder value creation in the AI era. The company will share how ",
+      "_provider": "fmp_news_stock"
+    }
+  ],
+  "analyst_actions": [
+    {
+      "date": "2026-10-01T00:00:00+00:00",
+      "action": "",
+      "firm": "",
+      "new_grade": "",
+      "previous_grade": "",
+      "url": ""
+    }
+  ],
+  "analyst_actions_source": "fmp_grades_historical",
+  "analyst_consensus": {
+    "strong_buy": 0,
+    "buy": 18,
+    "hold": 20,
+    "sell": 1,
+    "strong_sell": 0,
+    "consensus": "Hold"
+  },
+  "pt_revision_momentum": {
+    "direction": "DOWN",
+    "consensus_delta_pct_1m": -1.57,
+    "consensus_delta_pct_3m": -0.89,
+    "analysts_last_month": 12,
+    "analysts_last_quarter": 14,
+    "note": "PT revision direction only — absolute levels stripped (V3.45.4 anti cross-lane anchoring)"
+  },
+  "analyst_news": [
+    {
+      "date": "2026-10-01T11:17:08+00:00",
+      "title": "HPE price target raised to $92 from $76 at Citi",
+      "publisher": "",
+      "url": "https://thefly.com/ajax/news_get.php?id=4433756"
+    },
+    {
+      "date": "2026-10-01T09:38:15+00:00",
+      "title": "HPE price target raised to $83 from $79 at Barclays",
+      "publisher": "",
+      "url": "https://thefly.com/ajax/news_get.php?id=4433580"
+    },
+    {
+      "date": "2026-09-30T18:54:51+00:00",
+      "title": "HPE price target raised to $63 from $54 at Wells Fargo",
+      "publisher": "",
+      "url": "https://thefly.com/ajax/news_get.php?id=4433407"
+    }
+  ],
+  "sec_filings_recent": [],
+  "sec_8k_filings": [
+    {
+      "filing_date": "2026-09-30 00:00:00",
+      "accepted_date": "2026-09-30 07:49:26",
+      "form_type": "8-K",
+      "url": "https://www.sec.gov/Archives/edgar/data/1645590/000164559026000084/hpe-20260930.htm",
+      "_provider": "fmp_sec_8k"
+    },
+    {
+      "filing_date": "2026-09-02 00:00:00",
+      "accepted_date": "2026-09-02 16:06:52",
+      "form_type": "8-K",
+      "url": "https://www.sec.gov/Archives/edgar/data/1645590/000164559026000078/ex-991x922026x8k.htm",
+      "_provider": "fmp_sec_8k"
+    }
+  ],
+  "warnings": [],
+  "data_quality": {
+    "fmp_stock_news_count": 11,
+    "fmp_press_release_count": 0,
+    "finviz_news_count": 0,
+    "finviz_analyst_count": 0,
+    "yf_news_count": 10,
+    "finnhub_news_count": 25,
+    "fmp_grades_count": 1,
+    "fmp_grades_news_count": 3,
+    "fmp_sec_8k_count": 2,
+    "headlines_total_dedup": 36,
+    "headlines_primary_source": "fmp_news_stock",
+    "fmp_calls": 9,
+    "fmp_failures": 0,
+    "sparse": false,
+    "recommendation": "ok"
+  }
+}

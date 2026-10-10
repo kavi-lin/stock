@@ -1,0 +1,28 @@
+{
+  "source_records": {
+    "842de77b1cc16b8a51c6eed0c670292d35dd8f5e7f14729e2ce362024ed99a92": {
+      "kind": "market",
+      "data": null,
+      "data_as_of": null,
+      "published_at": null,
+      "fetched_at": "2026-10-01T01:43:09.456793+00:00",
+      "financial_period": "2026-07-26",
+      "content_hash": "sha256:74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "status": "transport_error",
+      "reason": "transport_error",
+      "endpoint": "/stable/sector-pe-snapshot",
+      "http_status": 400,
+      "http_calls": 1,
+      "queue_seconds": 0.0005398751236498356
+    }
+  },
+  "source_telemetry": {
+    "requests": 1,
+    "cache_hits": 0,
+    "http_calls_known": 1,
+    "http_calls_unknown": 0,
+    "outcomes": {
+      "transport_error": 1
+    }
+  }
+}

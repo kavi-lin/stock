@@ -1,0 +1,62 @@
+{
+  "ticker": "NVDA",
+  "generated_at": "2026-10-01T01:43:10+00:00",
+  "data_source": "bundle+yfinance",
+  "price": {
+    "current": 228.38,
+    "market_cap": 5514691870720.0,
+    "52w_high": 236.54,
+    "52w_low": 164.27
+  },
+  "valuation": {
+    "pe_ratio": 28.96603773584905,
+    "pe_forward": 14.562609,
+    "pe_sector_median": null,
+    "peg_ratio": 0.47,
+    "ev_ebitda": 23.940175035413642,
+    "pb_ratio": 24.32691017713028
+  },
+  "growth": {
+    "revenue_yoy_pct": 105.85,
+    "revenue_trailing_3y_cagr_pct": 100.05,
+    "eps_growth_forward_consensus_pct": 127.8
+  },
+  "margins_cash": {
+    "gross_margin_pct": 74.67,
+    "operating_margin_pct": 65.21,
+    "fcf_margin_pct": 13.8,
+    "fcf_yield_pct": 2.28,
+    "net_margin_pct": 63.66
+  },
+  "balance_sheet": {
+    "debt_to_equity": 0.1697061803444782,
+    "net_cash_positive": true,
+    "cash_and_equivalents": 62469001216,
+    "total_debt": 38860001280
+  },
+  "earnings_calendar": {
+    "next_earnings_date": "2026-11-18",
+    "days_until_earnings": 48
+  },
+  "analyst": {
+    "consensus_rating": "STRONG_BUY",
+    "analyst_count": 59,
+    "price_target_mean": 327.7,
+    "price_target_upside_pct": 43.49
+  },
+  "warnings": [],
+  "data_quality": {
+    "fmp_calls": 1,
+    "fmp_failures": 1,
+    "yf_fallbacks": 1,
+    "bundle_used": true,
+    "bundle_meta": {
+      "source": "EARNINGS_ANALYST_BUNDLE",
+      "as_of": "2026-10-01",
+      "ticker": "NVDA"
+    },
+    "missing_fields": [
+      "pe_sector_median"
+    ]
+  }
+}

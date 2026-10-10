@@ -30,7 +30,7 @@
     "finalLink": "https://www.sec.gov/Archives/edgar/data/1013880/000110465924030001/tm247637d1_ex99-1.htm"
   },
   {
-    "symbol": "DTE",
+    "symbol": "DTW",
     "cik": "0000936340",
     "filingDate": "2024-03-01 00:00:00",
     "acceptedDate": "2024-03-01 16:20:34",
@@ -40,7 +40,17 @@
     "finalLink": "https://www.sec.gov/Archives/edgar/data/936340/000093634024000090/dtegasexhibit991123123.htm"
   },
   {
-    "symbol": "DTW",
+    "symbol": "DTG",
+    "cik": "0000936340",
+    "filingDate": "2024-03-01 00:00:00",
+    "acceptedDate": "2024-03-01 16:20:34",
+    "formType": "8-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/936340/000093634024000090/0000936340-24-000090-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/936340/000093634024000090/dtegasexhibit991123123.htm"
+  },
+  {
+    "symbol": "DTE",
     "cik": "0000936340",
     "filingDate": "2024-03-01 00:00:00",
     "acceptedDate": "2024-03-01 16:20:34",
@@ -61,16 +71,6 @@
   },
   {
     "symbol": "DTP",
-    "cik": "0000936340",
-    "filingDate": "2024-03-01 00:00:00",
-    "acceptedDate": "2024-03-01 16:20:34",
-    "formType": "8-K",
-    "hasFinancials": true,
-    "link": "https://www.sec.gov/Archives/edgar/data/936340/000093634024000090/0000936340-24-000090-index.htm",
-    "finalLink": "https://www.sec.gov/Archives/edgar/data/936340/000093634024000090/dtegasexhibit991123123.htm"
-  },
-  {
-    "symbol": "DTG",
     "cik": "0000936340",
     "filingDate": "2024-03-01 00:00:00",
     "acceptedDate": "2024-03-01 16:20:34",
@@ -300,7 +300,7 @@
     "finalLink": "https://www.sec.gov/Archives/edgar/data/15615/000119312524054015/d775448dex991.htm"
   },
   {
-    "symbol": "DAY",
+    "symbol": "CDAY",
     "cik": "0001725057",
     "filingDate": "2024-03-01 00:00:00",
     "acceptedDate": "2024-02-29 19:15:14",
@@ -310,7 +310,7 @@
     "finalLink": "https://www.sec.gov/Archives/edgar/data/1725057/000095017024023418/day-ex10_1.htm"
   },
   {
-    "symbol": "CDAY",
+    "symbol": "DAY",
     "cik": "0001725057",
     "filingDate": "2024-03-01 00:00:00",
     "acceptedDate": "2024-02-29 19:15:14",
@@ -350,7 +350,7 @@
     "finalLink": "https://www.sec.gov/Archives/edgar/data/1401257/000140125724000036/fetq42023earningsrelease.htm"
   },
   {
-    "symbol": "NVX",
+    "symbol": "NVNXF",
     "cik": "0001859795",
     "filingDate": "2024-02-29 00:00:00",
     "acceptedDate": "2024-02-29 17:11:51",
@@ -360,7 +360,7 @@
     "finalLink": "https://www.sec.gov/Archives/edgar/data/1859795/000095017024023263/nvx-ex99_1.htm"
   },
   {
-    "symbol": "NVNXF",
+    "symbol": "NVX",
     "cik": "0001859795",
     "filingDate": "2024-02-29 00:00:00",
     "acceptedDate": "2024-02-29 17:11:51",

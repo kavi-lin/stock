@@ -1,0 +1,121 @@
+{
+  "schema": "p5-qualitative/1.0",
+  "ticker": "HPE",
+  "date": "2026-10-01",
+  "lanes": {
+    "fundamentals": {
+      "signal": "BUY",
+      "key_factors": [
+        "Revenue growth 32.7%; forward EPS growth 410%",
+        "Forward P/E 13.7; PEG 0.80",
+        "Altman danger offsets strong Piotroski score"
+      ],
+      "risk_flags": [
+        "Altman Z in danger zone",
+        "Working-capital-driven cash conversion; $14B net debt"
+      ]
+    },
+    "sentiment": {
+      "signal": "BUY",
+      "key_factors": [
+        "Accumulation in two earlier quarters",
+        "Short interest remains below five percent",
+        "Market sentiment composite remains neutral positive"
+      ],
+      "risk_flags": [
+        "Weakening breadth and invalidated follow-through",
+        "Latest insider selling offsets earlier accumulation"
+      ]
+    },
+    "news": {
+      "signal": "BUY",
+      "key_factors": [
+        "Vultr placed $1.2B AMD Helios order",
+        "Networking outlook raised; Juniper synergies",
+        "PT hikes offset soft consensus revisions"
+      ],
+      "risk_flags": [
+        "One-month PT revisions down 1.57%",
+        "High long-term yields pressure technology multiples"
+      ]
+    },
+    "technical": {
+      "signal": "HOLD",
+      "key_factors": [
+        "Stage 2 above all major averages",
+        "Bullish RSI; MACD histogram is falling",
+        "Price sits 0.43% below resistance"
+      ],
+      "risk_flags": [
+        "Immediate resistance at $63.28",
+        "Fading MACD histogram momentum"
+      ]
+    },
+    "valuation": {
+      "signal": "SELL",
+      "key_factors": [
+        "Primary DCF below current price",
+        "Relative family has correlated anchors",
+        "Transition case lacks safe forecast"
+      ],
+      "risk_flags": [
+        "Through-cycle DCF sensitivity remains material",
+        "Transition upside remains forecast-sensitive"
+      ]
+    }
+  },
+  "red_team": {
+    "verdict": "STRONG_COUNTER",
+    "counter_thesis": "The staged-entry bull case depends on a 39.83% five-year FCF CAGR implied by $62.99, while the frozen packet supplies no actual three-year or lane FCF growth estimate to corroborate it; the primary auditable DCF is $37.34, 40.72% below price. The fundamentals lane flags working-capital-driven cash conversion and about $14B net debt, while FRED's 2.91% 10-year real yield and high-yield spreads at the 85th percentile raise the hurdle for a technology rerating.",
+    "kill_conditions": [
+      "IF HPE's FCF growth annualizes below 20% over the next two reported fiscal quarters (within 180 days) THEN the $62.99 price case premised on an implied 39.83% five-year FCF CAGR fails.",
+      "IF within 90 days DFII10 remains above 2.0% and BAMLH0A0HYM2 remains above its 75th percentile for 20 of 30 trading sessions (latest: 2.91% real yield on 2026-09-29, +47 bps over one month; 3.08% HY spread, 85th percentile, +45 bps over one month) THEN the technology and networking rerating case fails under persistent discount-rate and credit stress.",
+      "IF within 15 trading days HPE closes below $60.68 before clearing the $63.28 pivot on volume at least 1.5 times the 20-day average THEN the staged-entry technical setup is invalidated."
+    ],
+    "counter_evidence_strength": 5,
+    "thesis_break_probability": 0.66
+  },
+  "burry_narrative": "Burry 44.7/100（NEUTRAL）：FCF yield 4.79%、EV/EBIT 14.37、D/E 0.76、距 52 週高點 1.38%，insider_net=SELL；此結果作風險敘述，未觸發獨立覆寫。",
+  "conflict_bias": {
+    "schema": "conflict_bias.v1",
+    "tentative_decision": "STAGED_ENTRY",
+    "lane_signals": {
+      "fundamentals": "BUY",
+      "sentiment": "BUY",
+      "news": "BUY",
+      "technical": "HOLD",
+      "valuation": "SELL"
+    },
+    "triggers_fired": [],
+    "conflict_summary": "No T1–T5 trigger or ANTI_BIAS condition fired on the frozen lane scores/signals, Phase 0 macro score, Burry score, and forward validation; tentative decision is STAGED_ENTRY.",
+    "t4_detail": null,
+    "t5_detail": null,
+    "proceed_to_phase3": true
+  },
+  "macro_context": "Phase 0 為 VOLATILE，backdrop -1.5、multiplier 0.75；市場 breadth 28.6（Weakening），FTD 已失效；FRED 10 年實質殖利率 2.91%（2026-09-29），HY spread 3.08%（第 85 百分位）。",
+  "watch_conditions": {
+    "support_break": "收盤跌破 $60.68，依技術 lane 的 consolidation 條件重新評估進場假設。",
+    "pivot_and_resistance": "先收復 $63.28 pivot，再以至少 1.5 倍 20 日均量突破 $65.65，才確認延續。",
+    "fcf_growth_kill": "IF HPE's FCF growth annualizes below 20% over the next two reported fiscal quarters (within 180 days) THEN the $62.99 price case premised on an implied 39.83% five-year FCF CAGR fails.",
+    "rates_and_credit_stress": "IF within 90 days DFII10 remains above 2.0% and BAMLH0A0HYM2 remains above its 75th percentile for 20 of 30 trading sessions (latest: 2.91% real yield on 2026-09-29, +47 bps over one month; 3.08% HY spread, 85th percentile, +45 bps over one month) THEN the technology and networking rerating case fails under persistent discount-rate and credit stress.",
+    "next_earnings": "2026-12-02 財報檢驗營收成長、FCF 現金轉換及 FY2027 展望。"
+  },
+  "key_risks": [
+    "主要 through-cycle DCF 公允價值 $37.34，較 $62.99 現價低 40.72%。",
+    "營運資金驅動現金轉換與約 $14B 淨負債，Altman Z 落在 danger zone。",
+    "10 年實質殖利率 2.91% 且 HY spread 位於第 85 百分位，折現率與信用環境限制科技股估值。",
+    "轉型訊號來源時間不一致，Phase 3 已標記 transition data stale，相關軟化條件未生效。",
+    "股價距 $65.65 阻力僅一段，MHP 指向 wait_for_pullback，短期追價空間有限。",
+    "最新 insider MSPR 為 -100；機構流向與價格量能確認不足。"
+  ],
+  "bias_notes": "基本面、情緒與新聞 lane 偏多，但估值 lane 為 SELL，Red Team 為 STRONG_COUNTER。不要讓 AI 訂單敘事蓋過 DCF 折價、營運資金現金轉換、淨負債與實質利率壓力；轉型資料已被 Phase 3 判為 stale。",
+  "phase2_fanout_mode": "PARALLEL_SUBAGENT",
+  "degraded_analysts": [],
+  "decision_point_days": 21,
+  "devils_advocate_filed": true,
+  "trade_metadata": {
+    "trade_type": "trend",
+    "event_tag": "AI_order_and_networking_guidance"
+  },
+  "last_outcome": "UNKNOWN"
+}

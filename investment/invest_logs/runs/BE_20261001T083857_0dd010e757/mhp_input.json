@@ -1,0 +1,11 @@
+{
+  "ticker": "BE",
+  "key_levels": {
+    "support": 249.05,
+    "resistance": 283.83,
+    "pivot": 266.52
+  },
+  "pattern_taxonomy": "pullback_in_uptrend",
+  "smart_money_label": "mixed",
+  "immediate_catalyst_5d": null
+}

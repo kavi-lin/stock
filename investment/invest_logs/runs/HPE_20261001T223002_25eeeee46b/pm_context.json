@@ -1,0 +1,46 @@
+{
+  "burry": {
+    "ticker": "HPE",
+    "generated_at": "2026-10-01T14:39:31.677318+00:00",
+    "burry_score": 44.7,
+    "verdict": "NEUTRAL",
+    "components": {
+      "fcf_yield_pct": 4.79,
+      "ev_ebit": 14.37,
+      "debt_to_equity": 0.76,
+      "pct_below_52w_high": 1.38,
+      "insider_net": "SELL"
+    },
+    "component_scores": {
+      "fcf_yield": 47.9,
+      "ev_ebit": 53.6,
+      "debt_to_equity": 63.4,
+      "pct_below_52w_high": 20.0,
+      "insider": 20
+    },
+    "weights_active": [
+      "fcf_yield",
+      "ev_ebit",
+      "debt_to_equity",
+      "pct_below_52w_high",
+      "insider"
+    ],
+    "reasoning": "FCF yield 4.8% │ EV/EBITDA 14.4 │ D/E 0.76 │ 1% below 52wH │ insider=SELL"
+  },
+  "conflict_bias": {
+    "schema": "conflict_bias.v1",
+    "tentative_decision": "STAGED_ENTRY",
+    "lane_signals": {
+      "fundamentals": "BUY",
+      "sentiment": "BUY",
+      "news": "BUY",
+      "technical": "HOLD",
+      "valuation": "SELL"
+    },
+    "triggers_fired": [],
+    "conflict_summary": "No T1–T5 trigger or ANTI_BIAS condition fired on the frozen lane scores/signals, Phase 0 macro score, Burry score, and forward validation; tentative decision is STAGED_ENTRY.",
+    "t4_detail": null,
+    "t5_detail": null,
+    "proceed_to_phase3": true
+  }
+}

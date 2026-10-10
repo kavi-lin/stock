@@ -1,0 +1,157 @@
+{
+  "phase": 3,
+  "engine": "decision_engine.py v1.1.0 (V4.131.13)",
+  "decision_engine_version": "1.1.0",
+  "ticker": "HPE",
+  "calculation_steps": {
+    "fund": "0.25 × 2 × 0.72 = 0.3600",
+    "sent": "0.15 × 1.22 × 0.60 = 0.1098",
+    "news": "0.20 × 2.5 × 0.72 = 0.3600",
+    "tech": "0.25 × 1.5 × 0.72 = 0.2700",
+    "val": "0.15 × -1 × 0.72 = -0.1080",
+    "raw_total": 0.9918,
+    "structural_shift_modulation": {
+      "tier": "CONFIRMED",
+      "applied_adjustments": [
+        "Red Team mean-reversion attack BLOCKED (cascade rule #1 downgrades mr/contaminated STRONG_COUNTER)",
+        "shift_macro_floor = 1.00 (sector_avoid 對個股失效)",
+        "position_size_cap_pct = 100"
+      ],
+      "shift_macro_floor": 1.0,
+      "position_size_cap_pct": 100,
+      "red_team_mean_reversion_blocked": true
+    },
+    "polarization_modulation": {
+      "label": "MIXED",
+      "lane_range": 3.5,
+      "pos_strong": 4,
+      "neg_strong": 1,
+      "outlier_lane_id": null,
+      "applied_adjustments": [
+        "avg_confidence × 0.75",
+        "position cap 不動"
+      ],
+      "confidence_multiplier": 0.75,
+      "position_cap_after": 100
+    },
+    "red_team_basis": "unclassified",
+    "red_team_auto_downgrade": false,
+    "cascade_rule_applied": "rule_5_default_strong_counter",
+    "dynamic_threshold": {
+      "buy_threshold": 1.2,
+      "staged_threshold": 0.8,
+      "rationale": "default 1.2 (tier=CONFIRMED, polarization=MIXED)"
+    },
+    "t5_forward_validation": {
+      "forward_validation_status": "PASS",
+      "forward_validation_applies": true,
+      "valuation_score": -1.0,
+      "warning_triggered": false,
+      "hard_downgrade_eligible": false,
+      "downgrade_applied": false,
+      "decision_before": "STAGED_ENTRY",
+      "decision_after": "STAGED_ENTRY"
+    },
+    "red_team_verdict": "STRONG_COUNTER",
+    "red_team_effective_verdict": "STRONG_COUNTER",
+    "red_team_counter_evidence_strength": 5,
+    "red_team_thesis_break_probability": 0.66,
+    "bonus_applied": false,
+    "penalty_applied": true,
+    "penalty_value": 0.95,
+    "raw_after_bonus": 0.94221,
+    "macro_multiplier": 0.75,
+    "macro_alignment": "CONTRARIAN",
+    "effective_macro_mult": 1.0,
+    "final_score": 0.9422
+  },
+  "avg_confidence": 0.555,
+  "avg_confidence_raw": 0.74,
+  "final_score": 0.9422,
+  "final_decision": "STAGED_ENTRY",
+  "forward_validation": {
+    "schema": "forward_validation.v1",
+    "status": "PASS",
+    "applies": true,
+    "reason": "all evaluable forward checks support current price",
+    "dcf_value": 37.34,
+    "dcf_gap_pct": -40.72,
+    "extreme_dcf_threshold_pct": -30.0,
+    "checks": [
+      {
+        "name": "archetype_shadow",
+        "available": true,
+        "supports_current_price": true,
+        "actual": 13.84,
+        "threshold": ">=-10% vs current",
+        "detail": {
+          "anchors_used_n": 8
+        }
+      },
+      {
+        "name": "forward_earnings",
+        "available": true,
+        "supports_current_price": true,
+        "actual": -3.98,
+        "threshold": ">=-10% vs current",
+        "detail": {
+          "analyst_count": 6,
+          "horizon_years": 2.084
+        }
+      },
+      {
+        "name": "revenue_path",
+        "available": true,
+        "supports_current_price": true,
+        "actual": 0.0,
+        "threshold": "<= analyst CAGR + 0.05",
+        "detail": {
+          "analyst_revenue_cagr": 0.1629,
+          "analyst_horizon_years": 5.0
+        }
+      }
+    ],
+    "evaluated_count": 3,
+    "support_count": 3,
+    "supported_checks": [
+      "archetype_shadow",
+      "forward_earnings",
+      "revenue_path"
+    ],
+    "failed_checks": [],
+    "quality_flags": [],
+    "valuation_score_before": -1.0,
+    "valuation_score_effective": -1.0,
+    "score_adjustment": "none",
+    "t5_hard_downgrade_eligible": false
+  },
+  "decision_band_before_adjustments": "STAGED_ENTRY",
+  "band_adjustments": [],
+  "decision_margin": "final_score +0.9422 vs buy 1.2 / staged 0.8 → STAGED_ENTRY (margin_to_buy -0.2578)",
+  "hot_zone_probe": false,
+  "hot_zone_probe_tier": null,
+  "hot_zone_eval": "not_qualifying",
+  "hot_zone_position_size_cap": null,
+  "auto_reject": {
+    "triggered": false,
+    "reasons": [],
+    "forced_decision": null,
+    "probe_prospective_triggered": false,
+    "probe_prospective_reasons": []
+  },
+  "decision_cap_active": false,
+  "decision_cap_reason": null,
+  "position_size_cap_pct": 100,
+  "polar_position_cap_pct": 100,
+  "transition_data_stale_or_inconsistent": true,
+  "alerts": [
+    {
+      "level": "HIGH",
+      "kind": "transition_mtime_skew",
+      "bundle_mtime": 1790783997.290968,
+      "forecaster_mtime": 1790859173.0,
+      "delta_seconds": 75175.7
+    }
+  ],
+  "warnings": []
+}

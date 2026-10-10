@@ -1,0 +1,11 @@
+{
+  "ticker": "HPE",
+  "pattern_taxonomy": "consolidation",
+  "smart_money_label": "mixed",
+  "key_levels": {
+    "support": 60.68,
+    "resistance": 65.65,
+    "pivot": 63.28
+  },
+  "immediate_catalyst_5d": null
+}

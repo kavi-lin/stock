@@ -1,0 +1,153 @@
+{
+  "ticker": "HPE",
+  "lane_scores": {
+    "fundamentals": 2.0,
+    "sentiment": 1.22,
+    "news": 2.5,
+    "technical": 1.5,
+    "valuation": -1.0
+  },
+  "lane_confidence": {
+    "fundamentals": 0.68,
+    "sentiment": 0.66,
+    "news": 0.78,
+    "technical": 0.68,
+    "valuation": 0.9
+  },
+  "valuation_lane": {
+    "score": -1.0,
+    "confidence": 0.9
+  },
+  "structural_shift": {
+    "tier": "CONFIRMED"
+  },
+  "red_team": {
+    "verdict": "STRONG_COUNTER",
+    "counter_thesis": "The staged-entry bull case depends on a 39.83% five-year FCF CAGR implied by $62.99, while the frozen packet supplies no actual three-year or lane FCF growth estimate to corroborate it; the primary auditable DCF is $37.34, 40.72% below price. The fundamentals lane flags working-capital-driven cash conversion and about $14B net debt, while FRED's 2.91% 10-year real yield and high-yield spreads at the 85th percentile raise the hurdle for a technology rerating.",
+    "kill_conditions": [
+      "IF HPE's FCF growth annualizes below 20% over the next two reported fiscal quarters (within 180 days) THEN the $62.99 price case premised on an implied 39.83% five-year FCF CAGR fails.",
+      "IF within 90 days DFII10 remains above 2.0% and BAMLH0A0HYM2 remains above its 75th percentile for 20 of 30 trading sessions (latest: 2.91% real yield on 2026-09-29, +47 bps over one month; 3.08% HY spread, 85th percentile, +45 bps over one month) THEN the technology and networking rerating case fails under persistent discount-rate and credit stress.",
+      "IF within 15 trading days HPE closes below $60.68 before clearing the $63.28 pivot on volume at least 1.5 times the 20-day average THEN the staged-entry technical setup is invalidated."
+    ],
+    "counter_evidence_strength": 5,
+    "thesis_break_probability": 0.66
+  },
+  "transition": {
+    "transition_signature": "paradigm_only",
+    "transition_signature_mtime": "2026-09-30T15:59:57.290968+00:00",
+    "forecaster_transition_case": true,
+    "forecaster_transition_case_mtime": "2026-10-01T12:52:53+00:00",
+    "valuation_cited_transition_overlay": true,
+    "valuation_transition_dissent_basis": "macro_systemic"
+  },
+  "macro": {
+    "macro_multiplier": 0.75,
+    "macro_backdrop_score": -1.5,
+    "market_regime": "VOLATILE"
+  },
+  "burry": {
+    "ticker": "HPE",
+    "generated_at": "2026-10-01T14:39:31.677318+00:00",
+    "burry_score": 44.7,
+    "verdict": "NEUTRAL",
+    "components": {
+      "fcf_yield_pct": 4.79,
+      "ev_ebit": 14.37,
+      "debt_to_equity": 0.76,
+      "pct_below_52w_high": 1.38,
+      "insider_net": "SELL"
+    },
+    "component_scores": {
+      "fcf_yield": 47.9,
+      "ev_ebit": 53.6,
+      "debt_to_equity": 63.4,
+      "pct_below_52w_high": 20.0,
+      "insider": 20
+    },
+    "weights_active": [
+      "fcf_yield",
+      "ev_ebit",
+      "debt_to_equity",
+      "pct_below_52w_high",
+      "insider"
+    ],
+    "reasoning": "FCF yield 4.8% │ EV/EBITDA 14.4 │ D/E 0.76 │ 1% below 52wH │ insider=SELL",
+    "score": 44.7,
+    "veto_flag": false,
+    "label": "NEUTRAL"
+  },
+  "gates": {
+    "proceed_to_phase3": true,
+    "binary_classification": "positive",
+    "binary_event_within_48h": false,
+    "mandatory_risk_flags": [
+      "valuation_sell"
+    ],
+    "phase2_fanout_mode": "PARALLEL_SUBAGENT",
+    "risk_reward_ratio": 2.16
+  },
+  "hot_zone": {
+    "industry_top_30pct": false
+  },
+  "forward_validation": {
+    "schema": "forward_validation.v1",
+    "status": "PASS",
+    "applies": true,
+    "reason": "all evaluable forward checks support current price",
+    "dcf_value": 37.34,
+    "dcf_gap_pct": -40.72,
+    "extreme_dcf_threshold_pct": -30.0,
+    "checks": [
+      {
+        "name": "archetype_shadow",
+        "available": true,
+        "supports_current_price": true,
+        "actual": 13.84,
+        "threshold": ">=-10% vs current",
+        "detail": {
+          "anchors_used_n": 8
+        }
+      },
+      {
+        "name": "forward_earnings",
+        "available": true,
+        "supports_current_price": true,
+        "actual": -3.98,
+        "threshold": ">=-10% vs current",
+        "detail": {
+          "analyst_count": 6,
+          "horizon_years": 2.084
+        }
+      },
+      {
+        "name": "revenue_path",
+        "available": true,
+        "supports_current_price": true,
+        "actual": 0.0,
+        "threshold": "<= analyst CAGR + 0.05",
+        "detail": {
+          "analyst_revenue_cagr": 0.1629,
+          "analyst_horizon_years": 5.0
+        }
+      }
+    ],
+    "evaluated_count": 3,
+    "support_count": 3,
+    "supported_checks": [
+      "archetype_shadow",
+      "forward_earnings",
+      "revenue_path"
+    ],
+    "failed_checks": [],
+    "quality_flags": [],
+    "valuation_score_before": -1.0,
+    "valuation_score_effective": -1.0,
+    "score_adjustment": "none",
+    "t5_hard_downgrade_eligible": false
+  },
+  "decision_cap": {
+    "anchors_available": 5,
+    "fair_value_confidence": "high",
+    "lane_data_quality_low": false
+  }
+}

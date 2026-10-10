@@ -1,0 +1,214 @@
+{
+  "schema": "p5-qualitative/1.0",
+  "ticker": "BE",
+  "date": "2026-10-01",
+  "lanes": {
+    "fundamentals": {
+      "signal": "HOLD",
+      "key_factors": [
+        "Revenue +165.5% YoY; accelerating",
+        "FCF margin 16.4%; cash conversion 3.03x",
+        "P/E 333.9x; FCF yield 0.77%"
+      ],
+      "risk_flags": [
+        "Debt/equity 3.73x; net debt",
+        "No valid peer median; PT dispersion 60.8%"
+      ]
+    },
+    "sentiment": {
+      "signal": "HOLD",
+      "key_factors": [
+        "Recent insider ratio below threshold",
+        "Congressional trades show bullish net flow",
+        "Market composite near neutral; breadth weak"
+      ],
+      "risk_flags": [
+        "Insider feed has future-dated quarters",
+        "Elevated yields and weak breadth weigh on risk"
+      ]
+    },
+    "news": {
+      "signal": "BUY",
+      "key_factors": [
+        "AI power demand headlines remain supportive",
+        "Buy consensus, but PT revisions trend down",
+        "Macro yields and credit stress weigh"
+      ],
+      "risk_flags": [
+        "30d PT revisions down; no fresh grade actions",
+        "High yields and credit stress oppose growth trade"
+      ]
+    },
+    "technical": {
+      "signal": "HOLD",
+      "key_factors": [
+        "Price holds above rising 20/50/200-day averages",
+        "Recent 20/50 golden cross; RSI remains bullish",
+        "Resistance $283.83 sits only 2.47% overhead"
+      ],
+      "risk_flags": [
+        "MACD histogram falling; volume at 0.83x 20-day average",
+        "Insider feed conflicts with reported share totals"
+      ]
+    },
+    "valuation": {
+      "signal": "SELL",
+      "key_factors": [
+        "DCF primary anchor: $45.27",
+        "Analyst consensus PT has zero effective weight",
+        "Comparable peer cohort is insufficient"
+      ],
+      "risk_flags": [
+        "Low confidence: DCF carries all effective weight",
+        "Peer and forecast anchors are unavailable"
+      ]
+    }
+  },
+  "lane_detail": {
+    "fundamentals": {
+      "phase0_alignment": "MISALIGNED",
+      "data_source_timestamp": "2026-10-01 08:39",
+      "moat_assessment": {
+        "level": "NONE",
+        "type": "無",
+        "evidence_one_line": "INSUFFICIENT_DATA — only one eligible peer; ROIC, moat, and FCF-margin trend evidence are absent."
+      },
+      "near_term_catalysts": [
+        {
+          "date": "2026-10-26",
+          "type": "earnings",
+          "description": "Q3 earnings; canonical date, while analyst bundle estimates Oct 27.",
+          "impact": "high"
+        },
+        {
+          "date": "2026-10-26",
+          "type": "guidance",
+          "description": "Potential FY26 outlook update with Q3 results; no separate date or detail in inputs.",
+          "impact": "medium"
+        },
+        {
+          "date": "2026-Q4",
+          "type": "macro_event",
+          "description": "INSUFFICIENT_DATA: no dated macro calendar; monitor high rates and credit stress.",
+          "impact": "medium"
+        }
+      ],
+      "bull_thesis_one_line": "Q2 revenue grew 166% YoY; FCF margin was 16.4%.",
+      "bear_thesis_one_line": "P/E is 334x and FCF yield is only 0.77%."
+    },
+    "sentiment": {
+      "phase0_alignment": "NEUTRAL",
+      "data_source_timestamp": "2026-10-01 00:41",
+      "market_sentiment_composite": 54.4,
+      "vix_current": 16.34,
+      "insider_signal": -1,
+      "short_pct_float": 7.34,
+      "mspr_latest": -29.184015
+    },
+    "news": {
+      "phase0_alignment": "MISALIGNED",
+      "data_source_timestamp": "2026-10-01 00:41",
+      "immediate_catalyst_5d": null,
+      "decision_point_days": 25,
+      "cross_asset_spillover": [
+        {
+          "asset": "sector_utilities",
+          "direction": "BULLISH",
+          "mechanism": "AI data-center demand can shift utilities toward onsite generation and grid-capacity investment."
+        }
+      ],
+      "reasoning_one_line": "AI demand and supportive coverage offset declining one-month PT momentum and an adverse macro backdrop.",
+      "pt_revision_momentum": {
+        "direction": "DOWN",
+        "consensus_delta_pct_1m": -8.17,
+        "consensus_delta_pct_3m": 6.78,
+        "analysts_last_month": 3,
+        "analysts_last_quarter": 17,
+        "note": "PT revision direction only — absolute levels stripped (V3.45.4 anti cross-lane anchoring)"
+      }
+    },
+    "technical": {
+      "phase0_alignment": "MISALIGNED",
+      "data_source_timestamp": "2026-10-01 00:39",
+      "smart_money_analysis": {
+        "label": "mixed",
+        "narrative": "FMP marks the latest trend as distributing and reports an acquired/disposed ratio of 0.0, but that quarter lists 510,994 acquired shares and zero disposed; the down day also had only 0.83x average volume, so price-volume confirmation is limited."
+      },
+      "pattern_taxonomy": "pullback_in_uptrend",
+      "confirmation_criteria": "Holding $266.52 (20-day average) and reclaiming $283.83 on above-average volume confirms continuation; a close below $249.05 invalidates the setup.",
+      "market_strength": "NEUTRAL",
+      "key_levels": {
+        "support": 249.05,
+        "resistance": 283.83,
+        "pivot": 266.52
+      },
+      "high_prob_scenario": "Over the next 5–15 days, holding the $266.52 pivot could keep the pullback constructive; a high-volume reclaim of $283.83 opens $288, while a close below $249.05 invalidates the setup.",
+      "volatility": {
+        "atr_14": null,
+        "hist_vol_20d_daily": null,
+        "momentum_20d_pct": null
+      }
+    },
+    "valuation": {
+      "phase0_alignment": "ALIGNED",
+      "data_source_timestamp": "2026-10-01 08:39",
+      "weighted_fair_value": 45.27,
+      "vs_current_pct": -83.66,
+      "valuation_commentary": "The frozen pack records weighted fair value $45.27 versus current price $276.98 (vs_current_pct -83.66), with score -1.0 and low confidence. Its dcf_primary_anchor_range mode uses dcf_self_built as the primary anchor with effective weight 1.0. The analyst PT consensus at $287.73 is eligible but has zero effective weight; owner_earnings_mult at $23.70 is also zero-weighted and flagged as an outlier. The peer P/E anchor is missing, comps are ineligible because fewer than three business-similar peers were available, forecaster_blend has no value, and fwd_earnings_discounted is ineligible because cashflow-intrinsic anchors are live. This supports a negative valuation signal while keeping confidence low given the pack's recorded anchor dispersion and STRETCHED forward validation. No suppression proposal is warranted: the primary DCF is dated 2026-10-01, while the other anchors are already superseded, ineligible, or zero-weighted. The phase 0 volatile backdrop and high Treasury yields align with valuation pressure.",
+      "suppression_proposals": []
+    }
+  },
+  "red_team": {
+    "verdict": "STRONG_COUNTER",
+    "counter_thesis": "The HOLD consensus underweights the execution hurdle embedded in BE's price: the frozen packet shows $276.98 current price versus a $45.27 DCF anchor and a 60% implied 5-year FCF CAGR, while actual and lane FCF growth estimates are unavailable. A 2.88% 10-year real yield and 8.17% one-month downward consensus price-target revisions add independent pressure if growth fails to convert into cash flow.",
+    "kill_conditions": [
+      "IF within 180 days the next two quarters' FCF annualized growth is below 30% (half the packet's 60% implied 5-year FCF CAGR) THEN the current-price valuation thesis is broken.",
+      "IF within 180 days either of the next two quarterly reports shows revenue growth below 46% year over year THEN the market-implied revenue path in the frozen packet is broken.",
+      "IF within 90 days the FRED 10-year real Treasury yield remains above 2.0% (frozen reading: 2.88%) THEN the elevated discount-rate hurdle persists and the HOLD thesis that growth can validate the current multiple is broken."
+    ],
+    "counter_evidence_strength": 5,
+    "thesis_break_probability": 0.62,
+    "execution_failed": false
+  },
+  "burry_narrative": "Burry 21.3 分（WARNING）：FCF yield 0.7%、EV/EBITDA 195.2、D/E 1.72、較 52 週高點低 20%、內部人淨賣出。依 protocol，此 verdict 僅作高估風險敘述，不調整倉位。",
+  "conflict_bias": {
+    "schema": "conflict_bias.v1",
+    "tentative_decision": "HOLD",
+    "lane_signals": {
+      "fundamentals": "HOLD",
+      "sentiment": "HOLD",
+      "news": "BUY",
+      "technical": "HOLD",
+      "valuation": "SELL"
+    },
+    "triggers_fired": [],
+    "conflict_summary": "T1–T5 未觸發；五線訊號為 HOLD、HOLD、BUY、HOLD、SELL，暫定 HOLD，進入 Phase 3。",
+    "t4_detail": null,
+    "t5_detail": null,
+    "proceed_to_phase3": true
+  },
+  "macro_context": "Phase 0 顯示 VOLATILE regime、macro backdrop score −2.0、macro multiplier 0.75；breadth 28.6 且趨勢轉弱，VIX 16.34 為 NORMAL，FTD 未確認。高美債殖利率與信用壓力構成估值逆風；forward validation 為 STRETCHED。",
+  "watch_conditions": {
+    "support_break": "若收盤跌破 $249.05 技術支撐，重新評估上升趨勢是否失效。",
+    "resistance_reclaim": "若放量站上 $283.83 阻力，重新評估短中期動能；未突破前維持觀望。",
+    "q3_earnings": "追蹤 2026-10-26 Q3 財報與指引，檢查營收與自由現金流能否支持成長路徑。",
+    "fcf_growth_validation": "未來兩季 FCF 年化增速若低於 30%，依 Red Team kill condition 重估估值論點。"
+  },
+  "key_risks": [
+    "主要 DCF anchor 為 $45.27，現價 $276.98，fair-value confidence 為 low，錨點分散度高。",
+    "價格隱含 5 年 FCF CAGR 60%，但 actual 與 lane FCF 增長估計不可用。",
+    "30 日分析師目標價共識下修 8.17%；forward earnings 與 archetype shadow 未支持現價。",
+    "實質利率 2.88%、macro score −2.0、breadth 28.6，宏觀折現率與市場參與度形成壓力。",
+    "Tail risk 為 FRAGILE（score 81.2）；Phase 4 risk level 為 HIGH。"
+  ],
+  "bias_notes": "Forecaster 因 ratios endpoint 的 PE 歷史不足而 unavailable；相關 anchor 保持 null。估值錨分散、fair-value confidence low，decision cap 已按 quant 啟動。五線訊號混合，Red Team 對執行與現金流兌現路徑提出強反方。",
+  "phase2_fanout_mode": "PARALLEL_SUBAGENT",
+  "degraded_analysts": [],
+  "decision_point_days": 25,
+  "devils_advocate_filed": false,
+  "trade_metadata": {
+    "trade_type": "trend",
+    "event_tag": "earnings"
+  },
+  "last_outcome": "UNKNOWN"
+}

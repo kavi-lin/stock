@@ -1,0 +1,39 @@
+{
+  "phase": 2,
+  "agent": "technical_Analyst",
+  "ticker": "BE",
+  "signal": "HOLD",
+  "score": 1.5,
+  "confidence": 0.69,
+  "key_factors": [
+    "Price holds above rising 20/50/200-day averages",
+    "Recent 20/50 golden cross; RSI remains bullish",
+    "Resistance $283.83 sits only 2.47% overhead"
+  ],
+  "risk_flags": [
+    "MACD histogram falling; volume at 0.83x 20-day average",
+    "Insider feed conflicts with reported share totals"
+  ],
+  "phase0_alignment": "MISALIGNED",
+  "data_source_timestamp": "2026-10-01 00:39",
+  "subagent_isolated": true,
+  "skill_execution_failed": "false",
+  "smart_money_analysis": {
+    "label": "mixed",
+    "narrative": "FMP marks the latest trend as distributing and reports an acquired/disposed ratio of 0.0, but that quarter lists 510,994 acquired shares and zero disposed; the down day also had only 0.83x average volume, so price-volume confirmation is limited."
+  },
+  "pattern_taxonomy": "pullback_in_uptrend",
+  "confirmation_criteria": "Holding $266.52 (20-day average) and reclaiming $283.83 on above-average volume confirms continuation; a close below $249.05 invalidates the setup.",
+  "market_strength": "NEUTRAL",
+  "key_levels": {
+    "support": 249.05,
+    "resistance": 283.83,
+    "pivot": 266.52
+  },
+  "high_prob_scenario": "Over the next 5–15 days, holding the $266.52 pivot could keep the pullback constructive; a high-volume reclaim of $283.83 opens $288, while a close below $249.05 invalidates the setup.",
+  "volatility": {
+    "atr_14": null,
+    "hist_vol_20d_daily": null,
+    "momentum_20d_pct": null
+  }
+}

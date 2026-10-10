@@ -1,0 +1,228 @@
+{
+  "schema": "p5-qualitative/1.0",
+  "ticker": "NVDA",
+  "date": "2026-09-30",
+  "lanes": {
+    "fundamentals": {
+      "signal": "BUY",
+      "key_factors": [
+        "Revenue +105.9% YoY; FCF margin 22.2%",
+        "Forward EPS growth estimate +127.8%",
+        "Net cash; debt/equity 0.05"
+      ],
+      "risk_flags": [
+        "FCF yield 2.3%, below the 5% threshold",
+        "DCF 3.4% below spot; credit spreads at 85th percentile"
+      ]
+    },
+    "sentiment": {
+      "signal": "HOLD",
+      "key_factors": [
+        "Recent insider sales exceed acquisitions",
+        "Low short interest provides modest support",
+        "Fear and weakening breadth temper market tone"
+      ],
+      "risk_flags": [
+        "Persistent insider distribution",
+        "Elevated rates and credit stress"
+      ]
+    },
+    "news": {
+      "signal": "BUY",
+      "key_factors": [
+        "Production Vera Rubin rollout",
+        "Upward PT revisions, low sample",
+        "DeepSeek-Huawei software challenge"
+      ],
+      "risk_flags": [
+        "PT revision reflects one analyst",
+        "AI capex and software competition"
+      ]
+    },
+    "technical": {
+      "signal": "BUY",
+      "key_factors": [
+        "Stage 2 price above all major averages",
+        "Bullish RSI and rising MACD histogram",
+        "Resistance at $233.21 limits near-term upside"
+      ],
+      "risk_flags": [
+        "Elevated yields and credit stress pressure technology",
+        "Insider transactions indicate distribution"
+      ]
+    },
+    "valuation": {
+      "signal": "HOLD",
+      "key_factors": [
+        "Fair value is close to current price",
+        "Only fundamental and external-expectations families qualify",
+        "Peer and forecaster anchors are ineligible"
+      ],
+      "risk_flags": [
+        "Forward validation marked STRETCHED",
+        "Owner earnings anchor is a low outlier"
+      ]
+    }
+  },
+  "lane_detail": {
+    "fundamentals": {
+      "moat_assessment": {
+        "level": "NARROW",
+        "type": "scale_economies",
+        "evidence_one_line": "66.2% operating margin and 22.2% FCF margin indicate scale; curated peer cohort is unavailable."
+      },
+      "near_term_catalysts": [
+        {
+          "date": "2026-11-18",
+          "type": "earnings",
+          "description": "Next earnings estimate; guidance will test continued revenue growth above 100% YoY.",
+          "impact": "high"
+        },
+        {
+          "date": "2026-Q4",
+          "type": "macro_event",
+          "description": "10-year yield at 5.24% and real yield near 2.9% may pressure growth multiples.",
+          "impact": "medium"
+        },
+        {
+          "date": "2026-Q4",
+          "type": "macro_event",
+          "description": "High-yield spreads at the 85th percentile; further widening could weigh on risk appetite.",
+          "impact": "medium"
+        },
+        {
+          "date": "2026-Q4",
+          "type": "macro_event",
+          "description": "US-Iran oil-supply uncertainty could sustain inflation and rates volatility.",
+          "impact": "medium"
+        }
+      ],
+      "bull_thesis_one_line": "營收年增105.9%，營業利益率66.2%，淨現金支撐再投資。",
+      "bear_thesis_one_line": "28.7倍本益比高於DCF估值3.4%；信用利差升至一年85百分位。"
+    },
+    "sentiment": {
+      "market_sentiment_composite": 57.9,
+      "vix_current": 15.91,
+      "insider_signal": -2.0,
+      "short_pct_float": 1.27,
+      "mspr_latest": -93.08281
+    },
+    "news": {
+      "immediate_catalyst_5d": null,
+      "decision_point_days": 21,
+      "cross_asset_spillover": [
+        {
+          "asset": "sector_XLK",
+          "direction": "BULLISH",
+          "mechanism": "CoreWeave's production Vera Rubin rollout supports AI infrastructure demand expectations across technology suppliers."
+        }
+      ],
+      "reasoning_one_line": "Production deployment and upward revisions support a modest bullish news read, tempered by software competition, a thin revision sample, and risk-off Phase 0 conditions.",
+      "analyst_consensus": {
+        "strong_buy": 2,
+        "buy": 58,
+        "hold": 16,
+        "sell": 3,
+        "strong_sell": 0,
+        "consensus": "Buy"
+      },
+      "pt_revision_momentum": {
+        "direction": "UP",
+        "consensus_delta_pct_1m": 15.07,
+        "consensus_delta_pct_3m": 1.11,
+        "analysts_last_month": 1,
+        "analysts_last_quarter": 23,
+        "note": "PT revision direction only; absolute levels excluded."
+      }
+    },
+    "technical": {
+      "smart_money_analysis": {
+        "label": "distributing",
+        "narrative": "Q3 acquired/disposed ratio is 0.0882, with 3 acquired versus 34 disposed transactions. Effective volume is 94.3M versus the 112.3M 20-day average, so current price-volume data does not confirm accumulation."
+      },
+      "pattern_taxonomy": {
+        "pattern": "uptrend_continuation",
+        "confirmation_criteria": "A close above $233.21 with volume at or above the 20-day average confirms continuation; a close below $221.09 weakens the setup."
+      },
+      "market_strength": "STRONG",
+      "key_levels": {
+        "support": 221.09,
+        "resistance": 233.21,
+        "pivot": 229.98
+      },
+      "high_prob_scenario": "A hold above $229.98 and close above $233.21 with volume at or above 112.3M would favor a test of $236.00; a break below $221.09 risks a pullback toward $217.27.",
+      "volatility": {
+        "atr_14": null,
+        "hist_vol_20d_daily": null,
+        "momentum_20d_pct": null
+      }
+    },
+    "valuation": {
+      "weighted_fair_value": 220.12,
+      "vs_current_pct": -4.39,
+      "suppression_proposals": [
+        {
+          "anchor": "owner_earnings_mult",
+          "reason": "Request next-run review of anchor calibration/normalization; this is an advisory proposal and does not alter the frozen pack.",
+          "evidence": "The pack's outlier diagnostics flag value 15.75 outside its stated [73.02, 657.22] range."
+        }
+      ],
+      "valuation_commentary": "The frozen pack places weighted fair value at 220.12 versus current price 230.24 (-4.39%), in the fairly_valued band, with score 0.0 and medium confidence; HOLD follows that neutral valuation signal. Its degraded equal-family aggregation has only the fundamental and external_expectations families: the DCF pair shares one correlation group, while the peer and comps anchors are ineligible for lack of a qualifying peer cohort and the forecaster blend is ineligible for low forecast confidence. The owner_earnings_mult anchor is an extreme low outlier per pack diagnostics, while forward validation is marked STRETCHED. No live number is changed by this review."
+    }
+  },
+  "red_team": {
+    "verdict": "STRONG_COUNTER",
+    "counter_thesis": "At $230.24, the underwriting margin is thin: the frozen valuation pack puts fair value at $220.12 (-4.39%) while implied expectations require 60% five-year FCF CAGR, with actual and lane FCF-growth estimates unavailable to corroborate that hurdle. The frozen FRED input shows a 2.86% 10-year real yield, adding a material discount-rate headwind to a growth-dependent valuation.",
+    "kill_conditions": [
+      "IF annualized FCF growth is below 30% across the next two reported quarters (within 180 days) THEN the 60% five-year FCF CAGR embedded in the price is not credible and the cash-flow thesis breaks.",
+      "IF annualized revenue growth falls below 35% across the next two reported quarters (within 180 days) THEN the frozen market-implied revenue path is missed and the growth justification breaks.",
+      "IF the 10-year real yield remains at or above its frozen FRED reading of 2.86% for 30 trading days within the next 90 days THEN persistent high discount rates undermine the staged-entry risk/reward thesis."
+    ],
+    "counter_evidence_strength": 4,
+    "thesis_break_probability": 0.36,
+    "execution_failed": false
+  },
+  "burry_narrative": "FCF yield 0.8% │ EV/EBITDA 27.1 │ D/E 0.17 │ 2% below 52wH │ insider=SELL",
+  "conflict_bias": {
+    "schema": "conflict_bias.v1",
+    "tentative_decision": "STAGED_ENTRY",
+    "lane_signals": {
+      "fundamentals": "BUY",
+      "sentiment": "HOLD",
+      "news": "BUY",
+      "technical": "BUY",
+      "valuation": "HOLD"
+    },
+    "triggers_fired": [],
+    "conflict_summary": "No T1–T5 triggers fired; tentative STAGED_ENTRY reflects the three-BUY/two-HOLD lane vote and remains subject to Phase 3 and Red Team.",
+    "t4_detail": null,
+    "t5_detail": null,
+    "proceed_to_phase3": true
+  },
+  "macro_context": "Phase 0 判定 VOLATILE，macro_backdrop_score=-2.0、macro_multiplier=0.75；長端殖利率偏高、信用利差位於第85百分位且市場 breadth 轉弱；凍結的 FRED 10 年實質殖利率讀值為 2.86%。",
+  "watch_conditions": {
+    "support_break": "收盤跌破 $221.09 將削弱 uptrend_continuation 型態，重新評估趨勢支撐。",
+    "resistance_confirmation": "收盤站上 $233.21 且成交量達或高於 20 日均量 112.3M，才確認延續並解除目前阻力限制。",
+    "fcf_growth_kill": "未來 180 天內連續兩季的年化 FCF 成長低於 30%，依 Red Team 條件推翻現價隱含的成長假設。",
+    "real_yield_persistence": "未來 90 天內 10 年實質殖利率連續 30 個交易日維持在 2.86% 或以上，依 Red Team 條件重新評估折現率壓力。"
+  },
+  "key_risks": [
+    "加權公允價值 $220.12 低於現價 $230.24 約 4.39%，估值安全邊際有限。",
+    "現價隱含五年 FCF CAGR 約 60%，但可用實際與 lane FCF 成長估計不足以驗證該門檻。",
+    "10 年實質殖利率凍結讀值 2.86%；信用利差位於第85百分位，成長股折現與風險偏好承壓。",
+    "內部人交易呈分配：Q3 acquired/disposed ratio 為 0.0882，3 筆取得對 34 筆處分。",
+    "可比同業與 forecaster anchor 不合格，估值聚合僅由 fundamental 與 external-expectations 家族支撐。",
+    "AI capex 需求與 DeepSeek-Huawei 軟體競爭可能改變供應商需求預期。",
+    "$233.21 阻力限制短期上檔；MHP 指向 wait_for_pullback。"
+  ],
+  "bias_notes": "基本面、新聞與技術面三條 lane 為 BUY，情緒與估值為 HOLD；Red Team 提出 STRONG_COUNTER。避免以三個偏多 lane 投票掩蓋估值安全邊際有限、內部人分配、利率壓力及估值 anchor 缺口；owner-earnings anchor 另有低值離群警示。",
+  "phase2_fanout_mode": "PARALLEL_SUBAGENT",
+  "degraded_analysts": [],
+  "decision_point_days": 21,
+  "devils_advocate_filed": true,
+  "trade_metadata": {
+    "trade_type": "trend",
+    "event_tag": "earnings"
+  },
+  "last_outcome": "UNKNOWN"
+}

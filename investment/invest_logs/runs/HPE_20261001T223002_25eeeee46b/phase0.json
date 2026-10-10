@@ -1,0 +1,488 @@
+{
+  "phase": 0,
+  "scan_date": "2026-10-01",
+  "fetched_at": "2026-10-01T12:42:15+00:00",
+  "phase0_source": "SKILL_CHAIN",
+  "macro_summary": {
+    "macro_backdrop_score": -1.5,
+    "market_regime": "VOLATILE",
+    "regime_confidence": 0.3,
+    "key_themes": [
+      "Cooler inflation contrasts with resilient GDP, spending and payroll data; long-dated yields kept rising.",
+      "The September 29 ten-year and thirty-year Treasury yields reached 5.293% and 5.6206%, respectively.",
+      "Breadth is weak (28.6, Weakening) on observations through 2026-09-24; FTD is invalidated while VIX remains NORMAL.",
+      "Twenty-day rotation favors Technology and Communication Services while tracked defensive sectors lag; FRED macro rotation favors Energy and defensives."
+    ],
+    "hot_sectors": [
+      "Technology",
+      "Communication Services"
+    ],
+    "cold_sectors": [
+      "Utilities",
+      "Consumer Staples",
+      "Health Care",
+      "Real Estate",
+      "Consumer Discretionary"
+    ]
+  },
+  "_market_signals": {
+    "fear_greed_index": 30.7,
+    "market_sentiment_composite": 54.4,
+    "vix_current": 16.32,
+    "vix_regime": "NORMAL",
+    "spy_rsi_14": 48.8,
+    "spy_pct_above_ma50": 0.19,
+    "spy_pct_above_ma200": 6.5,
+    "breadth_composite": 28.6,
+    "breadth_zone": "Weakening",
+    "breadth_trend": "deteriorating",
+    "breadth_data_date": "2026-09-24",
+    "breadth_data_days_old": 7,
+    "ftd_status": "NO_SIGNAL",
+    "ftd_status_text": "FTD_INVALIDATED",
+    "ftd_days_since": null,
+    "ftd_quality_score": 0,
+    "market_top_score": 40.0,
+    "market_top_zone": "yellow",
+    "market_top_zone_label": "Yellow (Early Warning)",
+    "top_catalysts": [
+      {
+        "date": "2026-09-30",
+        "ticker": null,
+        "headline": "Long-dated Treasury yields rose for a seventh straight session as resilient growth kept rate pressure elevated.",
+        "source": "Reuters via Investing.com: https://www.investing.com/news/economy-news/trading-day-shrugging-off-a-volatile-september-markets-shuffle-into-q4-4925953"
+      },
+      {
+        "date": "2026-09-29",
+        "ticker": null,
+        "headline": "Treasury yields reached multi-decade highs as consumer confidence fell and job openings declined.",
+        "source": "Reuters via Investing.com: https://www.investing.com/news/economy-news/equities-dip-as-bond-yields-hold-near-multidecade-highs-4923360"
+      },
+      {
+        "date": "2026-09-30",
+        "ticker": null,
+        "headline": "Stocks diverged as stronger GDP kept yields high despite softer inflation.",
+        "source": "AP: https://apnews.com/article/1ee73f14dc23f6139eeb12c7397f543e"
+      }
+    ]
+  },
+  "fred_available": true,
+  "fred_snapshot": {
+    "generated_at": "2026-10-01T12:42:04+00:00",
+    "asof": null,
+    "cache_hit": false,
+    "cache_age_sec": 0,
+    "series": {
+      "T10Y2Y": {
+        "value": 0.41,
+        "value_smooth_3d": 0.3667,
+        "date": "2026-09-30",
+        "data_freshness_days": 1,
+        "delta_bps_1m": 0.0,
+        "delta_bps_3m": 6.0,
+        "delta_bps_1y": -15.0,
+        "percentile_1y": 20,
+        "trend_30d": "stable",
+        "trend_90d": "stable"
+      },
+      "DGS10": {
+        "value": 5.26,
+        "value_smooth_3d": 5.2233,
+        "date": "2026-09-29",
+        "data_freshness_days": 2,
+        "delta_bps_1m": 51.0,
+        "delta_bps_3m": 78.0,
+        "delta_bps_1y": 111.0,
+        "percentile_1y": 100,
+        "trend_30d": "rising",
+        "trend_90d": "rising"
+      },
+      "DGS2": {
+        "value": 4.89,
+        "value_smooth_3d": 4.8733,
+        "date": "2026-09-29",
+        "data_freshness_days": 2,
+        "delta_bps_1m": 55.0,
+        "delta_bps_3m": 72.0,
+        "delta_bps_1y": 126.0,
+        "percentile_1y": 99,
+        "trend_30d": "rising",
+        "trend_90d": "rising"
+      },
+      "DFII10": {
+        "value": 2.91,
+        "value_smooth_3d": 2.88,
+        "date": "2026-09-29",
+        "data_freshness_days": 2,
+        "delta_bps_1m": 47.0,
+        "delta_bps_3m": 66.0,
+        "delta_bps_1y": 111.0,
+        "percentile_1y": 100,
+        "trend_30d": "rising",
+        "trend_90d": "rising"
+      },
+      "T10Y3M": {
+        "value": 1.09,
+        "value_smooth_3d": 1.02,
+        "date": "2026-09-30",
+        "data_freshness_days": 1,
+        "delta_bps_1m": 25.0,
+        "delta_bps_3m": 42.0,
+        "delta_bps_1y": 95.0,
+        "percentile_1y": 100,
+        "trend_30d": "rising",
+        "trend_90d": "rising"
+      },
+      "DFF": {
+        "value": 3.88,
+        "value_smooth_3d": 3.88,
+        "date": "2026-09-29",
+        "data_freshness_days": 2,
+        "delta_bps_1m": 25.0,
+        "delta_bps_3m": 25.0,
+        "delta_bps_1y": -21.0,
+        "percentile_1y": 80,
+        "trend_30d": "rising",
+        "trend_90d": "rising"
+      },
+      "CPIAUCSL": {
+        "value": 334.131,
+        "date": "2026-08-01",
+        "data_freshness_days": 61,
+        "yoy_change_pct": 3.35,
+        "mom_change_pct": 0.4,
+        "wow_change": 0.0,
+        "percentile_1y": 92,
+        "trend_30d": "stable",
+        "trend_90d": "stable"
+      },
+      "CPILFESL": {
+        "value": 337.765,
+        "date": "2026-08-01",
+        "data_freshness_days": 61,
+        "yoy_change_pct": 2.45,
+        "mom_change_pct": 0.29,
+        "wow_change": 0.0,
+        "percentile_1y": 92,
+        "trend_30d": "stable",
+        "trend_90d": "stable"
+      },
+      "UNRATE": {
+        "value": 4.1,
+        "date": "2026-08-01",
+        "data_freshness_days": 61,
+        "yoy_change_pct": -4.65,
+        "mom_change_pct": 0.0,
+        "wow_change": 0.0,
+        "percentile_1y": 0,
+        "trend_30d": "stable",
+        "trend_90d": "falling"
+      },
+      "ICSA": {
+        "value": 197000.0,
+        "date": "2026-09-26",
+        "data_freshness_days": 5,
+        "yoy_change_pct": -12.44,
+        "mom_change_pct": -4.83,
+        "wow_change": -1000.0,
+        "percentile_1y": 4,
+        "trend_30d": "falling",
+        "trend_90d": "falling"
+      },
+      "RSXFS": {
+        "value": 646347.0,
+        "date": "2026-08-01",
+        "data_freshness_days": 61,
+        "yoy_change_pct": 5.36,
+        "mom_change_pct": 1.14,
+        "wow_change": 0.0,
+        "percentile_1y": 92,
+        "trend_30d": "stable",
+        "trend_90d": "stable"
+      },
+      "NFCI": {
+        "value": -0.548,
+        "date": "2026-09-25",
+        "data_freshness_days": 6,
+        "yoy_change_pct": -4.18,
+        "mom_change_pct": 1.97,
+        "wow_change": 0.005,
+        "percentile_1y": 23,
+        "trend_30d": "stable",
+        "trend_90d": "falling"
+      },
+      "SAHMREALTIME": {
+        "value": -0.07,
+        "date": "2026-08-01",
+        "data_freshness_days": 61,
+        "yoy_change_pct": -153.85,
+        "mom_change_pct": -133.33,
+        "wow_change": 0.0,
+        "percentile_1y": 0,
+        "trend_30d": "stable",
+        "trend_90d": "falling"
+      },
+      "PAYEMS": {
+        "value": 159075.0,
+        "date": "2026-08-01",
+        "data_freshness_days": 61,
+        "yoy_change_pct": 0.38,
+        "mom_change_pct": 0.1,
+        "wow_change": 0.0,
+        "percentile_1y": 92,
+        "trend_30d": "stable",
+        "trend_90d": "stable"
+      },
+      "DCOILWTICO": {
+        "value": 96.16,
+        "date": "2026-09-29",
+        "data_freshness_days": 2,
+        "yoy_change_pct": 49.62,
+        "mom_change_pct": 10.49,
+        "wow_change": -0.25,
+        "percentile_1y": 79,
+        "trend_30d": "rising",
+        "trend_90d": "rising"
+      },
+      "BAMLH0A0HYM2": {
+        "value": 3.08,
+        "value_smooth_3d": 3.01,
+        "date": "2026-09-29",
+        "data_freshness_days": 2,
+        "delta_bps_1m": 45.0,
+        "delta_bps_3m": 34.0,
+        "delta_bps_1y": 34.0,
+        "percentile_1y": 85,
+        "trend_30d": "rising",
+        "trend_90d": "rising"
+      },
+      "PCEPILFE": {
+        "value": 130.455,
+        "date": "2026-08-01",
+        "data_freshness_days": 61,
+        "yoy_change_pct": 3.01,
+        "mom_change_pct": 0.25,
+        "wow_change": 0.0,
+        "percentile_1y": 92,
+        "trend_30d": "stable",
+        "trend_90d": "stable"
+      }
+    },
+    "regime_signals": {
+      "yield_curve_inverted": false,
+      "yield_curve_steep": true,
+      "yield_curve_value": 1.02,
+      "yield_curve_10y2y": 0.37,
+      "yield_curve_10y3m": 1.02,
+      "yield_curve_10y3m_inverted": false,
+      "yield_curve_10y2y_inverted": false,
+      "credit_stress_elevated": true,
+      "credit_spread_pctile_1y": 85,
+      "financial_stress_above_avg": false,
+      "nfci_wow_change": 0.005,
+      "nfci_deteriorating_fast": false,
+      "sahm_value": -0.07,
+      "sahm_triggered": false,
+      "retail_contracting": false,
+      "retail_sales_mom_pct": 1.14,
+      "fed_rate_direction": "flat",
+      "fed_funds_current": 3.88,
+      "real_rate_10y_estimate": 1.87,
+      "real_rate_dfii10": 2.88,
+      "real_rate_preferred": 2.88
+    },
+    "macro_scores": {
+      "rates": 55,
+      "inflation": 50,
+      "employment": 75,
+      "credit": 20,
+      "financial_conditions": 85,
+      "composite": 57,
+      "_weights": {
+        "rates": 1.0,
+        "credit": 1.0,
+        "financial_conditions": 1.0,
+        "employment": 0.7,
+        "inflation": 0.5
+      }
+    },
+    "regime_label": "Late Cycle Tightening",
+    "regime_confidence": 0.31,
+    "market_implications": [
+      "🔴 Late Cycle — 實質利率偏高，防禦股 / 現金為王",
+      "📉 實質利率 2.9% 偏高 → 成長股估值壓力，價值股 / 金融股相對佔優",
+      "📈 殖利率曲線陡峭 → 早期復甦訊號，銀行 / 週期股受惠",
+      "🔴 高收益債利差壓力 (1y pctile 85) → 信用市場緊張，避開高槓桿公司"
+    ],
+    "macro_posture_guidance": {
+      "equity_exposure": 0.25,
+      "bond_duration": "short",
+      "cash_level": 0.35,
+      "note": "macro-only — calibrate with valuation (Shiller PE) and momentum before execution"
+    },
+    "top_risks": [
+      "Credit stress elevated — HY spread at 85th pctile; systemic contagion risk rising",
+      "Growth derating — real rate 2.9% compresses long-duration equity valuations",
+      "Recession onset risk — tightening cycle historically ends in slowdown within 12-18 months"
+    ],
+    "change_velocity": {
+      "T10Y2Y": {
+        "trend_30d": "stable",
+        "delta_bps_1m": 0.0,
+        "monthly_baseline_bps": -1.2,
+        "velocity": "stable",
+        "data_freshness_days": 1
+      },
+      "DGS10": {
+        "trend_30d": "rising",
+        "delta_bps_1m": 51.0,
+        "monthly_baseline_bps": 9.2,
+        "velocity": "accelerating",
+        "data_freshness_days": 2
+      },
+      "DFF": {
+        "trend_30d": "rising",
+        "delta_bps_1m": 25.0,
+        "monthly_baseline_bps": -1.8,
+        "velocity": "accelerating",
+        "data_freshness_days": 2
+      },
+      "CPIAUCSL": {
+        "trend_30d": "stable",
+        "mom_change_pct": 0.4,
+        "monthly_baseline": 0.2792,
+        "velocity": "accelerating",
+        "data_freshness_days": 61,
+        "stale": true
+      },
+      "CPILFESL": {
+        "trend_30d": "stable",
+        "mom_change_pct": 0.29,
+        "monthly_baseline": 0.2042,
+        "velocity": "accelerating",
+        "data_freshness_days": 61,
+        "stale": true
+      },
+      "UNRATE": {
+        "trend_30d": "stable",
+        "mom_change_pct": 0.0,
+        "monthly_baseline": -0.3875,
+        "velocity": "decelerating",
+        "data_freshness_days": 61,
+        "stale": true
+      },
+      "ICSA": {
+        "trend_30d": "falling",
+        "mom_change_pct": -4.83,
+        "monthly_baseline": -1.0367,
+        "velocity": "accelerating",
+        "data_freshness_days": 5,
+        "stale": false
+      },
+      "BAMLH0A0HYM2": {
+        "trend_30d": "rising",
+        "delta_bps_1m": 45.0,
+        "monthly_baseline_bps": 2.8,
+        "velocity": "accelerating",
+        "data_freshness_days": 2
+      },
+      "NFCI": {
+        "trend_30d": "stable",
+        "mom_change_pct": 1.97,
+        "monthly_baseline": -0.3483,
+        "velocity": "decelerating",
+        "data_freshness_days": 6,
+        "stale": false
+      }
+    },
+    "sector_rotation": {
+      "_guide": "⚠️ 使用前必讀 skills/fred-macro/SECTOR_ROTATION_GUIDE.md — 說明 favor（base）vs adjustments（overlay）差異、衝突處理規則與使用時機",
+      "regime": "Late Cycle Tightening",
+      "favor": [
+        "Energy",
+        "Consumer Staples",
+        "Health Care",
+        "Utilities"
+      ],
+      "avoid": [
+        "Technology",
+        "Consumer Discretionary",
+        "Real Estate"
+      ],
+      "rationale": "實質利率高 / 曲線倒掛 → 防禦股 + 現金，避開高負債 / 高估值",
+      "adjustments": [
+        {
+          "factor": "real_rate_high",
+          "value": 2.88,
+          "lower": [
+            "Technology",
+            "Real Estate"
+          ],
+          "raise": [
+            "Financials",
+            "Energy"
+          ],
+          "note": "實質利率 2.9% > 2% — 科技 / REIT 長存續期 DCF 折現率壓升；銀行 NIM 擴大、能源現金流不受影響"
+        },
+        {
+          "factor": "credit_stress_elevated",
+          "value": 85,
+          "lower": [
+            "Financials",
+            "Consumer Discretionary",
+            "Industrials"
+          ],
+          "raise": [
+            "Consumer Staples",
+            "Health Care",
+            "Utilities"
+          ],
+          "note": "HY 利差 >75th pctile — 信用市場壓力傳導至高槓桿行業；防禦三角（必需消費 / 醫療 / 公用）抗跌"
+        },
+        {
+          "factor": "yield_curve_steep",
+          "value": 1.02,
+          "lower": [
+            "Utilities"
+          ],
+          "raise": [
+            "Financials",
+            "Industrials"
+          ],
+          "note": "曲線陡峭（>1.0%）— 銀行借短貸長利差最大化；景氣擴張預期升溫有利工業，長債利率上升壓制公用"
+        }
+      ]
+    },
+    "data_quality": {
+      "series_fetched": 17,
+      "series_failed": 0,
+      "missing": [],
+      "errors": []
+    },
+    "macro_scores_composite": 57,
+    "yield_curve_value": 1.02,
+    "yield_curve_inverted": false,
+    "credit_stress_elevated": true,
+    "financial_stress_above_avg": false,
+    "fed_rate_direction": "flat",
+    "real_rate_preferred": 2.88,
+    "sector_rotation_favor": [
+      "Energy",
+      "Consumer Staples",
+      "Health Care",
+      "Utilities"
+    ],
+    "sector_rotation_avoid": [
+      "Technology",
+      "Consumer Discretionary",
+      "Real Estate"
+    ],
+    "velocity_highlights": [
+      "DGS10:accelerating",
+      "DFF:accelerating",
+      "CPIAUCSL:accelerating"
+    ]
+  },
+  "phase3_macro_multiplier": 0.75,
+  "macro_multiplier_rationale": "score=-1.5 consistency_cap=none → baseline=0.75 fred_caps: credit_stress_elevated=0.85, real_rate>2.0=0.9 → final=0.75"
+}

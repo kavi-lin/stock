@@ -1,0 +1,626 @@
+{
+  "run_id": "BE_20261001T083857_0dd010e757",
+  "lane": "technical",
+  "ticker": "BE",
+  "snapshot_hash": "sha256:61fbb448c0aac800f335ca0f794f83833ab6e8c4b9f78e9e0e53611241dab047",
+  "input": {
+    "factpack": {
+      "ticker": "BE",
+      "bundles": {
+        "fmp_supp_bundle": {
+          "insider_summary": {
+            "quarters": [
+              {
+                "year": 2028,
+                "quarter": 3,
+                "acquired_disposed_ratio": 0,
+                "total_acquired_shares": 510994,
+                "total_disposed_shares": 0,
+                "acquired_transactions": 10,
+                "disposed_transactions": 0,
+                "total_purchases": 0,
+                "total_sales": 0
+              },
+              {
+                "year": 2027,
+                "quarter": 1,
+                "acquired_disposed_ratio": 0,
+                "total_acquired_shares": 0,
+                "total_disposed_shares": 110000,
+                "acquired_transactions": 0,
+                "disposed_transactions": 1,
+                "total_purchases": 0,
+                "total_sales": 0
+              },
+              {
+                "year": 2026,
+                "quarter": 3,
+                "acquired_disposed_ratio": 0.1538,
+                "total_acquired_shares": 24688,
+                "total_disposed_shares": 399292,
+                "acquired_transactions": 2,
+                "disposed_transactions": 13,
+                "total_purchases": 0,
+                "total_sales": 11
+              },
+              {
+                "year": 2026,
+                "quarter": 2,
+                "acquired_disposed_ratio": 0.7222,
+                "total_acquired_shares": 100082,
+                "total_disposed_shares": 313774,
+                "acquired_transactions": 13,
+                "disposed_transactions": 18,
+                "total_purchases": 0,
+                "total_sales": 16
+              }
+            ],
+            "latest_trend": "distributing",
+            "source": "FMP /stable/insider-trading/statistics"
+          }
+        }
+      }
+    },
+    "script_output": {
+      "ticker": "BE",
+      "generated_at": "2026-10-01T00:39:01+00:00",
+      "price": {
+        "current": 276.98,
+        "change_pct": -4.9,
+        "52w_high": 351.28,
+        "52w_low": 66.62
+      },
+      "ma_structure": {
+        "ma_20": 266.52,
+        "ma_50": 233.53,
+        "ma_200": 205.51,
+        "stage": "Stage 2 uptrend",
+        "above_ma20_pct": 3.93,
+        "above_ma50_pct": 18.6,
+        "above_ma200_pct": 34.78,
+        "recent_crosses": [
+          {
+            "type": "golden_cross_20_50",
+            "date": "2026-09-11",
+            "days_ago": 13
+          }
+        ]
+      },
+      "rsi_14": {
+        "rsi_14": 55.5,
+        "zone": "bullish"
+      },
+      "macd": {
+        "macd_line": 12.827,
+        "signal_line": 12.682,
+        "histogram": 0.145,
+        "histogram_trend": "falling",
+        "bullish_cross": false,
+        "bearish_cross": false
+      },
+      "volume": {
+        "today": 14584593,
+        "today_effective": 14584593,
+        "avg_20d": 17585134,
+        "avg_50d": 16267042,
+        "ratio_20d": 0.83,
+        "spike_label": "NORMAL",
+        "spike_days_last_10": 1,
+        "volume_trend": "contracting",
+        "intraday_state": "complete",
+        "elapsed_min": 390
+      },
+      "support_resistance": {
+        "recent_swing_highs": [
+          288.0,
+          283.83,
+          227.99,
+          249.45,
+          252.0
+        ],
+        "recent_swing_lows": [
+          249.05,
+          197.5,
+          185.93,
+          210.02,
+          157.33
+        ],
+        "nearest_resistance": 283.83,
+        "nearest_support": 249.05,
+        "pct_to_resistance": 2.47,
+        "pct_to_support": 10.08
+      },
+      "signal_hints": {
+        "stage_2_complete": false,
+        "bearish_breakdown": false,
+        "parabolic_risk": false,
+        "macd_bullish_cross": false,
+        "macd_bearish_cross": false,
+        "rubric_hint": "+1 to +2"
+      },
+      "warnings": []
+    },
+    "script_status": "ok",
+    "missing_reason": null
+  },
+  "phase0": {
+    "phase": 0,
+    "scan_date": "2026-10-01",
+    "fetched_at": "2026-09-30T23:58:46+00:00",
+    "phase0_source": "SKILL_CHAIN",
+    "macro_summary": {
+      "macro_backdrop_score": -2.0,
+      "market_regime": "VOLATILE",
+      "regime_confidence": 0.62,
+      "key_themes": [
+        "High Treasury yields pressure equity valuations",
+        "Softer inflation offset by resilient activity",
+        "Elevated credit stress and weak participation",
+        "Iran-linked oil volatility adds inflation risk"
+      ],
+      "hot_sectors": [],
+      "cold_sectors": []
+    },
+    "_market_signals": {
+      "fear_greed_index": 30.8,
+      "market_sentiment_composite": 54.4,
+      "vix_current": 16.34,
+      "vix_regime": "NORMAL",
+      "spy_rsi_14": 48.8,
+      "spy_pct_above_ma50": 0.19,
+      "spy_pct_above_ma200": 6.5,
+      "breadth_composite": 28.6,
+      "breadth_zone": "Weakening",
+      "breadth_trend": "deteriorating",
+      "breadth_data_date": "2026-09-24",
+      "ftd_status": "NO_SIGNAL",
+      "ftd_status_text": "FTD_INVALIDATED",
+      "ftd_days_since": null,
+      "ftd_quality_score": 0,
+      "market_top_score": 40.0,
+      "market_top_zone": "Yellow",
+      "market_top_zone_label": "Yellow (Early Warning)",
+      "top_catalysts": [
+        {
+          "date": "2026-09-30",
+          "ticker": null,
+          "headline": "Most U.S. stocks fell as stronger growth data kept Treasury yields high despite softer inflation",
+          "source": "AP: https://apnews.com/article/1ee73f14dc23f6139eeb12c7397f543e"
+        },
+        {
+          "date": "2026-09-29",
+          "ticker": null,
+          "headline": "Rising Treasury yields weighed on equities as long bond yields reached multi-decade highs",
+          "source": "Reuters: https://www.investing.com/news/economy-news/equities-dip-as-bond-yields-hold-near-multidecade-highs-4923360"
+        },
+        {
+          "date": "2026-09-29",
+          "ticker": null,
+          "headline": "Oil volatility tied to the U.S.-Iran conflict sustained inflation and rate concerns",
+          "source": "AP: https://apnews.com/article/269abea6fd8ea7f314a8c34152788e0c"
+        }
+      ]
+    },
+    "fred_available": true,
+    "fred_snapshot": {
+      "generated_at": "2026-09-30T23:07:47+00:00",
+      "asof": null,
+      "cache_hit": true,
+      "cache_age_sec": 3042,
+      "series": {
+        "DFF": {
+          "value": 3.88,
+          "value_smooth_3d": 3.88,
+          "date": "2026-09-29",
+          "data_freshness_days": 2,
+          "delta_bps_1m": 25.0,
+          "delta_bps_3m": 25.0,
+          "delta_bps_1y": -21.0,
+          "percentile_1y": 80,
+          "trend_30d": "rising",
+          "trend_90d": "rising"
+        },
+        "T10Y3M": {
+          "value": 1.09,
+          "value_smooth_3d": 1.02,
+          "date": "2026-09-30",
+          "data_freshness_days": 1,
+          "delta_bps_1m": 25.0,
+          "delta_bps_3m": 42.0,
+          "delta_bps_1y": 95.0,
+          "percentile_1y": 100,
+          "trend_30d": "rising",
+          "trend_90d": "rising"
+        },
+        "DGS2": {
+          "value": 4.89,
+          "value_smooth_3d": 4.8733,
+          "date": "2026-09-29",
+          "data_freshness_days": 2,
+          "delta_bps_1m": 55.0,
+          "delta_bps_3m": 72.0,
+          "delta_bps_1y": 126.0,
+          "percentile_1y": 99,
+          "trend_30d": "rising",
+          "trend_90d": "rising"
+        },
+        "T10Y2Y": {
+          "value": 0.41,
+          "value_smooth_3d": 0.3667,
+          "date": "2026-09-30",
+          "data_freshness_days": 1,
+          "delta_bps_1m": 0.0,
+          "delta_bps_3m": 6.0,
+          "delta_bps_1y": -15.0,
+          "percentile_1y": 20,
+          "trend_30d": "stable",
+          "trend_90d": "stable"
+        },
+        "DGS10": {
+          "value": 5.26,
+          "value_smooth_3d": 5.2233,
+          "date": "2026-09-29",
+          "data_freshness_days": 2,
+          "delta_bps_1m": 51.0,
+          "delta_bps_3m": 78.0,
+          "delta_bps_1y": 111.0,
+          "percentile_1y": 100,
+          "trend_30d": "rising",
+          "trend_90d": "rising"
+        },
+        "DFII10": {
+          "value": 2.91,
+          "value_smooth_3d": 2.88,
+          "date": "2026-09-29",
+          "data_freshness_days": 2,
+          "delta_bps_1m": 47.0,
+          "delta_bps_3m": 66.0,
+          "delta_bps_1y": 111.0,
+          "percentile_1y": 100,
+          "trend_30d": "rising",
+          "trend_90d": "rising"
+        },
+        "CPILFESL": {
+          "value": 337.765,
+          "date": "2026-08-01",
+          "data_freshness_days": 61,
+          "yoy_change_pct": 2.45,
+          "mom_change_pct": 0.29,
+          "wow_change": 0.0,
+          "percentile_1y": 92,
+          "trend_30d": "stable",
+          "trend_90d": "stable"
+        },
+        "CPIAUCSL": {
+          "value": 334.131,
+          "date": "2026-08-01",
+          "data_freshness_days": 61,
+          "yoy_change_pct": 3.35,
+          "mom_change_pct": 0.4,
+          "wow_change": 0.0,
+          "percentile_1y": 92,
+          "trend_30d": "stable",
+          "trend_90d": "stable"
+        },
+        "UNRATE": {
+          "value": 4.1,
+          "date": "2026-08-01",
+          "data_freshness_days": 61,
+          "yoy_change_pct": -4.65,
+          "mom_change_pct": 0.0,
+          "wow_change": 0.0,
+          "percentile_1y": 0,
+          "trend_30d": "stable",
+          "trend_90d": "falling"
+        },
+        "ICSA": {
+          "value": 197000.0,
+          "date": "2026-09-19",
+          "data_freshness_days": 12,
+          "yoy_change_pct": -10.05,
+          "mom_change_pct": -3.43,
+          "wow_change": -1000.0,
+          "percentile_1y": 4,
+          "trend_30d": "falling",
+          "trend_90d": "falling"
+        },
+        "PAYEMS": {
+          "value": 159075.0,
+          "date": "2026-08-01",
+          "data_freshness_days": 61,
+          "yoy_change_pct": 0.38,
+          "mom_change_pct": 0.1,
+          "wow_change": 0.0,
+          "percentile_1y": 92,
+          "trend_30d": "stable",
+          "trend_90d": "stable"
+        },
+        "PCEPILFE": {
+          "value": 130.455,
+          "date": "2026-08-01",
+          "data_freshness_days": 61,
+          "yoy_change_pct": 3.01,
+          "mom_change_pct": 0.25,
+          "wow_change": 0.0,
+          "percentile_1y": 92,
+          "trend_30d": "stable",
+          "trend_90d": "stable"
+        },
+        "SAHMREALTIME": {
+          "value": -0.07,
+          "date": "2026-08-01",
+          "data_freshness_days": 61,
+          "yoy_change_pct": -153.85,
+          "mom_change_pct": -133.33,
+          "wow_change": 0.0,
+          "percentile_1y": 0,
+          "trend_30d": "stable",
+          "trend_90d": "falling"
+        },
+        "RSXFS": {
+          "value": 646347.0,
+          "date": "2026-08-01",
+          "data_freshness_days": 61,
+          "yoy_change_pct": 5.36,
+          "mom_change_pct": 1.14,
+          "wow_change": 0.0,
+          "percentile_1y": 92,
+          "trend_30d": "stable",
+          "trend_90d": "stable"
+        },
+        "NFCI": {
+          "value": -0.548,
+          "date": "2026-09-25",
+          "data_freshness_days": 6,
+          "yoy_change_pct": -4.18,
+          "mom_change_pct": 1.97,
+          "wow_change": 0.005,
+          "percentile_1y": 23,
+          "trend_30d": "stable",
+          "trend_90d": "falling"
+        },
+        "DCOILWTICO": {
+          "value": 96.16,
+          "date": "2026-09-29",
+          "data_freshness_days": 2,
+          "yoy_change_pct": 49.62,
+          "mom_change_pct": 10.49,
+          "wow_change": -0.25,
+          "percentile_1y": 79,
+          "trend_30d": "rising",
+          "trend_90d": "rising"
+        },
+        "BAMLH0A0HYM2": {
+          "value": 3.08,
+          "value_smooth_3d": 3.01,
+          "date": "2026-09-29",
+          "data_freshness_days": 2,
+          "delta_bps_1m": 45.0,
+          "delta_bps_3m": 34.0,
+          "delta_bps_1y": 34.0,
+          "percentile_1y": 85,
+          "trend_30d": "rising",
+          "trend_90d": "rising"
+        }
+      },
+      "regime_signals": {
+        "yield_curve_inverted": false,
+        "yield_curve_steep": true,
+        "yield_curve_value": 1.02,
+        "yield_curve_10y2y": 0.37,
+        "yield_curve_10y3m": 1.02,
+        "yield_curve_10y3m_inverted": false,
+        "yield_curve_10y2y_inverted": false,
+        "credit_stress_elevated": true,
+        "credit_spread_pctile_1y": 85,
+        "financial_stress_above_avg": false,
+        "nfci_wow_change": 0.005,
+        "nfci_deteriorating_fast": false,
+        "sahm_value": -0.07,
+        "sahm_triggered": false,
+        "retail_contracting": false,
+        "retail_sales_mom_pct": 1.14,
+        "fed_rate_direction": "flat",
+        "fed_funds_current": 3.88,
+        "real_rate_10y_estimate": 1.87,
+        "real_rate_dfii10": 2.88,
+        "real_rate_preferred": 2.88
+      },
+      "macro_scores": {
+        "rates": 55,
+        "inflation": 50,
+        "employment": 75,
+        "credit": 20,
+        "financial_conditions": 85,
+        "composite": 57,
+        "_weights": {
+          "rates": 1.0,
+          "credit": 1.0,
+          "financial_conditions": 1.0,
+          "employment": 0.7,
+          "inflation": 0.5
+        }
+      },
+      "regime_label": "Late Cycle Tightening",
+      "regime_confidence": 0.31,
+      "market_implications": [
+        "🔴 Late Cycle — 實質利率偏高，防禦股 / 現金為王",
+        "📉 實質利率 2.9% 偏高 → 成長股估值壓力，價值股 / 金融股相對佔優",
+        "📈 殖利率曲線陡峭 → 早期復甦訊號，銀行 / 週期股受惠",
+        "🔴 高收益債利差壓力 (1y pctile 85) → 信用市場緊張，避開高槓桿公司"
+      ],
+      "macro_posture_guidance": {
+        "equity_exposure": 0.25,
+        "bond_duration": "short",
+        "cash_level": 0.35,
+        "note": "macro-only — calibrate with valuation (Shiller PE) and momentum before execution"
+      },
+      "top_risks": [
+        "Credit stress elevated — HY spread at 85th pctile; systemic contagion risk rising",
+        "Growth derating — real rate 2.9% compresses long-duration equity valuations",
+        "Recession onset risk — tightening cycle historically ends in slowdown within 12-18 months"
+      ],
+      "change_velocity": {
+        "T10Y2Y": {
+          "trend_30d": "stable",
+          "delta_bps_1m": 0.0,
+          "monthly_baseline_bps": -1.2,
+          "velocity": "stable",
+          "data_freshness_days": 1
+        },
+        "DGS10": {
+          "trend_30d": "rising",
+          "delta_bps_1m": 51.0,
+          "monthly_baseline_bps": 9.2,
+          "velocity": "accelerating",
+          "data_freshness_days": 2
+        },
+        "DFF": {
+          "trend_30d": "rising",
+          "delta_bps_1m": 25.0,
+          "monthly_baseline_bps": -1.8,
+          "velocity": "accelerating",
+          "data_freshness_days": 2
+        },
+        "CPIAUCSL": {
+          "trend_30d": "stable",
+          "mom_change_pct": 0.4,
+          "monthly_baseline": 0.2792,
+          "velocity": "accelerating",
+          "data_freshness_days": 61,
+          "stale": true
+        },
+        "CPILFESL": {
+          "trend_30d": "stable",
+          "mom_change_pct": 0.29,
+          "monthly_baseline": 0.2042,
+          "velocity": "accelerating",
+          "data_freshness_days": 61,
+          "stale": true
+        },
+        "UNRATE": {
+          "trend_30d": "stable",
+          "mom_change_pct": 0.0,
+          "monthly_baseline": -0.3875,
+          "velocity": "decelerating",
+          "data_freshness_days": 61,
+          "stale": true
+        },
+        "ICSA": {
+          "trend_30d": "falling",
+          "mom_change_pct": -3.43,
+          "monthly_baseline": -0.8375,
+          "velocity": "accelerating",
+          "data_freshness_days": 12,
+          "stale": false
+        },
+        "BAMLH0A0HYM2": {
+          "trend_30d": "rising",
+          "delta_bps_1m": 45.0,
+          "monthly_baseline_bps": 2.8,
+          "velocity": "accelerating",
+          "data_freshness_days": 2
+        },
+        "NFCI": {
+          "trend_30d": "stable",
+          "mom_change_pct": 1.97,
+          "monthly_baseline": -0.3483,
+          "velocity": "decelerating",
+          "data_freshness_days": 6,
+          "stale": false
+        }
+      },
+      "sector_rotation": {
+        "_guide": "⚠️ 使用前必讀 skills/fred-macro/SECTOR_ROTATION_GUIDE.md — 說明 favor（base）vs adjustments（overlay）差異、衝突處理規則與使用時機",
+        "regime": "Late Cycle Tightening",
+        "favor": [
+          "Energy",
+          "Consumer Staples",
+          "Health Care",
+          "Utilities"
+        ],
+        "avoid": [
+          "Technology",
+          "Consumer Discretionary",
+          "Real Estate"
+        ],
+        "rationale": "實質利率高 / 曲線倒掛 → 防禦股 + 現金，避開高負債 / 高估值",
+        "adjustments": [
+          {
+            "factor": "real_rate_high",
+            "value": 2.88,
+            "lower": [
+              "Technology",
+              "Real Estate"
+            ],
+            "raise": [
+              "Financials",
+              "Energy"
+            ],
+            "note": "實質利率 2.9% > 2% — 科技 / REIT 長存續期 DCF 折現率壓升；銀行 NIM 擴大、能源現金流不受影響"
+          },
+          {
+            "factor": "credit_stress_elevated",
+            "value": 85,
+            "lower": [
+              "Financials",
+              "Consumer Discretionary",
+              "Industrials"
+            ],
+            "raise": [
+              "Consumer Staples",
+              "Health Care",
+              "Utilities"
+            ],
+            "note": "HY 利差 >75th pctile — 信用市場壓力傳導至高槓桿行業；防禦三角（必需消費 / 醫療 / 公用）抗跌"
+          },
+          {
+            "factor": "yield_curve_steep",
+            "value": 1.02,
+            "lower": [
+              "Utilities"
+            ],
+            "raise": [
+              "Financials",
+              "Industrials"
+            ],
+            "note": "曲線陡峭（>1.0%）— 銀行借短貸長利差最大化；景氣擴張預期升溫有利工業，長債利率上升壓制公用"
+          }
+        ]
+      },
+      "data_quality": {
+        "series_fetched": 17,
+        "series_failed": 0,
+        "missing": [],
+        "errors": []
+      },
+      "macro_scores_composite": 57,
+      "yield_curve_value": 1.02,
+      "yield_curve_inverted": false,
+      "credit_stress_elevated": true,
+      "financial_stress_above_avg": false,
+      "fed_rate_direction": "flat",
+      "real_rate_preferred": 2.88,
+      "sector_rotation_favor": [
+        "Energy",
+        "Consumer Staples",
+        "Health Care",
+        "Utilities"
+      ],
+      "sector_rotation_avoid": [
+        "Technology",
+        "Consumer Discretionary",
+        "Real Estate"
+      ],
+      "velocity_highlights": [
+        "DGS10:accelerating",
+        "DFF:accelerating",
+        "CPIAUCSL:accelerating"
+      ]
+    },
+    "phase3_macro_multiplier": 0.75,
+    "macro_multiplier_rationale": "score=-2.0 consistency_cap=none → baseline=0.75 fred_caps: credit_stress_elevated=0.85 → final=0.75"
+  },
+  "protocol": "# Multi-Agent Investment Protocol (V5.0)\n\n> US equity single-ticker analysis. **Execution-only file** — historical changelog/rationale see `CHANGELOG.md`. Bundle schemas see `protocol_appendix_fmp_bundles.md`. Session export schema see `phase5_export_schema.md`.\n\n---\n\n## SESSION STARTUP\n\n```\nSESSION CONFIG\nRISK_TOLERANCE : LOW | MEDIUM | HIGH   (預設 MEDIUM)\n```\n\nTicker 由 user 指定。**非互動模式**（Dashboard reverse-call via `claude -p`）：所有需要 user input 的點皆採 protocol 預設，不停下等候。\n\n---\n\n## GLOBAL RULES (PM cheatsheet)\n\n### MUST\n1. **Phase order**: 0 → 1 → 2 → 2.4 → 2.5 → 2.8 → 3 → 4 → 4.5 → 5。不跳過。（2.4 = price framework engine，V3.45.3）\n2. **Skill execution (NO SIMULATION)**: 凡標 **MUST run** 的 skill 指令必須實際執行 Bash 呼叫並解析 JSON 輸出，**禁止** LLM 估算 / 模擬數值。受規則約束的 skill：\n   - `market-sentiment-analyzer`, `us-stock-analysis`, `market-news-analyst`, `technical-analyst`, `short-contrarian-analyst`, `portfolio-risk-manager`, `tail-risk-analyzer`, `fred-macro`\n   - 失敗時必須在 final report 標 `skill_execution_failed: true` + stderr，禁止靜默用估算值補上。\n3. **Isolated subagent (Phase 2)**: 五份 prompt 必須在收到任何 lane 結果之前全部凍結。五條 lane 各自在獨立 context 執行；同時執行數為 min(3, 環境可用名額)，未知名額採 1。後續批次不得注入先前 lane 結論。每個 subagent JSON 必須含 `subagent_isolated: true`；缺則 confidence cap 0.6 + `subagent_validation_failed: true`。V5.5 試行路徑見 `investment/run_workflow_v55.md`。\n4. **Red Team (Phase 2.8)**: 必須以 Agent tool 呼叫 subagent 執行，**禁止 inline 推理代替**。\n5. **MD Report (Phase 5)**: 存 `reports/YYYYMMDD_TICKER.md`。**不得省略**。\n6. **Phase 0 cache**: Phase 0 是全市場 snapshot，不屬於 ticker。FRESH = 真實來源 `fetched_at` 距凍結時間 <3h；缺可靠時間必須重建，不得用 mtime 或補現在時間延長期限。優先讀 canonical `invest_logs/YYYY-MM-DD_phase0.json`（舊 ticker-scoped 檔只作相容 fallback）。sector_intel 只能當 L3 重建素材，不能通過 Phase 0 gate。\n7. **Validate gates rc=0**:\n   - Phase 0: `validate_phase0.py --path <factpack.phase0_path>`\n   - Phase 5: `validate_session_export.py` + `validate_markdown_export.py`\n\n### MUST NOT\n- ❌ Phase 2 subagent prompt 含其他 lane 的 score / signal / reasoning\n- ❌ Phase 2 subagent prompt 含 PM 的 historical_bias / active_weights / prior session\n- ❌ 跨 lane 引用 PEER_BUNDLE / EARNINGS_ANALYST_BUNDLE / FMP_SUPP_BUNDLE 的數字推測對方結論\n- ❌ 手抄數字進 Phase 5 MD 報告（V4.87.0 起全篇由 `render_investment_report.py` 渲染；`--polish` 只准動五段純敘事，且數字須通過事實集合圍堵）\n- ❌ Final Score 用 `/5.0` 或 `/10` scale（V1.88 統一 `/3.0`）\n- ❌ 為了補 cache 自動 enqueue `財報` protocol（user 主動觸發層）\n\n### Output rules\n- 邏輯輸出 JSON；Markdown 僅用於 Final Viz Table + Phase 5 MD report\n- `key_factors`：最多 3 條，每條 ≤ 8 英文字\n\n```\nYou are the <LANE> analyst for ticker <TICKER>.\n\nISOLATION CONTRACT:\n  - 你與其他 4 個 analyst 以獨立 context 平行執行。\n  - 你看不到其他 analyst 的 score / signal / reasoning。\n  - 禁止推測其他 lane 的結論。\n  - 禁止為了「與共識一致」調整自己的 score。\n  - 禁止考慮 PM 的 historical_bias / active_weights / prior session。\n  - score -5..+5 僅依據你本 lane 收集的證據。\n\nTICKER: <TICKER>\n\nPHASE 0 MACRO CONTEXT (read-only):\n<paste Phase 0 macro_summary + _market_signals>\n\nTICKER DATA BUNDLE (read-only, all 5 lanes):\n<paste TICKER_DATA_BUNDLE.scoring; if unavailable 標 \"TICKER_DATA_BUNDLE: unavailable\">\n\n[CONDITIONAL BUNDLES — 依 lane 注入規則; 見 protocol_appendix_fmp_bundles.md]\n\nDATA SOURCE DISCIPLINE (STRICT):\n  ❌ FORBIDDEN web search for: Quote/Valuation scalar (price/peRatio/forwardPE/peg/eps/mktCap/divYield/PB/D-E/FCF/ROE), Market signals (VIX/F&G/RSI/breadth/FTD/top score), Insider/short, Analyst rating/PT, Filings, OHLCV, news headlines (skill 已抓三來源)\n  ✅ ALLOWED web search (≤ 1 call, narrative tone only): Reddit/X tone, transcript quotes, supply chain rumors, competitive narrative\n  違規處理：subagent 引用 web search 的數字 → PM 自動扣 confidence 0.2；連 3 次 → 該 lane 視為 degraded\n  ⚠️ V4.124.0 現況：上面這條扣分**沒有產生器**（「連 3 次」是跨 session 狀態，從沒有東西保存過）。\n     本版只做 shadow —— `investment/scripts/websearch_shadow.py` 從 run log 讀每個 lane 的實際\n     web call 數（走 `parent_tool_use_id` 歸屬），寫進 ledger，**不扣分、不進決策**。\n     補實作或刪宣稱都會改變行為，需使用者拍板；證據見 docs/plan_invest_stale_stages.md T2。\n\nYOUR LANE RUBRIC:\n<RUBRIC_LANE>\n\nMANDATORY DATA COLLECTION:\n<SKILL_CMD — MUST run, do NOT simulate>\n\nOUTPUT (strict JSON):\n{\n  \"phase\": 2,\n  \"agent\": \"<LANE>_Analyst\",\n  \"ticker\": \"<TICKER>\",\n  \"signal\": \"BUY | SELL | HOLD\",\n  \"score\": \"-5 to +5\",\n  \"confidence\": \"0.0 to 1.0\",\n  \"key_factors\": [\"max 3 items, ≤ 8 words each\"],\n  \"risk_flags\": [\"max 2 items\"],\n  \"phase0_alignment\": \"ALIGNED | MISALIGNED | NEUTRAL\",\n  \"data_source_timestamp\": \"YYYY-MM-DD HH:MM\",\n  \"subagent_isolated\": true,\n  \"skill_execution_failed\": \"true | false\"\n}\n```\n\n> **V4.125.0 — 本 shape 對 C1 lane_contract（V4.90）與各道閘核對過的結果**（模板寫於 2026-05-04，\n> 契約與閘是 8 月的；以下是核完的四條，不是新規則）：\n>\n> - **`signal` 自 V4.122.0 起是決策軌的輸入，不再只是敘述**：PM 必須把五個 lane 的 `signal`\n>   原樣填進 export 的 `conflict_bias.lane_signals`（validator §16 用它重算 T2/T3，且會擋\n>   「signal 與同 lane score 反向」）。lane 漏填 `signal` = PM 填不出那一格。\n> - **`score` 的 −5..+5 只適用四個 LLM lane**（fundamentals / sentiment / news / technical）。\n>   **Valuation lane 不自填分數**——它 verbatim 抄 `valuation_pack.score`（Phase 1.5 engine\n>   產出，validator 強制兩者相等）。歷史上唯一一筆 −4.0（2026-06-14 RGTI）正是在 pack\n>   成為必填之前自由填出來的，之後不可能再發生。\n> - **`skill_execution_failed` 是 skill script 真的會吐的欄位**（`momentum.py` /\n>   `technical-analyst/analyze.py` 失敗時輸出），不是模板自創；照填。\n> - **不要產 lane_contract 的欄位**（`provenance` / `producer_version` / `input_hash` /\n>   `shadow_score`）：那四個由 Phase 5 Step 1.5 的 `apply_det_shadow.py` 寫入，**LLM 手寫\n>   等於偽造 provenance**（§15 會擋）。subagent 只出上面這個 shape。\n\n### Lane Rubrics\n\n\n- **Rubric**: 20/50/200MA 結構、RSI(14)、MACD histogram、volume vs 20D avg、support/resistance。Stage 2 上升結構 → +3+；跌破 200MA + 量放大 → -3-\n\n> **V4.116.3 — Technical lane 不得靜默超出自家 script 的 rubric**：\n> `technical-analyst/scripts/analyze.py` 會把 stage 結構折算成 `signal_hints.rubric_hint`\n> 分數帶（例如 `\"0 to +1 (basing — wait for confirmation)\"`），並把整份 payload 寫到\n> `skills/technical-analyst/cache/<T>_technical_payload.json`。validator 直接讀**那個檔**\n> 與 `lane_scores.technical` 比對：落在帶外且未填 `technical_lane.rubric_override_reason`\n> → **rc=1**。\n> **偏離是允許的，靜默偏離不是。** 2026-08-09 同一檔股票，一個引擎對 `0 to +1` 回 +2.5、\n> 隔次回 +2.0，另一個引擎對同一個 hint 回 +1.0——任一者都足以翻轉最終決策。\n- **Skill**: `python3 skills/technical-analyst/scripts/analyze.py <TICKER> --json-only`\n- OHLCV-only lane，但 V2.13 起額外讀 FMP_SUPP_BUNDLE.insider_summary 做主力分析（見下）\n\n##### V3.17 (Wave 1) — Large-cap parabolic ceiling\n\n當本 lane MANDATORY 的 `technical-analyst/scripts/analyze.py` 輸出 `warnings` 含\n`large_cap_parabolic`（marketCap > $10B AND above_ma200_pct > 100）時 Technical lane：\n\n> V4.72.0 (P2-9) 斷鏈修補：此 flag 原只由 momentum-monitor 產出，但 momentum.py 不在\n> 本 lane MUST-run 清單——規則引用了 lane 拿不到的 flag（AUDIT_2026-07-16 F6 #1）。\n> 判定已抽到 `skills/_shared/technical_core.parabolic_severity_tag` 單一源，\n> technical-analyst 與 momentum-monitor 共用；本 lane 由自己的 MANDATORY script 直接取得。\n- `raw score ceiling = +1`(就算 trend / pattern / smart money 都偏多,score 也不得 > +1)\n- 必填 narrative `extension_penalty_note`: 1 句說明為何 large-cap parabolic 蓋頂(crowded trade、回測 SMA50 平均 -30%、historical R/R 不對稱)\n- 設計理由(Codex v5):大型股 +100% above SMA200 的 R/R 跟小型股 不同 — 全市場可見 → 散戶 FOMO 已到、回檔深度通常更大。Technical 不能因 Stage 2 / golden cross 給滿分\n\n##### V2.13.0 Technical lane 額外輸出（必填，不影響 score 公式）\n\n對應外部模板「主力吸籌/出貨」+「型態分類」+「強弱/關鍵價/劇本」三件套：\n\n1. **`smart_money_analysis`**（必填）：物件 `{label, narrative}` —— 正文欄位一律叫\n   `narrative`（V5.3 形狀鎖；歷史上出現過 `note` 與純字串兩種形態，validator §15 現在會擋）\n   - label: `accumulating | distributing | neutral | mixed`\n   - 依據綜合：\n     - `FMP_SUPP_BUNDLE.insider_summary.quarters[0].acquired_disposed_ratio`（< 0.3 distributing；> 1.0 accumulating）\n     - `quote.volume vs avgVolume` 量價背離（量放大 + 跌 = distributing；量放大 + 漲 = accumulating）\n     - `analyst_actions[]` 30d 升降評淨值（≥ +3 = accumulating sell-side flow；≤ -3 = distributing）\n     - 若 institutional 訊號（V2.9.0 sector intel `institutional_holders_qoq_delta` 該股可用）正負一致 → 強化判斷\n   - 例：「insider Q ratio 0.06 重度賣超 + 機構 13F holders QoQ −12 + sell-side 30d 淨降評 −2 → distributing」\n\n2. **`pattern_taxonomy`**（必填，從 8 種選一）：\n   - `uptrend_breakout` / `uptrend_continuation` / `consolidation` /\n     `pullback_in_uptrend` / `false_breakout` / `topping_pattern` /\n     `downtrend` / `oversold_bounce_attempt`\n   - 必附 `confirmation_criteria`（1 句）：什麼條件代表 pattern 成立或失效\n   - 例：「pattern: pullback_in_uptrend；confirmation: 站穩 50MA $118 且收回 5MA 上方 → 持續上升；跌破 $115 + 量 > 1.5×avg → 降為 false_breakout」\n\n3. **三件套 output**（必填）：\n   - `market_strength`: `STRONG | NEUTRAL | WEAK` （盤面強弱單字判決）\n   - `key_levels`: `{support: float, resistance: float, pivot: float}` （三個關鍵價位；缺項用 null）\n   - `high_prob_scenario`: 1 句話描繪未來 5-15 天最有機率的走法（明確帶價位 + 觸發條件）\n     例：「站穩 $122 pivot + 量 ≥ 1.5×20D avg → 突破上攻 $135；跌破 $115 → 回測 $108 200MA」\n\n4. **`volatility`**（V5.1 必填，deterministic — 餵 Phase 4.5 Multi-Horizon Price Framework 5-Day Band）：\n   - `atr_14`: FMP `technicalIndicators` ATR period 14（float；缺 → null）\n   - `hist_vol_20d_daily`: 20D 日報酬標準差（小數，e.g. 0.028；FMP `technicalIndicators` standardDeviation period 20，或 20D close 序列算）。缺 → 用 `atr_14 / current_price` 反推\n   - `momentum_20d_pct`: 20 交易日報酬 %（(price / close_20d_ago − 1) × 100；float）\n   - 三值皆**直接寫入原始數字**，LLM **不**重新判讀；缺料寫 null（Phase 4.5 自動降級，不擋）\n\n> 以上 4 區塊**必填**；1-3 區塊資料缺寫 `INSUFFICIENT_DATA`，volatility 缺寫 null。LLM 不得跳過。\n",
+  "instruction": "Execute only your assigned Phase 2 lane in a fresh isolated context. Use frozen inputs. Do not read other lane outputs or mutable caches. Return protocol lane JSON; no provenance fields. No other phases or history writes."
+}

@@ -1,0 +1,203 @@
+{
+  "bundle_version": "P5-INPUTS/1.0",
+  "ticker": "HPE",
+  "date": "2026-10-01",
+  "phase0": {
+    "regime_confidence": 0.3,
+    "market_top_zone": "yellow",
+    "ftd_state": "NO_SIGNAL",
+    "breadth_composite": 28.6,
+    "vix": 16.32,
+    "fred_verdict": "Late Cycle Tightening",
+    "real_rate_pct": null,
+    "hot_sectors": [
+      "Technology",
+      "Communication Services"
+    ],
+    "cold_sectors": [
+      "Utilities",
+      "Consumer Staples",
+      "Health Care",
+      "Real Estate",
+      "Consumer Discretionary"
+    ]
+  },
+  "lanes": {
+    "fundamentals": {
+      "signal": "BUY",
+      "score": 2.0,
+      "confidence": 0.68,
+      "key_factors": [
+        "Revenue growth 32.7%; forward EPS growth 410%",
+        "Forward P/E 13.7; PEG 0.80",
+        "Altman danger offsets strong Piotroski score"
+      ],
+      "risk_flags": [
+        "Altman Z in danger zone",
+        "Working-capital-driven cash conversion; $14B net debt"
+      ],
+      "phase0_alignment": "MISALIGNED",
+      "data_source_timestamp": "2026-10-01 14:31",
+      "skill_execution_failed": false,
+      "moat_assessment": {
+        "level": "INSUFFICIENT_DATA",
+        "type": "INSUFFICIENT_DATA",
+        "evidence_one_line": "Frozen inputs lack HPE-specific competitive-advantage evidence and ROIC/WACC data."
+      },
+      "near_term_catalysts": [
+        {
+          "date": "2026-12-02",
+          "type": "earnings",
+          "description": "Next earnings; test revenue growth and cash conversion",
+          "impact": "high"
+        },
+        {
+          "date": "2026-12-02",
+          "type": "guidance",
+          "description": "FY2027 outlook and hardware demand commentary with results",
+          "impact": "medium"
+        },
+        {
+          "date": "2026-Q4",
+          "type": "macro_event",
+          "description": "High Treasury yields and elevated HY spreads may pressure enterprise capex",
+          "impact": "medium"
+        }
+      ],
+      "bull_thesis_one_line": "營收年增32.72%、遠期本益比13.7，成長與估值具吸引力。",
+      "bear_thesis_one_line": "現金轉換受營運資金驅動，淨負債與高利率削弱品質。"
+    },
+    "sentiment": {
+      "signal": "BUY",
+      "score": 1.22,
+      "confidence": 0.66,
+      "key_factors": [
+        "Accumulation in two earlier quarters",
+        "Short interest remains below five percent",
+        "Market sentiment composite remains neutral positive"
+      ],
+      "risk_flags": [
+        "Weakening breadth and invalidated follow-through",
+        "Latest insider selling offsets earlier accumulation"
+      ],
+      "phase0_alignment": "NEUTRAL",
+      "data_source_timestamp": "2026-10-01 22:30",
+      "skill_execution_failed": false,
+      "market_sentiment_composite": 54.4,
+      "vix_current": 16.32,
+      "insider_signal": 1,
+      "short_pct_float": 4.8,
+      "mspr_latest": -100
+    },
+    "news": {
+      "signal": "BUY",
+      "score": 2.5,
+      "confidence": 0.78,
+      "key_factors": [
+        "Vultr placed $1.2B AMD Helios order",
+        "Networking outlook raised; Juniper synergies",
+        "PT hikes offset soft consensus revisions"
+      ],
+      "risk_flags": [
+        "One-month PT revisions down 1.57%",
+        "High long-term yields pressure technology multiples"
+      ],
+      "phase0_alignment": "NEUTRAL",
+      "data_source_timestamp": "2026-10-01 14:30",
+      "skill_execution_failed": false,
+      "pt_revision_momentum": {
+        "direction": "DOWN",
+        "consensus_delta_pct_1m": -1.57,
+        "consensus_delta_pct_3m": -0.89
+      },
+      "immediate_catalyst_5d": null,
+      "decision_point_days": 21,
+      "cross_asset_spillover": [
+        {
+          "asset": "sector_XLK",
+          "direction": "BULLISH",
+          "mechanism": "The large AI rack order supports demand expectations across AI infrastructure and networking suppliers."
+        }
+      ],
+      "reasoning_one_line": "A large inaugural AI rack order and raised networking outlook make the 48-hour news flow clearly positive; mild negative PT momentum and a hold-heavy consensus temper the score."
+    },
+    "technical": {
+      "signal": "HOLD",
+      "score": 1.5,
+      "confidence": 0.68,
+      "key_factors": [
+        "Stage 2 above all major averages",
+        "Bullish RSI; MACD histogram is falling",
+        "Price sits 0.43% below resistance"
+      ],
+      "risk_flags": [
+        "Immediate resistance at $63.28",
+        "Fading MACD histogram momentum"
+      ],
+      "phase0_alignment": "NEUTRAL",
+      "data_source_timestamp": "2026-10-01 14:35",
+      "skill_execution_failed": false,
+      "smart_money_analysis": {
+        "label": "mixed",
+        "narrative": "FMP labels the recent trend accumulating, but the latest quarterly acquired/disposed ratio is 1.0 and volume is normal, so price-volume confirmation is limited."
+      },
+      "pattern_taxonomy": {
+        "pattern": "consolidation",
+        "confirmation_criteria": "A close above $63.28 and then $65.65 on volume at least 1.5x the 20-day average confirms continuation; a close below $60.68 invalidates it."
+      },
+      "market_strength": "NEUTRAL",
+      "key_levels": {
+        "support": 60.68,
+        "resistance": 65.65,
+        "pivot": 63.28
+      },
+      "high_prob_scenario": "Over the next 5-15 days, holding $60.68 and clearing the $63.28 pivot on volume at least 1.5x the 20-day average would favor a test of $65.65; a close below $60.68 would weaken the setup.",
+      "volatility": {
+        "atr_14": null,
+        "hist_vol_20d_daily": null,
+        "momentum_20d_pct": null
+      }
+    },
+    "valuation": {
+      "signal": "SELL",
+      "score": -1.0,
+      "confidence": 0.9,
+      "key_factors": [
+        "Primary DCF below current price",
+        "Relative family has correlated anchors",
+        "Transition case lacks safe forecast"
+      ],
+      "risk_flags": [
+        "Through-cycle DCF sensitivity remains material",
+        "Transition upside remains forecast-sensitive"
+      ],
+      "phase0_alignment": "ALIGNED",
+      "data_source_timestamp": "2026-10-01 14:30",
+      "skill_execution_failed": false,
+      "weighted_fair_value": 37.34,
+      "vs_current_pct": -40.72,
+      "verdict_band": "extreme_overvalued",
+      "primary_method": "dcf_self_built",
+      "suppression_proposals": [],
+      "valuation_commentary": "At $62.99 current price, the frozen pack projects weighted fair value $37.34, -40.72%, and an extreme_overvalued band; score -1.0 is copied verbatim. The eligible primary through-cycle DCF anchor is $37.34 with sensitivity of $30.07–$48.35. Other live references diverge: owner earnings $16.20, analyst PT $67.75, and the relative family $56.85 (peer P/E $43.54; comps $70.16). Peer P/E and comps share one correlation group; analyst PT is external expectations rather than cash-flow evidence. Legacy DCF anchors are ineligible as superseded by the auditable DCF; forward earnings is ineligible while cash-flow intrinsic anchors are live; the forecaster blend is ineligible for low forecast confidence and transition without a safe model. I acknowledge the paradigm-only transition case but do not override the pack's cash-flow evidence; high-rate regime pressure is the dissent basis rather than rejection of the transition thesis.",
+      "cited_transition_overlay": true,
+      "transition_dissent_basis": "macro_systemic"
+    }
+  },
+  "burry": {
+    "score": 44.7,
+    "narrative": "Burry 44.7/100（NEUTRAL）：FCF yield 4.79%、EV/EBIT 14.37、D/E 0.76、距 52 週高點 1.38%，insider_net=SELL；此結果作風險敘述，未觸發獨立覆寫。"
+  },
+  "phase3": {
+    "final_score": 0.9422,
+    "final_decision": "STAGED_ENTRY",
+    "final_action": "EXECUTE"
+  },
+  "phase4": {
+    "position_size_pct": 0.035375,
+    "analysis_price": 62.99
+  },
+  "red_team": {
+    "verdict": "STRONG_COUNTER"
+  }
+}

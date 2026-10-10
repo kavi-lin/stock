@@ -1,0 +1,79 @@
+{
+  "command": [
+    "skills/technical-analyst/scripts/analyze.py",
+    "HPE",
+    "--json-only"
+  ],
+  "started_at": "2026-10-01T12:52:41.862976+00:00",
+  "finished_at": "2026-10-01T12:52:43.384406+00:00",
+  "elapsed_seconds": 1.5214340421371162,
+  "returncode": 0,
+  "status": "ok",
+  "reason": null,
+  "content_hash": "sha256:ba9248a1c7ab4730f38d4519ae5b1d56a43e2db130a1d019985a76bbda649b6e",
+  "source_records": {
+    "bf13022ddc27edeb9908d7737622ad034cb7a50caa2f11c84a3d433cd4ca24db": {
+      "kind": "market",
+      "data": [
+        {
+          "symbol": "HPE",
+          "price": 65.108,
+          "marketCap": 86216245108,
+          "beta": 1.442,
+          "lastDividend": 0.57,
+          "range": "19.84-67.1008",
+          "change": 3.618,
+          "changePercentage": 5.88389,
+          "volume": 16379896,
+          "averageVolume": 25498767,
+          "companyName": "Hewlett Packard Enterprise Company",
+          "currency": "USD",
+          "cik": "0001645590",
+          "isin": "US42824C1099",
+          "cusip": "42824C109",
+          "exchangeFullName": "New York Stock Exchange",
+          "exchange": "NYSE",
+          "industry": "Computer Hardware",
+          "website": "https://www.hpe.com",
+          "description": "Hewlett Packard Enterprise (HPE) is a global technology firm that provides comprehensive solutions, empowering clients across the Americas, Europe, the Middle East, Africa, Asia Pacific, and Japan to efficiently capture, analyze, and utilize their data. The company's diverse product range features adaptable servers for various computing demands, including general-purpose, workload-optimized, and specific lines like HPE ProLiant rack and tower servers, HPE BladeSystem, and HPE Synergy. HPE also offers a full suite of storage solutions, from traditional tape and storage networking to advanced disk products such as HPE Modular Storage Arrays and HPE XP. Additionally, its portfolio includes specialized high-performance computing (HPC) offerings like HPE Apollo and Cray, alongside critical infrastructure platforms such as HPE Superdome Flex, HPE Nonstop, HPE Integrity, and HPE Edgeline. Through its HPE Aruba division, HPE delivers extensive networking capabilities, encompassing wired and wireless local area network (LAN) hardware—including Wi-Fi access points, switches, routers, and sensors—and a range of software and services for cloud management, network access control, analytics, and location services. HPE further provides professional and support services, along with flexible as-a-service and consumption models for its intelligent edge products. To streamline technology acquisition and deployment, HPE offers various financial services, including leasing, financing, IT consumption programs, and asset management. These services enable customers to procure complete IT solutions, spanning hardware, software, and services, from both HPE and other providers. The company strategically invests in communications and media solutions and has a key partnership with Striim, Inc., to deliver high-performance, mission-critical solutions with real-time analytics. HPE serves a broad clientele, including commercial and large enterprise groups in both the business and public sectors, reaching them through an extensive network of partners such as resellers, distributors, original equipment manufacturers (OEMs), independent software vendors (ISVs), system integrators (SIs), and advisory firms. Established in 1939, Hewlett Packard Enterprise Company is headquartered in Houston, Texas.",
+          "ceo": "Antonio Fabio Neri",
+          "sector": "Technology",
+          "country": "US",
+          "fullTimeEmployees": "67000",
+          "phone": "678 259 9860",
+          "address": "1701 East Mossy Oaks Road",
+          "city": "Spring",
+          "state": "TX",
+          "zip": "77389",
+          "image": "https://images.financialmodelingprep.com/symbol/HPE.png",
+          "ipoDate": "2015-10-19",
+          "defaultImage": false,
+          "isEtf": false,
+          "isActivelyTrading": true,
+          "isAdr": false,
+          "isFund": false
+        }
+      ],
+      "data_as_of": null,
+      "published_at": null,
+      "fetched_at": "2026-09-30T15:59:55.515089+00:00",
+      "financial_period": "2026-07-31",
+      "content_hash": "sha256:c64f0f7500ed66e80bc07e8cb94862acf6276235bb9f520be0d14470d0c5c80b",
+      "status": "ok",
+      "reason": null,
+      "endpoint": "/stable/profile",
+      "http_status": 200,
+      "http_calls": 1,
+      "queue_seconds": 0.0004552919417619705
+    }
+  },
+  "source_telemetry": {
+    "requests": 0,
+    "cache_hits": 1,
+    "http_calls_known": 0,
+    "http_calls_unknown": 0,
+    "outcomes": {
+      "ok": 1
+    }
+  }
+}

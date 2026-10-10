@@ -1,0 +1,11 @@
+{
+  "ticker": "HPE",
+  "key_levels": {
+    "support": 54.88,
+    "resistance": 65.65,
+    "pivot": 63.28
+  },
+  "pattern_taxonomy": "uptrend_continuation",
+  "smart_money_label": "accumulating",
+  "immediate_catalyst_5d": null
+}

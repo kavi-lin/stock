@@ -1,0 +1,119 @@
+{
+  "generated_at": "2026-10-01T01:43:09.567382+00:00",
+  "composite_score": 54.4,
+  "label": "Neutral",
+  "vix": {
+    "current": 16.34,
+    "percentile_1y": 31.9,
+    "regime": "NORMAL"
+  },
+  "spy_momentum": {
+    "rsi_14": 48.8,
+    "pct_above_ma50": 0.19,
+    "pct_above_ma200": 6.5
+  },
+  "put_call_ratio": null,
+  "fear_greed_index": 30.8,
+  "components_used": [
+    "vix",
+    "spy_rsi",
+    "pct_above_ma",
+    "fg"
+  ],
+  "extreme_sentiment_triggered": false,
+  "cache_hit": false,
+  "cache_age_sec": 0,
+  "ticker_signals": {
+    "ticker": "NVDA",
+    "insider_stats": [
+      {
+        "year": 2026,
+        "quarter": 3,
+        "acquired_disposed_ratio": 0.0882,
+        "total_acquired_shares": 174917,
+        "total_disposed_shares": 6430271,
+        "acquired_transactions": 3,
+        "disposed_transactions": 34,
+        "total_purchases": 0,
+        "total_sales": 25
+      },
+      {
+        "year": 2026,
+        "quarter": 2,
+        "acquired_disposed_ratio": 0.7857,
+        "total_acquired_shares": 70408,
+        "total_disposed_shares": 2802775,
+        "acquired_transactions": 11,
+        "disposed_transactions": 14,
+        "total_purchases": 0,
+        "total_sales": 7
+      },
+      {
+        "year": 2026,
+        "quarter": 1,
+        "acquired_disposed_ratio": 0.1596,
+        "total_acquired_shares": 60494159,
+        "total_disposed_shares": 31689036,
+        "acquired_transactions": 15,
+        "disposed_transactions": 94,
+        "total_purchases": 0,
+        "total_sales": 86
+      },
+      {
+        "year": 2025,
+        "quarter": 4,
+        "acquired_disposed_ratio": 0.0099,
+        "total_acquired_shares": 9639142,
+        "total_disposed_shares": 53465000,
+        "acquired_transactions": 2,
+        "disposed_transactions": 203,
+        "total_purchases": 0,
+        "total_sales": 190
+      }
+    ],
+    "insider_sentiment": {
+      "monthly_mspr": [
+        {
+          "year": 2026,
+          "month": 2,
+          "mspr": -100,
+          "change_shares": -47640
+        },
+        {
+          "year": 2026,
+          "month": 3,
+          "mspr": -0.08332534,
+          "change_shares": -100898
+        },
+        {
+          "year": 2026,
+          "month": 5,
+          "mspr": -100,
+          "change_shares": -625
+        },
+        {
+          "year": 2026,
+          "month": 6,
+          "mspr": -95.84094,
+          "change_shares": -2742641
+        },
+        {
+          "year": 2026,
+          "month": 7,
+          "mspr": -100,
+          "change_shares": -500000
+        },
+        {
+          "year": 2026,
+          "month": 9,
+          "mspr": -93.08281,
+          "change_shares": -4642764
+        }
+      ],
+      "latest_mspr": -93.08281
+    },
+    "short_pct_float": 1.27,
+    "short_pct_float_source": "yfinance.info (FINRA bi-monthly)",
+    "insider_stats_source": "FMP_SUPP_BUNDLE"
+  }
+}

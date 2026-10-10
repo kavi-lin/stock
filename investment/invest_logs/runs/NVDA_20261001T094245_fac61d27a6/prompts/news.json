@@ -1,0 +1,1020 @@
+{
+  "run_id": "NVDA_20261001T094245_fac61d27a6",
+  "lane": "news",
+  "ticker": "NVDA",
+  "snapshot_hash": "sha256:1f71223d45b6688a0f8df9188a7c1be419b54e8747b634857604e87b6cb774ae",
+  "input": {
+    "factpack": {
+      "ticker": "NVDA",
+      "bundles": {
+        "ticker_data_bundle": {
+          "status": "ok",
+          "fetched_at": "2026-10-01T01:42:52.872383Z",
+          "scoring": {
+            "_source": "finnhub",
+            "price": 228.38,
+            "previousClose": 227.21,
+            "dayHigh": 232.37,
+            "dayLow": 228.17,
+            "mktCap": 5475761014602.952,
+            "peRatio": 28.7145,
+            "epsTTM": 7.9108,
+            "dividendYield": 0.03349,
+            "priceToBookRatio": 28.8075,
+            "forwardPE": 17.02191,
+            "pegRatio": 0.51347,
+            "roeTTM": 110.11,
+            "debtToEquity": 0.0538,
+            "fcfPerShareTTM": 5.2372,
+            "nextEarningsDate": "2026-11-17"
+          }
+        },
+        "fmp_supp_bundle": {
+          "ma_events": {
+            "lookback_days": 180,
+            "events": [],
+            "source": "FMP /stable/mergers-acquisitions-latest"
+          }
+        }
+      }
+    },
+    "script_output": {
+      "ticker": "NVDA",
+      "generated_at": "2026-10-01T01:43:07+00:00",
+      "window_hours": 48,
+      "headlines": [
+        {
+          "date": "2026-10-01T00:14:38+00:00",
+          "title": "Trend vs. Hype",
+          "source": "Yahoo",
+          "url": "https://finnhub.io/api/news?id=d7c4a53bcaa40d5f5cfd919bc15bd033ad552f7889f0e5fc52405e163383713f",
+          "category": "company"
+        },
+        {
+          "date": "2026-09-30T23:50:00+00:00",
+          "title": "Warren Buffett's Record: $1,000 Became About $61 Million. Can Greg Abel Keep Compounding It?",
+          "source": "Yahoo",
+          "url": "https://finnhub.io/api/news?id=f64cf8d0bfe65ab93a4ead735ee19ec12352ebade3499f14b6d76e7e942b0c07",
+          "category": "company"
+        },
+        {
+          "date": "2026-09-30T23:30:00+00:00",
+          "title": "Novo Is Open to Acquisitions. Here Are 2 Companies That Would Be Great Candidates to Buy",
+          "source": "Yahoo",
+          "url": "https://finnhub.io/api/news?id=88b7df9c9d61e720043af10293f6dff5981ba23098b746adcd33aa8c361ae5f2",
+          "category": "company"
+        },
+        {
+          "date": "2026-09-30T23:19:10+00:00",
+          "title": "Why Synopsys Stock Soared Nearly 5% Higher Today",
+          "source": "Yahoo",
+          "url": "https://finnhub.io/api/news?id=1b2bd181aec3441518397bd1259c3041b6cbdc56fb2a4d6b3dc4ae8db09b6cc6",
+          "category": "company"
+        },
+        {
+          "date": "2026-09-30T23:14:01+00:00",
+          "title": "Micron’s Revenue More Than Quadrupled. Here’s What Comes Next for the AI Chipmaker.",
+          "source": "Yahoo",
+          "url": "https://finnhub.io/api/news?id=f44b47335c1166f97f5a80826ad4aee231198581f39f1c005d754e956aa4f302",
+          "category": "company"
+        },
+        {
+          "date": "2026-09-30T23:06:29+00:00",
+          "title": "Forget Waiting Three Months for SPY’s Dividend. Invesco’s High-Dividend Fund Pays Every Month",
+          "source": "24/7 Wall St.",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/forget-waiting-three-months-spy-230629592.html"
+        },
+        {
+          "date": "2026-09-30T23:04:00+00:00",
+          "title": "Nvidia, Broadcom, and AMD Investors Need to Have Oct. 15 Circled on Their Calendars",
+          "source": "Yahoo",
+          "url": "https://finnhub.io/api/news?id=4a438b5d0e95cb6bd7403fa88539f5348b58651232f9615f1d3f5d35a122dbaa",
+          "category": "company"
+        },
+        {
+          "date": "2026-09-30T22:38:00+00:00",
+          "title": "Tech CEOs Privately Questioned Amodei for Sounding AI Alarm Bells",
+          "source": "The Wall Street Journal",
+          "url": "https://www.wsj.com/tech/ai/tech-ceos-privately-questioned-amodei-for-sounding-ai-alarm-bells-aaa47df3?siteid=yhoof2&yptr=yahoo"
+        },
+        {
+          "date": "2026-09-30T22:33:21+00:00",
+          "title": "Tech CEOs questioned Anthropic leader over AI safety warnings, WSJ reports",
+          "source": "Yahoo",
+          "url": "https://finnhub.io/api/news?id=2e7c30b64a15bca359cc262d3161efd378f87d094791c9aa2fa423cbb8138cad",
+          "category": "company"
+        },
+        {
+          "date": "2026-09-30T22:32:00+00:00",
+          "title": "Nvidia's record buyback exposes strange Wall Street gap",
+          "source": "Yahoo",
+          "url": "https://finnhub.io/api/news?id=cd0265d251859d4240e24219a4fb34340f41c5b484d860418f4c6718ac7f5b8f",
+          "category": "company"
+        },
+        {
+          "date": "2026-09-30T22:13:09+00:00",
+          "title": "Why Peoples Bancorp Stock Tanked Today",
+          "source": "Yahoo",
+          "url": "https://finnhub.io/api/news?id=27b66fccd8cc044b6c6450db6779ddf6b5b2e3ce6d75499848b3d840503ee28c",
+          "category": "company"
+        },
+        {
+          "date": "2026-09-30T22:05:00+00:00",
+          "title": "In AI Race, Software Is Now Winning Alongside Chips",
+          "source": "Barrons.com",
+          "url": "https://www.barrons.com/articles/ai-agents-meta-muse-stocks-chips-cb06386a?siteid=yhoof2&yptr=yahoo"
+        },
+        {
+          "date": "2026-09-30T21:50:00+00:00",
+          "title": "Rivian Stock Is Going to $19 According to This Wall Street Analyst. Here's Why They May Be Right.",
+          "source": "Yahoo",
+          "url": "https://finnhub.io/api/news?id=045c60443fe3b8f884485ad1e8d11c5564f1e11aaabbae519d1b9fa8ea8f1113",
+          "category": "company"
+        },
+        {
+          "date": "2026-09-30T21:41:35+00:00",
+          "title": "Why Celcuity Stock Was a Winner on Wednesday",
+          "source": "Yahoo",
+          "url": "https://finnhub.io/api/news?id=23ed0e5f27ccccbbdfc78b83c146e8e4830a97a281a0740bc213e1d7284445a4",
+          "category": "company"
+        },
+        {
+          "date": "2026-09-30T21:33:00+00:00",
+          "title": "JPMorgan sends a strong message to Mag-7 stock investors",
+          "source": "Yahoo",
+          "url": "https://finnhub.io/api/news?id=5d3c1a924a076dd4a318800346bb7a073aa74b0c7fb9e2beed62fe6dc73e49f5",
+          "category": "company"
+        },
+        {
+          "date": "2026-09-30T21:32:03+00:00",
+          "title": "NVIDIA Is World's Largest Stock Yet Still Undervalued",
+          "source": "Yahoo",
+          "url": "https://finnhub.io/api/news?id=c85317ba82e5a7559eafed079255445fb4f6fccb74453227dfb85414759aac24",
+          "category": "company"
+        },
+        {
+          "date": "2026-09-30T21:25:13+00:00",
+          "title": "FormFactor (FORM) Shares Skyrocket, What You Need To Know",
+          "source": "Yahoo",
+          "url": "https://finnhub.io/api/news?id=1db6d561a5b371190771a7223ca91e37ddbeeb18c5643287b72ee06ec4ab1534",
+          "category": "company"
+        },
+        {
+          "date": "2026-09-30T21:20:00+00:00",
+          "title": "Viking Therapeutics Stock Soars 36% on Weight-Loss Drug Data. Why It's Not Too Late to Buy the Stock.",
+          "source": "Yahoo",
+          "url": "https://finnhub.io/api/news?id=c681ecd51bebed5e433958435348512ebe4ab762fa43fe4f97f4feed2da35df2",
+          "category": "company"
+        },
+        {
+          "date": "2026-09-30T21:16:36+00:00",
+          "title": "Robinhood Wants Your AI Agent to Trade 24/7",
+          "source": "Yahoo",
+          "url": "https://finnhub.io/api/news?id=4bf6bec6e1a06755490854b99333d5db50db7c851519827c006d62a54ccb0046",
+          "category": "company"
+        },
+        {
+          "date": "2026-09-30T21:13:01+00:00",
+          "title": "Netflix Stock Has Turned $1,000 Into About $654,000 Since Its IPO. It Has Gone Nowhere Since 2021.",
+          "source": "Yahoo",
+          "url": "https://finnhub.io/api/news?id=23cbe95678f0acda1356afbb16829aa632fcbdd39b9a2c7168a3b5c8d0e5dc45",
+          "category": "company"
+        },
+        {
+          "date": "2026-09-30T21:09:02+00:00",
+          "title": "FormFactor Stock Jumps As Chip-Gear Firm Gets Fresh Buy Rating",
+          "source": "Yahoo",
+          "url": "https://finnhub.io/api/news?id=078aab24977e8769f18e8cb8c5828ee89d22a6a779b5d978dbdd355b589ab464",
+          "category": "company"
+        },
+        {
+          "date": "2026-09-30T21:07:54+00:00",
+          "title": "Why Cal-Maine Foods Stock Dipped on Wednesday",
+          "source": "Yahoo",
+          "url": "https://finnhub.io/api/news?id=e93191dfa4b0f07dd72930f7a4cbbc5c89cb12db53552d30e18f1915c43bbc36",
+          "category": "company"
+        },
+        {
+          "date": "2026-09-30T21:05:00+00:00",
+          "title": "Is Cameco Stock a Buy Now?",
+          "source": "Yahoo",
+          "url": "https://finnhub.io/api/news?id=d54ca28f2663126132ac70d387f50e56ba96994a34acd48af3607d9dff1cbbf0",
+          "category": "company"
+        },
+        {
+          "date": "2026-09-30T20:54:22+00:00",
+          "title": "Stock Market Today: Dow Knocked Down, Nasdaq Pares Gain; Micron Holds Firm After Earnings Soar",
+          "source": "Investor's Business Daily",
+          "url": "https://www.investors.com/market-trend/stock-market-today/dow-jones-sp500-nasdaq-inflation-data-micron-earnings-mu-stock/?src=A00220&yptr=yahoo"
+        },
+        {
+          "date": "2026-09-30T20:52:26+00:00",
+          "title": "What Changed In Marvell's Story?",
+          "source": "Trefis",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/changed-marvells-story-205226599.html"
+        },
+        {
+          "date": "2026-09-30T20:19:14+00:00",
+          "title": "Nvidia, AMD Collaborator Teases Breakout To Record High. These Clues Bode Well.",
+          "source": "Investor's Business Daily",
+          "url": "https://www.investors.com/research/breakout-stocks-technical-analysis/semtech-stock-teases-record-high-nvidia-amd-enter-buy-range/?src=A00220&yptr=yahoo"
+        },
+        {
+          "date": "2026-09-30T19:47:00+00:00",
+          "title": "FTC Reportedly Probes OpenAI and Anthropic as Trump Backs AI Self-Regulation",
+          "source": "Barrons.com",
+          "url": "https://www.barrons.com/articles/ftc-openai-anthropic-ai-safety-investigation-8eb4be96?siteid=yhoof2&yptr=yahoo"
+        },
+        {
+          "date": "2026-09-30T19:15:32+00:00",
+          "title": "Is Cerebras' Next Big Thing Already Here?",
+          "source": "Trefis",
+          "url": "https://finance.yahoo.com/technology/ai/articles/cerebras-next-big-thing-already-191532128.html"
+        },
+        {
+          "date": "2026-09-30T18:51:54+00:00",
+          "title": "What Is The Case For Waiting On Qualcomm Stock?",
+          "source": "Trefis",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/case-waiting-qualcomm-stock-185154269.html"
+        },
+        {
+          "date": "2026-09-30T14:10:14+00:00",
+          "title": "Breaking down Jensen Huang's biggest moves of Q3 2026",
+          "source": "Yahoo Finance Video",
+          "url": "https://finance.yahoo.com/video/breaking-down-jensen-huangs-biggest-141014414.html"
+        },
+        {
+          "date": "2026-09-30 20:03:00",
+          "title": "Nvidia Could Have a Monster October. Here's Why.",
+          "source": "fool.com",
+          "url": "https://www.fool.com/investing/2026/09/30/nvidia-could-have-a-monster-october-heres-why/",
+          "summary": "AI hyperscalers releasing their capital expenditure projections early could kick-start a rally for Nvidia. The chipmaker's stock is priced at a dirt-cheap level.",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-30 18:40:58",
+          "title": "Q3 Earnings on Track for 8th Consecutive Quarter of Double-Digit Growth",
+          "source": "zacks.com",
+          "url": "https://www.zacks.com/commentary/2998480/q3-earnings-on-track-for-8th-consecutive-quarter-of-double-digit-growth?cid=CS-STOCKNEWSAPI-FT-earnings_trends-2998480",
+          "summary": "The Q3 earnings season is shaping up to be the most broad-based growth performance in recent times, with 14 of the 16 Zacks sectors expected to enjoy higher earnings and six sectors producing double-digit growth.",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-30 18:17:01",
+          "title": "Nvidia Stock Can Top $400 in 5 Years If One Assumption Holds Up",
+          "source": "fool.com",
+          "url": "https://www.fool.com/investing/2026/09/30/nvidia-stock-can-top-usd400-in-5-years-if-one-assumption-holds-up/",
+          "summary": "Nvidia's adjusted earnings per share rose 120% year over year in the fiscal second quarter. The chipmaker's newly expanded buyback could retire around 4% of its shares at today's price.",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-30 17:20:01",
+          "title": "Stock Market Today, Sept. 30: Nvidia Authorizes $150B Buyback, Lifting Total to $235B",
+          "source": "fool.com",
+          "url": "https://www.fool.com/coverage/stock-market-today/2026/09/30/stock-market-today-sept-30-nvidia-authorizes-usd150b-buyback-lifting-total-to-usd235b/",
+          "summary": "Today, Sept. 30, 2026, the AI chip giant reinforced management confidence with an expanded repurchase program through 2028.",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-30 16:18:43",
+          "title": "Nvidia's Demand Outlook Still Supports The Bull Case",
+          "source": "seekingalpha.com",
+          "url": "https://seekingalpha.com/article/4951149-nvidia-demand-outlook-still-supports-bull-case",
+          "summary": "Nvidia remains a Buy, supported by robust Q2 FY27 results and bullish management guidance for continued AI-driven growth. Data center revenue surged 117% YoY to $89 billion, with strong gains across hyperscale and ACIE customers, reinforcing NVDA's full-stack AI platform dominanc",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-30 13:30:00",
+          "title": "Michael Burry Buys Put Options on Nvidia, Micron, and Palantir as \"The Big Short\" Investor Predicts a 1987-Style Market Crash",
+          "source": "fool.com",
+          "url": "https://www.fool.com/investing/2026/09/30/michael-burry-buys-put-options-on-nvidia-micron-an/",
+          "summary": "Michael Burry thinks AI stocks are overvalued and at risk of fueling a widespread market crash. While some of Burry's arguments are valid, he has a clear incentive to publish his trades.",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-30 13:12:11",
+          "title": "Where AI Competitive Moats Are Evaporating & Being Built",
+          "source": "etftrends.com",
+          "url": "https://www.etftrends.com/artificial-intelligence-content-hub/where-ai-competitive-moats-are-evaporating-being-built/",
+          "summary": "Artificial intelligence (AI) is dismantling the competitive advantages that entire market segments have relied on for decades. Understanding where competitive moats are disappearing versus where they are being reinforced due to AI may be one of the most important questions that i",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-30 13:00:12",
+          "title": "The Big 3: NVDA, BE, SPCX",
+          "source": "youtube.com",
+          "url": "https://www.youtube.com/watch?v=kDFWSH3hd1o",
+          "summary": "High concentration in tech stocks isn't a bad thing for short-term traders, according to Tim Bohen (@Stockstotrade) who points to trading opportunities it presents across Wall Street. He names Nvidia (NVDA) as the long-standing AI giant with plenty of value, Bloom Energy (BE) as ",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-30 12:30:53",
+          "title": "After Massive 2026 Gains, Can NVIDIA, Micron, and SanDisk Keep Climbing in 2027?",
+          "source": "247wallst.com",
+          "url": "https://247wallst.com/investing/2026/09/30/after-massive-2026-gains-can-nvidia-micron-and-sandisk-keep-climbing-in-2027/",
+          "summary": "NVIDIA is up 23% this year, but Micron and SanDisk have left it in the dust with gains that few analysts thought possible.",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-30 12:01:39",
+          "title": "Nvidia Looks Criminally Cheap",
+          "source": "seekingalpha.com",
+          "url": "https://seekingalpha.com/article/4951069-nvidia-looks-criminally-cheap",
+          "summary": "Nvidia Corporation remains a Buy, with a 12–16 month price target of $352, implying 55% upside as AI-driven growth and platform dominance persist. Full-stack architecture complexity increases revenue generation toward $40 billion per gigawatt across new scale-up NVLink, CPU, and ",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-30 11:59:01",
+          "title": "QUICK SPARK: Meta Could Be the AI Trade's Come-From-Behind Winner, Says Strategist",
+          "source": "benzinga.com",
+          "url": "https://www.benzinga.com/trading-ideas/long-ideas/26/09/62084801/meta-ai-trade-winner",
+          "summary": "NVIDIA Corp (NASDAQ:NVDA) has captured the financial spotlight from the AI boom, but the next phase of the trade could favor companies that are already turning AI into revenue. WisdomTree Macro Strategist Sam Rines sees Meta Platforms Inc (NASDAQ:META) as an overlooked beneficiar",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-30 11:58:00",
+          "title": "JPMorgan Stocks Edge Lower as Bank Joins Open Agent-Safety Project",
+          "source": "gurufocus.com",
+          "url": "https://www.gurufocus.com/news/9103675/jpmorgan-stocks-edge-lower-as-bank-joins-open-agentsafety-project",
+          "summary": "JPMorgan Chase (JPM), the global banking and financial-services company, joined Nvidia's (NVDA) open-source agent-safety collaboration announced September 28, w",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-30 11:48:48",
+          "title": "EXCLUSIVE: If AI Capex Cracks, Nvidia Could Feel It Before Meta Does",
+          "source": "benzinga.com",
+          "url": "https://www.benzinga.com/trading-ideas/long-ideas/26/09/62084519/nvidia-ai-capex-meta",
+          "summary": "The next crack in the AI trade may show up in spending before it appears in revenue. Sam Rines, Macro Strategist at WisdomTree, says a slowdown in hyperscaler capital spending would likely hit semiconductors and infrastructure providers hardest, while companies using AI to improv",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-30 11:41:53",
+          "title": "Why is Nvidia stock rising on Wednesday?",
+          "source": "invezz.com",
+          "url": "https://invezz.com/news/2026/09/30/why-is-nvidia-stock-rising-on-wednesday/",
+          "summary": "Nvidia shares NVDA rose more than 1.6% on Wednesday as softer-than-expected US inflation boosted hopes that the Federal Reserve may hold off on another interest rate increase as soon as next month, benefiting most mega-cap and growth stocks. The Commerce Department reported that ",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-30 11:02:33",
+          "title": "AI Uncertainty Is Rising, But These 3 Chip ETFs Still Have Momentum",
+          "source": "marketbeat.com",
+          "url": "https://www.marketbeat.com/articles/ai-uncertainty-is-rising-but-these-3-chip-etfs-still-have-momentum/",
+          "summary": "It's easy to get skittish about the tech sector amid recent talk of slowing AI development and OpenAI scrapping the launch of its latest model due to safety concerns. AI demand has driven much of the sector's growth in recent years, after all.",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-30 10:30:02",
+          "title": "Price Prediction: 5 Years From Now, This Could Be Nvidia Stock's Price",
+          "source": "247wallst.com",
+          "url": "https://247wallst.com/investing/2026/09/30/price-prediction-5-years-from-now-this-could-be-nvidia-stocks-price/",
+          "summary": "Nvidia just doubled its revenue while its stock barely moved, and Wall Street is split on what comes next. The math behind a $500 price target by 2031 is tighter than it looks, and one overlooked number changes everything.",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-30 09:47:00",
+          "title": "CoreWeave Stock Rises After Debuting Nvidia Vera Rubin, New Software",
+          "source": "gurufocus.com",
+          "url": "https://www.gurufocus.com/news/9103510/coreweave-stock-rises-after-debuting-nvidia-vera-rubin-new-software",
+          "summary": "CoreWeave (CRWV) unveiled a batch of products and customer wins at its Fully Connected conference, led by the availability of Nvidia's (NVDA) Vera Rubin NVL72 s",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-30 09:28:00",
+          "title": "Cathie Wood Just Dropped $78 Million on This Red-Hot Chip Stock",
+          "source": "gurufocus.com",
+          "url": "https://www.gurufocus.com/news/9103273/cathie-wood-just-dropped-78-million-on-this-redhot-chip-stock",
+          "summary": "Cathie Wood increased her exposure to Nvidia (NVDA) while trimming Advanced Micro Devices (AMD) on Tuesday, shifting some AI-chip allocation after a sharp diver",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-30 09:27:00",
+          "title": "DeepSeek and Huawei Just Took Aim at Nvidia's Biggest Software Advantage",
+          "source": "gurufocus.com",
+          "url": "https://www.gurufocus.com/news/9103272/deepseek-and-huawei-just-took-aim-at-nvidias-biggest-software-advantage",
+          "summary": "Another Chinese threat is targeting Nvidia (NVDA, Financials) beyond its AI chips. According to DeepSeek's official WeChat account, Huawei Technologies and Deep",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-30 09:24:00",
+          "title": "Cathie Wood Just Dumped $110 Million of AMD--and Bought Nvidia and Broadcom",
+          "source": "gurufocus.com",
+          "url": "https://www.gurufocus.com/news/9103189/cathie-wood-just-dumped-110-million-of-amdand-bought-nvidia-and-broadcom",
+          "summary": "Advanced Micro Devices (AMD, Financials) just lost another sizable chunk of Cathie Wood's backing as ARK Invest shifted money toward two of its biggest AI-chip",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-30 09:17:00",
+          "title": "Nvidia Stocks Rise After Signing White House AI Safety Accord",
+          "source": "gurufocus.com",
+          "url": "https://www.gurufocus.com/news/9103152/nvidia-stocks-rise-after-signing-white-house-ai-safety-accord",
+          "summary": "Nvidia (NVDA), the AI-chip and data-center platform company, signed the White House's voluntary AI accord on September 29, with shares up approximately 0.3% dur",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-30 09:16:39",
+          "title": "Cathie Wood Sold $110 Million of AMD and Bought Nvidia Instead",
+          "source": "247wallst.com",
+          "url": "https://247wallst.com/investing/2026/09/30/cathie-wood-sold-110-million-of-amd-and-bought-nvidia-instead/",
+          "summary": "Cathie Wood just dumped one of this year's biggest AI winners to load up on a stock that has barely moved, and the reasoning behind that swap reveals a lot about where she thinks the real opportunity still sits.",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-30 09:05:00",
+          "title": "Cathie Wood Goes Bargain Hunting: 3 Stocks She Just Bought",
+          "source": "fool.com",
+          "url": "https://www.fool.com/investing/2026/09/30/cathie-wood-goes-bargain-hunting-3-stocks-she-just/",
+          "summary": "The widely followed growth investor made some big market purchases on Tuesday.",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-30 09:00:00",
+          "title": "CoreWeave Delivers NVIDIA Vera Rubin NVL72 Performance at Production Scale, Starting With Cognition",
+          "source": "businesswire.com",
+          "url": "https://www.businesswire.com/news/home/20260930041932/en/CoreWeave-Delivers-NVIDIA-Vera-Rubin-NVL72-Performance-at-Production-Scale-Starting-With-Cognition/",
+          "summary": "SAN FRANCISCO--(BUSINESS WIRE)--CoreWeave Inc. (Nasdaq: CRWV), The Essential Cloud for AI™, today announced the availability of NVIDIA Vera Rubin NVL72 on CoreWeave, with Cognition as the first customer anywhere running production workloads on the system. Customers, like Cognitio",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-30 08:59:01",
+          "title": "Broadcom vs. NVIDIA: Which Technology Stock Is a Better Buy in 2026?",
+          "source": "fool.com",
+          "url": "https://www.fool.com/coverage/better-buy/2026/09/30/broadcom-vs-nvidia-which-technology-stock-is-a-better-buy-in-2026/",
+          "summary": "Broadcom's 36% net margin and $27B free cash flow offer stability, while NVIDIA's 56% margin and $97B cash generation power explosive growth.",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-30 08:50:00",
+          "title": "Silo Pharma's QwikAgents Expands AI Agent Platform with NVIDIA Model Support and New Runtime Flexibility",
+          "source": "globenewswire.com",
+          "url": "https://www.globenewswire.com/news-release/2026/09/30/3371897/0/en/silo-pharma-s-qwikagents-expands-ai-agent-platform-with-nvidia-model-support-and-new-runtime-flexibility.html",
+          "summary": "Addition of NVIDIA Nemotron models and Hermes runtime expands customer choice across both AI models and agent software SARASOTA, FLA., Sept. 30, 2026 (GLOBE NEWSWIRE) -- Silo Pharma (Nasdaq: SILO) (“Silo” or “the Company”), a developmental-stage biopharmaceutical company focused ",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-30 08:00:01",
+          "title": "3 Tech Stocks That Could Be in Trouble if There's an Artificial Intelligence (AI) Slowdown",
+          "source": "fool.com",
+          "url": "https://www.fool.com/investing/2026/09/30/3-tech-stocks-that-could-be-in-trouble-if-there-s-an-artificial-intelligence-ai-slowdown/",
+          "summary": "These stocks have been hot buys in large part due to expectations of continued strong growth driven by artificial intelligence (AI).",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-30 07:30:00",
+          "title": "Meet the Low-Cost Vanguard ETF With 51.8% Invested in Nvidia, Apple, Alphabet, Microsoft, and Amazon While VOO Has Just 30%",
+          "source": "fool.com",
+          "url": "https://www.fool.com/investing/2026/09/30/mega-cap-growth-stocks-mgk-voo-nvidia-apple/",
+          "summary": "The Vanguard Mega Cap Growth ETF is a bet that today's leading companies will continue driving broader market gains. Mega-cap growth stock valuations have come down as investors question the payoff of capital-intensive AI investments.",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-30 07:20:58",
+          "title": "Should WisdomTree U.S. LargeCap ETF (EPS) Be on Your Investing Radar?",
+          "source": "zacks.com",
+          "url": "https://www.zacks.com/stock/news/2997888/should-wisdomtree-u-s-largecap-etf-eps-be-on-your-investing-radar?cid=CS-STOCKNEWSAPI-FT-style_box_etf-2997888",
+          "summary": "Designed to provide broad exposure to the Large Cap Value segment of the US equity market, the WisdomTree U.S. LargeCap ETF (EPS) is a passively managed exchange traded fund launched on February 23, 2007.",
+          "_provider": "fmp_news_stock"
+        },
+        {
+          "date": "2026-09-30 07:15:56",
+          "title": "Jim Cramer's Nvidia Take is Surprisngly Sound For Once",
+          "source": "247wallst.com",
+          "url": "https://247wallst.com/investing/2026/09/30/jim-cramers-nvidia-take-is-surprisngly-sound-for-once/",
+          "summary": "Jim Cramer called for a $500 billion buyback and named Nvidia the single best investment Jensen Huang can make. The math behind that argument is harder to argue with than you might expect.",
+          "_provider": "fmp_news_stock"
+        }
+      ],
+      "analyst_actions": [],
+      "analyst_actions_source": "finviz_fallback",
+      "analyst_consensus": {
+        "strong_buy": 2,
+        "buy": 58,
+        "hold": 16,
+        "sell": 3,
+        "strong_sell": 0,
+        "consensus": "Buy"
+      },
+      "pt_revision_momentum": {
+        "direction": "UP",
+        "consensus_delta_pct_1m": 15.07,
+        "consensus_delta_pct_3m": 1.11,
+        "analysts_last_month": 1,
+        "analysts_last_quarter": 23,
+        "note": "PT revision direction only — absolute levels stripped (V3.45.4 anti cross-lane anchoring)"
+      },
+      "analyst_news": [],
+      "sec_filings_recent": [],
+      "sec_8k_filings": [
+        {
+          "filing_date": "2026-09-03 00:00:00",
+          "accepted_date": "2026-09-03 08:03:56",
+          "form_type": "8-K",
+          "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000078/nvda-20260902.htm",
+          "_provider": "fmp_sec_8k"
+        }
+      ],
+      "warnings": [
+        "no_analyst_actions_in_30d"
+      ],
+      "data_quality": {
+        "fmp_stock_news_count": 30,
+        "fmp_press_release_count": 0,
+        "finviz_news_count": 0,
+        "finviz_analyst_count": 0,
+        "yf_news_count": 10,
+        "finnhub_news_count": 25,
+        "fmp_grades_count": 0,
+        "fmp_grades_news_count": 0,
+        "fmp_sec_8k_count": 1,
+        "headlines_total_dedup": 60,
+        "headlines_primary_source": "fmp_news_stock",
+        "fmp_calls": 9,
+        "fmp_failures": 0,
+        "sparse": false,
+        "recommendation": "ok"
+      }
+    },
+    "script_status": "ok",
+    "missing_reason": null
+  },
+  "phase0": {
+    "phase": 0,
+    "scan_date": "2026-10-01",
+    "fetched_at": "2026-09-30T23:58:46+00:00",
+    "phase0_source": "SKILL_CHAIN",
+    "macro_summary": {
+      "macro_backdrop_score": -2.0,
+      "market_regime": "VOLATILE",
+      "regime_confidence": 0.62,
+      "key_themes": [
+        "High Treasury yields pressure equity valuations",
+        "Softer inflation offset by resilient activity",
+        "Elevated credit stress and weak participation",
+        "Iran-linked oil volatility adds inflation risk"
+      ],
+      "hot_sectors": [],
+      "cold_sectors": []
+    },
+    "_market_signals": {
+      "fear_greed_index": 30.8,
+      "market_sentiment_composite": 54.4,
+      "vix_current": 16.34,
+      "vix_regime": "NORMAL",
+      "spy_rsi_14": 48.8,
+      "spy_pct_above_ma50": 0.19,
+      "spy_pct_above_ma200": 6.5,
+      "breadth_composite": 28.6,
+      "breadth_zone": "Weakening",
+      "breadth_trend": "deteriorating",
+      "breadth_data_date": "2026-09-24",
+      "ftd_status": "NO_SIGNAL",
+      "ftd_status_text": "FTD_INVALIDATED",
+      "ftd_days_since": null,
+      "ftd_quality_score": 0,
+      "market_top_score": 40.0,
+      "market_top_zone": "Yellow",
+      "market_top_zone_label": "Yellow (Early Warning)",
+      "top_catalysts": [
+        {
+          "date": "2026-09-30",
+          "ticker": null,
+          "headline": "Most U.S. stocks fell as stronger growth data kept Treasury yields high despite softer inflation",
+          "source": "AP: https://apnews.com/article/1ee73f14dc23f6139eeb12c7397f543e"
+        },
+        {
+          "date": "2026-09-29",
+          "ticker": null,
+          "headline": "Rising Treasury yields weighed on equities as long bond yields reached multi-decade highs",
+          "source": "Reuters: https://www.investing.com/news/economy-news/equities-dip-as-bond-yields-hold-near-multidecade-highs-4923360"
+        },
+        {
+          "date": "2026-09-29",
+          "ticker": null,
+          "headline": "Oil volatility tied to the U.S.-Iran conflict sustained inflation and rate concerns",
+          "source": "AP: https://apnews.com/article/269abea6fd8ea7f314a8c34152788e0c"
+        }
+      ]
+    },
+    "fred_available": true,
+    "fred_snapshot": {
+      "generated_at": "2026-09-30T23:07:47+00:00",
+      "asof": null,
+      "cache_hit": true,
+      "cache_age_sec": 3042,
+      "series": {
+        "DFF": {
+          "value": 3.88,
+          "value_smooth_3d": 3.88,
+          "date": "2026-09-29",
+          "data_freshness_days": 2,
+          "delta_bps_1m": 25.0,
+          "delta_bps_3m": 25.0,
+          "delta_bps_1y": -21.0,
+          "percentile_1y": 80,
+          "trend_30d": "rising",
+          "trend_90d": "rising"
+        },
+        "T10Y3M": {
+          "value": 1.09,
+          "value_smooth_3d": 1.02,
+          "date": "2026-09-30",
+          "data_freshness_days": 1,
+          "delta_bps_1m": 25.0,
+          "delta_bps_3m": 42.0,
+          "delta_bps_1y": 95.0,
+          "percentile_1y": 100,
+          "trend_30d": "rising",
+          "trend_90d": "rising"
+        },
+        "DGS2": {
+          "value": 4.89,
+          "value_smooth_3d": 4.8733,
+          "date": "2026-09-29",
+          "data_freshness_days": 2,
+          "delta_bps_1m": 55.0,
+          "delta_bps_3m": 72.0,
+          "delta_bps_1y": 126.0,
+          "percentile_1y": 99,
+          "trend_30d": "rising",
+          "trend_90d": "rising"
+        },
+        "T10Y2Y": {
+          "value": 0.41,
+          "value_smooth_3d": 0.3667,
+          "date": "2026-09-30",
+          "data_freshness_days": 1,
+          "delta_bps_1m": 0.0,
+          "delta_bps_3m": 6.0,
+          "delta_bps_1y": -15.0,
+          "percentile_1y": 20,
+          "trend_30d": "stable",
+          "trend_90d": "stable"
+        },
+        "DGS10": {
+          "value": 5.26,
+          "value_smooth_3d": 5.2233,
+          "date": "2026-09-29",
+          "data_freshness_days": 2,
+          "delta_bps_1m": 51.0,
+          "delta_bps_3m": 78.0,
+          "delta_bps_1y": 111.0,
+          "percentile_1y": 100,
+          "trend_30d": "rising",
+          "trend_90d": "rising"
+        },
+        "DFII10": {
+          "value": 2.91,
+          "value_smooth_3d": 2.88,
+          "date": "2026-09-29",
+          "data_freshness_days": 2,
+          "delta_bps_1m": 47.0,
+          "delta_bps_3m": 66.0,
+          "delta_bps_1y": 111.0,
+          "percentile_1y": 100,
+          "trend_30d": "rising",
+          "trend_90d": "rising"
+        },
+        "CPILFESL": {
+          "value": 337.765,
+          "date": "2026-08-01",
+          "data_freshness_days": 61,
+          "yoy_change_pct": 2.45,
+          "mom_change_pct": 0.29,
+          "wow_change": 0.0,
+          "percentile_1y": 92,
+          "trend_30d": "stable",
+          "trend_90d": "stable"
+        },
+        "CPIAUCSL": {
+          "value": 334.131,
+          "date": "2026-08-01",
+          "data_freshness_days": 61,
+          "yoy_change_pct": 3.35,
+          "mom_change_pct": 0.4,
+          "wow_change": 0.0,
+          "percentile_1y": 92,
+          "trend_30d": "stable",
+          "trend_90d": "stable"
+        },
+        "UNRATE": {
+          "value": 4.1,
+          "date": "2026-08-01",
+          "data_freshness_days": 61,
+          "yoy_change_pct": -4.65,
+          "mom_change_pct": 0.0,
+          "wow_change": 0.0,
+          "percentile_1y": 0,
+          "trend_30d": "stable",
+          "trend_90d": "falling"
+        },
+        "ICSA": {
+          "value": 197000.0,
+          "date": "2026-09-19",
+          "data_freshness_days": 12,
+          "yoy_change_pct": -10.05,
+          "mom_change_pct": -3.43,
+          "wow_change": -1000.0,
+          "percentile_1y": 4,
+          "trend_30d": "falling",
+          "trend_90d": "falling"
+        },
+        "PAYEMS": {
+          "value": 159075.0,
+          "date": "2026-08-01",
+          "data_freshness_days": 61,
+          "yoy_change_pct": 0.38,
+          "mom_change_pct": 0.1,
+          "wow_change": 0.0,
+          "percentile_1y": 92,
+          "trend_30d": "stable",
+          "trend_90d": "stable"
+        },
+        "PCEPILFE": {
+          "value": 130.455,
+          "date": "2026-08-01",
+          "data_freshness_days": 61,
+          "yoy_change_pct": 3.01,
+          "mom_change_pct": 0.25,
+          "wow_change": 0.0,
+          "percentile_1y": 92,
+          "trend_30d": "stable",
+          "trend_90d": "stable"
+        },
+        "SAHMREALTIME": {
+          "value": -0.07,
+          "date": "2026-08-01",
+          "data_freshness_days": 61,
+          "yoy_change_pct": -153.85,
+          "mom_change_pct": -133.33,
+          "wow_change": 0.0,
+          "percentile_1y": 0,
+          "trend_30d": "stable",
+          "trend_90d": "falling"
+        },
+        "RSXFS": {
+          "value": 646347.0,
+          "date": "2026-08-01",
+          "data_freshness_days": 61,
+          "yoy_change_pct": 5.36,
+          "mom_change_pct": 1.14,
+          "wow_change": 0.0,
+          "percentile_1y": 92,
+          "trend_30d": "stable",
+          "trend_90d": "stable"
+        },
+        "NFCI": {
+          "value": -0.548,
+          "date": "2026-09-25",
+          "data_freshness_days": 6,
+          "yoy_change_pct": -4.18,
+          "mom_change_pct": 1.97,
+          "wow_change": 0.005,
+          "percentile_1y": 23,
+          "trend_30d": "stable",
+          "trend_90d": "falling"
+        },
+        "DCOILWTICO": {
+          "value": 96.16,
+          "date": "2026-09-29",
+          "data_freshness_days": 2,
+          "yoy_change_pct": 49.62,
+          "mom_change_pct": 10.49,
+          "wow_change": -0.25,
+          "percentile_1y": 79,
+          "trend_30d": "rising",
+          "trend_90d": "rising"
+        },
+        "BAMLH0A0HYM2": {
+          "value": 3.08,
+          "value_smooth_3d": 3.01,
+          "date": "2026-09-29",
+          "data_freshness_days": 2,
+          "delta_bps_1m": 45.0,
+          "delta_bps_3m": 34.0,
+          "delta_bps_1y": 34.0,
+          "percentile_1y": 85,
+          "trend_30d": "rising",
+          "trend_90d": "rising"
+        }
+      },
+      "regime_signals": {
+        "yield_curve_inverted": false,
+        "yield_curve_steep": true,
+        "yield_curve_value": 1.02,
+        "yield_curve_10y2y": 0.37,
+        "yield_curve_10y3m": 1.02,
+        "yield_curve_10y3m_inverted": false,
+        "yield_curve_10y2y_inverted": false,
+        "credit_stress_elevated": true,
+        "credit_spread_pctile_1y": 85,
+        "financial_stress_above_avg": false,
+        "nfci_wow_change": 0.005,
+        "nfci_deteriorating_fast": false,
+        "sahm_value": -0.07,
+        "sahm_triggered": false,
+        "retail_contracting": false,
+        "retail_sales_mom_pct": 1.14,
+        "fed_rate_direction": "flat",
+        "fed_funds_current": 3.88,
+        "real_rate_10y_estimate": 1.87,
+        "real_rate_dfii10": 2.88,
+        "real_rate_preferred": 2.88
+      },
+      "macro_scores": {
+        "rates": 55,
+        "inflation": 50,
+        "employment": 75,
+        "credit": 20,
+        "financial_conditions": 85,
+        "composite": 57,
+        "_weights": {
+          "rates": 1.0,
+          "credit": 1.0,
+          "financial_conditions": 1.0,
+          "employment": 0.7,
+          "inflation": 0.5
+        }
+      },
+      "regime_label": "Late Cycle Tightening",
+      "regime_confidence": 0.31,
+      "market_implications": [
+        "🔴 Late Cycle — 實質利率偏高，防禦股 / 現金為王",
+        "📉 實質利率 2.9% 偏高 → 成長股估值壓力，價值股 / 金融股相對佔優",
+        "📈 殖利率曲線陡峭 → 早期復甦訊號，銀行 / 週期股受惠",
+        "🔴 高收益債利差壓力 (1y pctile 85) → 信用市場緊張，避開高槓桿公司"
+      ],
+      "macro_posture_guidance": {
+        "equity_exposure": 0.25,
+        "bond_duration": "short",
+        "cash_level": 0.35,
+        "note": "macro-only — calibrate with valuation (Shiller PE) and momentum before execution"
+      },
+      "top_risks": [
+        "Credit stress elevated — HY spread at 85th pctile; systemic contagion risk rising",
+        "Growth derating — real rate 2.9% compresses long-duration equity valuations",
+        "Recession onset risk — tightening cycle historically ends in slowdown within 12-18 months"
+      ],
+      "change_velocity": {
+        "T10Y2Y": {
+          "trend_30d": "stable",
+          "delta_bps_1m": 0.0,
+          "monthly_baseline_bps": -1.2,
+          "velocity": "stable",
+          "data_freshness_days": 1
+        },
+        "DGS10": {
+          "trend_30d": "rising",
+          "delta_bps_1m": 51.0,
+          "monthly_baseline_bps": 9.2,
+          "velocity": "accelerating",
+          "data_freshness_days": 2
+        },
+        "DFF": {
+          "trend_30d": "rising",
+          "delta_bps_1m": 25.0,
+          "monthly_baseline_bps": -1.8,
+          "velocity": "accelerating",
+          "data_freshness_days": 2
+        },
+        "CPIAUCSL": {
+          "trend_30d": "stable",
+          "mom_change_pct": 0.4,
+          "monthly_baseline": 0.2792,
+          "velocity": "accelerating",
+          "data_freshness_days": 61,
+          "stale": true
+        },
+        "CPILFESL": {
+          "trend_30d": "stable",
+          "mom_change_pct": 0.29,
+          "monthly_baseline": 0.2042,
+          "velocity": "accelerating",
+          "data_freshness_days": 61,
+          "stale": true
+        },
+        "UNRATE": {
+          "trend_30d": "stable",
+          "mom_change_pct": 0.0,
+          "monthly_baseline": -0.3875,
+          "velocity": "decelerating",
+          "data_freshness_days": 61,
+          "stale": true
+        },
+        "ICSA": {
+          "trend_30d": "falling",
+          "mom_change_pct": -3.43,
+          "monthly_baseline": -0.8375,
+          "velocity": "accelerating",
+          "data_freshness_days": 12,
+          "stale": false
+        },
+        "BAMLH0A0HYM2": {
+          "trend_30d": "rising",
+          "delta_bps_1m": 45.0,
+          "monthly_baseline_bps": 2.8,
+          "velocity": "accelerating",
+          "data_freshness_days": 2
+        },
+        "NFCI": {
+          "trend_30d": "stable",
+          "mom_change_pct": 1.97,
+          "monthly_baseline": -0.3483,
+          "velocity": "decelerating",
+          "data_freshness_days": 6,
+          "stale": false
+        }
+      },
+      "sector_rotation": {
+        "_guide": "⚠️ 使用前必讀 skills/fred-macro/SECTOR_ROTATION_GUIDE.md — 說明 favor（base）vs adjustments（overlay）差異、衝突處理規則與使用時機",
+        "regime": "Late Cycle Tightening",
+        "favor": [
+          "Energy",
+          "Consumer Staples",
+          "Health Care",
+          "Utilities"
+        ],
+        "avoid": [
+          "Technology",
+          "Consumer Discretionary",
+          "Real Estate"
+        ],
+        "rationale": "實質利率高 / 曲線倒掛 → 防禦股 + 現金，避開高負債 / 高估值",
+        "adjustments": [
+          {
+            "factor": "real_rate_high",
+            "value": 2.88,
+            "lower": [
+              "Technology",
+              "Real Estate"
+            ],
+            "raise": [
+              "Financials",
+              "Energy"
+            ],
+            "note": "實質利率 2.9% > 2% — 科技 / REIT 長存續期 DCF 折現率壓升；銀行 NIM 擴大、能源現金流不受影響"
+          },
+          {
+            "factor": "credit_stress_elevated",
+            "value": 85,
+            "lower": [
+              "Financials",
+              "Consumer Discretionary",
+              "Industrials"
+            ],
+            "raise": [
+              "Consumer Staples",
+              "Health Care",
+              "Utilities"
+            ],
+            "note": "HY 利差 >75th pctile — 信用市場壓力傳導至高槓桿行業；防禦三角（必需消費 / 醫療 / 公用）抗跌"
+          },
+          {
+            "factor": "yield_curve_steep",
+            "value": 1.02,
+            "lower": [
+              "Utilities"
+            ],
+            "raise": [
+              "Financials",
+              "Industrials"
+            ],
+            "note": "曲線陡峭（>1.0%）— 銀行借短貸長利差最大化；景氣擴張預期升溫有利工業，長債利率上升壓制公用"
+          }
+        ]
+      },
+      "data_quality": {
+        "series_fetched": 17,
+        "series_failed": 0,
+        "missing": [],
+        "errors": []
+      },
+      "macro_scores_composite": 57,
+      "yield_curve_value": 1.02,
+      "yield_curve_inverted": false,
+      "credit_stress_elevated": true,
+      "financial_stress_above_avg": false,
+      "fed_rate_direction": "flat",
+      "real_rate_preferred": 2.88,
+      "sector_rotation_favor": [
+        "Energy",
+        "Consumer Staples",
+        "Health Care",
+        "Utilities"
+      ],
+      "sector_rotation_avoid": [
+        "Technology",
+        "Consumer Discretionary",
+        "Real Estate"
+      ],
+      "velocity_highlights": [
+        "DGS10:accelerating",
+        "DFF:accelerating",
+        "CPIAUCSL:accelerating"
+      ]
+    },
+    "phase3_macro_multiplier": 0.75,
+    "macro_multiplier_rationale": "score=-2.0 consistency_cap=none → baseline=0.75 fred_caps: credit_stress_elevated=0.85 → final=0.75"
+  },
+  "protocol": "# Multi-Agent Investment Protocol (V5.0)\n\n> US equity single-ticker analysis. **Execution-only file** — historical changelog/rationale see `CHANGELOG.md`. Bundle schemas see `protocol_appendix_fmp_bundles.md`. Session export schema see `phase5_export_schema.md`.\n\n---\n\n## SESSION STARTUP\n\n```\nSESSION CONFIG\nRISK_TOLERANCE : LOW | MEDIUM | HIGH   (預設 MEDIUM)\n```\n\nTicker 由 user 指定。**非互動模式**（Dashboard reverse-call via `claude -p`）：所有需要 user input 的點皆採 protocol 預設，不停下等候。\n\n---\n\n## GLOBAL RULES (PM cheatsheet)\n\n### MUST\n1. **Phase order**: 0 → 1 → 2 → 2.4 → 2.5 → 2.8 → 3 → 4 → 4.5 → 5。不跳過。（2.4 = price framework engine，V3.45.3）\n2. **Skill execution (NO SIMULATION)**: 凡標 **MUST run** 的 skill 指令必須實際執行 Bash 呼叫並解析 JSON 輸出，**禁止** LLM 估算 / 模擬數值。受規則約束的 skill：\n   - `market-sentiment-analyzer`, `us-stock-analysis`, `market-news-analyst`, `technical-analyst`, `short-contrarian-analyst`, `portfolio-risk-manager`, `tail-risk-analyzer`, `fred-macro`\n   - 失敗時必須在 final report 標 `skill_execution_failed: true` + stderr，禁止靜默用估算值補上。\n3. **Isolated subagent (Phase 2)**: 五份 prompt 必須在收到任何 lane 結果之前全部凍結。五條 lane 各自在獨立 context 執行；同時執行數為 min(3, 環境可用名額)，未知名額採 1。後續批次不得注入先前 lane 結論。每個 subagent JSON 必須含 `subagent_isolated: true`；缺則 confidence cap 0.6 + `subagent_validation_failed: true`。V5.5 試行路徑見 `investment/run_workflow_v55.md`。\n4. **Red Team (Phase 2.8)**: 必須以 Agent tool 呼叫 subagent 執行，**禁止 inline 推理代替**。\n5. **MD Report (Phase 5)**: 存 `reports/YYYYMMDD_TICKER.md`。**不得省略**。\n6. **Phase 0 cache**: Phase 0 是全市場 snapshot，不屬於 ticker。FRESH = 真實來源 `fetched_at` 距凍結時間 <3h；缺可靠時間必須重建，不得用 mtime 或補現在時間延長期限。優先讀 canonical `invest_logs/YYYY-MM-DD_phase0.json`（舊 ticker-scoped 檔只作相容 fallback）。sector_intel 只能當 L3 重建素材，不能通過 Phase 0 gate。\n7. **Validate gates rc=0**:\n   - Phase 0: `validate_phase0.py --path <factpack.phase0_path>`\n   - Phase 5: `validate_session_export.py` + `validate_markdown_export.py`\n\n### MUST NOT\n- ❌ Phase 2 subagent prompt 含其他 lane 的 score / signal / reasoning\n- ❌ Phase 2 subagent prompt 含 PM 的 historical_bias / active_weights / prior session\n- ❌ 跨 lane 引用 PEER_BUNDLE / EARNINGS_ANALYST_BUNDLE / FMP_SUPP_BUNDLE 的數字推測對方結論\n- ❌ 手抄數字進 Phase 5 MD 報告（V4.87.0 起全篇由 `render_investment_report.py` 渲染；`--polish` 只准動五段純敘事，且數字須通過事實集合圍堵）\n- ❌ Final Score 用 `/5.0` 或 `/10` scale（V1.88 統一 `/3.0`）\n- ❌ 為了補 cache 自動 enqueue `財報` protocol（user 主動觸發層）\n\n### Output rules\n- 邏輯輸出 JSON；Markdown 僅用於 Final Viz Table + Phase 5 MD report\n- `key_factors`：最多 3 條，每條 ≤ 8 英文字\n\n```\nYou are the <LANE> analyst for ticker <TICKER>.\n\nISOLATION CONTRACT:\n  - 你與其他 4 個 analyst 以獨立 context 平行執行。\n  - 你看不到其他 analyst 的 score / signal / reasoning。\n  - 禁止推測其他 lane 的結論。\n  - 禁止為了「與共識一致」調整自己的 score。\n  - 禁止考慮 PM 的 historical_bias / active_weights / prior session。\n  - score -5..+5 僅依據你本 lane 收集的證據。\n\nTICKER: <TICKER>\n\nPHASE 0 MACRO CONTEXT (read-only):\n<paste Phase 0 macro_summary + _market_signals>\n\nTICKER DATA BUNDLE (read-only, all 5 lanes):\n<paste TICKER_DATA_BUNDLE.scoring; if unavailable 標 \"TICKER_DATA_BUNDLE: unavailable\">\n\n[CONDITIONAL BUNDLES — 依 lane 注入規則; 見 protocol_appendix_fmp_bundles.md]\n\nDATA SOURCE DISCIPLINE (STRICT):\n  ❌ FORBIDDEN web search for: Quote/Valuation scalar (price/peRatio/forwardPE/peg/eps/mktCap/divYield/PB/D-E/FCF/ROE), Market signals (VIX/F&G/RSI/breadth/FTD/top score), Insider/short, Analyst rating/PT, Filings, OHLCV, news headlines (skill 已抓三來源)\n  ✅ ALLOWED web search (≤ 1 call, narrative tone only): Reddit/X tone, transcript quotes, supply chain rumors, competitive narrative\n  違規處理：subagent 引用 web search 的數字 → PM 自動扣 confidence 0.2；連 3 次 → 該 lane 視為 degraded\n  ⚠️ V4.124.0 現況：上面這條扣分**沒有產生器**（「連 3 次」是跨 session 狀態，從沒有東西保存過）。\n     本版只做 shadow —— `investment/scripts/websearch_shadow.py` 從 run log 讀每個 lane 的實際\n     web call 數（走 `parent_tool_use_id` 歸屬），寫進 ledger，**不扣分、不進決策**。\n     補實作或刪宣稱都會改變行為，需使用者拍板；證據見 docs/plan_invest_stale_stages.md T2。\n\nYOUR LANE RUBRIC:\n<RUBRIC_LANE>\n\nMANDATORY DATA COLLECTION:\n<SKILL_CMD — MUST run, do NOT simulate>\n\nOUTPUT (strict JSON):\n{\n  \"phase\": 2,\n  \"agent\": \"<LANE>_Analyst\",\n  \"ticker\": \"<TICKER>\",\n  \"signal\": \"BUY | SELL | HOLD\",\n  \"score\": \"-5 to +5\",\n  \"confidence\": \"0.0 to 1.0\",\n  \"key_factors\": [\"max 3 items, ≤ 8 words each\"],\n  \"risk_flags\": [\"max 2 items\"],\n  \"phase0_alignment\": \"ALIGNED | MISALIGNED | NEUTRAL\",\n  \"data_source_timestamp\": \"YYYY-MM-DD HH:MM\",\n  \"subagent_isolated\": true,\n  \"skill_execution_failed\": \"true | false\"\n}\n```\n\n> **V4.125.0 — 本 shape 對 C1 lane_contract（V4.90）與各道閘核對過的結果**（模板寫於 2026-05-04，\n> 契約與閘是 8 月的；以下是核完的四條，不是新規則）：\n>\n> - **`signal` 自 V4.122.0 起是決策軌的輸入，不再只是敘述**：PM 必須把五個 lane 的 `signal`\n>   原樣填進 export 的 `conflict_bias.lane_signals`（validator §16 用它重算 T2/T3，且會擋\n>   「signal 與同 lane score 反向」）。lane 漏填 `signal` = PM 填不出那一格。\n> - **`score` 的 −5..+5 只適用四個 LLM lane**（fundamentals / sentiment / news / technical）。\n>   **Valuation lane 不自填分數**——它 verbatim 抄 `valuation_pack.score`（Phase 1.5 engine\n>   產出，validator 強制兩者相等）。歷史上唯一一筆 −4.0（2026-06-14 RGTI）正是在 pack\n>   成為必填之前自由填出來的，之後不可能再發生。\n> - **`skill_execution_failed` 是 skill script 真的會吐的欄位**（`momentum.py` /\n>   `technical-analyst/analyze.py` 失敗時輸出），不是模板自創；照填。\n> - **不要產 lane_contract 的欄位**（`provenance` / `producer_version` / `input_hash` /\n>   `shadow_score`）：那四個由 Phase 5 Step 1.5 的 `apply_det_shadow.py` 寫入，**LLM 手寫\n>   等於偽造 provenance**（§15 會擋）。subagent 只出上面這個 shape。\n\n### Lane Rubrics\n\n\n- **Rubric**: 過去 48h company news + analyst rating changes + PT trend + cross-ref Phase 0 themes\n- **Skill**: `python3 skills/market-news-analyst/scripts/fetch.py <TICKER> --hours 48 --json-only`\n- 結構化欄位（**禁止** web search 重抓 analyst rating / target 數字）：\n  - `analyst_actions[]` (FMP `/grades-historical` 過去 30d)\n  - `analyst_consensus`: Strong Buy +1.5 / Buy +1 / Hold 0 / Sell -1 / Strong Sell -2\n  - `pt_revision_momentum` (V3.45.4 — 取代舊「PT vs price 折溢價 ±1」項): 30d consensus PT\n    **變動方向**。`direction=UP` 且 `delta_1m > +3%` → bullish sell-side flow（同 rating change 性質，+0.5~+1）；\n    `DOWN` 且 `delta_1m < -3%` → bearish（-0.5~-1）；`FLAT/UNKNOWN` → 0\n    - **V4.117.0 起必須寫進 export 的結構化欄位，不能只寫在散文裡**（`export_date >= 2026-08-09`\n      缺欄 → validator rc=1）。`UP`/`DOWN` 要帶數值 `consensus_delta_pct_1m`（否則 ±3% 門檻無從套用）；\n      抓不到資料就明寫 `{\"direction\": \"UNKNOWN\", \"unavailable_reason\": \"<為什麼>\"}`。\n      由來：2026-08-09 一份 export 在 risk flag 散文寫了 `-2.94% 1m`，結構化欄位卻是 null——\n      分數剛好沒受影響，所以斷掉的稽核鏈沒人發現。\n  - `analyst_news[]` (FMP `/grades-news`)\n  - `headlines[]` (finviz + yfinance + Finnhub deduped)\n  - `sec_filings_recent[]` + `sec_8k_filings[]` (30d)\n- **優先檢查 Phase 0 `_market_signals.top_catalysts[]`** 避免重抓\n- `FMP_SUPP_BUNDLE.ma_events.events[]` 非空 → 強訊號（target 通常 +1）\n\n> **V3.45.4 — PT 注入層剝離（去三重計分）**：PT consensus **level** 已在 Valuation anchor\n> (0.20) + MHP 60d `pt_60d` (0.35) 計分兩次；News lane 再比 level vs price 是第三次（cross-lane\n> anchoring，共識牛市系統性放大多頭）。`fetch.py` V3.45.4 起 payload **不含任何絕對 PT level**\n> （`price_target` block 已移除，只給 `pt_revision_momentum` 方向+幅度%）。**禁止**：在 News lane\n> prompt 額外注入 PT level、或 reasoning 中以「PT 折價/溢價 X%」「目標價 vs 現價」計分 —\n> 後驗由 `apply_det_shadow.py` `news_pt_leakage` keyword classifier 抓（warning 級，累積統計）。\n\n##### V2.13.0 News lane 額外輸出（必填，不影響 score 公式）\n\n對應外部模板「利多 / 利空 / 下一步」三段時間軸 + 跨資產溢出：\n\n1. **`immediate_catalyst_5d`**（必填）：物件或 null\n   - 5 天內 binary 事件（earnings / FOMC / FDA / 重大公告）\n   - shape: `{event: str, date: ISO, direction_lean: BULLISH|BEARISH|NEUTRAL, expected_move_pct: float|null}`\n   - 例：`{\"event\":\"Q2 earnings\", \"date\":\"2026-08-13\", \"direction_lean\":\"BULLISH\", \"expected_move_pct\": 5.5}`\n   - 無 5d 內 binary 事件 → null\n\n2. ~~`medium_term_shift_20d`~~（V4.71.0 P1-6 移除）：無渲染/決策消費者（AUDIT F5），\n   且「無顯著拐點 → no significant shift expected」的 default 輸出佔多數 = 模板白產。不再產出。\n\n3. **`decision_point_days`**（必填）：int\n   - 下次該重新評估的天數（用於 watch_conditions 的 review trigger）\n   - 通常 = 最近 binary 事件距今天數；若無 binary，預設 21\n   - 例：14（下次財報）、5（下次 FOMC）、21（無 binary，例行 review）\n\n4. **`cross_asset_spillover[]`**（必填）：受影響的非個股市場\n   - shape: `[{asset: str, direction: BULLISH|BEARISH|NEUTRAL, mechanism: str}]`\n   - asset 例：`treasury_10y / DXY / oil_WTI / gold / copper / sector_XLK / VIX`\n   - mechanism 1 句話解釋傳導路徑\n   - 至少 1 筆；若該股新聞純個股無溢出，明示 `[{\"asset\":\"none\",\"direction\":\"NEUTRAL\",\"mechanism\":\"news 純個股財務，無跨資產傳導\"}]`\n   - 例：`[{\"asset\":\"treasury_10y\", \"direction\":\"BEARISH\", \"mechanism\":\"AI capex 預期 → cyclical 通膨壓力 → 殖利率上行\"}]`\n\n5. **`reasoning_one_line`** + **`key_factors[]`**（V3.45.4 必填，持久化進 export）：\n   - `reasoning_one_line`: 1 句 — News score 的核心依據\n   - `key_factors[]`: 2-4 條短語 — 計分主因（與 Final Visualization Table 的 Key Factors 同源）\n   - **用途**：history.json 持久化後供 `apply_det_shadow.py` `news_pt_leakage` classifier 掃描\n     （V2.19 red_team_basis 同模式 — 沒有落地文字，後驗防線就沒有 haystack）\n\n> 以上 5 個欄位**必填**；缺資料寫 `INSUFFICIENT_DATA`（陣列用 `[]` + 註記）。\n",
+  "instruction": "Execute only your assigned Phase 2 lane in a fresh isolated context. Use frozen inputs. Do not read other lane outputs or mutable caches. Return protocol lane JSON; no provenance fields. No other phases or history writes."
+}

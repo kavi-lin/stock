@@ -1,0 +1,958 @@
+{
+  "run_id": "HPE_20261001T223002_25eeeee46b",
+  "lane": "fundamentals",
+  "ticker": "HPE",
+  "snapshot_hash": "sha256:7409ac5ba88b4299cfa5b73401558b175c076df11055a00650955c104d1234b3",
+  "input": {
+    "factpack": {
+      "ticker": "HPE",
+      "bundles": {
+        "ticker_data_bundle": {
+          "status": "ok",
+          "fetched_at": "2026-10-01T14:30:06.064824Z",
+          "scoring": {
+            "_source": "finnhub",
+            "price": 63.1,
+            "previousClose": 63.89,
+            "dayHigh": 66.11,
+            "dayLow": 61.76,
+            "mktCap": 81625807128.47086,
+            "peRatio": 29.0915,
+            "epsTTM": 1.9631999999999998,
+            "dividendYield": 3.03222,
+            "priceToBookRatio": 1.3047,
+            "forwardPE": 13.6745,
+            "pegRatio": 0.80471,
+            "roeTTM": 11.020000000000001,
+            "debtToEquity": 0.9059,
+            "fcfPerShareTTM": 3.2298,
+            "nextEarningsDate": "2026-12-02"
+          }
+        },
+        "earnings_analyst_bundle": {
+          "status": "ok",
+          "last_earnings_date": "2026-07-31",
+          "next_earnings_est": "2026-12-03",
+          "composite_score": 68,
+          "verdict": "SOLID",
+          "score_components": {
+            "quality": 28,
+            "growth": 22,
+            "valuation": 7,
+            "analyst": 11
+          },
+          "quality_flags": [
+            "cash_conversion_wc_driven"
+          ],
+          "margins_8q": [
+            {
+              "date": "2026-07-31",
+              "period": "Q3",
+              "gross": 0.4011299435028249,
+              "operating": 0.11405878981413248,
+              "net": 0.12609514451813642
+            },
+            {
+              "date": "2026-04-30",
+              "period": "Q2",
+              "gross": 0.3652369357557595,
+              "operating": 0.06995692077168009,
+              "net": 0.05843790972092152
+            },
+            {
+              "date": "2026-01-31",
+              "period": "Q1",
+              "gross": 0.3591011719169982,
+              "operating": 0.09654875819804322,
+              "net": 0.04451134286635846
+            },
+            {
+              "date": "2025-10-31",
+              "period": "Q4",
+              "gross": 0.304042904290429,
+              "operating": 0.04383250825082508,
+              "net": 0.0180486798679868
+            },
+            {
+              "date": "2025-07-31",
+              "period": "Q3",
+              "gross": 0.2838513366659422,
+              "operating": 0.053683981743099324,
+              "net": 0.033144968485111934
+            },
+            {
+              "date": "2025-04-30",
+              "period": "Q2",
+              "gross": 0.275830258302583,
+              "operating": 0.03360569319978914,
+              "net": -0.13837638376383765
+            },
+            {
+              "date": "2025-01-31",
+              "period": "Q1",
+              "gross": 0.28335467349551857,
+              "operating": 0.06017925736235595,
+              "net": 0.08028169014084507
+            },
+            {
+              "date": "2024-10-31",
+              "period": "Q4",
+              "gross": 0.3019335062485263,
+              "operating": 0.09702900259372789,
+              "net": 0.1610469228955435
+            }
+          ],
+          "yoy_growth": {
+            "revenue_yoy": 0.3272,
+            "earnings_yoy": 4.0492,
+            "operating_yoy": 1.8198,
+            "revenue_qoq": 0.1438,
+            "growth_acceleration": "decelerating"
+          },
+          "balance_health": {
+            "working_capital": 3429000000,
+            "current_ratio": 1.113,
+            "debt_to_equity": 0.762,
+            "net_cash": -14028000000
+          },
+          "cash_flow_quality": {
+            "fcf_margin": 0.0734,
+            "cash_conversion": 2.432,
+            "capex_intensity": 0.061,
+            "ocf_ttm": 6694000000,
+            "ni_ttm": 2753000000
+          },
+          "valuation": {
+            "dcf_intrinsic": 6.722758268720117,
+            "dcf_levered_intrinsic": 12.539122078382844,
+            "dcf_vs_price_pct": -0.8933,
+            "price_target_consensus": 67.75,
+            "pt_upside_pct": 0.0756,
+            "pt_dispersion_pct": 47.2,
+            "pt_news": [
+              {
+                "date": null,
+                "analystCompany": "Truist Financial",
+                "priceTarget": 70,
+                "adjPriceTarget": 70,
+                "publishedDate": "2026-09-03T13:24:48.000Z"
+              },
+              {
+                "date": null,
+                "analystCompany": "Morgan Stanley",
+                "priceTarget": 67,
+                "adjPriceTarget": 67,
+                "publishedDate": "2026-09-03T12:26:12.000Z"
+              },
+              {
+                "date": null,
+                "analystCompany": "Evercore ISI",
+                "priceTarget": 65,
+                "adjPriceTarget": 65,
+                "publishedDate": "2026-09-03T12:05:38.000Z"
+              },
+              {
+                "date": null,
+                "analystCompany": "UBS",
+                "priceTarget": 59,
+                "adjPriceTarget": 59,
+                "publishedDate": "2026-09-03T11:55:15.000Z"
+              },
+              {
+                "date": null,
+                "analystCompany": "Piper Sandler",
+                "priceTarget": 57,
+                "adjPriceTarget": 57,
+                "publishedDate": "2026-09-03T10:52:56.000Z"
+              },
+              {
+                "date": null,
+                "analystCompany": "Barclays",
+                "priceTarget": 79,
+                "adjPriceTarget": 79,
+                "publishedDate": "2026-09-03T09:55:15.000Z"
+              },
+              {
+                "date": null,
+                "analystCompany": "Wells Fargo",
+                "priceTarget": 54,
+                "adjPriceTarget": 54,
+                "publishedDate": "2026-09-03T09:47:00.000Z"
+              },
+              {
+                "date": null,
+                "analystCompany": "Raymond James",
+                "priceTarget": 86,
+                "adjPriceTarget": 86,
+                "publishedDate": "2026-09-03T09:16:00.000Z"
+              }
+            ]
+          },
+          "analyst": {
+            "rating_trend": "insufficient_data",
+            "grades_summary": {
+              "strongBuy": 0,
+              "buy": 0,
+              "hold": 0,
+              "sell": 0,
+              "strongSell": 0,
+              "strong_buy_pct": null,
+              "total_analysts": 0
+            },
+            "grades_news": [
+              {
+                "date": null,
+                "gradingCompany": "UBS",
+                "previousGrade": "Neutral",
+                "newGrade": "Neutral",
+                "action": "hold"
+              },
+              {
+                "date": null,
+                "gradingCompany": "Piper Sandler",
+                "previousGrade": "Neutral",
+                "newGrade": "Neutral",
+                "action": "hold"
+              },
+              {
+                "date": null,
+                "gradingCompany": "Citigroup",
+                "previousGrade": "Buy",
+                "newGrade": "Buy",
+                "action": "hold"
+              },
+              {
+                "date": null,
+                "gradingCompany": "Barclays",
+                "previousGrade": "Overweight",
+                "newGrade": "Overweight",
+                "action": "hold"
+              },
+              {
+                "date": null,
+                "gradingCompany": "Wells Fargo",
+                "previousGrade": "Positive",
+                "newGrade": "Positive",
+                "action": "hold"
+              },
+              {
+                "date": null,
+                "gradingCompany": "Goldman Sachs",
+                "previousGrade": "Buy",
+                "newGrade": "Buy",
+                "action": "hold"
+              },
+              {
+                "date": null,
+                "gradingCompany": "Jefferies",
+                "previousGrade": "Buy",
+                "newGrade": "Buy",
+                "action": "hold"
+              },
+              {
+                "date": null,
+                "gradingCompany": "Raymond James",
+                "previousGrade": "Outperform",
+                "newGrade": "Outperform",
+                "action": "hold"
+              },
+              {
+                "date": null,
+                "gradingCompany": "Deutsche Bank",
+                "previousGrade": "Buy",
+                "newGrade": "Buy",
+                "action": "hold"
+              },
+              {
+                "date": null,
+                "gradingCompany": "Deutsche Bank",
+                "previousGrade": "Buy",
+                "newGrade": "Buy",
+                "action": "initialise"
+              }
+            ]
+          },
+          "report_path": "HPE_2026-07-31"
+        },
+        "peer_bundle": {
+          "status": "ok",
+          "peers": [
+            "PSTG",
+            "SMCI",
+            "SNDK"
+          ],
+          "peer_selector": "exact_industry_business_model_v1",
+          "peer_exclusions": [
+            {
+              "symbol": "ASX",
+              "reason": "industry_mismatch",
+              "subject_industry": "Computer Hardware",
+              "peer_industry": "Semiconductors"
+            },
+            {
+              "symbol": "CIEN",
+              "reason": "industry_mismatch",
+              "subject_industry": "Computer Hardware",
+              "peer_industry": "Communication Equipment"
+            },
+            {
+              "symbol": "CRDO",
+              "reason": "industry_mismatch",
+              "subject_industry": "Computer Hardware",
+              "peer_industry": "Semiconductors"
+            },
+            {
+              "symbol": "ERIC",
+              "reason": "industry_mismatch",
+              "subject_industry": "Computer Hardware",
+              "peer_industry": "Communication Equipment"
+            },
+            {
+              "symbol": "FI",
+              "reason": "industry_mismatch",
+              "subject_industry": "Computer Hardware",
+              "peer_industry": "Information Technology Services"
+            },
+            {
+              "symbol": "KEYS",
+              "reason": "industry_mismatch",
+              "subject_industry": "Computer Hardware",
+              "peer_industry": "Hardware, Equipment & Parts"
+            },
+            {
+              "symbol": "NOK",
+              "reason": "industry_mismatch",
+              "subject_industry": "Computer Hardware",
+              "peer_industry": "Communication Equipment"
+            }
+          ],
+          "subject_industry": "Computer Hardware",
+          "peer_pe_median": 22.38544613011057,
+          "peer_market_cap_median": 28492341385,
+          "peer_beta_median": 1.996,
+          "peer_sector": "Technology",
+          "peer_ev_ebitda_median": 19.36409375974026,
+          "peer_ev_sales_median": 7.110602563360149,
+          "peer_pb_median": 8.975474971629474,
+          "peer_ratios_n": 3,
+          "self_ratios_ttm": {
+            "ev_to_ebitda_ttm": 17.69740461469186,
+            "ev_to_sales_ttm": 2.3925802695998852,
+            "roe_ttm": 0.1087411620650156,
+            "price_to_book_ttm": 3.2797857735535945,
+            "book_value_per_share_ttm": 19.845808383233532,
+            "net_profit_margin_ttm": 0.06572288006111536,
+            "pe_ttm": 32.38308457711443
+          },
+          "range_peer_cohort": {
+            "eligible": false,
+            "reason": "no_curated_peer_cohort",
+            "scope": "range_only",
+            "peer_count": 0,
+            "peers": {}
+          },
+          "range_peer_scenario": {
+            "eligible": false,
+            "reason": "no_curated_peer_cohort",
+            "scope": "range_only",
+            "peer_count": 0,
+            "peers": {},
+            "value": null
+          }
+        },
+        "fmp_supp_bundle": {
+          "quality_scores": {
+            "altmanZScore": 1.498364997033157,
+            "piotroskiScore": 7,
+            "altman_zone": "danger",
+            "piotroski_strength": "strong",
+            "workingCapital": 3429000000,
+            "totalAssets": 83596000000,
+            "retainedEarnings": -948000000,
+            "ebit": 2734000000,
+            "totalLiabilities": 57082000000,
+            "revenue": 41888000000,
+            "_note": "altman: <1.81=danger, 1.81-2.99=grey, >2.99=safe; piotroski: >=7=strong, <=2=weak",
+            "source": "FMP /stable/financial-scores"
+          },
+          "owner_earnings": {
+            "period": "2026-Q3",
+            "as_of_date": "2026-07-31",
+            "ownersEarnings": 1567573440,
+            "ownersEarningsPerShare": 1.08,
+            "maintenanceCapex": -73426560,
+            "growthCapex": -671573440,
+            "averagePPE": 0.22304,
+            "qoq_growth": 0.0339,
+            "history_quarters": 5,
+            "source": "FMP /stable/owner-earnings"
+          },
+          "employee_history": {
+            "latest_period": "2025-10-31",
+            "latest_count": 67000,
+            "one_year_pct": 9.8,
+            "cagr_5y_pct": 2.6,
+            "expansion_signal": false,
+            "layoff_signal": false,
+            "data_points": 11,
+            "source": "FMP /stable/historical-employee-count"
+          }
+        }
+      }
+    },
+    "script_output": {
+      "ticker": "HPE",
+      "generated_at": "2026-10-01T14:30:22+00:00",
+      "data_source": "bundle+yfinance",
+      "price": {
+        "current": 63.1,
+        "market_cap": 83763027968.0,
+        "52w_high": 67.101,
+        "52w_low": 19.84
+      },
+      "valuation": {
+        "pe_ratio": 32.38308457711443,
+        "pe_forward": 13.449053,
+        "pe_sector_median": null,
+        "peg_ratio": 0.49,
+        "ev_ebitda": 17.69740461469186,
+        "pb_ratio": 3.2797857735535945
+      },
+      "growth": {
+        "revenue_yoy_pct": 32.72,
+        "revenue_trailing_3y_cagr_pct": 6.37,
+        "eps_growth_forward_consensus_pct": 410.2
+      },
+      "margins_cash": {
+        "gross_margin_pct": 36.02,
+        "operating_margin_pct": 8.27,
+        "fcf_margin_pct": 11.32,
+        "fcf_yield_pct": 4.82,
+        "net_margin_pct": 6.57
+      },
+      "balance_sheet": {
+        "debt_to_equity": 0.7635211586331749,
+        "net_cash_positive": false,
+        "cash_and_equivalents": 6216000000,
+        "total_debt": 20320999424
+      },
+      "earnings_calendar": {
+        "next_earnings_date": "2026-12-03",
+        "days_until_earnings": -28
+      },
+      "analyst": {
+        "consensus_rating": "BUY",
+        "analyst_count": 20,
+        "price_target_mean": 71.13,
+        "price_target_upside_pct": 12.73
+      },
+      "warnings": [],
+      "data_quality": {
+        "fmp_calls": 1,
+        "fmp_failures": 1,
+        "yf_fallbacks": 1,
+        "bundle_used": true,
+        "bundle_meta": {
+          "source": "EARNINGS_ANALYST_BUNDLE",
+          "as_of": "2026-10-01",
+          "ticker": "HPE"
+        },
+        "missing_fields": [
+          "pe_sector_median"
+        ]
+      }
+    },
+    "script_status": "ok",
+    "missing_reason": null
+  },
+  "phase0": {
+    "phase": 0,
+    "scan_date": "2026-10-01",
+    "fetched_at": "2026-10-01T12:42:15+00:00",
+    "phase0_source": "SKILL_CHAIN",
+    "macro_summary": {
+      "macro_backdrop_score": -1.5,
+      "market_regime": "VOLATILE",
+      "regime_confidence": 0.3,
+      "key_themes": [
+        "Cooler inflation contrasts with resilient GDP, spending and payroll data; long-dated yields kept rising.",
+        "The September 29 ten-year and thirty-year Treasury yields reached 5.293% and 5.6206%, respectively.",
+        "Breadth is weak (28.6, Weakening) on observations through 2026-09-24; FTD is invalidated while VIX remains NORMAL.",
+        "Twenty-day rotation favors Technology and Communication Services while tracked defensive sectors lag; FRED macro rotation favors Energy and defensives."
+      ],
+      "hot_sectors": [
+        "Technology",
+        "Communication Services"
+      ],
+      "cold_sectors": [
+        "Utilities",
+        "Consumer Staples",
+        "Health Care",
+        "Real Estate",
+        "Consumer Discretionary"
+      ]
+    },
+    "_market_signals": {
+      "fear_greed_index": 30.7,
+      "market_sentiment_composite": 54.4,
+      "vix_current": 16.32,
+      "vix_regime": "NORMAL",
+      "spy_rsi_14": 48.8,
+      "spy_pct_above_ma50": 0.19,
+      "spy_pct_above_ma200": 6.5,
+      "breadth_composite": 28.6,
+      "breadth_zone": "Weakening",
+      "breadth_trend": "deteriorating",
+      "breadth_data_date": "2026-09-24",
+      "breadth_data_days_old": 7,
+      "ftd_status": "NO_SIGNAL",
+      "ftd_status_text": "FTD_INVALIDATED",
+      "ftd_days_since": null,
+      "ftd_quality_score": 0,
+      "market_top_score": 40.0,
+      "market_top_zone": "yellow",
+      "market_top_zone_label": "Yellow (Early Warning)",
+      "top_catalysts": [
+        {
+          "date": "2026-09-30",
+          "ticker": null,
+          "headline": "Long-dated Treasury yields rose for a seventh straight session as resilient growth kept rate pressure elevated.",
+          "source": "Reuters via Investing.com: https://www.investing.com/news/economy-news/trading-day-shrugging-off-a-volatile-september-markets-shuffle-into-q4-4925953"
+        },
+        {
+          "date": "2026-09-29",
+          "ticker": null,
+          "headline": "Treasury yields reached multi-decade highs as consumer confidence fell and job openings declined.",
+          "source": "Reuters via Investing.com: https://www.investing.com/news/economy-news/equities-dip-as-bond-yields-hold-near-multidecade-highs-4923360"
+        },
+        {
+          "date": "2026-09-30",
+          "ticker": null,
+          "headline": "Stocks diverged as stronger GDP kept yields high despite softer inflation.",
+          "source": "AP: https://apnews.com/article/1ee73f14dc23f6139eeb12c7397f543e"
+        }
+      ]
+    },
+    "fred_available": true,
+    "fred_snapshot": {
+      "generated_at": "2026-10-01T12:42:04+00:00",
+      "asof": null,
+      "cache_hit": false,
+      "cache_age_sec": 0,
+      "series": {
+        "T10Y2Y": {
+          "value": 0.41,
+          "value_smooth_3d": 0.3667,
+          "date": "2026-09-30",
+          "data_freshness_days": 1,
+          "delta_bps_1m": 0.0,
+          "delta_bps_3m": 6.0,
+          "delta_bps_1y": -15.0,
+          "percentile_1y": 20,
+          "trend_30d": "stable",
+          "trend_90d": "stable"
+        },
+        "DGS10": {
+          "value": 5.26,
+          "value_smooth_3d": 5.2233,
+          "date": "2026-09-29",
+          "data_freshness_days": 2,
+          "delta_bps_1m": 51.0,
+          "delta_bps_3m": 78.0,
+          "delta_bps_1y": 111.0,
+          "percentile_1y": 100,
+          "trend_30d": "rising",
+          "trend_90d": "rising"
+        },
+        "DGS2": {
+          "value": 4.89,
+          "value_smooth_3d": 4.8733,
+          "date": "2026-09-29",
+          "data_freshness_days": 2,
+          "delta_bps_1m": 55.0,
+          "delta_bps_3m": 72.0,
+          "delta_bps_1y": 126.0,
+          "percentile_1y": 99,
+          "trend_30d": "rising",
+          "trend_90d": "rising"
+        },
+        "DFII10": {
+          "value": 2.91,
+          "value_smooth_3d": 2.88,
+          "date": "2026-09-29",
+          "data_freshness_days": 2,
+          "delta_bps_1m": 47.0,
+          "delta_bps_3m": 66.0,
+          "delta_bps_1y": 111.0,
+          "percentile_1y": 100,
+          "trend_30d": "rising",
+          "trend_90d": "rising"
+        },
+        "T10Y3M": {
+          "value": 1.09,
+          "value_smooth_3d": 1.02,
+          "date": "2026-09-30",
+          "data_freshness_days": 1,
+          "delta_bps_1m": 25.0,
+          "delta_bps_3m": 42.0,
+          "delta_bps_1y": 95.0,
+          "percentile_1y": 100,
+          "trend_30d": "rising",
+          "trend_90d": "rising"
+        },
+        "DFF": {
+          "value": 3.88,
+          "value_smooth_3d": 3.88,
+          "date": "2026-09-29",
+          "data_freshness_days": 2,
+          "delta_bps_1m": 25.0,
+          "delta_bps_3m": 25.0,
+          "delta_bps_1y": -21.0,
+          "percentile_1y": 80,
+          "trend_30d": "rising",
+          "trend_90d": "rising"
+        },
+        "CPIAUCSL": {
+          "value": 334.131,
+          "date": "2026-08-01",
+          "data_freshness_days": 61,
+          "yoy_change_pct": 3.35,
+          "mom_change_pct": 0.4,
+          "wow_change": 0.0,
+          "percentile_1y": 92,
+          "trend_30d": "stable",
+          "trend_90d": "stable"
+        },
+        "CPILFESL": {
+          "value": 337.765,
+          "date": "2026-08-01",
+          "data_freshness_days": 61,
+          "yoy_change_pct": 2.45,
+          "mom_change_pct": 0.29,
+          "wow_change": 0.0,
+          "percentile_1y": 92,
+          "trend_30d": "stable",
+          "trend_90d": "stable"
+        },
+        "UNRATE": {
+          "value": 4.1,
+          "date": "2026-08-01",
+          "data_freshness_days": 61,
+          "yoy_change_pct": -4.65,
+          "mom_change_pct": 0.0,
+          "wow_change": 0.0,
+          "percentile_1y": 0,
+          "trend_30d": "stable",
+          "trend_90d": "falling"
+        },
+        "ICSA": {
+          "value": 197000.0,
+          "date": "2026-09-26",
+          "data_freshness_days": 5,
+          "yoy_change_pct": -12.44,
+          "mom_change_pct": -4.83,
+          "wow_change": -1000.0,
+          "percentile_1y": 4,
+          "trend_30d": "falling",
+          "trend_90d": "falling"
+        },
+        "RSXFS": {
+          "value": 646347.0,
+          "date": "2026-08-01",
+          "data_freshness_days": 61,
+          "yoy_change_pct": 5.36,
+          "mom_change_pct": 1.14,
+          "wow_change": 0.0,
+          "percentile_1y": 92,
+          "trend_30d": "stable",
+          "trend_90d": "stable"
+        },
+        "NFCI": {
+          "value": -0.548,
+          "date": "2026-09-25",
+          "data_freshness_days": 6,
+          "yoy_change_pct": -4.18,
+          "mom_change_pct": 1.97,
+          "wow_change": 0.005,
+          "percentile_1y": 23,
+          "trend_30d": "stable",
+          "trend_90d": "falling"
+        },
+        "SAHMREALTIME": {
+          "value": -0.07,
+          "date": "2026-08-01",
+          "data_freshness_days": 61,
+          "yoy_change_pct": -153.85,
+          "mom_change_pct": -133.33,
+          "wow_change": 0.0,
+          "percentile_1y": 0,
+          "trend_30d": "stable",
+          "trend_90d": "falling"
+        },
+        "PAYEMS": {
+          "value": 159075.0,
+          "date": "2026-08-01",
+          "data_freshness_days": 61,
+          "yoy_change_pct": 0.38,
+          "mom_change_pct": 0.1,
+          "wow_change": 0.0,
+          "percentile_1y": 92,
+          "trend_30d": "stable",
+          "trend_90d": "stable"
+        },
+        "DCOILWTICO": {
+          "value": 96.16,
+          "date": "2026-09-29",
+          "data_freshness_days": 2,
+          "yoy_change_pct": 49.62,
+          "mom_change_pct": 10.49,
+          "wow_change": -0.25,
+          "percentile_1y": 79,
+          "trend_30d": "rising",
+          "trend_90d": "rising"
+        },
+        "BAMLH0A0HYM2": {
+          "value": 3.08,
+          "value_smooth_3d": 3.01,
+          "date": "2026-09-29",
+          "data_freshness_days": 2,
+          "delta_bps_1m": 45.0,
+          "delta_bps_3m": 34.0,
+          "delta_bps_1y": 34.0,
+          "percentile_1y": 85,
+          "trend_30d": "rising",
+          "trend_90d": "rising"
+        },
+        "PCEPILFE": {
+          "value": 130.455,
+          "date": "2026-08-01",
+          "data_freshness_days": 61,
+          "yoy_change_pct": 3.01,
+          "mom_change_pct": 0.25,
+          "wow_change": 0.0,
+          "percentile_1y": 92,
+          "trend_30d": "stable",
+          "trend_90d": "stable"
+        }
+      },
+      "regime_signals": {
+        "yield_curve_inverted": false,
+        "yield_curve_steep": true,
+        "yield_curve_value": 1.02,
+        "yield_curve_10y2y": 0.37,
+        "yield_curve_10y3m": 1.02,
+        "yield_curve_10y3m_inverted": false,
+        "yield_curve_10y2y_inverted": false,
+        "credit_stress_elevated": true,
+        "credit_spread_pctile_1y": 85,
+        "financial_stress_above_avg": false,
+        "nfci_wow_change": 0.005,
+        "nfci_deteriorating_fast": false,
+        "sahm_value": -0.07,
+        "sahm_triggered": false,
+        "retail_contracting": false,
+        "retail_sales_mom_pct": 1.14,
+        "fed_rate_direction": "flat",
+        "fed_funds_current": 3.88,
+        "real_rate_10y_estimate": 1.87,
+        "real_rate_dfii10": 2.88,
+        "real_rate_preferred": 2.88
+      },
+      "macro_scores": {
+        "rates": 55,
+        "inflation": 50,
+        "employment": 75,
+        "credit": 20,
+        "financial_conditions": 85,
+        "composite": 57,
+        "_weights": {
+          "rates": 1.0,
+          "credit": 1.0,
+          "financial_conditions": 1.0,
+          "employment": 0.7,
+          "inflation": 0.5
+        }
+      },
+      "regime_label": "Late Cycle Tightening",
+      "regime_confidence": 0.31,
+      "market_implications": [
+        "🔴 Late Cycle — 實質利率偏高，防禦股 / 現金為王",
+        "📉 實質利率 2.9% 偏高 → 成長股估值壓力，價值股 / 金融股相對佔優",
+        "📈 殖利率曲線陡峭 → 早期復甦訊號，銀行 / 週期股受惠",
+        "🔴 高收益債利差壓力 (1y pctile 85) → 信用市場緊張，避開高槓桿公司"
+      ],
+      "macro_posture_guidance": {
+        "equity_exposure": 0.25,
+        "bond_duration": "short",
+        "cash_level": 0.35,
+        "note": "macro-only — calibrate with valuation (Shiller PE) and momentum before execution"
+      },
+      "top_risks": [
+        "Credit stress elevated — HY spread at 85th pctile; systemic contagion risk rising",
+        "Growth derating — real rate 2.9% compresses long-duration equity valuations",
+        "Recession onset risk — tightening cycle historically ends in slowdown within 12-18 months"
+      ],
+      "change_velocity": {
+        "T10Y2Y": {
+          "trend_30d": "stable",
+          "delta_bps_1m": 0.0,
+          "monthly_baseline_bps": -1.2,
+          "velocity": "stable",
+          "data_freshness_days": 1
+        },
+        "DGS10": {
+          "trend_30d": "rising",
+          "delta_bps_1m": 51.0,
+          "monthly_baseline_bps": 9.2,
+          "velocity": "accelerating",
+          "data_freshness_days": 2
+        },
+        "DFF": {
+          "trend_30d": "rising",
+          "delta_bps_1m": 25.0,
+          "monthly_baseline_bps": -1.8,
+          "velocity": "accelerating",
+          "data_freshness_days": 2
+        },
+        "CPIAUCSL": {
+          "trend_30d": "stable",
+          "mom_change_pct": 0.4,
+          "monthly_baseline": 0.2792,
+          "velocity": "accelerating",
+          "data_freshness_days": 61,
+          "stale": true
+        },
+        "CPILFESL": {
+          "trend_30d": "stable",
+          "mom_change_pct": 0.29,
+          "monthly_baseline": 0.2042,
+          "velocity": "accelerating",
+          "data_freshness_days": 61,
+          "stale": true
+        },
+        "UNRATE": {
+          "trend_30d": "stable",
+          "mom_change_pct": 0.0,
+          "monthly_baseline": -0.3875,
+          "velocity": "decelerating",
+          "data_freshness_days": 61,
+          "stale": true
+        },
+        "ICSA": {
+          "trend_30d": "falling",
+          "mom_change_pct": -4.83,
+          "monthly_baseline": -1.0367,
+          "velocity": "accelerating",
+          "data_freshness_days": 5,
+          "stale": false
+        },
+        "BAMLH0A0HYM2": {
+          "trend_30d": "rising",
+          "delta_bps_1m": 45.0,
+          "monthly_baseline_bps": 2.8,
+          "velocity": "accelerating",
+          "data_freshness_days": 2
+        },
+        "NFCI": {
+          "trend_30d": "stable",
+          "mom_change_pct": 1.97,
+          "monthly_baseline": -0.3483,
+          "velocity": "decelerating",
+          "data_freshness_days": 6,
+          "stale": false
+        }
+      },
+      "sector_rotation": {
+        "_guide": "⚠️ 使用前必讀 skills/fred-macro/SECTOR_ROTATION_GUIDE.md — 說明 favor（base）vs adjustments（overlay）差異、衝突處理規則與使用時機",
+        "regime": "Late Cycle Tightening",
+        "favor": [
+          "Energy",
+          "Consumer Staples",
+          "Health Care",
+          "Utilities"
+        ],
+        "avoid": [
+          "Technology",
+          "Consumer Discretionary",
+          "Real Estate"
+        ],
+        "rationale": "實質利率高 / 曲線倒掛 → 防禦股 + 現金，避開高負債 / 高估值",
+        "adjustments": [
+          {
+            "factor": "real_rate_high",
+            "value": 2.88,
+            "lower": [
+              "Technology",
+              "Real Estate"
+            ],
+            "raise": [
+              "Financials",
+              "Energy"
+            ],
+            "note": "實質利率 2.9% > 2% — 科技 / REIT 長存續期 DCF 折現率壓升；銀行 NIM 擴大、能源現金流不受影響"
+          },
+          {
+            "factor": "credit_stress_elevated",
+            "value": 85,
+            "lower": [
+              "Financials",
+              "Consumer Discretionary",
+              "Industrials"
+            ],
+            "raise": [
+              "Consumer Staples",
+              "Health Care",
+              "Utilities"
+            ],
+            "note": "HY 利差 >75th pctile — 信用市場壓力傳導至高槓桿行業；防禦三角（必需消費 / 醫療 / 公用）抗跌"
+          },
+          {
+            "factor": "yield_curve_steep",
+            "value": 1.02,
+            "lower": [
+              "Utilities"
+            ],
+            "raise": [
+              "Financials",
+              "Industrials"
+            ],
+            "note": "曲線陡峭（>1.0%）— 銀行借短貸長利差最大化；景氣擴張預期升溫有利工業，長債利率上升壓制公用"
+          }
+        ]
+      },
+      "data_quality": {
+        "series_fetched": 17,
+        "series_failed": 0,
+        "missing": [],
+        "errors": []
+      },
+      "macro_scores_composite": 57,
+      "yield_curve_value": 1.02,
+      "yield_curve_inverted": false,
+      "credit_stress_elevated": true,
+      "financial_stress_above_avg": false,
+      "fed_rate_direction": "flat",
+      "real_rate_preferred": 2.88,
+      "sector_rotation_favor": [
+        "Energy",
+        "Consumer Staples",
+        "Health Care",
+        "Utilities"
+      ],
+      "sector_rotation_avoid": [
+        "Technology",
+        "Consumer Discretionary",
+        "Real Estate"
+      ],
+      "velocity_highlights": [
+        "DGS10:accelerating",
+        "DFF:accelerating",
+        "CPIAUCSL:accelerating"
+      ]
+    },
+    "phase3_macro_multiplier": 0.75,
+    "macro_multiplier_rationale": "score=-1.5 consistency_cap=none → baseline=0.75 fred_caps: credit_stress_elevated=0.85, real_rate>2.0=0.9 → final=0.75"
+  },
+  "protocol": "# Multi-Agent Investment Protocol (V5.0)\n\n> US equity single-ticker analysis. **Execution-only file** — historical changelog/rationale see `CHANGELOG.md`. Bundle schemas see `protocol_appendix_fmp_bundles.md`. Session export schema see `phase5_export_schema.md`.\n\n---\n\n## SESSION STARTUP\n\n```\nSESSION CONFIG\nRISK_TOLERANCE : LOW | MEDIUM | HIGH   (預設 MEDIUM)\n```\n\nTicker 由 user 指定。**非互動模式**（Dashboard reverse-call via `claude -p`）：所有需要 user input 的點皆採 protocol 預設，不停下等候。\n\n---\n\n## GLOBAL RULES (PM cheatsheet)\n\n### MUST\n1. **Phase order**: 0 → 1 → 2 → 2.4 → 2.5 → 2.8 → 3 → 4 → 4.5 → 5。不跳過。（2.4 = price framework engine，V3.45.3）\n2. **Skill execution (NO SIMULATION)**: 凡標 **MUST run** 的 skill 指令必須實際執行 Bash 呼叫並解析 JSON 輸出，**禁止** LLM 估算 / 模擬數值。受規則約束的 skill：\n   - `market-sentiment-analyzer`, `us-stock-analysis`, `market-news-analyst`, `technical-analyst`, `short-contrarian-analyst`, `portfolio-risk-manager`, `tail-risk-analyzer`, `fred-macro`\n   - 失敗時必須在 final report 標 `skill_execution_failed: true` + stderr，禁止靜默用估算值補上。\n3. **Isolated subagent (Phase 2)**: 五份 prompt 必須在收到任何 lane 結果之前全部凍結。五條 lane 各自在獨立 context 執行；同時執行數為 min(3, 環境可用名額)，未知名額採 1。後續批次不得注入先前 lane 結論。每個 subagent JSON 必須含 `subagent_isolated: true`；缺則 confidence cap 0.6 + `subagent_validation_failed: true`。V5.5 試行路徑見 `investment/run_workflow_v55.md`。\n4. **Red Team (Phase 2.8)**: 必須以 Agent tool 呼叫 subagent 執行，**禁止 inline 推理代替**。\n5. **MD Report (Phase 5)**: 存 `reports/YYYYMMDD_TICKER.md`。**不得省略**。\n6. **Phase 0 cache**: Phase 0 是全市場 snapshot，不屬於 ticker。FRESH = 真實來源 `fetched_at` 距凍結時間 <3h；缺可靠時間必須重建，不得用 mtime 或補現在時間延長期限。優先讀 canonical `invest_logs/YYYY-MM-DD_phase0.json`（舊 ticker-scoped 檔只作相容 fallback）。sector_intel 只能當 L3 重建素材，不能通過 Phase 0 gate。\n7. **Validate gates rc=0**:\n   - Phase 0: `validate_phase0.py --path <factpack.phase0_path>`\n   - Phase 5: `validate_session_export.py` + `validate_markdown_export.py`\n\n### MUST NOT\n- ❌ Phase 2 subagent prompt 含其他 lane 的 score / signal / reasoning\n- ❌ Phase 2 subagent prompt 含 PM 的 historical_bias / active_weights / prior session\n- ❌ 跨 lane 引用 PEER_BUNDLE / EARNINGS_ANALYST_BUNDLE / FMP_SUPP_BUNDLE 的數字推測對方結論\n- ❌ 手抄數字進 Phase 5 MD 報告（V4.87.0 起全篇由 `render_investment_report.py` 渲染；`--polish` 只准動五段純敘事，且數字須通過事實集合圍堵）\n- ❌ Final Score 用 `/5.0` 或 `/10` scale（V1.88 統一 `/3.0`）\n- ❌ 為了補 cache 自動 enqueue `財報` protocol（user 主動觸發層）\n\n### Output rules\n- 邏輯輸出 JSON；Markdown 僅用於 Final Viz Table + Phase 5 MD report\n- `key_factors`：最多 3 條，每條 ≤ 8 英文字\n\n```\nYou are the <LANE> analyst for ticker <TICKER>.\n\nISOLATION CONTRACT:\n  - 你與其他 4 個 analyst 以獨立 context 平行執行。\n  - 你看不到其他 analyst 的 score / signal / reasoning。\n  - 禁止推測其他 lane 的結論。\n  - 禁止為了「與共識一致」調整自己的 score。\n  - 禁止考慮 PM 的 historical_bias / active_weights / prior session。\n  - score -5..+5 僅依據你本 lane 收集的證據。\n\nTICKER: <TICKER>\n\nPHASE 0 MACRO CONTEXT (read-only):\n<paste Phase 0 macro_summary + _market_signals>\n\nTICKER DATA BUNDLE (read-only, all 5 lanes):\n<paste TICKER_DATA_BUNDLE.scoring; if unavailable 標 \"TICKER_DATA_BUNDLE: unavailable\">\n\n[CONDITIONAL BUNDLES — 依 lane 注入規則; 見 protocol_appendix_fmp_bundles.md]\n\nDATA SOURCE DISCIPLINE (STRICT):\n  ❌ FORBIDDEN web search for: Quote/Valuation scalar (price/peRatio/forwardPE/peg/eps/mktCap/divYield/PB/D-E/FCF/ROE), Market signals (VIX/F&G/RSI/breadth/FTD/top score), Insider/short, Analyst rating/PT, Filings, OHLCV, news headlines (skill 已抓三來源)\n  ✅ ALLOWED web search (≤ 1 call, narrative tone only): Reddit/X tone, transcript quotes, supply chain rumors, competitive narrative\n  違規處理：subagent 引用 web search 的數字 → PM 自動扣 confidence 0.2；連 3 次 → 該 lane 視為 degraded\n  ⚠️ V4.124.0 現況：上面這條扣分**沒有產生器**（「連 3 次」是跨 session 狀態，從沒有東西保存過）。\n     本版只做 shadow —— `investment/scripts/websearch_shadow.py` 從 run log 讀每個 lane 的實際\n     web call 數（走 `parent_tool_use_id` 歸屬），寫進 ledger，**不扣分、不進決策**。\n     補實作或刪宣稱都會改變行為，需使用者拍板；證據見 docs/plan_invest_stale_stages.md T2。\n\nYOUR LANE RUBRIC:\n<RUBRIC_LANE>\n\nMANDATORY DATA COLLECTION:\n<SKILL_CMD — MUST run, do NOT simulate>\n\nOUTPUT (strict JSON):\n{\n  \"phase\": 2,\n  \"agent\": \"<LANE>_Analyst\",\n  \"ticker\": \"<TICKER>\",\n  \"signal\": \"BUY | SELL | HOLD\",\n  \"score\": \"-5 to +5\",\n  \"confidence\": \"0.0 to 1.0\",\n  \"key_factors\": [\"max 3 items, ≤ 8 words each\"],\n  \"risk_flags\": [\"max 2 items\"],\n  \"phase0_alignment\": \"ALIGNED | MISALIGNED | NEUTRAL\",\n  \"data_source_timestamp\": \"YYYY-MM-DD HH:MM\",\n  \"subagent_isolated\": true,\n  \"skill_execution_failed\": \"true | false\"\n}\n```\n\n> **V4.125.0 — 本 shape 對 C1 lane_contract（V4.90）與各道閘核對過的結果**（模板寫於 2026-05-04，\n> 契約與閘是 8 月的；以下是核完的四條，不是新規則）：\n>\n> - **`signal` 自 V4.122.0 起是決策軌的輸入，不再只是敘述**：PM 必須把五個 lane 的 `signal`\n>   原樣填進 export 的 `conflict_bias.lane_signals`（validator §16 用它重算 T2/T3，且會擋\n>   「signal 與同 lane score 反向」）。lane 漏填 `signal` = PM 填不出那一格。\n> - **`score` 的 −5..+5 只適用四個 LLM lane**（fundamentals / sentiment / news / technical）。\n>   **Valuation lane 不自填分數**——它 verbatim 抄 `valuation_pack.score`（Phase 1.5 engine\n>   產出，validator 強制兩者相等）。歷史上唯一一筆 −4.0（2026-06-14 RGTI）正是在 pack\n>   成為必填之前自由填出來的，之後不可能再發生。\n> - **`skill_execution_failed` 是 skill script 真的會吐的欄位**（`momentum.py` /\n>   `technical-analyst/analyze.py` 失敗時輸出），不是模板自創；照填。\n> - **不要產 lane_contract 的欄位**（`provenance` / `producer_version` / `input_hash` /\n>   `shadow_score`）：那四個由 Phase 5 Step 1.5 的 `apply_det_shadow.py` 寫入，**LLM 手寫\n>   等於偽造 provenance**（§15 會擋）。subagent 只出上面這個 shape。\n\n### Lane Rubrics\n\n\n- **Rubric**: P/E vs sector/peer median, revenue YoY, FCF margin, D/E, next earnings date, analyst EPS growth。強訊號（FCF yield > 5% AND rev_growth > 20%）給 +3/+4。\n- **Skill**: `python3 skills/us-stock-analysis/scripts/analyze.py <TICKER> --json-only`\n- **Bundle 使用**：\n  - `TICKER_DATA_BUNDLE.scoring.*` 為 15 scalar 權威來源；skill 輸出衝突 → 採 bundle，註記「以 dual-fetch canonical 為準」\n  - `EARNINGS_ANALYST_BUNDLE.derived` (8Q margins / yoy_growth / cash_flow_quality) 為深層證據引用；`quality_flags` 觸發 → score ±1\n  - `PEER_BUNDLE.peer_pe_median`：差異 > 30% → ±1；> 50% → ±2\n  - `FMP_SUPP_BUNDLE.quality_scores`: `altman_zone == danger` → -1；`piotroski_strength == strong` → +1，weak → -1\n  - `FMP_SUPP_BUNDLE.owner_earnings.qoq_growth`: > 0.15 → reasoning 註記；< -0.30 → -0.5\n  - `FMP_SUPP_BUNDLE.employee_history` (V5.0): 5Y CAGR > 15% → +0.5（持續擴張）；最近 1Y -5% → -0.5（裁員）\n- **絕對禁止**: 把 `composite_score / verdict` 直接 mirror 為 lane score\n\n##### V2.13.0 Fundamentals lane 額外輸出（必填，不影響 score 公式）\n\n對應外部模板「真正強在哪 / 市場擔心什麼」+ moat + catalysts：\n\n1. **`moat_assessment`**（必填）：物件 `{level, type, evidence_one_line}` ——\n   `WIDE | NARROW | ERODING | NONE` + 1 行依據（V5.3 形狀鎖：字串形態已落日）\n   - 類型：brand / IP-patent / switching_cost / scale_economies / network_effect / regulation / 無\n   - 例：「WIDE — 平台網路效應（active devs ≥ 25M, App Store 30% take rate 連續 5Y 穩定）」\n   - 依據：peer 比較（PEER_BUNDLE）+ FCF margin trend + ROIC vs WACC（如可得）\n\n2. **`near_term_catalysts[]`**（必填，3-5 筆）：每筆 `{date, type, description, impact}`\n   - `type ∈ {earnings | guidance | product_launch | analyst_day | M&A | macro_event}`\n   - `impact ∈ {high | medium | low}`\n   - `date` 用 ISO `YYYY-MM-DD`；不確定用 `2026-Q3` 季度標記\n   - 來源：EARNINGS_ANALYST_BUNDLE next_earnings + News bundle headlines + macro calendar\n   - 例：`[{\"date\":\"2026-08-15\",\"type\":\"earnings\",\"description\":\"Q3 FY26 財報\",\"impact\":\"high\"},...]`\n\n3. **二元對偶 narrative**（必填）：\n   - `bull_thesis_one_line`: 一句話「真正強在哪」（≤ 40 字，量化證據）\n   - `bear_thesis_one_line`: 一句話「市場擔心什麼」（≤ 40 字，量化反駁）\n\n> 以上**必填**；缺資料寫 `INSUFFICIENT_DATA` 而非 null。`bull/bear thesis` 是 narrative summary，不替代 lane score。\n\n##### ~~V2.17.0 Fundamentals lane TAM / Market Position sub-block~~（V4.71.0 P1-6 移除）\n\n> **`market_position` 不再產出**。AUDIT_2026-07-16 F5：此 block 無任何渲染/決策消費者\n> （Dashboard 決策頁不渲染、ic-memo fact pack 不讀、不進 score 公式），而 TAM/CAGR/市占\n> 是協議中最大的無來源數字幻覺面（F3 註記 PEG 0.59 / TAM 類數字報告內無法溯源）。\n> 落日移除 = 同時省 token 與砍幻覺面。舊 entry 含此欄無害（schema 本就 optional）。\n> `moat_assessment`（V2.13）**保留** — Dashboard 決策頁與 ic-memo template 有渲染。\n",
+  "instruction": "Execute only your assigned Phase 2 lane in a fresh isolated context. Use frozen inputs. Do not read other lane outputs or mutable caches. Return protocol lane JSON; no provenance fields. No other phases or history writes."
+}

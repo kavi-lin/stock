@@ -1,0 +1,11 @@
+{
+  "ticker": "NVDA",
+  "key_levels": {
+    "support": 221.09,
+    "resistance": 229.98,
+    "pivot": 227.67
+  },
+  "pattern_taxonomy": "consolidation",
+  "smart_money_label": "distributing",
+  "immediate_catalyst_5d": null
+}

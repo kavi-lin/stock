@@ -1,0 +1,10 @@
+{
+  "source_records": {},
+  "source_telemetry": {
+    "requests": 0,
+    "cache_hits": 0,
+    "http_calls_known": 0,
+    "http_calls_unknown": 0,
+    "outcomes": {}
+  }
+}

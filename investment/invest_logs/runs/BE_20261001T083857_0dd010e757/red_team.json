@@ -1,0 +1,13 @@
+{
+  "ticker": "BE",
+  "verdict": "STRONG_COUNTER",
+  "counter_thesis": "The HOLD consensus underweights the execution hurdle embedded in BE's price: the frozen packet shows $276.98 current price versus a $45.27 DCF anchor and a 60% implied 5-year FCF CAGR, while actual and lane FCF growth estimates are unavailable. A 2.88% 10-year real yield and 8.17% one-month downward consensus price-target revisions add independent pressure if growth fails to convert into cash flow.",
+  "kill_conditions": [
+    "IF within 180 days the next two quarters' FCF annualized growth is below 30% (half the packet's 60% implied 5-year FCF CAGR) THEN the current-price valuation thesis is broken.",
+    "IF within 180 days either of the next two quarterly reports shows revenue growth below 46% year over year THEN the market-implied revenue path in the frozen packet is broken.",
+    "IF within 90 days the FRED 10-year real Treasury yield remains above 2.0% (frozen reading: 2.88%) THEN the elevated discount-rate hurdle persists and the HOLD thesis that growth can validate the current multiple is broken."
+  ],
+  "counter_evidence_strength": 5,
+  "thesis_break_probability": 0.62,
+  "subagent_isolated": true
+}

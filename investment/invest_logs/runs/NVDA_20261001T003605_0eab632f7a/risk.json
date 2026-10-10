@@ -1,0 +1,120 @@
+{
+  "phase": 4,
+  "engine": "trade_plan_builder.py v1.0.0 (V4.82.0)",
+  "trade_plan_builder_version": "1.0.0",
+  "ticker": "NVDA",
+  "final_decision_in": "HOLD",
+  "final_decision": "HOLD",
+  "mandatory_risk_flags": [],
+  "trade_plan": {
+    "entry_aggressive": [
+      231.11,
+      233.21
+    ],
+    "entry_conservative": [
+      221.09,
+      231.11
+    ],
+    "take_profit": 233.21,
+    "stop_loss": 218.88,
+    "risk_reward_ratio": 5.48,
+    "time_horizon": "mid",
+    "exit_conditions": "需突破 $233.21 才上看 $242.68；跌破 $218.88（structural stop）觸發退場",
+    "entry_reference_price": 221.09,
+    "entry_track_used": "conservative_low",
+    "rr_solve_trace": [
+      "aggressive_mid @ 232.16 → R/R 0.08",
+      "conservative_mid @ 226.1 → R/R 0.99",
+      "conservative_low @ 221.09 → R/R 5.48"
+    ],
+    "provenance_notes": [
+      "take_profit 由 mid_target $242.68 cap 在 resistance $233.21（需突破 $233.21 才上看 $242.68）"
+    ]
+  },
+  "risk_audit": {
+    "risk_level": "MEDIUM",
+    "sized_for_decision": "HOLD",
+    "vol_adjusted_limit_pct": 20.0,
+    "position_size_method": "VOL_ADJUSTED",
+    "tail_risk": {
+      "fragility_label": "MODERATE",
+      "tail_risk_score": 41.1,
+      "fragility_adjustment": "× 0.75",
+      "degraded": false
+    },
+    "binary_classification": "unknown",
+    "binary_event_within_48h": false,
+    "burry_override_active": false,
+    "burry_override_multiplier": 1.0,
+    "ftd_timeline_gate": {
+      "applied": false,
+      "days_since_ftd": null,
+      "stage": "n/a",
+      "sector_class": "cyclical",
+      "multiplier": 1.0,
+      "stop_loss_adjustment_pp": 0,
+      "rejection_triggered": false
+    },
+    "sector_concentration_f1": {
+      "applied": false,
+      "multiplier": 1.0,
+      "sector": "Technology",
+      "active_same_sector_confirmed": null,
+      "source": "registry_unavailable",
+      "note": "concentration 輸入不可得（registry_unavailable）— F1 未評估，不當作 0 部位"
+    },
+    "sizing_chain": {
+      "base": 0.2,
+      "tail_adj": 0.15,
+      "macro_cap": 0.15,
+      "binary_adj": 0.15,
+      "binary_multiplier": 1.0,
+      "burry_override_adj": 0.15,
+      "burry_override_multiplier": 1.0,
+      "ftd_adj": 0.15,
+      "f1_adj": 0.15,
+      "f1_multiplier": 1.0,
+      "shift_adj": 0.15,
+      "polar_adj": 0.15,
+      "final_position_size": 0.15,
+      "steps": [
+        "base 0.200000 × fragility 0.75 = 0.150000",
+        "macro_backdrop -2.0 ≥ -3.0 → macro cap 不觸發 = 0.150000",
+        "binary unknown (event<48h=False) → × 1.0 = 0.150000",
+        "burry_override False → × 1.0 = 0.150000",
+        "ftd_timeline × 1.0 = 0.150000",
+        "V20-F1 sector concentration × 1.0 = 0.150000",
+        "structural_shift cap 100.0% → × 1.0 = 0.150000",
+        "polarization cap 100.0% → × 1.0 = 0.150000",
+        "decision HOLD → 不折半 = 0.150000"
+      ]
+    },
+    "position_size_pct": 0.0,
+    "final_stop_loss_pct": -1.0,
+    "stop_loss_derivation": {
+      "base_stop_pct": -1.0,
+      "ftd_stop_adjustment_pp": 0,
+      "floored_at_limit": false,
+      "structural_stop_price": 218.88,
+      "pct_based_stop_price": 218.88,
+      "selected": "structural",
+      "note": "base -1.00% + FTD 0pp = -1.00%"
+    },
+    "staged_entry_split": null,
+    "hot_zone_probe_capped": false,
+    "approval": "APPROVED",
+    "rejection_reason": null
+  },
+  "sector_resolution": {
+    "sector": "Technology",
+    "sector_class": "cyclical",
+    "basis": "protocol_table"
+  },
+  "ftd_notes": [
+    "ftd.state='NO_SIGNAL' != FTD_CONFIRMED → gate 不適用"
+  ],
+  "warnings": [
+    "concentration 輸入不可得（registry_unavailable）— F1 未評估，不當作 0 部位",
+    "預設 entry 軌 R/R < 2.0 → 依 Step 1「收緊 entry」改用 conservative_low（嘗試序：aggressive_mid @ 232.16 → R/R 0.08 | conservative_mid @ 226.1 → R/R 0.99 | conservative_low @ 221.09 → R/R 5.48）"
+  ]
+}

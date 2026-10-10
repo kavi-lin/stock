@@ -1,0 +1,147 @@
+{
+  "schema": "investment-run/1.0",
+  "run_id": "HPE_20261001T000754_f552f5f9fc",
+  "ticker": "HPE",
+  "analysis_at": "2026-09-30T16:08:03.334969+00:00",
+  "snapshot_hash": "sha256:c5aee0ddc73505cac343e264c727b2680490ae8bba62d66cdfcc369511fa58db",
+  "producer_version": "sha256:a697ee0deea480ee7d35438ae12641433b970f6ead1acc9d537352c3d8ac16f9",
+  "protocol_version": "V5.5",
+  "prompts": {
+    "fundamentals": "sha256:5dbeca965a98b8d1a0425515bd0862383a89f285506d991716b948fb614ffa03",
+    "sentiment": "sha256:01accedca5d4a89302b0bca57beb6906959bcfc845ec0ab4c04944ec5bc086a5",
+    "news": "sha256:052942c520113a5e0526fc8d0090d580d942e943c7d71795cb554828b3e8a235",
+    "technical": "sha256:b63c22a007a9e69d2d74c56133f8e4587b30c4911a1ad078b17d67c947a299e3",
+    "valuation": "sha256:3c37bd4918b9e68a275ab8c88a333e7953a5a32585376834de5d6e4d04457404"
+  },
+  "status": "ready",
+  "created_at": "2026-09-30T16:08:03.550655+00:00",
+  "offline_fixture": false,
+  "host_job_id": "invest_manual_codex_HPE_20260930_235237",
+  "telemetry": {
+    "prepare_seconds": 9.488854750059545,
+    "fmp": {
+      "preparation": {
+        "requests": 3,
+        "cache_hits": 2,
+        "http_calls_known": 3,
+        "http_calls_unknown": 0,
+        "outcomes": {
+          "ok": 5
+        }
+      },
+      "earnings": {
+        "requests": 5,
+        "cache_hits": 20,
+        "http_calls_known": 5,
+        "http_calls_unknown": 0,
+        "outcomes": {
+          "ok": 21,
+          "transport_error": 2,
+          "permission_denied": 2
+        }
+      },
+      "factpack": {
+        "requests": 33,
+        "cache_hits": 7,
+        "http_calls_known": 33,
+        "http_calls_unknown": 0,
+        "outcomes": {
+          "ok": 30,
+          "permission_denied": 9,
+          "empty": 1
+        }
+      }
+    },
+    "tokens": {
+      "input": null,
+      "output": null,
+      "cached": null
+    }
+  },
+  "stages": {
+    "quant": {
+      "status": "complete",
+      "attempts": 0,
+      "artifact": "quant.json",
+      "output_hash": "sha256:c3cc547a04114dadeaba1eceee19e14bfeed8a009944a5f435f3f192b32aee16",
+      "dependency_hash": "sha256:6be4d02831041f801e5a47afb27bc75c23ae4f080ea1018ed86240598110ce63",
+      "finished_at": "2026-09-30T16:08:03.555428+00:00"
+    },
+    "fundamentals": {
+      "status": "retry",
+      "attempts": 1,
+      "fallback": false,
+      "started_at": "2026-09-30T16:08:46.913500+00:00",
+      "model": "gpt-6-luna",
+      "effort": "max",
+      "input_hash": "sha256:5dbeca965a98b8d1a0425515bd0862383a89f285506d991716b948fb614ffa03",
+      "queued_seconds": 43.362857,
+      "tokens": {
+        "input": null,
+        "output": null,
+        "cached": null
+      },
+      "failure_kind": "execution"
+    },
+    "sentiment": {
+      "status": "retry",
+      "attempts": 1,
+      "fallback": false,
+      "started_at": "2026-09-30T16:08:46.913524+00:00",
+      "model": "gpt-6-luna",
+      "effort": "max",
+      "input_hash": "sha256:01accedca5d4a89302b0bca57beb6906959bcfc845ec0ab4c04944ec5bc086a5",
+      "queued_seconds": 43.362871,
+      "tokens": {
+        "input": null,
+        "output": null,
+        "cached": null
+      },
+      "failure_kind": "execution"
+    },
+    "news": {
+      "status": "retry",
+      "attempts": 1,
+      "fallback": false,
+      "started_at": "2026-09-30T16:08:46.913530+00:00",
+      "model": "gpt-6-luna",
+      "effort": "max",
+      "input_hash": "sha256:052942c520113a5e0526fc8d0090d580d942e943c7d71795cb554828b3e8a235",
+      "queued_seconds": 43.362876,
+      "tokens": {
+        "input": null,
+        "output": null,
+        "cached": null
+      },
+      "failure_kind": "execution"
+    },
+    "technical": {
+      "status": "pending",
+      "attempts": 0
+    },
+    "valuation": {
+      "status": "pending",
+      "attempts": 0
+    },
+    "red_team": {
+      "status": "pending",
+      "attempts": 0
+    },
+    "decision": {
+      "status": "pending",
+      "attempts": 0
+    },
+    "mhp": {
+      "status": "pending",
+      "attempts": 0
+    },
+    "risk": {
+      "status": "pending",
+      "attempts": 0
+    },
+    "finalize": {
+      "status": "pending",
+      "attempts": 0
+    }
+  }
+}
