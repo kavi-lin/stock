@@ -46,6 +46,9 @@ from scripts.break_news import store  # noqa: E402
 # ── Contract constants ───────────────────────────────────────────────
 SCHEMA_VERSION = 1
 SOURCE_BREAK_NEWS = "break_news"
+SOURCE_RESEARCH = "research"
+# Backlink targets. Research is a producer but has no per-artifact backlink:
+# its cards are superseded per event revision, so stamping them is pointless.
 KNOWN_SOURCES = {SOURCE_BREAK_NEWS}
 
 # Radar is deliberately absent in V1: it is sector-shaped rather than
@@ -78,6 +81,25 @@ _CONFLICT_MIN_HITS = 3
 _CONFLICT_AGREEMENT = 0.5
 
 _CRED_MULT = {"HIGH": 1.0, "MEDIUM": 0.7, "LOW": 0.4}
+
+# ── Research producer (scripts/research, invest lane only) ───────────
+# Research is the deep second pass over escalated break-news debates: its
+# claims are checked against verbatim source excerpts. It feeds the invest lane
+# only — the claims are not earnings- or momentum-shaped, and putting them on
+# those pages is what made the old standalone research panel feel bolted on.
+RESEARCH_DB = _ROOT / "news" / "research_cache" / "research.sqlite3"
+RESEARCH_LANE = "invest"
+# `insufficient` / `retracted` claims never reach a page; `contested` ones are
+# shown (a live dispute is worth seeing) but weigh less.
+_RESEARCH_STATUS_MULT = {"supported": 1.0, "contested": 0.6}
+# A question names a gap, not a finding: it rides along on a card that exists
+# for other reasons but never creates one.
+_RESEARCH_KIND_MULT = {"fact": 1.0, "inference": 0.8, "question": 0.0}
+_RESEARCH_HALF_LIFE_H = 24.0   # verified claims age slower than raw headlines
+_RESEARCH_SCALE = 1.0
+_RESEARCH_BOOST = 20.0         # most a break-news candidate gains from research
+_RESEARCH_NEUTRAL_MULT = 0.75  # direction unknown: material, but less actionable
+_MAX_RESEARCH_CLAIMS = 5
 
 # Direction predicates. CATALYST_FOR / MENTIONED_IN / COMPETES_WITH are
 # deliberately excluded: they say a ticker is *involved*, not which way.
@@ -206,7 +228,15 @@ def scan_signature(window_days: int = DEFAULT_WINDOW_DAYS,
         state_mtime = STATE_PATH.stat().st_mtime
     except OSError:
         state_mtime = 0.0
-    return (count, round(newest, 3), round(state_mtime, 3))
+    # The research DB runs in WAL mode, so a publish lands in the -wal file and
+    # the main file's mtime does not move until a checkpoint.
+    research_mtime = 0.0
+    for path in (RESEARCH_DB, RESEARCH_DB.with_name(RESEARCH_DB.name + "-wal")):
+        try:
+            research_mtime = max(research_mtime, path.stat().st_mtime)
+        except OSError:
+            continue
+    return (count, round(newest, 3), round(state_mtime, 3), round(research_mtime, 3))
 
 
 def _clamp_days(window_days: Any) -> int:
@@ -310,6 +340,9 @@ def _collect_break_news(window_days: int, now: datetime,
         event = {
             "source": SOURCE_BREAK_NEWS,
             "event_key": event_key,
+            "content_revision": hashlib.sha256(json.dumps(
+                {"summary": summary, "triage": triage, "source": src},
+                sort_keys=True, ensure_ascii=False).encode()).hexdigest()[:16],
             "artifact_id": news_id,
             "cluster_id": cluster_id,
             "direction": event_direction,
@@ -349,6 +382,186 @@ def _collect_break_news(window_days: int, now: datetime,
 
     dropped["_scanned_files"] = scanned
     return list(by_event.values())
+
+
+# ── Producer: research claims ────────────────────────────────────────
+def _read_research_cards() -> list[dict]:
+    """Raw card payloads, read-only.
+
+    Opened with `mode=ro` instead of through `research.store.Repository`, whose
+    constructor creates the directory and tables — a read path must not write.
+    A missing or locked database simply means no research this round.
+    """
+    import sqlite3
+
+    if not RESEARCH_DB.exists():
+        return []
+    try:
+        conn = sqlite3.connect(f"file:{RESEARCH_DB}?mode=ro", uri=True, timeout=2)
+        try:
+            rows = conn.execute("SELECT payload FROM cards").fetchall()
+        finally:
+            conn.close()
+    except sqlite3.Error:
+        return []
+    out = []
+    for (payload,) in rows:
+        try:
+            card = json.loads(payload)
+        except (TypeError, ValueError):
+            continue
+        if isinstance(card, dict):
+            out.append(card)
+    return out
+
+
+def _collect_research(window_days: int, now: datetime,
+                      dropped: dict[str, int]) -> dict[str, list[dict]]:
+    """ticker -> research claims usable on the invest lane, newest first."""
+    by_ticker: dict[str, list[dict]] = {}
+    floor = now - timedelta(days=window_days)
+    for card in _read_research_cards():
+        if card.get("superseded") or card.get("phase") != "live":
+            continue
+        if RESEARCH_LANE not in (card.get("lanes") or []):
+            continue
+        status = str(card.get("status") or "")
+        if status not in _RESEARCH_STATUS_MULT:
+            dropped["research_unverified"] = dropped.get("research_unverified", 0) + 1
+            continue
+        created = _parse_dt(card.get("created_at"))
+        # A claim from the future is a clock bug, not an extra-fresh signal.
+        if created is None or created < floor or created > now:
+            continue
+        tickers = [t for t in (normalize_ticker(x) for x in card.get("tickers") or []) if t]
+        if not tickers:
+            continue
+        evidence = card.get("evidence") or []
+        refs = card.get("evidence_refs") or []
+        source = evidence[0] if evidence and isinstance(evidence[0], dict) else {}
+        quote = next((r.get("quote") for r in refs if isinstance(r, dict) and r.get("quote")), "")
+        direction = str(card.get("direction") or "neutral")
+        claim = {
+            "claim_id": str(card.get("id") or ""),
+            "revision": str(card.get("revision") or ""),
+            "text": str(card.get("text") or "")[:400],
+            "kind": str(card.get("kind") or ""),
+            "status": status,
+            "direction": direction if direction in ("bullish", "bearish", "mixed") else "neutral",
+            "headline": str(card.get("headline") or "")[:300],
+            "source_name": str(source.get("source") or ""),
+            "url": str(source.get("url") or ""),
+            "quote": str(quote)[:480],
+            "challenge": str(card.get("challenge") or "")[:400],
+            "falsifier": str(card.get("falsifier") or "")[:400],
+            "materiality": _as_float(card.get("materiality")),
+            "created_at": _utc_iso(created),
+            "event_id": str(card.get("event_id") or ""),
+            "_when": created,
+            "_n_tickers": len(tickers),
+        }
+        for ticker in tickers:
+            by_ticker.setdefault(ticker, []).append(claim)
+    for claims in by_ticker.values():
+        claims.sort(key=lambda c: c["_when"], reverse=True)
+    return by_ticker
+
+
+def _research_weight(claim: dict, now: datetime) -> float:
+    age_h = max(0.0, (now - claim["_when"]).total_seconds() / 3600.0)
+    recency = 0.5 ** (age_h / _RESEARCH_HALF_LIFE_H)
+    return ((claim["materiality"] / 5.0) * _RESEARCH_STATUS_MULT[claim["status"]]
+            * _RESEARCH_KIND_MULT.get(claim["kind"], 0.0) * recency
+            / math.sqrt(max(1, claim["_n_tickers"])))
+
+
+def _public_claim(claim: dict) -> dict:
+    return {k: v for k, v in claim.items() if not k.startswith("_")}
+
+
+def _research_summary(claims: list[dict], now: datetime) -> dict:
+    mass = sum(_research_weight(c, now) for c in claims)
+    signed = sum(_research_weight(c, now) * (1 if c["direction"] == "bullish" else -1)
+                 for c in claims if c["direction"] in ("bullish", "bearish"))
+    return {
+        "mass": mass,
+        "signed": signed,
+        "supported": sum(1 for c in claims if c["status"] == "supported"),
+        "contested": sum(1 for c in claims if c["status"] == "contested"),
+        "claims": [_public_claim(c) for c in claims[:_MAX_RESEARCH_CLAIMS]],
+        "revision_keys": sorted(f"{c['claim_id']}:{c['revision']}" for c in claims),
+    }
+
+
+def _attach_research(candidate: dict, summary: dict) -> None:
+    """Fold research into a break-news candidate without letting it flip direction.
+
+    Research can confirm and add weight; it never overrides what the debates
+    concluded — a lone contrary claim shows up as `research_disagrees`.
+    """
+    candidate["research"] = {k: summary[k] for k in ("supported", "contested", "claims")}
+    candidate["score"] = round(min(100.0, candidate["score"] + _RESEARCH_BOOST
+                                   * math.tanh(summary["mass"] / _RESEARCH_SCALE)), 1)
+    research_dir = ("bullish" if summary["signed"] > 0
+                    else "bearish" if summary["signed"] < 0 else None)
+    candidate["research_disagrees"] = bool(research_dir and research_dir != candidate["direction"])
+    candidate["revision"] = _revision([candidate["revision"], *summary["revision_keys"]])
+    candidate["sources"] = sorted({*candidate.get("sources", []), SOURCE_RESEARCH})
+    for claim in summary["claims"]:
+        candidate["source_refs"].append({"source": SOURCE_RESEARCH,
+                                         "artifact_id": claim["claim_id"],
+                                         "event_id": claim["event_id"]})
+
+
+def _research_only_candidate(ticker: str, claims: list[dict], summary: dict,
+                             now: datetime) -> dict | None:
+    """A ticker research found that no debate put on the invest lane."""
+    if summary["mass"] <= 0:   # only questions: a gap is not a candidate
+        return None
+    directional = sum(abs(_research_weight(c, now)) for c in claims
+                      if c["direction"] in ("bullish", "bearish"))
+    agreement = abs(summary["signed"]) / directional if directional > 0 else 0.0
+    if summary["signed"] > 0 and agreement >= _CONFLICT_AGREEMENT:
+        direction = "bullish"
+    elif summary["signed"] < 0 and agreement >= _CONFLICT_AGREEMENT:
+        direction = "bearish"
+    else:
+        # Most verified claims are neutral facts ("Schneider nears a $20bn PTC
+        # deal"). Material, but the direction is the analysis's job to decide.
+        direction = "neutral"
+    times = [c["_when"] for c in claims]
+    return {
+        "candidate_id": f"{RESEARCH_LANE}:{ticker}",
+        "revision": _revision(summary["revision_keys"]),
+        "lane": RESEARCH_LANE,
+        "ticker": ticker,
+        "direction": direction,
+        # Same curve as a debate candidate. One verified neutral fact should sit
+        # below a ticker several debates agree on, not above it.
+        "score": round(100.0 * math.tanh(summary["mass"] / _SCORE_SCALE)
+                       * (_RESEARCH_NEUTRAL_MULT if direction == "neutral"
+                          else 0.5 + 0.5 * agreement), 1),
+        "hits": 0,
+        "raw_mentions": 0,
+        "agreement": round(agreement, 3),
+        "conflict": summary["contested"] > 0 and summary["supported"] == 0,
+        "bullish_hits": 0,
+        "bearish_hits": 0,
+        "max_materiality": round(max(c["materiality"] for c in claims), 2),
+        "top_credibility": "MEDIUM",
+        "first_seen": _utc_iso(min(times)),
+        "last_seen": _utc_iso(max(times)),
+        "sectors": [],
+        "themes": [],
+        "news_types": {},
+        "source_refs": [{"source": SOURCE_RESEARCH, "artifact_id": c["claim_id"],
+                         "event_id": c["event_id"]} for c in summary["claims"]],
+        "evidence": [],
+        "consumed_by": [],
+        "sources": [SOURCE_RESEARCH],
+        "research": {k: summary[k] for k in ("supported", "contested", "claims")},
+        "research_disagrees": False,
+    }
 
 
 # ── Lane routing ─────────────────────────────────────────────────────
@@ -454,7 +667,8 @@ def _build_candidate(lane: str, ticker: str, mentions: list[tuple[dict, float, s
 
     return {
         "candidate_id": f"{lane}:{ticker}",
-        "revision": _revision([event["event_key"] for event in events]),
+        "revision": _revision([event["event_key"] + ":" + event.get("content_revision", "")
+                               for event in events]),
         "lane": lane,
         "ticker": ticker,
         "direction": "bullish" if raw > 0 else "bearish",
@@ -491,6 +705,9 @@ def _build_candidate(lane: str, ticker: str, mentions: list[tuple[dict, float, s
             "final_take": event["final_take"],
         } for event, _, direction in ordered[:3]],
         "consumed_by": consumed_by[:_MAX_CONSUMED_BY],
+        "sources": [SOURCE_BREAK_NEWS],
+        "research": None,
+        "research_disagrees": False,
     }
 
 
@@ -532,10 +749,30 @@ def compute_signal_queue(window_days: int = DEFAULT_WINDOW_DAYS,
             for lane in event_lanes:
                 buckets.setdefault((lane, ticker), []).append((event, weight, direction))
 
-    state = load_state()
-    out: dict[str, list[dict]] = {lane: [] for lane in lanes}
+    research = (_collect_research(window_days, now, dropped)
+                if RESEARCH_LANE in lanes else {})
+    research_events = len({c["event_id"] for claims in research.values() for c in claims})
+
+    built: list[dict] = []
     for (lane, ticker), mentions in buckets.items():
         candidate = _build_candidate(lane, ticker, mentions)
+        claims = research.get(ticker) if lane == RESEARCH_LANE else None
+        if claims:
+            _attach_research(candidate, _research_summary(claims, now))
+        built.append(candidate)
+    for ticker, claims in research.items():
+        if (RESEARCH_LANE, ticker) in buckets:
+            continue
+        candidate = _research_only_candidate(ticker, claims, _research_summary(claims, now), now)
+        if candidate is None:
+            dropped["research_questions_only"] = dropped.get("research_questions_only", 0) + 1
+        else:
+            built.append(candidate)
+
+    state = load_state()
+    out: dict[str, list[dict]] = {lane: [] for lane in lanes}
+    for candidate in built:
+        lane = candidate["lane"]
         if _suppress(candidate, min_score):
             dropped["low_score"] = dropped.get("low_score", 0) + 1
             continue
@@ -556,6 +793,7 @@ def compute_signal_queue(window_days: int = DEFAULT_WINDOW_DAYS,
         "window_days": window_days,
         "scanned_files": scanned_files,
         "usable_events": len(events),
+        "research_events": research_events,
         "lanes": out,
         "counts": {lane: len(items) for lane, items in out.items()},
         "dropped": dropped,

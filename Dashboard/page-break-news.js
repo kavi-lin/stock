@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentItems = [];
   let selectedId = null;
   let detailTimer = null;
+  let researchActive = false;   // selected item's research is queued/running
 
   let bnTrend = null;   // TrendChart instance (full mode)
 
@@ -625,7 +626,9 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>`;
     }
 
-    panel.innerHTML = header + thread + summaryBlock;
+    const rev = item.research && item.research.event;
+    researchActive = !!rev && (rev.state === 'pending' || rev.state === 'researching');
+    panel.innerHTML = header + thread + summaryBlock + renderResearch(item.research);
     if (opts.resetScroll) panel.scrollTop = 0;
     const replay = panel.querySelector('[data-replay]');
     if (replay) replay.addEventListener('click', async (e) => {
@@ -642,6 +645,82 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window.lucide && lucide.createIcons) lucide.createIcons();
   }
 
+  // ── Research deep dive (escalated debates only) ──────────────────
+  // Debates are the first pass; scripts/research/handoff.py scores each closed
+  // one and only the high scorers get the luna/max research call pair.
+  const RESEARCH_STATUS = {
+    supported: ['證據支持', 'Supported', '#22c55e'],
+    contested: ['仍有爭議', 'Contested', '#eab308'],
+    insufficient: ['證據不足', 'Insufficient', '#a1a1aa'],
+    retracted: ['已撤回', 'Retracted', '#ef4444'],
+  };
+  const RESEARCH_KIND = { fact: ['事實', 'Fact'], inference: ['推論', 'Inference'], question: ['待回答', 'Question'] };
+  const ESCALATION_REASON = {
+    debate_unsettled: ['辯論未收斂', 'debate unsettled'],
+    binary_event: ['二元事件', 'binary event'],
+    multi_source_echo: ['多來源報導', 'multi-source echo'],
+    high_priority: ['高優先', 'high priority'],
+    strong_verdict: ['強烈結論', 'strong verdict'],
+    stated_dispute: ['有明確爭點', 'stated dispute'],
+    no_universe_ticker: ['無追蹤標的', 'no universe ticker'],
+  };
+
+  function renderResearch(r) {
+    if (!r || r.error) return '';
+    const h = r.handoff, ev = r.event;
+    if (!h && !ev) return '';
+    const reasons = ((h && h.reasons) || []).map(k => {
+      const l = ESCALATION_REASON[k];
+      return l ? t(l[0], l[1]) : k;
+    }).join(' · ');
+    const box = (body, color) => `<div style="margin-top:12px;padding:10px 12px;border-radius:8px;
+      border:1px solid ${color};background:color-mix(in srgb,${color},transparent 94%);font-size:12px;">
+      <div style="font-size:10px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;
+        color:${color};margin-bottom:6px;">🔬 ${t('深度研究', 'Deep Research')}</div>${body}</div>`;
+    const muted = s => `<div style="color:var(--text-muted);font-size:11px;line-height:1.55;">${s}</div>`;
+    if (!ev) {
+      if (h && h.escalated && h.rejected) {
+        return box(muted(`${t('分數夠但未通過研究門檻', 'Escalated but blocked by research gate')}: ${esc(h.rejected)}`), '#a1a1aa');
+      }
+      return box(muted(`${t('未送研究', 'Not escalated')} · ${t('分數', 'score')} ${h.score}` +
+        (reasons ? ` · ${esc(reasons)}` : '')), '#71717a');
+    }
+    const stateLabel = {
+      pending: t('排隊等待研究', 'Queued for research'),
+      researching: t('研究中…', 'Researching…'),
+      deferred_stop: t('研究暫停，等待恢復', 'Paused, awaiting resume'),
+      failed: t('研究失敗', 'Research failed'),
+      discovery: t('未進入研究', 'Not queued'),
+    };
+    const head = muted(`${t('升級分數', 'Escalation score')} ${esc((ev.escalation || {}).score ?? '?')}` +
+      (reasons ? ` · ${esc(reasons)}` : ''));
+    if (ev.state !== 'researched') {
+      const err = ev.state === 'failed' && ev.error ? ` (${esc(ev.error)})` : '';
+      return box(head + `<div style="margin-top:6px;color:var(--text-main);">${stateLabel[ev.state] || esc(ev.state)}${err}</div>`, '#60a5fa');
+    }
+    const cards = (r.cards || []).map(c => {
+      const st = RESEARCH_STATUS[c.status] || [c.status, c.status, '#a1a1aa'];
+      const kd = RESEARCH_KIND[c.kind] || [c.kind, c.kind];
+      const quotes = [...(c.evidence_refs || []), ...(c.challenge_refs || [])].slice(0, 3)
+        .map(ref => `<blockquote style="border-left:2px solid #52525b;padding-left:8px;margin:6px 0;
+          font-size:11px;color:var(--text-muted);overflow-wrap:anywhere;">${esc(ref.quote)}</blockquote>`).join('');
+      return `<div style="margin-top:8px;padding:8px 10px;border-left:3px solid ${st[2]};border-radius:4px;
+          background:rgba(255,255,255,0.02);">
+        <div style="font-size:10px;font-weight:700;color:${st[2]};">${t(st[0], st[1])} · ${t(kd[0], kd[1])}
+          ${c.tickers && c.tickers.length ? `<span style="color:var(--text-muted);font-weight:500;"> · ${esc(c.tickers.join(' '))}</span>` : ''}</div>
+        <div style="margin-top:4px;color:var(--text-main);line-height:1.55;">${esc(c.text)}</div>
+        <div style="margin-top:4px;font-size:11px;color:var(--text-muted);line-height:1.5;">${t('審查', 'Review')}: ${esc(c.challenge)}</div>
+        <details style="margin-top:4px;font-size:11px;color:var(--text-muted);">
+          <summary style="cursor:pointer;">${t('原文依據 · 反證 · 追蹤', 'Sources · falsifier · follow-up')}</summary>
+          ${quotes}
+          <div>${t('反證條件', 'Falsifier')}: ${esc(c.falsifier)}</div>
+          <div>${t('下一步', 'Next')}: ${esc((c.followup || {}).condition)}</div>
+        </details>
+      </div>`;
+    }).join('');
+    return box(head + (cards || muted(t('研究完成，沒有產出主張', 'Research finished with no claims'))), '#60a5fa');
+  }
+
   function selectItem(id) {
     const changed = selectedId !== id;
     selectedId = id;
@@ -652,7 +731,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (detailTimer) clearInterval(detailTimer);
     detailTimer = setInterval(() => {
       const it = currentItems.find(i => i.news_id === id);
-      if (it && (it.state === 'debating' || it.state === 'pending_debate')) {
+      if (researchActive || (it && (it.state === 'debating' || it.state === 'pending_debate'))) {
         loadDetail(id);
       }
     }, BN_DETAIL_POLL_MS);

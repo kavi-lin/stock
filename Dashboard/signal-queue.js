@@ -33,7 +33,7 @@
   // ── Copy ───────────────────────────────────────────────────────────
   const LANE_TITLE = {
     earnings: ['辯論推薦的財報候選', 'Debate-sourced earnings candidates'],
-    invest:   ['辯論推薦的深度分析候選', 'Debate-sourced analysis candidates'],
+    invest:   ['新聞推薦的深度分析候選', 'News-sourced analysis candidates'],
     momentum: ['辯論點名的動能標的', 'Tickers the debates flagged'],
   };
 
@@ -70,18 +70,97 @@
   }
 
   // ── Rendering ──────────────────────────────────────────────────────
-  function renderEvidence(candidate) {
-    return (candidate.evidence || []).map(ev => {
+  // The card face carries no prose: strength, direction and provenance are all
+  // drawn. Every sentence lives in the peek popover, opened by hover, focus or
+  // tap on the source glyphs.
+  const DIR = {
+    bullish: { cls: 'up',   glyph: '▲', zh: '看多',   en: 'bullish' },
+    bearish: { cls: 'down', glyph: '▼', zh: '看空',   en: 'bearish' },
+    neutral: { cls: 'flat', glyph: '◆', zh: '待判讀', en: 'unread' },
+  };
+  const CLAIM_STATUS = {
+    supported: ['證據支持', 'Supported'],
+    contested: ['仍有爭議', 'Contested'],
+  };
+  const CLAIM_KIND = { fact: ['事實', 'Fact'], inference: ['推論', 'Inference'], question: ['待回答', 'Open question'] };
+
+  const dirOf = c => DIR[c.direction] || DIR.neutral;
+  const pick = pair => (zh() ? pair[0] : pair[1]);
+
+  function safeUrl(value) {
+    try {
+      const u = new URL(value);
+      return ['https:', 'http:'].includes(u.protocol) ? u.href : '';
+    } catch (_) { return ''; }
+  }
+
+  // Strength meter. Fill length is the score; a split candidate is drawn as the
+  // bull/bear share of its debates so the disagreement is visible, not a label.
+  function renderMeter(candidate) {
+    const pct = Math.max(4, Math.min(100, Number(candidate.score) || 0));
+    const total = (candidate.bullish_hits || 0) + (candidate.bearish_hits || 0);
+    const fill = candidate.conflict && total
+      ? `<span class="sq-fill sq-fill-split" style="width:${pct}%;--bull:${
+          Math.round(100 * candidate.bullish_hits / total)}%"></span>`
+      : `<span class="sq-fill sq-fill-${dirOf(candidate).cls}" style="width:${pct}%"></span>`;
+    return `<span class="sq-meter" role="meter" aria-valuemin="0" aria-valuemax="100"
+        aria-valuenow="${esc(candidate.score)}" aria-label="${zh() ? '訊號強度' : 'Signal strength'}">${fill}</span>`;
+  }
+
+  // One glyph per piece of provenance: ▲/▼ for a debate, ◆ for a research
+  // claim (solid = supported, hollow = contested).
+  function renderGlyphs(candidate) {
+    const debates = (candidate.evidence || []).map(ev =>
+      `<span class="sq-g sq-g-${ev.direction === 'bullish' ? 'up' : 'down'}">${
+        ev.direction === 'bullish' ? '▲' : '▼'}</span>`);
+    const extra = Math.max(0, (candidate.hits || 0) - debates.length);
+    if (extra) debates.push(`<span class="sq-g-more">+${extra}</span>`);
+    const claims = (candidate.research?.claims || []).map(cl =>
+      `<span class="sq-g sq-g-claim sq-g-${cl.status}">◆</span>`);
+    return [...debates, ...claims].join('');
+  }
+
+  function renderPeek(candidate) {
+    const debates = (candidate.evidence || []).map(ev => {
       const title = zh() && ev.headline_zh ? ev.headline_zh : ev.headline;
-      const arrow = ev.direction === 'bullish' ? '▲' : '▼';
-      const cls = ev.direction === 'bullish' ? 'sq-up' : 'sq-down';
-      return `<li>
-        <a class="sq-ev" href="break-news.html?news_id=${encodeURIComponent(ev.artifact_id)}">
-          <span class="${cls}">${arrow}</span> ${esc(title)}
-        </a>
-        <span class="sq-ev-meta">${esc(ev.source_name)}</span>
+      const d = ev.direction === 'bullish' ? DIR.bullish : DIR.bearish;
+      return `<li class="sq-pop-row">
+        <span class="sq-g sq-g-${d.cls}" aria-label="${pick([d.zh, d.en])}">${d.glyph}</span>
+        <a class="sq-pop-link" href="break-news.html?news_id=${encodeURIComponent(ev.artifact_id)}">${esc(title)}</a>
+        <span class="sq-pop-src">${esc(ev.source_name)}</span>
       </li>`;
     }).join('');
+
+    const claims = (candidate.research?.claims || []).map(cl => {
+      const url = safeUrl(cl.url);
+      const kind = CLAIM_KIND[cl.kind] ? pick(CLAIM_KIND[cl.kind]) : '';
+      return `<li class="sq-pop-row">
+        <span class="sq-g sq-g-claim sq-g-${esc(cl.status)}" title="${esc(pick(CLAIM_STATUS[cl.status] || ['', '']))}">◆</span>
+        <div class="sq-pop-claim">
+          <p>${esc(cl.text)}</p>
+          <details>
+            <summary>${esc(kind)} · ${esc(pick(CLAIM_STATUS[cl.status] || ['', '']))}</summary>
+            ${cl.quote ? `<blockquote>${esc(cl.quote)}</blockquote>` : ''}
+            ${cl.falsifier ? `<p class="sq-pop-falsifier"><b>${zh() ? '若此成立則推翻' : 'Falsified if'}</b>${esc(cl.falsifier)}</p>` : ''}
+            ${url ? `<a class="sq-pop-link" href="${esc(url)}" target="_blank" rel="noopener noreferrer">${
+              esc(cl.source_name || (zh() ? '原始來源' : 'Source'))} ↗</a>` : ''}
+          </details>
+        </div>
+      </li>`;
+    }).join('');
+
+    const flags = [
+      candidate.conflict && (zh() ? '各場辯論結論不一致：這是分歧訊號，不是買賣訊號。'
+                                  : 'Debates disagree: a divergence signal, not a trade signal.'),
+      candidate.research_disagrees && (zh() ? '查證主張的方向與辯論結論相反。'
+                                            : 'Research points the other way from the debates.'),
+      candidate.direction === 'neutral' && (zh() ? '查證屬實但方向未定，交給深度分析判讀。'
+                                                 : 'Verified, direction undecided: the analysis decides.'),
+    ].filter(Boolean).map(t => `<p class="sq-pop-flag">${esc(t)}</p>`).join('');
+
+    return `${flags}
+      ${debates ? `<h4>${zh() ? '辯論' : 'Debates'}<span>${candidate.hits || 0}</span></h4><ul>${debates}</ul>` : ''}
+      ${claims ? `<h4>${zh() ? '查證' : 'Research'}<span>${candidate.research.claims.length}</span></h4><ul>${claims}</ul>` : ''}`;
   }
 
   function renderDelivered(candidate) {
@@ -110,8 +189,10 @@
     const delivered = renderDelivered(candidate);
     if (delivered) return delivered;
     const retryNote = candidate.delivery?.previous_status === 'failed'
-      ? `<span class="sq-failed" title="${esc(candidate.delivery.error || '')}">${
-          zh() ? '上次執行失敗，可重試' : 'Last run failed; retry available'}</span>`
+      ? `<span class="sq-failed sq-retry" title="${esc(
+          (zh() ? '上次執行失敗，可重試' : 'Last run failed; retry available')
+          + (candidate.delivery.error ? `\n${candidate.delivery.error}` : ''))}"
+          aria-label="${zh() ? '上次執行失敗' : 'Last run failed'}">!</span>`
       : '';
 
     if (candidate.lane === 'momentum') {
@@ -136,38 +217,40 @@
       return `${retryNote}<span class="sq-btn sq-btn-off" title="${esc((zh() ? rule.note[0] : rule.note[1]))}">${
         esc(label)}</span>${link}`;
     }
-    return `${retryNote}<button class="sq-btn" data-act="accept" data-protocol="${rule.protocol}">${
-      esc(label)}</button>`;
+    // The eligibility note used to be a line of grey prose on the card; it is
+    // the button's tooltip now.
+    return `${retryNote}<button class="sq-btn" data-act="accept" data-protocol="${rule.protocol}"
+        title="${esc(zh() ? rule.note[0] : rule.note[1])}">${esc(label)}</button>`;
   }
 
   function renderCard(candidate) {
-    const up = candidate.direction === 'bullish';
-    const rule = candidate.lane === 'earnings' ? eligibilityFor(candidate) : null;
-    const note = rule ? (zh() ? rule.note[0] : rule.note[1]) : '';
-    const conflict = candidate.conflict
-      ? `<span class="sq-flag" title="${esc(zh()
-          ? '各場辯論結論不一致，這是分歧訊號而非買賣訊號'
-          : 'Debates disagreed — a divergence signal, not a trade signal')}">${
-          zh() ? '多空分歧' : 'split'}</span>`
-      : '';
+    const d = dirOf(candidate);
+    const popId = `sq-pop-${String(candidate.candidate_id).replace(/[^A-Za-z0-9_-]/g, '_')}`;
+    const scoreTip = zh()
+      ? `${candidate.hits || 0} 場辯論 · ${candidate.research?.claims?.length || 0} 則查證 · 一致度 ${candidate.agreement}`
+      : `${candidate.hits || 0} debates · ${candidate.research?.claims?.length || 0} claims · agreement ${candidate.agreement}`;
+    const split = candidate.conflict || candidate.research_disagrees;
 
-    return `<article class="sq-card ${up ? 'sq-card-up' : 'sq-card-down'}"
+    return `<article class="sq-card sq-card-${d.cls}${split ? ' sq-card-split' : ''}"
         data-id="${esc(candidate.candidate_id)}" data-rev="${esc(candidate.revision)}">
-      <header class="sq-head">
+      <div class="sq-head">
         <span class="sq-ticker">${esc(candidate.ticker)}</span>
-        <span class="sq-dir ${up ? 'sq-up' : 'sq-down'}">${up
-          ? (zh() ? '看多' : 'bullish') : (zh() ? '看空' : 'bearish')}</span>
-        ${conflict}
-        <span class="sq-score" title="${esc(zh()
-          ? `${candidate.hits} 場辯論（原始提及 ${candidate.raw_mentions}）· 一致度 ${candidate.agreement}`
-          : `${candidate.hits} debates (${candidate.raw_mentions} mentions) · agreement ${candidate.agreement}`)}"
-          >${candidate.score}</span>
+        <span class="sq-dir sq-${d.cls}"><span aria-hidden="true">${d.glyph}</span> ${pick([d.zh, d.en])}</span>
+        ${split ? `<span class="sq-split" title="${zh() ? '多空分歧' : 'Split'}" aria-label="${zh() ? '多空分歧' : 'Split'}">⇅</span>` : ''}
+        <span class="sq-score" title="${esc(scoreTip)}">${esc(Math.round(candidate.score))}</span>
         <button class="sq-dismiss" data-act="dismiss" title="${
-          zh() ? '忽略此候選' : 'Dismiss'}">×</button>
-      </header>
-      ${note ? `<p class="sq-note">${esc(note)}</p>` : ''}
-      <ul class="sq-evidence">${renderEvidence(candidate)}</ul>
-      <footer class="sq-foot">${renderAction(candidate)}</footer>
+          zh() ? '忽略此候選' : 'Dismiss'}" aria-label="${zh() ? '忽略' : 'Dismiss'} ${esc(candidate.ticker)}">×</button>
+      </div>
+      ${renderMeter(candidate)}
+      <div class="sq-foot">
+        <span class="sq-peek-wrap">
+          <button type="button" class="sq-peek" data-peek aria-expanded="false" aria-controls="${popId}"
+              aria-label="${zh() ? '顯示依據' : 'Show sources'}">${renderGlyphs(candidate)}</button>
+          <div class="sq-pop" id="${popId}" role="dialog" aria-label="${esc(candidate.ticker)} ${
+            zh() ? '依據' : 'sources'}">${renderPeek(candidate)}</div>
+        </span>
+        <span class="sq-act">${renderAction(candidate)}</span>
+      </div>
     </article>`;
   }
 
@@ -201,6 +284,16 @@
     const limit = (opts && opts.limit) || 8;
     let latest = null;
     let timer = null;
+    // A pinned (tapped) popover survives the 60s poll re-render.
+    let pinned = null;
+
+    function legend(items) {
+      const hasResearch = items.some(c => c.research?.claims?.length);
+      return `<span class="sq-legend" aria-hidden="true">
+        <span><span class="sq-g sq-g-up">▲</span><span class="sq-g sq-g-down">▼</span>${zh() ? '辯論' : 'debate'}</span>
+        ${hasResearch ? `<span><span class="sq-g sq-g-claim sq-g-supported">◆</span>${zh() ? '查證' : 'verified'}</span>` : ''}
+      </span>`;
+    }
 
     function render() {
       const items = latest?.lanes?.[lane] || [];
@@ -209,12 +302,60 @@
         <h3 class="sq-title">
           ${zh() ? title[0] : title[1]}
           <span class="sq-count">${items.length}</span>
-          <a class="sq-src" href="break-news.html">${zh() ? '來源：即時辯論' : 'from live debates'} →</a>
+          ${items.length ? legend(items) : ''}
+          <a class="sq-src" href="break-news.html">${zh() ? '即時辯論' : 'Live debates'} →</a>
         </h3>
         <div class="sq-list">${
           items.length ? items.map(renderCard).join('') : renderEmpty(latest, lane)}</div>
       </section>`;
+      if (pinned) {
+        const card = [...host.querySelectorAll('.sq-card')].find(c => c.dataset.id === pinned);
+        if (card) setOpen(card, true); else pinned = null;
+      }
     }
+
+    // Flip the popover to the card's right edge when it would leave the viewport.
+    function place(card) {
+      const pop = card.querySelector('.sq-pop');
+      if (!pop) return;
+      pop.classList.remove('sq-pop-end');
+      const left = card.getBoundingClientRect().left;
+      if (left + Math.min(380, window.innerWidth - 32) > window.innerWidth - 16) {
+        pop.classList.add('sq-pop-end');
+      }
+    }
+
+    function setOpen(card, open) {
+      const btn = card.querySelector('[data-peek]');
+      card.classList.toggle('sq-open', open);
+      if (btn) btn.setAttribute('aria-expanded', String(open));
+      if (open) place(card);
+    }
+
+    function closeAll(except) {
+      host.querySelectorAll('.sq-card.sq-open').forEach(c => { if (c !== except) setOpen(c, false); });
+    }
+
+    host.addEventListener('pointerover', e => {
+      const card = e.target.closest('.sq-peek-wrap')?.closest('.sq-card');
+      if (card) place(card);
+    });
+    host.addEventListener('focusin', e => {
+      const card = e.target.closest('.sq-peek-wrap')?.closest('.sq-card');
+      if (card) place(card);
+    });
+    document.addEventListener('click', e => {
+      if (!pinned || host.contains(e.target) && e.target.closest('.sq-peek-wrap')) return;
+      pinned = null;
+      closeAll();
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Escape' || !host.querySelector('.sq-open')) return;
+      const card = host.querySelector('.sq-open');
+      pinned = null;
+      closeAll();
+      card?.querySelector('[data-peek]')?.focus();
+    });
 
     async function load() {
       try {
@@ -231,6 +372,15 @@
     }
 
     host.addEventListener('click', async (e) => {
+      const peek = e.target.closest('[data-peek]');
+      if (peek) {
+        const card = peek.closest('.sq-card');
+        const open = !card.classList.contains('sq-open');
+        closeAll(card);
+        setOpen(card, open);
+        pinned = open ? card.dataset.id : null;
+        return;
+      }
       const btn = e.target.closest('[data-act]');
       if (!btn) return;
       const card = btn.closest('.sq-card');

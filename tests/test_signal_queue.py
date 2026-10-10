@@ -32,6 +32,14 @@ def bn_store(tmp_path, monkeypatch):
     return d
 
 
+@pytest.fixture(autouse=True)
+def research_db(tmp_path, monkeypatch):
+    """Never read the live research DB; tests that want research write one."""
+    p = tmp_path / "research_cache" / "research.sqlite3"
+    monkeypatch.setattr(sq, "RESEARCH_DB", p)
+    return p
+
+
 @pytest.fixture
 def state_file(tmp_path, monkeypatch):
     p = tmp_path / "signals" / "queue_state.json"
@@ -645,3 +653,107 @@ def test_break_news_deep_link_is_not_limited_to_feed_membership():
     assert "currentItems.some(it => it.news_id === wanted)" not in src
     assert "selectItem(wanted);" in src
     assert "/api/break-news/item/${encodeURIComponent(id)}" in src
+
+
+# ── Research producer (invest lane) ──────────────────────────────────
+def write_research(db_path, *cards):
+    import sqlite3
+
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(db_path)
+    conn.execute("CREATE TABLE IF NOT EXISTS cards (id TEXT PRIMARY KEY, payload TEXT NOT NULL)")
+    for card in cards:
+        conn.execute("INSERT OR REPLACE INTO cards VALUES (?,?)", (card["id"], json.dumps(card)))
+    conn.commit()
+    conn.close()
+
+
+def research_card(cid="rc_1", *, tickers=("PTC",), status="supported", kind="fact",
+                  direction="neutral", hours_ago=2.0, materiality=3.5, superseded=False,
+                  phase="live", lanes=("invest", "earnings", "momentum", "nexus"), revision="r1"):
+    return {
+        "id": cid, "revision": revision, "event_id": "re_" + cid, "text": "Schneider nears PTC deal",
+        "kind": kind, "status": status, "direction": direction, "tickers": list(tickers),
+        "headline": "Schneider Electric nears $20bn PTC deal", "materiality": materiality,
+        "evidence": [{"id": "ev_1", "source": "Reuters", "url": "https://example.com/r"}],
+        "evidence_refs": [{"evidence_id": "ev_1", "quote": "nears a deal"}],
+        "challenge": "quote matches", "falsifier": "deal denied",
+        "created_at": (NOW - timedelta(hours=hours_ago)).isoformat(),
+        "superseded": superseded, "phase": phase, "lanes": list(lanes),
+    }
+
+
+def invest(**kw):
+    return compute(lanes=("invest",), **kw)["lanes"]["invest"]
+
+
+def test_research_only_ticker_becomes_a_neutral_invest_candidate(bn_store, state_file, research_db):
+    write_research(research_db, research_card())
+    [c] = invest()
+    assert c["ticker"] == "PTC" and c["direction"] == "neutral"
+    assert c["sources"] == ["research"] and c["research"]["supported"] == 1
+    assert c["research"]["claims"][0]["quote"] == "nears a deal"
+    assert not any(k.startswith("_") for k in c["research"]["claims"][0])
+
+
+def test_research_never_reaches_earnings_or_momentum(bn_store, state_file, research_db):
+    write_research(research_db, research_card())
+    out = compute()["lanes"]
+    assert out["earnings"] == [] and out["momentum"] == []
+
+
+@pytest.mark.parametrize("override", [
+    {"status": "insufficient"}, {"status": "retracted"}, {"superseded": True},
+    {"phase": "preflight"}, {"tickers": ()}, {"hours_ago": 24 * 5}, {"hours_ago": -3},
+    {"lanes": ("nexus",)},
+])
+def test_unusable_research_is_ignored(bn_store, state_file, research_db, override):
+    write_research(research_db, research_card(**override))
+    assert invest() == []
+
+
+def test_questions_alone_do_not_create_a_candidate(bn_store, state_file, research_db):
+    write_research(research_db, research_card(kind="question"))
+    assert invest() == []
+
+
+def test_research_merges_into_a_debate_candidate(bn_store, state_file, research_db):
+    write_item(bn_store, tickers=("PTC",), news_type="corporate", headline="PTC deal talk")
+    base = invest()[0]
+    write_research(research_db, research_card())
+    [merged] = invest()
+    assert merged["sources"] == ["break_news", "research"]
+    assert merged["direction"] == base["direction"]
+    assert merged["score"] > base["score"]
+    assert merged["revision"] != base["revision"]
+
+
+def test_contrary_research_flags_but_does_not_flip(bn_store, state_file, research_db):
+    write_item(bn_store, tickers=("PTC",), news_type="corporate", verdict="BULLISH",
+               headline="PTC deal talk")
+    write_research(research_db, research_card(direction="bearish"))
+    [c] = invest()
+    assert c["direction"] == "bullish" and c["research_disagrees"] is True
+
+
+def test_new_research_revision_rearms_a_dismissal(bn_store, state_file, research_db):
+    write_research(research_db, research_card(materiality=3.5))
+    c = invest()[0]
+    sq.record_action(c["candidate_id"], c["revision"], "dismiss", candidate=c, now=NOW)
+    assert invest() == []
+    write_research(research_db, research_card(revision="r2"))
+    assert [x["ticker"] for x in invest()] == ["PTC"]
+
+
+def test_research_backlinks_are_skipped(bn_store, state_file, research_db, monkeypatch):
+    calls = []
+    monkeypatch.setattr(store, "add_consumed_by", lambda *a, **k: calls.append(a))
+    sq._write_backlinks([{"source": "research", "artifact_id": "rc_1", "event_id": "re_1"}],
+                        protocol="invest", lane="invest", ticker="PTC", report_path=None, now=NOW)
+    assert calls == []
+
+
+def test_research_db_change_moves_the_scan_signature(bn_store, state_file, research_db):
+    before = sq.scan_signature(3, now=NOW)
+    write_research(research_db, research_card())
+    assert sq.scan_signature(3, now=NOW) != before

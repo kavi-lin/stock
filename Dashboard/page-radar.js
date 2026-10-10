@@ -605,6 +605,73 @@ async function _ensureHeatmapIndustries() {
     return _heatmapLoading;
 }
 
+// Radar industries use finviz names; the heatmap universe uses FMP's taxonomy,
+// which spells most of them differently ("Medical Devices" vs "Medical - Devices")
+// and lumps some together (FMP has no "Semiconductor Equipment & Materials" —
+// AMAT/LRCX/KLAC sit under "Semiconductors"). finviz name → FMP names; `approx`
+// marks a broader FMP bucket, so the note can say the list isn't exact.
+const _FINVIZ_TO_FMP_INDUSTRY = {
+    'Airlines':                                 { fmp: ['Airlines, Airports & Air Services'], approx: true },
+    'Airports & Air Services':                  { fmp: ['Airlines, Airports & Air Services'], approx: true },
+    'Apparel Manufacturing':                    { fmp: ['Apparel - Manufacturers'] },
+    'Apparel Retail':                           { fmp: ['Apparel - Retail'] },
+    'Asset Management':                         { fmp: ['Asset Management', 'Asset Management - Global'] },
+    'Auto & Truck Dealerships':                 { fmp: ['Auto - Dealerships'] },
+    'Auto Manufacturers':                       { fmp: ['Auto - Manufacturers'] },
+    'Auto Parts':                               { fmp: ['Auto - Parts'] },
+    'Beverages - Brewers':                      { fmp: ['Beverages - Alcoholic'], approx: true },
+    'Building Materials':                       { fmp: ['Construction Materials'] },
+    'Building Products & Equipment':            { fmp: ['Construction'], approx: true },
+    'Capital Markets':                          { fmp: ['Financial - Capital Markets', 'Investment - Banking & Investment Services'] },
+    'Confectioners':                            { fmp: ['Food Confectioners'] },
+    'Credit Services':                          { fmp: ['Financial - Credit Services'] },
+    'Diagnostics & Research':                   { fmp: ['Medical - Diagnostics & Research'] },
+    'Electronic Components':                    { fmp: ['Hardware, Equipment & Parts'], approx: true },
+    'Farm & Heavy Construction Machinery':      { fmp: ['Agricultural - Machinery'] },
+    'Farm Products':                            { fmp: ['Agricultural Farm Products'] },
+    'Financial Data & Stock Exchanges':         { fmp: ['Financial - Data & Stock Exchanges'] },
+    'Footwear & Accessories':                   { fmp: ['Apparel - Footwear & Accessories'] },
+    'Gambling':                                 { fmp: ['Gambling, Resorts & Casinos'], approx: true },
+    'Health Information Services':              { fmp: ['Medical - Healthcare Information Services'] },
+    'Healthcare Plans':                         { fmp: ['Medical - Healthcare Plans'] },
+    'Home Improvement Retail':                  { fmp: ['Home Improvement'] },
+    'Industrial Distribution':                  { fmp: ['Industrial - Distribution'] },
+    'Insurance Brokers':                        { fmp: ['Insurance - Brokers'] },
+    'Internet Retail':                          { fmp: ['Specialty Retail'], approx: true },
+    'Lodging':                                  { fmp: ['Travel Lodging'] },
+    'Medical Care Facilities':                  { fmp: ['Medical - Care Facilities'] },
+    'Medical Devices':                          { fmp: ['Medical - Devices'] },
+    'Medical Distribution':                     { fmp: ['Medical - Distribution'] },
+    'Medical Instruments & Supplies':           { fmp: ['Medical - Instruments & Supplies'] },
+    'Oil & Gas E&P':                            { fmp: ['Oil & Gas Exploration & Production'] },
+    'Personal Services':                        { fmp: ['Personal Products & Services'] },
+    'Pollution & Treatment Controls':           { fmp: ['Industrial - Pollution & Treatment Controls'] },
+    'Real Estate Services':                     { fmp: ['Real Estate - Services'] },
+    'Resorts & Casinos':                        { fmp: ['Gambling, Resorts & Casinos'], approx: true },
+    'Scientific & Technical Instruments':       { fmp: ['Hardware, Equipment & Parts'], approx: true },
+    'Semiconductor Equipment & Materials':      { fmp: ['Semiconductors'], approx: true },
+    'Specialty Chemicals':                      { fmp: ['Chemicals - Specialty'] },
+    'Specialty Industrial Machinery':           { fmp: ['Industrial - Machinery'] },
+    'Telecom Services':                         { fmp: ['Telecommunications Services'] },
+    'Tools & Accessories':                      { fmp: ['Manufacturing - Tools & Accessories'] },
+    'Utilities - Diversified':                  { fmp: ['Diversified Utilities'] },
+    'Utilities - Independent Power Producers':  { fmp: ['Independent Power Producers'] },
+    'Utilities - Regulated Electric':           { fmp: ['Regulated Electric'] },
+    'Utilities - Regulated Gas':                { fmp: ['Regulated Gas'] },
+    'Utilities - Regulated Water':              { fmp: ['Regulated Water'] },
+    'Utilities - Renewable':                    { fmp: ['Renewable Utilities'] },
+};
+
+// Local large-caps for a finviz industry: exact name first, then the FMP alias.
+function _localIndustryMembers(map, name) {
+    if (map[name]?.length) return { members: map[name], via: null, approx: false };
+    const alias = _FINVIZ_TO_FMP_INDUSTRY[name];
+    if (!alias) return { members: [], via: null, approx: false };
+    const members = alias.fmp.flatMap(n => map[n] || [])
+        .sort((a, b) => (b.change_pct ?? -1e9) - (a.change_pct ?? -1e9));
+    return { members, via: alias.fmp.join(' / '), approx: !!alias.approx };
+}
+
 // finviz Market Cap → human $X.XB / $XXXM. Handles raw numbers and "12.7B" strings.
 function _fmtMktCap(v) {
     if (v == null || v === '') return '';
@@ -617,6 +684,16 @@ function _fmtMktCap(v) {
     if (n >= 1e6)  return '$' + (n / 1e6).toFixed(1) + 'M';
     if (n >= 1e3)  return '$' + (n / 1e3).toFixed(0) + 'K';
     return '$' + n;
+}
+
+// finviz Market Cap → number (USD), for descending sort. "" / "-" → -1 (sinks).
+function _mktCapNum(v) {
+    if (v == null || v === '') return -1;
+    const s = String(v).toUpperCase().trim();
+    const n = parseFloat(s.replace(/[^0-9.]/g, ''));
+    if (!isFinite(n)) return -1;
+    const mult = { K: 1e3, M: 1e6, B: 1e9, T: 1e12 }[s.slice(-1)] || 1;
+    return n * mult;
 }
 
 // Chip for a constituent (reuses analyze-ticker-btn → deep analyze handler).
@@ -649,6 +726,8 @@ async function showIndustryStocks(name) {
                 ? `完整 finviz 產業清單（含小中型）· 來源 finviz${j.cached ? '（快取）' : ''}`
                 : `Full finviz industry list (incl. small/mid caps)${j.cached ? ' (cached)' : ''}`;
             $('ind-stock-chips').innerHTML = j.tickers
+                .slice()
+                .sort((a, b) => _mktCapNum(b.market_cap) - _mktCapNum(a.market_cap))
                 .map(m => _indStockChip(m.ticker, _fmtMktCap(m.market_cap), `${m.company || ''} · ${_fmtMktCap(m.market_cap)} — ${zh ? '深度分析' : 'deep analyze'}`))
                 .join('');
             return;
@@ -657,11 +736,16 @@ async function showIndustryStocks(name) {
 
     // Fallback: local large-caps from the heatmap universe.
     const map = await _ensureHeatmapIndustries();
-    const members = map[name] || [];
+    const { members, via, approx } = _localIndustryMembers(map, name);
     $('ind-stock-count').textContent = `${members.length}`;
-    $('ind-stock-note').textContent = zh
+    const viaNote = !via ? ''
+        : approx
+            ? (zh ? `本地資料未細分此產業，以相近產業「${via}」代替，清單會含其他子產業。`
+                  : `Local data has no exact match; showing the broader "${via}" bucket.`)
+            : (zh ? `（本地分類名稱：${via}）` : ` (local category: ${via})`);
+    $('ind-stock-note').textContent = (zh
         ? 'finviz 完整清單抓取失敗，改顯示本地大型股（S&P500 / NDX100）。'
-        : 'Full finviz fetch failed — showing local large-caps (S&P500 / NDX100).';
+        : 'Full finviz fetch failed — showing local large-caps (S&P500 / NDX100). ') + viaNote;
     $('ind-stock-chips').innerHTML = members.length
         ? members.map(m => {
             const pct = m.change_pct != null ? `${m.change_pct >= 0 ? '+' : ''}${m.change_pct.toFixed(1)}%` : '';
