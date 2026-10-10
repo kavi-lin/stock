@@ -17,6 +17,7 @@ Discovery rules:
 """
 from __future__ import annotations
 import argparse
+import math
 import json
 import re
 import sys
@@ -147,11 +148,15 @@ def compute_reality_for_ticker(ticker: str, decision_date: date, eval_date: date
         return None
     prices = fetch_history(ticker, decision_date - timedelta(days=4),
                                    eval_date + timedelta(days=4))
-    if not prices:
+    # fetch_history deliberately caches a wider range through today. Invalid
+    # bars outside this decision's window cannot invalidate its past outcome.
+    prices = {k: v for k, v in prices.items()
+              if decision_date.isoformat() <= k <= eval_date.isoformat()}
+    if not prices or any(not isinstance(v, (int, float)) or not math.isfinite(v) or v <= 0 for v in prices.values()):
         return None
     d_key, p_dec = closest_price(prices, decision_date, "after")
     e_key, p_eval = closest_price(prices, eval_date, "before")
-    if p_dec is None or p_eval is None:
+    if p_dec is None or p_eval is None or not math.isfinite(p_dec) or not math.isfinite(p_eval) or p_dec <= 0:
         return None
     # V2.17.22 — when eval price falls back to decision-day bar (yfinance
     # has no later bar yet), the window is genuinely incomplete. Treat as
@@ -164,6 +169,9 @@ def compute_reality_for_ticker(ticker: str, decision_date: date, eval_date: date
         in_window = {d_key: p_dec, e_key: p_eval}
 
     return {
+        "price_window_complete": ((eval_date - date.fromisoformat(e_key)).days <= 4
+                                  and len(in_window) >= max(2, int((eval_date - decision_date).days * 5 / 7) - 3)),
+        "price_observations": len(in_window),
         "price_at_decision": round(p_dec, 4),
         "price_at_decision_date": d_key,
         "price_at_eval": round(p_eval, 4),
@@ -238,6 +246,16 @@ def build_eval_block(record: dict, today: date) -> tuple[dict, dict]:
         if ticker_reality:
             verdict["max_runup_pct"] = ticker_reality.get("max_runup_pct")
             verdict["max_drawdown_pct"] = ticker_reality.get("max_drawdown_pct")
+            proposal = dc.get("trader_proposal") or {}
+            def touched(key, above):
+                value = proposal.get(key)
+                if not isinstance(value, (int, float)) or isinstance(value, bool) or not math.isfinite(value):
+                    return None
+                return ticker_reality["max_runup_since"] >= value if above else ticker_reality["max_drawdown_since"] <= value
+            base["trade_condition_evaluation"] = {
+                "method": "daily_close_touch; no intraday ordering or execution inference",
+                "entry_price_touched": touched("entry", False),
+                "take_profit_touched": touched("tp", True), "stop_loss_touched": touched("sl", False)}
 
     elif src == "sector-scan":
         etfs = list({r.get("etf") for r in (dc.get("sector_ratings") or []) if r.get("etf")}) + ["SPY"]
@@ -473,7 +491,23 @@ def main(today: date):
     print(f"Building event_index (today = {today})", file=sys.stderr)
     sources = discover_sources()
 
+    from scripts.extractors.committed_investment import load_committed, evaluation_metadata, supplement_legacy
+    committed, authority_diagnostics, covered = load_committed(ROOT / "investment/invest_logs/history.json")
+    legacy_candidates = []
+    if any(r.get("needs_legacy_supplement") for r in committed):
+        for path in sources.get("deep-dive", []):
+            try:
+                legacy_candidates.append(EXTRACTOR_DISPATCH["deep-dive"](path))
+            except (ValueError, OSError, KeyError) as exc:
+                authority_diagnostics.append({"path": str(path), "reason": "legacy_supplement_parse_failed", "error": str(exc)})
     out_records: list[dict] = []
+    for rec in committed:
+        supplement_legacy(rec, legacy_candidates)
+        if rec.get("legacy_supplement_status") == "ambiguous":
+            authority_diagnostics.append({"decision_id": rec["decision_id"], "reason": "ambiguous_legacy_supplement"})
+        rec["reality_at_eval"], rec["verdict"] = build_eval_block(rec, today)
+        rec["evaluation"] = evaluation_metadata(rec, rec["reality_at_eval"], today=today)
+        out_records.append(rec)
     for cat, paths in sources.items():
         if not paths:
             continue
@@ -490,7 +524,11 @@ def main(today: date):
         for p in paths:
             try:
                 rec = EXTRACTOR_DISPATCH[cat](p)
+                if cat == "deep-dive" and (rec.get("decision_date"), (rec.get("tickers") or [None])[0]) in covered:
+                    continue
                 rec["reality_at_eval"], rec["verdict"] = build_eval_block(rec, today)
+                if cat == "deep-dive":
+                    rec["evaluation"] = evaluation_metadata(rec, rec["reality_at_eval"], today=today)
                 out_records.append(rec)
             except Exception as e:
                 print(f"  !! {p.name}: {e}", file=sys.stderr)
@@ -498,9 +536,22 @@ def main(today: date):
     industry_rollup = _build_industry_rollup(out_records)
     adjustment_ledger = _load_adjustment_ledger()
     decisive_agent_split = _build_decisive_agent_split(out_records)
+    from scripts.extractors.committed_investment import preserve_evaluations
+    from investment.scripts.run_data import read_json, atomic_json
+    out_dir = ROOT / "reports/decision_review"
+    latest_path = out_dir / "event_index_latest.json"
+    previous = read_json(latest_path) if latest_path.exists() else {}
+    identity_map = preserve_evaluations(out_records, previous, out_dir / "evaluations", today)
+    from scripts._sector_heat import enrich_ticker_heat
+    heat_sidecar = {r["decision_id"]: {"evaluated_at": today.isoformat(), "shadow_only": True,
+                                     "heat": enrich_ticker_heat(r["tickers"][0])}
+                    for r in out_records if r.get("source") == "deep-dive" and r.get("tickers")}
+    atomic_json(out_dir / f"industry_heat_evaluation_{today.isoformat()}.json", heat_sidecar)
 
     out = {
-        "version": "1.2",
+        "version": "2.0",
+        "authority_diagnostics": authority_diagnostics,
+        "identity_map": identity_map,
         "generated_at": datetime.now().isoformat(),
         "today": today.isoformat(),
         "decision_count": len(out_records),
@@ -513,8 +564,9 @@ def main(today: date):
     out_path = out_dir / f"event_index_{today.isoformat()}.json"
     latest_path = out_dir / "event_index_latest.json"
     payload = json.dumps(out, indent=2, ensure_ascii=False)
-    out_path.write_text(payload)
-    latest_path.write_text(payload)
+    from investment.scripts.run_data import atomic_json
+    atomic_json(out_path, out)
+    atomic_json(latest_path, out)
     print(f"\nWrote {len(out_records)} records → {out_path}", file=sys.stderr)
     print(f"Also wrote latest copy → {latest_path}", file=sys.stderr)
 

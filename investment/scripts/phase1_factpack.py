@@ -58,7 +58,8 @@ from statistics import median
 import validate_phase0 as phase0_gate
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-FRESH_SECONDS = 3 * 3600  # Phase 0 cache FRESH window (mtime < 3h), matches protocol
+sys.path.insert(0, REPO)
+FRESH_SECONDS = 3 * 3600  # source timestamp, never filesystem mtime
 
 
 def _mtime_age_hours(path):
@@ -95,7 +96,12 @@ def load_phase0(ticker):
                 data = json.load(f)
         except (OSError, json.JSONDecodeError):
             return "INVALID_NEEDS_L3", age_h, {}, relpath
-        source = "INVEST_CACHE" if age_h * 3600 < FRESH_SECONDS else "STALE_NEEDS_L3"
+        from run_data import timestamp, utcnow
+        try:
+            age_h = (timestamp(utcnow()) - timestamp(data.get("fetched_at") or data.get("generated_at"))).total_seconds() / 3600
+        except (ValueError, TypeError):
+            return "STALE_NEEDS_L3", None, _phase0_core(data), relpath
+        source = "INVEST_CACHE" if 0 <= age_h * 3600 < FRESH_SECONDS else "STALE_NEEDS_L3"
         return source, age_h, _phase0_core(data), relpath
 
     # sector_intel is useful context for rebuilding Phase 0, but it is not a
@@ -147,8 +153,13 @@ def load_ticker_data_bundle(ticker):
     """run_dual_fetch.sh → read scoring (15 scalar). Strips _audit per isolation contract."""
     today = date.today().isoformat()
     out_path = os.path.join(REPO, f"skills/finnhub-client/data/{today}/{ticker}.json")
-    # reuse today's fetch if present; else run dual_fetch
-    if not os.path.exists(out_path):
+    from run_data import fresh, read_json, source
+    try:
+        cached = read_json(out_path) if os.path.exists(out_path) else {}
+    except (ValueError, OSError):
+        cached = {}
+    usable = fresh(source(cached, kind="quote", fetched_at=cached.get("fetched_at")))
+    if not usable:
         if not (os.environ.get("FINNHUB_API_KEY") and os.environ.get("FMP_API_KEY")):
             return {"status": "unavailable", "reason": "missing FINNHUB_API_KEY/FMP_API_KEY"}
         try:
@@ -165,6 +176,8 @@ def load_ticker_data_bundle(ticker):
         d = json.load(open(out_path))
     except Exception as e:
         return {"status": "unavailable", "reason": f"read failed: {e}"}
+    if not fresh(source(d, kind="quote", fetched_at=d.get("fetched_at"))):
+        return {"status": "unavailable", "reason": "dual_fetch quote source timestamp stale or unavailable"}
     scoring = d.get("scoring")
     if not scoring:
         return {"status": "unavailable", "reason": "no scoring block"}
@@ -302,13 +315,15 @@ def load_earnings_bundle(ticker):
     if not cands:
         return {"status": "not_available"}
     path = sorted(cands)[-1]
-    age_days = (time.time() - os.path.getmtime(path)) / 86400.0
-    if age_days > 90:
-        return {"status": "not_available", "reason": f"stale {age_days:.0f}d > 90d"}
     try:
         ea = json.load(open(path))
     except Exception as e:
         return {"status": "not_available", "reason": f"read failed: {e}"}
+    from run_data import fresh
+    records = ea.get("source_records") or {}
+    financial = [r for r in records.values() if r.get("kind") == "financial" and r.get("status") == "ok"]
+    if not financial or not all(fresh(r, period=ea.get("last_earnings_date")) for r in financial):
+        return {"status": "not_available", "reason": "financial source timestamp missing/stale; refresh required"}
     if "composite_score" not in ea:
         return {"status": "not_available", "reason": "no composite_score (analyze.py incomplete)"}
     val = ea.get("valuation") or {}
@@ -468,7 +483,7 @@ def load_supp_bundle(ticker):
 
 
 # ---------------------------------------------------------------- main
-def build(ticker, run_validator=True, prewarm_earnings=True):
+def build(ticker, run_validator=True, prewarm_earnings=True, prewarm_forecaster=True):
     ticker = ticker.upper()
     phase0_source, stale_h, phase0, phase0_path = load_phase0(ticker)
     validator_rc = (validate_phase0_rc(ticker, phase0_path)
@@ -493,12 +508,17 @@ def build(ticker, run_validator=True, prewarm_earnings=True):
         out["earnings_prewarm"], _refreshed = prewarm_earnings_cache(ticker)
         # Strictly after the earnings refresh — forecast.py reads that cache — and it
         # needs to know whether a new quarter landed, because its own TTL can't tell.
-        out["forecaster_prewarm"] = prewarm_forecaster_cache(ticker, _refreshed)
+        out["forecaster_prewarm"] = prewarm_forecaster_cache(ticker, _refreshed) if prewarm_forecaster else "deferred_to_run_collector"
     else:
         out["earnings_prewarm"] = out["forecaster_prewarm"] = "disabled"
     eab = load_earnings_bundle(ticker)
-    pb = load_peer_bundle(ticker)
-    fsb = load_supp_bundle(ticker)
+    from skills._shared.investment_data import SourceCache, source_context
+    cache = SourceCache(os.path.join(REPO, "skills/earnings-analyst/cache/sources"), period=eab.get("last_earnings_date"))
+    with source_context(cache):
+        pb = load_peer_bundle(ticker)
+        fsb = load_supp_bundle(ticker)
+    out["source_records"] = cache.sources
+    out["source_telemetry"] = cache.metrics
     out["bundles"] = {
         "ticker_data_bundle": tdb,
         "earnings_analyst_bundle": eab,
@@ -522,13 +542,14 @@ def main():
     ap.add_argument("--no-validator", action="store_true", help="skip validate_phase0 subprocess")
     ap.add_argument("--no-prewarm", action="store_true",
                     help="skip the earnings-analyst cache refresh (offline / zero-FMP runs)")
+    ap.add_argument("--no-prewarm-forecaster", action="store_true", help="run controller collects forecaster once after earnings refresh")
     args = ap.parse_args()
     out = build(args.ticker, run_validator=not args.no_validator,
-                prewarm_earnings=not args.no_prewarm)
+                prewarm_earnings=not args.no_prewarm, prewarm_forecaster=not args.no_prewarm_forecaster)
     text = json.dumps(out, ensure_ascii=False, indent=2)
     if args.out:
-        with open(args.out, "w") as f:
-            f.write(text)
+        from run_data import atomic_json
+        atomic_json(args.out, out)
         print(f"[phase1_factpack] wrote {args.out}", file=sys.stderr)
     print(text)
 

@@ -12,7 +12,7 @@ Phase 1 末段檢查 `skills/earnings-analyst/cache/<TICKER>_*.json`。**不**�
 
 ### Freshness rules
 - cache 必須含 `composite_score`（代表 analyze.py 已跑完）
-- 距 cache 檔 mtime ≤ 90 天（對齊 earnings-analyst CACHE_TTL_DAYS）
+- `source_records` 必須有可靠來源時間：財報／季度資料 7 天、市場估值資料 24 小時、報價 5 分鐘。`analyze.py` 重寫檔案不延長期限；舊檔缺來源時間須重新抓取。每場確認最新財報期間，換季立即失效。
 
 ### Bundle shape
 
@@ -136,7 +136,7 @@ FMP_SUPP_BUNDLE = get_supplementary_bundle(TICKER)
 | News | `ma_events` |
 | Burry | `quality_scores`, `owner_earnings`, `insider_summary`, `comp_benchmark` |
 | Valuation Specialist (V5.0) | `quality_scores`, `owner_earnings` |
-| Technical | ❌ 不注入（OHLCV-only） |
+| Technical | 僅 `insider_summary`，沿用主協議 V2.13 主力分析；其他 FMP_SUPP 欄位不注入 |
 
 ### Failure
 - `FMP_SUPP_BUNDLE is None` → 全部 lane 注入省略，標 `unavailable — fallback to skill-internal sources`

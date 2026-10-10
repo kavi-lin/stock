@@ -523,6 +523,8 @@ def _lane_extras(lane, blk, trade):
     elif lane == "technical":
         tl = trade.get("technical_lane") or {}
         pat = tl.get("pattern_taxonomy") or {}
+        if isinstance(pat, str):
+            pat = {"pattern": pat, "confirmation_criteria": tl.get("confirmation_criteria")}
         kl = tl.get("key_levels") or {}
         vol = tl.get("volatility") or {}
         if pat:
@@ -784,6 +786,16 @@ def render(entry, trade, bundle, narrative, polish_stamp="none"):
         "",
         sec_footer(entry, trade, polish_stamp),
     ]
+    context = entry.get("run_context")
+    if isinstance(context, dict):
+        parts.extend(["", "## 本場資料與執行紀錄", "",
+                      f"場次 `{context.get('run_id')}` · 凍結時間 {context.get('analysis_at')}",
+                      f"統一計價 ${trade.get('analysis_price')} · 執行品質 {trade.get('execution_quality')}",
+                      f"快照摘要 `{context.get('snapshot_hash')}`",
+                      f"Red Team synthetic: {str(bool(trade.get('red_team_synthetic'))).lower()}"])
+        parts.extend(["", "| 價格來源 | 原始價格 | 與凍結價差 | 抓取時間 | 行情時間 |", "|---|---:|---:|---|---|"])
+        for row in trade.get("price_sources", []):
+            parts.append(f"| {row['source']} | {row.get('price')} | {row.get('difference_from_frozen')} | {row.get('fetched_at')} | {row.get('data_as_of')} |")
     return "\n".join(parts).rstrip() + "\n"
 
 
@@ -1075,8 +1087,13 @@ def main(argv=None):
     ticker = entry.get("ticker") or trade.get("ticker") or ""
     out_path = args.out or os.path.join(REPORTS_DIR, f"{date.replace('-', '')}_{ticker}.md")
     os.makedirs(os.path.dirname(os.path.abspath(out_path)) or ".", exist_ok=True)
-    with open(out_path, "w", encoding="utf-8") as fp:
+    import tempfile
+    fd, tmp = tempfile.mkstemp(dir=os.path.dirname(os.path.abspath(out_path)), prefix=".report-")
+    with os.fdopen(fd, "w", encoding="utf-8") as fp:
         fp.write(md)
+        fp.flush()
+        os.fsync(fp.fileno())
+    os.replace(tmp, out_path)
     rel = os.path.relpath(os.path.abspath(out_path), ROOT)
     print(f"[render] ✓ {rel} — {len(md.splitlines())} 行；polish: {stamp}")
     return 0

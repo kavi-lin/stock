@@ -157,15 +157,20 @@ def _resolve_phase0_path(ticker, supplied=None):
     return path
 
 
-def load_artifacts(ticker, date, *, p3_input, p4_input, quant_path=None, phase0_path=None):
+def load_artifacts(ticker, date, *, p3_input, p4_input, quant_path=None, phase0_path=None, run_dir=None):
     """Collect every deterministic input. Missing artifact → rc=1 naming the file."""
     t = ticker.upper()
     quant_path = quant_path or os.path.join(
         ROOT, f"investment/invest_logs/{date}_{t}_pf_quant.json")
-    phase0_path = _resolve_phase0_path(t, phase0_path)
+    phase0_path = (os.path.join(run_dir, "phase0.json") if run_dir else
+                   _resolve_phase0_path(t, phase0_path))
     engine_path = os.path.join(
         ROOT, f"investment/invest_logs/decision_engine/{t}_decision_engine.json")
 
+    if run_dir:
+        engine_path = os.path.join(run_dir, "decision.json")
+        quant_path = os.path.join(run_dir, "quant.json")
+        phase0_path = os.path.join(run_dir, "phase0.json")
     engine = _read_json(engine_path, "decision_engine artifact")
     if str(engine.get("ticker", "")).upper() != t:
         raise BuildError(
@@ -259,6 +264,9 @@ def load_qualitative(path, ticker, date):
         for f in ("key_factors", "risk_flags"):
             if not isinstance(lane[f], list):
                 raise BuildError(f"lanes.{name}.{f} 必須是 list")
+        detail = (q.get("lane_detail") or {}).get(name) or {}
+        if not isinstance(detail, dict) or set(detail) & (LANE_REJECTED | LANE_REQUIRED):
+            raise BuildError(f"lane_detail.{name} 不得覆寫 lane 核心欄位")
 
     wc = q.get("watch_conditions")
     if not isinstance(wc, dict) or len(wc) < 3:
@@ -315,6 +323,7 @@ def build_bundle(qual, art, ticker, date):
     sig = p0.get("_market_signals") or {}
     fred = p0.get("fred_snapshot") or {}
     eng = art["engine"]
+    governed = final_governance(art)
     plan = art["plan"]
     tp = plan.get("trade_plan") or {}
 
@@ -340,11 +349,11 @@ def build_bundle(qual, art, ticker, date):
         },
         "phase3": {
             "final_score": eng.get("final_score"),
-            "final_decision": eng.get("final_decision"),
-            "final_action": _final_action(eng, plan),
+            "final_decision": governed["final_decision"],
+            "final_action": governed["final_action"],
         },
         "phase4": {
-            "position_size_pct": _position_size(plan),
+            "position_size_pct": governed["position_size_pct"],
             # Same source as the entry's analysis_price. Deriving the two from
             # different places is exactly the drift check_consistency() rejects —
             # it caught this during V4.126.0 bring-up (596.55 vs 592.10).
@@ -372,7 +381,28 @@ def _position_size(plan):
             return tp[k]
         if k in plan:
             return plan[k]
-    return None
+    return (plan.get("risk_audit") or {}).get("position_size_pct")
+
+
+def final_governance(art):
+    """Apply the existing Phase 4.6 engine after sizing; retain Phase 3 evidence."""
+    from decision_engine import apply_decision_cap
+    eng, plan = art["engine"], art["plan"]
+    size = _position_size(plan)
+    if isinstance(size, bool) or not isinstance(size, (int, float)) or not 0 <= size <= 1:
+        raise BuildError("Phase 4 risk artifact missing finite position_size_pct")
+    fvs = (art["quant"].get("quant_blocks") or {}).get("fair_value_summary") or {}
+    return apply_decision_cap({
+        "decision_cap_active": eng.get("decision_cap_active", False),
+        "decision_cap_reason": eng.get("decision_cap_reason"),
+        "final_decision": eng.get("final_decision"),
+        "avg_confidence": eng.get("avg_confidence"),
+        "position_size_pct": size,
+        "final_action": _final_action(eng, plan),
+        "hot_zone_probe": eng.get("hot_zone_probe"),
+        "cap_override_reason": art["p3"].get("cap_override_reason"),
+        "speculative": {k: fvs.get(k) for k in ("pre_profit_anchor_live", "sell_side_only")},
+    })
 
 
 def _final_action(eng, plan):
@@ -489,6 +519,12 @@ def build_entry(qual, art, ticker, date):
         "decision_point_days": qual.get("decision_point_days"),
     }
     trade["trade_metadata"] = qual["trade_metadata"]
+    governed = final_governance(art)
+    for key in ("final_decision", "final_action", "avg_confidence", "position_size_pct",
+                "decision_cap_active", "decision_cap_reason", "cap_override_reason",
+                "speculative_grade", "speculative_reasons"):
+        trade[key] = governed[key]
+    trade["phase4_6"] = governed
 
     return {
         "session_export_version": SESSION_EXPORT_VERSION,
@@ -540,6 +576,7 @@ def main(argv=None):
     ap.add_argument("--p3-input", required=True, help="decision_engine 的輸入 JSON（lane 數字的權威來源）")
     ap.add_argument("--p4-input", required=True, help="trade_plan_builder 的輸入 JSON")
     ap.add_argument("--quant", help="覆寫 pf_quant 路徑")
+    ap.add_argument("--run-dir", help="V5.5 isolated run artifacts")
     ap.add_argument("--phase0", help="覆寫 phase0 路徑")
     ap.add_argument("--bundle-out", help="覆寫 bundle 輸出路徑")
     ap.add_argument("--session-out",
@@ -555,18 +592,58 @@ def main(argv=None):
         raise BuildError(f"--date 必須是 YYYY-MM-DD，收到 {args.date!r}")
 
     art = load_artifacts(ticker, args.date, p3_input=args.p3_input, p4_input=args.p4_input,
-                         quant_path=args.quant, phase0_path=args.phase0)
+                         quant_path=args.quant, phase0_path=args.phase0, run_dir=args.run_dir)
     qual = load_qualitative(args.qualitative, ticker, args.date)
+    if args.run_dir:
+        from run_data import accepted_lane_detail
+        details = qual.setdefault("lane_detail", {})
+        for lane in LANES:
+            accepted = _read_json(os.path.join(args.run_dir, lane + ".json"), lane)
+            for field, value in (details.get(lane) or {}).items():
+                if value != accepted.get(field):
+                    raise BuildError(f"{lane} detail {field} differs from accepted result")
+            # Accepted lane evidence is copied by the program, never manually
+            # omitted to make a downstream renderer or validator succeed.
+            details[lane] = accepted_lane_detail(accepted)
 
     entry = build_entry(qual, art, ticker, args.date)
     bundle = build_bundle(qual, art, ticker, args.date)
+    if args.run_dir:
+        from run_investment import _load
+        from run_exports import attach
+        directory, manifest, snapshot = _load(os.path.basename(os.path.abspath(args.run_dir)))
+        if os.path.realpath(directory) != os.path.realpath(args.run_dir):
+            raise BuildError("run directory mismatch")
+        # Qualitative lane and RT content must be the accepted artifacts.
+        for lane in LANES:
+            accepted = _read_json(os.path.join(args.run_dir, lane + ".json"), lane)
+            for field in LANE_REQUIRED:
+                if qual["lanes"][lane].get(field) != accepted.get(field):
+                    raise BuildError(f"{lane}.{field} differs from accepted result")
+            for field, value in ((qual.get("lane_detail") or {}).get(lane) or {}).items():
+                if value != accepted.get(field):
+                    raise BuildError(f"{lane} detail {field} differs from accepted result")
+        accepted_rt = _read_json(os.path.join(args.run_dir, "red_team.json"), "red_team")
+        pm_context = _read_json(os.path.join(args.run_dir, "prompts/red_team.json"), "red_team context").get("pm_context", {})
+        if qual.get("conflict_bias") != pm_context.get("conflict_bias"):
+            raise BuildError("conflict_bias differs from frozen Red Team context")
+        for field in RED_TEAM_REQUIRED:
+            if qual["red_team"].get(field) != accepted_rt.get(field):
+                raise BuildError(f"red_team.{field} differs from accepted result")
+        entry["trades_this_session"][0]["red_team_execution_failed"] = bool(accepted_rt.get("execution_failed"))
+        degraded = [n for n in LANES if manifest["stages"][n]["status"] == "degraded"]
+        entry["trades_this_session"][0]["degraded_analysts"] = degraded
+        entry["trades_this_session"][0]["phase2_fanout_mode"] = (
+            "FULL_FALLBACK" if len(degraded) == 5 else "PARTIAL_FALLBACK" if len(degraded) >= 2 else "PARALLEL_SUBAGENT")
+        attach(entry, directory, manifest, snapshot)
+
 
     if not args.no_bundle:
         out = args.bundle_out or os.path.join(
             ROOT, f"investment/invest_logs/phase_inputs/{args.date}_{ticker}.json")
         os.makedirs(os.path.dirname(out), exist_ok=True)
-        with open(out, "w", encoding="utf-8") as fp:
-            json.dump(bundle, fp, ensure_ascii=False, indent=1)
+        from run_data import atomic_json
+        atomic_json(out, bundle)
         print(f"[build_session_export] bundle → {os.path.relpath(out, ROOT)}",
               file=sys.stderr)
 

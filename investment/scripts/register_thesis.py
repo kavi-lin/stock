@@ -97,6 +97,13 @@ def _build_thesis_data(entry):
     trade = (entry.get("trades_this_session") or [{}])[0]
     ticker = trade.get("ticker") or entry.get("ticker") or "UNKNOWN"
     fvs = trade.get("fair_value_summary") or {}
+    if entry.get("session_export_version") == "V5.5":
+        from run_investment import _load
+        _, _, snapshot = _load(entry["run_context"]["run_id"])
+        raw = (snapshot["sources"].get("raw_inputs") or {}).get("data") or {}
+        structural_shift = (raw.get("earnings") or {}).get("structural_shift")
+    else:
+        structural_shift = _read_structural_shift(ticker)
     return {
         "ticker": ticker,
         "source": "investment_protocol_v5",
@@ -113,7 +120,7 @@ def _build_thesis_data(entry):
         "key_risks": trade.get("key_risks") or [],
         "watch_conditions": trade.get("watch_conditions") or {},
         "export_date": entry.get("export_date"),
-        "structural_shift": _read_structural_shift(ticker),
+        "structural_shift": structural_shift,
     }
 
 

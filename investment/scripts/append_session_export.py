@@ -88,11 +88,13 @@ def _strip_for_digest(entry: dict) -> dict:
     against the next such field.
     """
     out = {k: v for k, v in entry.items() if k not in DIGEST_SKIP_ENTRY_KEYS}
+    skip_trade = (DIGEST_SKIP_TRADE_KEYS if entry.get("session_export_version") != "V5.5"
+                  else frozenset({"thesis_id", "thesis_registered_at"}))
     trades = out.get("trades_this_session")
     if isinstance(trades, list):
         out["trades_this_session"] = [
             {k: v for k, v in t.items()
-             if k not in DIGEST_SKIP_TRADE_KEYS and not k.startswith("_")}
+             if k not in skip_trade and not k.startswith("_")}
             if isinstance(t, dict) else t
             for t in trades
         ]
@@ -268,6 +270,13 @@ def _atomic_append(entry: dict, history_path: Path | None = None,
             _err(f"history.json unreadable: {e}", rc=2)
         if not isinstance(existing, list):
             _err("history.json must be a JSON array", rc=2)
+        run_id = (entry.get("run_context") or {}).get("run_id")
+        if run_id:
+            matches = [e for e in existing if (e.get("run_context") or {}).get("run_id") == run_id]
+            if matches:
+                if len(matches) != 1 or entry_digest(matches[0]) != entry_digest(entry):
+                    _err("run_id already committed with different content; refusing overwrite")
+                return len(existing)
         if replace_last:
             # Guarded so a --replace-last on the wrong turn cannot eat a
             # different session's record: the entry being dropped has to be the
@@ -346,6 +355,16 @@ def main() -> int:
     if args.stamp_only:
         print(f"[append_session_export] ✓ stamped only — {args.stamped_out}")
         return 0
+
+    if entry.get("session_export_version") == "V5.5":
+        import subprocess
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", encoding="utf-8") as check_file:
+            json.dump(entry, check_file, ensure_ascii=False)
+            check_file.flush()
+            checked = subprocess.run([sys.executable, str(ROOT / "investment/scripts/validate_session_export.py"),
+                                      "--history", check_file.name], capture_output=True, text=True)
+            if checked.returncode:
+                _err("V5.5 validation refused commit: " + (checked.stderr or checked.stdout)[-1500:])
 
     new_len = _atomic_append(entry, Path(args.history) if args.history else None,
                              replace_last=args.replace_last)

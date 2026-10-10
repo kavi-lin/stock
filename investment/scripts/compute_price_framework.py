@@ -580,7 +580,7 @@ SCRIPT_NOT_RUN = "script_not_run"
 def mark_unrun_anchor_scripts(ticker, anchors: dict | None, anchor_meta: dict,
                               *, now: float | None = None,
                               max_age_days: int = SCRIPT_ARTIFACT_MAX_AGE_DAYS,
-                              base_dir: str | None = None) -> dict:
+                              base_dir: str | None = None, script_artifacts: dict | None = None) -> dict:
     """Separate "the script produced nothing usable" from "it was never run".
 
     Both used to arrive as `missing_or_nonpositive_value`, and that conflation is
@@ -615,13 +615,14 @@ def mark_unrun_anchor_scripts(ticker, anchors: dict | None, anchor_meta: dict,
             continue                    # an upstream reason is more specific
 
         artifact = os.path.join(root, spec["artifact"].format(t=ticker))
-        payload = None
-        try:
-            if (now - os.path.getmtime(artifact)) <= cutoff:
-                with open(artifact, "r", encoding="utf-8") as fp:
-                    payload = json.load(fp)
-        except (OSError, json.JSONDecodeError):
-            payload = None
+        payload = script_artifacts.get(name) if script_artifacts is not None else None
+        if script_artifacts is None:  # legacy standalone compatibility only
+            try:
+                if (now - os.path.getmtime(artifact)) <= cutoff:
+                    with open(artifact, "r", encoding="utf-8") as fp:
+                        payload = json.load(fp)
+            except (OSError, json.JSONDecodeError):
+                payload = None
 
         # Credible = this script's own output, for this ticker, with the shape it
         # actually emits. Anything less is treated as not-run, because a file
@@ -1622,9 +1623,9 @@ def compute_forward_validation(pack: dict, implied: dict, shadow: dict) -> dict:
 
 
 # ── Volatility fetch (FMP OHLCV → sigma/atr/momentum；LLM 抄寫風險消除) ───────
-def fetch_volatility(ticker: str) -> dict:
+def fetch_volatility(ticker: str, *, fetcher=None) -> dict:
     from scripts._shared import fmp_pool
-    rows = fmp_pool.get(
+    rows = (fetcher or fmp_pool.get)(
         "historical-price-eod/full",
         {"symbol": ticker},
         stable=True, retries=2, timeout=20, hard_fail=False,
@@ -1715,7 +1716,8 @@ def _supersede_vendor_dcf(anchor_meta: dict, dcf_payload: dict) -> list[str]:
     return superseded
 
 
-def assemble_inputs(ticker: str, inp: dict, *, authoritative_anchors: bool = False) -> list:
+def assemble_inputs(ticker: str, inp: dict, *, authoritative_anchors: bool = False,
+                    phase0_path=None, sources=None) -> list:
     """Fill missing fields from deterministic sources.
 
     With ``authoritative_anchors=True`` (the CLI ``--self-assemble`` path), all
@@ -1755,19 +1757,22 @@ def assemble_inputs(ticker: str, inp: dict, *, authoritative_anchors: bool = Fal
 
     today = dt.date.today().isoformat()
 
-    ec = _latest_earnings_cache(ticker) or {}
+    ec = (sources.get("earnings", {}) if sources is not None else _latest_earnings_cache(ticker)) or {}
     val = ec.get("valuation") or {}
     _fill("anchors.dcf_unlevered", _pos(val.get("dcf_intrinsic")))
     _fill("anchors.dcf_levered", _pos(val.get("dcf_levered_intrinsic")))
     _fill("anchors.analyst_pt_consensus", _pos(val.get("price_target_consensus")))
     earnings_asof = ec.get("last_earnings_date") or ec.get("as_of_date")
+    source_dates = {str(r.get("endpoint", "")).split("/")[-1]: str(r.get("fetched_at") or "")[:10]
+                    for r in (ec.get("source_records") or {}).values() if r.get("status") == "ok"}
     earnings_lineage = f"earnings_analyst:{ticker.upper()}:{earnings_asof or 'unknown'}"
     for name in ("dcf_unlevered", "dcf_levered"):
-        _meta(name, provenance="earnings_analyst_bundle", as_of=earnings_asof,
+        source_date = source_dates.get("discounted-cash-flow" if name == "dcf_unlevered" else "levered-discounted-cash-flow") or earnings_asof
+        _meta(name, provenance="earnings_analyst_bundle", as_of=source_date,
               correlation_key=earnings_lineage, input_lineage_ids=[earnings_lineage])
     pt_dates = [str(row.get("publishedDate"))[:10] for row in (val.get("pt_news") or [])
                 if isinstance(row, dict) and row.get("publishedDate")]
-    pt_asof = max(pt_dates) if pt_dates else None
+    pt_asof = source_dates.get("price-target-consensus") or (max(pt_dates) if pt_dates else None)
     _meta("analyst_pt_consensus", provenance="earnings_analyst_bundle.pt_news",
           as_of=pt_asof, correlation_key=f"analyst_pt:{ticker.upper()}:{pt_asof or 'unknown'}",
           input_lineage_ids=[f"analyst_pt:{ticker.upper()}:{pt_asof or 'unknown'}"])
@@ -1789,7 +1794,8 @@ def assemble_inputs(ticker: str, inp: dict, *, authoritative_anchors: bool = Fal
     # quote: current_price（stable quote 無 eps 欄 — eps 由 ratios-ttm P/E 反推，見下）
     try:
         from scripts._shared import fmp_pool
-        q = fmp_pool.get("quote", {"symbol": ticker}, stable=True, retries=1, timeout=15, hard_fail=False)
+        q = (sources.get("quote") if sources is not None else
+             fmp_pool.get("quote", {"symbol": ticker}, stable=True, retries=1, timeout=15, hard_fail=False))
         row = q[0] if isinstance(q, list) and q else (q if isinstance(q, dict) else {})
         _fill("current_price", _pos(row.get("price")))
     except Exception:
@@ -1800,7 +1806,7 @@ def assemble_inputs(ticker: str, inp: dict, *, authoritative_anchors: bool = Fal
     try:
         sys.path.insert(0, os.path.join(BASE_DIR, "investment", "scripts"))
         from phase1_factpack import load_peer_bundle
-        pb = load_peer_bundle(ticker) or {}
+        pb = (sources.get("peers", {}) if sources is not None else load_peer_bundle(ticker)) or {}
         if pb.get("status") == "ok":
             sr = pb.get("self_ratios_ttm") or {}
             # eps_ttm = price / pe_ttm 反推（stable quote 無 eps）。pe ≤ 0 / null（虧損股）→
@@ -1828,7 +1834,7 @@ def assemble_inputs(ticker: str, inp: dict, *, authoritative_anchors: bool = Fal
             inp.setdefault("valuation_scenarios", {})["peer_pe_range"] = pb_range
             filled.append("valuation_scenarios.peer_pe_range")
         from skills._shared.company_context import get_profile
-        prof = get_profile(ticker) or {}
+        prof = (sources.get("profile", {}) if sources is not None else get_profile(ticker)) or {}
         _fill("beta", _num(prof.get("beta")))
     except Exception:
         pass
@@ -1836,10 +1842,13 @@ def assemble_inputs(ticker: str, inp: dict, *, authoritative_anchors: bool = Fal
     # valuation-modeler payloads are first-class deterministic anchor inputs.
     vm_cache = os.path.join(BASE_DIR, "skills", "valuation-modeler", "cache")
     dcf_path = os.path.join(vm_cache, f"{ticker.upper()}_dcf_payload.json")
-    if os.path.exists(dcf_path):
+    if (sources.get("dcf") if sources is not None else os.path.exists(dcf_path)):
         try:
-            with open(dcf_path, encoding="utf-8") as f:
-                dcf_payload = json.load(f)
+            if sources is not None:
+                dcf_payload = sources["dcf"]
+            else:
+                with open(dcf_path, encoding="utf-8") as f:
+                    dcf_payload = json.load(f)
             _fill("anchors.dcf_self_built", _pos(dcf_payload.get("fair_value_per_share")))
             model = dcf_payload.get("model_eligibility") or {}
             _meta("dcf_self_built", provenance="valuation_modeler.dcf",
@@ -1859,10 +1868,13 @@ def assemble_inputs(ticker: str, inp: dict, *, authoritative_anchors: bool = Fal
         except Exception:
             pass
     comps_path = os.path.join(vm_cache, f"{ticker.upper()}_comps_payload.json")
-    if os.path.exists(comps_path):
+    if (sources.get("comps") if sources is not None else os.path.exists(comps_path)):
         try:
-            with open(comps_path, encoding="utf-8") as f:
-                comps_payload = json.load(f)
+            if sources is not None:
+                comps_payload = sources["comps"]
+            else:
+                with open(comps_path, encoding="utf-8") as f:
+                    comps_payload = json.load(f)
             universe = comps_payload.get("universe") or {}
             model = comps_payload.get("model_eligibility") or {}
             _fill("anchors.comps_implied", _pos(comps_payload.get("comps_implied_value")))
@@ -1892,7 +1904,7 @@ def assemble_inputs(ticker: str, inp: dict, *, authoritative_anchors: bool = Fal
     # owner earnings per share → ×15 anchor + reverse DCF fcf base
     try:
         from skills._shared.fmp_supplementary import get_supplementary_bundle
-        supp = get_supplementary_bundle(ticker) or {}
+        supp = (sources.get("supplementary", {}) if sources is not None else get_supplementary_bundle(ticker)) or {}
         oeps = _num((supp.get("owner_earnings") or {}).get("ownersEarningsPerShare"))
         if oeps and oeps > 0:
             _fill("anchors.owner_earnings_mult", round(oeps * 15, 2))
@@ -1908,10 +1920,13 @@ def assemble_inputs(ticker: str, inp: dict, *, authoritative_anchors: bool = Fal
     # forecaster cache（不 subprocess 跑 — 只讀 cache；缺/stale → null）
     fc_path = os.path.join(BASE_DIR, "skills", "earnings-valuation-forecaster", "cache",
                            f"{ticker.upper()}.json")
-    if os.path.exists(fc_path):
+    if (sources.get("forecaster") if sources is not None else os.path.exists(fc_path)):
         try:
-            with open(fc_path, encoding="utf-8") as f:
-                fc = json.load(f)
+            if sources is not None:
+                fc = sources["forecaster"]
+            else:
+                with open(fc_path, encoding="utf-8") as f:
+                    fc = json.load(f)
             _fill("anchors.forecaster_blend", _pos(fc.get("expected_value")))
             live = fc.get("live_eligibility") or {}
             methods = (fc.get("forward_eps") or {}).get("methods") or {}
@@ -1933,7 +1948,8 @@ def assemble_inputs(ticker: str, inp: dict, *, authoritative_anchors: bool = Fal
             pass
 
     # phase0 snapshot: real rate
-    p0 = sorted(_glob.glob(os.path.join(BASE_DIR, "investment", "invest_logs", "*phase0*.json")))
+    p0 = ([str(phase0_path)] if phase0_path else [] if sources is not None else
+          sorted(_glob.glob(os.path.join(BASE_DIR, "investment", "invest_logs", "*phase0*.json"))))
     if p0:
         try:
             with open(p0[-1], encoding="utf-8") as f:
@@ -1949,7 +1965,8 @@ def assemble_inputs(ticker: str, inp: dict, *, authoritative_anchors: bool = Fal
         if vm_scripts not in sys.path:
             sys.path.insert(0, vm_scripts)
         import fmp_client as vm_fmp_client
-        rf, rf_source = vm_fmp_client.risk_free_rate()
+        rf, rf_source = (sources.get("risk_free", (None, None)) if sources is not None
+                         else vm_fmp_client.risk_free_rate())
         if rf_source and str(rf_source).startswith("fred"):
             _fill("fred.treasury_10y", _num(rf))
             _fill("fred.treasury_10y_source", rf_source)
@@ -1965,7 +1982,8 @@ def assemble_inputs(ticker: str, inp: dict, *, authoritative_anchors: bool = Fal
         if vm_scripts not in sys.path:
             sys.path.insert(0, vm_scripts)
         import fmp_client as vm_fmp_client  # noqa: F811 — 同一模組，上段已載入
-        estimates = vm_fmp_client.analyst_estimates(ticker) or []
+        estimates = (sources.get("estimates", []) if sources is not None
+                     else vm_fmp_client.analyst_estimates(ticker)) or []
     except Exception:
         estimates = []
     if estimates:
@@ -2093,7 +2111,8 @@ def build_quant_stage(inp: dict, *, assembled: list | None = None) -> dict:
     pack = build_valuation_pack(
         anchors_raw, cp,
         anchor_meta=mark_unrun_anchor_scripts(
-            inp.get("ticker"), anchors_raw, inp.get("anchor_meta") or {}),
+            inp.get("ticker"), anchors_raw, inp.get("anchor_meta") or {},
+            script_artifacts=inp.get("script_artifacts")),
         structural_shift=inp.get("structural_shift") or {},
         strict_metadata=True,
     )
@@ -2219,6 +2238,7 @@ def write_quant_artifact(quant: dict, path: str) -> str:
 def main():
     ap = argparse.ArgumentParser(description="Deterministic price framework engine (V4.88.0)")
     ap.add_argument("--from-file", help="input JSON path (default: stdin)")
+    ap.add_argument("--snapshot", help="immutable run snapshot; disables all live reads")
     ap.add_argument("--no-fetch", action="store_true",
                     help="skip FMP volatility fetch even if volatility absent")
     ap.add_argument("--self-assemble", action="store_true",
@@ -2238,18 +2258,33 @@ def main():
         if args.from_quant and args.stage != "mhp":
             raise EngineInputError("--from-quant only applies to --stage mhp")
         if args.stage == "mhp":
+            if args.snapshot:
+                raise EngineInputError("--snapshot is for quant; MHP requires the frozen --from-quant artifact")
             if not args.from_quant:
                 raise EngineInputError("--stage mhp requires --from-quant")
             # qualitative 缺料不擋：compute_mhp 自己降級（drift=0 / 無 key level cap）
             out = build_full_output(load_quant_stage(args.from_quant),
                                     read_input(args.from_file, allow_empty=True))
         else:
-            inp = read_input(args.from_file)
-            assembled = resolve_effective_input(
-                inp, self_assemble=args.self_assemble, no_fetch=args.no_fetch)
+            if args.snapshot:
+                from run_data import load_snapshot
+                if args.self_assemble or args.from_file:
+                    raise EngineInputError("--snapshot cannot combine with mutable input sources")
+                try:
+                    frozen = load_snapshot(args.snapshot)
+                except (ValueError, OSError, KeyError) as exc:
+                    raise EngineInputError(str(exc)) from exc
+                inp = frozen["quant_input"]
+                assembled = resolve_effective_input(inp, no_fetch=True)
+            else:
+                inp = read_input(args.from_file)
+                assembled = resolve_effective_input(
+                    inp, self_assemble=args.self_assemble, no_fetch=args.no_fetch)
             quant = build_quant_stage(inp, assembled=assembled)
             if args.stage == "quant":
-                path = args.out or default_quant_artifact_path(inp.get("ticker"))
+                path = args.out or (None if args.snapshot else default_quant_artifact_path(inp.get("ticker")))
+                if args.snapshot and path and os.path.exists(path):
+                    raise EngineInputError("frozen run artifact already exists; refusing overwrite")
                 if path:
                     write_quant_artifact(quant, path)
                 else:

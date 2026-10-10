@@ -42,6 +42,7 @@ import subprocess
 import sys
 import time
 from datetime import datetime
+from pathlib import Path
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, ROOT)
@@ -147,6 +148,23 @@ def server_busy():
         return False                        # not reachable → no contention
 
 
+def acquire_with_wait(provider, protocol, wait_seconds):
+    """Queue for execution capacity only; never retry quota/auth/model errors."""
+    deadline = time.monotonic() + wait_seconds
+    announced = False
+    while True:
+        try:
+            return ds._mrouter.acquire_protocol_lease("agentic_protocol", protocol, pinned_model=provider)
+        except ds._mrouter.ProtocolBlocked as exc:
+            remaining = deadline - time.monotonic()
+            if "broker:refused(provider_busy)" not in str(exc) or remaining <= 0:
+                raise
+            if not announced:
+                print(f"  queued: waiting up to {wait_seconds}s for provider execution capacity; no model call", flush=True)
+                announced = True
+            time.sleep(min(5, remaining))
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -158,7 +176,19 @@ def main(argv=None):
                     choices=("LOW", "MEDIUM", "HIGH"))
     ap.add_argument("--yes", action="store_true",
                     help="skip the confirmation prompt")
+    ap.add_argument("--v55", action="store_true", help="pilot the isolated V5.5 runner")
+    ap.add_argument("--codex-model", help="explicit user-selected Codex model")
+    ap.add_argument("--effort", choices=("low", "medium", "high", "xhigh", "max"))
+    ap.add_argument("--wait-for-slot", type=int, default=None,
+                    help="seconds to wait only for provider_busy (V5.5 default 300; legacy 0)")
     args = ap.parse_args(argv)
+    if args.v55:
+        os.environ["AIC_INVEST_RUNNER"] = "v55"
+    if (args.codex_model or args.effort) and args.provider != "codex":
+        ap.error("--codex-model/--effort require codex provider")
+    wait_seconds = args.wait_for_slot if args.wait_for_slot is not None else (300 if args.v55 else 0)
+    if wait_seconds < 0:
+        ap.error("--wait-for-slot must be nonnegative")
 
     template = ds.PROTOCOL_PROMPTS[args.protocol]
     if "{ticker}" in template and not args.ticker:
@@ -177,6 +207,23 @@ def main(argv=None):
                        ("risk_tolerance", args.risk_tolerance)):
         prompt = prompt.replace("{" + key + "}", value)
     prompt = ds._adapt_protocol_prompt(args.provider, prompt, args.protocol)
+    if args.codex_model:
+        prompt = (f"User explicitly selects {args.codex_model}, reasoning effort {args.effort or 'default'}, "
+                  "for this trial and every isolated lane/Red Team. The coordinator CLI is launched with "
+                  "those exact model/effort arguments. For isolated agents, pass the host tool's explicit "
+                  "model and reasoning_effort parameters and use fresh contexts. Verify host dispatch "
+                  "arguments/receipts, not an LLM's self-description: a generic Codex/GPT-6 identity "
+                  "does not prove a model mismatch. The repo certification registry certifies the "
+                  "codex provider, not individual GPT model names. Do not require agents to self-attest "
+                  "their model or effort. If the host rejects the selected model/effort, stop with that "
+                  "actual error and preserve progress. "
+                  "Never substitute a different model or change engine/protocol code.\n\n" + prompt)
+    if args.v55 and args.protocol == "invest":
+        from validate_phase0 import find_latest
+        candidate = find_latest(args.ticker)
+        if candidate:
+            prompt = (f"Phase 0 candidate resolved by the shared finder: {candidate}. "
+                      "Validate this exact path and source timestamp; do not guess a date-only filename.\n\n" + prompt)
 
     timeout = ds.PROTOCOL_TIMEOUT_OVERRIDES.get(args.protocol, ds.PROTOCOL_TIMEOUT_SEC)
     claude_model = (ds._protocol_model_for(args.protocol)
@@ -197,12 +244,39 @@ def main(argv=None):
             sys.exit("aborted (no tty; pass --yes)")
 
     acquire_lock()
+    invest_lock = None
+    if args.protocol == "invest":
+        from run_data import execution_lock
+        invest_lock = execution_lock(args.ticker)
+        try:
+            invest_lock.__enter__()
+        except BlockingIOError:
+            release_lock()
+            sys.exit("protocol output domain is busy: cross-process ticker lock")
+    from run_data import atomic_json, utcnow
+    job_path = Path(RUN_DIR) / f"{job_id}.telemetry.json"
+    job = {"job_id": job_id, "ticker": args.ticker, "protocol": args.protocol,
+           "runner": "v55" if args.v55 else "legacy", "provider": args.provider,
+           "model": args.codex_model or "cli-default", "effort": args.effort,
+           "created_at": utcnow(), "status": "queued", "model_called": False,
+           "tokens": {"input": None, "output": None, "cached": None}}
+    atomic_json(job_path, job)
+    queued_at = time.monotonic()
     try:
-        selected, lease, broker_note = ds._mrouter.acquire_protocol_lease(
-            "agentic_protocol", args.protocol, pinned_model=args.provider)
+        selected, lease, broker_note = acquire_with_wait(args.provider, args.protocol, wait_seconds)
     except ds._mrouter.ProtocolBlocked as exc:
+        job.update(status="blocked", reason=str(exc), queued_seconds=time.monotonic() - queued_at)
+        atomic_json(job_path, job)
+        if invest_lock is not None:
+            invest_lock.__exit__(None, None, None)
         release_lock()
         sys.exit(f"✗ broker blocked certification run: {exc}")
+    except BaseException:
+        if invest_lock is not None:
+            invest_lock.__exit__(None, None, None)
+        release_lock()
+        raise
+    job["queued_seconds"] = time.monotonic() - queued_at
     if selected != args.provider:
         lease.cancel("pinned certification provider mismatch")
         release_lock()
@@ -210,7 +284,7 @@ def main(argv=None):
     agy_model = ds._mrouter.broker_gate.assigned_model(lease)
     cmd = ds._protocol_command(
         selected, prompt, claude_model=claude_model, timeout_sec=timeout,
-        agy_model=agy_model,
+        agy_model=agy_model, codex_model=args.codex_model, effort=args.effort,
     )
     print(f"  lease  : {broker_note}")
 
@@ -227,18 +301,21 @@ def main(argv=None):
             "PATH": os.environ.get("PATH", "") + ":/Users/kavi/.local/bin",
             "NEWS_RUN_START_MS": str(int(started.timestamp() * 1000)),
             "AIC_PROTOCOL_MODEL": args.provider,
-            "AIC_PROTOCOL_MODEL_TIER": claude_model or "cli-default",
+            "AIC_PROTOCOL_MODEL_TIER": args.codex_model or claude_model or "cli-default",
+            "AIC_PROTOCOL_EFFORT": args.effort or "unknown",
             "AIC_PROTOCOL_NAME": args.protocol,
             "AIC_PROTOCOL_JOB_ID": job_id,
         }
         with open(log_path, "w", buffering=1, encoding="utf-8") as log:
             log.write(f"=== protocol={args.protocol} "
-                      f"model={args.provider}:{claude_model or 'cli-default'} "
+                      f"model={args.provider}:{args.codex_model or claude_model or 'cli-default'} effort={args.effort or 'unknown'} "
                       f"prompt={prompt!r} started={started.isoformat(timespec='seconds')} "
                       f"manual=1 ===\n")
             proc = subprocess.Popen(cmd, cwd=ROOT, stdout=subprocess.PIPE,
                                     stderr=subprocess.STDOUT, text=True,
                                     bufsize=1, env=env, start_new_session=True)
+            job.update(status="running", model_called=True, started_at=utcnow())
+            atomic_json(job_path, job)
             lease.attach_process(proc.pid, os.getpgid(proc.pid))
             beat = time.time()
             try:
@@ -264,6 +341,8 @@ def main(argv=None):
             pass
         raise
     finally:
+        if invest_lock is not None:
+            invest_lock.__exit__(None, None, None)
         release_lock()
 
     try:
@@ -278,7 +357,7 @@ def main(argv=None):
         error_tail = "manual protocol log unavailable"
     ds._mrouter.note_run(
         args.provider, rc == 0, "" if rc == 0 else error_tail,
-        tokens=tokens, lease=lease,
+        tokens=tokens, lease=lease, log_path=log_path,
     )
 
     elapsed = int((datetime.now() - started).total_seconds())
@@ -304,23 +383,44 @@ def main(argv=None):
     # ── post-run gate ────────────────────────────────────────────────────────
     validator = ds.PROTOCOL_VALIDATORS.get(args.protocol)
     v_rc = None
-    if validator:
-        result = subprocess.run(
-            [sys.executable, *[os.path.join(ROOT, p) for p in validator]],
-            cwd=ROOT, capture_output=True, text=True)
+    verified_run_report = None
+    if args.v55 and args.protocol == "invest":
+        from run_data import RUNS, read_json
+        from run_investment import _load
+        sessions = []
+        for path in RUNS.glob(f"{args.ticker.upper()}_*/manifest.json"):
+            m = read_json(path)
+            if m.get("host_job_id") == job_id and m.get("status") == "committed":
+                try:
+                    directory, _, _ = _load(path.parent.name)
+                    sessions.append(directory / "session.json")
+                except (ValueError, OSError, KeyError) as exc:
+                    print(f"  ✗ run evidence failed: {exc}")
+        if len(sessions) != 1:
+            v_rc = 1
+            print(f"  ✗ V5.5 requires exactly one verified committed run for this job; found {len(sessions)}")
+        else:
+            result = subprocess.run([sys.executable, str(Path(ROOT) / "investment/scripts/validate_session_export.py"),
+                                     "--history", str(sessions[0])], cwd=ROOT, capture_output=True, text=True)
+            v_rc = result.returncode
+            print(f"validator rc={v_rc}: {(result.stdout or result.stderr).strip()[:600]}")
+            if v_rc == 0:
+                verified_run_report = str(sessions[0].parent / "report.md")
+    elif validator:
+        result = ds._run_protocol_validators(args.protocol, {"ticker": args.ticker}, started)
         v_rc = result.returncode
         print(f"\nvalidator rc={v_rc}")
         for line in (result.stdout or result.stderr).strip().splitlines()[:10]:
             print(f"  | {line}")
 
-    report = None
-    if args.ticker:
+    report = verified_run_report
+    if args.ticker and not args.v55:
         candidate = os.path.join(
             ROOT, "reports", f"{started.strftime('%Y%m%d')}_{args.ticker.upper()}.md")
         if os.path.exists(candidate) and os.path.getmtime(candidate) >= started.timestamp():
             report = candidate
 
-    if (rc != 0 or (v_rc not in (None, 0))) and report:
+    if (rc != 0 or (v_rc not in (None, 0))) and report and not args.v55:
         # Quarantine, not rollback. The rename takes the report out of
         # `build_event_index`'s pattern so a failed run cannot become a sample in
         # the decision calendar, while leaving every byte on disk for diagnosis.
@@ -331,7 +431,7 @@ def main(argv=None):
         print("  （檔名不再符合 deep-dive pattern，不會進決策日曆；內容原封不動）")
     elif report:
         print(f"\n報告：{os.path.relpath(report, ROOT)}"
-              + ("" if DEEP_DIVE_RE.match(os.path.basename(report))
+              + ("" if args.v55 or DEEP_DIVE_RE.match(os.path.basename(report))
                  else "  (不符 deep-dive pattern，不會進決策日曆)"))
     elif args.ticker:
         print("\n⚠ 沒有產出本次的報告檔")
@@ -340,7 +440,24 @@ def main(argv=None):
         print(f"\n要回退決策日曆：cp '{os.path.relpath(backup, ROOT)}' "
               f"'{os.path.relpath(HISTORY, ROOT)}'")
     print(f"log：{os.path.relpath(log_path, ROOT)}")
-    return 0 if (rc == 0 and v_rc in (None, 0)) else 1
+    passed = rc == 0 and v_rc in (None, 0) and not touched and (not args.ticker or report)
+    receipt = {"input": None, "output": None, "cached": None}
+    if args.provider == "codex":
+        for line in Path(log_path).read_text().splitlines():
+            try:
+                event = json.loads(line)
+            except ValueError:
+                continue
+            if event.get("type") == "turn.completed" and isinstance(event.get("usage"), dict):
+                receipt = {key: event["usage"].get(source) for key, source in
+                           (("input", "input_tokens"), ("output", "output_tokens"), ("cached", "cached_input_tokens"))}
+    job.update(status="complete" if passed else "failed", finished_at=utcnow(),
+               elapsed_seconds=elapsed, process_rc=rc, validator_rc=v_rc,
+               code_untouched=not touched, report=report,
+               tokens=receipt,
+               token_scope="coordinator_stream_receipt; child inclusion provider-dependent")
+    atomic_json(job_path, job)
+    return 0 if passed else 1
 
 
 if __name__ == "__main__":

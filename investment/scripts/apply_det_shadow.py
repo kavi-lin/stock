@@ -360,7 +360,7 @@ CONTRACT_VERSION = "C1/1.0"
 # V4.6 的四 lane fanout 與今天的六 lane 契約不是同一回事，補一塊「看起來很完整」
 # 的 provenance 上去等於在稽核軌跡放假證據（Phase 6 按 provenance 分層時會直接吃到）。
 # 與 §13 / §14 同一條紀律：門檻綁 schema 版本，不綁日期。
-LANE_CONTRACT_VERSIONS = ("V5.3", "V5.4")
+LANE_CONTRACT_VERSIONS = ("V5.3", "V5.4", "V5.5")
 
 # 六個 lane = 五個 Phase 2 分析 lane + Red Team。RT 放進同一張表而不是另立一組欄位，
 # 是為了讓 L8（RT decision-invariant skip）只要改 `lanes.red_team.provenance`，
@@ -705,6 +705,9 @@ def apply_to_session_export(payload: dict) -> dict:
     V4.90.0: forward `session_export_version` so the C1 lane contract is only written
     on entries whose schema version declares it (old entries stay untouched).
     """
+    if payload.get("session_export_version") == "V5.5" and all(
+            t.get("lane_contract") for t in payload.get("trades_this_session", [])):
+        return payload  # frozen evidence is owned by the run assembler
     export_date = payload.get("export_date") or payload.get("date")
     # 缺版號的 payload 傳 ""（不是 None）：None 在 apply_to_trade 的語意是「沒有 entry 外殼」
     # → 寫契約。這裡外殼是有的、只是欄位漏了，那是壞掉的 entry，不該因此拿到一份契約

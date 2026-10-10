@@ -626,11 +626,8 @@ def extract(path: Path) -> dict:
     # Rec 7 (V2.17.16) sub-industry heat — needed up-front so Rec 11 hot-zone
     # instrumentation can read industry_top_30pct. Fail-soft.
     heat = None
-    if enrich_ticker_heat is not None and ticker:
-        try:
-            heat = enrich_ticker_heat(ticker)
-        except Exception as e:                                              # pragma: no cover
-            heat = {"error": str(e)[:120]}
+    # No historical classification from today's mutable heat/profile caches.
+    # Unknown is retained until a contemporaneous source is supplied.
     top30 = heat.get("industry_top_30pct") is True if isinstance(heat, dict) else None
 
     # TODO-015 (REVIEW_2026-06-28) — Rec 11 hot-zone probe eval instrumentation.
@@ -680,5 +677,9 @@ def extract(path: Path) -> dict:
     # review can group repeat-misses by sector/industry instead of only ticker.
     if heat is not None:
         record["tuning_hooks"]["sub_industry_heat"] = heat
-    record["decision_id"] = f"deep-dive_{ticker}_{decision_date}"
+    import hashlib
+    record["legacy_ids"] = [f"deep-dive_{ticker}_{decision_date}"]
+    record["decision_id"] = "legacy:" + hashlib.sha256((str(path) + "\0" + text).encode()).hexdigest()
+    record["authority"] = "legacy_markdown"
+    record["classification"] = {"sector": None, "industry": None, "regime": macro["market_regime"]}
     return record

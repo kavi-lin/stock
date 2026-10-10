@@ -1,5 +1,24 @@
 # Phase 5 Session Export Schema
 
+
+## V5.5 場次來源擴充
+
+V5.5 由 `run_investment.py finalize` / `build_session_export.py --run-dir` 產出。
+舊版 V4.8–V5.4 仍可驗證與重播；下面的歷史 FULL EXAMPLE 保留原版。
+
+- `run_context` 必填：run_id、snapshot_hash、analysis_at、protocol_version、producer_version、當時 classification、各 stage 的模型／執行狀態／輸入輸出摘要。
+- `sentiment_det`、`det_inputs`、`det_inputs_metadata` 必填；缺來源為 null 且附原因，shadow_only 永遠 true。
+- `lane_contract.lanes.*` 的 input_hash、producer_version、model、execution_status 由控制器填入，LLM 不得自填。
+- `execution_quality` 為 complete/degraded/incomplete；`red_team_synthetic` 標示流程失敗裁決，禁止新增部位且不列入 RT 成效校準。kill_condition_evaluation 在沒有事件證據時保持 unknown。
+- V5.5 provenance digest 包含 det_shadow 與 lane_contract；同 run_id 相同摘要只提交一次，不同摘要拒絕。正式 validator 必須讀指定場次的 snapshot／quant／decision／lane 產物，缺席不得靜默回退。
+
+詳見 [run_workflow_v55.md](run_workflow_v55.md)。
+
+V5.5 的 `phase4_6` 必填，由 assembler 在定倉後呼叫既有 cap／speculative governor
+產生，保存完整 adjustments trace。final_decision、final_action、avg_confidence、
+position_size_pct、cap 與 speculative 欄位均由此導出；部位必須為有效數值，不能 null。
+validator 以指定場次的 decision／risk／quant／p3 產物重算比對，Phase 3 原產物保留。
+
 > **Schema Version**: `V5.4`
 > **Consumer**: `bridge.py` / Dashboard decisions cards / decision history
 > **Producer**: Investment Protocol Phase 5 (PM / deterministic renderer)

@@ -728,10 +728,20 @@ const DECISION_TIPS = {
               scale: '🟢 ≥ 70%   high — standard size\n🟡 50-70%  medium — cut one notch\n⚪ < 50%   low — wait or tiny pilot (high fragility → just wait)' },
     },
     // ── Protocol version bookmarks ──────────────────────────────────────
+    version_v55: {
+        zh: { title: 'Protocol V5.5 — 凍結快照與可追溯場次（最新）',
+              desc: 'V5.4 全部 + **每場使用固定資料快照**，保留來源時間、lane 輸入摘要、實際模型及執行狀態。支援隔離派工、驗證後續跑與不可重複提交。\n\n情緒對照與 Red Team 校準保留作觀測；正式評分、權重及決策門檻維持現況。V5.5 目前採指定場次試行。' },
+        en: { title: 'Protocol V5.5 — Frozen Snapshots & Traceable Runs (current)',
+              desc: 'All of V5.4 + **a fixed data snapshot for each run**, with source timestamps, lane input hashes, actual models and execution status. Supports isolated dispatch, validated resume and idempotent commit.\n\nSentiment comparisons and Red Team calibration remain observational; scoring, weights and decision thresholds are unchanged. V5.5 is currently enabled for selected pilot runs.' },
+    },
+    version_stamped: {
+        zh: { title: '場次 Protocol 版本', desc: '標籤顯示這場分析記錄的版本；此介面尚無該版本的詳細說明。' },
+        en: { title: 'Run Protocol Version', desc: 'The badge shows the version recorded for this analysis. This interface has no detailed description for that version yet.' },
+    },
     version_v54: {
-        zh: { title: 'Protocol V5.4 — LLM 執行引擎標籤與多模型協同（最新）',
+        zh: { title: 'Protocol V5.4 — LLM 執行引擎標籤與多模型協同',
               desc: 'V5.3 全部 + **卡片與決策審計完整標記 LLM 執行引擎**：決策卡片與 session export 明確記錄並標示各分析是由哪一個 LLM（Claude / Codex / Gemini / GPT 等）驅動，支援多模型派工與透明化溯源。\n\n**為什麼要這塊**：配合多 LLM 模型路由與 Broker 配額協調，使用者能一眼看出每張決策卡片是哪一個 AI 模組分析的，避免模型混淆，並為後續 cross-model backtest 與權重回歸提供乾淨的 attribution 基礎。' },
-        en: { title: 'Protocol V5.4 — LLM Engine Attribution & Multi-Model Coordination (current)',
+        en: { title: 'Protocol V5.4 — LLM Engine Attribution & Multi-Model Coordination',
               desc: 'All of V5.3 + **Full LLM Engine Attribution & Multi-Model Tagging**: Decision cards and session exports explicitly record and display which LLM (Claude / Codex / Gemini / GPT etc.) executed the analysis, enabling multi-model dispatch and transparent provenance.\n\n**Why**: Coordinated with multi-LLM routing and broker quota management, users can see at a glance which AI engine drove each analysis card, preventing model confusion and establishing clean attribution for cross-model backtesting and weight calibration.' },
     },
     version_v53: {
@@ -889,6 +899,7 @@ function versionAtLeast(version, floor) {
 }
 
 const VERSION_COLOR = {
+    'V5.5':   { bg: 'rgba(20,184,166,0.22)',  border: 'rgba(45,212,191,0.70)', fg: '#5eead4', label: 'V5.5'   },
     // V5.4 — LLM 執行引擎標籤與多模型審計
     'V5.4':   { bg: 'rgba(139,92,246,0.25)',  border: 'rgba(167,139,250,0.85)', fg: '#c4b5fd', label: 'V5.4'   },
     'V5.3':   { bg: 'rgba(139,92,246,0.18)',  border: 'rgba(167,139,250,0.60)', fg: '#c4b5fd', label: 'V5.3'   },
@@ -903,9 +914,13 @@ const VERSION_COLOR = {
 };
 
 function buildVersionBookmark(version) {
-    const c = VERSION_COLOR[version] || VERSION_COLOR['LEGACY'];
+    // A new stamped protocol is not an archived record just because its palette is missing.
+    const hasVersionStamp = /^V\d+\.\d+(?:\.\d+)?$/.test(String(version));
+    const c = VERSION_COLOR[version] || (hasVersionStamp
+        ? { ...VERSION_COLOR['LEGACY'], label: version } : VERSION_COLOR['LEGACY']);
     // V2.17.8 — version bookmark gets rich tooltip via data-tip-key
     const tipKeyMap = {
+        'V5.5':   'version_v55',
         'V5.4':   'version_v54',
         'V5.3':   'version_v53',
         'V5.2':   'version_v52',
@@ -917,7 +932,7 @@ function buildVersionBookmark(version) {
         'V4.5':   'version_v46',     // share scale doc
         'LEGACY': 'version_legacy',
     };
-    const tipKey = tipKeyMap[version] || 'version_legacy';
+    const tipKey = tipKeyMap[version] || (hasVersionStamp ? 'version_stamped' : 'version_legacy');
     return `
     <div class="version-bookmark" data-tip-key="${tipKey}"
          style="padding:2px 7px 3px; font-size:8px; font-weight:800; letter-spacing:0.06em;

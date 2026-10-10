@@ -28,6 +28,7 @@ import csv
 import glob
 import json
 import os
+import re
 import sys
 import time
 from datetime import datetime, timezone
@@ -260,6 +261,21 @@ def section_sector_perf(date_str) -> list[str]:
     return out
 
 
+def _earnings_time(e) -> str:
+    """BMO/AMC tag for an earnings row.
+
+    FMP leaves `time` as "" and the sector-protocol record buries the real tag
+    one level deeper under source_payload.raw_event, so the old single-level
+    lookup rendered every row as "—" even when the tag was present.
+    """
+    p = e.get("source_payload") or {}
+    for cand in (e.get("time"), p.get("time"), (p.get("raw_event") or {}).get("time")):
+        t = str(cand or "").strip()
+        if t:
+            return t
+    return "—"
+
+
 def section_earnings(data, date_str) -> list[str]:
     out = ["## 5. Today's Earnings", ""]
     events = (data or {}).get("upcoming_events") or []
@@ -271,9 +287,7 @@ def section_earnings(data, date_str) -> list[str]:
     out.append("| Time | Ticker | Estimate |")
     out.append("|---|---|---|")
     for e in today:
-        p = e.get("source_payload") or {}
-        t = p.get("time") or e.get("time") or "—"
-        out.append(f"| {t or '—'} | {', '.join(e.get('tickers') or []) or '?'} | "
+        out.append(f"| {_earnings_time(e)} | {', '.join(e.get('tickers') or []) or '?'} | "
                    f"{e.get('description', '')} |")
     out.append("")
     return out
@@ -392,6 +406,14 @@ def section_momentum() -> list[str]:
     return out
 
 
+def _risk_ticker(r, label):
+    """binary_risks rows carry no tickers field; recover it from the headline."""
+    for tk in (r.get("tickers") or []):
+        return tk
+    m = re.match(r"^([A-Z]{1,5})(?:[.\-][A-Z])?\b", str(label or "").strip())
+    return m.group(0) if m else None
+
+
 def section_binary(data, date_str) -> list[str]:
     out = ["## 10. Watch Items / Binary Risks (≤48h)", ""]
     events = (data or {}).get("upcoming_events") or []
@@ -419,8 +441,29 @@ def section_binary(data, date_str) -> list[str]:
         out.append("_No binary catalysts in the next 48h._")
         out.append("")
         return out
+
+    # binary_risks and upcoming_events describe the same catalysts from two
+    # feeds (FDX showed up as both "FDX 財報（盤後）" and "FDX 財報"). Suppress a
+    # risk whose (date, ticker) is already covered by the event list below.
+    # (date, None) must never enter the set: a risk with no recoverable ticker
+    # would then be suppressed by any unrelated ticker-less event that day.
+    covered = {(e.get("date"), (e.get("tickers") or [None])[0]) for e in flagged}
+    covered.discard(None)
+    covered = {k for k in covered if k[1]}
     for r in risks[:8]:
-        out.append(f"- ⚠️ {r.get('title', r) if isinstance(r, dict) else r}")
+        if not isinstance(r, dict):
+            out.append(f"- ⚠️ {r}")
+            continue
+        # the schema key is `event`; `title` was a guess, and .get('title', r)
+        # fell back to the whole dict and printed its repr into the report.
+        label = r.get("event") or r.get("title")
+        if not label:
+            _warnings.append(f"binary_risks entry has no event/title key: {sorted(r)}")
+            continue
+        tk = _risk_ticker(r, label)
+        if tk and (r.get("date"), tk) in covered:
+            continue
+        out.append(f"- ⚠️ {label}")
     for e in sorted(flagged, key=lambda e: e.get("date", ""))[:12]:
         tag = "🔴 binary" if e.get("is_binary") else "🟡 high-impact"
         out.append(f"- {tag} · {e.get('date', '?')} · {e.get('title', '?')} "
@@ -445,10 +488,23 @@ def build_report(date_str: str) -> str:
     _note_source(data_path, "data.json")
     data = _load_json(data_path)
 
-    gen = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    now_utc = datetime.now(timezone.utc)
+    gen = now_utc.strftime("%Y-%m-%d %H:%M UTC")
+    # A re-run after 09:30 ET still renders EOD+overnight data, but calling it
+    # a "pre-open snapshot" then is simply false — say when it was really built.
+    try:
+        from zoneinfo import ZoneInfo
+        et = now_utc.astimezone(ZoneInfo("America/New_York"))
+        pre_open = (et.hour, et.minute) < (9, 30)
+        gen += f" / {et.strftime('%H:%M ET')}"
+    except Exception:
+        pre_open = True
+    stamp = ("pre-open snapshot (EOD + overnight, no live intraday)" if pre_open
+             else "⚠️ built AFTER the 09:30 ET open — same EOD + overnight data, "
+                  "but no longer a pre-open snapshot")
     lines = [
         f"# Pre-Market Morning Brief — {date_str}",
-        f"_Generated {gen} · pre-open snapshot (EOD + overnight, no live intraday)_",
+        f"_Generated {gen} · {stamp}_",
         "",
     ]
     lines += section_regime(data)

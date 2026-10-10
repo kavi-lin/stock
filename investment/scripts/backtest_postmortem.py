@@ -17,6 +17,7 @@ Usage:
 import argparse
 import datetime as dt
 import re
+import math
 import sys
 from collections import Counter
 from pathlib import Path
@@ -192,6 +193,32 @@ def parse_report(path):
 
 # ----------------- price fetching -----------------
 
+def parse_committed(record):
+    dc = record["decision_content"]
+    trade = dc.get("trader_proposal") or {}
+    def bounds(value):
+        if isinstance(value, list) and len(value) == 2:
+            return sorted(value)
+        return [value, value] if isinstance(value, (int, float)) else [None, None]
+    aggr = bounds(trade.get("entry"))
+    cons = bounds(dc.get("entry_conservative"))
+    return {"ticker": record["tickers"][0], "date": dt.date.fromisoformat(record["decision_date"]),
+            "decision_id": record["decision_id"], "authority": record["authority"],
+            "identity_ambiguous": record.get("identity_ambiguous"), "report_path": record["raw_path"],
+            "decision": dc.get("final_decision"), "action": dc.get("final_action"),
+            "final_score": dc.get("final_score"), "pos_pct": dc.get("position_size_pct"),
+            "lanes": {a["agent"]: a for a in record.get("agent_breakdown", [])},
+            "rt_label": dc.get("red_team_verdict"), "rt_strength": dc.get("red_team_counter_evidence_strength"),
+            "rt_synthetic": dc.get("red_team_synthetic") or dc.get("red_team_execution_failed"),
+            "sl": trade.get("sl"), "tp": trade.get("tp"), "aggr_low": aggr[0], "aggr_high": aggr[1],
+            "cons_low": cons[0], "cons_high": cons[1], "parse_incomplete": [],
+            "rr": dc.get("risk_reward_ratio"), "burry_score": dc.get("burry_score"),
+            "raw_score": (dc.get("calculation_steps") or {}).get("raw_total"),
+            "rt_gate": (dc.get("calculation_steps") or {}).get("cascade_rule_applied"),
+            "macro_mult": dc.get("macro_multiplier"), "tech_rsi": (dc.get("technical_lane") or {}).get("rsi"),
+            "early_warning": False, "confirmed_top": False}
+
+
 def fetch_prices(ticker, start_date, n_days=30):
     """Fetch trading days from start_date through today (max n_days)."""
     end = min(dt.date.today() + dt.timedelta(days=1),
@@ -224,6 +251,9 @@ def compute_outcome(parsed, prices, window_days=20):
     forward = prices[prices.index >= dd]
     if forward.empty:
         return {"outcome_available": False}
+    if any(not math.isfinite(float(v)) or float(v) <= 0 for column in ("Close", "Low", "High")
+           for v in forward.iloc[:window_days + 1][column]):
+        return {"outcome_available": False, "reason": "nonfinite_or_nonpositive_price"}
     decision_close = float(forward["Close"].iloc[0])
     out["decision_close"] = decision_close
 
@@ -233,6 +263,7 @@ def compute_outcome(parsed, prices, window_days=20):
         return {"outcome_available": False, "decision_close": decision_close}
     out["outcome_available"] = True
     out["days_observed"] = len(after)
+    out["window_complete"] = len(after) == window_days
 
     # Aggressive fill check
     aggr_filled, aggr_fill_price = False, None
@@ -284,7 +315,7 @@ def make_xtab(rows, group_fn, group_label, metric_keys):
     """Generic cross-tab: bucket rows by group_fn, average metric_keys per bucket."""
     buckets = {}
     for r in rows:
-        if not r.get("outcome_available"):
+        if not r.get("outcome_available") or not r.get("calibration_eligible", False):
             continue
         g = group_fn(r)
         if g is None:
@@ -459,7 +490,7 @@ def render_report(parsed_rows, run_date):
     out.append("\n| Date | Ticker | Decision | Score | RT | Tech RSI | EarlyWarn | 10d Ret | Aggr filled | Aggr P/L now |\n"
                "|---|---|---|---:|---:|---:|:---:|---:|:---:|---:|")
     for r in sorted(rows, key=lambda x: (x["date"], x["ticker"])):
-        if not r.get("outcome_available"):
+        if not r.get("outcome_available") or not r.get("calibration_eligible", False):
             continue
         rt = f"{r['rt_strength']}/5" if r.get("rt_strength") is not None else "—"
         rsi = f"{r['tech_rsi']:.0f}" if r.get("tech_rsi") else "—"
@@ -481,6 +512,7 @@ def render_report(parsed_rows, run_date):
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[1])
     ap.add_argument("--reports-dir", default=str(DEFAULT_REPORTS))
+    ap.add_argument("--history", default=str(ROOT / "investment/invest_logs/history.json"))
     ap.add_argument("--output", default=None,
                     help="Override default reports/POSTMORTEM_<date>.md")
     ap.add_argument("--window", type=int, default=20,
@@ -492,14 +524,26 @@ def main():
     paths = [p for p in paths if re.match(r"\d{8}_[A-Z]+\.md", p.name)]
     print(f"Scanning {len(paths)} ticker-report files...", file=sys.stderr)
 
-    rows = []
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from scripts.extractors.committed_investment import load_committed
+    records, diagnostics, covered = load_committed(args.history)
+    parsed_records = [parse_committed(r) for r in records]
     for p in paths:
-        parsed = parse_report(p)
+        candidate = parse_report(p)
+        if candidate and (candidate["date"].isoformat(), candidate["ticker"]) not in covered:
+            candidate["authority"] = "legacy_markdown"
+            parsed_records.append(candidate)
+    rows = []
+    for parsed in parsed_records:
         if not parsed:
             continue
         prices = fetch_prices(parsed["ticker"], parsed["date"], n_days=args.window + 14)
         outcome = compute_outcome(parsed, prices, window_days=args.window)
         parsed.update(outcome)
+        parsed["evaluation_version"] = "postmortem/2.0"
+        parsed["calibration_eligible"] = bool(
+            parsed.get("authority") == "committed_json" and not parsed.get("identity_ambiguous")
+            and not parsed.get("rt_synthetic") and parsed.get("window_complete"))
         rows.append(parsed)
         print(f"  {parsed['date']} {parsed['ticker']}: "
               f"{parsed.get('decision', '?')} score={parsed.get('final_score')} "

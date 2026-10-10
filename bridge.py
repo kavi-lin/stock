@@ -168,9 +168,45 @@ def load_positions_by_ticker():
     return by_ticker, all_positions
 
 
-def get_latest_file(pattern):
-    files = glob.glob(pattern)
+#: Aggregate files that live in the same directory as the per-run snapshots and
+#: match the same glob. They are not snapshots and must never win "which is the
+#: newest one".
+#:
+#: `market_breadth_history.json` is the one that bit, on 2026-08-26: it is a
+#: *list* of past runs, and the analyzer rewrites it in the same second as the
+#: snapshot — so `max(mtime)` came down to whatever order `glob.glob()` happened
+#: to return, and losing the toss killed the entire bridge run with
+#: `TypeError: list indices must be integers` three thousand lines away.
+AGGREGATE_SUFFIXES = ("_history.json",)
+
+
+def get_latest_file(pattern, *, exclude_suffixes=AGGREGATE_SUFFIXES):
+    files = [f for f in glob.glob(pattern) if not f.endswith(exclude_suffixes)]
     return max(files, key=os.path.getmtime) if files else None
+
+
+def load_snapshot_json(latest, label):
+    """Read one cache snapshot, insisting it is an object.
+
+    The shape check is the point. Every caller goes on to subscript this by
+    name, and a JSON list answers `"key" not in data` perfectly happily — so a
+    wrong-shaped file does not fail where it is read, it fails much later,
+    somewhere that has no idea which file it came from.
+    """
+    try:
+        with open(latest, 'r') as f:
+            data = json.load(f)
+    except Exception as e:
+        print(f"[WARN] {label} read error: {e}")
+        return None
+    if not isinstance(data, dict):
+        print(f"[WARN] {label}: {os.path.basename(latest)} is a "
+              f"{type(data).__name__}, not an object — skipped")
+        return None
+    state, age = _freshness_label(latest)
+    tag = "[OK]" if state == "FRESH" else "[STALE]"
+    print(f"{tag} {label}: {os.path.basename(latest)} ({state}, {age})")
+    return data
 
 
 # Unified cache freshness rule: 3h of market-open time elapsed since mtime.
@@ -242,16 +278,7 @@ def load_breadth_cache():
     latest = get_latest_file(os.path.join(BREADTH_CACHE, "market_breadth_*.json"))
     if not latest:
         return None
-    try:
-        with open(latest, 'r') as f:
-            data = json.load(f)
-        state, age = _freshness_label(latest)
-        tag = "[OK]" if state == "FRESH" else "[STALE]"
-        print(f"{tag} Breadth cache: {os.path.basename(latest)} ({state}, {age})")
-        return data
-    except Exception as e:
-        print(f"[WARN] Breadth cache read error: {e}")
-        return None
+    return load_snapshot_json(latest, "Breadth cache")
 
 
 def extract_breadth_from_analyzer(raw):
@@ -682,8 +709,64 @@ import re as _re_events  # avoid shadowing module-level `re` use elsewhere
 
 
 def _slugify(text, max_len=30):
-    s = _re_events.sub(r'[^a-z0-9]+', '-', (text or '').lower()).strip('-')
-    return s[:max_len] or 'untitled'
+    # Keep CJK: the ASCII-only class collapsed every Chinese headline to the
+    # stray digits around it ('8 月新屋開工與建照' -> '8', 'FOMC 會議紀要' ->
+    # 'fomc'), so two unrelated Chinese events on one date could share a dedupe
+    # key and silently merge into one calendar row.
+    s = _re_events.sub(r'[^a-z0-9\u3400-\u4dbf\u4e00-\u9fff]+', '-',
+                       (text or '').lower()).strip('-')
+    # strip again AFTER the cut: a hard slice can leave a trailing '-', which
+    # would make the same title slugify differently depending on where the
+    # upstream title happened to be truncated (archive key churn).
+    return s[:max_len].strip('-') or 'untitled'
+
+
+# Time zone for every US macro/econ release we surface. FMP's stable
+# economic-calendar returns its `date` field in UTC; the sector-protocol feed
+# passes the same upstream timestamps through an LLM and also arrives in UTC
+# (verified against 8 known release times: ISM 10:00 ET / jobless claims
+# 08:30 ET / EIA 10:30 ET / MBA 07:00 ET ...). Both must be converted, not
+# relabelled.
+try:
+    from zoneinfo import ZoneInfo as _ZoneInfo
+    _ET_TZ = _ZoneInfo("America/New_York")
+except Exception:  # pragma: no cover - stdlib since 3.9
+    _ET_TZ = None
+
+
+def _utc_hhmm_to_et(hhmm, date_str):
+    """'12:30' + '2026-09-17' -> '08:30 ET' (DST-aware). None when unparseable."""
+    if not hhmm or _ET_TZ is None:
+        return None
+    m = _re_events.match(r'^\s*(\d{1,2}):(\d{2})\s*$', str(hhmm))
+    if not m:
+        return None
+    try:
+        d = datetime.strptime(date_str, "%Y-%m-%d").date()
+    except Exception:
+        return None
+    hh, mm = int(m.group(1)), int(m.group(2))
+    if hh > 23 or mm > 59:
+        return None
+    utc_dt = datetime(d.year, d.month, d.day, hh, mm, tzinfo=timezone.utc)
+    return utc_dt.astimezone(_ET_TZ).strftime("%H:%M ET")
+
+
+def _truncate_title(text, max_len=48):
+    """Cut on a word boundary instead of mid-token.
+
+    `title[:36]` produced 'Jobless Claims 4-Week Average (Sep/1' — a truncated
+    date tag reads as a different release. Break at the last space/punctuation
+    before the limit and mark the cut with an ellipsis.
+    """
+    t = (text or '').strip()
+    if len(t) <= max_len:
+        return t
+    head = t[:max_len]
+    cut = max(head.rfind(' '), head.rfind('('), head.rfind('、'), head.rfind(','))
+    if cut < max_len * 0.6:      # no sane boundary — keep the hard cut
+        cut = max_len
+    return head[:cut].rstrip(' ,、(') + '…'
 
 
 def _clean_event_text(raw_title):
@@ -693,7 +776,7 @@ def _clean_event_text(raw_title):
        'DOJ ends Powell probe — Warsh Senate banking vote 4/29 (Pirro can reopen probe at any time; Fed independence binary)'
 
     回傳 (clean_title, description, extracted_sectors_list)
-    - clean_title: 第一個括號／em-dash 之前的核心主標, 截短到 ~36 字元
+    - clean_title: 第一個括號／em-dash 之前的核心主標, 依 _truncate_title 在詞界截短
     - description: 括號內的非結構化補述（去掉 "binary;" 雜訊）
     - extracted_sectors: 從 "看多/看空 X、Y、Z" 抽出的 GICS sector list
     """
@@ -728,9 +811,8 @@ def _clean_event_text(raw_title):
         if cleaned_tail:
             desc = cleaned_tail
 
-    # 截短主標
-    if len(head) > 36:
-        head = head[:35].rstrip() + '…'
+    # 截短主標（word boundary, 不切在 token 中間）
+    head = _truncate_title(head)
 
     return head, desc, sectors
 
@@ -741,6 +823,89 @@ def _event_dedupe_key(e):
     if e.get("tickers"):
         return (e["date"], e["tickers"][0], e["category"])
     return (e["date"], None, e["category"], _slugify(e["title"]))
+
+
+# ── canonical macro releases ────────────────────────────────────────────────
+# The same release reaches us twice: once from fmp-econ (English, category
+# "econ", real time + prev/est) and once from sector-protocol (LLM-written, often
+# Chinese, category "macro"). `_slugify` can't match those — it drops CJK
+# entirely — so the calendar listed one release up to three times.
+#
+# Each rule is (canonical_key, required_pattern). Deliberately conservative:
+# a rule must name the *issuing series*, never a generic word, because a false
+# merge silently deletes a real event. Under-merging is the safe failure.
+_CANONICAL_RELEASES = [
+    ("fomc-rate-decision",  r'fed\s+interest\s+rate\s+decision|fomc\s*利率決議|聯準會\s*利率決議'),
+    ("fomc-minutes",        r'fomc\s+minutes|fomc\s*會議紀要'),
+    ("cpi",                 r'\bcpi\b|消費者物價'),
+    ("ppi",                 r'\bppi\b|生產者物價'),
+    ("core-pce",            r'core\s+pce|核心\s*pce'),
+    ("nonfarm-payrolls",    r'nonfarm\s+payrolls|非農(?:就業)?'),
+    ("initial-claims",      r'initial\s+jobless\s+claims|初領失業金'),
+    ("continuing-claims",   r'continuing\s+jobless\s+claims|續領失業金'),
+    ("ism-manufacturing",   r'ism\s+manufacturing\s+pmi|ism\s*製造業\s*pmi'),
+    ("ism-services",        r'ism\s+(?:non-manufacturing|services)\s+pmi|ism\s*服務業\s*pmi'),
+    ("retail-sales",        r'retail\s+sales\s+mom|零售銷售'),
+    ("housing-starts",      r'housing\s+starts|新屋開工'),
+    ("building-permits",    r'building\s+permits|建照'),
+    ("jolts",               r'jolts\s+job\s+openings|職位空缺'),
+    ("michigan-sentiment",  r'michigan\s+consumer\s+sentiment|密(?:西根|大)\s*消費者信心'),
+    ("gdp-growth",          r'gdp\s+growth\s+rate\s+qoq|gdp\s*成長率'),
+]
+_CANONICAL_RELEASES = [(k, _re_events.compile(p, _re_events.I)) for k, p in _CANONICAL_RELEASES]
+
+
+_RELEASE_CATEGORIES = ("econ", "macro", "economic", "macro_data",
+                      "fed", "monetary_policy")
+
+
+def _canonical_releases(title):
+    """Every canonical series a title names. [] when unrecognised.
+
+    One key = a single release, mergeable with the same release from the other
+    feed. Two or more = a composite headline ("8 月新屋開工與建照" = housing
+    starts + building permits), which is handled separately: collapsing it onto
+    either series alone would drop the other.
+    """
+    t = (title or '').strip()
+    if not t:
+        return []
+    return [k for k, rx in _CANONICAL_RELEASES if rx.search(t)]
+
+
+def _release_dedupe_key(e):
+    """Cross-source/cross-category key for a ticker-less single-release entry.
+
+    Returns None when the event should keep its per-source identity.
+    """
+    if e.get("tickers") or e.get("category") not in _RELEASE_CATEGORIES:
+        return None
+    keys = _canonical_releases(e.get("title"))
+    if len(keys) == 1:
+        return (e.get("date"), "release", keys[0])
+    if keys:
+        return None       # composite — handled by the absorb pass, not merged
+    # Fallback for series the table doesn't name: both feeds often carry the
+    # byte-identical English title ("ISM Non-Manufacturing Prices (Apr)" as
+    # econ AND macro). Exact normalized-title equality on the same day is a
+    # safe merge; anything looser is not.
+    norm = _re_events.sub(r'[^a-z0-9\u4e00-\u9fff]+', '', (e.get("title") or '').lower())
+    return (e.get("date"), "title", norm) if norm else None
+
+
+def _release_merge_score(e):
+    """Prefer the record that actually carries a usable time + numbers."""
+    sp = e.get("source_payload") or {}
+    score = 0
+    if str(e.get("time") or "").endswith(" ET"):
+        score += 4
+    elif e.get("time"):
+        score += 1
+    if sp.get("previous") is not None or sp.get("estimate") is not None:
+        score += 2
+    if e.get("source") == "fmp-econ":
+        score += 1
+    return score
 
 
 def _impact_rank(i):  # higher = more impact, used to pick winner during merge
@@ -787,6 +952,13 @@ def _from_sector_protocol_new(s_data):
         rec.setdefault("description", None)
         rec.setdefault("time", None)
         rec.setdefault("links", {})
+        # The protocol feed passes FMP's UTC timestamps through unlabelled
+        # ("14:00" for a 10:00 ET release). Convert bare HH:MM; leave anything
+        # already tagged (ET / BMO / AMC) untouched.
+        et = _utc_hhmm_to_et(rec.get("time"), ev_date)
+        if et:
+            rec["source_payload"]["raw_time_utc"] = rec["time"]
+            rec["time"] = et
         if not rec.get("id"):
             slug = rec["tickers"][0] if rec["tickers"] else _slugify(rec["title"])
             rec["id"] = f"sector-protocol_{slug}_{ev_date}"
@@ -851,11 +1023,18 @@ def _from_sector_protocol(s_data):
     return out
 
 
-def _merge_two(primary, other):
+def _merge_two(primary, other, pin_primary=False):
     """Cross-source merge for same dedupe key. Primary = higher impact wins.
-    is_binary OR; tickers/sectors union; source_payload soft-merge."""
-    if _impact_rank(other["impact"]) > _impact_rank(primary["impact"]):
+    is_binary OR; tickers/sectors union; source_payload soft-merge.
+
+    pin_primary=True keeps `primary` primary regardless of impact. Used for the
+    archive merge: a fresh feed row must win on title/time even when the stale
+    archived row carries the same impact, otherwise corrections never land.
+    """
+    if not pin_primary and _impact_rank(other["impact"]) > _impact_rank(primary["impact"]):
         primary, other = other, primary  # swap so higher-impact is primary
+    if pin_primary and _impact_rank(other.get("impact")) > _impact_rank(primary.get("impact")):
+        primary["impact"] = other["impact"]  # keep the record, take the impact
     primary["is_binary"] = bool(primary.get("is_binary")) or bool(other.get("is_binary"))
     primary["tickers"]   = list(dict.fromkeys((primary.get("tickers") or []) + (other.get("tickers") or [])))
     primary["sectors"]   = list(dict.fromkeys((primary.get("sectors") or []) + (other.get("sectors") or [])))
@@ -1003,7 +1182,11 @@ def _from_fmp_econ(today, horizon_days=14):
 
         # date may be "YYYY-MM-DD HH:MM:SS"
         date_str = (ev.get("date") or "")[:10]
-        time_str = (ev.get("date") or "")[11:16] + " ET" if len(ev.get("date") or "") >= 16 else None
+        # FMP's `date` is UTC — it must be converted, not suffixed with " ET".
+        # The old code labelled 12:30 UTC as "12:30 ET", putting every morning
+        # release 4 hours late on the pre-market brief.
+        raw_hhmm = (ev.get("date") or "")[11:16] if len(ev.get("date") or "") >= 16 else None
+        time_str = _utc_hhmm_to_et(raw_hhmm, date_str)
         try:
             ev_date = datetime.strptime(date_str, "%Y-%m-%d").date()
         except Exception:
@@ -1032,7 +1215,7 @@ def _from_fmp_econ(today, horizon_days=14):
             "date":        date_str,
             "time":        time_str,
             "category":    "econ",
-            "title":       title[:36],
+            "title":       _truncate_title(title),
             "description": (f"prev: {ev.get('previous')} / est: {ev.get('estimate')}"
                             if ev.get("estimate") is not None or ev.get("previous") is not None else None),
             "tickers":     [],
@@ -1048,6 +1231,8 @@ def _from_fmp_econ(today, horizon_days=14):
                 "actual":   ev.get("actual"),
                 "currency": ev.get("currency"),
                 "raw_impact": impact_raw,
+                "raw_utc":  ev.get("date"),
+                "raw_title": title,
             },
             "links":       {},
         })
@@ -1096,6 +1281,15 @@ def _load_calendar_universe():
                     t = ln.strip().upper()
                     if t and not t.startswith("#"):
                         universe.add(t)
+                        # Class-share tickers are spelled with a dash for
+                        # Yahoo (BRK-B) and a dot for some FMP endpoints
+                        # (BRK.B). The files are Yahoo-canonical; accept both
+                        # here so the earnings filter can't drop a real name
+                        # on a punctuation mismatch.
+                        if "-" in t:
+                            universe.add(t.replace("-", "."))
+                        elif "." in t:
+                            universe.add(t.replace(".", "-"))
         except OSError as e:
             print(f"[bridge] WARN universe load failed {path}: {e}", file=sys.stderr)
     _CALENDAR_UNIVERSE_CACHE = universe
@@ -1245,6 +1439,35 @@ def _from_fmp_earnings(today, horizon_days=14):
     return out
 
 
+def _repair_archived_times(events):
+    """One-shot migration: fmp-econ rows archived before the UTC->ET fix carry
+    a UTC clock wearing an " ET" label. They are identifiable by the absence of
+    `source_payload.raw_utc`, which the fixed writer always stamps. Convert
+    once and stamp them so this never runs twice on the same row.
+
+    Only fmp-econ rows are touched: sector-protocol times came through an LLM
+    and are not uniformly reconstructable after the fact.
+    """
+    fixed = 0
+    for e in events or []:
+        sp = e.get("source_payload") or {}
+        if e.get("source") != "fmp-econ" or sp.get("raw_utc"):
+            continue
+        t = str(e.get("time") or "")
+        if not t.endswith(" ET"):
+            continue
+        et = _utc_hhmm_to_et(t[:-3], e.get("date") or "")
+        if not et:
+            continue
+        e["time"] = et
+        e.setdefault("source_payload", {})["raw_utc"] = f"{e.get('date')} {t[:-3]}:00"
+        e["source_payload"]["_time_repaired"] = True
+        fixed += 1
+    if fixed:
+        print(f"[bridge] events_archive: repaired {fixed} mislabelled UTC->ET times")
+    return events or []
+
+
 def _load_events_archive():
     """Load persistent events archive (past + known future events).
 
@@ -1310,18 +1533,84 @@ def aggregate_upcoming_events(s_data):
     raw.extend(_from_fmp_earnings(today))
 
     # Pass 0: load persisted archive (past + future events known so far)
-    archived = _load_events_archive()
+    archived = _repair_archived_times(_load_events_archive())
 
     # Pass 1: dedupe by (date, ticker, category) / (date, None, category, slug).
     # Order matters: archive first (so fresh raw entries overwrite stale archive
     # versions on dedupe match — newer source data is more accurate).
     by_key = {}
+    raw_ids = {id(e) for e in raw}
     for e in archived + raw:
         k = _event_dedupe_key(e)
-        if k in by_key:
-            by_key[k] = _merge_two(by_key[k], e)
-        else:
+        if k not in by_key:
             by_key[k] = e
+            continue
+        # `e` is fresh (raw) whenever it comes from the second list — pin it as
+        # primary so its title/time replace the archived copy. Same-impact rows
+        # otherwise left the stale archive version in place, which is why the
+        # UTC->ET and truncation fixes did not reach already-archived events.
+        if id(e) in raw_ids:
+            by_key[k] = _merge_two(e, by_key[k], pin_primary=True)
+        else:
+            by_key[k] = _merge_two(by_key[k], e)
+
+    # Pass 1b: cross-category merge for the SAME macro release reaching us from
+    # two feeds — fmp-econ ("Housing Starts (Aug)", category econ) and
+    # sector-protocol ("8 月新屋開工與建照", category macro). Pass 1 can't see
+    # these as one event: different category, and _slugify drops CJK entirely.
+    # Winner = whichever record carries a real ET time + prev/est numbers.
+    by_release = {}
+    for ev in list(by_key.values()):
+        rk = _release_dedupe_key(ev)
+        if rk is None:
+            continue
+        prev = by_release.get(rk)
+        if prev is None:
+            by_release[rk] = ev
+            continue
+        keep, drop = ((prev, ev) if _release_merge_score(prev) >= _release_merge_score(ev)
+                      else (ev, prev))
+        # _merge_two re-picks by impact; force the richer record to stay primary
+        # by copying the loser's extras onto it directly.
+        keep["is_binary"] = bool(keep.get("is_binary")) or bool(drop.get("is_binary"))
+        if _impact_rank(drop.get("impact")) > _impact_rank(keep.get("impact")):
+            keep["impact"] = drop["impact"]
+        keep["sectors"] = list(dict.fromkeys((keep.get("sectors") or []) + (drop.get("sectors") or [])))
+        if not keep.get("description") and drop.get("description"):
+            keep["description"] = drop["description"]
+        sp = keep.setdefault("source_payload", {})
+        sp["_merged_from_sources"] = list(dict.fromkeys(
+            (sp.get("_merged_from_sources") or [keep.get("source")])
+            + ((drop.get("source_payload") or {}).get("_merged_from_sources") or [drop.get("source")])))
+        sp["_merged_titles"] = list(dict.fromkeys(
+            (sp.get("_merged_titles") or []) + [drop.get("title")]))
+        by_release[rk] = keep
+        by_key = {k: v for k, v in by_key.items() if v is not drop}
+
+    # Pass 1c: absorb composite headlines. A sector-protocol row like
+    # "8 月新屋開工與建照" covers two series that fmp-econ already lists
+    # separately with real times and estimates — three calendar rows for two
+    # releases. Drop the composite only when EVERY series it names is already
+    # covered that day; otherwise it is the only record of the missing one.
+    for ev in list(by_key.values()):
+        if ev.get("tickers") or ev.get("category") not in _RELEASE_CATEGORIES:
+            continue
+        keys = _canonical_releases(ev.get("title"))
+        if len(keys) < 2:
+            continue
+        covering = [by_release.get((ev.get("date"), "release", k)) for k in keys]
+        if not all(covering):
+            continue
+        for host in covering:
+            hsp = host.setdefault("source_payload", {})
+            hsp["_merged_titles"] = list(dict.fromkeys(
+                (hsp.get("_merged_titles") or []) + [ev.get("title")]))
+            hsp["_merged_from_sources"] = list(dict.fromkeys(
+                (hsp.get("_merged_from_sources") or [host.get("source")])
+                + [ev.get("source")]))
+            host["sectors"] = list(dict.fromkeys(
+                (host.get("sectors") or []) + (ev.get("sectors") or [])))
+        by_key = {k: v for k, v in by_key.items() if v is not ev}
 
     # Pass 2: cross-category merge for same (date, ticker) — sector-protocol may flag
     # AAPL earnings as "binary" while fmp-earnings flags same as "earnings"; merge to
@@ -1863,16 +2152,7 @@ def load_ftd_cache():
     latest = get_latest_file(os.path.join(FTD_CACHE, "ftd_detector_*.json"))
     if not latest:
         return None
-    try:
-        with open(latest, 'r') as f:
-            data = json.load(f)
-        state, age = _freshness_label(latest)
-        tag = "[OK]" if state == "FRESH" else "[STALE]"
-        print(f"{tag} FTD cache: {os.path.basename(latest)} ({state}, {age})")
-        return data
-    except Exception as e:
-        print(f"[WARN] FTD cache read error: {e}")
-        return None
+    return load_snapshot_json(latest, "FTD cache")
 
 
 def extract_ftd_data(raw):
@@ -1943,16 +2223,7 @@ def load_market_top_cache():
     latest = get_latest_file(os.path.join(MARKET_TOP_CACHE, "market_top_*.json"))
     if not latest:
         return None
-    try:
-        with open(latest, 'r') as f:
-            data = json.load(f)
-        state, age = _freshness_label(latest)
-        tag = "[OK]" if state == "FRESH" else "[STALE]"
-        print(f"{tag} Market Top cache: {os.path.basename(latest)} ({state}, {age})")
-        return data
-    except Exception as e:
-        print(f"[WARN] Market Top cache read error: {e}")
-        return None
+    return load_snapshot_json(latest, "Market Top cache")
 
 
 def extract_earnings_analyses():

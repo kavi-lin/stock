@@ -78,6 +78,7 @@ def main():
         canonical = os.path.join(invest_dir, "2026-08-21_phase0.json")
         sector = os.path.join(sector_dir, "2026-08-21_sector_intel.json")
         payload = {
+            "fetched_at": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat(),
             "macro_summary": {"market_regime": "Goldilocks"},
             "_market_signals": {"vix": 14.9},
             "fred_snapshot": {"regime_label": "Goldilocks"},

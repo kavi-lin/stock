@@ -88,12 +88,17 @@ def _check_technical_rubric(entry, trade, errors, warnings):
         return
     path = os.path.join(ROOT, TECHNICAL_PAYLOAD.format(t=ticker))
     try:
-        if (time.time() - os.path.getmtime(path)) > TECHNICAL_PAYLOAD_MAX_AGE_DAYS * 86400:
-            return
-        with open(path, "r", encoding="utf-8") as fp:
-            payload = json.load(fp)
-    except (OSError, json.JSONDecodeError):
-        return
+        if entry.get("session_export_version") == "V5.5":
+            from run_investment import _load
+            _, _, snapshot = _load(entry.get("run_context", {}).get("run_id", "invalid"))
+            payload = snapshot["lane_inputs"]["technical"].get("script_output") or {}
+        else:
+            if (time.time() - os.path.getmtime(path)) > TECHNICAL_PAYLOAD_MAX_AGE_DAYS * 86400:
+                return
+            with open(path, "r", encoding="utf-8") as fp:
+                payload = json.load(fp)
+    except (OSError, ValueError, KeyError):
+        return  # V5.5 strict evidence gate reports malformed run artifacts below.
     if str((payload or {}).get("ticker") or "").upper() != ticker:
         return
     hint = ((payload.get("signal_hints") or {}).get("rubric_hint") or "")
@@ -279,6 +284,9 @@ def _check_calculation_steps_parity(entry, trade, errors, warnings):
     if not ticker:
         return
     path = os.path.join(ROOT, DECISION_ENGINE_ARTIFACT.format(t=ticker))
+    if entry.get("session_export_version") == "V5.5":
+        from run_investment import run_dir
+        path = str(run_dir(entry.get("run_context", {}).get("run_id", "invalid")) / "decision.json")
     try:
         age = time.time() - os.path.getmtime(path)
         if age > DECISION_ENGINE_ARTIFACT_MAX_AGE_DAYS * 86400:
@@ -341,17 +349,17 @@ HISTORY_JSON = os.path.join(ROOT, "investment/invest_logs/history.json")
 # Accepted schema versions, oldest → newest. V4.8 (4-lane legacy) lives until pre-V5.0
 # entries decay; V5.0 opened the 5-lane era; V5.1 makes the Phase 3 engine block mandatory;
 # V5.2 does the same for the Phase 4 engine block.
-ACCEPTED_VERSIONS = ("V4.8", "V5.0", "V5.1", "V5.2", "V5.3", "V5.4")
-CURRENT_VERSION   = "V5.4"
+ACCEPTED_VERSIONS = ("V4.8", "V5.0", "V5.1", "V5.2", "V5.3", "V5.4", "V5.5")
+CURRENT_VERSION   = "V5.5"
 # 5-lane era — valuation_lane / fair_value_summary required, Rec 11 + MHP instrumented.
-V5_VERSIONS = ("V5.0", "V5.1", "V5.2", "V5.3", "V5.4")
+V5_VERSIONS = ("V5.0", "V5.1", "V5.2", "V5.3", "V5.4", "V5.5")
 # Versions whose entries MUST carry the Phase 3 engine output (`calculation_steps` +
 # `decision_engine_version`). Version-keyed rather than date-keyed so a backfilled entry
 # stamped V5.1 is held to exactly the same bar as one exported today.
-CALC_STEPS_REQUIRED_VERSIONS = ("V5.1", "V5.2", "V5.3", "V5.4")
+CALC_STEPS_REQUIRED_VERSIONS = ("V5.1", "V5.2", "V5.3", "V5.4", "V5.5")
 # Versions whose entries MUST carry the Phase 4 engine output (`risk_audit` +
 # `trade_plan_builder_version` + `mandatory_risk_flags`). Same version-keyed discipline.
-RISK_AUDIT_REQUIRED_VERSIONS = ("V5.2", "V5.3", "V5.4")
+RISK_AUDIT_REQUIRED_VERSIONS = ("V5.2", "V5.3", "V5.4", "V5.5")
 # Versions whose entries MUST carry the C1 lane contract (`lane_contract`).
 # 值域與形狀的單一事實來源在 apply_det_shadow.py（producer），這裡只 import 不複製。
 LANE_CONTRACT_REQUIRED_VERSIONS = LANE_CONTRACT_VERSIONS
@@ -2473,6 +2481,8 @@ def main(argv=None):
     # ── 15. V4.90.0 — C1 統一 lane 資料契約 + lane 區塊形狀鎖 ──
     # 版號不在 LANE_CONTRACT_REQUIRED_VERSIONS 的 entry 整段跳過 → 向後相容。
     check_lane_contract(entry, trade, errors, warnings)
+    from run_exports import check as check_run_evidence
+    check_run_evidence(entry, errors)
 
     # ── 16. V4.122.0 — Phase 2.5 conflict & bias（重算應觸發集合）──
     # CONFLICT_BIAS_REQUIRED_FROM 之前的 entry 整段跳過 → 舊 entry 不回填。

@@ -20,6 +20,7 @@ sys.path.insert(0, HERE)
 from compute_price_framework import (  # noqa: E402
     build_valuation_pack,
     fair_value_summary_from_pack,
+    build_quant_stage,
 )
 from apply_det_shadow import apply_to_trade  # noqa: E402
 from append_session_export import _stamp_provenance  # noqa: E402
@@ -52,7 +53,7 @@ if not os.path.exists(history_path):
           "absent (gitignored private data) — no session entry to derive a fixture from")
     raise SystemExit(0)
 history = json.load(open(history_path, encoding="utf-8"))
-entry = json.loads(json.dumps(history[-1]))
+entry = json.loads(json.dumps(next(e for e in reversed(history) if e.get("session_export_version") != "V5.5")))
 trade = entry["trades_this_session"][0]
 trade["analysis_price"] = 100.0
 
@@ -93,8 +94,12 @@ meta = {
            "correlation_key": name}
     for name in anchors
 }
-pack = build_valuation_pack(anchors, 100.0, anchor_meta=meta)
-summary = fair_value_summary_from_pack(pack)
+# Exercise the production composition: forward-validation projections are part
+# of the quant contract. Building only a raw pack leaves these fields absent.
+blocks = build_quant_stage({"current_price": 100.0, "anchors": anchors, "anchor_meta": meta})["quant_blocks"]
+pack = blocks["valuation_pack"]
+summary = blocks["fair_value_summary"]
+trade["forward_validation"] = blocks["forward_validation"]
 trade["valuation_pack"] = pack
 trade["fair_value_summary"] = summary
 trade["valuation_lane"].update({

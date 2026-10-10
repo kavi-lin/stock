@@ -22,10 +22,10 @@ Ticker 由 user 指定。**非互動模式**（Dashboard reverse-call via `claud
 2. **Skill execution (NO SIMULATION)**: 凡標 **MUST run** 的 skill 指令必須實際執行 Bash 呼叫並解析 JSON 輸出，**禁止** LLM 估算 / 模擬數值。受規則約束的 skill：
    - `market-sentiment-analyzer`, `us-stock-analysis`, `market-news-analyst`, `technical-analyst`, `short-contrarian-analyst`, `portfolio-risk-manager`, `tail-risk-analyzer`, `fred-macro`
    - 失敗時必須在 final report 標 `skill_execution_failed: true` + stderr，禁止靜默用估算值補上。
-3. **Parallel subagent (Phase 2)**: 5 lane 必須各自在**獨立 context** 執行，且**五個全部開起來之後才等待任何一個**（序列執行會讓後面的 lane 被前面的結論汙染）。Claude 的實現是單一訊息內 5 個 Agent tool_use blocks（`subagent_type: "general-purpose"`）；其他 CLI 對應到自己的隔離 subagent 機制——**契約是上面那兩句，語法不是**（詳見 §PHASE 2 Fan-Out 執行）。每個 subagent JSON 必須含 `subagent_isolated: true`；缺則 confidence cap 0.6 + `subagent_validation_failed: true`。
+3. **Isolated subagent (Phase 2)**: 五份 prompt 必須在收到任何 lane 結果之前全部凍結。五條 lane 各自在獨立 context 執行；同時執行數為 min(3, 環境可用名額)，未知名額採 1。後續批次不得注入先前 lane 結論。每個 subagent JSON 必須含 `subagent_isolated: true`；缺則 confidence cap 0.6 + `subagent_validation_failed: true`。V5.5 試行路徑見 `investment/run_workflow_v55.md`。
 4. **Red Team (Phase 2.8)**: 必須以 Agent tool 呼叫 subagent 執行，**禁止 inline 推理代替**。
 5. **MD Report (Phase 5)**: 存 `reports/YYYYMMDD_TICKER.md`。**不得省略**。
-6. **Phase 0 cache**: Phase 0 是全市場 snapshot，不屬於 ticker。FRESH = mtime < 3h；優先讀 canonical `invest_logs/YYYY-MM-DD_phase0.json`（舊 ticker-scoped 檔只作相容 fallback）。sector_intel 只能當 L3 重建素材，不能通過 Phase 0 gate。
+6. **Phase 0 cache**: Phase 0 是全市場 snapshot，不屬於 ticker。FRESH = 真實來源 `fetched_at` 距凍結時間 <3h；缺可靠時間必須重建，不得用 mtime 或補現在時間延長期限。優先讀 canonical `invest_logs/YYYY-MM-DD_phase0.json`（舊 ticker-scoped 檔只作相容 fallback）。sector_intel 只能當 L3 重建素材，不能通過 Phase 0 gate。
 7. **Validate gates rc=0**:
    - Phase 0: `validate_phase0.py --path <factpack.phase0_path>`
    - Phase 5: `validate_session_export.py` + `validate_markdown_export.py`
@@ -67,17 +67,31 @@ Burry 不參與 Phase 3 加權，僅作 T4 veto check。Valuation Specialist 參
 
 ## PHASE 0 — GLOBAL NEWS INTELLIGENCE
 
-### 三層 resolver (FRESH = mtime < 3h / 10800s)
-1. **L1 — shared Phase 0 authority**: 把 canonical `./invest_logs/*_phase0.json` 與 migration 期間的 `*_phase0_<ticker>.json` 視為同一個市場 snapshot pool，取 mtime 最新者；同 mtime 時 canonical 優先。檔名中的 ticker **不是 ownership boundary**，所以 AAOI 產生的 fresh snapshot 可供稍後的 GEV 使用。
+### 三層 resolver (FRESH = source fetched_at < 3h / 10800s)
+1. **L1 — shared Phase 0 authority**: 把 canonical `./invest_logs/*_phase0.json` 與 migration 期間的 `*_phase0_<ticker>.json` 視為同一個市場 snapshot pool，mtime 只用於定位候選；實際有效期限由來源 fetched_at 驗證，同 mtime 時 canonical 優先。檔名中的 ticker **不是 ownership boundary**，所以 AAOI 產生的 fresh snapshot 可供稍後的 GEV 使用。
 2. **L2 — rebuild context only**: `../sector/sector_logs/*_sector_intel.json` 可提供 market regime / FTD / themes 等 L3 重建素材，但它缺完整 `macro_summary`、`_market_signals` 與 FRED schema，必須回報 `INCOMPLETE_NEEDS_L3`，不得當成可直接使用的 Phase 0。
-3. **L3** (`STALE_NEEDS_L3` / `INCOMPLETE_NEEDS_L3` / `INVALID_NEEDS_L3`): 跑 4 個 skill chain：
+3. **L3** (`STALE_NEEDS_L3` / `INCOMPLETE_NEEDS_L3` / `INVALID_NEEDS_L3`)：**先搶重建鎖，避免兩個幾乎同時起跑的 ticker（例如 GOOG 跟 JPM 相差 8 秒派工）各自重建同一份市場快照，各付一次外部 API 成本**：
    ```bash
-   python3 skills/market-sentiment-analyzer/scripts/sentiment.py --json-only
-   python3 skills/market-breadth-analyzer/scripts/market_breadth_analyzer.py --output-dir sector/breadth_cache/
-   python3 sector/ftd_yfinance.py --output-dir sector/ftd_cache/
-   python3 sector/market_top_yfinance.py --output-dir sector/market_top_cache/
+   python3 investment/scripts/phase0_lock.py acquire
    ```
-   合成 + L4 FRED → **只寫 canonical** `./invest_logs/YYYY-MM-DD_phase0.json`（`phase0_source: SKILL_CHAIN`），不再複製 ticker-scoped Phase 0。≥ 2 skill 失敗 → fallback web search（`WEB_SEARCH_FALLBACK`）。寫完後重跑 factpack，凍結新的 `phase0_path`，再進 Phase 2。
+   - `status: "acquired"` → 執行下面 4 個 skill chain；**不論成功或失敗，結束前都必須釋放鎖**：
+     ```bash
+     python3 skills/market-sentiment-analyzer/scripts/sentiment.py --json-only
+     python3 skills/market-breadth-analyzer/scripts/market_breadth_analyzer.py --output-dir sector/breadth_cache/
+     python3 sector/ftd_yfinance.py --output-dir sector/ftd_cache/
+     python3 sector/market_top_yfinance.py --output-dir sector/market_top_cache/
+     ```
+     合成 + L4 FRED → **只寫 canonical** `./invest_logs/YYYY-MM-DD_phase0.json`（`phase0_source: SKILL_CHAIN`），不再複製 ticker-scoped Phase 0。≥ 2 skill 失敗 → fallback web search（`WEB_SEARCH_FALLBACK`）。寫完後重跑 factpack，凍結新的 `phase0_path`，最後用 `acquire` 回傳的 `token` 釋放鎖：
+     ```bash
+     python3 investment/scripts/phase0_lock.py release --token <acquire 回傳的 token>
+     ```
+     再進 Phase 2。
+   - `status: "held"` → 另一個 run 正在重建同一份快照，改跑：
+     ```bash
+     python3 investment/scripts/phase0_lock.py wait --timeout 900
+     ```
+     - `status: "released"` → **不要自己重建**，回到 L1 重新檢查 canonical 的來源 `fetched_at`；若已變 FRESH，直接當 `INVEST_CACHE` 使用；若仍是 stale，回第一步重新 `acquire` 一次自己重建。
+     - `status: "timeout"` → **停下回報**：跟使用者說「Phase 0 重建鎖等待逾時，另一個 run 疑似卡住（`held_since`/`age_sec` 見輸出）」，不要搶鎖、不要繞過鎖直接重建。
 
 ### L4 — FRED macro snapshot (每次新建 Phase 0 snapshot 都 MUST run)
 ```bash
@@ -95,6 +109,7 @@ snapshot 之外的 FRED fetch。
 {
   "phase": 0,
   "scan_date": "YYYY-MM-DD",
+  "fetched_at": "真正取得 Phase 0 資料的 UTC ISO timestamp（含時區）",
   "macro_summary": {
     "macro_backdrop_score": "float -5.0 to +5.0",
     "market_regime": "BULL | BEAR | SIDEWAYS | VOLATILE | RISK_OFF | RISK_ON",
@@ -283,7 +298,7 @@ Phase 1.5 未跑時 Phase 2.4 可退回單發模式（見該節），但 Valuati
 
 ## PHASE 2 — 5-LANE PARALLEL SUBAGENT FAN-OUT
 
-PM 以**單一訊息**平行呼叫 5 個 Agent subagent（Fundamentals / Sentiment / News / Technical / Valuation Specialist），等 5 個結果回傳後進入 Phase 2 末段（Burry inline）與 Phase 2.5。
+PM 先凍結全部五份 prompt，再依 min(3, 環境可用名額) 分批派工隔離 subagent（Fundamentals / Sentiment / News / Technical / Valuation Specialist）；未知名額採 1。每份結果立即驗 schema；五線完成後進入 Burry 與 Phase 2.5。排隊不算執行失敗。
 
 ### Model 分層（V4.0.0 — 成本治理）
 
@@ -577,7 +592,7 @@ shadow 樣本**（1 筆 = 一支個股的一次分析；多股 session 一場可
      - 若 institutional 訊號（V2.9.0 sector intel `institutional_holders_qoq_delta` 該股可用）正負一致 → 強化判斷
    - 例：「insider Q ratio 0.06 重度賣超 + 機構 13F holders QoQ −12 + sell-side 30d 淨降評 −2 → distributing」
 
-2. **`pattern_taxonomy`**（必填，從 8 種選一）：
+2. **`pattern_taxonomy`**（必填物件：`{"pattern": "<下列選一>", "confirmation_criteria": "<一句>"}`，不得只回傳字串）：
    - `uptrend_breakout` / `uptrend_continuation` / `consolidation` /
      `pullback_in_uptrend` / `false_breakout` / `topping_pattern` /
      `downtrend` / `oversold_bounce_attempt`
@@ -740,7 +755,7 @@ Red Team subagent 收 `red_team_kill_seed` 當 kill condition 起點。shape 見
 （`Read`/`Write`/`Bash`/`Agent(...)`…）當**抽象操作詞彙**，不是要求執行者必須是 Claude：
 
 ```
-[single assistant turn, 5 tool_use blocks in parallel]
+[freeze all 5 prompts first; dispatch in isolated batches of at most 3]
   Agent(description="Fundamentals analyst",  subagent_type="general-purpose", prompt="<fund prompt>")
   Agent(description="Sentiment analyst",     subagent_type="general-purpose", prompt="<sent prompt>")
   Agent(description="News analyst",          subagent_type="general-purpose", prompt="<news prompt>")
@@ -751,11 +766,9 @@ Red Team subagent 收 `red_team_kill_seed` 當 kill condition 起點。shape 見
 > **非 claude provider 的詞彙對照由 runner 注入，不必在這裡各寫一份**：
 > `dashboard_server._adapt_protocol_prompt()`（`run_protocol_manual.py` 也呼叫同一支）
 > 會在 prompt 前面加上「把 Read/Write/Edit/Grep/Bash/WebFetch/WebSearch 對應到你自己的
-> 工具；把每個 `Agent(...)` 需求對應到一個隔離 subagent，要求平行 fan-out 時先把全部
-> agent 開起來再等待」。claude 不加前導（它自動載入 `CLAUDE.md`）。
+> 工具；把每個 `Agent(...)` 需求對應到一個隔離 subagent，先凍結全部 prompt，再依可用名額分批派工；後批保持獨立 context」。claude 不加前導（它自動載入 `CLAUDE.md`）。
 > 覆蓋範圍由 `tests/test_protocol_model_routing.py` 逐 provider 斷言。
-> **今天 `protocol_providers.invest` 只開 claude + codex**；gemini 的路由已驗、
-> 5-lane subagent 執行能力**未驗**，沒過不得加進白名單（判準見 `TODO.md`）。
+> 可用 provider 由 `scripts/_shared/llm_task_registry.py` 與 `config/llm_certifications.json` 的現行認證決定；不得以文件中的歷史名單繞過 broker 或認證。
 
 ### Fan-In 驗證 + Inline Fallback
 
@@ -1181,7 +1194,7 @@ Step 2 (Red-Team-Gated Bonus/Penalty — V3.17 5-level priority cascade):
       # 不寫 SESSION_NOTES.md (per CLAUDE.md §2 EXCLUSION — protocol run 不是 session)
     # Field source:
     # - `bundle.transition_signature_mtime` emitted by earnings-analyst analyze.py
-    #   and backfilled from cache file mtime by forecaster if missing.
+    #   from financial source timestamps; missing timestamps stay unknown.
     # - `forecaster.transition_case_mtime` emitted by forecast.py.
 
   IF all 5 signals same direction AND Burry.veto_flag = false AND red_team_verdict = NO_VIABLE_COUNTER:

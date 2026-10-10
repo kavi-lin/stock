@@ -78,7 +78,7 @@ def verdict_deep_dive(decision_content: dict, reality: dict | None) -> dict:
         return {"label": "pending", "rationale": "尚未取得 eval 價格"}
 
     ret = reality["return_pct"]
-    final_action = (decision_content.get("final_action") or decision_content.get("decision") or "").upper()
+    final_action = (decision_content.get("final_decision") or decision_content.get("final_action") or decision_content.get("decision") or "").upper()
 
     # V2.17.26 — V5.0 動詞型 action 顯式對映：
     #   STAGED_ENTRY / EXECUTE / STAGED  → 看多進場（bullish）
