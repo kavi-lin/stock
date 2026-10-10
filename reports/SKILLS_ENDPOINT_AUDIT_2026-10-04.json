@@ -1,0 +1,3039 @@
+{
+  "schema_version": "skills-endpoint-audit/1",
+  "generated_at": "2026-10-04T03:00:26.910734+00:00",
+  "scope": {
+    "skill_count": 26,
+    "review": "repository current working tree, including pre-existing dirty changes",
+    "external_api": true,
+    "dashboard_routes": true,
+    "code_modified": false,
+    "llm_calls": 0,
+    "services_restarted": false
+  },
+  "summary": {
+    "confirmed_findings": 6,
+    "priorities": {
+      "P1": 2,
+      "P2": 4
+    },
+    "baseline_fmp_probes": 52,
+    "baseline_other_probes": 27,
+    "dashboard_read_probes": 11,
+    "pytest_passed": 1426,
+    "pytest_failed": 3,
+    "direct_test_scripts_passed": 8,
+    "skills_lint_warnings": 0
+  },
+  "findings": [
+    {
+      "id": "F01",
+      "priority": "P1",
+      "kind": "runtime_wiring",
+      "title": "Dashboard 常駐程序沒有資料供應商憑證環境",
+      "locations": [
+        "scripts/restart_dashboard.sh:63",
+        "dashboard_server.py:4876"
+      ],
+      "evidence": "PID 36952 的啟動環境可讀，但 FMP_API_KEY、FINNHUB_API_KEY、FRED_API_KEY、ALPACA_API_KEY 全部缺席；本稽核 shell 四者皆存在。/api/intraday-mood/data 為 _partial=true 且三支 ETF missing；相同 intraday.build() 在本 shell 回三支 ok、_partial=false。",
+      "cause": "launchctl submit 不沿用呼叫 shell 環境，目前啟動指令只明確傳入 PATH、DASHBOARD_PORT。",
+      "impact": "UI 觸發的 skills 與常駐資料更新可能整批缺源；狀態 endpoint 仍 last_error=null。",
+      "fix": "修正常駐啟動的憑證環境交付及啟動檢查；不得將秘密值寫入 argv、log 或 repo。重新啟動前檢查執行中工作。",
+      "validation": "以已知帶/不帶測試環境的 launcher contract 證明能抓缺失；實際重啟後驗三 ETF health 與供應商連線。",
+      "evidence_files": [
+        "runtime-environment-presence.json",
+        "dashboard-get.json",
+        "live-parsers.json"
+      ]
+    },
+    {
+      "id": "F02",
+      "priority": "P1",
+      "kind": "response_contract",
+      "title": "月度評級分布被當作分析師升降評事件",
+      "locations": [
+        "skills/market-news-analyst/scripts/fetch.py:195",
+        "skills/market-news-analyst/scripts/fetch.py:529",
+        "skills/thematic-screener/scripts/enrich.py:137"
+      ],
+      "evidence": "grades-historical HTTP 200 僅含 analystRatings* 和 date，沒有 action/gradingCompany/newGrade。新聞產出有日期但其餘空白的事件，並覆蓋 finviz fallback；題材選股升降評計數恆為 0。grades HTTP 200 具有事件欄位與 upgrade/downgrade。",
+      "impact": "News lane 的分析師事件錯誤，thematic analyst_tailwind 靜默失效。探索層仍不應進入決策。",
+      "fix": "事件消費者改用 grades 或 grades-news，保留時間窗、必要欄位與空資料 fallback；earnings-analyst 的 monthly grades-historical 用法正確，應保留。",
+      "validation": "真實事件 payload 契約 fixture、正控制與入口接線測試；不能只測 HTTP wrapper 被呼叫。",
+      "evidence_files": [
+        "contract-reproductions.json",
+        "thematic-positive-control.json"
+      ]
+    },
+    {
+      "id": "F03",
+      "priority": "P2",
+      "kind": "endpoint_and_schema",
+      "title": "財報分析兩個 endpoint 404，另有評級與日期欄位不匹配",
+      "locations": [
+        "skills/earnings-analyst/scripts/fetch.py:299",
+        "skills/earnings-analyst/scripts/fetch.py:300",
+        "skills/earnings-analyst/scripts/fetch.py:182",
+        "skills/earnings-analyst/scripts/fetch.py:203"
+      ],
+      "evidence": "rating-historical 與 grades-summary 都 HTTP 404；ratings-historical 與 grades-consensus HTTP 200。ratings-historical 回 overallScore，consumer 取 ratingScore→None，rating_trend=insufficient_data。grades-news 回 publishedDate，slim 卻取 date→None。",
+      "impact": "財報及 fact-pack 丟失評級歷史、分析師共識摘要與升降評日期。",
+      "fix": "替換兩支 endpoint；映射 overallScore 及 publishedDate；確認評分方向與時間頻率，FMP 財務 ratings 不等同 brokerage analyst recommendation。更新契約文件與測試。",
+      "validation": "以真實鍵名走 fetch bundle 入口；驗非空歷史/共識/日期，測零筆與權限失敗。",
+      "evidence_files": [
+        "fmp-probes.json",
+        "followup-probes.json",
+        "contract-reproductions.json"
+      ]
+    },
+    {
+      "id": "F04",
+      "priority": "P2",
+      "kind": "request_contract",
+      "title": "Fundamentals 產業本益比 API 缺少必要 date",
+      "locations": [
+        "skills/us-stock-analysis/scripts/analyze.py:144"
+      ],
+      "evidence": "{sector:Technology} HTTP 400；加 date=2026-10-02 後 HTTP 200 且有 pe。",
+      "impact": "pe_sector_median 無法從 FMP 取得，靜默落入缺資料/fallback。",
+      "fix": "傳入有效交易日期，明確處理週末/假日空資料，正確挑選 sector row。",
+      "validation": "驗 transport params 必帶 date、週末處理及返回正確 sector 的 pe。",
+      "evidence_files": [
+        "followup-probes.json"
+      ]
+    },
+    {
+      "id": "F05",
+      "priority": "P2",
+      "kind": "local_entrypoint_drift",
+      "title": "Dashboard 廣度更新指向專案外舊 skill",
+      "locations": [
+        "dashboard_server.py:2259",
+        "daily_update.sh:181"
+      ],
+      "evidence": "PREFLIGHT_ITEMS 的 breadth 使用 ~/.claude/skills/...；daily_update.sh 已改用 repo skills/market-breadth-analyzer/scripts/market_breadth_analyzer.py。",
+      "impact": "UI preflight 與 daily 跑不同副本，換機可能缺檔。依 workspace 限制沒有讀取或驗證 home 內舊副本。",
+      "fix": "UI preflight 改用 repo canonical script，與 daily 對齊。",
+      "validation": "入口測試擷取 subprocess argv 並斷言 root-relative script 存在。",
+      "evidence_files": []
+    },
+    {
+      "id": "F06",
+      "priority": "P2",
+      "kind": "endpoint_typo",
+      "title": "Finnhub splits 使用錯誤複數 endpoint",
+      "locations": [
+        "skills/finnhub-client/scripts/finnhub_client.py:350",
+        "skills/finnhub-client/SKILL.md:41"
+      ],
+      "evidence": "/stock/splits 回 HTTP 200 非 JSON；官方 client 使用 /stock/split。本機 /stock/split 回 403 JSON，因此修路徑後仍有權限限制。",
+      "impact": "splits() 目前拋 Invalid JSON；此 optional 方法非核心 quote/metric/calendar scoring 路徑。",
+      "fix": "改成 /stock/split 並同步文件；保留清楚的 permission-denied 處理，不宣稱修正後可免費取資料。",
+      "validation": "mock HTTP boundary 斷言 singular path 與 403 exception；不要以 HTTP 200 當通過。",
+      "evidence_files": [
+        "other-probes.json",
+        "finnhub-split-corrected.json"
+      ]
+    }
+  ],
+  "provider_restrictions": {
+    "fmp_permission_402": [
+      "news/press-releases",
+      "institutional-ownership/symbol-positions-summary",
+      "esg-disclosures",
+      "esg-ratings",
+      "executive-compensation-benchmark",
+      "earning-call-transcript"
+    ],
+    "finnhub_permission_403": [
+      "stock/price-target",
+      "stock/upgrade-downgrade",
+      "stock/dividend2",
+      "stock/split (corrected endpoint)"
+    ],
+    "public_source_unavailable": {
+      "CNN fear greed": "HTTP 418",
+      "CBOE totalpc": "HTTP 403",
+      "CBOE equitypc": "HTTP 403",
+      "Yahoo ^CPC": "0 rows"
+    },
+    "note": "No retries after permission failures; no subscription changes or invented fallback scores. Report these as unavailable/degraded, not code typo unless a specific mismatch is proven."
+  },
+  "skill_inventory": [
+    {
+      "skill": "dual-axis-skill-reviewer",
+      "connection": "local skill docs + test runner",
+      "coverage_status": "tooling_only",
+      "finding_ids": []
+    },
+    {
+      "skill": "earnings-analyst",
+      "connection": "FMP + cache + Dashboard earnings routes",
+      "coverage_status": "confirmed_defect",
+      "finding_ids": [
+        "F03"
+      ]
+    },
+    {
+      "skill": "earnings-valuation-forecaster",
+      "connection": "FMP + earnings source_records + SCRIPT_PROTOCOLS",
+      "coverage_status": "representative_api_and_tests_passed",
+      "finding_ids": []
+    },
+    {
+      "skill": "economic-calendar-fetcher",
+      "connection": "FMP economic-calendar + sector prefetch",
+      "coverage_status": "representative_api_and_tests_passed",
+      "finding_ids": []
+    },
+    {
+      "skill": "finnhub-client",
+      "connection": "17 exposed methods; 16 baseline live probes, candle documented premium not invoked",
+      "coverage_status": "confirmed_defect_and_permissions",
+      "finding_ids": [
+        "F06"
+      ]
+    },
+    {
+      "skill": "fred-macro",
+      "connection": "FRED series/observations + daemon",
+      "coverage_status": "api_ok_runtime_affected",
+      "finding_ids": [
+        "F01"
+      ]
+    },
+    {
+      "skill": "ftd-detector",
+      "connection": "FMP stable adapter; daily sector/ftd_yfinance.py",
+      "coverage_status": "representative_api_and_tests_passed",
+      "finding_ids": []
+    },
+    {
+      "skill": "ic-memo-writer",
+      "connection": "history + earnings/company caches; no own endpoint",
+      "coverage_status": "local_tests_passed",
+      "finding_ids": []
+    },
+    {
+      "skill": "market-breadth-analyzer",
+      "connection": "TraderMonty CSV; daily and preflight",
+      "coverage_status": "canonical_entrypoint_drift",
+      "finding_ids": [
+        "F05"
+      ]
+    },
+    {
+      "skill": "market-news-analyst",
+      "connection": "FMP news/grades/SEC + Finnhub/Finviz",
+      "coverage_status": "confirmed_defect_and_permissions",
+      "finding_ids": [
+        "F02"
+      ]
+    },
+    {
+      "skill": "market-sentiment-analyzer",
+      "connection": "FMP bars, Yahoo, CNN, CBOE, Alpaca, Finnhub; Dashboard pollers",
+      "coverage_status": "runtime_and_provider_failures",
+      "finding_ids": [
+        "F01"
+      ]
+    },
+    {
+      "skill": "market-top-detector",
+      "connection": "FMP stable adapter; daily sector/market_top_yfinance.py",
+      "coverage_status": "representative_api_and_tests_passed",
+      "finding_ids": []
+    },
+    {
+      "skill": "momentum-monitor",
+      "connection": "shared technical_core FMP/Yahoo; screen/journal routes",
+      "coverage_status": "shared_provider_and_read_routes_verified",
+      "finding_ids": []
+    },
+    {
+      "skill": "portfolio-risk-manager",
+      "connection": "positions + technical_core",
+      "coverage_status": "local_tests_and_shared_provider_verified",
+      "finding_ids": []
+    },
+    {
+      "skill": "quant-backtest",
+      "connection": "technical_core + script dispatch + /api/backtest/*",
+      "coverage_status": "tests_and_read_routes_verified",
+      "finding_ids": []
+    },
+    {
+      "skill": "retail-sector-pulse",
+      "connection": "news + short-term-target outputs",
+      "coverage_status": "local_tests_passed",
+      "finding_ids": []
+    },
+    {
+      "skill": "sector-analyst",
+      "connection": "TraderMonty uptrend + Finviz + FMP sector snapshots",
+      "coverage_status": "representative_sources_and_tests_passed",
+      "finding_ids": []
+    },
+    {
+      "skill": "short-contrarian-analyst",
+      "connection": "Yahoo fundamentals/prices",
+      "coverage_status": "representative_provider_and_tests_passed",
+      "finding_ids": []
+    },
+    {
+      "skill": "short-term-target",
+      "connection": "technical_core + dual-fetch caches",
+      "coverage_status": "static_wiring_and_shared_provider_verified",
+      "finding_ids": []
+    },
+    {
+      "skill": "tail-risk-analyzer",
+      "connection": "Yahoo history",
+      "coverage_status": "representative_provider_and_tests_passed",
+      "finding_ids": []
+    },
+    {
+      "skill": "technical-analyst",
+      "connection": "technical_core + payload cache",
+      "coverage_status": "static_wiring_and_shared_provider_verified",
+      "finding_ids": []
+    },
+    {
+      "skill": "thematic-screener",
+      "connection": "theme-detector + short-term-target + FMP enrichment",
+      "coverage_status": "confirmed_defect",
+      "finding_ids": [
+        "F02"
+      ]
+    },
+    {
+      "skill": "theme-detector",
+      "connection": "Finviz groups/screener + FMP/Yahoo + uptrend CSV",
+      "coverage_status": "144_industry_live_parse_and_488_tests_passed",
+      "finding_ids": []
+    },
+    {
+      "skill": "us-stock-analysis",
+      "connection": "earnings bundle + Yahoo + FMP sector PE",
+      "coverage_status": "confirmed_defect",
+      "finding_ids": [
+        "F04"
+      ]
+    },
+    {
+      "skill": "valuation-modeler",
+      "connection": "FMP statements/estimates + FRED cache",
+      "coverage_status": "direct_tests_and_representative_api_passed",
+      "finding_ids": []
+    },
+    {
+      "skill": "weekly-tech-playbook",
+      "connection": "Yahoo + skill caches + LLM selection/render",
+      "coverage_status": "static_wiring_and_provider_verified_no_llm_run",
+      "finding_ids": []
+    }
+  ],
+  "shared_modules": {
+    "technical_core": "FMP adjusted OHLC field contract verified; Yahoo representative history returns rows; unit tests pass",
+    "company_context": "FMP profile/peers/key-metrics/ratios endpoints and response keys inspected",
+    "fmp_supplementary": "core scores/owner-earnings/insider/executives available; optional endpoints include 402",
+    "investment_data": "source_records cache contract inspected; legacy tests need migration"
+  },
+  "test_caveats": [
+    "3 failures in skills/earnings-analyst/tests/test_stale_gate_simulated.py expect file-mtime fallback or a synthetic timestamp, contrary to current source_records freshness contract; do not weaken current freshness gate merely to pass old tests.",
+    "Several suites are direct scripts, not pytest collectors. rc=5/SystemExit/fixture-errors from the initial generic runner were resolved by the documented direct entrypoints, all eight rc=0.",
+    "No live protocol/LLM runs or POST mutations were executed. 11 GET checks cover read sides; dispatch/validators checked by existing mocked integration tests.",
+    "HTTP 200 is insufficient: response schema, parser keys, content type and _partial were checked.",
+    "Baseline SEC symbol search probe lacked date bounds and returned 400; the real consumer includes from/to and follow-up returns 200, so it is not a defect.",
+    "/api/preview-cache/AAPL returned 404 because the preview artifact is missing; this is not a missing route.",
+    "Static frontend unmatched literals were subsequently matched against regex routes: zero unresolved."
+  ],
+  "official_sources": [
+    {
+      "title": "FMP Historical Ratings",
+      "url": "https://site.financialmodelingprep.com/developer/docs/stable/historical-ratings"
+    },
+    {
+      "title": "FMP stable endpoint catalog / grades-consensus",
+      "url": "https://site.financialmodelingprep.com/developer/docs"
+    },
+    {
+      "title": "FMP historical ratings fields and meaning",
+      "url": "https://site.financialmodelingprep.com/de/insights/platform/how-to-retrieve-historical-rating-scores-using-a-free-api"
+    },
+    {
+      "title": "Finnhub official Python client stock_splits",
+      "url": "https://github.com/Finnhub-Stock-API/finnhub-python/blob/master/finnhub/client.py#L278"
+    }
+  ],
+  "repair_plan": {
+    "authorization": "awaiting user OK under AGENTS.md multi-file confirmation rule; audit/report only so no version bump performed",
+    "groups": [
+      {
+        "files": [
+          "scripts/restart_dashboard.sh",
+          "dashboard_server.py"
+        ],
+        "action": "fix",
+        "estimated_lines": "40-90",
+        "description": "F01 secure runtime credential delivery + fail-fast health; F05 repo-local breadth entrypoint"
+      },
+      {
+        "files": [
+          "skills/earnings-analyst/scripts/fetch.py",
+          "skills/earnings-analyst/schema.md"
+        ],
+        "action": "fix",
+        "estimated_lines": "35-70",
+        "description": "F03 endpoints, rating field semantics, grades-news timestamp"
+      },
+      {
+        "files": [
+          "skills/market-news-analyst/scripts/fetch.py",
+          "skills/thematic-screener/scripts/enrich.py"
+        ],
+        "action": "fix",
+        "estimated_lines": "20-45",
+        "description": "F02 event endpoint selection and required-field/fallback behavior"
+      },
+      {
+        "files": [
+          "skills/us-stock-analysis/scripts/analyze.py",
+          "skills/finnhub-client/scripts/finnhub_client.py",
+          "skills/finnhub-client/SKILL.md"
+        ],
+        "action": "fix",
+        "estimated_lines": "20-40",
+        "description": "F04 date-aware sector PE; F06 singular split path and permission docs"
+      },
+      {
+        "files": [
+          "tests/test_skill_endpoint_contracts.py (new)",
+          "tests/test_thematic_enrich.py",
+          "skills/earnings-analyst/tests/test_fetch_schema_contract.py",
+          "skills/MARKET_INDEX.md",
+          "docs/agent-ops/OPS_COMMANDS.md",
+          "VERSION",
+          "Dashboard/utils.js",
+          "CHANGELOG.md",
+          "SESSION_NOTES.md",
+          "TODO.md"
+        ],
+        "action": "regression tests and required maintenance",
+        "estimated_lines": "140-240",
+        "description": "HTTP/request/payload/entrypoint contracts with negative controls; refresh audit index; bump version in three places and update notes per MAINTENANCE"
+      }
+    ],
+    "estimated_minutes": "25-40",
+    "out_of_scope_without_further_evidence": [
+      "changing subscriptions",
+      "inventing alternative sentiment scores",
+      "altering investment weights or thresholds",
+      "automatically rerunning investment reports"
+    ]
+  },
+  "evidence": {
+    "other-probes.json": [
+      {
+        "provider_endpoint": "Finnhub quote",
+        "http_status": 200,
+        "seconds": 0.8,
+        "bytes": 93,
+        "shape": "dict",
+        "rows": 8,
+        "keys": [
+          "c",
+          "d",
+          "dp",
+          "h",
+          "l",
+          "o",
+          "pc",
+          "t"
+        ],
+        "nested_rows": {}
+      },
+      {
+        "provider_endpoint": "Finnhub stock/profile2",
+        "http_status": 200,
+        "seconds": 0.29,
+        "bytes": 419,
+        "shape": "dict",
+        "rows": 14,
+        "keys": [
+          "country",
+          "currency",
+          "estimateCurrency",
+          "exchange",
+          "finnhubIndustry",
+          "floatingShare",
+          "ipo",
+          "logo",
+          "marketCapitalization",
+          "name",
+          "phone",
+          "shareOutstanding",
+          "ticker",
+          "weburl"
+        ],
+        "nested_rows": {}
+      },
+      {
+        "provider_endpoint": "Finnhub stock/metric",
+        "http_status": 200,
+        "seconds": 0.26,
+        "bytes": 242674,
+        "shape": "dict",
+        "rows": 4,
+        "keys": [
+          "metric",
+          "metricType",
+          "series",
+          "symbol"
+        ],
+        "nested_rows": {
+          "metric": 133,
+          "series": 2
+        }
+      },
+      {
+        "provider_endpoint": "Finnhub stock/financials-reported",
+        "http_status": 200,
+        "seconds": 0.31,
+        "bytes": 553999,
+        "shape": "dict",
+        "rows": 3,
+        "keys": [
+          "cik",
+          "data",
+          "symbol"
+        ],
+        "nested_rows": {
+          "data": 49
+        }
+      },
+      {
+        "provider_endpoint": "Finnhub stock/filings",
+        "http_status": 200,
+        "seconds": 0.33,
+        "bytes": 5031,
+        "shape": "list",
+        "rows": 14,
+        "keys": [
+          "acceptedDate",
+          "accessNumber",
+          "cik",
+          "filedDate",
+          "filingUrl",
+          "form",
+          "reportUrl",
+          "symbol"
+        ]
+      },
+      {
+        "provider_endpoint": "Finnhub company-news",
+        "http_status": 200,
+        "seconds": 0.29,
+        "bytes": 145029,
+        "shape": "list",
+        "rows": 243,
+        "keys": [
+          "category",
+          "datetime",
+          "headline",
+          "id",
+          "image",
+          "related",
+          "source",
+          "summary",
+          "url"
+        ]
+      },
+      {
+        "provider_endpoint": "Finnhub calendar/earnings",
+        "http_status": 200,
+        "seconds": 0.26,
+        "bytes": 23,
+        "shape": "dict",
+        "rows": 1,
+        "keys": [
+          "earningsCalendar"
+        ],
+        "nested_rows": {
+          "earningsCalendar": 0
+        }
+      },
+      {
+        "provider_endpoint": "Finnhub stock/earnings",
+        "http_status": 200,
+        "seconds": 0.24,
+        "bytes": 559,
+        "shape": "list",
+        "rows": 4,
+        "keys": [
+          "actual",
+          "estimate",
+          "period",
+          "quarter",
+          "surprise",
+          "surprisePercent",
+          "symbol",
+          "year"
+        ]
+      },
+      {
+        "provider_endpoint": "Finnhub stock/insider-transactions",
+        "http_status": 200,
+        "seconds": 0.28,
+        "bytes": 4785,
+        "shape": "dict",
+        "rows": 2,
+        "keys": [
+          "data",
+          "symbol"
+        ],
+        "nested_rows": {
+          "data": 19
+        }
+      },
+      {
+        "provider_endpoint": "Finnhub stock/insider-sentiment",
+        "http_status": 200,
+        "seconds": 0.31,
+        "bytes": 454,
+        "shape": "dict",
+        "rows": 2,
+        "keys": [
+          "data",
+          "symbol"
+        ],
+        "nested_rows": {
+          "data": 6
+        }
+      },
+      {
+        "provider_endpoint": "Finnhub stock/recommendation",
+        "http_status": 200,
+        "seconds": 0.23,
+        "bytes": 393,
+        "shape": "list",
+        "rows": 4,
+        "keys": [
+          "buy",
+          "hold",
+          "period",
+          "sell",
+          "strongBuy",
+          "strongSell",
+          "symbol"
+        ]
+      },
+      {
+        "provider_endpoint": "Finnhub stock/price-target",
+        "http_status": 403,
+        "seconds": 0.22,
+        "bytes": 51,
+        "shape": "dict",
+        "rows": 1,
+        "keys": [
+          "error"
+        ],
+        "nested_rows": {}
+      },
+      {
+        "provider_endpoint": "Finnhub stock/upgrade-downgrade",
+        "http_status": 403,
+        "seconds": 0.22,
+        "bytes": 51,
+        "shape": "dict",
+        "rows": 1,
+        "keys": [
+          "error"
+        ],
+        "nested_rows": {}
+      },
+      {
+        "provider_endpoint": "Finnhub stock/dividend2",
+        "http_status": 403,
+        "seconds": 0.29,
+        "bytes": 51,
+        "shape": "dict",
+        "rows": 1,
+        "keys": [
+          "error"
+        ],
+        "nested_rows": {}
+      },
+      {
+        "provider_endpoint": "Finnhub stock/splits",
+        "http_status": 200,
+        "seconds": 0.51,
+        "bytes": 6226,
+        "shape": "non-json"
+      },
+      {
+        "provider_endpoint": "Finnhub calendar/ipo",
+        "http_status": 200,
+        "seconds": 0.27,
+        "bytes": 9370,
+        "shape": "dict",
+        "rows": 1,
+        "keys": [
+          "ipoCalendar"
+        ],
+        "nested_rows": {
+          "ipoCalendar": 54
+        }
+      },
+      {
+        "provider_endpoint": "FRED observations",
+        "http_status": 200,
+        "seconds": 0.59,
+        "bytes": 749,
+        "shape": "dict",
+        "rows": 13,
+        "keys": [
+          "count",
+          "file_type",
+          "limit",
+          "observation_end",
+          "observation_start",
+          "observations",
+          "offset",
+          "order_by",
+          "output_type",
+          "realtime_end",
+          "realtime_start",
+          "sort_order",
+          "units"
+        ],
+        "nested_rows": {
+          "observations": 5
+        }
+      },
+      {
+        "provider_endpoint": "Alpaca IEX bars",
+        "http_status": 200,
+        "seconds": 0.77,
+        "bytes": 623,
+        "shape": "dict",
+        "rows": 2,
+        "keys": [
+          "bars",
+          "next_page_token"
+        ],
+        "nested_rows": {
+          "bars": 1
+        }
+      },
+      {
+        "provider_endpoint": "TraderMonty breadth detail",
+        "http_status": 200,
+        "seconds": 0.87,
+        "bytes": 447388,
+        "shape": "non-json"
+      },
+      {
+        "provider_endpoint": "TraderMonty breadth summary",
+        "http_status": 200,
+        "seconds": 0.33,
+        "bytes": 350,
+        "shape": "non-json"
+      },
+      {
+        "provider_endpoint": "TraderMonty sector",
+        "http_status": 200,
+        "seconds": 0.5,
+        "bytes": 993,
+        "shape": "non-json"
+      },
+      {
+        "provider_endpoint": "TraderMonty uptrend",
+        "http_status": 200,
+        "seconds": 1.05,
+        "bytes": 2648305,
+        "shape": "non-json"
+      },
+      {
+        "provider_endpoint": "CNN fear greed",
+        "http_status": 418,
+        "seconds": 0.33,
+        "bytes": 27,
+        "shape": "non-json"
+      },
+      {
+        "provider_endpoint": "CBOE totalpc",
+        "http_status": 403,
+        "seconds": 1.25,
+        "bytes": 111,
+        "shape": "non-json"
+      },
+      {
+        "provider_endpoint": "CBOE equitypc",
+        "http_status": 403,
+        "seconds": 0.62,
+        "bytes": 111,
+        "shape": "non-json"
+      },
+      {
+        "provider_endpoint": "Finviz groups",
+        "http_status": 200,
+        "seconds": 0.85,
+        "bytes": 230717,
+        "shape": "non-json"
+      },
+      {
+        "provider_endpoint": "Finviz screener",
+        "http_status": 200,
+        "seconds": 0.63,
+        "bytes": 202366,
+        "shape": "non-json"
+      }
+    ],
+    "route-inventory.json": {
+      "exact_route_count": 65,
+      "prefix_route_count": 13,
+      "unmatched_frontend_literals": [
+        {
+          "file": "Dashboard/utils.js",
+          "path": "/api/protocol-queue/",
+          "regex_match_after_placeholder": true
+        },
+        {
+          "file": "Dashboard/analyze-queue.js",
+          "path": "/api/analyze-queue/",
+          "regex_match_after_placeholder": true
+        },
+        {
+          "file": "Dashboard/page-momentum.js",
+          "path": "/api/momentum-watchlist/",
+          "regex_match_after_placeholder": true
+        },
+        {
+          "file": "Dashboard/page-decisions.js",
+          "path": "/api/positions/",
+          "regex_match_after_placeholder": true
+        },
+        {
+          "file": "Dashboard/page-decisions.js",
+          "path": "/api/positions/",
+          "regex_match_after_placeholder": true
+        }
+      ],
+      "regex_routes": [
+        "^/api/positions/([\\w\\-]+)$",
+        "^/api/positions/([\\w\\-]+)$",
+        "^/api/analyze-queue/([A-Za-z0-9\\.\\-]+)$",
+        "^/api/protocol-queue/([A-Za-z0-9_\\.\\-]+)$",
+        "^/api/signal-queue/action/([a-z_]+:[A-Z][A-Z0-9.\\-]{0,5})$",
+        "^/api/momentum-watchlist/([A-Za-z0-9\\.\\-]+)$"
+      ],
+      "unresolved": []
+    },
+    "thematic-positive-control.json": {
+      "symbol": "AAPL",
+      "days": 365,
+      "current_consumer_with_monthly_snapshot": {
+        "upgrades": 0,
+        "downgrades": 0,
+        "since_days": 365
+      },
+      "event_endpoint_http_status": 200,
+      "real_event_action_counts": {
+        "maintain": 103,
+        "upgrade": 6,
+        "downgrade": 4
+      },
+      "monthly_schema_has_action": false
+    },
+    "live-parsers.json": {
+      "AAPL": {
+        "rows": 21,
+        "latest": "2026-10-02 00:00:00-04:00"
+      },
+      "^VIX": {
+        "rows": 23,
+        "latest": "2026-10-02 00:00:00-05:00"
+      },
+      "^CPC": {
+        "rows": 0,
+        "latest": null
+      },
+      "intraday_build": {
+        "aggregate": {
+          "score": 11,
+          "risk_label": "中性",
+          "risk_label_en": "Neutral",
+          "headline_zh": "盤面中性（11）：近25日出貨日 10 天、高開低走，開盤動能轉弱",
+          "flags": [
+            {
+              "type": "distribution_days",
+              "severity": "med",
+              "text_zh": "近25日出貨日 10 天",
+              "tickers": [
+                "SPY",
+                "QQQ",
+                "IWM"
+              ]
+            },
+            {
+              "type": "gap_up_fade",
+              "severity": "med",
+              "text_zh": "高開低走，開盤動能轉弱",
+              "tickers": [
+                "QQQ",
+                "IWM"
+              ]
+            },
+            {
+              "type": "below_vwap",
+              "severity": "low",
+              "text_zh": "跌破 VWAP（-0.13%）",
+              "tickers": [
+                "QQQ",
+                "IWM"
+              ]
+            }
+          ]
+        },
+        "_source_health": {
+          "SPY": "ok",
+          "QQQ": "ok",
+          "IWM": "ok"
+        },
+        "_partial": false
+      },
+      "finviz_industry_parser": {
+        "rows": 144,
+        "sample_keys": [
+          "name",
+          "perf_1m",
+          "perf_1w",
+          "perf_1y",
+          "perf_3m",
+          "perf_6m",
+          "perf_ytd"
+        ]
+      }
+    },
+    "finnhub-split-corrected.json": {
+      "endpoint": "Finnhub stock/split",
+      "http": 403,
+      "shape": "dict",
+      "rows": 1,
+      "keys": [
+        "error"
+      ]
+    },
+    "test-summary.json": [
+      {
+        "log": "tmp/skills-endpoint-audit-20261004/integration.log",
+        "passed": 18,
+        "failed": null,
+        "tail": [
+          "..................                                       [100%]",
+          "18 passed, 16 subtests passed in 2.75s"
+        ]
+      },
+      {
+        "log": "tmp/skills-endpoint-audit-20261004/skills__shared.log",
+        "passed": 48,
+        "failed": null,
+        "tail": [
+          "................................................                         [100%]",
+          "48 passed in 0.65s"
+        ]
+      },
+      {
+        "log": "tmp/skills-endpoint-audit-20261004/skills_dual-axis-skill-reviewer.log",
+        "passed": 23,
+        "failed": null,
+        "tail": [
+          ".......................                                                  [100%]",
+          "23 passed in 0.45s"
+        ]
+      },
+      {
+        "log": "tmp/skills-endpoint-audit-20261004/skills_earnings-analyst.log",
+        "passed": 90,
+        "failed": 3,
+        "tail": [
+          "FAILED skills/earnings-analyst/tests/test_stale_gate_simulated.py::TestForecasterBackfillsMtimeFromOldCache::test_explicit_mtime_in_cache_wins_over_backfill",
+          "3 failed, 90 passed, 8 subtests passed in 1.30s"
+        ]
+      },
+      {
+        "log": "tmp/skills-endpoint-audit-20261004/skills_earnings-valuation-forecaster.log",
+        "passed": 13,
+        "failed": null,
+        "tail": [
+          ".............                                                            [100%]",
+          "13 passed in 0.11s"
+        ]
+      },
+      {
+        "log": "tmp/skills-endpoint-audit-20261004/skills_economic-calendar-fetcher.log",
+        "passed": 19,
+        "failed": null,
+        "tail": [
+          "...................                                                      [100%]",
+          "19 passed in 0.12s"
+        ]
+      },
+      {
+        "log": "tmp/skills-endpoint-audit-20261004/skills_ftd-detector.log",
+        "passed": 65,
+        "failed": null,
+        "tail": [
+          ".................................................................        [100%]",
+          "65 passed in 0.15s"
+        ]
+      },
+      {
+        "log": "tmp/skills-endpoint-audit-20261004/skills_ic-memo-writer.log",
+        "passed": 60,
+        "failed": null,
+        "tail": [
+          "............................................................             [100%]",
+          "60 passed in 0.20s"
+        ]
+      },
+      {
+        "log": "tmp/skills-endpoint-audit-20261004/skills_market-breadth-analyzer.log",
+        "passed": 115,
+        "failed": null,
+        "tail": [
+          "...........................................                              [100%]",
+          "115 passed in 0.16s"
+        ]
+      },
+      {
+        "log": "tmp/skills-endpoint-audit-20261004/skills_market-sentiment-analyzer.log",
+        "passed": 56,
+        "failed": null,
+        "tail": [
+          "ERROR skills/market-sentiment-analyzer/scripts/test_intraday.py::test_momentum_flags",
+          "56 passed, 5 warnings, 2 errors in 0.15s"
+        ]
+      },
+      {
+        "log": "tmp/skills-endpoint-audit-20261004/skills_market-top-detector.log",
+        "passed": 210,
+        "failed": null,
+        "tail": [
+          "..................................................................       [100%]",
+          "210 passed in 0.36s"
+        ]
+      },
+      {
+        "log": "tmp/skills-endpoint-audit-20261004/skills_portfolio-risk-manager.log",
+        "passed": 39,
+        "failed": null,
+        "tail": [
+          ".......................................                                  [100%]",
+          "39 passed in 0.82s"
+        ]
+      },
+      {
+        "log": "tmp/skills-endpoint-audit-20261004/skills_quant-backtest.log",
+        "passed": null,
+        "failed": null,
+        "tail": [
+          "",
+          "no tests ran in 0.98s"
+        ]
+      },
+      {
+        "log": "tmp/skills-endpoint-audit-20261004/skills_retail-sector-pulse.log",
+        "passed": 61,
+        "failed": null,
+        "tail": [
+          ".............................................................            [100%]",
+          "61 passed in 0.97s"
+        ]
+      },
+      {
+        "log": "tmp/skills-endpoint-audit-20261004/skills_sector-analyst.log",
+        "passed": 47,
+        "failed": null,
+        "tail": [
+          "...............................................                          [100%]",
+          "47 passed in 0.09s"
+        ]
+      },
+      {
+        "log": "tmp/skills-endpoint-audit-20261004/skills_short-contrarian-analyst.log",
+        "passed": 40,
+        "failed": null,
+        "tail": [
+          "........................................                                 [100%]",
+          "40 passed in 0.66s"
+        ]
+      },
+      {
+        "log": "tmp/skills-endpoint-audit-20261004/skills_tail-risk-analyzer.log",
+        "passed": 34,
+        "failed": null,
+        "tail": [
+          "..................................                                       [100%]",
+          "34 passed in 0.53s"
+        ]
+      },
+      {
+        "log": "tmp/skills-endpoint-audit-20261004/skills_theme-detector.log",
+        "passed": 488,
+        "failed": null,
+        "tail": [
+          "........................................................                 [100%]",
+          "488 passed in 1.18s"
+        ]
+      },
+      {
+        "log": "tmp/skills-endpoint-audit-20261004/skills_us-stock-analysis.log",
+        "passed": null,
+        "failed": null,
+        "tail": [
+          "",
+          "no tests ran in 0.95s"
+        ]
+      },
+      {
+        "log": "tmp/skills-endpoint-audit-20261004/skills_valuation-modeler.log",
+        "passed": null,
+        "failed": null,
+        "tail": [
+          "",
+          "no tests ran in 0.30s"
+        ]
+      },
+      {
+        "log": "tmp/skills-endpoint-audit-20261004/test_backtest.direct.log",
+        "passed": null,
+        "failed": null,
+        "tail": [
+          "",
+          "all asserts passed"
+        ]
+      },
+      {
+        "log": "tmp/skills-endpoint-audit-20261004/test_bundle_merge.direct.log",
+        "passed": null,
+        "failed": null,
+        "tail": [
+          "",
+          "✓ bundle→block merge contract holds"
+        ]
+      },
+      {
+        "log": "tmp/skills-endpoint-audit-20261004/test_comps.direct.log",
+        "passed": null,
+        "failed": null,
+        "tail": [
+          "✓ test_comps: all pass"
+        ]
+      },
+      {
+        "log": "tmp/skills-endpoint-audit-20261004/test_dcf.direct.log",
+        "passed": null,
+        "failed": null,
+        "tail": [
+          "✓ test_dcf: all pass"
+        ]
+      },
+      {
+        "log": "tmp/skills-endpoint-audit-20261004/test_export_xlsx.direct.log",
+        "passed": null,
+        "failed": null,
+        "tail": [
+          "✓ test_export_xlsx: all pass (13 asserts)"
+        ]
+      },
+      {
+        "log": "tmp/skills-endpoint-audit-20261004/test_intraday.direct.log",
+        "passed": null,
+        "failed": null,
+        "tail": [
+          "========================================================",
+          "ALL PASS"
+        ]
+      },
+      {
+        "log": "tmp/skills-endpoint-audit-20261004/test_protocol_cooldown.direct.log",
+        "passed": null,
+        "failed": null,
+        "tail": [
+          "[break_news] module load failed: No module named 'news.fetch_news_rss'",
+          "OK — broker-backed protocol scheduler (3 parallel, bounded, refill verified)"
+        ]
+      },
+      {
+        "log": "tmp/skills-endpoint-audit-20261004/test_protocol_model_routing.direct.log",
+        "passed": null,
+        "failed": null,
+        "tail": [
+          "[model_router] protocol_providers[invest] is not a list; blocking rather than assuming unrestricted",
+          "✓ protocol model routing contract holds"
+        ]
+      }
+    ],
+    "runtime-environment-presence.json": [
+      {
+        "pid": 36952,
+        "ps_rc": 0,
+        "environment_visible": true,
+        "server_key_presence": {
+          "FMP_API_KEY": false,
+          "FINNHUB_API_KEY": false,
+          "FRED_API_KEY": false,
+          "ALPACA_API_KEY": false
+        },
+        "audit_shell_key_presence": {
+          "FMP_API_KEY": true,
+          "FINNHUB_API_KEY": true,
+          "FRED_API_KEY": true,
+          "ALPACA_API_KEY": true
+        }
+      }
+    ],
+    "contract-reproductions.json": {
+      "earnings_rating_parsed": [
+        {
+          "date": "2026-10-02",
+          "rating": "B",
+          "ratingScore": null
+        }
+      ],
+      "earnings_rating_trend": "insufficient_data",
+      "earnings_grades_news_parsed": [
+        {
+          "date": null,
+          "gradingCompany": "Needham",
+          "previousGrade": "Hold",
+          "newGrade": "Hold",
+          "action": "hold"
+        }
+      ],
+      "news_analyst_actions": [
+        {
+          "date": "2026-10-01T00:00:00+00:00",
+          "action": "",
+          "firm": "",
+          "new_grade": "",
+          "previous_grade": "",
+          "url": ""
+        },
+        {
+          "date": "2026-09-01T00:00:00+00:00",
+          "action": "",
+          "firm": "",
+          "new_grade": "",
+          "previous_grade": "",
+          "url": ""
+        }
+      ],
+      "thematic_grades_recent": {
+        "upgrades": 0,
+        "downgrades": 0,
+        "since_days": 30
+      },
+      "real_grades_actions_30d": {
+        "maintain": 11
+      }
+    },
+    "followup-probes.json": [
+      {
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.0012355828657746315,
+        "endpoint": "ratings-historical",
+        "params": {
+          "symbol": "AAPL",
+          "limit": 12
+        },
+        "rows": 12,
+        "sample": {
+          "symbol": "AAPL",
+          "date": "2026-10-02",
+          "rating": "B",
+          "overallScore": 3,
+          "discountedCashFlowScore": 3,
+          "returnOnEquityScore": 5,
+          "returnOnAssetsScore": 5,
+          "debtToEquityScore": 1,
+          "priceToEarningsScore": 2,
+          "priceToBookScore": 1
+        }
+      },
+      {
+        "status": "transport_error",
+        "http_status": 400,
+        "http_calls": 1,
+        "queue_seconds": 0.000890582799911499,
+        "endpoint": "sector-pe-snapshot",
+        "params": {
+          "sector": "Technology"
+        },
+        "rows": 0
+      },
+      {
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.0016445000655949116,
+        "endpoint": "sector-pe-snapshot",
+        "params": {
+          "sector": "Technology",
+          "date": "2026-10-02"
+        },
+        "rows": 1,
+        "sample": {
+          "date": "2026-10-02",
+          "sector": "Technology",
+          "exchange": "NASDAQ",
+          "pe": 48.804755751113554
+        }
+      },
+      {
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.0018647080287337303,
+        "endpoint": "sec-filings-search/symbol",
+        "params": {
+          "symbol": "AAPL",
+          "from": "2026-09-01",
+          "to": "2026-10-04",
+          "limit": 10
+        },
+        "rows": 10,
+        "sample": {
+          "symbol": "AAPL",
+          "cik": "0000320193",
+          "filingDate": "2026-10-01 00:00:00",
+          "acceptedDate": "2026-10-01 18:30:11",
+          "formType": "4",
+          "link": "https://www.sec.gov/Archives/edgar/data/320193/000114036126038307/0001140361-26-038307-index.htm",
+          "finalLink": "https://www.sec.gov/Archives/edgar/data/320193/000114036126038307/xslF345X06/form4.xml"
+        }
+      }
+    ],
+    "dashboard-get.json": [
+      {
+        "path": "/api/preflight",
+        "status": 200,
+        "type": "dict",
+        "keys": [
+          "items"
+        ],
+        "data": {
+          "items": [
+            {
+              "key": "breadth",
+              "label": "廣度分數",
+              "label_en": "Breadth Score",
+              "status": "STALE",
+              "age_sec": 41871,
+              "age_str": "11.6h",
+              "free": true
+            },
+            {
+              "key": "ftd",
+              "label": "FTD 信號",
+              "label_en": "FTD Signal",
+              "status": "STALE",
+              "age_sec": 41873,
+              "age_str": "11.6h",
+              "free": true
+            },
+            {
+              "key": "market_top",
+              "label": "頂部風險",
+              "label_en": "Top Risk",
+              "status": "STALE",
+              "age_sec": 41862,
+              "age_str": "11.6h",
+              "free": true
+            },
+            {
+              "key": "rss",
+              "label": "RSS 新聞源",
+              "label_en": "RSS Feed",
+              "status": "STALE",
+              "age_sec": 36975,
+              "age_str": "10.3h",
+              "free": true
+            },
+            {
+              "key": "sector",
+              "label": "產業情報",
+              "label_en": "Sector Intel",
+              "status": "STALE",
+              "age_sec": 40311,
+              "age_str": "11.2h",
+              "free": false
+            },
+            {
+              "key": "news",
+              "label": "新聞 DIGEST",
+              "label_en": "News DIGEST",
+              "status": "STALE",
+              "age_sec": 36711,
+              "age_str": "10.2h",
+              "free": false
+            }
+          ]
+        }
+      },
+      {
+        "path": "/api/intraday-mood/state",
+        "status": 200,
+        "type": "dict",
+        "keys": [
+          "available",
+          "interval_sec",
+          "live"
+        ],
+        "data": {
+          "live": {
+            "last_poll": "2026-10-04T10:35:20",
+            "last_error": null,
+            "last_score": null
+          },
+          "interval_sec": 300,
+          "available": true
+        }
+      },
+      {
+        "path": "/api/intraday-mood/data",
+        "status": 200,
+        "type": "dict",
+        "keys": [
+          "_partial",
+          "_source_health",
+          "aggregate",
+          "generated_at",
+          "market_open",
+          "session_fraction",
+          "tickers",
+          "version"
+        ]
+      },
+      {
+        "path": "/api/backtest/strategies",
+        "status": 200,
+        "type": "dict",
+        "keys": [
+          "cost_bps_per_side",
+          "failed_tickers",
+          "generated_at",
+          "methodology",
+          "period",
+          "ranking",
+          "schema_version",
+          "universe"
+        ]
+      },
+      {
+        "path": "/api/backtest/list",
+        "status": 200,
+        "type": "dict",
+        "keys": [
+          "results"
+        ]
+      },
+      {
+        "path": "/api/ops/scripts",
+        "status": 200,
+        "type": "dict",
+        "keys": [
+          "generated_at",
+          "scripts"
+        ]
+      },
+      {
+        "path": "/api/run-momentum-screen/status",
+        "status": 200,
+        "type": "dict",
+        "keys": [
+          "cache_hits_count",
+          "csv_path",
+          "done",
+          "ended_at",
+          "error",
+          "errors_count",
+          "last_params",
+          "log_tail",
+          "phase",
+          "started_at",
+          "status",
+          "total"
+        ]
+      },
+      {
+        "path": "/api/journal-update/status",
+        "status": 200,
+        "type": "dict",
+        "keys": [
+          "ended_at",
+          "error",
+          "phase",
+          "status"
+        ]
+      },
+      {
+        "path": "/api/earnings-cache/AAPL",
+        "status": 200,
+        "type": "dict",
+        "keys": [
+          "as_of_date",
+          "cache_age_days",
+          "cached",
+          "composite_score",
+          "last_earnings_date",
+          "next_earnings_est",
+          "quality_flags",
+          "report_path",
+          "score_components",
+          "ticker",
+          "verdict"
+        ]
+      },
+      {
+        "path": "/api/earnings-infographic/AAPL",
+        "status": 200,
+        "type": "dict",
+        "keys": [
+          "cache",
+          "comparison",
+          "infographic",
+          "ticker",
+          "view"
+        ]
+      },
+      {
+        "path": "/api/preview-cache/AAPL",
+        "status": 404,
+        "type": "dict",
+        "keys": [
+          "error",
+          "ticker"
+        ]
+      }
+    ],
+    "fmp-probes.json": [
+      {
+        "endpoint": "profile",
+        "params": {
+          "symbol": "AAPL"
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.0007002078928053379,
+        "seconds": 1.03,
+        "rows": 1,
+        "keys": [
+          "address",
+          "averageVolume",
+          "beta",
+          "ceo",
+          "change",
+          "changePercentage",
+          "cik",
+          "city",
+          "companyName",
+          "country",
+          "currency",
+          "cusip",
+          "defaultImage",
+          "description",
+          "exchange",
+          "exchangeFullName",
+          "fullTimeEmployees",
+          "image",
+          "industry",
+          "ipoDate",
+          "isActivelyTrading",
+          "isAdr",
+          "isEtf",
+          "isFund",
+          "isin",
+          "lastDividend",
+          "marketCap",
+          "phone",
+          "price",
+          "range",
+          "sector",
+          "state",
+          "symbol",
+          "volume",
+          "website",
+          "zip"
+        ],
+        "date": null
+      },
+      {
+        "endpoint": "quote",
+        "params": {
+          "symbol": "AAPL"
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.0010177078656852245,
+        "seconds": 1.03,
+        "rows": 1,
+        "keys": [
+          "change",
+          "changePercentage",
+          "dayHigh",
+          "dayLow",
+          "exchange",
+          "marketCap",
+          "name",
+          "open",
+          "previousClose",
+          "price",
+          "priceAvg200",
+          "priceAvg50",
+          "symbol",
+          "timestamp",
+          "volume",
+          "yearHigh",
+          "yearLow"
+        ],
+        "date": null
+      },
+      {
+        "endpoint": "stock-peers",
+        "params": {
+          "symbol": "AAPL"
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.0017476249486207962,
+        "seconds": 1.03,
+        "rows": 9,
+        "keys": [
+          "companyName",
+          "mktCap",
+          "price",
+          "symbol"
+        ],
+        "date": null
+      },
+      {
+        "endpoint": "key-metrics-ttm",
+        "params": {
+          "symbol": "AAPL"
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.0024950001388788223,
+        "seconds": 0.92,
+        "rows": 1,
+        "keys": [
+          "averageInventoryTTM",
+          "averagePayablesTTM",
+          "averageReceivablesTTM",
+          "capexToDepreciationTTM",
+          "capexToOperatingCashFlowTTM",
+          "capexToRevenueTTM",
+          "cashConversionCycleTTM",
+          "currentRatioTTM",
+          "daysOfInventoryOutstandingTTM",
+          "daysOfPayablesOutstandingTTM",
+          "daysOfSalesOutstandingTTM",
+          "earningsYieldTTM",
+          "enterpriseValueTTM",
+          "evToEBITDATTM",
+          "evToFreeCashFlowTTM",
+          "evToOperatingCashFlowTTM",
+          "evToSalesTTM",
+          "freeCashFlowToEquityTTM",
+          "freeCashFlowToFirmTTM",
+          "freeCashFlowYieldTTM",
+          "grahamNetNetTTM",
+          "grahamNumberTTM",
+          "incomeQualityTTM",
+          "intangiblesToTotalAssetsTTM",
+          "interestBurdenTTM",
+          "investedCapitalTTM",
+          "marketCap",
+          "netCurrentAssetValueTTM",
+          "netDebtToEBITDATTM",
+          "operatingCycleTTM",
+          "operatingReturnOnAssetsTTM",
+          "researchAndDevelopementToRevenueTTM",
+          "returnOnAssetsTTM",
+          "returnOnCapitalEmployedTTM",
+          "returnOnEquityTTM",
+          "returnOnInvestedCapitalTTM",
+          "returnOnTangibleAssetsTTM",
+          "salesGeneralAndAdministrativeToRevenueTTM",
+          "stockBasedCompensationToRevenueTTM",
+          "symbol",
+          "tangibleAssetValueTTM",
+          "taxBurdenTTM",
+          "workingCapitalTTM"
+        ],
+        "date": null
+      },
+      {
+        "endpoint": "ratios-ttm",
+        "params": {
+          "symbol": "AAPL"
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.003248083870857954,
+        "seconds": 0.94,
+        "rows": 1,
+        "keys": [
+          "assetTurnoverTTM",
+          "bookValuePerShareTTM",
+          "bottomLineProfitMarginTTM",
+          "capexPerShareTTM",
+          "capitalExpenditureCoverageRatioTTM",
+          "cashPerShareTTM",
+          "cashRatioTTM",
+          "continuousOperationsProfitMarginTTM",
+          "currentRatioTTM",
+          "debtServiceCoverageRatioTTM",
+          "debtToAssetsRatioTTM",
+          "debtToCapitalRatioTTM",
+          "debtToEquityRatioTTM",
+          "debtToMarketCapTTM",
+          "dividendPaidAndCapexCoverageRatioTTM",
+          "dividendPayoutRatioTTM",
+          "dividendPerShareTTM",
+          "dividendYieldTTM",
+          "ebitMarginTTM",
+          "ebitdaMarginTTM",
+          "ebtPerEbitTTM",
+          "effectiveTaxRateTTM",
+          "enterpriseValueMultipleTTM",
+          "enterpriseValueTTM",
+          "financialLeverageRatioTTM",
+          "fixedAssetTurnoverTTM",
+          "forwardPriceToEarningsGrowthRatioTTM",
+          "freeCashFlowOperatingCashFlowRatioTTM",
+          "freeCashFlowPerShareTTM",
+          "grossProfitMarginTTM",
+          "interestCoverageRatioTTM",
+          "interestDebtPerShareTTM",
+          "inventoryTurnoverTTM",
+          "longTermDebtToCapitalRatioTTM",
+          "netIncomePerEBTTTM",
+          "netIncomePerShareTTM",
+          "netProfitMarginTTM",
+          "operatingCashFlowCoverageRatioTTM",
+          "operatingCashFlowPerShareTTM",
+          "operatingCashFlowRatioTTM",
+          "operatingCashFlowSalesRatioTTM",
+          "operatingProfitMarginTTM",
+          "payablesTurnoverTTM",
+          "pretaxProfitMarginTTM",
+          "priceToBookRatioTTM",
+          "priceToEarningsDilutedGrowthRatioTTM",
+          "priceToEarningsDilutedRatioTTM",
+          "priceToEarningsGrowthRatioTTM",
+          "priceToEarningsRatioTTM",
+          "priceToFairValueTTM",
+          "priceToFreeCashFlowRatioTTM",
+          "priceToOperatingCashFlowRatioTTM",
+          "priceToSalesRatioTTM",
+          "quickRatioTTM",
+          "receivablesTurnoverTTM",
+          "revenuePerShareTTM",
+          "shareholdersEquityPerShareTTM",
+          "shortTermOperatingCashFlowCoverageRatioTTM",
+          "solvencyRatioTTM",
+          "symbol",
+          "tangibleBookValuePerShareTTM",
+          "workingCapitalTurnoverRatioTTM"
+        ],
+        "date": null
+      },
+      {
+        "endpoint": "ratios",
+        "params": {
+          "symbol": "AAPL"
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.0016381670720875263,
+        "seconds": 0.94,
+        "rows": 5,
+        "keys": [
+          "assetTurnover",
+          "bookValuePerShare",
+          "bottomLineProfitMargin",
+          "capexPerShare",
+          "capitalExpenditureCoverageRatio",
+          "cashPerShare",
+          "cashRatio",
+          "continuousOperationsProfitMargin",
+          "currentRatio",
+          "date",
+          "debtServiceCoverageRatio",
+          "debtToAssetsRatio",
+          "debtToCapitalRatio",
+          "debtToEquityRatio",
+          "debtToMarketCap",
+          "dividendPaidAndCapexCoverageRatio",
+          "dividendPayoutRatio",
+          "dividendPerShare",
+          "dividendYield",
+          "dividendYieldPercentage",
+          "ebitMargin",
+          "ebitdaMargin",
+          "ebtPerEbit",
+          "effectiveTaxRate",
+          "enterpriseValueMultiple",
+          "financialLeverageRatio",
+          "fiscalYear",
+          "fixedAssetTurnover",
+          "forwardPriceToEarningsGrowthRatio",
+          "freeCashFlowOperatingCashFlowRatio",
+          "freeCashFlowPerShare",
+          "grossProfitMargin",
+          "interestCoverageRatio",
+          "interestDebtPerShare",
+          "inventoryTurnover",
+          "longTermDebtToCapitalRatio",
+          "netIncomePerEBT",
+          "netIncomePerShare",
+          "netProfitMargin",
+          "operatingCashFlowCoverageRatio",
+          "operatingCashFlowPerShare",
+          "operatingCashFlowRatio",
+          "operatingCashFlowSalesRatio",
+          "operatingProfitMargin",
+          "payablesTurnover",
+          "period",
+          "pretaxProfitMargin",
+          "priceToBookRatio",
+          "priceToEarningsDilutedGrowthRatio",
+          "priceToEarningsDilutedRatio",
+          "priceToEarningsGrowthRatio",
+          "priceToEarningsRatio",
+          "priceToFairValue",
+          "priceToFreeCashFlowRatio",
+          "priceToOperatingCashFlowRatio",
+          "priceToSalesRatio",
+          "quickRatio",
+          "receivablesTurnover",
+          "reportedCurrency",
+          "revenuePerShare",
+          "shareholdersEquityPerShare",
+          "shortTermOperatingCashFlowCoverageRatio",
+          "solvencyRatio",
+          "symbol",
+          "tangibleBookValuePerShare",
+          "workingCapitalTurnoverRatio"
+        ],
+        "date": "2025-09-27"
+      },
+      {
+        "endpoint": "income-statement",
+        "params": {
+          "symbol": "AAPL",
+          "period": "quarter",
+          "limit": 8
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.0013171248137950897,
+        "seconds": 0.85,
+        "rows": 8,
+        "keys": [
+          "acceptedDate",
+          "bottomLineNetIncome",
+          "cik",
+          "costAndExpenses",
+          "costOfRevenue",
+          "date",
+          "depreciationAndAmortization",
+          "ebit",
+          "ebitda",
+          "eps",
+          "epsDiluted",
+          "filingDate",
+          "fiscalYear",
+          "generalAndAdministrativeExpenses",
+          "grossProfit",
+          "incomeBeforeTax",
+          "incomeTaxExpense",
+          "interestExpense",
+          "interestIncome",
+          "netIncome",
+          "netIncomeDeductions",
+          "netIncomeFromContinuingOperations",
+          "netIncomeFromDiscontinuedOperations",
+          "netInterestIncome",
+          "nonOperatingIncomeExcludingInterest",
+          "operatingExpenses",
+          "operatingIncome",
+          "otherAdjustmentsToNetIncome",
+          "otherExpenses",
+          "period",
+          "reportedCurrency",
+          "researchAndDevelopmentExpenses",
+          "revenue",
+          "sellingAndMarketingExpenses",
+          "sellingGeneralAndAdministrativeExpenses",
+          "symbol",
+          "totalOtherIncomeExpensesNet",
+          "weightedAverageShsOut",
+          "weightedAverageShsOutDil"
+        ],
+        "date": "2026-06-27"
+      },
+      {
+        "endpoint": "balance-sheet-statement",
+        "params": {
+          "symbol": "AAPL",
+          "period": "quarter",
+          "limit": 8
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.0015152920968830585,
+        "seconds": 0.84,
+        "rows": 8,
+        "keys": [
+          "acceptedDate",
+          "accountPayables",
+          "accountsReceivables",
+          "accruedExpenses",
+          "accumulatedOtherComprehensiveIncomeLoss",
+          "additionalPaidInCapital",
+          "capitalLeaseObligations",
+          "capitalLeaseObligationsCurrent",
+          "capitalLeaseObligationsNonCurrent",
+          "cashAndCashEquivalents",
+          "cashAndShortTermInvestments",
+          "cik",
+          "commonStock",
+          "date",
+          "deferredRevenue",
+          "deferredRevenueNonCurrent",
+          "deferredTaxLiabilitiesNonCurrent",
+          "filingDate",
+          "fiscalYear",
+          "goodwill",
+          "goodwillAndIntangibleAssets",
+          "intangibleAssets",
+          "inventory",
+          "longTermDebt",
+          "longTermInvestments",
+          "minorityInterest",
+          "netDebt",
+          "netReceivables",
+          "otherAssets",
+          "otherCurrentAssets",
+          "otherCurrentLiabilities",
+          "otherLiabilities",
+          "otherNonCurrentAssets",
+          "otherNonCurrentLiabilities",
+          "otherPayables",
+          "otherReceivables",
+          "otherTotalStockholdersEquity",
+          "period",
+          "preferredStock",
+          "prepaids",
+          "propertyPlantEquipmentNet",
+          "reportedCurrency",
+          "retainedEarnings",
+          "shortTermDebt",
+          "shortTermInvestments",
+          "symbol",
+          "taxAssets",
+          "taxPayables",
+          "totalAssets",
+          "totalCurrentAssets",
+          "totalCurrentLiabilities",
+          "totalDebt",
+          "totalEquity",
+          "totalInvestments",
+          "totalLiabilities",
+          "totalLiabilitiesAndTotalEquity",
+          "totalNonCurrentAssets",
+          "totalNonCurrentLiabilities",
+          "totalPayables",
+          "totalStockholdersEquity",
+          "treasuryStock"
+        ],
+        "date": "2026-06-27"
+      },
+      {
+        "endpoint": "cash-flow-statement",
+        "params": {
+          "symbol": "AAPL",
+          "period": "quarter",
+          "limit": 8
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.001714250072836876,
+        "seconds": 0.84,
+        "rows": 8,
+        "keys": [
+          "acceptedDate",
+          "accountsPayables",
+          "accountsReceivables",
+          "acquisitionsNet",
+          "capitalExpenditure",
+          "cashAtBeginningOfPeriod",
+          "cashAtEndOfPeriod",
+          "changeInWorkingCapital",
+          "cik",
+          "commonDividendsPaid",
+          "commonStockIssuance",
+          "commonStockRepurchased",
+          "date",
+          "deferredIncomeTax",
+          "depreciationAndAmortization",
+          "effectOfForexChangesOnCash",
+          "filingDate",
+          "fiscalYear",
+          "freeCashFlow",
+          "incomeTaxesPaid",
+          "interestPaid",
+          "inventory",
+          "investmentsInPropertyPlantAndEquipment",
+          "longTermNetDebtIssuance",
+          "netCashProvidedByFinancingActivities",
+          "netCashProvidedByInvestingActivities",
+          "netCashProvidedByOperatingActivities",
+          "netChangeInCash",
+          "netCommonStockIssuance",
+          "netDebtIssuance",
+          "netDividendsPaid",
+          "netIncome",
+          "netPreferredStockIssuance",
+          "netStockIssuance",
+          "operatingCashFlow",
+          "otherFinancingActivities",
+          "otherInvestingActivities",
+          "otherNonCashItems",
+          "otherWorkingCapital",
+          "period",
+          "preferredDividendsPaid",
+          "purchasesOfInvestments",
+          "reportedCurrency",
+          "salesMaturitiesOfInvestments",
+          "shortTermNetDebtIssuance",
+          "stockBasedCompensation",
+          "symbol"
+        ],
+        "date": "2026-06-27"
+      },
+      {
+        "endpoint": "financial-growth",
+        "params": {
+          "symbol": "AAPL"
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.0014400412328541279,
+        "seconds": 0.85,
+        "rows": 5,
+        "keys": [
+          "assetGrowth",
+          "bookValueperShareGrowth",
+          "date",
+          "debtGrowth",
+          "dividendsPerShareGrowth",
+          "ebitdaGrowth",
+          "ebitgrowth",
+          "epsdilutedGrowth",
+          "epsgrowth",
+          "fiscalYear",
+          "fiveYBottomLineNetIncomeGrowthPerShare",
+          "fiveYDividendperShareGrowthPerShare",
+          "fiveYNetIncomeGrowthPerShare",
+          "fiveYOperatingCFGrowthPerShare",
+          "fiveYRevenueGrowthPerShare",
+          "fiveYShareholdersEquityGrowthPerShare",
+          "freeCashFlowGrowth",
+          "grossProfitGrowth",
+          "growthCapitalExpenditure",
+          "inventoryGrowth",
+          "netIncomeGrowth",
+          "operatingCashFlowGrowth",
+          "operatingIncomeGrowth",
+          "period",
+          "rdexpenseGrowth",
+          "receivablesGrowth",
+          "reportedCurrency",
+          "revenueGrowth",
+          "sgaexpensesGrowth",
+          "symbol",
+          "tenYBottomLineNetIncomeGrowthPerShare",
+          "tenYDividendperShareGrowthPerShare",
+          "tenYNetIncomeGrowthPerShare",
+          "tenYOperatingCFGrowthPerShare",
+          "tenYRevenueGrowthPerShare",
+          "tenYShareholdersEquityGrowthPerShare",
+          "threeYBottomLineNetIncomeGrowthPerShare",
+          "threeYDividendperShareGrowthPerShare",
+          "threeYNetIncomeGrowthPerShare",
+          "threeYOperatingCFGrowthPerShare",
+          "threeYRevenueGrowthPerShare",
+          "threeYShareholdersEquityGrowthPerShare",
+          "weightedAverageSharesDilutedGrowth",
+          "weightedAverageSharesGrowth"
+        ],
+        "date": "2025-09-27"
+      },
+      {
+        "endpoint": "enterprise-values",
+        "params": {
+          "symbol": "AAPL"
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.005804167129099369,
+        "seconds": 0.93,
+        "rows": 5,
+        "keys": [
+          "addTotalDebt",
+          "date",
+          "enterpriseValue",
+          "marketCapitalization",
+          "minusCashAndCashEquivalents",
+          "numberOfShares",
+          "stockPrice",
+          "symbol"
+        ],
+        "date": "2025-09-27"
+      },
+      {
+        "endpoint": "discounted-cash-flow",
+        "params": {
+          "symbol": "AAPL"
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.0020210412330925465,
+        "seconds": 0.92,
+        "rows": 1,
+        "keys": [
+          "Stock Price",
+          "date",
+          "dcf",
+          "symbol"
+        ],
+        "date": "2026-10-03"
+      },
+      {
+        "endpoint": "levered-discounted-cash-flow",
+        "params": {
+          "symbol": "AAPL"
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.002919916994869709,
+        "seconds": 0.94,
+        "rows": 1,
+        "keys": [
+          "Stock Price",
+          "date",
+          "dcf",
+          "symbol"
+        ],
+        "date": "2026-10-03"
+      },
+      {
+        "endpoint": "price-target-consensus",
+        "params": {
+          "symbol": "AAPL"
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.0007875422015786171,
+        "seconds": 0.87,
+        "rows": 1,
+        "keys": [
+          "symbol",
+          "targetConsensus",
+          "targetHigh",
+          "targetLow",
+          "targetMedian"
+        ],
+        "date": null
+      },
+      {
+        "endpoint": "ratings-snapshot",
+        "params": {
+          "symbol": "AAPL"
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.0008010002784430981,
+        "seconds": 0.86,
+        "rows": 1,
+        "keys": [
+          "debtToEquityScore",
+          "discountedCashFlowScore",
+          "overallScore",
+          "priceToBookScore",
+          "priceToEarningsScore",
+          "rating",
+          "returnOnAssetsScore",
+          "returnOnEquityScore",
+          "symbol"
+        ],
+        "date": null
+      },
+      {
+        "endpoint": "grades-historical",
+        "params": {
+          "symbol": "AAPL"
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.001476583071053028,
+        "seconds": 0.85,
+        "rows": 94,
+        "keys": [
+          "analystRatingsBuy",
+          "analystRatingsHold",
+          "analystRatingsSell",
+          "analystRatingsStrongBuy",
+          "analystRatingsStrongSell",
+          "date",
+          "symbol"
+        ],
+        "date": "2026-10-01"
+      },
+      {
+        "endpoint": "price-target-news",
+        "params": {
+          "symbol": "AAPL",
+          "limit": 3
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.0013294587843120098,
+        "seconds": 0.94,
+        "rows": 3,
+        "keys": [
+          "adjPriceTarget",
+          "analystCompany",
+          "analystName",
+          "newsBaseURL",
+          "newsPublisher",
+          "newsTitle",
+          "newsURL",
+          "priceTarget",
+          "priceWhenPosted",
+          "publishedDate",
+          "symbol"
+        ],
+        "date": null
+      },
+      {
+        "endpoint": "rating-historical",
+        "params": {
+          "symbol": "AAPL"
+        },
+        "status": "transport_error",
+        "http_status": 404,
+        "http_calls": 1,
+        "queue_seconds": 0.001338374800980091,
+        "seconds": 0.84,
+        "rows": 0,
+        "keys": [],
+        "date": null
+      },
+      {
+        "endpoint": "grades-summary",
+        "params": {
+          "symbol": "AAPL"
+        },
+        "status": "transport_error",
+        "http_status": 404,
+        "http_calls": 1,
+        "queue_seconds": 0.0054109590128064156,
+        "seconds": 0.94,
+        "rows": 0,
+        "keys": [],
+        "date": null
+      },
+      {
+        "endpoint": "grades-news",
+        "params": {
+          "symbol": "AAPL",
+          "limit": 3
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.00310533307492733,
+        "seconds": 0.92,
+        "rows": 3,
+        "keys": [
+          "action",
+          "gradingCompany",
+          "newGrade",
+          "newsBaseURL",
+          "newsPublisher",
+          "newsTitle",
+          "newsURL",
+          "previousGrade",
+          "priceWhenPosted",
+          "publishedDate",
+          "symbol"
+        ],
+        "date": null
+      },
+      {
+        "endpoint": "earnings",
+        "params": {
+          "symbol": "AAPL"
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.0012018331326544285,
+        "seconds": 0.86,
+        "rows": 165,
+        "keys": [
+          "date",
+          "epsActual",
+          "epsEstimated",
+          "lastUpdated",
+          "revenueActual",
+          "revenueEstimated",
+          "symbol"
+        ],
+        "date": "2026-10-29"
+      },
+      {
+        "endpoint": "revenue-product-segmentation",
+        "params": {
+          "symbol": "AAPL"
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.0009607085958123207,
+        "seconds": 0.87,
+        "rows": 16,
+        "keys": [
+          "data",
+          "date",
+          "fiscalYear",
+          "period",
+          "reportedCurrency",
+          "symbol"
+        ],
+        "date": "2025-09-27"
+      },
+      {
+        "endpoint": "revenue-geographic-segmentation",
+        "params": {
+          "symbol": "AAPL"
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.0009225830435752869,
+        "seconds": 0.84,
+        "rows": 16,
+        "keys": [
+          "data",
+          "date",
+          "fiscalYear",
+          "period",
+          "reportedCurrency",
+          "symbol"
+        ],
+        "date": "2025-09-27"
+      },
+      {
+        "endpoint": "dividends",
+        "params": {
+          "symbol": "AAPL"
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.000620666891336441,
+        "seconds": 0.84,
+        "rows": 92,
+        "keys": [
+          "adjDividend",
+          "date",
+          "declarationDate",
+          "dividend",
+          "frequency",
+          "paymentDate",
+          "recordDate",
+          "symbol",
+          "yield"
+        ],
+        "date": "2026-08-10"
+      },
+      {
+        "endpoint": "analyst-estimates",
+        "params": {
+          "symbol": "AAPL",
+          "period": "annual",
+          "limit": 6
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.0018985001370310783,
+        "seconds": 0.94,
+        "rows": 6,
+        "keys": [
+          "date",
+          "ebitAvg",
+          "ebitHigh",
+          "ebitLow",
+          "ebitdaAvg",
+          "ebitdaHigh",
+          "ebitdaLow",
+          "epsAvg",
+          "epsHigh",
+          "epsLow",
+          "netIncomeAvg",
+          "netIncomeHigh",
+          "netIncomeLow",
+          "numAnalystsEps",
+          "numAnalystsRevenue",
+          "revenueAvg",
+          "revenueHigh",
+          "revenueLow",
+          "sgaExpenseAvg",
+          "sgaExpenseHigh",
+          "sgaExpenseLow",
+          "symbol"
+        ],
+        "date": "2030-09-27"
+      },
+      {
+        "endpoint": "grades-consensus",
+        "params": {
+          "symbol": "AAPL"
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.002567834220826626,
+        "seconds": 0.93,
+        "rows": 1,
+        "keys": [
+          "buy",
+          "consensus",
+          "hold",
+          "sell",
+          "strongBuy",
+          "strongSell",
+          "symbol"
+        ],
+        "date": null
+      },
+      {
+        "endpoint": "price-target-summary",
+        "params": {
+          "symbol": "AAPL"
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.0021727923303842545,
+        "seconds": 0.93,
+        "rows": 1,
+        "keys": [
+          "allTimeAvgPriceTarget",
+          "allTimeCount",
+          "lastMonthAvgPriceTarget",
+          "lastMonthCount",
+          "lastQuarterAvgPriceTarget",
+          "lastQuarterCount",
+          "lastYearAvgPriceTarget",
+          "lastYearCount",
+          "publishers",
+          "symbol"
+        ],
+        "date": null
+      },
+      {
+        "endpoint": "news/stock",
+        "params": {
+          "symbols": "AAPL",
+          "limit": 3
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.0029334579594433308,
+        "seconds": 0.96,
+        "rows": 3,
+        "keys": [
+          "image",
+          "publishedDate",
+          "publisher",
+          "site",
+          "symbol",
+          "text",
+          "title",
+          "url"
+        ],
+        "date": null
+      },
+      {
+        "endpoint": "news/press-releases",
+        "params": {
+          "symbol": "AAPL",
+          "limit": 3
+        },
+        "status": "permission_denied",
+        "http_status": 402,
+        "http_calls": 1,
+        "queue_seconds": 0.0030372501350939274,
+        "seconds": 0.94,
+        "rows": 0,
+        "keys": [],
+        "date": null
+      },
+      {
+        "endpoint": "sec-filings-financials",
+        "params": {
+          "symbol": "AAPL",
+          "limit": 3
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.0026391660794615746,
+        "seconds": 0.94,
+        "rows": 3,
+        "keys": [
+          "acceptedDate",
+          "cik",
+          "filingDate",
+          "finalLink",
+          "formType",
+          "hasFinancials",
+          "link",
+          "symbol"
+        ],
+        "date": null
+      },
+      {
+        "endpoint": "sec-filings-search/symbol",
+        "params": {
+          "symbol": "AAPL",
+          "limit": 3
+        },
+        "status": "transport_error",
+        "http_status": 400,
+        "http_calls": 1,
+        "queue_seconds": 0.006775833200663328,
+        "seconds": 0.96,
+        "rows": 0,
+        "keys": [],
+        "date": null
+      },
+      {
+        "endpoint": "financial-scores",
+        "params": {
+          "symbol": "AAPL"
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.0054152910597622395,
+        "seconds": 0.94,
+        "rows": 1,
+        "keys": [
+          "altmanZScore",
+          "ebit",
+          "marketCap",
+          "piotroskiScore",
+          "reportedCurrency",
+          "retainedEarnings",
+          "revenue",
+          "symbol",
+          "totalAssets",
+          "totalLiabilities",
+          "workingCapital"
+        ],
+        "date": null
+      },
+      {
+        "endpoint": "owner-earnings",
+        "params": {
+          "symbol": "AAPL"
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.0030617499724030495,
+        "seconds": 0.95,
+        "rows": 5,
+        "keys": [
+          "averagePPE",
+          "date",
+          "fiscalYear",
+          "growthCapex",
+          "maintenanceCapex",
+          "ownersEarnings",
+          "ownersEarningsPerShare",
+          "period",
+          "reportedCurrency",
+          "symbol"
+        ],
+        "date": "2026-06-27"
+      },
+      {
+        "endpoint": "insider-trading/statistics",
+        "params": {
+          "symbol": "AAPL"
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.0014125420711934566,
+        "seconds": 0.85,
+        "rows": 94,
+        "keys": [
+          "acquiredDisposedRatio",
+          "acquiredTransactions",
+          "averageAcquired",
+          "averageDisposed",
+          "cik",
+          "disposedTransactions",
+          "quarter",
+          "symbol",
+          "totalAcquired",
+          "totalDisposed",
+          "totalPurchases",
+          "totalSales",
+          "year"
+        ],
+        "date": null
+      },
+      {
+        "endpoint": "institutional-ownership/symbol-positions-summary",
+        "params": {
+          "symbol": "AAPL",
+          "year": 2026,
+          "quarter": 2
+        },
+        "status": "permission_denied",
+        "http_status": 402,
+        "http_calls": 1,
+        "queue_seconds": 0.01178604131564498,
+        "seconds": 0.84,
+        "rows": 0,
+        "keys": [],
+        "date": null
+      },
+      {
+        "endpoint": "senate-trades",
+        "params": {
+          "symbol": "AAPL"
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.00838679214939475,
+        "seconds": 0.94,
+        "rows": 100,
+        "keys": [
+          "amount",
+          "assetDescription",
+          "assetType",
+          "capitalGainsOver200USD",
+          "comment",
+          "disclosureDate",
+          "district",
+          "firstName",
+          "lastName",
+          "link",
+          "office",
+          "owner",
+          "senateID",
+          "symbol",
+          "transactionDate",
+          "type"
+        ],
+        "date": null
+      },
+      {
+        "endpoint": "house-trades",
+        "params": {
+          "symbol": "AAPL"
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.006271874997764826,
+        "seconds": 0.95,
+        "rows": 100,
+        "keys": [
+          "amount",
+          "assetDescription",
+          "assetType",
+          "capitalGainsOver200USD",
+          "comment",
+          "disclosureDate",
+          "district",
+          "firstName",
+          "lastName",
+          "link",
+          "office",
+          "owner",
+          "senateID",
+          "symbol",
+          "transactionDate",
+          "type"
+        ],
+        "date": null
+      },
+      {
+        "endpoint": "mergers-acquisitions-latest",
+        "params": {
+          "symbol": "AAPL",
+          "limit": 3
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.0047867922112345695,
+        "seconds": 0.95,
+        "rows": 3,
+        "keys": [
+          "acceptedDate",
+          "cik",
+          "companyName",
+          "link",
+          "symbol",
+          "targetedCik",
+          "targetedCompanyName",
+          "targetedSymbol",
+          "transactionDate"
+        ],
+        "date": null
+      },
+      {
+        "endpoint": "esg-disclosures",
+        "params": {
+          "symbol": "AAPL"
+        },
+        "status": "permission_denied",
+        "http_status": 402,
+        "http_calls": 1,
+        "queue_seconds": 0.001489291898906231,
+        "seconds": 0.91,
+        "rows": 0,
+        "keys": [],
+        "date": null
+      },
+      {
+        "endpoint": "esg-ratings",
+        "params": {
+          "symbol": "AAPL"
+        },
+        "status": "permission_denied",
+        "http_status": 402,
+        "http_calls": 1,
+        "queue_seconds": 0.005164457950741053,
+        "seconds": 0.93,
+        "rows": 0,
+        "keys": [],
+        "date": null
+      },
+      {
+        "endpoint": "governance-executive-compensation",
+        "params": {
+          "symbol": "AAPL"
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.003491333220154047,
+        "seconds": 1.05,
+        "rows": 339,
+        "keys": [
+          "acceptedDate",
+          "allOtherCompensation",
+          "bonus",
+          "cik",
+          "companyName",
+          "filingDate",
+          "incentivePlanCompensation",
+          "link",
+          "nameAndPosition",
+          "optionAward",
+          "salary",
+          "stockAward",
+          "symbol",
+          "total",
+          "year"
+        ],
+        "date": null
+      },
+      {
+        "endpoint": "executive-compensation-benchmark",
+        "params": {
+          "symbol": "AAPL"
+        },
+        "status": "permission_denied",
+        "http_status": 402,
+        "http_calls": 1,
+        "queue_seconds": 0.001723417080938816,
+        "seconds": 0.86,
+        "rows": 0,
+        "keys": [],
+        "date": null
+      },
+      {
+        "endpoint": "historical-market-capitalization",
+        "params": {
+          "symbol": "AAPL"
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.0017469162121415138,
+        "seconds": 0.85,
+        "rows": 64,
+        "keys": [
+          "date",
+          "marketCap",
+          "symbol"
+        ],
+        "date": "2026-10-02"
+      },
+      {
+        "endpoint": "historical-employee-count",
+        "params": {
+          "symbol": "AAPL"
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.0022674170322716236,
+        "seconds": 0.84,
+        "rows": 32,
+        "keys": [
+          "acceptanceTime",
+          "cik",
+          "companyName",
+          "employeeCount",
+          "filingDate",
+          "formType",
+          "periodOfReport",
+          "source",
+          "symbol"
+        ],
+        "date": null
+      },
+      {
+        "endpoint": "earning-call-transcript",
+        "params": {
+          "symbol": "AAPL",
+          "year": 2026,
+          "quarter": 3
+        },
+        "status": "permission_denied",
+        "http_status": 402,
+        "http_calls": 1,
+        "queue_seconds": 0.0019887080416083336,
+        "seconds": 0.92,
+        "rows": 0,
+        "keys": [],
+        "date": null
+      },
+      {
+        "endpoint": "historical-price-eod/full",
+        "params": {
+          "symbol": "SPY",
+          "from": "2026-09-26",
+          "to": "2026-10-04"
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.00048462487757205963,
+        "seconds": 0.84,
+        "rows": 5,
+        "keys": [
+          "change",
+          "changePercent",
+          "close",
+          "date",
+          "high",
+          "low",
+          "open",
+          "symbol",
+          "volume",
+          "vwap"
+        ],
+        "date": "2026-10-02"
+      },
+      {
+        "endpoint": "historical-price-eod/dividend-adjusted",
+        "params": {
+          "symbol": "SPY",
+          "from": "2026-09-26",
+          "to": "2026-10-04"
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.0005995831452310085,
+        "seconds": 0.92,
+        "rows": 5,
+        "keys": [
+          "adjClose",
+          "adjHigh",
+          "adjLow",
+          "adjOpen",
+          "date",
+          "symbol",
+          "volume"
+        ],
+        "date": "2026-10-02"
+      },
+      {
+        "endpoint": "historical-chart/5min",
+        "params": {
+          "symbol": "SPY",
+          "from": "2026-09-26",
+          "to": "2026-10-04"
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.000822083093225956,
+        "seconds": 0.86,
+        "rows": 390,
+        "keys": [
+          "close",
+          "date",
+          "high",
+          "low",
+          "open",
+          "volume"
+        ],
+        "date": "2026-10-02 15:55:00"
+      },
+      {
+        "endpoint": "economic-calendar",
+        "params": {
+          "from": "2026-09-26",
+          "to": "2026-10-04"
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.0034997500479221344,
+        "seconds": 1.08,
+        "rows": 721,
+        "keys": [
+          "actual",
+          "change",
+          "changePercentage",
+          "country",
+          "currency",
+          "date",
+          "estimate",
+          "event",
+          "impact",
+          "previous",
+          "unit"
+        ],
+        "date": "2026-10-04 10:00:00"
+      },
+      {
+        "endpoint": "sector-pe-snapshot",
+        "params": {
+          "date": "2026-10-02"
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.0015706666745245457,
+        "seconds": 0.87,
+        "rows": 11,
+        "keys": [
+          "date",
+          "exchange",
+          "pe",
+          "sector"
+        ],
+        "date": "2026-10-02"
+      },
+      {
+        "endpoint": "sector-performance-snapshot",
+        "params": {
+          "date": "2026-10-02"
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.002053665928542614,
+        "seconds": 0.91,
+        "rows": 11,
+        "keys": [
+          "averageChange",
+          "date",
+          "exchange",
+          "sector"
+        ],
+        "date": "2026-10-02"
+      },
+      {
+        "endpoint": "industry-performance-snapshot",
+        "params": {
+          "date": "2026-10-02"
+        },
+        "status": "ok",
+        "http_status": 200,
+        "http_calls": 1,
+        "queue_seconds": 0.00253045791760087,
+        "seconds": 0.93,
+        "rows": 127,
+        "keys": [
+          "averageChange",
+          "date",
+          "exchange",
+          "industry"
+        ],
+        "date": "2026-10-02"
+      }
+    ]
+  },
+  "limitations": [
+    "Representative symbols/date windows only; no claim of every ticker/plan working.",
+    "Permission-denied endpoints cannot be validated for payload shape in this account.",
+    "No access to external home skill copy; only confirmed canonical path drift.",
+    "Runtime launch environment was inspected as presence booleans only; no credential values were displayed or saved.",
+    "Repair plan estimates may change if a secure daemon environment path requires an existing credential-loading mechanism."
+  ]
+}

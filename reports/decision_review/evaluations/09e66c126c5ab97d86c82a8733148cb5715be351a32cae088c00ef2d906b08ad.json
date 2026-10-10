@@ -1,0 +1,52 @@
+{
+  "decision_id": "sha256:b4bbe8ddcf0410285375a3b259d0d56254901ad211f7fb27a42846fab8b9d85c",
+  "evaluation": {
+    "version": "investment-evaluation/2.0",
+    "evaluated_at": "2026-10-01",
+    "source": "/Users/kavi/Developer/Claude/Projects/ai-investment-committee/investment/invest_logs/history.json#169",
+    "window_complete": true,
+    "calibration_eligible": true,
+    "exclusion_reasons": []
+  },
+  "reality": {
+    "decision_date": "2026-06-24",
+    "eval_date": "2026-07-24",
+    "today": "2026-10-01",
+    "window_days": 30,
+    "days_elapsed": 99,
+    "window_complete_pct": 100,
+    "pending": false,
+    "ticker_reality": {
+      "price_window_complete": true,
+      "price_observations": 22,
+      "price_at_decision": 1914.46,
+      "price_at_decision_date": "2026-06-24",
+      "price_at_eval": 1436.5601,
+      "price_at_eval_date": "2026-07-24",
+      "return_pct": -24.963,
+      "max_runup_since": 2335.0,
+      "max_drawdown_since": 1354.8199,
+      "max_runup_pct": 21.967,
+      "max_drawdown_pct": -29.232
+    },
+    "trade_condition_evaluation": {
+      "method": "daily_close_touch; no intraday ordering or execution inference",
+      "entry_price_touched": null,
+      "take_profit_touched": null,
+      "stop_loss_touched": null
+    }
+  },
+  "verdict": {
+    "label": "hit",
+    "rationale": "觀望/CANCEL → 實際 -24.96%, 避開下跌",
+    "max_runup_pct": 21.967,
+    "max_drawdown_pct": -29.232
+  },
+  "original_label": null,
+  "prior_evaluations": [
+    {
+      "label": "pending",
+      "rationale": "尚未取得 eval 價格"
+    }
+  ]
+}

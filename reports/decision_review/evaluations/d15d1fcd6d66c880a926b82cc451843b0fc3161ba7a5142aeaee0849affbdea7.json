@@ -1,0 +1,30 @@
+{
+  "decision_id": "sha256:1faf70dd495cb6371787c3146417433c74fe5e8d03b3aa934d9e6397065ea99b",
+  "evaluation": {
+    "version": "investment-evaluation/2.0",
+    "evaluated_at": "2026-10-01",
+    "source": "/Users/kavi/Developer/Claude/Projects/ai-investment-committee/investment/invest_logs/history.json#31",
+    "window_complete": false,
+    "calibration_eligible": false,
+    "exclusion_reasons": [
+      "window_incomplete",
+      "prices_missing_or_nonfinite"
+    ]
+  },
+  "reality": {
+    "decision_date": "2026-04-18",
+    "eval_date": "2026-05-18",
+    "today": "2026-10-01",
+    "window_days": 30,
+    "days_elapsed": 166,
+    "window_complete_pct": 100,
+    "pending": false,
+    "ticker_reality": null
+  },
+  "verdict": {
+    "label": "pending",
+    "rationale": "尚未取得 eval 價格"
+  },
+  "original_label": "UNKNOWN",
+  "prior_evaluations": []
+}

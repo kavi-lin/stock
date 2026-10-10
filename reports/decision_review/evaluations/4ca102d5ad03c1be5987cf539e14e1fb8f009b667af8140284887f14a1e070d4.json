@@ -1,0 +1,37 @@
+{
+  "decision_id": "sha256:3a9beb22690080be6c24d86565e4e74a1866bf7316d35bc900aa9c3b77232e35",
+  "evaluation": {
+    "version": "investment-evaluation/2.0",
+    "evaluated_at": "2026-10-01",
+    "source": "/Users/kavi/Developer/Claude/Projects/ai-investment-committee/investment/invest_logs/history.json#201",
+    "window_complete": false,
+    "calibration_eligible": false,
+    "exclusion_reasons": [
+      "window_incomplete",
+      "prices_missing_or_nonfinite"
+    ]
+  },
+  "reality": {
+    "decision_date": "2026-08-21",
+    "eval_date": "2026-09-20",
+    "today": "2026-10-01",
+    "window_days": 30,
+    "days_elapsed": 41,
+    "window_complete_pct": 100,
+    "pending": false,
+    "ticker_reality": null
+  },
+  "verdict": {
+    "label": "pending",
+    "rationale": "尚未取得 eval 價格"
+  },
+  "original_label": "UNKNOWN",
+  "prior_evaluations": [
+    {
+      "label": "hit",
+      "rationale": "觀望 → 實際 +0.04% 區間內, 判讀一致｜trader 條件: SL 觸發",
+      "max_runup_pct": 1.511,
+      "max_drawdown_pct": -6.095
+    }
+  ]
+}

@@ -1,0 +1,411 @@
+{
+  "version": "4.137.0",
+  "date": "2026-10-01",
+  "strategy_changed": false,
+  "baseline": "tmp/investment-v55-baseline/status.bin",
+  "delivery": {
+    "source_snapshots": "implemented",
+    "controller": "implemented",
+    "shadow_telemetry": "implemented",
+    "committed_index": "implemented",
+    "red_team_calibration": "implemented"
+  },
+  "tests": {
+    "new_controller_contract": {
+      "passed": 48,
+      "scenarios": [
+        "profitable",
+        "negative_cashflow",
+        "insufficient_peers",
+        "slots_1_2_3",
+        "idempotent_commit",
+        "invalid_source",
+        "disconnected_validator_mutation",
+        "JSON_authority",
+        "optional_forecaster_rc1_keeps_reason_and_rejects_old_cache",
+        "window_external_nan_rejected_only_inside_window",
+        "legacy_summary_gap_fill",
+        "technical_shape_accept_gate",
+        "producer_change_finalize_gate",
+        "all_raw_script_bootstraps",
+        "lane_FMP_shared_limiter",
+        "phase46_cap_and_nonnull_position_full_commit",
+        "Red_Team_frozen_Phase0_included_before_hash",
+        "finalize_failure_telemetry",
+        "final_cap_strategy_replay",
+        "RT_factor_clustered_touch_rates",
+        "uncommitted_prompt_tamper_health"
+      ]
+    },
+    "fmp_limiter": {
+      "passed": 1
+    },
+    "old_export_and_renderer": "passed",
+    "quant_decision_position_golden": "passed",
+    "broker_and_routing": "passed",
+    "earnings_schema": {
+      "passed": 27
+    },
+    "forecaster": {
+      "passed": 13
+    },
+    "valuation_dcf_comps": "passed",
+    "macro_regime_lookup": {
+      "passed": 5
+    }
+  },
+  "replay": {
+    "total": 201,
+    "changed_numeric_rows": 0,
+    "existing_decision_mismatches": 11,
+    "position_current_rule_mismatches": 0,
+    "baseline_description_only_change": "supported versions now include V5.5"
+  },
+  "known_preexisting_failure": {
+    "test": "scripts/extractors/tests/test_extractors_review_fixes.py::test_news_digest_parenthetical_backcompat",
+    "cause": "news_digest_extractor does not parse session_macro_delta(+0.2)",
+    "scope": "unchanged news parser"
+  },
+  "rollout": {
+    "default_switched": false,
+    "pilot_target": 5,
+    "observation_target": 20,
+    "strategy_approval_required": true,
+    "pilot_verified_successes": 1
+  },
+  "trials": {
+    "requested_model": "gpt-6-luna",
+    "effort": "max",
+    "HPE": "fresh_run_committed; six_model_stages_first_attempt; JSON_Markdown_provenance_and_unchanged_code_verified",
+    "NVDA": "live_trial_phase46_gate_failed; fixed_saved_input_replay_passed; no_production_commit",
+    "BE": "live_trial_renderer_gate_failed; fixed_saved_input_JSON_and_Markdown_replay_passed; no_production_commit",
+    "formal_verified_successes": 1
+  },
+  "trial_attempts": [
+    {
+      "ticker": "HPE",
+      "model": "gpt-6-luna",
+      "effort": "max",
+      "job_id": "invest_manual_codex_HPE_20260930_230922",
+      "elapsed_seconds": 447,
+      "status": "cancelled_before_snapshot",
+      "reason": "FRED mapping and Phase 0 copy verification corrected",
+      "code_untouched": true
+    },
+    {
+      "ticker": "HPE",
+      "model": "gpt-6-luna",
+      "effort": "max",
+      "job_id": "invest_manual_codex_HPE_20260930_232504",
+      "elapsed_seconds": 751,
+      "status": "phase0_schema_failed",
+      "reason": "FRED nested regime_signals were not flattened; deterministic assembler added and validated",
+      "code_untouched": true,
+      "committed": false,
+      "coordinator_usage": {
+        "input_tokens": 2498228,
+        "cached_input_tokens": 2328832,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 37047,
+        "reasoning_output_tokens": 30163
+      }
+    },
+    {
+      "ticker": "HPE",
+      "model": "gpt-6-luna",
+      "effort": "max",
+      "job_id": "invest_manual_codex_HPE_20260930_235237",
+      "elapsed_seconds": 1154,
+      "status": "subagent_self_attestation_blocked",
+      "reason": "No host model rejection recorded; generic model self-description was incorrectly treated as a model gate",
+      "code_untouched": true,
+      "committed": false,
+      "run_id": "HPE_20261001T000754_f552f5f9fc",
+      "coordinator_usage": {
+        "input_tokens": 7492507,
+        "cached_input_tokens": 7317248,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 45606,
+        "reasoning_output_tokens": 34390
+      }
+    },
+    {
+      "job_id": "invest_manual_codex_NVDA_20261001_003028",
+      "ticker": "NVDA",
+      "protocol": "invest",
+      "runner": "v55",
+      "provider": "codex",
+      "model": "gpt-6-luna",
+      "effort": "max",
+      "created_at": "2026-09-30T16:30:29.749579+00:00",
+      "status": "complete",
+      "model_called": true,
+      "tokens": {
+        "input": 11938518,
+        "output": 87109,
+        "cached": 11604224
+      },
+      "queued_seconds": 29.358536374755204,
+      "started_at": "2026-09-30T16:30:59.697922+00:00",
+      "finished_at": "2026-09-30T17:05:16.655904+00:00",
+      "elapsed_seconds": 2055,
+      "process_rc": 0,
+      "validator_rc": 0,
+      "code_untouched": true,
+      "report": "/Users/kavi/Developer/Claude/Projects/ai-investment-committee/investment/invest_logs/runs/NVDA_20261001T003605_0eab632f7a/report.md",
+      "token_scope": "coordinator_stream_receipt; child inclusion provider-dependent",
+      "accepted_for_pilot": false,
+      "post_run_audit": {
+        "reason": "Burry source field not mapped into engine score",
+        "fixed_replay_numeric_difference": false
+      }
+    },
+    {
+      "job_id": "invest_manual_codex_BE_20261001_075649",
+      "ticker": "BE",
+      "protocol": "invest",
+      "runner": "v55",
+      "provider": "codex",
+      "model": "gpt-6-luna",
+      "effort": "max",
+      "created_at": "2026-09-30T23:56:49.925412+00:00",
+      "status": "failed",
+      "model_called": true,
+      "tokens": {
+        "input": 5102159,
+        "output": 40736,
+        "cached": 4943616
+      },
+      "queued_seconds": 1.8660049168393016,
+      "started_at": "2026-09-30T23:56:52.047524+00:00",
+      "finished_at": "2026-10-01T00:11:42.421209+00:00",
+      "elapsed_seconds": 890,
+      "process_rc": 0,
+      "validator_rc": 1,
+      "code_untouched": true,
+      "report": null,
+      "token_scope": "coordinator_stream_receipt; child inclusion provider-dependent",
+      "reason": "Host treated optional Forecaster insufficient PE history rc1 as mandatory gate; controller collection now owns optional failure handling"
+    },
+    {
+      "job_id": "invest_manual_codex_BE_20261001_083740",
+      "ticker": "BE",
+      "protocol": "invest",
+      "runner": "v55",
+      "provider": "codex",
+      "model": "gpt-6-luna",
+      "effort": "max",
+      "created_at": "2026-10-01T00:37:40.504924+00:00",
+      "status": "failed",
+      "model_called": true,
+      "tokens": {
+        "input": 8630072,
+        "output": 72549,
+        "cached": 8393728
+      },
+      "queued_seconds": 2.7278968333266675,
+      "started_at": "2026-10-01T00:37:43.594156+00:00",
+      "finished_at": "2026-10-01T01:11:49.341996+00:00",
+      "elapsed_seconds": 2043,
+      "process_rc": 0,
+      "validator_rc": 1,
+      "code_untouched": true,
+      "report": null,
+      "token_scope": "coordinator_stream_receipt; child inclusion provider-dependent",
+      "run_id": "BE_20261001T083857_0dd010e757",
+      "reason": "technical pattern_taxonomy string rejected by renderer; no history entry; fixed renderer replay and Markdown validator pass",
+      "accepted_for_pilot": false
+    },
+    {
+      "ticker": "NVDA",
+      "model": "gpt-6-luna",
+      "effort": "max",
+      "job_id": "invest_manual_codex_NVDA_20261001_094042",
+      "run_id": "NVDA_20261001T094245_fac61d27a6",
+      "elapsed_seconds": 2045,
+      "status": "phase46_export_gate_failed",
+      "code_untouched": true,
+      "committed": false,
+      "offline_replay": "tmp/investment-v55-baseline/NVDA_cap_replay.json",
+      "offline_json_and_markdown_validators": 0,
+      "reason": "Assembler did not invoke existing Phase 4.6 cap and omitted risk_audit position field; corrected without formula changes",
+      "tokens": {
+        "input": 9705103,
+        "output": 85058,
+        "cached": 9377792
+      },
+      "queued_seconds": 16.881396458949894,
+      "validator_rc": 1,
+      "accepted_for_pilot": false
+    },
+    {
+      "job_id": "invest_manual_codex_HPE_20261001_203815",
+      "ticker": "HPE",
+      "protocol": "invest",
+      "runner": "v55",
+      "provider": "codex",
+      "model": "gpt-6-luna",
+      "effort": "max",
+      "created_at": "2026-10-01T12:38:15.898565+00:00",
+      "status": "failed",
+      "model_called": true,
+      "tokens": {
+        "input": 7026285,
+        "output": 70820,
+        "cached": 6606592
+      },
+      "queued_seconds": 27.73310579173267,
+      "started_at": "2026-10-01T12:38:43.912004+00:00",
+      "finished_at": "2026-10-01T13:11:36.685242+00:00",
+      "elapsed_seconds": 1972,
+      "process_rc": 0,
+      "validator_rc": 1,
+      "code_untouched": true,
+      "report": null,
+      "token_scope": "coordinator_stream_receipt; child inclusion provider-dependent",
+      "run_id": "HPE_20261001T205216_57560a0501",
+      "accepted_for_pilot": false,
+      "failure_reason": "Coordinator changed controller-frozen Red Team prompt after hash; claim gate rejected before RT dispatch"
+    },
+    {
+      "job_id": "invest_manual_codex_HPE_20261001_222822",
+      "ticker": "HPE",
+      "protocol": "invest",
+      "runner": "v55",
+      "provider": "codex",
+      "model": "gpt-6-luna",
+      "effort": "max",
+      "created_at": "2026-10-01T14:28:22.701874+00:00",
+      "status": "complete",
+      "model_called": true,
+      "tokens": {
+        "input": 11846021,
+        "output": 76508,
+        "cached": 11467776
+      },
+      "queued_seconds": 2.856980875134468,
+      "started_at": "2026-10-01T14:28:26.013926+00:00",
+      "finished_at": "2026-10-01T15:02:26.970160+00:00",
+      "elapsed_seconds": 2040,
+      "process_rc": 0,
+      "validator_rc": 0,
+      "code_untouched": true,
+      "report": "/Users/kavi/Developer/Claude/Projects/ai-investment-committee/investment/invest_logs/runs/HPE_20261001T223002_25eeeee46b/report.md",
+      "token_scope": "coordinator_stream_receipt; child inclusion provider-dependent",
+      "run_id": "HPE_20261001T223002_25eeeee46b",
+      "accepted_for_pilot": true,
+      "committed": true,
+      "dashboard_wait_seconds": 213,
+      "post_run_audit": {
+        "json_validator_rc": 0,
+        "markdown_validator_rc": 0,
+        "history_entries": 1,
+        "provenance_valid": true,
+        "frozen_evidence_valid": true,
+        "all_six_model_stages_first_attempt": true
+      },
+      "result": {
+        "final_decision": "STAGED_ENTRY",
+        "final_score": 0.9422,
+        "position_size_pct": 0.035375,
+        "analysis_price": 62.99,
+        "execution_quality": "complete",
+        "red_team_verdict": "STRONG_COUNTER",
+        "red_team_synthetic": false
+      }
+    }
+  ],
+  "broker_waits": [
+    {
+      "job_id": "invest_manual_codex_HPE_20260930_234135",
+      "reason": "provider_busy",
+      "model_called": false
+    },
+    {
+      "job_id": "invest_manual_codex_HPE_20260930_234309",
+      "reason": "provider_busy",
+      "model_called": false
+    },
+    {
+      "job_id": "invest_manual_codex_NVDA_20261001_093738",
+      "ticker": "NVDA",
+      "protocol": "invest",
+      "runner": "v55",
+      "provider": "codex",
+      "model": "gpt-6-luna",
+      "effort": "max",
+      "created_at": "2026-10-01T01:37:39.009427+00:00",
+      "status": "blocked",
+      "model_called": false,
+      "tokens": {
+        "input": null,
+        "output": null,
+        "cached": null
+      },
+      "reason": "the quota broker did not authorise this run (broker:unavailable): the broker could not be reached — check the daemon is up (`lqb status`). Broker-only mode stops every LLM task.",
+      "queued_seconds": 10.685414749663323
+    }
+  ],
+  "live_index": {
+    "records": 566,
+    "committed_json": 206,
+    "eligible_windows": 205,
+    "history_unchanged_by_rebuild": true,
+    "eligible_red_team": 156,
+    "exclusion_reasons": {
+      "execution_not_complete": 49,
+      "incomplete_or_unverified": 1
+    },
+    "scope": "Index built before successful HPE rerun; new HPE observation window pending, excluded from current calibration"
+  },
+  "trial_repair_validation": {
+    "BE_renderer_replay": "tmp/investment-v55-baseline/BE_renderer_replay.md",
+    "markdown_validator_rc": 0,
+    "history_modified": false,
+    "window_regression_before_fix": "1 failed",
+    "window_regression_after_fix": "passed"
+  },
+  "offline_trial_replays": {
+    "NVDA": {
+      "session": "tmp/investment-v55-baseline/NVDA_cap_replay.json",
+      "report": "tmp/investment-v55-baseline/NVDA_cap_replay.md",
+      "committed": false,
+      "final_decision": "HOLD",
+      "final_score": 0.7151,
+      "avg_confidence": 0.65,
+      "position_size_pct": 0.0,
+      "json_validator_rc": 0,
+      "markdown_validator_rc": 0
+    },
+    "BE": {
+      "session": "tmp/investment-v55-baseline/BE_fixed_replay.json",
+      "report": "tmp/investment-v55-baseline/BE_fixed_replay.md",
+      "committed": false,
+      "final_decision": "HOLD",
+      "final_score": 0.2824,
+      "avg_confidence": 0.604,
+      "position_size_pct": 0.0,
+      "json_validator_rc": 0,
+      "markdown_validator_rc": 0
+    }
+  },
+  "final_health": {
+    "runs": 6,
+    "committed": 1,
+    "raw_committed": 2,
+    "invalid_evidence_runs": 4,
+    "evidence_failure_rate": 0.6666666666666666,
+    "eligible_red_team_samples": 156
+  },
+  "maintenance": {
+    "version_sync": "4.137.0",
+    "context_sync": true,
+    "history_rewritten": false,
+    "git_commit_created": false,
+    "changelog_archive": "archive/changelog_pre_v4.135.md",
+    "archived_lines": 12579
+  },
+  "model_trials_stopped": true,
+  "human_report": "reports/decision_review/investment_v55_acceptance.md",
+  "latest_verification_at": "2026-10-01T15:06:24.049070+00:00"
+}

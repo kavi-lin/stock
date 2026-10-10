@@ -1,0 +1,51 @@
+{
+  "experiment_id": "research-20261005",
+  "checked_at": "2026-10-05T10:42:38.473165+00:00",
+  "passed": true,
+  "observation_seconds": 21611.23426,
+  "start": "2026-10-04T18:07:31.109927+00:00",
+  "deadline": "2026-10-05T00:07:31.109927+00:00",
+  "finished_at": "2026-10-05T00:07:42.344187+00:00",
+  "preflight_calls": 24,
+  "live_calls": 28,
+  "peak_rolling_hour_debates": 5,
+  "model_effort": "gpt-6-luna/max",
+  "no_calls_after_quota": true,
+  "no_calls_after_deadline": true,
+  "acknowledged_calls": 52,
+  "broker_executions": 52,
+  "broker_history_rows": 53,
+  "reconciliation_errors": [],
+  "unknown_usage_calls": [
+    "rd_417797dda73a40958b212cbb7afb1a59_a",
+    "rd_915215910b42427da46e24b839f906eb_a"
+  ],
+  "known_token_sum": 1020072,
+  "known_token_samples": 50,
+  "known_token_mean": 20401.44,
+  "cards": 19,
+  "cards_with_original_page_available": 2,
+  "cards_citing_original_page": 1,
+  "cards_citing_feed_only": 18,
+  "provider_busy_wait_seconds": 577.56754,
+  "quota_pause_to_deadline_seconds": 2569.666845,
+  "interfaces": {
+    "invest": {
+      "http": 200,
+      "cards": 1
+    },
+    "earnings": {
+      "http": 200,
+      "cards": 1
+    },
+    "momentum": {
+      "http": 200,
+      "cards": 1
+    },
+    "nexus": {
+      "http": 200,
+      "cards": 1
+    }
+  },
+  "worker_exited": true
+}

@@ -1,11 +1,11 @@
 # Pre-Market Morning Brief — 2026-08-24
-_Generated 2026-08-23 20:35 UTC · pre-open snapshot (EOD + overnight, no live intraday)_
+_Generated 2026-08-24 14:13 UTC · pre-open snapshot (EOD + overnight, no live intraday)_
 
 ## 1. Regime Snapshot
 
-- **Breadth**: 79.2/100 — Healthy (exposure 75-90%)
-- **FTD**: FTD_CONFIRMED — Strong FTD (exposure 75-100%, day 13)
-- **Market-Top**: 34.9/100 — Yellow (Early Warning) (risk budget 80-90%)
+- **Breadth**: 76.2/100 — Healthy (exposure 75-90%)
+- **FTD**: FTD_CONFIRMED — Strong FTD (exposure 75-100%, day 14)
+- **Market-Top**: 35.6/100 — Yellow (Early Warning) (risk budget 80-90%)
 - **Regime**: RISK_ON · cycle Early · Fear/Greed 63 (Greed) · macro 1.08x
 - **Hot**: Healthcare  |  **Cold**: Technology, Financials, Industrials, Materials
 
@@ -13,10 +13,10 @@ _Generated 2026-08-23 20:35 UTC · pre-open snapshot (EOD + overnight, no live i
 
 | Index | Last | Chg% |
 |---|--:|--:|
-| S&P 500 (^GSPC) | 7,674.37 | +0.43% |
-| Nasdaq Comp (^IXIC) | 26,180.46 | +0.43% |
-| Dow Jones (^DJI) | 53,277.01 | +0.98% |
-| VIX (^VIX) | 15.13 | -5.50% |
+| S&P 500 (^GSPC) | 7,643.34 | -0.40% |
+| Nasdaq Comp (^IXIC) | 25,924.70 | -0.98% |
+| Dow Jones (^DJI) | 53,377.35 | +0.19% |
+| VIX (^VIX) | 15.97 | +5.55% |
 
 ## 3. Biggest Movers — Large Caps (overnight)
 
@@ -25,46 +25,46 @@ _(ranked across 131 mega-cap names)_
 ### Gainers
 | Ticker | Chg% | Price | Name |
 |---|--:|--:|---|
-| FCX | +7.65% | 76.67 | Freeport-McMoRan Inc. |
-| TSLA | +5.14% | 362.86 | Tesla, Inc. |
-| CMG | +4.56% | 36.90 | Chipotle Mexican Grill, Inc. |
-| TGT | +4.53% | 165.42 | Target Corporation |
-| DE | +4.27% | 647.47 | Deere & Company |
-| GS | +3.73% | 1,039.28 | The Goldman Sachs Group, Inc |
-| MS | +3.25% | 214.20 | Morgan Stanley |
-| ORCL | +3.10% | 146.47 | Oracle Corporation |
-| NEM | +3.09% | 131.58 | Newmont Corporation |
-| F | +3.00% | 14.41 | Ford Motor Company |
+| DIS | +3.70% | 111.77 | The Walt Disney Company |
+| NUE | +3.14% | 251.27 | Nucor Corporation |
+| MO | +2.87% | 67.99 | Altria Group, Inc. |
+| PCG | +2.73% | 18.08 | PG&E Corporation |
+| KMB | +2.69% | 112.25 | Kimberly-Clark Corporation |
+| TGT | +2.55% | 169.66 | Target Corporation |
+| GIS | +2.25% | 40.87 | General Mills, Inc. |
+| AXP | +2.24% | 343.53 | American Express Company |
+| BKNG | +2.14% | 214.10 | Booking Holdings Inc. |
+| WFC | +2.14% | 85.63 | Wells Fargo & Company |
 
 ### Losers
 | Ticker | Chg% | Price | Name |
 |---|--:|--:|---|
-| SRE | -5.13% | 82.90 | Sempra |
-| AEP | -3.79% | 120.94 | American Electric Power Comp |
-| XEL | -3.06% | 76.30 | Xcel Energy Inc. |
-| EXC | -2.84% | 43.78 | Exelon Corporation |
-| SO | -2.72% | 88.94 | The Southern Company |
-| DUK | -2.31% | 119.85 | Duke Energy Corporation |
-| WEC | -2.30% | 106.01 | WEC Energy Group, Inc. |
-| INTC | -2.24% | 90.07 | Intel Corp. |
-| PCG | -2.00% | 17.60 | PG&E Corporation |
-| KMI | -1.99% | 30.98 | Kinder Morgan, Inc. |
+| INTC | -4.70% | 85.84 | Intel Corp. |
+| AMD | -4.27% | 453.03 | Advanced Micro Devices, Inc. |
+| DLR | -3.29% | 184.35 | Digital Realty Trust, Inc. |
+| AMAT | -3.23% | 476.41 | Applied Materials, Inc. |
+| ORCL | -3.10% | 141.94 | Oracle Corporation |
+| EQIX | -2.91% | 1,034.40 | Equinix, Inc. |
+| TXN | -2.79% | 256.98 | Texas Instruments Incorporat |
+| ETN | -2.68% | 407.98 | Eaton Corporation plc |
+| NVDA | -2.63% | 209.08 | NVIDIA Corporation |
+| CAT | -2.57% | 806.62 | Caterpillar Inc. |
 
 ## 4. Sector Performance (prev session)
 
 | Sector | Chg% |
 |---|--:|
-| Financial Services | +1.16% |
-| Healthcare | +1.02% |
-| Communication Services | +0.63% |
-| Basic Materials | -0.10% |
-| Real Estate | -0.21% |
-| Consumer Defensive | -0.28% |
-| Consumer Cyclical | -0.42% |
-| Technology | -1.49% |
-| Energy | -1.50% |
-| Industrials | -1.55% |
-| Utilities | -1.96% |
+| Communication Services | +0.94% |
+| Financial Services | +0.94% |
+| Consumer Defensive | +0.52% |
+| Basic Materials | +0.11% |
+| Consumer Cyclical | -0.17% |
+| Utilities | -0.31% |
+| Energy | -0.49% |
+| Industrials | -0.56% |
+| Healthcare | -0.62% |
+| Technology | -1.74% |
+| Real Estate | -2.26% |
 
 ## 5. Today's Earnings
 
@@ -92,16 +92,16 @@ _structural watchlist empty._
 
 | Rank | Ticker | Score | 1d% | Stage | Signals |
 |--:|---|--:|--:|---|---|
-| 1 | FCX | 72.5 | +7.64% | Stage 2 uptrend | stage2_uptrend_intact, low_short_interest, fre |
-| 2 | SYF | 77.5 | +3.60% | Stage 2 uptrend | stage2_uptrend_intact, volume_expansion, fresh |
-| 3 | A | 67.5 | +1.73% | Stage 2 uptrend | stage2_uptrend_intact, volume_expansion, low_s |
-| 4 | MRK | 67.5 | +2.39% | Stage 2 uptrend | stage2_uptrend_intact, volume_expansion, low_s |
-| 5 | GPC | 71.2 | +0.78% | Stage 2 uptrend | stage2_uptrend_intact, fresh_golden_cross_50_2 |
-| 6 | PYPL | 71.2 | -1.20% | Stage 2 uptrend | stage2_uptrend_intact, fresh_golden_cross_50_2 |
-| 7 | BDX | 73.8 | +2.33% | Stage 2 uptrend | stage2_uptrend_intact, fresh_golden_cross_50_2 |
-| 8 | CF | 72.5 | +3.10% | Stage 2 uptrend | stage2_uptrend_intact, macd_histogram_rising |
-| 9 | TRGP | 67.5 | -1.04% | Stage 2 uptrend | stage2_uptrend_intact, volume_expansion, low_s |
-| 10 | TGT | 68.8 | +4.54% | Stage 2 uptrend | stage2_uptrend_intact, volume_expansion, macd_ |
+| 1 | FCX | 72.5 | +1.20% | Stage 2 uptrend | stage2_uptrend_intact, volume_expansion, heavy |
+| 2 | ABNB | 76.2 | +1.92% | Stage 2 uptrend | stage2_uptrend_intact, at_52w_new_high, rs_lea |
+| 3 | TGT | 76.2 | +2.32% | Stage 2 uptrend | stage2_uptrend_intact, volume_expansion, macd_ |
+| 4 | XYZ | 72.5 | +1.40% | Stage 2 uptrend | stage2_uptrend_intact, macd_histogram_rising,  |
+| 5 | MA | 72.5 | +2.88% | Stage 2 uptrend | stage2_uptrend_intact, low_short_interest, fre |
+| 6 | BDX | 77.5 | +0.32% | Stage 2 uptrend | stage2_uptrend_intact, fresh_golden_cross_50_2 |
+| 7 | MRNA | 81.2 | -8.39% | Stage 2 uptrend | stage2_uptrend_intact, volume_expansion, heavy |
+| 8 | A | 67.5 | -1.68% | Stage 2 uptrend | stage2_uptrend_intact, volume_expansion, heavy |
+| 9 | PYPL | 71.2 | +0.68% | Stage 2 uptrend | stage2_uptrend_intact, fresh_golden_cross_50_2 |
+| 10 | MRK | 63.8 | -1.30% | Stage 2 uptrend | stage2_uptrend_intact, volume_expansion, low_s |
 
 ## 10. Watch Items / Binary Risks (≤48h)
 

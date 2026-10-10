@@ -1,0 +1,3175 @@
+{
+  "sha256:75d699c3cceeb11491a0de443fbac9fdd38eb129a4fcb542454faea9f260bb63": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Consumer Cyclical",
+      "ticker_industry": "Auto - Manufacturers",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "industry_avg_change_1d": 3.2394,
+      "industry_avg_rank": 8,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:142786094f74946df2f69e585306ec920b6a5136d9859f0ae652e7374f749292": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Utilities",
+      "ticker_industry": "Independent Power Producers",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 21,
+      "sector_rank": 11,
+      "sector_top_3": false
+    }
+  },
+  "sha256:c86efcdd206e3657bbf784b1db02d80c6afa7849a91661eb14891e5d402524cf": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Infrastructure",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.2029,
+      "industry_avg_rank": 45,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:43bdaf3c9782b52546bb6721f9f04c496035f0bcfb2acc4659d6f11659e71596": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Application",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.1289,
+      "industry_avg_rank": 49,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:3217a3fa43dffebfb755bbed894eb6e405a0e5a5e3c3136a85d6153d02ee3429": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:e790ee430bbe1a0638e13038c42d07e8efff44aafef415ee601a8df52bf47340": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Infrastructure",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.2029,
+      "industry_avg_rank": 45,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:baa0ef8c4c26f0729ef923756d378a081ef634dcbd668e4cd36bf2d5286f8f72": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Consumer Electronics",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 1.7237,
+      "industry_avg_rank": 10,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:8bc373feae19083a92610a0ab434ed52a544bf5f0c01352665e97fc6ae1ba4cb": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Consumer Cyclical",
+      "ticker_industry": "Specialty Retail",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "industry_avg_change_1d": 1.2037,
+      "industry_avg_rank": 15,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:e7aa2d881821cf162dc321333f870df2a4bdc027d6afa16d19858878bb91a82f": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Infrastructure",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.2029,
+      "industry_avg_rank": 45,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:d98ca1d5e359dd74bc5f7b453ea2cb927cfeaf88ffc649f8b5bc07451868bad6": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:e9104f75c1fd0f505a3aaa587da8fc425c4c626eaf1abf92903cc3efd621aa2a": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Consumer Cyclical",
+      "ticker_industry": "Auto - Manufacturers",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "industry_avg_change_1d": 3.2394,
+      "industry_avg_rank": 8,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:df3c3b189b65a9a850594c8830b190b372f8ee1919aaa38397d5dad5879407be": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Communication Services",
+      "ticker_industry": "Internet Content & Information",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "industry_avg_change_1d": 0.4181,
+      "industry_avg_rank": 37,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:6c7a43c7acc3de2a54f3b030d994c569d3ef34716891b2ee66bfe569486c230e": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Infrastructure",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.2029,
+      "industry_avg_rank": 45,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:17fffe527eb1334ca80e73ffebd0bfff3622ec92ebd1419f56800925d56201a0": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Communication Services",
+      "ticker_industry": "Internet Content & Information",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "industry_avg_change_1d": 0.4181,
+      "industry_avg_rank": 37,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:6ec62033d92bcbcfefe9df89cf51f41e1c76bf0ce567d3e62e21302404ba8b6b": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:8f98819a251eaca54388d64b4b1ef05d8fb5804c34476ccb10252a3ce7f86288": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:e6589eb8c62b5b4ab04db94deedf5e3b1f31212396062ee3b8821efcbbc8ed54": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Information Technology Services",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": -1.1487,
+      "industry_avg_rank": 100,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:1d28a3ba39e0e8158bafc4875031c043028f189e1713797b80e757310af74687": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Application",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.1289,
+      "industry_avg_rank": 49,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:b30895262aba9ff2cae4b9f80ffb0f5fe9c66bfebd6580bf0faaa868aa65c55d": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Infrastructure",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.2029,
+      "industry_avg_rank": 45,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:d705ffedf4e683722f9205e418c0268dd54758acfc27a07c9b2f793c52b932ce": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Communication Equipment",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 3.599,
+      "industry_avg_rank": 7,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:b7d78fef147e47cff14c5f93b881a2c892d08c2d57989a7b7c9a48475d2aad3e": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Computer Hardware",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 6.2238,
+      "industry_avg_rank": 1,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:b8406d2e5913f062b7536047649ed0de9ff89085a0f4a4939b7298252cb11f5d": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Computer Hardware",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 6.2238,
+      "industry_avg_rank": 1,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:e10e704e98cd2a7c2c480d6133c5ac01f7f484b9505ec41fe0a20bebd3d79a0e": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Application",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.1289,
+      "industry_avg_rank": 49,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:2c2499a1aea72e9bcca40b4b2a6108da9be3bfc0ae265ce79dabecd6bf266210": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Industrials",
+      "ticker_industry": "Electrical Equipment & Parts",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 52,
+      "sector_rank": 5,
+      "sector_top_3": false,
+      "industry_avg_change_1d": 0.2386,
+      "industry_avg_rank": 44,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:2b841f15c4e87fd3b05075a8c1667f596529cfde36c446ebbce305e9caf72f1a": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Infrastructure",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.2029,
+      "industry_avg_rank": 45,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:ad773f2d9932c0d4e5252d06daf48a95c3b1cc0d024b8972e3bb6fe172cfc18a": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Utilities",
+      "ticker_industry": "Independent Power Producers",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 21,
+      "sector_rank": 11,
+      "sector_top_3": false
+    }
+  },
+  "sha256:f23c31f3d05819c3573886b5e6f2cd130629bc2c62dfceffb40b315a15916799": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:233af27b0212f6b4dbba0db1f0683d0832d8b9a3caa06931a6b3b0a0b8d24cf9": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:03b2edbb699aadf8f247ed2a789d4728a88037eedcdab6de7a35572ca6fd6679": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:42a30bb9fe2da906dc7a9b80414955a0f2304a216fa98284767169672341b491": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Financial Services",
+      "ticker_industry": "Banks - Diversified",
+      "missing": [],
+      "data_date": "2026-09-30"
+    }
+  },
+  "sha256:e60eb99d034d4438b4508c5f3c767c97dcc22cdea8de1581ccacd277701c9f32": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Consumer Cyclical",
+      "ticker_industry": "Auto - Manufacturers",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "industry_avg_change_1d": 3.2394,
+      "industry_avg_rank": 8,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:1faf70dd495cb6371787c3146417433c74fe5e8d03b3aa934d9e6397065ea99b": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:a3611c63fa4c329155ba6044a0a81dc1272561bce17930ab00db28b5e48b440e": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:3b5f3c12471852f7ea6a0f862ca24558a783331ad82e91b4be2fd1cf331fbaf7": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:236856fead7470dac8239684064c7ab8301f51b91d743f593443c1329bd929fa": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Infrastructure",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.2029,
+      "industry_avg_rank": 45,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:91f7b31127a2ec5bf71b93a5904a0336d9ab3f34c0dc405327d939f7109477e3": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:e36c8c396bc2b3dcc9eb70a130b354c271840973095de347f357776ca91f9717": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Financial Services",
+      "ticker_industry": "Banks - Regional",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "industry_avg_change_1d": -0.534,
+      "industry_avg_rank": 74,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:2efd92f4e706d2c1d3f0c5b5970f50c99782b1f1d3f8f4c27f949eb456b172fb": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Computer Hardware",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 6.2238,
+      "industry_avg_rank": 1,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:9cedd7945056d826f7b3e77bff4d79bab3cb40505429d0384ae01b66462659ed": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Industrials",
+      "ticker_industry": "Engineering & Construction",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 52,
+      "sector_rank": 5,
+      "sector_top_3": false,
+      "industry_avg_change_1d": -1.1113,
+      "industry_avg_rank": 99,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:50de005b8f4d9ff633e6d7d0e9c0bee7399f4c64d098f97c1dee7576fa59a3cc": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Industrials",
+      "ticker_industry": "Integrated Freight & Logistics",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 52,
+      "sector_rank": 5,
+      "sector_top_3": false,
+      "industry_avg_change_1d": -1.8974,
+      "industry_avg_rank": 114,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:b124a447550dc5a62933e9cf1a71f1d9b69b40fbfc401efdf12c9bd989bb4083": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Industrials",
+      "ticker_industry": "Industrial - Machinery",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 52,
+      "sector_rank": 5,
+      "sector_top_3": false,
+      "industry_avg_change_1d": -0.7057,
+      "industry_avg_rank": 81,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:15f550e57203cbbfb0f46a9fcc44dce5dd2e4e13c9a8c3658b3ba90f8c388e3f": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Financial Services",
+      "ticker_industry": "Asset Management",
+      "missing": [],
+      "data_date": "2026-09-30"
+    }
+  },
+  "sha256:ea87e121dd38b5ed5a5e828fb6aea2e20ce158e56382de208bb065f082bba73e": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:8f82106df55b468922d6f733bd56f82b5a405556ddba8d6b39f2fe0e5f037981": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Consumer Cyclical",
+      "ticker_industry": "Specialty Retail",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "industry_avg_change_1d": 1.2037,
+      "industry_avg_rank": 15,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:73621f8537359d911a0c8e585defe4e4d034afa9462c1a21ed22c8dad94be91d": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:0e65e227a8faa3dc300e58041115f417b024a02318ab257c482e76ef7b1fe5c1": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Consumer Electronics",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 1.7237,
+      "industry_avg_rank": 10,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:683ce949585b8d54c8a8a8500855f0ebb434976cd7271913dd5706d63bcc77c5": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:234d173c59f49c0bd8684bcbdd0b4270dc3a379adb0136fd509a66d21bcab665": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Infrastructure",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.2029,
+      "industry_avg_rank": 45,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:f52cfd226dd443d74ef26a4703b99a40acff6780b4d028cf5dd36f8e256a66c5": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Communication Services",
+      "ticker_industry": "Internet Content & Information",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "industry_avg_change_1d": 0.4181,
+      "industry_avg_rank": 37,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:aec1c6930610d0f5cd7ac3a58f340cf051c01f06b8b357ad800d619c2462211e": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:b6d6b56c2d1bab23845ed980faf149fbd4397f39ce9b6c830c6e7f3417f2606e": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Information Technology Services",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": -1.1487,
+      "industry_avg_rank": 100,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:2a9bd5ff67a97bf99c3c0d914bccfa0e79b4d64b678ad8faa5ba72a8d6b8483f": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:4267f4f73fae4a850cd352dc7556a9628f0cdaef0ba3168064d9539a60873ac1": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Financial Services",
+      "ticker_industry": "Asset Management",
+      "missing": [],
+      "data_date": "2026-09-30"
+    }
+  },
+  "sha256:477945521c5cded1f226a824fb78e4f0b1cb92f3aacfe35032cf42b8a6dbb69e": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:68562df99c107869a13027a21dd738a4ab771d6ace964aaf92f1bad53a1a430f": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Industrials",
+      "ticker_industry": "Industrial - Machinery",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 52,
+      "sector_rank": 5,
+      "sector_top_3": false,
+      "industry_avg_change_1d": -0.7057,
+      "industry_avg_rank": 81,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:224be490fdfae2bebc98e3bcd12ed70a2608c455bcf416e4eb9905a7c6ccc4ca": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Financial Services",
+      "ticker_industry": "Asset Management",
+      "missing": [],
+      "data_date": "2026-09-30"
+    }
+  },
+  "sha256:d3f935e7f81078fdb75caa9e635ee85c9e267d6b4cd6cc144c327e2492682394": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:256218f100ddc492eef9c63e9e4dd6efc72e2d124c83b3c3d81c1a230629125a": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:0507c306f9a54899c14c5567736f612b6cb6779a760e0fd4a435409d01e4397a": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Computer Hardware",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 6.2238,
+      "industry_avg_rank": 1,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:d16b0d343f85176710b790ba579add7768dc300e037a58a6e73f4ab27dcb4dff": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Infrastructure",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.2029,
+      "industry_avg_rank": 45,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:d17619ab514c86666bf0026de89c667c72866a86028c65447417492b17e6108f": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Industrials",
+      "ticker_industry": "Electrical Equipment & Parts",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 52,
+      "sector_rank": 5,
+      "sector_top_3": false,
+      "industry_avg_change_1d": 0.2386,
+      "industry_avg_rank": 44,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:18407d1d415ced809eb05c9f4b3ca83d31789630312c9f626a2835dab4b40f00": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:56c6857d1c5f051507c25dd896cbfb476878a1926ed0c333dc3916e354bf9c47": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:06077f992924bec80982f460c4b37fa1ebbe66365701d29be473796e9fb3e044": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:365f1f23153d009c4b97ae6a19ade399b944ac1e5617a71b7cea9eeb22a37074": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Utilities",
+      "ticker_industry": "Regulated Electric",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 21,
+      "sector_rank": 11,
+      "sector_top_3": false,
+      "industry_avg_change_1d": 0.4561,
+      "industry_avg_rank": 33,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:53dbaf8eb620571d968e314e1b6de4cf447b1caac7b266d440ee2a7f5d486791": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Basic Materials",
+      "ticker_industry": "Copper",
+      "missing": [],
+      "data_date": "2026-09-30"
+    }
+  },
+  "sha256:2ed4e9c043214404d2cc5c5ea3f7eafd958e5c00817a531cee171477f2af8c74": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:03e350497b66977cf945ddb851f246284d13a31ed9ea32fa3942cf4f6645845b": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:06566b74389104eee3170aa372fe2044d944bf3d381722a13f0302509628858f": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Industrials",
+      "ticker_industry": "Manufacturing - Tools & Accessories",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 52,
+      "sector_rank": 5,
+      "sector_top_3": false,
+      "industry_avg_change_1d": 0.9308,
+      "industry_avg_rank": 22,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:9b5d7277443fc6f982299f425e5a3b632402cb1b57b3e23da0b1b6643df3b7d0": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:ef3b7a30b681894e075aba618d6dceec765d23d93b6d7332ad2d6f1c0ae95c2c": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Communication Services",
+      "ticker_industry": "Telecommunications Services",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "industry_avg_change_1d": 0.1188,
+      "industry_avg_rank": 50,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:fd03b618e727e7bd66517fcdc6a286fb274be5815b802fedd5a7f21bcdeadae5": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Industrials",
+      "ticker_industry": "Railroads",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 52,
+      "sector_rank": 5,
+      "sector_top_3": false,
+      "industry_avg_change_1d": -0.9185,
+      "industry_avg_rank": 91,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:27628a92a30f8eca3e19ff3635030759cef4ad5f3059aeb3e5aa0d6d7fe54283": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Real Estate",
+      "ticker_industry": "REIT - Specialty",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "industry_avg_change_1d": -0.1028,
+      "industry_avg_rank": 58,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:5486fbe4b3a979baf6954b5a44aac6be3876a61108d33f75959e87873b0d3e4d": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:b3e32e7f5efb25e8a065ee8a92fa9a08dfe9e2ad06e3089f0794be4c7c75cc10": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Financial Services",
+      "ticker_industry": "Insurance - Property & Casualty",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "industry_avg_change_1d": -0.8991,
+      "industry_avg_rank": 90,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:6f5283cfd337222e27c8689ab3952ae0c0868653a9fc87b3894f5811750f7c91": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Industrials",
+      "ticker_industry": "Electrical Equipment & Parts",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 52,
+      "sector_rank": 5,
+      "sector_top_3": false,
+      "industry_avg_change_1d": 0.2386,
+      "industry_avg_rank": 44,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:af03f01baaf32e2e2eb735caa779d03a6786939cef84e4742e18987632383671": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:14d06fac67e662ff4a457889a48b6b44d31012ad5c7cd7430027fb42c0a2290f": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:c37d092a771404fef5e9f9c6b7dedd55d0050feca2dfb4655440f4fdd77e7c95": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Communication Equipment",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 3.599,
+      "industry_avg_rank": 7,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:b74d752b8044e59873ce0b134c0e242819c419cedbc83f027976574be960df90": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Energy",
+      "ticker_industry": "Oil & Gas Equipment & Services",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 65,
+      "sector_rank": 3,
+      "sector_top_3": true,
+      "industry_avg_change_1d": -0.1487,
+      "industry_avg_rank": 61,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:1f420cc3fb46cd742263c126f3a7bfdecff6b4dec1524cc56e98ba2612b8e364": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Hardware, Equipment & Parts",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 3.6505,
+      "industry_avg_rank": 6,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:cb772588d382e050dac791304ceb2b9197c27001c0c95847f7dfe24d0e9ef304": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:6aeccdcd8c02e5c92525a7971ccd61d2418b433095c96e697498b6a7de0d14b5": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Communication Equipment",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 3.599,
+      "industry_avg_rank": 7,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:86f8fe23ed9ba0faa430175001c541a3a1bb40cf71457e3de8d3c0199f1ffefa": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Hardware, Equipment & Parts",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 3.6505,
+      "industry_avg_rank": 6,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:0fc7c178cd8047b94d33b12a9e829dffa5b188d23dce47780503688cd81348ae": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Communication Equipment",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 3.599,
+      "industry_avg_rank": 7,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:9d10c6a9bc229d7837296dbd98cebf66e453d0593836736bb72a308955514564": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:b1f1cf308d0ee08add0f39ff5d21cbba7a70fc1616574c77b31b10dae51e2389": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:31916770caab85827677e1ba381841e23e3cc0d07adf44acb289aefa8a2f5e9d": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:e441a6e73374ffef2c294481bc2b9b7171e2c30469b43cde95eef5a98bdd05f2": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Consumer Cyclical",
+      "ticker_industry": "Packaging & Containers",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "industry_avg_change_1d": 0.4246,
+      "industry_avg_rank": 35,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:5076eed202b2e8ffbeed62676ac49843c8b4aab6d7ee88e24125b46dc5104d27": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Application",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.1289,
+      "industry_avg_rank": 49,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:3f7cf4020b8058b69cc1f2ea4b4c2a4df437a162e7a984bb626d6dac34d00388": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Application",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.1289,
+      "industry_avg_rank": 49,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:0d1033a31610ccc33ae020e11a8ff66bee9690ae440524d8e26b9b4f7b1482ce": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:be0c2bef976e00f56205e1e63622c0021f5fde7aa507fccd681e1b5718054bba": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Industrials",
+      "ticker_industry": "Electrical Equipment & Parts",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 52,
+      "sector_rank": 5,
+      "sector_top_3": false,
+      "industry_avg_change_1d": 0.2386,
+      "industry_avg_rank": 44,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:4b2fe536e38753c23e036589745a38c81d224f7d774082730c76147fb73c8ab1": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Industrials",
+      "ticker_industry": "Electrical Equipment & Parts",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 52,
+      "sector_rank": 5,
+      "sector_top_3": false,
+      "industry_avg_change_1d": 0.2386,
+      "industry_avg_rank": 44,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:ba5ab7b017108e9acfbabf24f392bf4259343e10d7327f59288800717056ea9d": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:4f4346c7fa72d30682f51a37f8233d19c2a6690792e85df3d7f662112d10a337": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:5f8b712682e66a252ca825af42be5a6e6a782afd72acca6d912779d2317c5dc5": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Communication Services",
+      "ticker_industry": "Internet Content & Information",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "industry_avg_change_1d": 0.4181,
+      "industry_avg_rank": 37,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:beaea4a116086f5433a0b699db4ec5ba63b3f019fbb61a69258e87e6c41c7e2b": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:c43e5ca6f9c8564f42de8a9bfd6c5cc375e07cde8211d379e9d627287041f487": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:a58866bae23b44fdf27ad3c3fb711dad518e59d63c3e96e79966c7e29c9217aa": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Healthcare",
+      "ticker_industry": "Drug Manufacturers - General",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 71,
+      "sector_rank": 1,
+      "sector_top_3": true,
+      "industry_avg_change_1d": -1.2844,
+      "industry_avg_rank": 107,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:342728e0fa1256176112f9ddfe352fd142cddd2cd3166990a022745c80162f32": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Consumer Electronics",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 1.7237,
+      "industry_avg_rank": 10,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:0a20dbe4c32eba66622f85cdc0c22e40a842fbd32147cc438949dea2c1d04376": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Industrials",
+      "ticker_industry": "Electrical Equipment & Parts",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 52,
+      "sector_rank": 5,
+      "sector_top_3": false,
+      "industry_avg_change_1d": 0.2386,
+      "industry_avg_rank": 44,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:4264ac8ae290909cab6b56d459e97e4766e0f3d96e814beb36a6cf6388bc4fc3": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Application",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.1289,
+      "industry_avg_rank": 49,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:721df9eac0ba96152100d2f740ff12ca57e4bbc38bfde23137e124d7a0a47e1d": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:0093d4484091f12a8dd1b012a6c95a97a9c0b13b445effc70290587aaf223987": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Industrials",
+      "ticker_industry": "Engineering & Construction",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 52,
+      "sector_rank": 5,
+      "sector_top_3": false,
+      "industry_avg_change_1d": -1.1113,
+      "industry_avg_rank": 99,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:797c24042202e047381b09c180400e9d39f273aab75eec250059e3dc0fd03284": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Communication Services",
+      "ticker_industry": "Internet Content & Information",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "industry_avg_change_1d": 0.4181,
+      "industry_avg_rank": 37,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:8fee63f15ea0a3197c743b79d3bfe0fc131915ca21d6ee5ada2e1e943e6e045d": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Application",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.1289,
+      "industry_avg_rank": 49,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:426d986974db7099ab2415c9c69d63b7eefd46d302c09327ccb9ebc2ea54265e": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Industrials",
+      "ticker_industry": "Electrical Equipment & Parts",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 52,
+      "sector_rank": 5,
+      "sector_top_3": false,
+      "industry_avg_change_1d": 0.2386,
+      "industry_avg_rank": 44,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:df3ec7ab2f896e4e601caafc9ca39700e7a7eb0b810508aae73bc5673ef5c862": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:c8bd46091110ead6e49a4894b85d3b6564a0d39a9dd3c6a52d824f5bcf75c1ef": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Healthcare",
+      "ticker_industry": "Drug Manufacturers - General",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 71,
+      "sector_rank": 1,
+      "sector_top_3": true,
+      "industry_avg_change_1d": -1.2844,
+      "industry_avg_rank": 107,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:34ef7794a6cfde7d53958739bfdf410d788492752acfbaf8e73e36e43800bea4": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Infrastructure",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.2029,
+      "industry_avg_rank": 45,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:37477936f80b79e46efaddf1850419b478cfb0a416554856b850a8e8af1ca462": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:5724aa225532e9d39bb4238d89f81b906508e964b17e67c7bb69bb5bfc678239": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Infrastructure",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.2029,
+      "industry_avg_rank": 45,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:b7b1aa58189c09d1db0b4aa46b015f509f788d0d9ecca041b25577eabce2efcc": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Infrastructure",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.2029,
+      "industry_avg_rank": 45,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:1aaf2ae4310eee667a38fa36bfbc1bc014d6905acea769ad86d68cc50513b28a": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:362e86e050ceab70d903d361566f5ca5ddeee6b6be614e7afaecc16c0d9bdeee": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:d95f0b8be4e92a79302ec84b30eeffb2d141f534a422f04833f6dfaf47b861ec": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Infrastructure",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.2029,
+      "industry_avg_rank": 45,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:2bca96af97e358136e6f7371a8bd7e73e3a3048ae6dd5b6040970ee41e98151c": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:5e39991483344b01ae33e27c863f5a8c676432aa0d27249534432808ac0f4c80": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Infrastructure",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.2029,
+      "industry_avg_rank": 45,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:bde403032300751866d7a4686dc9ee1d59b19b93ef83050406eab8ee45e4592f": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:18c0135b478ecfc4b23f2641e4a2f4c40a356b5634c424cc56e4a1c09696c19d": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Utilities",
+      "ticker_industry": "Regulated Electric",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 21,
+      "sector_rank": 11,
+      "sector_top_3": false,
+      "industry_avg_change_1d": 0.4561,
+      "industry_avg_rank": 33,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:179e6034c58518aac2b3579b4bbace4a9e54b0b86ca736045e35e1ad24f42f93": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Infrastructure",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.2029,
+      "industry_avg_rank": 45,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:c8de0aa3c4cd92a2063d86864ccef51c49f7c50f43b68334aeff516225800db5": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:c764a3c7a1bafef4653448733fe0acc5460ad7b432024e9850c6099d59bd1b6e": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:01dc25b0d89fbe5a6fb0b4e3d293dda81ade5858f9c452897ba2576954f925a6": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Computer Hardware",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 6.2238,
+      "industry_avg_rank": 1,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:3f690062ed034b33f52120145c532dd07042b7157e9b35b62a3a4ac62a686802": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:beb96ec564aa75b712d44a3e90f55cd918c43a5e5419f4f512e2beabdde36934": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:08a7ffd5139c435af76fa74e41a4c3596c48d82c1851fa87a0791167574de94f": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:8170001fb527cc5a8a38183c1307ef32e96626c2498d95c7e578bd0f25a30056": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:8ded5df960ef53987f36bab69a4d04c3c9cab79edca40fb19719e0c39424f24e": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Utilities",
+      "ticker_industry": "Regulated Electric",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 21,
+      "sector_rank": 11,
+      "sector_top_3": false,
+      "industry_avg_change_1d": 0.4561,
+      "industry_avg_rank": 33,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:dcd9954d4e6e67ead94170415740071c94b84cfffe7568206208dd1747b98516": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:80e6eb6c4fa093fbc3defb810bca7af2962264f4c3a448d199fa9b259bc4341f": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:938ffa7d4cec9fbc35a633fd18dfe2031c4ad36d06fb5d70391894c0338ff4c8": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Communication Services",
+      "ticker_industry": "Internet Content & Information",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "industry_avg_change_1d": 0.4181,
+      "industry_avg_rank": 37,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:9b53bbc50e60fd1202fffea27c0be9f187f2498e887d0ebc5605b43b0b69a8af": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:381d6bf126214e512d4676cd7e656ebde856503f203e4c1b4c6d9568fe5d86bd": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Communication Equipment",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 3.599,
+      "industry_avg_rank": 7,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:437345ce81e02750217b2c97d582bf768d413a6806f998a6f82d313f1b6b8424": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Infrastructure",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.2029,
+      "industry_avg_rank": 45,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:8cdbf7e415a6d957405d7e79fcd52f146c7b7feefb7d2770a774e908192edc70": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:67109e5368c14e4dd6b6ecbcb8682b993678898a4e4ab8670cfcb08e5e87ce6e": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:fb47c5312139f114544705fa882dd394b4d6928037d3eb8fae736eb766869b97": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Infrastructure",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.2029,
+      "industry_avg_rank": 45,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:30bc18dfe68a7a05cfb629e71bc6d042198f25aef9429c016e38c935173c1e1a": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:904a70e5cc843bd34e687a400bb7df6b8c5b4b53a3ec4b28f6f2bada06205813": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Infrastructure",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.2029,
+      "industry_avg_rank": 45,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:458aa21075a0a150ae22b6c86d7d766a9f82c98ef897fcd39c88193394499ffd": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Infrastructure",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.2029,
+      "industry_avg_rank": 45,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:21eb24d2988a22c3fc61d4961a311b4d2b8720e3a6f81e734495a54e75c2eb7f": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:1055c3f9b32d02ea2666e12882ac3e41a69f7bca73d9f03e0fb7b5208c13440f": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:984461a1672ab9a3704daf54e69e79a13d1fc990075ab45118bd5f3fb4e7838a": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Communication Services",
+      "ticker_industry": "Internet Content & Information",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "industry_avg_change_1d": 0.4181,
+      "industry_avg_rank": 37,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:0aff45b8b5c3c6748b05df6481637935ba540e1aeaf9182bf61098f2c09eaecf": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Industrials",
+      "ticker_industry": "Aerospace & Defense",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 52,
+      "sector_rank": 5,
+      "sector_top_3": false,
+      "industry_avg_change_1d": -1.6152,
+      "industry_avg_rank": 113,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:3ad1b1912fe02e1caf86b5c2e39d977944b1ea11dbb0d18e25687fe183ddab1e": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Communication Equipment",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 3.599,
+      "industry_avg_rank": 7,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:5bbadf944f873fa3935415d724efe84576224eb7bad1040b2a21909011a62143": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:bdc7e171adf573a8d543686385253178cc2067f5df85b046609f6a8c90d2f28b": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:29f7799cd640f7b02bbedbde9293acb9a948414d6efbd176b2d9eeccf6d68561": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Consumer Electronics",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 1.7237,
+      "industry_avg_rank": 10,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:936253a5146e877290cbabd397f02cc7ec6e1844684a2f9714b161103e54e03e": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Infrastructure",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.2029,
+      "industry_avg_rank": 45,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:668e07a7cabeab7c07a29a7fb9145fe33dba8a9a2fea7d8e3ee7da7871fcd711": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Computer Hardware",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 6.2238,
+      "industry_avg_rank": 1,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:81a2ee95fdf5e2f983d1c8ef257045cc31b9d8a5162c47ecac6a1c7bf55c9028": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:aa805af24399e8168d1df5700ca994588b215e177bedc0c88e9cd535d3a7d594": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:c08877e6886d6d3c9dd5a6e8407d483b8bac69845e4c3925d26e1748ca359a5e": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:b63f37cfddb9a224d71b749af756c36cb9d714fe3ab417cf84c4660b9e2f1191": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Infrastructure",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.2029,
+      "industry_avg_rank": 45,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:551583487979181b1b20e48668faf3b7c8168d8d8e022376c92e4707e811164d": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:02e3f0d778403e343b404a64c91de72f1298fdf002c552aa1e7f9fa976b1e732": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:6aa387cd14c455a0abbcbe8f17ce14e9a8f6d0f83f5ba7f60d5e75c07e06c96f": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Infrastructure",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.2029,
+      "industry_avg_rank": 45,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:f9d4233c51466cc95338c71b8993dd78762f9c04e96343c9cc2a75f46bbd03dd": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Application",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.1289,
+      "industry_avg_rank": 49,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:e9eec97604bf2f3fa6a5e69335ef0e4ce5b51bd1c0cb416cf25ad34e81c3e354": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:a2b6e8ebf728ee68e36765012de44bafcbbd412e03d48fb7fd732a7ff68935eb": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:d3d162f3abb6f9c19ef32e15445dcbf65de3cdd31f35e7ac381fff339d164aa9": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:9fe47574f14fbef024bfb7afb82a60adf492dd585a082230cc28482136d29c8b": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:02a50e211d9d98e7b74a7da8b89893600468f10f13c9aaf8ecb19039d12e8149": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Communication Equipment",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 3.599,
+      "industry_avg_rank": 7,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:063c9e9a11d53027067bb359a456c676e741e4abe9a2d59ab189e3bed6269a84": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Consumer Electronics",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 1.7237,
+      "industry_avg_rank": 10,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:5d05ae4d6a6a9cab5b02c85190e997613b971d91bd679ee7825e4fe0373923ea": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Computer Hardware",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 6.2238,
+      "industry_avg_rank": 1,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:7ac73eb3cc39d8f9504db2caef8fe71978bc99e3b95e5a929e7f24bfc501ece1": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Energy",
+      "ticker_industry": "Uranium",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 65,
+      "sector_rank": 3,
+      "sector_top_3": true
+    }
+  },
+  "sha256:8a61b5ac9f0fff47d85cd186e30b19d08a64ce4c8da0ecd3755a0b1c01a31110": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Utilities",
+      "ticker_industry": "Independent Power Producers",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 21,
+      "sector_rank": 11,
+      "sector_top_3": false
+    }
+  },
+  "sha256:b4bbe8ddcf0410285375a3b259d0d56254901ad211f7fb27a42846fab8b9d85c": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Computer Hardware",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 6.2238,
+      "industry_avg_rank": 1,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:cb55424fb65f7a46ef53ffb546c5b99933820ba31443adc211b41a6f39fa2f9a": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Hardware, Equipment & Parts",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 3.6505,
+      "industry_avg_rank": 6,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:3ef4c2671db354bd3425a511c2b9ebfc6aa551c0b8596d2425b8d843bf646ec7": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Industrials",
+      "ticker_industry": "Aerospace & Defense",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 52,
+      "sector_rank": 5,
+      "sector_top_3": false,
+      "industry_avg_change_1d": -1.6152,
+      "industry_avg_rank": 113,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:b8527128e3727df570ed3e495c08499c9bc2a051e40697aeaec70915407c2545": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Infrastructure",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.2029,
+      "industry_avg_rank": 45,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:a1cbbf5a184dd1409d540e4b239fd6720cd1033a714bb711f80e4c80329c91e4": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Infrastructure",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.2029,
+      "industry_avg_rank": 45,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:e6755cbbd1f0d1900af2e187f0cee86ad298c9463abb94711b5caa731893e007": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Infrastructure",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.2029,
+      "industry_avg_rank": 45,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:ce581c6a00c0e50ab0a00248545c47385ef121d0c4676fef7860b8fc341742e8": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:edbdf352821f03af0c7c1ea270a587b231feb7f1b9a01309f4f67bb8d2bd6643": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:dd65d294aa07f061a6e36cf0f76ef4207c037d4f7d19ed950a69d998690c6e3a": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:a3725db66a78997e12e86fb995add52940c2114101ac8b03a2206da2955005b8": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:1f91a220a15c57125d2ee41bca6bf219987397ba8c36847cc5d31d16473b9e1f": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Infrastructure",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.2029,
+      "industry_avg_rank": 45,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:4d2d961ffad8b6290d98f4eeecaeedd61cecab086fad439b171993520a4fdf06": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Infrastructure",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.2029,
+      "industry_avg_rank": 45,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:4bb48887aabb53a8d1f52d59571873437d26a2e1cb9226beec23899ce6182734": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Infrastructure",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.2029,
+      "industry_avg_rank": 45,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:2a042e707a7c19a75e2e00ca9aee35bece5bd8a3561fc47898a33b34dabf098f": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Communication Equipment",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 3.599,
+      "industry_avg_rank": 7,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:463b4edeb7e6e4a2ea425782b6a3c7d1213b5896ea4cac993dd3308900e29e32": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Financial Services",
+      "ticker_industry": "Banks - Diversified",
+      "missing": [],
+      "data_date": "2026-09-30"
+    }
+  },
+  "sha256:0e67d199d35ee4568160e3baacc6cf601a8da97fe595122b7c7dd97507aa1740": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Financial Services",
+      "ticker_industry": "Banks - Diversified",
+      "missing": [],
+      "data_date": "2026-09-30"
+    }
+  },
+  "sha256:968b3ee77a4fac4db99b75c7bc583575fd2f229dab60d311ce24c6a885f00a1f": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Industrials",
+      "ticker_industry": "Aerospace & Defense",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 52,
+      "sector_rank": 5,
+      "sector_top_3": false,
+      "industry_avg_change_1d": -1.6152,
+      "industry_avg_rank": 113,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:5650815bb902219562c7b42ce5ab83049295b9b82d49d09ea4f83ca58031bc5d": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:fa456dbbea52f40018d2b4f7b7ea1c1c6528bddaa0c486af4dd989ea6478351e": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Communication Services",
+      "ticker_industry": "Internet Content & Information",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "industry_avg_change_1d": 0.4181,
+      "industry_avg_rank": 37,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:372390c316d4f6a4257b1a0e4ba1411a819c5e1535e58700af3c436298f7f154": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Computer Hardware",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 6.2238,
+      "industry_avg_rank": 1,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:57e00933344d5fc2e75925d3747a1f720a6cfecced4a3a7da27fe0a94dcda6ab": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Application",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.1289,
+      "industry_avg_rank": 49,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:a431e909382e8dddc60af32a459c00aa0b1daaf1fb0efdc2e39c2c5bf17b0908": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:1911a5d92e95f0ae776a7acb47a8d42ff60487ee993bddb1bf606255d116f434": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Communication Services",
+      "ticker_industry": "Internet Content & Information",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "industry_avg_change_1d": 0.4181,
+      "industry_avg_rank": 37,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:cc06496bb7e5ffbec4d19ffc672f116587489f6f8166e269829f258a44515e0a": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Communication Services",
+      "ticker_industry": "Telecommunications Services",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "industry_avg_change_1d": 0.1188,
+      "industry_avg_rank": 50,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:07abb117816cdaf0768d87eddc80804290b26c292ae58dd67ac221b5b096d1e4": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Consumer Cyclical",
+      "ticker_industry": "Auto - Manufacturers",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "industry_avg_change_1d": 3.2394,
+      "industry_avg_rank": 8,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:929a773b285c495cd04c487cd5017f5ffeb059a2cdcfde59dfcce5a4265143c6": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Communication Services",
+      "ticker_industry": "Telecommunications Services",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "industry_avg_change_1d": 0.1188,
+      "industry_avg_rank": 50,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:05efea9232ce30cd502fc1bc452acd086ffeb82d3b2a0b1359c4e4c99034d35e": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Communication Equipment",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 3.599,
+      "industry_avg_rank": 7,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:38dd2604869bd220b615a67465e756528cc1f9516ab5c200a14ccb7dec4fa338": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:3a9beb22690080be6c24d86565e4e74a1866bf7316d35bc900aa9c3b77232e35": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Industrials",
+      "ticker_industry": "Industrial - Machinery",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 52,
+      "sector_rank": 5,
+      "sector_top_3": false,
+      "industry_avg_change_1d": -0.7057,
+      "industry_avg_rank": 81,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:2acfcabf7e0f105ac7b72cbb4febf81fa9eb6795dcfb5c7b515b37a76bb8801f": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:2297cdd1885894714bfc69f36edfdd68334e357b622571279561c53a7aadeefe": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Financial Services",
+      "ticker_industry": "Financial - Data & Stock Exchanges",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "industry_avg_change_1d": 0.1828,
+      "industry_avg_rank": 47,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:32ff9b2410e6dce0793bd84e680180378416f1dbde5a0e4a2c3896fbb55b8895": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:0a9e22580270b8f4bad3931ef5f87d59c990ae74f1c963a49f0879385e56997b": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Computer Hardware",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 6.2238,
+      "industry_avg_rank": 1,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:c97c133c77b09d65a8a8e73c5027453965d332782c660848d00dda334cb25012": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Industrials",
+      "ticker_industry": "Electrical Equipment & Parts",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 52,
+      "sector_rank": 5,
+      "sector_top_3": false,
+      "industry_avg_change_1d": 0.2386,
+      "industry_avg_rank": 44,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:a5503264f6d06a23eaf6929801566194c34b2736878056039477f9d164481638": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Software - Infrastructure",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.2029,
+      "industry_avg_rank": 45,
+      "industry_top_30pct": false
+    }
+  },
+  "sha256:ebcaa2ebd7094895abb1763bc19725a522a63e93e54f2ec788fd6ca46a030ee7": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  },
+  "sha256:a542f826fa343a1fa437f1778b680dc93edba55d6252d95d5872b207e76ad91f": {
+    "evaluated_at": "2026-10-01",
+    "shadow_only": true,
+    "heat": {
+      "ticker_sector": "Technology",
+      "ticker_industry": "Semiconductors",
+      "missing": [],
+      "data_date": "2026-09-30",
+      "sector_composite_score": 67,
+      "sector_rank": 2,
+      "sector_top_3": true,
+      "industry_avg_change_1d": 0.461,
+      "industry_avg_rank": 32,
+      "industry_top_30pct": true
+    }
+  }
+}

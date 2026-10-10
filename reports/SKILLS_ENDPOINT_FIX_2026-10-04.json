@@ -1,0 +1,418 @@
+{
+  "schema_version": "skills-endpoint-fix/1",
+  "generated_at": "2026-10-04T03:36:26.538738+00:00",
+  "version": "4.139.4",
+  "authorization": "User approved repair plan and requested skill relevance assessment; no skills removed.",
+  "baseline_audit": "reports/SKILLS_ENDPOINT_AUDIT_2026-10-04.json",
+  "fixes": [
+    {
+      "id": "F01",
+      "status": "fixed_and_live_verified",
+      "change": "Private in-memory launchd environment handoff; fail before stopping existing service without main feed; expose partial intraday error."
+    },
+    {
+      "id": "F02",
+      "status": "fixed_and_live_verified",
+      "change": "Use grades events in News/thematic; reject monthly snapshots as News events and preserve fallback."
+    },
+    {
+      "id": "F03",
+      "status": "fixed_and_live_verified",
+      "change": "ratings-historical, grades-consensus, overallScore higher-is-better, publishedDate; source freshness policy unchanged."
+    },
+    {
+      "id": "F04",
+      "status": "fixed_and_live_verified",
+      "change": "Dated sector PE with NY date and bounded weekday fallback; permission/rate failure stops."
+    },
+    {
+      "id": "F05",
+      "status": "fixed_and_contract_verified",
+      "change": "Repo breadth preflight; residual sector fallback command/output path corrected."
+    },
+    {
+      "id": "F06",
+      "status": "path_fixed_permission_restriction_remains",
+      "change": "Singular stock/split; audited account still HTTP 403; no authentication retry."
+    }
+  ],
+  "additional_repair": "Restart stops only LISTEN PIDs, preserving connected client applications.",
+  "tests": {
+    "pytest": {
+      "passed": 111,
+      "subtests_passed": 8,
+      "failed": 0,
+      "log": "tmp/skills-endpoint-fix-20261004/regression.log"
+    },
+    "negative_control": {
+      "before_fix": "9 failed, 1 passed",
+      "after_fix": "10 passed",
+      "log": "tmp/skills-endpoint-fix-20261004/red.log"
+    },
+    "direct_scripts_rc0": [
+      "skills/us-stock-analysis/scripts/test_bundle_merge.py",
+      "tests/test_protocol_model_routing.py",
+      "skills/market-sentiment-analyzer/scripts/test_intraday.py",
+      "skills/finnhub-client/scripts/audit_drift_check.py"
+    ],
+    "drift_sample_count": 4,
+    "artifact_validators_rc0": [
+      "validate.py MU --require-history",
+      "validate_infographic.py MU --require-history"
+    ],
+    "skills_lint": {
+      "skills": 26,
+      "warnings": 0,
+      "info": 1
+    },
+    "syntax": [
+      "bash -n scripts/restart_dashboard.sh",
+      "node --check Dashboard/utils.js"
+    ],
+    "version_sync": "SYNC OK: 4.139.4",
+    "session_rotation": "12 notes, no-op"
+  },
+  "live_contracts": {
+    "checked_at": "2026-10-04T03:29:11.704830+00:00",
+    "ratings_rows": 12,
+    "rating_score": 3,
+    "rating_trend": "stable",
+    "grades_consensus": {
+      "strongBuy": 1,
+      "buy": 70,
+      "hold": 32,
+      "sell": 9,
+      "strongSell": 0,
+      "strong_buy_pct": 0.9,
+      "total_analysts": 112
+    },
+    "grade_news_dates": [
+      "2026-10-01",
+      "2026-09-29",
+      "2026-09-25",
+      "2026-09-17",
+      "2026-09-14",
+      "2026-09-10",
+      "2026-09-10",
+      "2026-09-10",
+      "2026-09-10",
+      "2026-09-09"
+    ],
+    "event_rows": 113,
+    "event_rows_have_firm_action_grade": true,
+    "grades_365d": {
+      "upgrades": 6,
+      "downgrades": 4,
+      "since_days": 365
+    },
+    "technology_pe": 48.8
+  },
+  "live_dashboard": {
+    "checked_at": "2026-10-04T03:33:05.530582+00:00",
+    "listener_pid": 77538,
+    "version": "4.139.4",
+    "credentials_present": {
+      "FMP_API_KEY": true,
+      "FINNHUB_API_KEY": true,
+      "FRED_API_KEY": true,
+      "ALPACA_API_KEY": true,
+      "ALPACA_SECRET_KEY": true
+    },
+    "intraday_state": {
+      "live": {
+        "last_poll": "2026-10-04T11:31:06",
+        "last_error": null,
+        "last_score": 11
+      },
+      "interval_sec": 300,
+      "available": true
+    },
+    "intraday_partial": false,
+    "intraday_source_health": {
+      "SPY": "ok",
+      "QQQ": "ok",
+      "IWM": "ok"
+    },
+    "intraday_aggregate": {
+      "score": 11,
+      "risk_label": "中性",
+      "risk_label_en": "Neutral",
+      "headline_zh": "盤面中性（11）：近25日出貨日 10 天、高開低走，開盤動能轉弱",
+      "flags": [
+        {
+          "type": "distribution_days",
+          "severity": "med",
+          "text_zh": "近25日出貨日 10 天",
+          "tickers": [
+            "SPY",
+            "QQQ",
+            "IWM"
+          ]
+        },
+        {
+          "type": "gap_up_fade",
+          "severity": "med",
+          "text_zh": "高開低走，開盤動能轉弱",
+          "tickers": [
+            "QQQ",
+            "IWM"
+          ]
+        },
+        {
+          "type": "below_vwap",
+          "severity": "low",
+          "text_zh": "跌破 VWAP（-0.13%）",
+          "tickers": [
+            "QQQ",
+            "IWM"
+          ]
+        }
+      ]
+    },
+    "intraday_generated_at": "2026-10-04T03:31:06.085933+00:00"
+  },
+  "provider_restrictions": {
+    "fmp_permission_402": [
+      "news/press-releases",
+      "institutional-ownership/symbol-positions-summary",
+      "esg-disclosures",
+      "esg-ratings",
+      "executive-compensation-benchmark",
+      "earning-call-transcript"
+    ],
+    "finnhub_permission_403": [
+      "stock/price-target",
+      "stock/upgrade-downgrade",
+      "stock/dividend2",
+      "stock/split (corrected endpoint)"
+    ],
+    "public_source_unavailable": {
+      "CNN fear greed": "HTTP 418",
+      "CBOE totalpc": "HTTP 403",
+      "CBOE equitypc": "HTTP 403",
+      "Yahoo ^CPC": "0 rows"
+    },
+    "note": "No retries after permission failures; no subscription changes or invented fallback scores. Report these as unavailable/degraded, not code typo unless a specific mismatch is proven."
+  },
+  "relevance": {
+    "document": "skills/MARKET_INDEX.md",
+    "counts": {
+      "keep": 22,
+      "consolidate": 2,
+      "optional": 2
+    },
+    "skills": [
+      {
+        "skill": "dual-axis-skill-reviewer",
+        "status": "optional",
+        "recommendation": "降為選配；最先停止例行維護",
+        "reason_and_dependencies": "Dev 工具，沒有 daily／protocol 消費者；其 auto 軸依上游 SKILL 模板打分，不能代表本 repo 功能品質。日常檢查可用 `check_skills.py --strict` + 對應測試 + endpoint contract；質性評估仍需人工，不宣稱完全等價。"
+      },
+      {
+        "skill": "weekly-tech-playbook",
+        "status": "optional",
+        "recommendation": "降為選配",
+        "reason_and_dependencies": "UI 明確按需觸發的 LLM 三籃方案；若只要觀察清單，radar + momentum + 既有委員會結果已涵蓋大部分用途。只有需要三組完整配置時才跑；第二模型意見維持 opt-in。退役前需處理 `dashboard_server.py` 的 playbook registry／UI。"
+      },
+      {
+        "skill": "economic-calendar-fetcher",
+        "status": "consolidate",
+        "recommendation": "優先整併",
+        "reason_and_dependencies": "`sector/scripts/phase_prefetch.py` 仍呼叫它，但 `bridge.py` 另有 economic-calendar inline 取資料。可抽單一 shared calendar service，保留 CLI／日期與時區／輸出契約；FRED 時間序列不能取代未來事件日曆。"
+      },
+      {
+        "skill": "retail-sector-pulse",
+        "status": "consolidate",
+        "recommendation": "第二順位整併",
+        "reason_and_dependencies": "daily Step 9.5、bridge、首頁與 mood 仍讀取。可併入 market-sentiment 資料層，保留 `retail_sector_pulse.json`、`trending_tickers.json` 與缺值狀態；不能因舊 retail-volume 元件退役就刪整個 skill。"
+      },
+      {
+        "skill": "earnings-analyst",
+        "status": "keep",
+        "recommendation": "保留",
+        "reason_and_dependencies": "財報分析與跨季歷史主入口；前瞻／memo／Dashboard 依賴其 cache 和來源時鐘。"
+      },
+      {
+        "skill": "earnings-valuation-forecaster",
+        "status": "keep",
+        "recommendation": "保留；可共用估值取數",
+        "reason_and_dependencies": "與 valuation-modeler 部分重疊，但 `compute_price_framework.py` 仍使用 `forecaster_blend`，Phase 1 prewarm 與 reviewer gate 亦依賴它。需先驗 anchor／transition_case／preview parity 才能替換，不能直接下架。"
+      },
+      {
+        "skill": "valuation-modeler",
+        "status": "keep",
+        "recommendation": "保留",
+        "reason_and_dependencies": "DCF／comps 正式估值錨及 initiation memo 的輸入；與前瞻 scenario 角色不同。"
+      },
+      {
+        "skill": "us-stock-analysis",
+        "status": "keep",
+        "recommendation": "保留",
+        "reason_and_dependencies": "Investment Fundamentals lane；可共用 FMP 取數，不能用 forecaster 替代財務品質判讀。"
+      },
+      {
+        "skill": "market-news-analyst",
+        "status": "keep",
+        "recommendation": "保留接線；宏觀獨立流程可收斂",
+        "reason_and_dependencies": "Investment News lane 實跑 per-ticker `fetch.py`；泛宏觀 WebSearch 可交 news protocol，但現行事件／filings payload 仍須保留。"
+      },
+      {
+        "skill": "short-contrarian-analyst",
+        "status": "keep",
+        "recommendation": "保留",
+        "reason_and_dependencies": "Protocol Phase 2 的 Burry lane／veto 檢查，有文字流程呼叫；不能以沒有直接 import 判成未使用。"
+      },
+      {
+        "skill": "technical-analyst",
+        "status": "keep",
+        "recommendation": "保留",
+        "reason_and_dependencies": "Investment 技術 lane 的單股契約；底層已共享 `technical_core`，與 universe screen 不等價。"
+      },
+      {
+        "skill": "portfolio-risk-manager",
+        "status": "keep",
+        "recommendation": "保留",
+        "reason_and_dependencies": "Phase 4 部位／組合風控與 `trade_plan_builder.py` 的依賴。"
+      },
+      {
+        "skill": "tail-risk-analyzer",
+        "status": "keep",
+        "recommendation": "保留",
+        "reason_and_dependencies": "Investment／sector 尾部風險及交易計畫約束；一般 volatility 無法直接替代。"
+      },
+      {
+        "skill": "sector-analyst",
+        "status": "keep",
+        "recommendation": "保留",
+        "reason_and_dependencies": "Sector Phase 1 產業輪動判讀；protocol 文字接線仍有效。與 theme-detector 的主題辨識不同。"
+      },
+      {
+        "skill": "ic-memo-writer",
+        "status": "keep",
+        "recommendation": "保留按需",
+        "reason_and_dependencies": "0-LLM 的報告 renderer；protocol 明確 build→compose→validate，有低維護成本與獨立輸出用途。"
+      },
+      {
+        "skill": "finnhub-client",
+        "status": "keep",
+        "recommendation": "保留；只縮減不可用選配端點",
+        "reason_and_dependencies": "Canonical dual-fetch／drift 與 per-ticker news 共用依賴；少數 403 不代表 quote／metric／calendar 等整個 client 無用。"
+      },
+      {
+        "skill": "fred-macro",
+        "status": "keep",
+        "recommendation": "保留",
+        "reason_and_dependencies": "Macro／regime／kill-trigger／估值折現基準；非日曆替代品。"
+      },
+      {
+        "skill": "market-breadth-analyzer",
+        "status": "keep",
+        "recommendation": "保留",
+        "reason_and_dependencies": "Daily 與 sector Phase 0；提供市場參與廣度，無法用 SPY 單一報酬替代。"
+      },
+      {
+        "skill": "market-sentiment-analyzer",
+        "status": "keep",
+        "recommendation": "保留；整併的承接者",
+        "reason_and_dependencies": "Daily mood／intraday 與 Investment sentiment。不可用情緒來源要揭露缺值，不能捏造中性。"
+      },
+      {
+        "skill": "ftd-detector",
+        "status": "keep",
+        "recommendation": "保留運算核心",
+        "reason_and_dependencies": "`sector/ftd_yfinance.py` 真正 import repo skill；可精簡重複 fetch wrapper，不能刪 FTD 引擎。"
+      },
+      {
+        "skill": "market-top-detector",
+        "status": "keep",
+        "recommendation": "保留運算核心",
+        "reason_and_dependencies": "`sector/market_top_yfinance.py` 真正 import repo skill；與 FTD 看相反市場階段，非重複訊號。"
+      },
+      {
+        "skill": "theme-detector",
+        "status": "keep",
+        "recommendation": "保留",
+        "reason_and_dependencies": "主題／產業 universe producer，被 sector、thematic、news 等消費。"
+      },
+      {
+        "skill": "thematic-screener",
+        "status": "keep",
+        "recommendation": "保留探索層",
+        "reason_and_dependencies": "把 theme cache 與短期預測組成 radar recommendations；不是 theme-detector 的同義輸出。"
+      },
+      {
+        "skill": "short-term-target",
+        "status": "keep",
+        "recommendation": "保留探索層",
+        "reason_and_dependencies": "thematic in-process 與 retail pulse 仍依賴 5d 方向；可共享技術因子，移除前必須遷移這些消費者。`weights.yaml` 維持使用者手動校準。"
+      },
+      {
+        "skill": "momentum-monitor",
+        "status": "keep",
+        "recommendation": "保留",
+        "reason_and_dependencies": "Daily universe screen、個股 momentum、journal 與 Dashboard；不等同單股技術 lane。"
+      },
+      {
+        "skill": "quant-backtest",
+        "status": "keep",
+        "recommendation": "保留按需探索層",
+        "reason_and_dependencies": "Dashboard subprocess，0 LLM 的策略驗證；可按需求降低維護順位，但沒有已接好的等價替代入口。"
+      }
+    ],
+    "implemented": false,
+    "note": "Recommendations only. No skills deleted, no protocol or weights changes."
+  },
+  "files_changed_this_session": [
+    "CHANGELOG.md",
+    "Dashboard/utils.js",
+    "SESSION_NOTES.md",
+    "TODO.md",
+    "VERSION",
+    "dashboard_server.py",
+    "docs/agent-ops/LESSONS.md",
+    "docs/agent-ops/OPS_COMMANDS.md",
+    "scripts/dashboard_launcher.py",
+    "scripts/restart_dashboard.sh",
+    "sector/protocol_appendix_fallback.md",
+    "skills/MARKET_INDEX.md",
+    "skills/earnings-analyst/schema.md",
+    "skills/earnings-analyst/scripts/fetch.py",
+    "skills/earnings-analyst/tests/test_stale_gate_simulated.py",
+    "skills/finnhub-client/SKILL.md",
+    "skills/finnhub-client/scripts/finnhub_client.py",
+    "skills/market-news-analyst/scripts/fetch.py",
+    "skills/thematic-screener/scripts/enrich.py",
+    "skills/us-stock-analysis/scripts/analyze.py",
+    "tests/test_dashboard_launcher.py",
+    "tests/test_skill_endpoint_contracts.py"
+  ],
+  "residual_scan": {
+    "known_current_strings_found": true,
+    "obsolete_active_endpoint_and_home_breadth_references": 0,
+    "historical_audit_backups_and_reports_preserved": true
+  },
+  "limitations": [
+    "Live probes cover representative symbols and dates, not every upstream payload.",
+    "Subscription restrictions remain degraded; no subscription changes or authentication retries.",
+    "Existing earnings/news/thematic caches were not bulk regenerated; corrected fields appear on the next normal producer run.",
+    "No investment/news/sector protocol or reviewer-model run initiated; existing Dashboard background services resumed on restart."
+  ],
+  "official_sources": [
+    {
+      "title": "FMP Historical Ratings",
+      "url": "https://site.financialmodelingprep.com/developer/docs/stable/historical-ratings"
+    },
+    {
+      "title": "FMP stable endpoint catalog / grades-consensus",
+      "url": "https://site.financialmodelingprep.com/developer/docs"
+    },
+    {
+      "title": "FMP historical ratings fields and meaning",
+      "url": "https://site.financialmodelingprep.com/de/insights/platform/how-to-retrieve-historical-rating-scores-using-a-free-api"
+    },
+    {
+      "title": "Finnhub official Python client stock_splits",
+      "url": "https://github.com/Finnhub-Stock-API/finnhub-python/blob/master/finnhub/client.py#L278"
+    }
+  ]
+}

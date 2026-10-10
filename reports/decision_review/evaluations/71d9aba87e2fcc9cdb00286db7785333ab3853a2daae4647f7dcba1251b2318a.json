@@ -1,0 +1,37 @@
+{
+  "decision_id": "sha256:4bb48887aabb53a8d1f52d59571873437d26a2e1cb9226beec23899ce6182734",
+  "evaluation": {
+    "version": "investment-evaluation/2.0",
+    "evaluated_at": "2026-10-01",
+    "source": "/Users/kavi/Developer/Claude/Projects/ai-investment-committee/investment/invest_logs/history.json#181",
+    "window_complete": false,
+    "calibration_eligible": false,
+    "exclusion_reasons": [
+      "window_incomplete",
+      "prices_missing_or_nonfinite"
+    ]
+  },
+  "reality": {
+    "decision_date": "2026-08-07",
+    "eval_date": "2026-09-06",
+    "today": "2026-10-01",
+    "window_days": 30,
+    "days_elapsed": 55,
+    "window_complete_pct": 100,
+    "pending": false,
+    "ticker_reality": null
+  },
+  "verdict": {
+    "label": "pending",
+    "rationale": "尚未取得 eval 價格"
+  },
+  "original_label": null,
+  "prior_evaluations": [
+    {
+      "label": "hit",
+      "rationale": "觀望/CANCEL → 實際 -7.11%, 避開下跌",
+      "max_runup_pct": 10.178,
+      "max_drawdown_pct": -9.168
+    }
+  ]
+}

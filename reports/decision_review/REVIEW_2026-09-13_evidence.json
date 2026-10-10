@@ -1,0 +1,1447 @@
+{
+  "generated_at": "2026-09-13T06:07:32.789334",
+  "index_sha256": "91f4e96c5f55da41a9383390d1ee74f102e2fec4240a5cfd6ed360590f29093b",
+  "source": {
+    "deep-dive": {
+      "raw": {
+        "n": 191,
+        "miss": 75,
+        "hit": 103,
+        "neutral": 13,
+        "miss_pct": 39.267
+      },
+      "full": {
+        "n": 175,
+        "miss": 67,
+        "hit": 97,
+        "neutral": 11,
+        "miss_pct": 38.286
+      },
+      "last_date": "2026-09-02"
+    },
+    "earnings-analyzer": {
+      "raw": {
+        "n": 1,
+        "neutral": 1,
+        "miss_pct": 0.0
+      },
+      "full": {
+        "n": 1,
+        "neutral": 1,
+        "miss_pct": 0.0
+      },
+      "last_date": "2026-04-26"
+    },
+    "momentum-screen": {
+      "raw": {
+        "n": 24,
+        "miss": 5,
+        "pending": 1,
+        "neutral": 14,
+        "hit": 4,
+        "miss_pct": 20.833
+      },
+      "full": {
+        "n": 23,
+        "miss": 5,
+        "neutral": 14,
+        "hit": 4,
+        "miss_pct": 21.739
+      },
+      "last_date": "2026-05-24"
+    },
+    "news-digest": {
+      "raw": {
+        "n": 99,
+        "miss": 3,
+        "n/a": 24,
+        "neutral": 70,
+        "hit": 1,
+        "pending": 1,
+        "miss_pct": 3.03
+      },
+      "full": {
+        "n": 74,
+        "miss": 3,
+        "neutral": 70,
+        "hit": 1,
+        "miss_pct": 4.054
+      },
+      "last_date": "2026-09-12"
+    },
+    "postmortem": {
+      "raw": {
+        "n": 5,
+        "n/a": 5,
+        "miss_pct": 0.0
+      },
+      "full": {
+        "n": 0,
+        "miss_pct": null
+      },
+      "last_date": "2026-08-10"
+    },
+    "sector-scan": {
+      "raw": {
+        "n": 88,
+        "neutral": 20,
+        "n/a": 2,
+        "hit": 36,
+        "miss": 26,
+        "pending": 4,
+        "miss_pct": 29.545
+      },
+      "full": {
+        "n": 77,
+        "neutral": 18,
+        "hit": 34,
+        "miss": 25,
+        "miss_pct": 32.468
+      },
+      "last_date": "2026-09-12"
+    },
+    "short-term-weekly": {
+      "raw": {
+        "n": 13,
+        "n/a": 13,
+        "miss_pct": 0.0
+      },
+      "full": {
+        "n": 0,
+        "miss_pct": null
+      },
+      "last_date": "2026-09-08"
+    },
+    "thematic-screener": {
+      "raw": {
+        "n": 108,
+        "hit": 29,
+        "neutral": 40,
+        "miss": 32,
+        "pending": 7,
+        "miss_pct": 29.63
+      },
+      "full": {
+        "n": 101,
+        "hit": 29,
+        "neutral": 40,
+        "miss": 32,
+        "miss_pct": 31.683
+      },
+      "last_date": "2026-09-12"
+    },
+    "theme-detector": {
+      "raw": {
+        "n": 5,
+        "miss": 1,
+        "neutral": 1,
+        "hit": 3,
+        "miss_pct": 20.0
+      },
+      "full": {
+        "n": 5,
+        "miss": 1,
+        "neutral": 1,
+        "hit": 3,
+        "miss_pct": 20.0
+      },
+      "last_date": "2026-04-25"
+    }
+  },
+  "nonfinite": [],
+  "action": {
+    "HOLD": {
+      "n": 92,
+      "miss": 44,
+      "hit": 48,
+      "miss_pct": 47.826
+    },
+    "EXECUTE": {
+      "n": 8,
+      "hit": 6,
+      "miss": 2,
+      "miss_pct": 25.0
+    },
+    "CANCEL": {
+      "n": 9,
+      "miss": 7,
+      "hit": 2,
+      "miss_pct": 77.778
+    },
+    "BUY": {
+      "n": 29,
+      "hit": 18,
+      "miss": 4,
+      "neutral": 7,
+      "miss_pct": 13.793
+    },
+    "STAGED_ENTRY": {
+      "n": 32,
+      "hit": 21,
+      "miss": 7,
+      "neutral": 4,
+      "miss_pct": 21.875
+    },
+    "STAGED": {
+      "n": 1,
+      "miss": 1,
+      "miss_pct": 100.0
+    },
+    "STAGED_EXIT": {
+      "n": 1,
+      "miss": 1,
+      "miss_pct": 100.0
+    },
+    "None": {
+      "n": 3,
+      "miss": 1,
+      "hit": 2,
+      "miss_pct": 33.333
+    }
+  },
+  "score": {
+    "<0": {
+      "n": 19,
+      "miss": 9,
+      "hit": 10,
+      "miss_pct": 47.368
+    },
+    "0-1": {
+      "n": 90,
+      "hit": 49,
+      "miss": 39,
+      "neutral": 2,
+      "miss_pct": 43.333
+    },
+    "null": {
+      "n": 8,
+      "hit": 3,
+      "miss": 5,
+      "miss_pct": 62.5
+    },
+    ">=1": {
+      "n": 58,
+      "hit": 35,
+      "miss": 14,
+      "neutral": 9,
+      "miss_pct": 24.138
+    }
+  },
+  "agent": {
+    "Fundamentals": {
+      "n": 64,
+      "miss": 23,
+      "hit": 36,
+      "neutral": 5,
+      "miss_pct": 35.938
+    },
+    "Technical": {
+      "n": 22,
+      "hit": 12,
+      "miss": 10,
+      "miss_pct": 45.455
+    },
+    "Sentiment": {
+      "n": 9,
+      "hit": 6,
+      "miss": 3,
+      "miss_pct": 33.333
+    },
+    "News": {
+      "n": 33,
+      "miss": 15,
+      "hit": 14,
+      "neutral": 4,
+      "miss_pct": 45.455
+    },
+    "None": {
+      "n": 41,
+      "miss": 12,
+      "hit": 27,
+      "neutral": 2,
+      "miss_pct": 29.268
+    },
+    "Valuation": {
+      "n": 6,
+      "miss": 4,
+      "hit": 2,
+      "miss_pct": 66.667
+    }
+  },
+  "regime": {
+    "None": {
+      "n": 33,
+      "miss": 16,
+      "hit": 16,
+      "neutral": 1,
+      "miss_pct": 48.485
+    },
+    "VOLATILE": {
+      "n": 19,
+      "hit": 8,
+      "neutral": 2,
+      "miss": 9,
+      "miss_pct": 47.368
+    },
+    "RISK_ON": {
+      "n": 77,
+      "miss": 26,
+      "hit": 44,
+      "neutral": 7,
+      "miss_pct": 33.766
+    },
+    "BULL": {
+      "n": 11,
+      "miss": 6,
+      "neutral": 1,
+      "hit": 4,
+      "miss_pct": 54.545
+    },
+    "SIDEWAYS": {
+      "n": 25,
+      "miss": 7,
+      "hit": 18,
+      "miss_pct": 28.0
+    },
+    "RISK_OFF": {
+      "n": 7,
+      "hit": 4,
+      "miss": 3,
+      "miss_pct": 42.857
+    },
+    "Soft Landing": {
+      "n": 3,
+      "hit": 3,
+      "miss_pct": 0.0
+    }
+  },
+  "heat": {
+    "True": {
+      "n": 105,
+      "miss": 43,
+      "hit": 55,
+      "neutral": 7,
+      "miss_pct": 40.952
+    },
+    "None": {
+      "n": 14,
+      "hit": 8,
+      "miss": 5,
+      "neutral": 1,
+      "miss_pct": 35.714
+    },
+    "False": {
+      "n": 56,
+      "hit": 34,
+      "miss": 19,
+      "neutral": 3,
+      "miss_pct": 33.929
+    }
+  },
+  "sector": {
+    "Consumer Cyclical": {
+      "n": 6,
+      "miss": 4,
+      "hit": 2,
+      "miss_pct": 66.667
+    },
+    "Utilities": {
+      "n": 5,
+      "hit": 3,
+      "miss": 2,
+      "miss_pct": 40.0
+    },
+    "Technology": {
+      "n": 132,
+      "hit": 70,
+      "miss": 55,
+      "neutral": 7,
+      "miss_pct": 41.667
+    },
+    "Communication Services": {
+      "n": 12,
+      "hit": 5,
+      "miss": 5,
+      "neutral": 2,
+      "miss_pct": 41.667
+    },
+    "Industrials": {
+      "n": 18,
+      "miss": 4,
+      "hit": 12,
+      "neutral": 2,
+      "miss_pct": 22.222
+    },
+    "Financial Services": {
+      "n": 6,
+      "miss": 2,
+      "neutral": 1,
+      "hit": 3,
+      "miss_pct": 33.333
+    },
+    "None": {
+      "n": 6,
+      "hit": 3,
+      "miss": 3,
+      "miss_pct": 50.0
+    },
+    "Basic Materials": {
+      "n": 1,
+      "hit": 1,
+      "miss_pct": 0.0
+    },
+    "Real Estate": {
+      "n": 1,
+      "neutral": 1,
+      "miss_pct": 0.0
+    },
+    "Energy": {
+      "n": 2,
+      "hit": 2,
+      "miss_pct": 0.0
+    },
+    "Healthcare": {
+      "n": 2,
+      "hit": 2,
+      "miss_pct": 0.0
+    }
+  },
+  "full_sector": {
+    "Consumer Cyclical": {
+      "n": 5,
+      "miss": 3,
+      "hit": 2,
+      "miss_pct": 60.0
+    },
+    "Utilities": {
+      "n": 5,
+      "hit": 3,
+      "miss": 2,
+      "miss_pct": 40.0
+    },
+    "Technology": {
+      "n": 123,
+      "hit": 68,
+      "miss": 50,
+      "neutral": 5,
+      "miss_pct": 40.65
+    },
+    "Communication Services": {
+      "n": 9,
+      "hit": 4,
+      "miss": 3,
+      "neutral": 2,
+      "miss_pct": 33.333
+    },
+    "Industrials": {
+      "n": 16,
+      "miss": 4,
+      "hit": 10,
+      "neutral": 2,
+      "miss_pct": 25.0
+    },
+    "Financial Services": {
+      "n": 5,
+      "miss": 2,
+      "neutral": 1,
+      "hit": 2,
+      "miss_pct": 40.0
+    },
+    "None": {
+      "n": 6,
+      "hit": 3,
+      "miss": 3,
+      "miss_pct": 50.0
+    },
+    "Basic Materials": {
+      "n": 1,
+      "hit": 1,
+      "miss_pct": 0.0
+    },
+    "Real Estate": {
+      "n": 1,
+      "neutral": 1,
+      "miss_pct": 0.0
+    },
+    "Energy": {
+      "n": 2,
+      "hit": 2,
+      "miss_pct": 0.0
+    },
+    "Healthcare": {
+      "n": 2,
+      "hit": 2,
+      "miss_pct": 0.0
+    }
+  },
+  "repeated_ticker": {
+    "MSFT": {
+      "n": 7,
+      "hit": 4,
+      "miss": 3,
+      "miss_pct": 42.857
+    },
+    "CRWV": {
+      "n": 5,
+      "miss": 1,
+      "hit": 4,
+      "miss_pct": 20.0
+    },
+    "AAPL": {
+      "n": 5,
+      "miss": 3,
+      "hit": 2,
+      "miss_pct": 60.0
+    },
+    "AMD": {
+      "n": 5,
+      "hit": 3,
+      "miss": 2,
+      "miss_pct": 40.0
+    },
+    "GOOGL": {
+      "n": 5,
+      "hit": 3,
+      "neutral": 1,
+      "miss": 1,
+      "miss_pct": 20.0
+    },
+    "MU": {
+      "n": 17,
+      "hit": 8,
+      "miss": 9,
+      "miss_pct": 52.941
+    },
+    "NVDA": {
+      "n": 9,
+      "hit": 4,
+      "miss": 3,
+      "neutral": 2,
+      "miss_pct": 33.333
+    },
+    "PLTR": {
+      "n": 7,
+      "miss": 5,
+      "hit": 2,
+      "miss_pct": 71.429
+    },
+    "TSM": {
+      "n": 13,
+      "hit": 8,
+      "neutral": 2,
+      "miss": 3,
+      "miss_pct": 23.077
+    },
+    "ALAB": {
+      "n": 5,
+      "hit": 3,
+      "miss": 2,
+      "miss_pct": 40.0
+    },
+    "MRVL": {
+      "n": 9,
+      "hit": 5,
+      "miss": 4,
+      "miss_pct": 44.444
+    }
+  },
+  "coverage": {
+    "final_action": 188,
+    "final_score": 183,
+    "hot_zone_eval": 0,
+    "hot_zone_probe": 0,
+    "decisive_agent": 134,
+    "macro_regime": 158,
+    "suppressing_risk_flags": 0,
+    "sub_industry_heat": 191
+  },
+  "semis_hold": {
+    "n": 31,
+    "miss": 21,
+    "hit": 10,
+    "miss_pct": 67.742
+  },
+  "post_semis_hold": {
+    "n": 12,
+    "hit": 9,
+    "miss": 3,
+    "miss_pct": 25.0
+  },
+  "collision": {
+    "theme-detector_2026-04-23": 3,
+    "thematic-screener_2026-07-30": 2,
+    "thematic-screener_2026-08-05": 2,
+    "thematic-screener_2026-08-16": 2,
+    "thematic-screener_2026-08-20": 2
+  },
+  "unique_id": 528,
+  "join_n": 185,
+  "ambiguous": [
+    [
+      "deep-dive_TEAM_2026-05-02",
+      2
+    ],
+    [
+      "deep-dive_VRT_2026-05-02",
+      2
+    ],
+    [
+      "deep-dive_CRWV_2026-05-03",
+      2
+    ],
+    [
+      "deep-dive_BAC_2026-08-09",
+      3
+    ],
+    [
+      "deep-dive_NOW_2026-08-09",
+      2
+    ],
+    [
+      "deep-dive_NVDA_2026-08-21",
+      2
+    ]
+  ],
+  "authority_cancel": {
+    "n": 106,
+    "miss": 55,
+    "miss_pct": 51.887
+  },
+  "authority_eval_n": 28,
+  "authority_eval_states": {
+    "suppressed_by_cap": 7,
+    "fired": 3,
+    "not_qualifying": 18
+  },
+  "eval_mismatch": [
+    [
+      "deep-dive_MU_2026-07-08",
+      "suppressed_by_cap",
+      "qualifying_unexplained"
+    ],
+    [
+      "deep-dive_NVDA_2026-07-08",
+      "fired",
+      "suppressed_by_risk_flag"
+    ],
+    [
+      "deep-dive_PLTR_2026-07-08",
+      "suppressed_by_cap",
+      "not_qualifying"
+    ],
+    [
+      "deep-dive_AAOI_2026-08-07",
+      "not_qualifying",
+      "qualifying_unexplained"
+    ],
+    [
+      "deep-dive_NET_2026-08-07",
+      "suppressed_by_cap",
+      "not_qualifying"
+    ],
+    [
+      "deep-dive_META_2026-08-10",
+      "not_qualifying",
+      "qualifying_unexplained"
+    ],
+    [
+      "deep-dive_GOOGL_2026-08-17",
+      "suppressed_by_cap",
+      "suppressed_by_risk_flag"
+    ],
+    [
+      "deep-dive_BE_2026-08-21",
+      "fired",
+      "not_qualifying"
+    ],
+    [
+      "deep-dive_COIN_2026-08-21",
+      "suppressed_by_cap",
+      "not_qualifying"
+    ],
+    [
+      "deep-dive_PLTR_2026-08-21",
+      "suppressed_by_cap",
+      "not_qualifying"
+    ],
+    [
+      "deep-dive_MRVL_2026-08-22",
+      "not_qualifying",
+      "suppressed_by_risk_flag"
+    ],
+    [
+      "deep-dive_NVMI_2026-09-02",
+      "suppressed_by_cap",
+      "suppressed_by_risk_flag"
+    ]
+  ],
+  "probe": [
+    {
+      "id": "deep-dive_MU_2026-06-21",
+      "eval": null,
+      "window": 100,
+      "regime": "RISK_ON",
+      "return": -19.858,
+      "dd": -29.919,
+      "position": 0.0015,
+      "cap": false
+    },
+    {
+      "id": "deep-dive_NVDA_2026-07-08",
+      "eval": "fired",
+      "window": 100,
+      "regime": "RISK_ON",
+      "return": 9.72,
+      "dd": -6.913,
+      "position": 0.0015,
+      "cap": false
+    },
+    {
+      "id": "deep-dive_AAOI_2026-08-21",
+      "eval": "fired",
+      "window": 76,
+      "regime": "RISK_ON",
+      "return": -15.59,
+      "dd": -19.58,
+      "position": null,
+      "cap": false
+    },
+    {
+      "id": "deep-dive_BE_2026-08-21",
+      "eval": "fired",
+      "window": 76,
+      "regime": "RISK_ON",
+      "return": 36.883,
+      "dd": 0.0,
+      "position": null,
+      "cap": false
+    }
+  ],
+  "news_null": [
+    "news-digest_2026-04-15",
+    "news-digest_2026-06-23",
+    "news-digest_2026-06-24",
+    "news-digest_2026-06-25",
+    "news-digest_2026-08-06",
+    "news-digest_2026-08-07",
+    "news-digest_2026-08-10",
+    "news-digest_2026-08-11",
+    "news-digest_2026-08-12",
+    "news-digest_2026-08-14",
+    "news-digest_2026-08-16",
+    "news-digest_2026-08-17",
+    "news-digest_2026-08-18",
+    "news-digest_2026-08-19",
+    "news-digest_2026-08-20",
+    "news-digest_2026-08-21",
+    "news-digest_2026-08-24",
+    "news-digest_2026-08-26",
+    "news-digest_2026-08-27",
+    "news-digest_2026-09-01",
+    "news-digest_2026-09-02",
+    "news-digest_2026-09-03",
+    "news-digest_2026-09-09",
+    "news-digest_2026-09-10",
+    "news-digest_2026-09-12"
+  ],
+  "news_recovered": [
+    "news-digest_2026-04-15",
+    "news-digest_2026-06-23",
+    "news-digest_2026-06-24",
+    "news-digest_2026-06-25",
+    "news-digest_2026-08-06",
+    "news-digest_2026-08-07",
+    "news-digest_2026-08-10",
+    "news-digest_2026-08-11",
+    "news-digest_2026-08-12",
+    "news-digest_2026-08-14",
+    "news-digest_2026-08-16",
+    "news-digest_2026-08-17",
+    "news-digest_2026-08-18",
+    "news-digest_2026-08-19",
+    "news-digest_2026-08-20",
+    "news-digest_2026-08-21",
+    "news-digest_2026-08-24",
+    "news-digest_2026-08-26",
+    "news-digest_2026-08-27",
+    "news-digest_2026-09-01",
+    "news-digest_2026-09-02",
+    "news-digest_2026-09-03",
+    "news-digest_2026-09-09",
+    "news-digest_2026-09-10",
+    "news-digest_2026-09-12"
+  ],
+  "news_wrong": [
+    [
+      "news-digest_2026-04-14",
+      -1.2,
+      -0.3
+    ],
+    [
+      "news-digest_2026-04-16",
+      -0.22,
+      -0.3
+    ],
+    [
+      "news-digest_2026-04-29",
+      -0.4,
+      -0.3
+    ],
+    [
+      "news-digest_2026-05-03",
+      -0.9,
+      -0.45
+    ],
+    [
+      "news-digest_2026-05-21",
+      0.1,
+      0.104
+    ]
+  ],
+  "news_strong": [
+    {
+      "id": "news-digest_2026-05-06",
+      "delta": 0.8,
+      "window": 100,
+      "spy": 0.745,
+      "label": "neutral"
+    },
+    {
+      "id": "news-digest_2026-05-14",
+      "delta": -0.6,
+      "window": 100,
+      "spy": -1.93,
+      "label": "hit"
+    },
+    {
+      "id": "news-digest_2026-05-23",
+      "delta": -0.55,
+      "window": 100,
+      "spy": 0.534,
+      "label": "neutral"
+    },
+    {
+      "id": "news-digest_2026-06-06",
+      "delta": -0.6,
+      "window": 100,
+      "spy": -0.198,
+      "label": "neutral"
+    },
+    {
+      "id": "news-digest_2026-06-10",
+      "delta": -0.7,
+      "window": 100,
+      "spy": 4.053,
+      "label": "miss"
+    },
+    {
+      "id": "news-digest_2026-06-24",
+      "delta": -0.7,
+      "window": 100,
+      "spy": 1.058,
+      "label": "n/a"
+    },
+    {
+      "id": "news-digest_2026-08-07",
+      "delta": -0.75,
+      "window": 100,
+      "spy": -0.1,
+      "label": "n/a"
+    },
+    {
+      "id": "news-digest_2026-08-11",
+      "delta": -1.0,
+      "window": 100,
+      "spy": 0.75,
+      "label": "n/a"
+    },
+    {
+      "id": "news-digest_2026-08-14",
+      "delta": -0.6,
+      "window": 100,
+      "spy": -0.938,
+      "label": "n/a"
+    },
+    {
+      "id": "news-digest_2026-08-16",
+      "delta": -0.8,
+      "window": 100,
+      "spy": -0.899,
+      "label": "n/a"
+    },
+    {
+      "id": "news-digest_2026-08-20",
+      "delta": -0.9,
+      "window": 100,
+      "spy": 0.434,
+      "label": "n/a"
+    },
+    {
+      "id": "news-digest_2026-08-27",
+      "delta": -1.0,
+      "window": 100,
+      "spy": -1.209,
+      "label": "n/a"
+    },
+    {
+      "id": "news-digest_2026-09-01",
+      "delta": -1.0,
+      "window": 100,
+      "spy": 1.104,
+      "label": "n/a"
+    },
+    {
+      "id": "news-digest_2026-09-02",
+      "delta": -0.6,
+      "window": 100,
+      "spy": 0.657,
+      "label": "n/a"
+    },
+    {
+      "id": "news-digest_2026-09-12",
+      "delta": -0.75,
+      "window": 20,
+      "spy": null,
+      "label": "pending"
+    }
+  ],
+  "sector_regime": {
+    "RISK_OFF": {
+      "n": 13,
+      "neutral": 4,
+      "miss": 6,
+      "hit": 3,
+      "miss_pct": 46.154
+    },
+    "VOLATILE": {
+      "n": 1,
+      "neutral": 1,
+      "miss_pct": 0.0
+    },
+    "None": {
+      "n": 1,
+      "neutral": 1,
+      "miss_pct": 0.0
+    },
+    "RISK_ON": {
+      "n": 55,
+      "hit": 26,
+      "neutral": 11,
+      "miss": 18,
+      "miss_pct": 32.727
+    },
+    "SIDEWAYS": {
+      "n": 6,
+      "hit": 4,
+      "neutral": 1,
+      "miss": 1,
+      "miss_pct": 16.667
+    },
+    "NEUTRAL": {
+      "n": 1,
+      "hit": 1,
+      "miss_pct": 0.0
+    }
+  },
+  "thematic_warning": {
+    "False": {
+      "n": 62,
+      "hit": 18,
+      "neutral": 27,
+      "miss": 17,
+      "miss_pct": 27.419
+    },
+    "True": {
+      "n": 39,
+      "neutral": 13,
+      "miss": 15,
+      "hit": 11,
+      "miss_pct": 38.462
+    }
+  },
+  "thematic_mature": {
+    "True": {
+      "n": 70,
+      "hit": 22,
+      "neutral": 29,
+      "miss": 19,
+      "miss_pct": 27.143
+    },
+    "False": {
+      "n": 31,
+      "neutral": 11,
+      "hit": 7,
+      "miss": 13,
+      "miss_pct": 41.935
+    }
+  },
+  "heat_changed": [
+    [
+      "deep-dive_ALAB_2026-04-21",
+      "Semiconductors",
+      null,
+      true,
+      null
+    ],
+    [
+      "deep-dive_NTRS_2026-04-21",
+      "Asset Management",
+      null,
+      null,
+      null
+    ],
+    [
+      "deep-dive_ALAB_2026-04-22",
+      "Semiconductors",
+      null,
+      true,
+      null
+    ],
+    [
+      "deep-dive_ALAB_2026-04-27",
+      "Semiconductors",
+      null,
+      true,
+      null
+    ],
+    [
+      "deep-dive_ALAB_2026-05-07",
+      "Semiconductors",
+      null,
+      true,
+      null
+    ],
+    [
+      "deep-dive_ALAB_2026-06-14",
+      "Semiconductors",
+      null,
+      true,
+      null
+    ]
+  ],
+  "completed_flips": [],
+  "weekly_counts": {
+    "deep-dive": {
+      "34": 14,
+      "35": 0,
+      "36": 1,
+      "37": 0
+    },
+    "earnings-analyzer": {
+      "34": 0,
+      "35": 0,
+      "36": 0,
+      "37": 0
+    },
+    "momentum-screen": {
+      "34": 0,
+      "35": 0,
+      "36": 0,
+      "37": 0
+    },
+    "news-digest": {
+      "34": 5,
+      "35": 3,
+      "36": 3,
+      "37": 3
+    },
+    "postmortem": {
+      "34": 0,
+      "35": 0,
+      "36": 0,
+      "37": 0
+    },
+    "sector-scan": {
+      "34": 5,
+      "35": 3,
+      "36": 3,
+      "37": 1
+    },
+    "short-term-weekly": {
+      "34": 1,
+      "35": 1,
+      "36": 0,
+      "37": 1
+    },
+    "thematic-screener": {
+      "34": 5,
+      "35": 5,
+      "36": 5,
+      "37": 5
+    },
+    "theme-detector": {
+      "34": 0,
+      "35": 0,
+      "36": 0,
+      "37": 0
+    }
+  },
+  "window_buckets": {
+    "deep-dive": {
+      "True": {
+        "n": 175,
+        "miss": 67,
+        "hit": 97,
+        "neutral": 11,
+        "miss_pct": 38.286
+      },
+      "False": {
+        "n": 16,
+        "miss": 8,
+        "hit": 6,
+        "neutral": 2,
+        "miss_pct": 50.0
+      }
+    },
+    "earnings-analyzer": {
+      "True": {
+        "n": 1,
+        "neutral": 1,
+        "miss_pct": 0.0
+      }
+    },
+    "momentum-screen": {
+      "True": {
+        "n": 24,
+        "miss": 5,
+        "pending": 1,
+        "neutral": 14,
+        "hit": 4,
+        "miss_pct": 20.833
+      }
+    },
+    "news-digest": {
+      "True": {
+        "n": 96,
+        "miss": 3,
+        "n/a": 22,
+        "neutral": 70,
+        "hit": 1,
+        "miss_pct": 3.125
+      },
+      "False": {
+        "n": 3,
+        "n/a": 2,
+        "pending": 1,
+        "miss_pct": 0.0
+      }
+    },
+    "postmortem": {
+      "False": {
+        "n": 5,
+        "n/a": 5,
+        "miss_pct": 0.0
+      }
+    },
+    "sector-scan": {
+      "True": {
+        "n": 82,
+        "neutral": 18,
+        "n/a": 2,
+        "hit": 34,
+        "miss": 25,
+        "pending": 3,
+        "miss_pct": 30.488
+      },
+      "False": {
+        "n": 6,
+        "hit": 2,
+        "miss": 1,
+        "neutral": 2,
+        "pending": 1,
+        "miss_pct": 16.667
+      }
+    },
+    "short-term-weekly": {
+      "True": {
+        "n": 13,
+        "n/a": 13,
+        "miss_pct": 0.0
+      }
+    },
+    "thematic-screener": {
+      "True": {
+        "n": 105,
+        "hit": 29,
+        "neutral": 40,
+        "miss": 32,
+        "pending": 4,
+        "miss_pct": 30.476
+      },
+      "False": {
+        "n": 3,
+        "pending": 3,
+        "miss_pct": 0.0
+      }
+    },
+    "theme-detector": {
+      "True": {
+        "n": 5,
+        "miss": 1,
+        "neutral": 1,
+        "hit": 3,
+        "miss_pct": 20.0
+      }
+    }
+  },
+  "authority_eval_consensus_n": 31,
+  "eval_consensus_mismatch": [
+    [
+      "deep-dive_MU_2026-07-08",
+      "suppressed_by_cap",
+      "qualifying_unexplained"
+    ],
+    [
+      "deep-dive_NVDA_2026-07-08",
+      "fired",
+      "suppressed_by_risk_flag"
+    ],
+    [
+      "deep-dive_PLTR_2026-07-08",
+      "suppressed_by_cap",
+      "not_qualifying"
+    ],
+    [
+      "deep-dive_AAOI_2026-08-07",
+      "not_qualifying",
+      "qualifying_unexplained"
+    ],
+    [
+      "deep-dive_NET_2026-08-07",
+      "suppressed_by_cap",
+      "not_qualifying"
+    ],
+    [
+      "deep-dive_META_2026-08-10",
+      "not_qualifying",
+      "qualifying_unexplained"
+    ],
+    [
+      "deep-dive_GOOGL_2026-08-17",
+      "suppressed_by_cap",
+      "suppressed_by_risk_flag"
+    ],
+    [
+      "deep-dive_BE_2026-08-21",
+      "fired",
+      "not_qualifying"
+    ],
+    [
+      "deep-dive_COIN_2026-08-21",
+      "suppressed_by_cap",
+      "not_qualifying"
+    ],
+    [
+      "deep-dive_PLTR_2026-08-21",
+      "suppressed_by_cap",
+      "not_qualifying"
+    ],
+    [
+      "deep-dive_MRVL_2026-08-22",
+      "not_qualifying",
+      "suppressed_by_risk_flag"
+    ],
+    [
+      "deep-dive_NVMI_2026-09-02",
+      "suppressed_by_cap",
+      "suppressed_by_risk_flag"
+    ]
+  ],
+  "news_replay_counts": {
+    "neutral": 84,
+    "hit": 2,
+    "miss": 3
+  },
+  "news_replay_n": 89,
+  "news_replay_changes": [
+    {
+      "id": "news-digest_2026-04-14",
+      "raw": "miss",
+      "authority_replay": "neutral",
+      "delta": -0.3,
+      "spy": 2.258
+    },
+    {
+      "id": "news-digest_2026-04-15",
+      "raw": "n/a",
+      "authority_replay": "neutral",
+      "delta": 0.0,
+      "spy": 1.254
+    },
+    {
+      "id": "news-digest_2026-05-03",
+      "raw": "miss",
+      "authority_replay": "neutral",
+      "delta": -0.45,
+      "spy": 2.731
+    },
+    {
+      "id": "news-digest_2026-06-23",
+      "raw": "n/a",
+      "authority_replay": "neutral",
+      "delta": -0.1,
+      "spy": -0.626
+    },
+    {
+      "id": "news-digest_2026-06-24",
+      "raw": "n/a",
+      "authority_replay": "miss",
+      "delta": -0.7,
+      "spy": 1.058
+    },
+    {
+      "id": "news-digest_2026-06-25",
+      "raw": "n/a",
+      "authority_replay": "neutral",
+      "delta": 0.16,
+      "spy": 1.698
+    },
+    {
+      "id": "news-digest_2026-08-06",
+      "raw": "n/a",
+      "authority_replay": "neutral",
+      "delta": -0.1,
+      "spy": 0.26
+    },
+    {
+      "id": "news-digest_2026-08-07",
+      "raw": "n/a",
+      "authority_replay": "neutral",
+      "delta": -0.75,
+      "spy": -0.1
+    },
+    {
+      "id": "news-digest_2026-08-10",
+      "raw": "n/a",
+      "authority_replay": "neutral",
+      "delta": 0.3,
+      "spy": 0.428
+    },
+    {
+      "id": "news-digest_2026-08-11",
+      "raw": "n/a",
+      "authority_replay": "neutral",
+      "delta": -1.0,
+      "spy": 0.75
+    },
+    {
+      "id": "news-digest_2026-08-12",
+      "raw": "n/a",
+      "authority_replay": "neutral",
+      "delta": 0.2,
+      "spy": 0.023
+    },
+    {
+      "id": "news-digest_2026-08-14",
+      "raw": "n/a",
+      "authority_replay": "neutral",
+      "delta": -0.6,
+      "spy": -0.938
+    },
+    {
+      "id": "news-digest_2026-08-16",
+      "raw": "n/a",
+      "authority_replay": "neutral",
+      "delta": -0.8,
+      "spy": -0.899
+    },
+    {
+      "id": "news-digest_2026-08-17",
+      "raw": "n/a",
+      "authority_replay": "neutral",
+      "delta": 0.4,
+      "spy": -0.899
+    },
+    {
+      "id": "news-digest_2026-08-18",
+      "raw": "n/a",
+      "authority_replay": "neutral",
+      "delta": -0.2,
+      "spy": -0.225
+    },
+    {
+      "id": "news-digest_2026-08-19",
+      "raw": "n/a",
+      "authority_replay": "neutral",
+      "delta": -0.3,
+      "spy": -0.727
+    },
+    {
+      "id": "news-digest_2026-08-20",
+      "raw": "n/a",
+      "authority_replay": "neutral",
+      "delta": -0.9,
+      "spy": 0.434
+    },
+    {
+      "id": "news-digest_2026-08-21",
+      "raw": "n/a",
+      "authority_replay": "neutral",
+      "delta": -0.2,
+      "spy": 0.047
+    },
+    {
+      "id": "news-digest_2026-08-24",
+      "raw": "n/a",
+      "authority_replay": "neutral",
+      "delta": -0.5,
+      "spy": 0.77
+    },
+    {
+      "id": "news-digest_2026-08-26",
+      "raw": "n/a",
+      "authority_replay": "neutral",
+      "delta": -0.1,
+      "spy": 0.127
+    },
+    {
+      "id": "news-digest_2026-08-27",
+      "raw": "n/a",
+      "authority_replay": "hit",
+      "delta": -1.0,
+      "spy": -1.209
+    },
+    {
+      "id": "news-digest_2026-09-01",
+      "raw": "n/a",
+      "authority_replay": "miss",
+      "delta": -1.0,
+      "spy": 1.104
+    },
+    {
+      "id": "news-digest_2026-09-02",
+      "raw": "n/a",
+      "authority_replay": "neutral",
+      "delta": -0.6,
+      "spy": 0.657
+    },
+    {
+      "id": "news-digest_2026-09-03",
+      "raw": "n/a",
+      "authority_replay": "neutral",
+      "delta": -0.2,
+      "spy": -0.933
+    }
+  ],
+  "news_strong_complete": 14,
+  "news_sub1_miss": 0,
+  "path_coverage": 175,
+  "frozen_semis_hold": {
+    "n": 34,
+    "miss": 23
+  },
+  "known_nontech_full": 46,
+  "frozen_nontech_full": 47,
+  "new_full_ids": [
+    "deep-dive_BAC_2026-08-09",
+    "deep-dive_NOW_2026-08-09",
+    "deep-dive_PLTR_2026-08-09",
+    "deep-dive_META_2026-08-10",
+    "deep-dive_NVDA_2026-08-10",
+    "deep-dive_RKLB_2026-08-10"
+  ],
+  "sector_regime_coverage": 85,
+  "full_heat_gap_pp": 7.022999999999996,
+  "window_finite_path_note": "Full cohort = window_complete_pct == 100 and label in hit/miss/neutral and recursively finite reality. No input rewrite.",
+  "join_note": "Execution action: unique date+ticker using trades_this_session or legacy top-level history row; 185 unique, 6 ambiguous. hot_zone_eval: field-level unanimous value allowed across duplicate rows (31), unique-session subset=28. Original labels retained for CANCEL cohort; no action-based verdict replay."
+}

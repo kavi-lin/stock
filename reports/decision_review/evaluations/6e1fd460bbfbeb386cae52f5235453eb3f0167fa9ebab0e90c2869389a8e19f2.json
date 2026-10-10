@@ -1,0 +1,52 @@
+{
+  "decision_id": "sha256:38dd2604869bd220b615a67465e756528cc1f9516ab5c200a14ccb7dec4fa338",
+  "evaluation": {
+    "version": "investment-evaluation/2.0",
+    "evaluated_at": "2026-10-01",
+    "source": "/Users/kavi/Developer/Claude/Projects/ai-investment-committee/investment/invest_logs/history.json#200",
+    "window_complete": true,
+    "calibration_eligible": true,
+    "exclusion_reasons": []
+  },
+  "reality": {
+    "decision_date": "2026-08-21",
+    "eval_date": "2026-09-20",
+    "today": "2026-10-01",
+    "window_days": 30,
+    "days_elapsed": 41,
+    "window_complete_pct": 100,
+    "pending": false,
+    "ticker_reality": {
+      "price_window_complete": true,
+      "price_observations": 20,
+      "price_at_decision": 214.72,
+      "price_at_decision_date": "2026-08-21",
+      "price_at_eval": 222.27,
+      "price_at_eval_date": "2026-09-18",
+      "return_pct": 3.516,
+      "max_runup_since": 230.36,
+      "max_drawdown_since": 208.48,
+      "max_runup_pct": 7.284,
+      "max_drawdown_pct": -2.906
+    },
+    "trade_condition_evaluation": {
+      "method": "daily_close_touch; no intraday ordering or execution inference",
+      "entry_price_touched": null,
+      "take_profit_touched": true,
+      "stop_loss_touched": true
+    }
+  },
+  "verdict": {
+    "label": "hit",
+    "rationale": "看多 → 實際 +3.52%, 命中｜trader 條件: TP 觸發 / SL 觸發",
+    "max_runup_pct": 7.284,
+    "max_drawdown_pct": -2.906
+  },
+  "original_label": "UNKNOWN",
+  "prior_evaluations": [
+    {
+      "label": "pending",
+      "rationale": "尚未取得 eval 價格"
+    }
+  ]
+}

@@ -1,0 +1,1351 @@
+{
+  "session_export_version": "V5.5",
+  "export_date": "2026-10-01",
+  "date": "2026-10-01",
+  "ticker": "NVDA",
+  "final_action": "CANCEL",
+  "phase0_file": "./invest_logs/runs/NVDA_20261001T094245_fac61d27a6/phase0.json",
+  "phase0_macro_snapshot": {
+    "market_regime": "VOLATILE",
+    "macro_backdrop_score": -2.0,
+    "macro_multiplier": 0.75,
+    "key_themes": [
+      "High Treasury yields pressure equity valuations",
+      "Softer inflation offset by resilient activity",
+      "Elevated credit stress and weak participation",
+      "Iran-linked oil volatility adds inflation risk"
+    ]
+  },
+  "trades_this_session": [
+    {
+      "ticker": "NVDA",
+      "final_action": "CANCEL",
+      "final_score": 0.7151,
+      "final_decision": "HOLD",
+      "decision_engine_version": "1.1.0",
+      "calculation_steps": {
+        "fund": "0.25 × 2 × 0.72 = 0.3600",
+        "sent": "0.15 × -0.53 × 0.72 = -0.0572",
+        "news": "0.20 × 1.5 × 0.60 = 0.1800",
+        "tech": "0.25 × 1.5 × 0.72 = 0.2700",
+        "val": "0.15 × 0 × 0.60 = 0.0000",
+        "raw_total": 0.7528,
+        "structural_shift_modulation": {
+          "tier": "NONE",
+          "applied_adjustments": [
+            "no modulation — standard rules apply"
+          ],
+          "shift_macro_floor": 0.0,
+          "position_size_cap_pct": 100,
+          "red_team_mean_reversion_blocked": false
+        },
+        "polarization_modulation": {
+          "label": "ALIGNED",
+          "lane_range": 2.53,
+          "pos_strong": 3,
+          "neg_strong": 0,
+          "outlier_lane_id": null,
+          "applied_adjustments": [
+            "no modulation"
+          ],
+          "confidence_multiplier": 1.0,
+          "position_cap_after": 100
+        },
+        "red_team_basis": "unclassified",
+        "red_team_auto_downgrade": false,
+        "cascade_rule_applied": "rule_5_default_strong_counter",
+        "dynamic_threshold": {
+          "buy_threshold": 1.2,
+          "staged_threshold": 0.8,
+          "rationale": "default 1.2 (tier=NONE, polarization=ALIGNED)"
+        },
+        "t5_forward_validation": {
+          "forward_validation_status": "STRETCHED",
+          "forward_validation_applies": true,
+          "valuation_score": 0.0,
+          "warning_triggered": false,
+          "hard_downgrade_eligible": false,
+          "downgrade_applied": false,
+          "decision_before": "HOLD",
+          "decision_after": "HOLD"
+        },
+        "red_team_verdict": "STRONG_COUNTER",
+        "red_team_effective_verdict": "STRONG_COUNTER",
+        "red_team_counter_evidence_strength": 4,
+        "red_team_thesis_break_probability": 0.42,
+        "bonus_applied": false,
+        "penalty_applied": true,
+        "penalty_value": 0.95,
+        "raw_after_bonus": 0.71512,
+        "macro_multiplier": 0.75,
+        "macro_alignment": "CONTRARIAN",
+        "effective_macro_mult": 0.75,
+        "final_score": 0.7151
+      },
+      "avg_confidence": 0.65,
+      "consensus_bonus_applied": false,
+      "macro_alignment": "CONTRARIAN",
+      "hot_zone_probe": false,
+      "hot_zone_probe_tier": null,
+      "hot_zone_eval": "not_qualifying",
+      "decision_cap_active": true,
+      "decision_cap_reason": "low_data_quality",
+      "transition_data_stale_or_inconsistent": true,
+      "red_team_verdict": "STRONG_COUNTER",
+      "red_team_counter_thesis": "NVDA’s mixed HOLD is vulnerable because the $228.38 price implies a 60% five-year FCF CAGR, while the frozen inputs provide no actual or lane FCF growth estimate; the weighted fair value is $220.12, and the 10-year real yield is 2.88%. The analyst revenue path of 39.28% CAGR does not establish that FCF can meet the higher implied hurdle.",
+      "red_team_kill_conditions": [
+        "IF FCF growth is below 30% annualized across the next two reported quarters WITHIN 180 days THEN the price-implied 60% five-year FCF growth case breaks.",
+        "IF year-over-year revenue growth falls below 36% in either of the next two quarterly reports WITHIN 180 days THEN the price-implied revenue path breaks.",
+        "IF the FRED 10-year real Treasury yield remains at or above 2.88% for the next 90 days THEN persistent discount-rate pressure and the $220.12 weighted fair value leave the $228.38 price without a rate-supported valuation cushion."
+      ],
+      "red_team_execution_failed": false,
+      "red_team_counter_evidence_strength": 4,
+      "red_team_thesis_break_probability": 0.42,
+      "phase2_fanout_mode": "PARALLEL_SUBAGENT",
+      "degraded_analysts": [],
+      "lane_scores": {
+        "fundamentals": 2,
+        "sentiment": -0.53,
+        "news": 1.5,
+        "technical": 1.5,
+        "valuation": 0.0
+      },
+      "conflict_bias": {
+        "schema": "conflict_bias.v1",
+        "tentative_decision": "HOLD",
+        "lane_signals": {
+          "fundamentals": "BUY",
+          "sentiment": "HOLD",
+          "news": "BUY",
+          "technical": "HOLD",
+          "valuation": "HOLD"
+        },
+        "triggers_fired": [],
+        "conflict_summary": "No T1–T5 triggers fired; lane signals are mixed.",
+        "t4_detail": null,
+        "t5_detail": null,
+        "proceed_to_phase3": true
+      },
+      "burry_score": 27.7,
+      "burry_override_active": false,
+      "burry_override_recheck_date": null,
+      "trade_plan_builder_version": "1.0.0",
+      "mandatory_risk_flags": [],
+      "entry_aggressive": [
+        227.52,
+        229.98
+      ],
+      "entry_conservative": [
+        221.09,
+        227.52
+      ],
+      "take_profit": 229.98,
+      "stop_loss": 218.88,
+      "risk_reward_ratio": 4.02,
+      "position_size_pct": 0.0,
+      "risk_audit": {
+        "risk_level": "MEDIUM",
+        "sized_for_decision": "HOLD",
+        "vol_adjusted_limit_pct": null,
+        "position_size_method": "RULE_BASED",
+        "tail_risk": {
+          "fragility_label": "MODERATE",
+          "tail_risk_score": null,
+          "fragility_adjustment": "× 0.75",
+          "degraded": true
+        },
+        "binary_classification": "unknown",
+        "binary_event_within_48h": false,
+        "burry_override_active": false,
+        "burry_override_multiplier": 1.0,
+        "ftd_timeline_gate": {
+          "applied": false,
+          "days_since_ftd": null,
+          "stage": "n/a",
+          "sector_class": "cyclical",
+          "multiplier": 1.0,
+          "stop_loss_adjustment_pp": 0,
+          "rejection_triggered": false
+        },
+        "sector_concentration_f1": {
+          "applied": false,
+          "multiplier": 1.0,
+          "sector": "Technology",
+          "active_same_sector_confirmed": null,
+          "source": "registry_unavailable",
+          "note": "concentration 輸入不可得（registry_unavailable）— F1 未評估，不當作 0 部位"
+        },
+        "sizing_chain": {
+          "base": 0.05,
+          "tail_adj": 0.0375,
+          "macro_cap": 0.0375,
+          "binary_adj": 0.0375,
+          "binary_multiplier": 1.0,
+          "burry_override_adj": 0.0375,
+          "burry_override_multiplier": 1.0,
+          "ftd_adj": 0.0375,
+          "f1_adj": 0.0375,
+          "f1_multiplier": 1.0,
+          "shift_adj": 0.0375,
+          "polar_adj": 0.0375,
+          "final_position_size": 0.0375,
+          "steps": [
+            "base 0.050000 × fragility 0.75 = 0.037500",
+            "macro_backdrop -2.0 ≥ -3.0 → macro cap 不觸發 = 0.037500",
+            "binary unknown (event<48h=False) → × 1.0 = 0.037500",
+            "burry_override False → × 1.0 = 0.037500",
+            "ftd_timeline × 1.0 = 0.037500",
+            "V20-F1 sector concentration × 1.0 = 0.037500",
+            "structural_shift cap 100.0% → × 1.0 = 0.037500",
+            "polarization cap 100.0% → × 1.0 = 0.037500",
+            "decision HOLD → 不折半 = 0.037500"
+          ]
+        },
+        "position_size_pct": 0.0,
+        "final_stop_loss_pct": -1.0,
+        "stop_loss_derivation": {
+          "base_stop_pct": -1.0,
+          "ftd_stop_adjustment_pp": 0,
+          "floored_at_limit": false,
+          "structural_stop_price": 218.88,
+          "pct_based_stop_price": 218.88,
+          "selected": "structural",
+          "note": "base -1.00% + FTD 0pp = -1.00%"
+        },
+        "staged_entry_split": null,
+        "hot_zone_probe_capped": false,
+        "approval": "APPROVED",
+        "rejection_reason": null
+      },
+      "time_horizon": "mid",
+      "analysis_price": 228.38,
+      "staged_split": null,
+      "position_size_method": "RULE_BASED",
+      "final_stop_loss_pct": -1.0,
+      "fragility_label": "MODERATE",
+      "binary_classification": "unknown",
+      "ftd_timeline_gate": {
+        "applied": false,
+        "days_since_ftd": null,
+        "stage": "n/a",
+        "sector_class": "cyclical",
+        "multiplier": 1.0,
+        "stop_loss_adjustment_pp": 0,
+        "rejection_triggered": false
+      },
+      "valuation_pack": {
+        "schema": "valuation_pack.v1",
+        "engine": "compute_price_framework.py v2.4 (V4.131.13)",
+        "built_at": "2026-10-01T01:43:20+00:00",
+        "current_price": 228.38,
+        "anchors": {
+          "dcf_unlevered": {
+            "value": 222.52383622345155,
+            "family": "fundamental",
+            "correlation_group": "cashflow_intrinsic:earnings_analyst:NVDA:2026-07-26",
+            "assumption_set_id": "abc31c27892f5902",
+            "provenance": "earnings_analyst_bundle",
+            "as_of": "2026-09-30",
+            "input_lineage_ids": [
+              "earnings_analyst:NVDA:2026-07-26"
+            ],
+            "status": "eligible",
+            "reason": null,
+            "weight_raw": 0.2,
+            "weight_effective": 0.083333,
+            "projection_mode": null,
+            "sensitivity_low": null,
+            "sensitivity_high": null,
+            "calibration": null
+          },
+          "dcf_levered": {
+            "value": 232.15742721278852,
+            "family": "fundamental",
+            "correlation_group": "cashflow_intrinsic:earnings_analyst:NVDA:2026-07-26",
+            "assumption_set_id": "abc31c27892f5902",
+            "provenance": "earnings_analyst_bundle",
+            "as_of": "2026-09-30",
+            "input_lineage_ids": [
+              "earnings_analyst:NVDA:2026-07-26"
+            ],
+            "status": "eligible",
+            "reason": null,
+            "weight_raw": 0.1,
+            "weight_effective": 0.083333,
+            "projection_mode": null,
+            "sensitivity_low": null,
+            "sensitivity_high": null,
+            "calibration": null
+          },
+          "dcf_self_built": {
+            "value": 95.04,
+            "family": "fundamental",
+            "correlation_group": "cashflow_intrinsic:dcf_self:NVDA:2026-10-01",
+            "assumption_set_id": "d6c2ec0b367e6e9c",
+            "provenance": "valuation_modeler.dcf",
+            "as_of": "2026-10-01",
+            "input_lineage_ids": [
+              "skills/valuation-modeler/cache/NVDA_dcf_payload.json"
+            ],
+            "status": "eligible",
+            "reason": null,
+            "weight_raw": 0.15,
+            "weight_effective": 0.166667,
+            "projection_mode": "legacy_constant_ratio",
+            "sensitivity_low": 85.04,
+            "sensitivity_high": 107.76,
+            "calibration": null
+          },
+          "analyst_pt_consensus": {
+            "value": 345.21,
+            "family": "external_expectations",
+            "correlation_group": "external_pt:analyst_pt:NVDA:2026-09-30",
+            "assumption_set_id": "d4f9e641c23ca7a5",
+            "provenance": "earnings_analyst_bundle.pt_news",
+            "as_of": "2026-09-30",
+            "input_lineage_ids": [
+              "analyst_pt:NVDA:2026-09-30"
+            ],
+            "status": "eligible",
+            "reason": null,
+            "weight_raw": 0.2,
+            "weight_effective": 0.5,
+            "projection_mode": null,
+            "sensitivity_low": null,
+            "sensitivity_high": null,
+            "calibration": null
+          },
+          "peer_pe_implied": {
+            "value": null,
+            "family": "relative",
+            "correlation_group": "peer_relative:b81d9f8561c6da0a",
+            "assumption_set_id": "b81d9f8561c6da0a",
+            "provenance": null,
+            "as_of": null,
+            "input_lineage_ids": [],
+            "status": "ineligible",
+            "reason": "missing_or_nonpositive_value",
+            "weight_raw": 0.15,
+            "weight_effective": 0.0,
+            "projection_mode": null,
+            "sensitivity_low": null,
+            "sensitivity_high": null,
+            "calibration": null
+          },
+          "comps_implied": {
+            "value": null,
+            "family": "relative",
+            "correlation_group": "peer_relative:peers:4f53cda18c2baa0c:2026-10-01",
+            "assumption_set_id": "fc6070b8d0015531",
+            "provenance": "valuation_modeler.comps",
+            "as_of": "2026-10-01",
+            "input_lineage_ids": [
+              "skills/valuation-modeler/cache/NVDA_comps_payload.json"
+            ],
+            "status": "ineligible",
+            "reason": "fewer_than_3_business_similar_peers",
+            "weight_raw": 0.1,
+            "weight_effective": 0.0,
+            "projection_mode": null,
+            "sensitivity_low": null,
+            "sensitivity_high": null,
+            "calibration": null
+          },
+          "owner_earnings_mult": {
+            "value": 15.75,
+            "family": "fundamental",
+            "correlation_group": "cashflow_intrinsic:owner_earnings:NVDA:2026-10-01",
+            "assumption_set_id": "bf5b9c6049ae854a",
+            "provenance": "fmp_supplementary.owner_earnings",
+            "as_of": "2026-10-01",
+            "input_lineage_ids": [
+              "owner_earnings:NVDA:2026-10-01"
+            ],
+            "status": "eligible",
+            "reason": null,
+            "weight_raw": 0.05,
+            "weight_effective": 0.166667,
+            "projection_mode": null,
+            "sensitivity_low": null,
+            "sensitivity_high": null,
+            "calibration": null
+          },
+          "forecaster_blend": {
+            "value": null,
+            "family": "fundamental",
+            "correlation_group": "earnings_projection:forecaster:NVDA:2026-10-01",
+            "assumption_set_id": "be21c7b9689ac3bd",
+            "provenance": "earnings_valuation_forecaster",
+            "as_of": "2026-10-01",
+            "input_lineage_ids": [
+              "skills/earnings-valuation-forecaster/cache/NVDA.json"
+            ],
+            "status": "ineligible",
+            "reason": "low_forecast_confidence",
+            "weight_raw": 0.05,
+            "weight_effective": 0.0,
+            "projection_mode": null,
+            "sensitivity_low": null,
+            "sensitivity_high": null,
+            "calibration": null
+          },
+          "fwd_earnings_discounted": {
+            "value": 215.5,
+            "family": "fundamental",
+            "correlation_group": "earnings_projection:analyst_estimates:NVDA:2030-01-25",
+            "assumption_set_id": "c0b5e8c6c7c5b0cb",
+            "provenance": "fmp_analyst_estimates.annual",
+            "as_of": "2026-10-01",
+            "input_lineage_ids": [
+              "analyst_estimates:NVDA:2030-01-25"
+            ],
+            "status": "ineligible",
+            "reason": "cashflow_intrinsic_anchors_live:dcf_unlevered,dcf_levered,dcf_self_built,owner_earnings_mult",
+            "weight_raw": 0.15,
+            "weight_effective": 0.0,
+            "projection_mode": null,
+            "sensitivity_low": null,
+            "sensitivity_high": null,
+            "calibration": {
+              "target_fiscal_year": "2030-01-25",
+              "target_eps": 23,
+              "analyst_count": 9,
+              "discount_rate": 0.1524,
+              "horizon_years": 3.318,
+              "justified_pe": 15.0,
+              "justified_pe_raw": 7.75,
+              "pe_clamp_binding": "lower",
+              "growth_source": "eps_cagr",
+              "beta_used": 2.217,
+              "beta_source": "profile",
+              "discount_clamp_binding": null
+            }
+          }
+        },
+        "families": {
+          "fundamental": {
+            "groups": {
+              "cashflow_intrinsic:earnings_analyst:NVDA:2026-07-26": {
+                "value": 227.34,
+                "members": [
+                  "dcf_unlevered",
+                  "dcf_levered"
+                ]
+              },
+              "cashflow_intrinsic:dcf_self:NVDA:2026-10-01": {
+                "value": 95.04,
+                "members": [
+                  "dcf_self_built"
+                ]
+              },
+              "cashflow_intrinsic:owner_earnings:NVDA:2026-10-01": {
+                "value": 15.75,
+                "members": [
+                  "owner_earnings_mult"
+                ]
+              }
+            },
+            "representative": 95.04,
+            "weight_raw": 0.55,
+            "weight_effective": 0.5
+          },
+          "external_expectations": {
+            "groups": {
+              "external_pt:analyst_pt:NVDA:2026-09-30": {
+                "value": 345.21,
+                "members": [
+                  "analyst_pt_consensus"
+                ]
+              }
+            },
+            "representative": 345.21,
+            "weight_raw": 0.2,
+            "weight_effective": 0.5
+          }
+        },
+        "families_present": [
+          "external_expectations",
+          "fundamental"
+        ],
+        "family_coverage_weight": 0.75,
+        "aggregation_mode": "degraded_equal_family_votes",
+        "primary_method": "family_aggregation",
+        "family_blended_fair_value": 220.12,
+        "weighted_fair_value": 220.12,
+        "vs_current_pct": -3.61,
+        "verdict_band": "fairly_valued",
+        "score": 0.0,
+        "confidence": "medium",
+        "evidence_independence": {
+          "eligible_anchors": [
+            "analyst_pt_consensus",
+            "dcf_levered",
+            "dcf_self_built",
+            "dcf_unlevered",
+            "owner_earnings_mult"
+          ],
+          "sell_side_anchors": [
+            "analyst_pt_consensus"
+          ],
+          "sell_side_only": false,
+          "note": "至少一根合格錨獨立於賣方預估"
+        },
+        "structural_shift": {},
+        "outlier_diagnostics": [
+          {
+            "anchor": "owner_earnings_mult",
+            "value": 15.75,
+            "reason": "outside [73.00, 657.04] (median 219.01 × 1/3..3)"
+          }
+        ],
+        "score_before_forward_validation": 0.0,
+        "forward_validation_status": "STRETCHED"
+      },
+      "fair_value_summary": {
+        "anchors": {
+          "dcf_unlevered": 222.52383622345155,
+          "dcf_levered": 232.15742721278852,
+          "dcf_self_built": 95.04,
+          "analyst_pt_consensus": 345.21,
+          "peer_pe_implied": null,
+          "comps_implied": null,
+          "owner_earnings_mult": 15.75,
+          "forecaster_blend": null,
+          "fwd_earnings_discounted": 215.5
+        },
+        "anchors_effective": {
+          "dcf_unlevered": 222.52383622345155,
+          "dcf_levered": 232.15742721278852,
+          "dcf_self_built": 95.04,
+          "analyst_pt_consensus": 345.21,
+          "peer_pe_implied": null,
+          "comps_implied": null,
+          "owner_earnings_mult": 15.75,
+          "forecaster_blend": null,
+          "fwd_earnings_discounted": null
+        },
+        "weights_used": {
+          "dcf_unlevered": 0.083333,
+          "dcf_levered": 0.083333,
+          "dcf_self_built": 0.166667,
+          "analyst_pt_consensus": 0.5,
+          "owner_earnings_mult": 0.166667
+        },
+        "weighted_fair_value": 220.12,
+        "current_price": 228.38,
+        "vs_current_pct": -3.61,
+        "verdict_band": "fairly_valued",
+        "score": 0.0,
+        "confidence": "medium",
+        "anchors_available": 5,
+        "families_present": [
+          "external_expectations",
+          "fundamental"
+        ],
+        "family_coverage_weight": 0.75,
+        "excluded_anchors": {
+          "peer_pe_implied": "missing_or_nonpositive_value",
+          "comps_implied": "fewer_than_3_business_similar_peers",
+          "forecaster_blend": "low_forecast_confidence",
+          "fwd_earnings_discounted": "cashflow_intrinsic_anchors_live:dcf_unlevered,dcf_levered,dcf_self_built,owner_earnings_mult"
+        },
+        "valuation_pack_schema": "valuation_pack.v1",
+        "primary_method": "family_aggregation",
+        "family_blended_fair_value": 220.12,
+        "sell_side_only": false,
+        "pre_profit_anchor_live": false,
+        "methodology_note": "canonical family aggregation; mode=degraded_equal_family_votes; 5/9 anchors; families=external_expectations,fundamental",
+        "outlier_diagnostics": [
+          {
+            "anchor": "owner_earnings_mult",
+            "value": 15.75,
+            "reason": "outside [73.00, 657.04] (median 219.01 × 1/3..3)"
+          }
+        ],
+        "score_before_forward_validation": 0.0,
+        "forward_validation_status": "STRETCHED"
+      },
+      "fair_value_range": {
+        "range_method": "weighted_percentile",
+        "p25": 131.46,
+        "p50": 225.74,
+        "p75": 288.68,
+        "min_anchor": 15.75,
+        "max_anchor": 345.21,
+        "dispersion_ratio": 21.92,
+        "range_verdict": "fair_zone",
+        "anchor_dispersion_cv": 0.4796,
+        "agreement_grade": "medium",
+        "anchors_used_n": 5,
+        "owner_earnings_multiple_shadow": {
+          "oe_mult_static": 15.0,
+          "oe_mult_rate_linked": 14.53,
+          "required_yield": 0.0688
+        }
+      },
+      "implied_expectations": {
+        "implied_5y_fcf_cagr": 0.6,
+        "implied_out_of_range": true,
+        "wacc_used": 0.0976,
+        "wacc_source": "fred_10y",
+        "fcf_base": 1.05,
+        "fcf_base_source": "owner_earnings",
+        "terminal_growth": 0.025,
+        "actual_3y_fcf_cagr": null,
+        "lane_fcf_estimate": null,
+        "sanity_note": "現價 $228.38 隱含 5Y FCF CAGR 60%",
+        "red_team_kill_seed": "IF 未來 2 季 FCF 年化增速 < 30%（隱含值一半）THEN 現價估值論點破滅",
+        "market_implied_revenue": {
+          "applicable": true,
+          "reason": null,
+          "ev_to_sales_ttm": 18.464030577385806,
+          "terminal_ev_to_sales": 4.0,
+          "terminal_ev_to_sales_sector_typical": 8.0,
+          "horizon_years": 5.0,
+          "required_revenue_multiple": 4.62,
+          "implied_revenue_cagr": 0.3579,
+          "required_revenue_multiple_sector": 2.31,
+          "implied_revenue_cagr_sector": 0.1821,
+          "analyst_revenue_cagr": 0.3928,
+          "analyst_horizon_years": 5.0,
+          "verdict": "aligned_with_sell_side",
+          "note": "EV/S 18.46x → 收斂到 4x 需營收 ×4.62（5Y CAGR 36%，且 EV 原地不動）；若倍數只收斂到科技中樞 8x 則需 18%；分析師路徑 39%；→ 與賣方預估大致一致",
+          "red_team_kill_seed": "IF 未來 2 季營收年化增速 < 36% THEN 現價內含的營收路徑破裂"
+        }
+      },
+      "valuation_archetype_shadow": {
+        "archetype": "hypergrowth",
+        "rule_hit": "rev_yoy=1.0585 / eps_ttm=None",
+        "missing_inputs": [
+          "eps_ttm"
+        ],
+        "new_anchors": {
+          "peer_ev_ebitda_implied": null,
+          "peer_ev_sales_implied": null,
+          "pb_roe_justified": null
+        },
+        "anchors_used_n": 5,
+        "weights_used": {
+          "dcf_unlevered": 0.1667,
+          "dcf_levered": 0.0833,
+          "dcf_self_built": 0.1667,
+          "analyst_pt_consensus": 0.3333,
+          "fwd_earnings_discounted": 0.25
+        },
+        "weighted_fair_value_shadow": 241.22,
+        "vs_current_pct_shadow": 5.62,
+        "verdict_band_shadow": "fairly_valued",
+        "flip_vs_live": false,
+        "note": "shadow-only — live fair_value_summary 權重/verdict 不受影響（#3b 切換待 ≥20 session 翻轉率報告）"
+      },
+      "forward_validation": {
+        "schema": "forward_validation.v1",
+        "status": "STRETCHED",
+        "applies": true,
+        "reason": "at least one credible forward check supports current price",
+        "dcf_value": 95.04,
+        "dcf_gap_pct": -58.39,
+        "extreme_dcf_threshold_pct": -30.0,
+        "checks": [
+          {
+            "name": "archetype_shadow",
+            "available": true,
+            "supports_current_price": true,
+            "actual": 5.62,
+            "threshold": ">=-10% vs current",
+            "detail": {
+              "anchors_used_n": 5
+            }
+          },
+          {
+            "name": "forward_earnings",
+            "available": true,
+            "supports_current_price": true,
+            "actual": -5.64,
+            "threshold": ">=-10% vs current",
+            "detail": {
+              "analyst_count": 9,
+              "horizon_years": 3.318
+            }
+          },
+          {
+            "name": "revenue_path",
+            "available": true,
+            "supports_current_price": true,
+            "actual": 0.3579,
+            "threshold": "<= analyst CAGR + 0.05",
+            "detail": {
+              "analyst_revenue_cagr": 0.3928,
+              "analyst_horizon_years": 5.0
+            }
+          }
+        ],
+        "evaluated_count": 3,
+        "support_count": 3,
+        "supported_checks": [
+          "archetype_shadow",
+          "forward_earnings",
+          "revenue_path"
+        ],
+        "failed_checks": [],
+        "quality_flags": [
+          "reverse_dcf_growth_out_of_range"
+        ],
+        "valuation_score_before": 0.0,
+        "valuation_score_effective": 0.0,
+        "score_adjustment": "none",
+        "t5_hard_downgrade_eligible": false
+      },
+      "valuation_explained_range": {
+        "available": false,
+        "reason": "no_eligible_structural_dcf_primary"
+      },
+      "valuation_reviewer_gate": {
+        "schema": "valuation_reviewer_gate.v1",
+        "ticker": "NVDA",
+        "would_invoke": true,
+        "mandatory_fired": false,
+        "triggers_fired": [
+          "no_peer_cohort",
+          "anchor_conflict_severe"
+        ],
+        "shadow_only": true
+      },
+      "valuation_lane": {
+        "signal": "HOLD",
+        "score": 0.0,
+        "confidence": 0.6,
+        "key_factors": [
+          "Fair-value blend is near the current price",
+          "Two correlated DCF anchors share one group",
+          "No business-similar peer cohort is available"
+        ],
+        "risk_flags": [
+          "Outlier owner-earnings anchor weakens robustness",
+          "Fundamental and analyst anchors diverge widely"
+        ],
+        "phase0_alignment": "ALIGNED",
+        "data_source_timestamp": "2026-10-01 01:43",
+        "skill_execution_failed": false,
+        "weighted_fair_value": 220.12,
+        "vs_current_pct": -3.61,
+        "verdict_band": "fairly_valued",
+        "valuation_commentary": "The pack rates NVDA fairly valued: weighted fair value is $220.12 versus current price of $228.38 (-3.61%), with score 0.0. This near-price result uses degraded equal-family voting across fundamental and external-expectations families, with 0.75 family coverage. The $222.52 unlevered and $232.16 levered DCF anchors share one correlation group. The self-built DCF is $95.04, while analyst consensus is $345.21. Peer P/E is unavailable and comps are ineligible because there are fewer than three business-similar peers; the forecaster blend is excluded for low forecast confidence. Owner earnings is flagged as an outlier, and discounted forward earnings is ineligible because cashflow-intrinsic anchors are live. The high-yield, volatile macro backdrop is consistent with limited support for valuation expansion.",
+        "suppression_proposals": [
+          {
+            "anchor": "owner_earnings_mult",
+            "reason": "Review business fit before using this outlier as a valuation anchor.",
+            "evidence": "The pack flags the $15.75 value outside its [73.00, 657.04] outlier range; the source bundle identifies the owner-earnings period as 2027-Q2."
+          }
+        ]
+      },
+      "fundamentals_lane": {
+        "signal": "BUY",
+        "score": 2,
+        "confidence": 0.79,
+        "key_factors": [
+          "Revenue up 106% YoY",
+          "Operating margin above 65%",
+          "Net cash and low leverage"
+        ],
+        "risk_flags": [
+          "Negative accruals quality flag",
+          "FCF yield only 2.28%"
+        ],
+        "phase0_alignment": "MISALIGNED",
+        "data_source_timestamp": "2026-10-01 01:44",
+        "skill_execution_failed": false,
+        "moat_assessment": {
+          "level": "WIDE",
+          "type": "scale_economies",
+          "evidence_one_line": "~75% gross and 65% operating margins with 106% revenue growth; curated peer cohort unavailable."
+        },
+        "near_term_catalysts": [
+          {
+            "date": "2026-11-18",
+            "type": "earnings",
+            "description": "Next earnings estimate; ticker bundle lists Nov 17 while analyst bundle lists Nov 18.",
+            "impact": "high"
+          },
+          {
+            "date": "2026-11-18",
+            "type": "guidance",
+            "description": "Management guidance at the next earnings release; separate timing not supplied.",
+            "impact": "high"
+          },
+          {
+            "date": "2026-Q4",
+            "type": "macro_event",
+            "description": "INSUFFICIENT_DATA — no additional dated catalyst supplied in frozen inputs.",
+            "impact": "low"
+          }
+        ],
+        "bull_thesis_one_line": "Revenue grew 106% YoY with ~65% operating margins, 128% forward EPS growth, and net cash.",
+        "bear_thesis_one_line": "FCF yield is 2.28%, accruals carry a warning, and elevated real rates pressure technology valuations."
+      },
+      "sentiment_lane": {
+        "signal": "HOLD",
+        "score": -0.53,
+        "confidence": 0.72,
+        "key_factors": [
+          "Recent insider selling; MSPR deeply negative",
+          "Weak breadth; VIX remains normal",
+          "Low short interest cushions sentiment"
+        ],
+        "risk_flags": [
+          "Insider and congressional selling signals",
+          "Weakening market breadth"
+        ],
+        "phase0_alignment": "ALIGNED",
+        "data_source_timestamp": "2026-10-01 01:43",
+        "skill_execution_failed": false
+      },
+      "news_lane": {
+        "signal": "BUY",
+        "score": 1.5,
+        "confidence": 0.62,
+        "key_factors": [
+          "Buyback expansion signals management confidence",
+          "Vera Rubin reaches production workloads",
+          "Upward PT revisions support momentum"
+        ],
+        "risk_flags": [
+          "No rating changes reported in 30 days",
+          "Macro yields, capex scrutiny, China competition"
+        ],
+        "phase0_alignment": "MISALIGNED",
+        "data_source_timestamp": "2026-10-01 01:43",
+        "skill_execution_failed": false,
+        "pt_revision_momentum": {
+          "direction": "UP",
+          "consensus_delta_pct_1m": 15.07
+        },
+        "immediate_catalyst_5d": null,
+        "decision_point_days": 21,
+        "cross_asset_spillover": [
+          {
+            "asset": "sector_XLK",
+            "direction": "BULLISH",
+            "mechanism": "Vera Rubin production deployment supports semiconductor demand sentiment."
+          }
+        ],
+        "reasoning_one_line": "Coverage leans bullish on buyback expansion, initial Vera Rubin production deployment, a Buy consensus, and upward one-month PT revisions; absent recent rating actions, AI capex and China risks, and Phase 0 macro headwinds limit conviction."
+      },
+      "technical_lane": {
+        "signal": "HOLD",
+        "score": 1.5,
+        "confidence": 0.74,
+        "key_factors": [
+          "Price above 20/50/200-day averages",
+          "RSI bullish; MACD positive but flat",
+          "Normal volume; resistance near $230"
+        ],
+        "risk_flags": [
+          "Resistance near $229.98",
+          "Insider transactions show net distribution"
+        ],
+        "phase0_alignment": "MISALIGNED",
+        "data_source_timestamp": "2026-10-01 01:43",
+        "skill_execution_failed": false,
+        "smart_money_analysis": {
+          "label": "distributing",
+          "narrative": "Q3 acquired/disposed ratio of 0.0882 indicates insider distribution; normal volume and a 0.51% gain provide no strong accumulation confirmation."
+        },
+        "pattern_taxonomy": {
+          "pattern": "consolidation",
+          "confirmation_criteria": "A close above $229.98 with volume above the 20-day average confirms an upside breakout; a close below $221.09 invalidates the range."
+        },
+        "market_strength": "STRONG",
+        "key_levels": {
+          "support": 221.09,
+          "resistance": 229.98,
+          "pivot": 227.67
+        },
+        "high_prob_scenario": "If price holds $221.09 support, it is likely to retest $229.98 over 5–15 days; a close above it on volume above the 20-day average opens $233.21.",
+        "volatility": {
+          "atr_14": null,
+          "hist_vol_20d_daily": null,
+          "momentum_20d_pct": null
+        }
+      },
+      "multi_horizon_price_framework": {
+        "short_term_5d": {
+          "band": [
+            216.51,
+            227.52,
+            238.53
+          ],
+          "band_capped": [
+            221.09,
+            227.52,
+            229.98
+          ],
+          "drift_sigma": -0.1,
+          "sigma_daily": 0.01684,
+          "atr_14": 5.2971,
+          "confidence": "high",
+          "catalyst_widened": false,
+          "key_level_note": "下界受 support $221.09 撐住（原始 $216.51）；上界受 resistance $229.98 壓制（原始 $238.53）"
+        },
+        "mid_term_60d": {
+          "momentum_target": 235.12,
+          "pt_60d": 247.58,
+          "earnings_revision": null,
+          "weights_used": {
+            "momentum": 0.5333,
+            "pt_60d": 0.4667
+          },
+          "mid_target": 240.94,
+          "reality_check_note": "需突破 $229.98 才成立"
+        },
+        "long_term_ref": {
+          "weighted_fair_value": 220.12,
+          "verdict_band": "fairly_valued",
+          "confidence": "medium"
+        },
+        "convergence": {
+          "mhp_signal": "wait_for_pullback",
+          "signal_note": "5d 帶下界 $221.09 > 長期FV $220.12 → 短期超漲、長期偏貴，等回檔"
+        },
+        "engine": "compute_price_framework.py v2.4 (V4.131.13)"
+      },
+      "macro_context": "Phase 0 為波動市況；高長端與實質利率、信用壓力及偏弱市場參與使科技股估值承壓，較溫和的通膨與韌性活動構成抵銷。FTD 為 NO_SIGNAL，宏觀環境對估值擴張的支持有限。",
+      "watch_conditions": {
+        "fcf_growth": "接下來兩次財報若年化 FCF 增速低於 30%，重新檢視現價隱含的長期現金流成長要求。",
+        "revenue_growth": "接下來兩次財報任一次營收年增低於 36%，重新評估目前營收路徑是否仍能支持估值。",
+        "real_yield": "若美國 10 年期實質殖利率連續 90 天維持在 2.88% 或以上，重新評估折現率壓力與估值折價。",
+        "range_support": "若收盤跌破 221.09 美元，視為目前整理區間失效並重新評估風險。",
+        "breakout_confirmation": "只有收盤站上 229.98 美元且成交量高於 20 日均量，才確認向上突破情境。"
+      },
+      "key_risks": [
+        "現價隱含五年 FCF CAGR 約 60%，但凍結資料沒有實際或 lane 預估的 FCF 成長率可確認此門檻。",
+        "Fundamentals 與 Burry 輸入的 FCF yield 分別為 2.28% 與 0.76%；口徑與期間未在本次輸入中調和。",
+        "估值僅有 5/9 錨點、同業群不足，Forecaster 因預測信心低而排除；估值結論受資料覆蓋限制。",
+        "內部人交易偏向賣出、廣度轉弱，且高實質利率可能壓抑高估值科技股。",
+        "forecaster transition source 與來源 bundle 的 mtime 相差約 9.2 小時，Phase 3 發出 transition_mtime_skew 高度警示。"
+      ],
+      "devils_advocate_filed": false,
+      "decision_point_days": 21,
+      "trade_metadata": {
+        "trade_type": "trend",
+        "event_tag": "earnings"
+      },
+      "cap_override_reason": null,
+      "speculative_grade": false,
+      "speculative_reasons": [],
+      "phase4_6": {
+        "phase": 4.6,
+        "engine": "decision_engine.py v1.1.0 (V4.131.13)",
+        "decision_cap_active": true,
+        "decision_cap_reason": "low_data_quality",
+        "cap_override_reason": null,
+        "final_decision": "HOLD",
+        "avg_confidence": 0.65,
+        "position_size_pct": 0.0,
+        "final_action": "CANCEL",
+        "hot_zone_probe": false,
+        "hot_zone_exception_applicable": false,
+        "adjustments": [
+          "avg_confidence 0.694 → 0.65 (cap)",
+          "final_action → CANCEL (decision fell to HOLD)"
+        ],
+        "warnings": [],
+        "speculative_grade": false,
+        "speculative_reasons": []
+      },
+      "sentiment_det": {
+        "producer_version": "sentiment_score.py v1.1 (L5 / V4.95.3)",
+        "shadow_only": true,
+        "ticker": "NVDA",
+        "score": -0.53,
+        "market_layer": 0.44,
+        "market_composite": 54.4,
+        "stock_specific": -1.5,
+        "stock_detail": {
+          "raw_sum": -1.5,
+          "clamped": false,
+          "rules_fired": [
+            {
+              "rule": "insider_ratio_low",
+              "points": -1.0,
+              "detail": "acquired_disposed_ratio 0.0882 < 0.3"
+            },
+            {
+              "rule": "mspr_negative",
+              "points": -1.0,
+              "detail": "latest_mspr -93.08281 < -30.0"
+            },
+            {
+              "rule": "short_low",
+              "points": 1.0,
+              "detail": "short_pct_float 1.27% < 5.0%"
+            },
+            {
+              "rule": "congress_bearish",
+              "points": -0.5,
+              "detail": "congressional_trades.net_signal=bearish"
+            }
+          ]
+        },
+        "missing_inputs": [
+          "institutional.accumulation_signal",
+          "stock_based_compensation_pct_revenue"
+        ],
+        "degraded_reason": null,
+        "input_hash": "sha256:e3b672645193d8be49327e65871777a8",
+        "note": "shadow-only — LLM 照跑 Sentiment lane，本紀錄不改任何決策數字。翻預設需使用者拍板（見 protocol §PHASE 2 Sentiment Subagent）"
+      },
+      "det_inputs": {
+        "altman_z": 41.28549305597691,
+        "debt_to_equity": 0.1697061803444782,
+        "fcf_yield": 0.022770677259816796,
+        "insider_ratio_q": 0.0882,
+        "short_interest_pct": 1.27,
+        "fred_in_sector_avoid": null
+      },
+      "det_inputs_metadata": {
+        "producer_version": "run_exports/1.0",
+        "shadow_only": true,
+        "input_hash": "sha256:acf7cdee5f1c353e4023c48f95f2f1ccff13dd10911696461b120647810a4b25",
+        "missing_reasons": {
+          "fred_in_sector_avoid": "not available in frozen source"
+        }
+      },
+      "price_sources": [
+        {
+          "source": "FMP frozen quote",
+          "price": 228.38,
+          "fetched_at": "2026-10-01T01:42:50.535329+00:00",
+          "data_as_of": 1790798401,
+          "difference_from_frozen": 0.0,
+          "status": "ok"
+        },
+        {
+          "source": "Finnhub scoring",
+          "price": 228.38,
+          "fetched_at": "2026-10-01T01:42:52.872383Z",
+          "data_as_of": null,
+          "difference_from_frozen": 0.0,
+          "status": "ok"
+        },
+        {
+          "source": "FMP audit",
+          "price": 228.38,
+          "fetched_at": "2026-10-01T01:42:52.872383Z",
+          "data_as_of": null,
+          "difference_from_frozen": 0.0,
+          "status": "ok"
+        }
+      ],
+      "_as_of_date_inherited": "2026-10-01",
+      "det_shadow": {
+        "version": "V3.45.4",
+        "signal_polarization": "ALIGNED",
+        "polarization_detail": {
+          "label": "ALIGNED",
+          "range": 2.53,
+          "max": 2.0,
+          "min": -0.53,
+          "pos_strong": 3,
+          "neg_strong": 0,
+          "missing_lanes": []
+        },
+        "valuation_score_det": 0.0,
+        "val_agreement": "AGREE",
+        "valuation_source": "valuation_pack",
+        "red_team_verdict_det": "NO_VIABLE_COUNTER",
+        "red_team_detail": {
+          "verdict": "NO_VIABLE_COUNTER",
+          "kill_count": 1,
+          "triggered": [
+            "insider_ratio_q"
+          ],
+          "missing": [
+            "fred_in_sector_avoid"
+          ]
+        },
+        "red_team_agreement": "DISAGREE",
+        "red_team_basis": "unclassified",
+        "red_team_basis_detail": {
+          "mr_hits": 0,
+          "fw_hits": 0,
+          "mr_keywords": [],
+          "fw_keywords": [],
+          "haystack_chars": 875,
+          "mr_density": 0.0,
+          "fw_density": 0.0
+        },
+        "lane_freshness": {
+          "version": "V2.20.0",
+          "as_of": "2026-10-01",
+          "lane_multipliers": {
+            "news": 1.0,
+            "sentiment": 1.0,
+            "technical": 1.0,
+            "fundamentals": 1.0,
+            "valuation": 1.0
+          },
+          "stalest_lane": null,
+          "stalest_age_days": null,
+          "applied": false
+        },
+        "news_pt_leakage": false,
+        "news_pt_leakage_detail": {
+          "flag": false,
+          "hits": [],
+          "scanned": true
+        }
+      },
+      "lane_contract": {
+        "contract_version": "C1/1.0",
+        "analysis_mode": "FULL_IC",
+        "llm_invoked_lanes": [
+          "fundamentals",
+          "sentiment",
+          "news",
+          "technical",
+          "valuation",
+          "red_team"
+        ],
+        "llm_skipped_lanes": [],
+        "lanes": {
+          "fundamentals": {
+            "provenance": "llm",
+            "llm_invoked": true,
+            "producer_version": "sha256:2e53fdc2bde594a13752a877eade50dfa36db632dad2fae490a8f78e03733058",
+            "input_hash": "sha256:ebfab3e840a9dd22d5f64548fc7608cec54728213a2ab6a30c664d5421504dba",
+            "shadow_score": null,
+            "model": "gpt-6-luna",
+            "execution_status": "complete"
+          },
+          "sentiment": {
+            "provenance": "llm",
+            "llm_invoked": true,
+            "producer_version": "sha256:2e53fdc2bde594a13752a877eade50dfa36db632dad2fae490a8f78e03733058",
+            "input_hash": "sha256:b57be129e334dccba5545eec0d2117a4ca40517bc6dbcb0150c06332ff9ba81b",
+            "shadow_score": -0.53,
+            "model": "gpt-6-luna",
+            "execution_status": "complete"
+          },
+          "news": {
+            "provenance": "llm",
+            "llm_invoked": true,
+            "producer_version": "sha256:2e53fdc2bde594a13752a877eade50dfa36db632dad2fae490a8f78e03733058",
+            "input_hash": "sha256:1c0b8a9cf3a3c19ead575fa836b01532e19030098269ae8b101bf23e019a93ae",
+            "shadow_score": null,
+            "model": "gpt-6-luna",
+            "execution_status": "complete"
+          },
+          "technical": {
+            "provenance": "llm",
+            "llm_invoked": true,
+            "producer_version": "sha256:2e53fdc2bde594a13752a877eade50dfa36db632dad2fae490a8f78e03733058",
+            "input_hash": "sha256:70ff1ee46b77ddaee18a797ce46f2a9f6c9cdbe19637bb9fe73cd204648a4eee",
+            "shadow_score": null,
+            "model": "gpt-6-luna",
+            "execution_status": "complete"
+          },
+          "valuation": {
+            "provenance": "llm",
+            "llm_invoked": true,
+            "producer_version": "sha256:2e53fdc2bde594a13752a877eade50dfa36db632dad2fae490a8f78e03733058",
+            "input_hash": "sha256:d90b3f363ff92f1df6790885dbeb397dba77b8e5bb9cc956929151dfeaaffc95",
+            "shadow_score": 0.0,
+            "model": "gpt-6-luna",
+            "execution_status": "complete"
+          },
+          "red_team": {
+            "provenance": "llm",
+            "llm_invoked": true,
+            "producer_version": "sha256:2e53fdc2bde594a13752a877eade50dfa36db632dad2fae490a8f78e03733058",
+            "input_hash": "sha256:e37e9287ed54cd16120f143a55af9ed8a72fb34d9b79d34d8abc458899b0a199",
+            "shadow_score": null,
+            "model": "gpt-6-luna",
+            "execution_status": "complete"
+          }
+        }
+      },
+      "execution_quality": "complete",
+      "red_team_synthetic": false,
+      "kill_condition_evaluation": {
+        "status": "unknown",
+        "event_evidence": [],
+        "reason": "requires subsequent event evidence; price return is not thesis proof"
+      }
+    }
+  ],
+  "active_weights_end_of_session": {
+    "Fundamentals": 0.25,
+    "Sentiment": 0.15,
+    "News": 0.2,
+    "Technical": 0.25,
+    "Valuation": 0.15
+  },
+  "bias_notes": "五個 lane 訊號混合，Phase 2.5 未觸發 T1–T5；同業與預測資料缺口使估值證據偏薄。過渡資料有 mtime skew 警示，對 transition 相關推論保留。",
+  "last_outcome": "UNKNOWN",
+  "run_context": {
+    "run_id": "NVDA_20261001T094245_fac61d27a6",
+    "snapshot_hash": "sha256:1f71223d45b6688a0f8df9188a7c1be419b54e8747b634857604e87b6cb774ae",
+    "analysis_at": "2026-10-01T01:43:19.967421+00:00",
+    "protocol_version": "V5.5",
+    "producer_version": "sha256:2e53fdc2bde594a13752a877eade50dfa36db632dad2fae490a8f78e03733058",
+    "classification": {
+      "sector": "Technology",
+      "industry": "Semiconductors",
+      "regime": "VOLATILE",
+      "data_as_of": "2026-09-30T23:58:46+00:00"
+    },
+    "stages": {
+      "quant": {
+        "input_hash": null,
+        "output_hash": "sha256:3a06bc4e6317f19d03258afa0aead7c98fc3a9ee04951cb5fc59fa3bf09e6e69",
+        "model": null,
+        "effort": null,
+        "status": "complete",
+        "dependency_hash": "sha256:4d40f9e79f3f5f952eeadc6334363157c69aa8a3bc6c6d6edd7ecdb3badb204d",
+        "attempts": 0,
+        "tokens": null,
+        "elapsed_seconds": null,
+        "queued_seconds": null
+      },
+      "fundamentals": {
+        "input_hash": "sha256:ebfab3e840a9dd22d5f64548fc7608cec54728213a2ab6a30c664d5421504dba",
+        "output_hash": "sha256:f871003ed72dbd045710ecd5dbf77c5864a45c5623fa508550a4ac6c53b401f1",
+        "model": "gpt-6-luna",
+        "effort": "max",
+        "status": "complete",
+        "dependency_hash": "sha256:d10391a1292da357a4ba2818942ac25a4679f804ce803803dd76abe0af3a4f41",
+        "attempts": 1,
+        "tokens": {
+          "input": null,
+          "output": null,
+          "cached": null
+        },
+        "elapsed_seconds": 147.046196,
+        "queued_seconds": 57.977411
+      },
+      "sentiment": {
+        "input_hash": "sha256:b57be129e334dccba5545eec0d2117a4ca40517bc6dbcb0150c06332ff9ba81b",
+        "output_hash": "sha256:7612d98f290d5e2d7bae4e41888a93b84a77a1008ea1a89d9764d9024d0d5838",
+        "model": "gpt-6-luna",
+        "effort": "max",
+        "status": "complete",
+        "dependency_hash": "sha256:d10391a1292da357a4ba2818942ac25a4679f804ce803803dd76abe0af3a4f41",
+        "attempts": 1,
+        "tokens": {
+          "input": null,
+          "output": null,
+          "cached": null
+        },
+        "elapsed_seconds": 121.482551,
+        "queued_seconds": 57.977422
+      },
+      "news": {
+        "input_hash": "sha256:1c0b8a9cf3a3c19ead575fa836b01532e19030098269ae8b101bf23e019a93ae",
+        "output_hash": "sha256:c1b471fa036ef3f74866f4fd325f791dd240dac5dc5e134f9325f248e791d2bf",
+        "model": "gpt-6-luna",
+        "effort": "max",
+        "status": "complete",
+        "dependency_hash": "sha256:d10391a1292da357a4ba2818942ac25a4679f804ce803803dd76abe0af3a4f41",
+        "attempts": 1,
+        "tokens": {
+          "input": null,
+          "output": null,
+          "cached": null
+        },
+        "elapsed_seconds": 241.829908,
+        "queued_seconds": 57.977428
+      },
+      "technical": {
+        "input_hash": "sha256:70ff1ee46b77ddaee18a797ce46f2a9f6c9cdbe19637bb9fe73cd204648a4eee",
+        "output_hash": "sha256:3d16cbea10e4fd5e6ac1f34ed48514a44d63b7e4ab4b17ccca681df7228e6403",
+        "model": "gpt-6-luna",
+        "effort": "max",
+        "status": "complete",
+        "dependency_hash": "sha256:d10391a1292da357a4ba2818942ac25a4679f804ce803803dd76abe0af3a4f41",
+        "attempts": 1,
+        "tokens": {
+          "input": null,
+          "output": null,
+          "cached": null
+        },
+        "elapsed_seconds": 123.193769,
+        "queued_seconds": 306.602549
+      },
+      "valuation": {
+        "input_hash": "sha256:d90b3f363ff92f1df6790885dbeb397dba77b8e5bb9cc956929151dfeaaffc95",
+        "output_hash": "sha256:51e39088544b1f22e122461f5c8bf78f411d6a09af3f8b339f8bfb360c51f806",
+        "model": "gpt-6-luna",
+        "effort": "max",
+        "status": "complete",
+        "dependency_hash": "sha256:d10391a1292da357a4ba2818942ac25a4679f804ce803803dd76abe0af3a4f41",
+        "attempts": 1,
+        "tokens": {
+          "input": null,
+          "output": null,
+          "cached": null
+        },
+        "elapsed_seconds": 189.408049,
+        "queued_seconds": 306.60256
+      },
+      "red_team": {
+        "input_hash": "sha256:e37e9287ed54cd16120f143a55af9ed8a72fb34d9b79d34d8abc458899b0a199",
+        "output_hash": "sha256:cddcaceda806618ccb45186f2b7bf8f3a8ea250f59753e76b9a5ddd5a576685a",
+        "model": "gpt-6-luna",
+        "effort": "max",
+        "status": "complete",
+        "dependency_hash": "sha256:7348ad70b003564936b3dfa9d3b32e078b99e956e50e41693dcfe22a8adda003",
+        "attempts": 2,
+        "tokens": {
+          "input": null,
+          "output": null,
+          "cached": null
+        },
+        "elapsed_seconds": 213.335746,
+        "queued_seconds": 245.652908
+      },
+      "decision": {
+        "input_hash": "sha256:bcc05423d0bc39f7cb1fbc83f855577ace911507b98408ce0f28953996afb00a",
+        "output_hash": "sha256:cc97d8778b55a22675b6364b5712127dd941e9a43df05fe1967ee0232e11cf78",
+        "model": null,
+        "effort": null,
+        "status": "complete",
+        "dependency_hash": "sha256:1409bef77af06086b4e3db20eaff5852cb8631c278b3803ef38b84ccd9d5fe46",
+        "attempts": 0,
+        "tokens": null,
+        "elapsed_seconds": 0.00159,
+        "queued_seconds": null
+      },
+      "mhp": {
+        "input_hash": "sha256:494f44e66fe7fdb59e2432cef37f9a0bfdff47c259f2380c7c3cc441140f314a",
+        "output_hash": "sha256:03d3db17541aa4fa24fde91bcafcb26af8e5f8b3c734d6cb8f024b15d7a0d1d3",
+        "model": null,
+        "effort": null,
+        "status": "complete",
+        "dependency_hash": "sha256:7348ad70b003564936b3dfa9d3b32e078b99e956e50e41693dcfe22a8adda003",
+        "attempts": 0,
+        "tokens": null,
+        "elapsed_seconds": 0.002307,
+        "queued_seconds": null
+      },
+      "risk": {
+        "input_hash": "sha256:79e669f80a584cef0540d0660027f57aa60761797d08bb7d7bf0fd8f94f66a0c",
+        "output_hash": "sha256:69634bf1b0f02ab85d7008203e89540b21569c316fff970c84cc786b804a3ca0",
+        "model": null,
+        "effort": null,
+        "status": "complete",
+        "dependency_hash": "sha256:49d7151d2249e16ecc4974dd69103b372061152ad332190ae4229b81d6a70ad8",
+        "attempts": 0,
+        "tokens": null,
+        "elapsed_seconds": 3.478163,
+        "queued_seconds": null
+      }
+    }
+  },
+  "export_provenance": {
+    "schema": "export_provenance.v1",
+    "writer": "append_session_export.py (V4.137.0)",
+    "appended_at": "2026-10-01T02:16:54Z",
+    "entry_digest": "sha256:a4cbeee66c3688037ccb11407e71830b637a261b2871f8ecbe5a4d5dcd76080c"
+  }
+}

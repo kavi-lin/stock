@@ -1,0 +1,54 @@
+{
+  "decision_id": "sha256:d3d162f3abb6f9c19ef32e15445dcbf65de3cdd31f35e7ac381fff339d164aa9",
+  "evaluation": {
+    "version": "investment-evaluation/2.0",
+    "evaluated_at": "2026-10-04",
+    "source": "/Users/kavi/Developer/Claude/Projects/ai-investment-committee/investment/invest_logs/history.json#162",
+    "window_complete": true,
+    "calibration_eligible": true,
+    "exclusion_reasons": []
+  },
+  "reality": {
+    "decision_date": "2026-06-22",
+    "eval_date": "2026-07-22",
+    "today": "2026-10-04",
+    "window_days": 30,
+    "days_elapsed": 104,
+    "window_complete_pct": 100,
+    "pending": false,
+    "ticker_reality": {
+      "price_window_complete": true,
+      "price_observations": 22,
+      "price_at_decision": 302.52,
+      "price_at_decision_date": "2026-06-22",
+      "price_at_eval": 228.27,
+      "price_at_eval_date": "2026-07-22",
+      "return_pct": -24.544,
+      "max_runup_since": 302.52,
+      "max_drawdown_since": 202.68,
+      "max_runup_pct": 0.0,
+      "max_drawdown_pct": -33.003
+    },
+    "trade_condition_evaluation": {
+      "method": "daily_close_touch; no intraday ordering or execution inference",
+      "entry_price_touched": null,
+      "take_profit_touched": false,
+      "stop_loss_touched": true
+    }
+  },
+  "verdict": {
+    "label": "hit",
+    "rationale": "觀望/CANCEL → 實際 -24.54%, 避開下跌｜trader 條件: SL 觸發",
+    "max_runup_pct": 0.0,
+    "max_drawdown_pct": -33.003
+  },
+  "original_label": null,
+  "prior_evaluations": [
+    {
+      "label": "hit",
+      "rationale": "觀望/CANCEL → 實際 -24.54%, 避開下跌｜trader 條件: SL 觸發",
+      "max_runup_pct": 0.0,
+      "max_drawdown_pct": -33.003
+    }
+  ]
+}
