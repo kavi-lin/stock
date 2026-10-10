@@ -1,0 +1,15 @@
+{
+  "version": "4.137.4",
+  "luna_run": "news_manual_codex_20261004_003338",
+  "model": "gpt-6-luna",
+  "effort": "medium",
+  "coordinator_original_result": "missing translations.n0127; validator rc=1",
+  "repair": "added translations n0127/n0063/n0192 only",
+  "lane_sha256_unchanged": "c302113add992e3ae6fffa36ff718cb407d30cfc85e2edc2c2fc814c712cf4b2",
+  "finalizer_rc": 0,
+  "validator_rc": 0,
+  "deep_count": 2,
+  "shallow_count": 10,
+  "cache_new_events": 2,
+  "model_calls_after_repair": 0
+}

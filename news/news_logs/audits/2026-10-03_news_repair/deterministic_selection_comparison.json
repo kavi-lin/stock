@@ -1,0 +1,82 @@
+[
+  {
+    "news_id": "n0237",
+    "headline": "Federal Reserve Board announces approval of application by Fleur Capital Corporation",
+    "before": {
+      "news_type": "monetary_policy",
+      "content_genre": "straight_news",
+      "materiality_score": 5.5,
+      "advance_to_stage2": true
+    },
+    "after": {
+      "news_type": "corporate",
+      "content_genre": "routine_regulatory",
+      "materiality_score": 2.0,
+      "advance_to_stage2": false
+    }
+  },
+  {
+    "news_id": "n0315",
+    "headline": "Federal Reserve Board announces it will extend, until November 4, the comment period on its proposal to modernize Regulation O",
+    "before": {
+      "news_type": "monetary_policy",
+      "content_genre": "straight_news",
+      "materiality_score": 5.5,
+      "advance_to_stage2": true
+    },
+    "after": {
+      "news_type": "corporate",
+      "content_genre": "routine_regulatory",
+      "materiality_score": 2.0,
+      "advance_to_stage2": false
+    }
+  },
+  {
+    "news_id": "n0344",
+    "headline": "U.S. Stocks Rise as Jobs Report Tempers Rate Outlook",
+    "before": {
+      "news_type": "monetary_policy",
+      "content_genre": "straight_news",
+      "materiality_score": 4.9,
+      "advance_to_stage2": true
+    },
+    "after": {
+      "news_type": "monetary_policy",
+      "content_genre": "straight_news",
+      "materiality_score": 4.9,
+      "advance_to_stage2": true
+    }
+  },
+  {
+    "news_id": "n0062",
+    "headline": "Aboard the USS George Washington, young sailors adjust to war with Iran - Reuters",
+    "before": {
+      "news_type": "geopolitical",
+      "content_genre": "straight_news",
+      "materiality_score": 4.5,
+      "advance_to_stage2": true
+    },
+    "after": {
+      "news_type": "geopolitical",
+      "content_genre": "background_feature",
+      "materiality_score": 2.5,
+      "advance_to_stage2": false
+    }
+  },
+  {
+    "news_id": "n0324",
+    "headline": "Saudis plan assault on Houthis to break Red Sea chokehold - Reuters",
+    "before": {
+      "news_type": "geopolitical",
+      "content_genre": "straight_news",
+      "materiality_score": 4.5,
+      "advance_to_stage2": true
+    },
+    "after": {
+      "news_type": "geopolitical",
+      "content_genre": "straight_news",
+      "materiality_score": 4.5,
+      "advance_to_stage2": true
+    }
+  }
+]

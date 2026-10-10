@@ -1,0 +1,573 @@
+{
+  "date": "2026-09-14",
+  "windows": [
+    {
+      "as_of": "2026-09-14T13:31:16+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-14T13:41:30+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-14T13:52:17+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-14T14:02:33+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-14T14:12:33+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-14T14:22:43+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-14T14:32:44+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-14T14:42:44+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-14T14:52:54+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-14T15:02:54+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-14T15:12:54+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-14T15:23:04+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-14T15:33:04+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-14T15:43:04+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-14T15:53:16+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-14T16:03:16+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-14T16:13:16+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-14T16:23:26+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-14T16:33:26+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-14T16:43:26+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-14T16:54:07+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-14T17:04:48+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-14T17:15:37+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-14T17:26:07+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-14T17:36:07+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-14T17:46:07+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-14T17:56:48+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-14T18:06:48+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-14T18:16:49+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-14T18:27:20+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-14T18:37:20+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-14T18:47:20+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-14T18:57:44+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-14T19:07:44+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-14T19:17:44+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-14T19:28:02+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-14T19:38:02+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-14T19:48:02+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-14T19:58:13+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-14T20:08:13+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard",
+        "smallcap_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-14T23:48:46+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-14T23:58:59+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "中性/區間"
+    }
+  ]
+}

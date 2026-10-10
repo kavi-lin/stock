@@ -1,0 +1,260 @@
+{
+  "date": "2026-09-17",
+  "windows": [
+    {
+      "as_of": "2026-09-17T13:37:30+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-17T13:47:59+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-17T13:58:00+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-17T14:08:01+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-17T14:21:22+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-17T14:31:22+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-17T14:41:22+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-17T14:51:36+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-17T15:01:37+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-17T15:11:37+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-17T15:21:48+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-17T15:31:49+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-17T15:41:49+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-17T15:52:08+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-17T15:57:15+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "semis_to_software_rotation",
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-17T16:07:15+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-17T16:17:27+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-17T16:27:27+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-17T16:37:27+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-17T16:47:38+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-17T16:57:38+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-17T17:07:38+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-17T17:17:46+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-17T20:45:32+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    }
+  ]
+}

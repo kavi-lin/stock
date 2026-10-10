@@ -1,0 +1,361 @@
+{
+  "date": "2026-09-11",
+  "windows": [
+    {
+      "as_of": "2026-09-11T13:35:33+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-11T13:45:48+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-11T13:55:58+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-11T14:05:58+00:00",
+      "strategy_ids": [
+        "software_momentum",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-11T14:16:10+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-11T14:26:22+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-11T14:36:22+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-11T14:46:22+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-11T14:56:39+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-11T15:06:52+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-11T15:17:03+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-11T15:27:03+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-11T15:37:16+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-11T15:47:16+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-11T15:57:16+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-11T16:07:27+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-11T16:17:28+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-11T16:27:28+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-11T16:37:45+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-11T16:47:45+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-11T16:57:45+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-11T17:08:01+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-11T17:18:16+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-11T17:28:16+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "crypto_fintech_riskon",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-11T17:38:31+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-11T17:48:44+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-11T17:58:44+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-11T18:08:44+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-11T18:18:57+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-11T18:28:57+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-11T18:38:57+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-11T18:49:10+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-11T18:59:10+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-11T19:09:10+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-11T19:19:20+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-11T19:29:20+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-11T19:39:20+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-11T19:49:29+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-11T19:59:29+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-11T20:09:29+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-12T01:06:12+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    },
+    {
+      "as_of": "2026-09-12T01:16:27+00:00",
+      "strategy_ids": [
+        "value_defensive_rotation",
+        "event_risk_guard"
+      ],
+      "regime_label": "中性/區間"
+    }
+  ]
+}

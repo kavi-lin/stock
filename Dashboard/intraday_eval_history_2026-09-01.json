@@ -1,0 +1,405 @@
+{
+  "date": "2026-09-01",
+  "windows": [
+    {
+      "as_of": "2026-09-01T13:32:09+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "crypto_fintech_riskon",
+        "avoid_laggards"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T13:42:23+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "value_defensive_rotation",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T13:52:41+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "value_defensive_rotation",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T14:03:00+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T14:13:16+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "value_defensive_rotation",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T14:23:30+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "value_defensive_rotation",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T14:33:30+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "value_defensive_rotation",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T14:43:30+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "value_defensive_rotation",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T14:53:48+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T15:04:11+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T15:14:21+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T15:24:38+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T15:34:38+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T15:44:38+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T15:54:53+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T16:05:08+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T16:15:08+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T16:25:08+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T16:35:20+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T16:45:20+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T16:55:20+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T17:05:23+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T17:15:39+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T17:25:39+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T17:35:39+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T17:45:53+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T17:55:53+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T18:05:53+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T18:16:04+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T18:26:04+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T18:36:04+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T18:46:17+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T18:56:17+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T19:06:17+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T19:16:28+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T19:26:28+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T19:36:28+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T19:46:40+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T19:56:40+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-09-01T20:06:40+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    }
+  ]
+}

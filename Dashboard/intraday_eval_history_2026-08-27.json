@@ -1,0 +1,321 @@
+{
+  "date": "2026-08-27",
+  "windows": [
+    {
+      "as_of": "2026-08-27T13:48:16+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "value_defensive_rotation"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-27T13:58:17+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-27T14:08:33+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-27T14:18:33+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-27T14:28:33+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-27T14:38:44+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-27T14:48:44+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-27T14:58:44+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-27T15:08:58+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-27T15:18:58+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-27T15:28:58+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-27T15:39:12+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-27T15:49:12+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-27T15:59:12+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-27T16:09:22+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-27T16:19:22+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-27T16:29:23+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-27T16:39:39+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-27T16:49:39+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-27T16:59:39+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-27T17:09:56+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-27T17:42:35+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-27T17:52:52+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "crypto_fintech_riskon"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-27T18:02:52+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "crypto_fintech_riskon",
+        "avoid_laggards"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-27T18:13:07+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "crypto_fintech_riskon",
+        "avoid_laggards"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-27T18:23:07+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "crypto_fintech_riskon",
+        "avoid_laggards"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-27T18:33:07+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "crypto_fintech_riskon",
+        "avoid_laggards"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-27T18:43:23+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "crypto_fintech_riskon",
+        "avoid_laggards"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-27T19:09:38+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "crypto_fintech_riskon",
+        "avoid_laggards"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-27T19:19:53+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "crypto_fintech_riskon",
+        "avoid_laggards"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-27T19:29:53+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "crypto_fintech_riskon",
+        "avoid_laggards"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-27T19:39:53+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "crypto_fintech_riskon",
+        "avoid_laggards"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-27T19:50:05+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "crypto_fintech_riskon",
+        "avoid_laggards"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-08-27T20:00:05+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "software_momentum",
+        "crypto_fintech_riskon",
+        "avoid_laggards"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    }
+  ]
+}

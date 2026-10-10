@@ -1,7 +1,7 @@
 {
   "version": "1.1",
   "schema_note": "V3.20.1 — 3-lane composite (price/polarity/attention); retail sourced from trending_tickers.json",
-  "as_of": "2026-08-23T20:32:21.626932+00:00",
+  "as_of": "2026-10-10T01:54:00.323522+00:00",
   "weights_version": "v1.1",
   "lookback_hours": 72,
   "horizon": "5d",
@@ -10,9 +10,9 @@
     {
       "sector": "Technology",
       "proxy_etf": "XLK",
-      "news_sentiment_score": null,
-      "news_label": "neutral",
-      "news_count_72h": 0,
+      "news_sentiment_score": -1.0,
+      "news_label": "mod_bear",
+      "news_count_72h": 1,
       "news_breadth": "narrow",
       "retail_polarity_score": null,
       "retail_engagement_score": null,
@@ -20,50 +20,53 @@
       "retail_top_tickers": [],
       "sample_posts": [],
       "matched_terms_summary": {},
-      "predicted_5d_median_pct": 0.33,
-      "predicted_5d_bullish_breadth_pct": 60.0,
-      "predicted_5d_avg_confidence": 0.54,
+      "predicted_5d_median_pct": null,
+      "predicted_5d_bullish_breadth_pct": null,
+      "predicted_5d_avg_confidence": null,
       "predicted_5d_label": "neutral",
-      "composite_score": 0.066,
+      "composite_score": null,
       "composite_direction": "neutral_mixed",
       "signal_lanes": {
-        "price_5d_norm": 0.066,
+        "price_5d_norm": null,
         "retail_polarity": null,
         "retail_attention": null
       },
-      "framing_zh": "5天中位 +0.3% (3/5 看漲)。資料部分缺。",
-      "framing_en": "5d med +0.3% (3/5 bull). Partial data.",
+      "framing_zh": "新聞 1 篇偏空。資料部分缺。",
+      "framing_en": "news 1 mostly bearish. Partial data.",
       "key_tickers": [
         {
-          "ticker": "MSFT",
-          "target_central_pct": 1.56,
-          "confidence": 0.63
-        },
-        {
-          "ticker": "NVDA",
-          "target_central_pct": 0.74,
-          "confidence": 0.58
+          "ticker": "AAPL",
+          "target_central_pct": 0.92,
+          "confidence": 0.66
         },
         {
           "ticker": "AVGO",
-          "target_central_pct": -0.58,
-          "confidence": 0.44
+          "target_central_pct": 0.06,
+          "confidence": 0.56
         }
       ],
-      "key_headlines": [],
+      "key_headlines": [
+        {
+          "published": "2026-10-09T08:38:54+00:00",
+          "source": "Reuters",
+          "headline": "China AI developers publish safety tests for just 3.6% of model releases, report finds",
+          "verdict": "BEARISH",
+          "net_impact_score": -1.0
+        }
+      ],
       "data_health": {
-        "news_72h_ok": false,
+        "news_72h_ok": true,
         "retail_signals_ok": false,
-        "predict_5d_ok": true,
+        "predict_5d_ok": false,
         "all_ok": false
       }
     },
     {
       "sector": "Healthcare",
       "proxy_etf": "XLV",
-      "news_sentiment_score": null,
-      "news_label": "neutral",
-      "news_count_72h": 0,
+      "news_sentiment_score": -1.3,
+      "news_label": "mod_bear",
+      "news_count_72h": 1,
       "news_breadth": "narrow",
       "retail_polarity_score": null,
       "retail_engagement_score": null,
@@ -71,50 +74,42 @@
       "retail_top_tickers": [],
       "sample_posts": [],
       "matched_terms_summary": {},
-      "predicted_5d_median_pct": 1.35,
-      "predicted_5d_bullish_breadth_pct": 80.0,
-      "predicted_5d_avg_confidence": 0.59,
-      "predicted_5d_label": "mod_bull",
-      "composite_score": 0.27,
-      "composite_direction": "mod_bull",
+      "predicted_5d_median_pct": null,
+      "predicted_5d_bullish_breadth_pct": null,
+      "predicted_5d_avg_confidence": null,
+      "predicted_5d_label": "neutral",
+      "composite_score": null,
+      "composite_direction": "neutral_mixed",
       "signal_lanes": {
-        "price_5d_norm": 0.27,
+        "price_5d_norm": null,
         "retail_polarity": null,
         "retail_attention": null
       },
-      "framing_zh": "5天中位 +1.4% (4/5 看漲)。資料部分缺。",
-      "framing_en": "5d med +1.4% (4/5 bull). Partial data.",
-      "key_tickers": [
+      "framing_zh": "新聞 1 篇偏空。資料部分缺。",
+      "framing_en": "news 1 mostly bearish. Partial data.",
+      "key_tickers": [],
+      "key_headlines": [
         {
-          "ticker": "MRK",
-          "target_central_pct": 2.8,
-          "confidence": 0.56
-        },
-        {
-          "ticker": "ABBV",
-          "target_central_pct": 1.55,
-          "confidence": 0.64
-        },
-        {
-          "ticker": "UNH",
-          "target_central_pct": -1.45,
-          "confidence": 0.61
+          "published": "2026-10-09T10:03:22+00:00",
+          "source": "Reuters",
+          "headline": "Fed says household income, wealth, debt stress rose from 2022 to 2025",
+          "verdict": "BEARISH",
+          "net_impact_score": -1.3
         }
       ],
-      "key_headlines": [],
       "data_health": {
-        "news_72h_ok": false,
+        "news_72h_ok": true,
         "retail_signals_ok": false,
-        "predict_5d_ok": true,
+        "predict_5d_ok": false,
         "all_ok": false
       }
     },
     {
       "sector": "Energy",
       "proxy_etf": "XLE",
-      "news_sentiment_score": null,
-      "news_label": "neutral",
-      "news_count_72h": 0,
+      "news_sentiment_score": -1.3,
+      "news_label": "mod_bear",
+      "news_count_72h": 1,
       "news_breadth": "narrow",
       "retail_polarity_score": null,
       "retail_engagement_score": null,
@@ -122,39 +117,47 @@
       "retail_top_tickers": [],
       "sample_posts": [],
       "matched_terms_summary": {},
-      "predicted_5d_median_pct": 1.77,
+      "predicted_5d_median_pct": 1.36,
       "predicted_5d_bullish_breadth_pct": 100.0,
-      "predicted_5d_avg_confidence": 0.608,
+      "predicted_5d_avg_confidence": 0.647,
       "predicted_5d_label": "mod_bull",
-      "composite_score": 0.354,
+      "composite_score": 0.272,
       "composite_direction": "mod_bull",
       "signal_lanes": {
-        "price_5d_norm": 0.354,
+        "price_5d_norm": 0.272,
         "retail_polarity": null,
         "retail_attention": null
       },
-      "framing_zh": "5天中位 +1.8% (5/5 看漲)。資料部分缺。",
-      "framing_en": "5d med +1.8% (5/5 bull). Partial data.",
+      "framing_zh": "5天中位 +1.4% (3/3 看漲); 新聞 1 篇偏空。資料部分缺。",
+      "framing_en": "5d med +1.4% (3/3 bull); news 1 mostly bearish. Partial data.",
       "key_tickers": [
         {
-          "ticker": "COP",
-          "target_central_pct": 2.15,
-          "confidence": 0.59
-        },
-        {
-          "ticker": "CVX",
-          "target_central_pct": 1.85,
+          "ticker": "XOM",
+          "target_central_pct": 1.57,
           "confidence": 0.65
         },
         {
-          "ticker": "XOM",
-          "target_central_pct": 1.77,
-          "confidence": 0.62
+          "ticker": "CVX",
+          "target_central_pct": 1.36,
+          "confidence": 0.66
+        },
+        {
+          "ticker": "EOG",
+          "target_central_pct": 0.57,
+          "confidence": 0.63
         }
       ],
-      "key_headlines": [],
+      "key_headlines": [
+        {
+          "published": "2026-10-07T12:35:01+00:00",
+          "source": "CNBC Top",
+          "headline": "Home heating oil prices are soaring — and users' winter bills could rise 21%, federal outlook shows",
+          "verdict": "BEARISH",
+          "net_impact_score": -1.3
+        }
+      ],
       "data_health": {
-        "news_72h_ok": false,
+        "news_72h_ok": true,
         "retail_signals_ok": false,
         "predict_5d_ok": true,
         "all_ok": false
@@ -163,49 +166,71 @@
     {
       "sector": "Financials",
       "proxy_etf": "XLF",
-      "news_sentiment_score": null,
-      "news_label": "neutral",
-      "news_count_72h": 0,
-      "news_breadth": "narrow",
+      "news_sentiment_score": -0.93,
+      "news_label": "mod_bear",
+      "news_count_72h": 5,
+      "news_breadth": "wide",
       "retail_polarity_score": null,
       "retail_engagement_score": null,
       "retail_volume_label": "calm",
       "retail_top_tickers": [],
       "sample_posts": [],
       "matched_terms_summary": {},
-      "predicted_5d_median_pct": -0.16,
+      "predicted_5d_median_pct": -1.47,
       "predicted_5d_bullish_breadth_pct": 20.0,
-      "predicted_5d_avg_confidence": 0.662,
-      "predicted_5d_label": "neutral",
-      "composite_score": -0.032,
-      "composite_direction": "neutral_mixed",
+      "predicted_5d_avg_confidence": 0.67,
+      "predicted_5d_label": "mod_bear",
+      "composite_score": -0.294,
+      "composite_direction": "mod_bear",
       "signal_lanes": {
-        "price_5d_norm": -0.032,
+        "price_5d_norm": -0.294,
         "retail_polarity": null,
         "retail_attention": null
       },
-      "framing_zh": "5天中位 -0.2% (1/5 看漲)。資料部分缺。",
-      "framing_en": "5d med -0.2% (1/5 bull). Partial data.",
+      "framing_zh": "5天中位 -1.5% (1/5 看漲); 新聞 5 篇偏空。資料部分缺。",
+      "framing_en": "5d med -1.5% (1/5 bull); news 5 mostly bearish. Partial data.",
       "key_tickers": [
         {
-          "ticker": "WFC",
-          "target_central_pct": -0.59,
-          "confidence": 0.64
-        },
-        {
-          "ticker": "BRK-B",
-          "target_central_pct": -0.51,
-          "confidence": 0.69
-        },
-        {
           "ticker": "BAC",
-          "target_central_pct": -0.16,
+          "target_central_pct": -1.85,
+          "confidence": 0.66
+        },
+        {
+          "ticker": "JPM",
+          "target_central_pct": -1.47,
           "confidence": 0.68
+        },
+        {
+          "ticker": "GS",
+          "target_central_pct": -1.57,
+          "confidence": 0.63
         }
       ],
-      "key_headlines": [],
+      "key_headlines": [
+        {
+          "published": "2026-10-09T10:03:22+00:00",
+          "source": "Reuters",
+          "headline": "Fed says household income, wealth, debt stress rose from 2022 to 2025",
+          "verdict": "BEARISH",
+          "net_impact_score": -1.3
+        },
+        {
+          "published": "2026-10-09T14:00:00+00:00",
+          "source": "Fed Press",
+          "headline": "Federal Reserve Board releases results of the 2025 Survey of Consumer Finances, which provides the public and policymakers with detailed insights into",
+          "verdict": "NEUTRAL",
+          "net_impact_score": -0.7
+        },
+        {
+          "published": "2026-10-07T11:14:47+00:00",
+          "source": "FinancialJuice",
+          "headline": "FinancialJuice: MUFG on Fed Minutes - FJElite",
+          "verdict": "NEUTRAL",
+          "net_impact_score": -0.7
+        }
+      ],
       "data_health": {
-        "news_72h_ok": false,
+        "news_72h_ok": true,
         "retail_signals_ok": false,
         "predict_5d_ok": true,
         "all_ok": false
@@ -214,51 +239,68 @@
     {
       "sector": "Consumer_Discretionary",
       "proxy_etf": "XLY",
-      "news_sentiment_score": null,
-      "news_label": "neutral",
-      "news_count_72h": 0,
-      "news_breadth": "narrow",
+      "news_sentiment_score": -0.98,
+      "news_label": "mod_bear",
+      "news_count_72h": 3,
+      "news_breadth": "wide",
       "retail_polarity_score": null,
       "retail_engagement_score": null,
       "retail_volume_label": "calm",
       "retail_top_tickers": [],
       "sample_posts": [],
       "matched_terms_summary": {},
-      "predicted_5d_median_pct": -0.27,
-      "predicted_5d_bullish_breadth_pct": 20.0,
-      "predicted_5d_avg_confidence": 0.588,
+      "predicted_5d_median_pct": null,
+      "predicted_5d_bullish_breadth_pct": null,
+      "predicted_5d_avg_confidence": null,
       "predicted_5d_label": "neutral",
-      "composite_score": -0.054,
+      "composite_score": null,
       "composite_direction": "neutral_mixed",
       "signal_lanes": {
-        "price_5d_norm": -0.054,
+        "price_5d_norm": null,
         "retail_polarity": null,
         "retail_attention": null
       },
-      "framing_zh": "5天中位 -0.3% (1/5 看漲)。資料部分缺。",
-      "framing_en": "5d med -0.3% (1/5 bull). Partial data.",
+      "framing_zh": "新聞 3 篇偏空。資料部分缺。",
+      "framing_en": "news 3 mostly bearish. Partial data.",
       "key_tickers": [
         {
-          "ticker": "TSLA",
-          "target_central_pct": 1.48,
-          "confidence": 0.53
-        },
-        {
-          "ticker": "NKE",
-          "target_central_pct": -1.02,
-          "confidence": 0.57
-        },
-        {
           "ticker": "MCD",
-          "target_central_pct": -0.7,
+          "target_central_pct": -1.62,
           "confidence": 0.65
+        },
+        {
+          "ticker": "HD",
+          "target_central_pct": -1.26,
+          "confidence": 0.62
         }
       ],
-      "key_headlines": [],
+      "key_headlines": [
+        {
+          "published": "2026-10-09T10:03:22+00:00",
+          "source": "Reuters",
+          "headline": "Fed says household income, wealth, debt stress rose from 2022 to 2025",
+          "verdict": "BEARISH",
+          "net_impact_score": -1.3
+        },
+        {
+          "published": "2026-10-07T12:35:01+00:00",
+          "source": "CNBC Top",
+          "headline": "Home heating oil prices are soaring — and users' winter bills could rise 21%, federal outlook shows",
+          "verdict": "BEARISH",
+          "net_impact_score": -1.3
+        },
+        {
+          "published": "2026-10-09T14:00:00+00:00",
+          "source": "Fed Press",
+          "headline": "Federal Reserve Board releases results of the 2025 Survey of Consumer Finances, which provides the public and policymakers with detailed insights into",
+          "verdict": "NEUTRAL",
+          "net_impact_score": -0.7
+        }
+      ],
       "data_health": {
-        "news_72h_ok": false,
+        "news_72h_ok": true,
         "retail_signals_ok": false,
-        "predict_5d_ok": true,
+        "predict_5d_ok": false,
         "all_ok": false
       }
     },
@@ -275,33 +317,33 @@
       "retail_top_tickers": [],
       "sample_posts": [],
       "matched_terms_summary": {},
-      "predicted_5d_median_pct": -0.21,
-      "predicted_5d_bullish_breadth_pct": 40.0,
-      "predicted_5d_avg_confidence": 0.66,
+      "predicted_5d_median_pct": 0.61,
+      "predicted_5d_bullish_breadth_pct": 80.0,
+      "predicted_5d_avg_confidence": 0.674,
       "predicted_5d_label": "neutral",
-      "composite_score": -0.042,
+      "composite_score": 0.122,
       "composite_direction": "neutral_mixed",
       "signal_lanes": {
-        "price_5d_norm": -0.042,
+        "price_5d_norm": 0.122,
         "retail_polarity": null,
         "retail_attention": null
       },
-      "framing_zh": "5天中位 -0.2% (2/5 看漲)。資料部分缺。",
-      "framing_en": "5d med -0.2% (2/5 bull). Partial data.",
+      "framing_zh": "5天中位 +0.6% (4/5 看漲)。資料部分缺。",
+      "framing_en": "5d med +0.6% (4/5 bull). Partial data.",
       "key_tickers": [
         {
-          "ticker": "KO",
-          "target_central_pct": 1.88,
-          "confidence": 0.7
-        },
-        {
-          "ticker": "WMT",
-          "target_central_pct": -1.95,
-          "confidence": 0.57
-        },
-        {
           "ticker": "PEP",
-          "target_central_pct": 1.23,
+          "target_central_pct": -1.53,
+          "confidence": 0.65
+        },
+        {
+          "ticker": "PG",
+          "target_central_pct": 1.44,
+          "confidence": 0.68
+        },
+        {
+          "ticker": "COST",
+          "target_central_pct": 0.72,
           "confidence": 0.69
         }
       ],
@@ -316,60 +358,101 @@
     {
       "sector": "Industrials",
       "proxy_etf": "XLI",
-      "news_sentiment_score": null,
+      "news_sentiment_score": 0.7,
       "news_label": "neutral",
-      "news_count_72h": 0,
+      "news_count_72h": 2,
       "news_breadth": "narrow",
-      "retail_polarity_score": null,
-      "retail_engagement_score": null,
+      "retail_polarity_score": 0.0,
+      "retail_engagement_score": 4.43,
       "retail_volume_label": "calm",
-      "retail_top_tickers": [],
-      "sample_posts": [],
+      "retail_top_tickers": [
+        {
+          "ticker": "RTX",
+          "engagement_score": 4.431,
+          "polarity_score": 0.0,
+          "mention_count": 2
+        }
+      ],
+      "sample_posts": [
+        {
+          "ticker": "RTX",
+          "headline": "Metal Driver for Nvidia GeForce RTX Cards on macOS 15 Sequoia on Intel Macs",
+          "url": "https://github.com/nullmoth/nvidia-macos-driver",
+          "source": "Hacker News",
+          "engagement": 2.485,
+          "polarity": 0.0,
+          "matched_terms": []
+        },
+        {
+          "ticker": "RTX",
+          "headline": "Nvidia RTX Spark Pre-Orders Open: N1X Runs 45-80W in Laptops, 140W in Desktops",
+          "url": "https://www.storagereview.com/news/nvidia-rtx-spark-pre-orders-n1x-laptop-desktop-tdp-mxc-dgx-station-for-windows",
+          "source": "Hacker News",
+          "engagement": 1.946,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
       "matched_terms_summary": {},
-      "predicted_5d_median_pct": -0.43,
-      "predicted_5d_bullish_breadth_pct": 20.0,
-      "predicted_5d_avg_confidence": 0.58,
-      "predicted_5d_label": "neutral",
-      "composite_score": -0.086,
+      "predicted_5d_median_pct": -1.2,
+      "predicted_5d_bullish_breadth_pct": 0.0,
+      "predicted_5d_avg_confidence": 0.632,
+      "predicted_5d_label": "mod_bear",
+      "composite_score": -0.072,
       "composite_direction": "neutral_mixed",
       "signal_lanes": {
-        "price_5d_norm": -0.086,
-        "retail_polarity": null,
-        "retail_attention": null
+        "price_5d_norm": -0.24,
+        "retail_polarity": 0.0,
+        "retail_attention": 0.0
       },
-      "framing_zh": "5天中位 -0.4% (1/5 看漲)。資料部分缺。",
-      "framing_en": "5d med -0.4% (1/5 bull). Partial data.",
+      "framing_zh": "5天中位 -1.2% (0/5 看漲); 散戶 polarity +0.00 (RTX); 新聞 2 篇中性。資料部分缺。",
+      "framing_en": "5d med -1.2% (0/5 bull); retail polarity +0.00 (RTX); news 2 neutral. Partial data.",
       "key_tickers": [
         {
-          "ticker": "UNP",
-          "target_central_pct": 1.68,
+          "ticker": "RTX",
+          "target_central_pct": -1.47,
           "confidence": 0.66
         },
         {
-          "ticker": "HON",
-          "target_central_pct": -0.98,
-          "confidence": 0.58
+          "ticker": "GE",
+          "target_central_pct": -1.48,
+          "confidence": 0.6
         },
         {
-          "ticker": "CAT",
-          "target_central_pct": -1.18,
-          "confidence": 0.45
+          "ticker": "HON",
+          "target_central_pct": -1.2,
+          "confidence": 0.66
         }
       ],
-      "key_headlines": [],
+      "key_headlines": [
+        {
+          "published": "2026-10-09T08:41:59+00:00",
+          "source": "Reuters",
+          "headline": "China, EU strike deal to cut Chinese hybrid vehicle exports by over half",
+          "verdict": "BINARY",
+          "net_impact_score": 0.8
+        },
+        {
+          "published": "2026-10-07T11:14:47+00:00",
+          "source": "FinancialJuice",
+          "headline": "FinancialJuice: MUFG on Fed Minutes - FJElite",
+          "verdict": "NEUTRAL",
+          "net_impact_score": -0.7
+        }
+      ],
       "data_health": {
-        "news_72h_ok": false,
-        "retail_signals_ok": false,
+        "news_72h_ok": true,
+        "retail_signals_ok": true,
         "predict_5d_ok": true,
-        "all_ok": false
+        "all_ok": true
       }
     },
     {
       "sector": "Materials",
       "proxy_etf": "XLB",
-      "news_sentiment_score": null,
+      "news_sentiment_score": -0.6,
       "news_label": "neutral",
-      "news_count_72h": 0,
+      "news_count_72h": 1,
       "news_breadth": "narrow",
       "retail_polarity_score": null,
       "retail_engagement_score": null,
@@ -377,50 +460,48 @@
       "retail_top_tickers": [],
       "sample_posts": [],
       "matched_terms_summary": {},
-      "predicted_5d_median_pct": 0.93,
-      "predicted_5d_bullish_breadth_pct": 60.0,
-      "predicted_5d_avg_confidence": 0.612,
+      "predicted_5d_median_pct": null,
+      "predicted_5d_bullish_breadth_pct": null,
+      "predicted_5d_avg_confidence": null,
       "predicted_5d_label": "neutral",
-      "composite_score": 0.186,
+      "composite_score": null,
       "composite_direction": "neutral_mixed",
       "signal_lanes": {
-        "price_5d_norm": 0.186,
+        "price_5d_norm": null,
         "retail_polarity": null,
         "retail_attention": null
       },
-      "framing_zh": "5天中位 +0.9% (3/5 看漲)。資料部分缺。",
-      "framing_en": "5d med +0.9% (3/5 bull). Partial data.",
+      "framing_zh": "新聞 1 篇中性。資料部分缺。",
+      "framing_en": "news 1 neutral. Partial data.",
       "key_tickers": [
         {
-          "ticker": "FCX",
-          "target_central_pct": 3.38,
-          "confidence": 0.47
-        },
-        {
           "ticker": "LIN",
-          "target_central_pct": -1.01,
-          "confidence": 0.68
-        },
-        {
-          "ticker": "APD",
-          "target_central_pct": 1.01,
-          "confidence": 0.64
+          "target_central_pct": 0.41,
+          "confidence": 0.67
         }
       ],
-      "key_headlines": [],
+      "key_headlines": [
+        {
+          "published": "2026-10-07T02:18:00+00:00",
+          "source": "Reuters",
+          "headline": "Gold slips as dollar gains; investors await Fed minutes for rate clues - Reuters",
+          "verdict": "NEUTRAL",
+          "net_impact_score": -0.6
+        }
+      ],
       "data_health": {
-        "news_72h_ok": false,
+        "news_72h_ok": true,
         "retail_signals_ok": false,
-        "predict_5d_ok": true,
+        "predict_5d_ok": false,
         "all_ok": false
       }
     },
     {
       "sector": "Utilities",
       "proxy_etf": "XLU",
-      "news_sentiment_score": null,
-      "news_label": "neutral",
-      "news_count_72h": 0,
+      "news_sentiment_score": -1.3,
+      "news_label": "mod_bear",
+      "news_count_72h": 1,
       "news_breadth": "narrow",
       "retail_polarity_score": null,
       "retail_engagement_score": null,
@@ -428,39 +509,47 @@
       "retail_top_tickers": [],
       "sample_posts": [],
       "matched_terms_summary": {},
-      "predicted_5d_median_pct": -1.83,
-      "predicted_5d_bullish_breadth_pct": 0.0,
-      "predicted_5d_avg_confidence": 0.652,
-      "predicted_5d_label": "mod_bear",
-      "composite_score": -0.366,
-      "composite_direction": "mod_bear",
+      "predicted_5d_median_pct": 0.07,
+      "predicted_5d_bullish_breadth_pct": 60.0,
+      "predicted_5d_avg_confidence": 0.7,
+      "predicted_5d_label": "neutral",
+      "composite_score": 0.014,
+      "composite_direction": "neutral_mixed",
       "signal_lanes": {
-        "price_5d_norm": -0.366,
+        "price_5d_norm": 0.014,
         "retail_polarity": null,
         "retail_attention": null
       },
-      "framing_zh": "5天中位 -1.8% (0/5 看漲)。資料部分缺。",
-      "framing_en": "5d med -1.8% (0/5 bull). Partial data.",
+      "framing_zh": "5天中位 +0.1% (3/5 看漲); 新聞 1 篇偏空。資料部分缺。",
+      "framing_en": "5d med +0.1% (3/5 bull); news 1 mostly bearish. Partial data.",
       "key_tickers": [
         {
-          "ticker": "SO",
-          "target_central_pct": -1.92,
+          "ticker": "NEE",
+          "target_central_pct": -1.31,
           "confidence": 0.67
         },
         {
-          "ticker": "NEE",
-          "target_central_pct": -1.83,
-          "confidence": 0.68
+          "ticker": "AEP",
+          "target_central_pct": 0.37,
+          "confidence": 0.7
         },
         {
-          "ticker": "AEP",
-          "target_central_pct": -1.92,
-          "confidence": 0.64
+          "ticker": "SO",
+          "target_central_pct": 0.09,
+          "confidence": 0.71
         }
       ],
-      "key_headlines": [],
+      "key_headlines": [
+        {
+          "published": "2026-10-07T12:35:01+00:00",
+          "source": "CNBC Top",
+          "headline": "Home heating oil prices are soaring — and users' winter bills could rise 21%, federal outlook shows",
+          "verdict": "BEARISH",
+          "net_impact_score": -1.3
+        }
+      ],
       "data_health": {
-        "news_72h_ok": false,
+        "news_72h_ok": true,
         "retail_signals_ok": false,
         "predict_5d_ok": true,
         "all_ok": false
@@ -479,34 +568,34 @@
       "retail_top_tickers": [],
       "sample_posts": [],
       "matched_terms_summary": {},
-      "predicted_5d_median_pct": 0.82,
-      "predicted_5d_bullish_breadth_pct": 60.0,
-      "predicted_5d_avg_confidence": 0.612,
+      "predicted_5d_median_pct": -0.03,
+      "predicted_5d_bullish_breadth_pct": 40.0,
+      "predicted_5d_avg_confidence": 0.616,
       "predicted_5d_label": "neutral",
-      "composite_score": 0.164,
+      "composite_score": -0.006,
       "composite_direction": "neutral_mixed",
       "signal_lanes": {
-        "price_5d_norm": 0.164,
+        "price_5d_norm": -0.006,
         "retail_polarity": null,
         "retail_attention": null
       },
-      "framing_zh": "5天中位 +0.8% (3/5 看漲)。資料部分缺。",
-      "framing_en": "5d med +0.8% (3/5 bull). Partial data.",
+      "framing_zh": "5天中位 -0.0% (2/5 看漲)。資料部分缺。",
+      "framing_en": "5d med -0.0% (2/5 bull). Partial data.",
       "key_tickers": [
         {
-          "ticker": "WELL",
-          "target_central_pct": 1.02,
-          "confidence": 0.65
-        },
-        {
-          "ticker": "AMT",
-          "target_central_pct": 1.08,
-          "confidence": 0.59
-        },
-        {
           "ticker": "PLD",
-          "target_central_pct": -0.83,
+          "target_central_pct": -1.55,
           "confidence": 0.69
+        },
+        {
+          "ticker": "CCI",
+          "target_central_pct": 1.46,
+          "confidence": 0.54
+        },
+        {
+          "ticker": "WELL",
+          "target_central_pct": -1.2,
+          "confidence": 0.64
         }
       ],
       "key_headlines": [],
@@ -530,34 +619,34 @@
       "retail_top_tickers": [],
       "sample_posts": [],
       "matched_terms_summary": {},
-      "predicted_5d_median_pct": 0.15,
+      "predicted_5d_median_pct": 0.47,
       "predicted_5d_bullish_breadth_pct": 60.0,
       "predicted_5d_avg_confidence": 0.592,
       "predicted_5d_label": "neutral",
-      "composite_score": 0.03,
+      "composite_score": 0.094,
       "composite_direction": "neutral_mixed",
       "signal_lanes": {
-        "price_5d_norm": 0.03,
+        "price_5d_norm": 0.094,
         "retail_polarity": null,
         "retail_attention": null
       },
-      "framing_zh": "5天中位 +0.1% (3/5 看漲)。資料部分缺。",
-      "framing_en": "5d med +0.1% (3/5 bull). Partial data.",
+      "framing_zh": "5天中位 +0.5% (3/5 看漲)。資料部分缺。",
+      "framing_en": "5d med +0.5% (3/5 bull). Partial data.",
       "key_tickers": [
         {
-          "ticker": "DIS",
-          "target_central_pct": 1.57,
-          "confidence": 0.64
+          "ticker": "TMUS",
+          "target_central_pct": -1.86,
+          "confidence": 0.52
         },
         {
           "ticker": "NFLX",
-          "target_central_pct": 1.42,
-          "confidence": 0.57
+          "target_central_pct": -1.07,
+          "confidence": 0.63
         },
         {
-          "ticker": "META",
-          "target_central_pct": -1.42,
-          "confidence": 0.54
+          "ticker": "DIS",
+          "target_central_pct": 0.54,
+          "confidence": 0.67
         }
       ],
       "key_headlines": [],
@@ -569,16 +658,38 @@
       }
     }
   ],
-  "market_wide_buzz": [],
+  "market_wide_buzz": [
+    {
+      "topic": "ai_capex",
+      "post_count": 2,
+      "engagement_score": 13.594,
+      "sample_posts": [
+        {
+          "headline": "Yandex Takes a Second Data Center Hit in 48 Hours",
+          "url": "https://united24media.com/war-in-ukraine/yandex-takes-a-second-data-center-hit-in-48-hours-now-its-biggest-russian-site-is-damaged-23277",
+          "source": "Hacker News",
+          "engagement": 10.955,
+          "polarity": 0.0
+        },
+        {
+          "headline": "2nd Yandex Cloud Data Center Was Attacked",
+          "url": "https://twitter.com/yandex/status/2108482115155169544",
+          "source": "Hacker News",
+          "engagement": 2.639,
+          "polarity": 0.0
+        }
+      ],
+      "polarity_score": 0.0
+    }
+  ],
   "trending_meta": {
     "available": true,
     "lexicon_version": "v1.3",
-    "post_count": 14,
-    "as_of": "2026-08-23T20:31:05.713667+00:00",
+    "post_count": 33,
+    "as_of": "2026-10-10T01:49:42.095497+00:00",
     "source_stats": {
-      "truth_social": 2,
-      "hacker_news": 11,
-      "google_trends": 1
+      "truth_social": 3,
+      "hacker_news": 30
     }
   }
 }

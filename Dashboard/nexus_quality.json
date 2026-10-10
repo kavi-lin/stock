@@ -1,31 +1,30 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-23T20:30:53.851520Z",
+  "generated_at": "2026-10-10T01:49:31.358524Z",
   "window_days": 45,
-  "window_start": "2026-07-09",
+  "window_start": "2026-08-26",
   "counts": {
-    "artifacts_eligible": 2516,
-    "artifacts_not_closed": 193,
-    "artifacts_outside_window": 3235,
-    "artifacts_scanned": 5944,
-    "claims_corroborated": 107,
-    "claims_provisional": 380,
-    "claims_total": 487,
-    "direction_conflicts": 0,
-    "relations_normalized": 925,
-    "relations_not_ticker_structural": 13440,
-    "relations_seen": 14396,
-    "relations_without_source_url": 31
+    "artifacts_eligible": 2697,
+    "artifacts_not_closed": 539,
+    "artifacts_outside_window": 5874,
+    "artifacts_scanned": 9110,
+    "claims_corroborated": 82,
+    "claims_provisional": 460,
+    "claims_total": 542,
+    "direction_conflicts": 2,
+    "relations_normalized": 1058,
+    "relations_not_ticker_structural": 17070,
+    "relations_seen": 18128
   },
   "claims_by_predicate": {
-    "COMPETES_WITH": 329,
-    "CO_DEVELOPS_WITH": 49,
-    "SUPPLIES_TO": 109
+    "COMPETES_WITH": 376,
+    "CO_DEVELOPS_WITH": 30,
+    "SUPPLIES_TO": 136
   },
   "corroborated_by_predicate": {
-    "COMPETES_WITH": 74,
-    "CO_DEVELOPS_WITH": 7,
-    "SUPPLIES_TO": 26
+    "COMPETES_WITH": 53,
+    "CO_DEVELOPS_WITH": 4,
+    "SUPPLIES_TO": 25
   },
   "top_corroborated_claims": [
     {
@@ -34,329 +33,21 @@
       "predicate": "SUPPLIES_TO",
       "object": "ticker:NVDA",
       "status": "corroborated",
-      "confidence": 0.8154,
-      "source_count": 36,
-      "source_domain_count": 9,
-      "last_seen": "2026-08-23"
-    },
-    {
-      "claim_id": "claim:2660781797d4c66c",
-      "subject": "ticker:TGT",
-      "predicate": "COMPETES_WITH",
-      "object": "ticker:WMT",
-      "status": "corroborated",
-      "confidence": 0.8307,
-      "source_count": 21,
+      "confidence": 0.7031,
+      "source_count": 49,
       "source_domain_count": 7,
-      "last_seen": "2026-08-22"
+      "last_seen": "2026-10-06"
     },
     {
-      "claim_id": "claim:61ab6a1ccc630218",
+      "claim_id": "claim:3b10813644839e61",
       "subject": "ticker:MU",
-      "predicate": "COMPETES_WITH",
-      "object": "ticker:SKHY",
-      "status": "corroborated",
-      "confidence": 0.8653,
-      "source_count": 17,
-      "source_domain_count": 7,
-      "last_seen": "2026-08-19"
-    },
-    {
-      "claim_id": "claim:1dc63c54bd56f790",
-      "subject": "ticker:SKHY",
       "predicate": "SUPPLIES_TO",
       "object": "ticker:NVDA",
       "status": "corroborated",
-      "confidence": 0.8477,
-      "source_count": 15,
+      "confidence": 0.7444,
+      "source_count": 39,
       "source_domain_count": 7,
-      "last_seen": "2026-08-19"
-    },
-    {
-      "claim_id": "claim:d83a6c927d45ce0d",
-      "subject": "ticker:NVDA",
-      "predicate": "SUPPLIES_TO",
-      "object": "ticker:NBIS",
-      "status": "corroborated",
-      "confidence": 0.8555,
-      "source_count": 10,
-      "source_domain_count": 7,
-      "last_seen": "2026-08-18"
-    },
-    {
-      "claim_id": "claim:9ee8953c460d3ae5",
-      "subject": "ticker:AMD",
-      "predicate": "COMPETES_WITH",
-      "object": "ticker:NVDA",
-      "status": "corroborated",
-      "confidence": 0.7829,
-      "source_count": 14,
-      "source_domain_count": 6,
-      "last_seen": "2026-08-23"
-    },
-    {
-      "claim_id": "claim:289ecf530641f229",
-      "subject": "ticker:NVDA",
-      "predicate": "SUPPLIES_TO",
-      "object": "ticker:CRWV",
-      "status": "corroborated",
-      "confidence": 0.855,
-      "source_count": 11,
-      "source_domain_count": 6,
-      "last_seen": "2026-08-22"
-    },
-    {
-      "claim_id": "claim:685ee09b57c7ddfa",
-      "subject": "ticker:NVDA",
-      "predicate": "SUPPLIES_TO",
-      "object": "ticker:MSFT",
-      "status": "corroborated",
-      "confidence": 0.86,
-      "source_count": 14,
-      "source_domain_count": 5,
-      "last_seen": "2026-08-23"
-    },
-    {
-      "claim_id": "claim:1dac01a6f5e13a5c",
-      "subject": "ticker:HD",
-      "predicate": "COMPETES_WITH",
-      "object": "ticker:LOW",
-      "status": "corroborated",
-      "confidence": 0.8011,
-      "source_count": 9,
-      "source_domain_count": 5,
-      "last_seen": "2026-08-19"
-    },
-    {
-      "claim_id": "claim:b92f502fbe1990fb",
-      "subject": "ticker:AMZN",
-      "predicate": "COMPETES_WITH",
-      "object": "ticker:MSFT",
-      "status": "corroborated",
-      "confidence": 0.8557,
-      "source_count": 7,
-      "source_domain_count": 5,
-      "last_seen": "2026-08-19"
-    },
-    {
-      "claim_id": "claim:504b37ac5a2ae198",
-      "subject": "ticker:AFRM",
-      "predicate": "COMPETES_WITH",
-      "object": "ticker:KLAR",
-      "status": "corroborated",
-      "confidence": 0.8592,
-      "source_count": 6,
-      "source_domain_count": 5,
-      "last_seen": "2026-08-18"
-    },
-    {
-      "claim_id": "claim:5bba2c51b93f6f7b",
-      "subject": "ticker:NVDA",
-      "predicate": "SUPPLIES_TO",
-      "object": "ticker:SMCI",
-      "status": "corroborated",
-      "confidence": 0.835,
-      "source_count": 9,
-      "source_domain_count": 4,
-      "last_seen": "2026-08-12"
-    },
-    {
-      "claim_id": "claim:91c0c74dfe16564a",
-      "subject": "ticker:AZN",
-      "predicate": "COMPETES_WITH",
-      "object": "ticker:BMY",
-      "status": "corroborated",
-      "confidence": 0.8462,
-      "source_count": 8,
-      "source_domain_count": 4,
-      "last_seen": "2026-08-03"
-    },
-    {
-      "claim_id": "claim:7f8bb3937bfaaec6",
-      "subject": "ticker:LLY",
-      "predicate": "COMPETES_WITH",
-      "object": "ticker:NVO",
-      "status": "corroborated",
-      "confidence": 0.8086,
-      "source_count": 7,
-      "source_domain_count": 4,
-      "last_seen": "2026-08-13"
-    },
-    {
-      "claim_id": "claim:1deb54cfd158c4da",
-      "subject": "ticker:COHR",
-      "predicate": "COMPETES_WITH",
-      "object": "ticker:LITE",
-      "status": "corroborated",
-      "confidence": 0.8608,
-      "source_count": 6,
-      "source_domain_count": 4,
-      "last_seen": "2026-08-17"
-    },
-    {
-      "claim_id": "claim:a96db1d66df46ec7",
-      "subject": "ticker:AMZN",
-      "predicate": "COMPETES_WITH",
-      "object": "ticker:GOOGL",
-      "status": "corroborated",
-      "confidence": 0.855,
-      "source_count": 6,
-      "source_domain_count": 4,
-      "last_seen": "2026-08-19"
-    },
-    {
-      "claim_id": "claim:1a9e8273fbe6f85e",
-      "subject": "ticker:COST",
-      "predicate": "COMPETES_WITH",
-      "object": "ticker:WMT",
-      "status": "corroborated",
-      "confidence": 0.812,
-      "source_count": 5,
-      "source_domain_count": 4,
-      "last_seen": "2026-08-20"
-    },
-    {
-      "claim_id": "claim:409f8ff5ca04edd4",
-      "subject": "ticker:PARA",
-      "predicate": "COMPETES_WITH",
-      "object": "ticker:WBD",
-      "status": "corroborated",
-      "confidence": 0.794,
-      "source_count": 5,
-      "source_domain_count": 4,
-      "last_seen": "2026-08-17"
-    },
-    {
-      "claim_id": "claim:3be3faae82c04fc4",
-      "subject": "ticker:AVGO",
-      "predicate": "COMPETES_WITH",
-      "object": "ticker:MRVL",
-      "status": "corroborated",
-      "confidence": 0.85,
-      "source_count": 4,
-      "source_domain_count": 4,
-      "last_seen": "2026-08-21"
-    },
-    {
-      "claim_id": "claim:e546709461064bd0",
-      "subject": "ticker:KLAR",
-      "predicate": "COMPETES_WITH",
-      "object": "ticker:PYPL",
-      "status": "corroborated",
-      "confidence": 0.8375,
-      "source_count": 4,
-      "source_domain_count": 4,
-      "last_seen": "2026-08-18"
-    },
-    {
-      "claim_id": "claim:9bccc14177d4c162",
-      "subject": "ticker:DELL",
-      "predicate": "COMPETES_WITH",
-      "object": "ticker:SMCI",
-      "status": "corroborated",
-      "confidence": 0.8486,
-      "source_count": 7,
-      "source_domain_count": 3,
-      "last_seen": "2026-08-13"
-    },
-    {
-      "claim_id": "claim:d15693832a8141e8",
-      "subject": "ticker:NVDA",
-      "predicate": "SUPPLIES_TO",
-      "object": "ticker:META",
-      "status": "corroborated",
-      "confidence": 0.7814,
-      "source_count": 7,
-      "source_domain_count": 3,
-      "last_seen": "2026-08-23"
-    },
-    {
-      "claim_id": "claim:64d5337bc520ccd8",
-      "subject": "ticker:STX",
-      "predicate": "COMPETES_WITH",
-      "object": "ticker:WDC",
-      "status": "corroborated",
-      "confidence": 0.8825,
-      "source_count": 6,
-      "source_domain_count": 3,
-      "last_seen": "2026-08-03"
-    },
-    {
-      "claim_id": "claim:e685a7d94ec58340",
-      "subject": "ticker:TSM",
-      "predicate": "SUPPLIES_TO",
-      "object": "ticker:AMD",
-      "status": "corroborated",
-      "confidence": 0.872,
-      "source_count": 5,
-      "source_domain_count": 3,
-      "last_seen": "2026-08-18"
-    },
-    {
-      "claim_id": "claim:a6c2d8d1631426bf",
-      "subject": "ticker:NVDA",
-      "predicate": "SUPPLIES_TO",
-      "object": "ticker:AMZN",
-      "status": "corroborated",
-      "confidence": 0.857,
-      "source_count": 5,
-      "source_domain_count": 3,
-      "last_seen": "2026-08-23"
-    },
-    {
-      "claim_id": "claim:18742de98cf7b8d4",
-      "subject": "ticker:AZN",
-      "predicate": "CO_DEVELOPS_WITH",
-      "object": "ticker:IONS",
-      "status": "corroborated",
-      "confidence": 0.895,
-      "source_count": 4,
-      "source_domain_count": 3,
-      "last_seen": "2026-08-22"
-    },
-    {
-      "claim_id": "claim:9367bf9eef20b514",
-      "subject": "ticker:CBRS",
-      "predicate": "COMPETES_WITH",
-      "object": "ticker:NVDA",
-      "status": "corroborated",
-      "confidence": 0.8387,
-      "source_count": 4,
-      "source_domain_count": 3,
-      "last_seen": "2026-08-13"
-    },
-    {
-      "claim_id": "claim:c7884a501083cff4",
-      "subject": "ticker:GOOGL",
-      "predicate": "COMPETES_WITH",
-      "object": "ticker:META",
-      "status": "corroborated",
-      "confidence": 0.8325,
-      "source_count": 4,
-      "source_domain_count": 3,
-      "last_seen": "2026-08-07"
-    },
-    {
-      "claim_id": "claim:a89db208e0bc16f8",
-      "subject": "ticker:ANET",
-      "predicate": "COMPETES_WITH",
-      "object": "ticker:CSCO",
-      "status": "corroborated",
-      "confidence": 0.82,
-      "source_count": 4,
-      "source_domain_count": 3,
-      "last_seen": "2026-08-13"
-    },
-    {
-      "claim_id": "claim:94f0dbb703c826b3",
-      "subject": "ticker:AMZN",
-      "predicate": "COMPETES_WITH",
-      "object": "ticker:WMT",
-      "status": "corroborated",
-      "confidence": 0.79,
-      "source_count": 4,
-      "source_domain_count": 3,
-      "last_seen": "2026-08-20"
+      "last_seen": "2026-10-07"
     },
     {
       "claim_id": "claim:d5265714c1ef4837",
@@ -364,65 +55,120 @@
       "predicate": "COMPETES_WITH",
       "object": "ticker:NVDA",
       "status": "corroborated",
-      "confidence": 0.7863,
-      "source_count": 4,
-      "source_domain_count": 3,
-      "last_seen": "2026-08-18"
+      "confidence": 0.6786,
+      "source_count": 22,
+      "source_domain_count": 7,
+      "last_seen": "2026-10-01"
     },
     {
-      "claim_id": "claim:3aa828acd1ebc63d",
-      "subject": "ticker:AVGO",
-      "predicate": "SUPPLIES_TO",
-      "object": "ticker:META",
+      "claim_id": "claim:9ee8953c460d3ae5",
+      "subject": "ticker:AMD",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:NVDA",
       "status": "corroborated",
-      "confidence": 0.7862,
-      "source_count": 4,
-      "source_domain_count": 3,
-      "last_seen": "2026-08-18"
+      "confidence": 0.7318,
+      "source_count": 19,
+      "source_domain_count": 7,
+      "last_seen": "2026-10-08"
     },
     {
-      "claim_id": "claim:03e1062f0175edb9",
-      "subject": "ticker:MRVL",
+      "claim_id": "claim:685ee09b57c7ddfa",
+      "subject": "ticker:NVDA",
+      "predicate": "SUPPLIES_TO",
+      "object": "ticker:MSFT",
+      "status": "corroborated",
+      "confidence": 0.758,
+      "source_count": 23,
+      "source_domain_count": 6,
+      "last_seen": "2026-10-07"
+    },
+    {
+      "claim_id": "claim:3be3faae82c04fc4",
+      "subject": "ticker:AVGO",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:MRVL",
+      "status": "corroborated",
+      "confidence": 0.8003,
+      "source_count": 15,
+      "source_domain_count": 5,
+      "last_seen": "2026-10-07"
+    },
+    {
+      "claim_id": "claim:059161c9a70d6009",
+      "subject": "ticker:AVGO",
       "predicate": "SUPPLIES_TO",
       "object": "ticker:GOOGL",
       "status": "corroborated",
-      "confidence": 0.8867,
-      "source_count": 3,
-      "source_domain_count": 3,
-      "last_seen": "2026-08-19"
+      "confidence": 0.7832,
+      "source_count": 11,
+      "source_domain_count": 5,
+      "last_seen": "2026-09-15"
     },
     {
-      "claim_id": "claim:bdabb7663e43c69a",
-      "subject": "ticker:CI",
-      "predicate": "COMPETES_WITH",
-      "object": "ticker:UNH",
+      "claim_id": "claim:3753112f94800bb2",
+      "subject": "ticker:NVDA",
+      "predicate": "SUPPLIES_TO",
+      "object": "ticker:ORCL",
       "status": "corroborated",
-      "confidence": 0.8833,
-      "source_count": 3,
-      "source_domain_count": 3,
-      "last_seen": "2026-07-30"
+      "confidence": 0.7491,
+      "source_count": 11,
+      "source_domain_count": 5,
+      "last_seen": "2026-09-21"
     },
     {
-      "claim_id": "claim:738de143c4942420",
-      "subject": "ticker:ADI",
-      "predicate": "COMPETES_WITH",
-      "object": "ticker:TXN",
+      "claim_id": "claim:8447a1a04e9db05f",
+      "subject": "ticker:NVDA",
+      "predicate": "SUPPLIES_TO",
+      "object": "ticker:DELL",
       "status": "corroborated",
-      "confidence": 0.8433,
-      "source_count": 3,
-      "source_domain_count": 3,
-      "last_seen": "2026-08-20"
+      "confidence": 0.854,
+      "source_count": 10,
+      "source_domain_count": 5,
+      "last_seen": "2026-10-03"
     },
     {
-      "claim_id": "claim:f900aa39e5712d81",
-      "subject": "ticker:MU",
+      "claim_id": "claim:a0d14279db349cab",
+      "subject": "ticker:DELL",
       "predicate": "COMPETES_WITH",
-      "object": "ticker:WDC",
+      "object": "ticker:HPE",
       "status": "corroborated",
-      "confidence": 0.84,
-      "source_count": 3,
-      "source_domain_count": 3,
-      "last_seen": "2026-08-14"
+      "confidence": 0.8488,
+      "source_count": 8,
+      "source_domain_count": 5,
+      "last_seen": "2026-09-02"
+    },
+    {
+      "claim_id": "claim:d786d391b1e73b4e",
+      "subject": "ticker:GOOGL",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:MSFT",
+      "status": "corroborated",
+      "confidence": 0.7469,
+      "source_count": 8,
+      "source_domain_count": 5,
+      "last_seen": "2026-10-02"
+    },
+    {
+      "claim_id": "claim:9a6172106d188024",
+      "subject": "ticker:TSM",
+      "predicate": "SUPPLIES_TO",
+      "object": "ticker:AAPL",
+      "status": "corroborated",
+      "confidence": 0.7,
+      "source_count": 7,
+      "source_domain_count": 5,
+      "last_seen": "2026-09-12"
+    },
+    {
+      "claim_id": "claim:719440f8ab74db74",
+      "subject": "ticker:NFLX",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:PSKY",
+      "status": "corroborated",
+      "confidence": 0.72,
+      "source_count": 6,
+      "source_domain_count": 5,
+      "last_seen": "2026-10-02"
     },
     {
       "claim_id": "claim:773d495062a47859",
@@ -430,243 +176,430 @@
       "predicate": "COMPETES_WITH",
       "object": "ticker:PANW",
       "status": "corroborated",
-      "confidence": 0.8383,
-      "source_count": 3,
-      "source_domain_count": 3,
-      "last_seen": "2026-08-18"
+      "confidence": 0.8331,
+      "source_count": 13,
+      "source_domain_count": 4,
+      "last_seen": "2026-09-19"
     },
     {
-      "claim_id": "claim:af43c3ee0371c647",
-      "subject": "ticker:AMZN",
+      "claim_id": "claim:d10839502e301971",
+      "subject": "ticker:CRWD",
       "predicate": "COMPETES_WITH",
-      "object": "ticker:META",
+      "object": "ticker:MSFT",
       "status": "corroborated",
-      "confidence": 0.8167,
-      "source_count": 3,
-      "source_domain_count": 3,
-      "last_seen": "2026-07-18"
+      "confidence": 0.825,
+      "source_count": 11,
+      "source_domain_count": 4,
+      "last_seen": "2026-09-14"
     },
     {
-      "claim_id": "claim:b52d9d13b6e007e1",
+      "claim_id": "claim:0ea005d37d5d9b70",
+      "subject": "ticker:NKE",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:ONON",
+      "status": "corroborated",
+      "confidence": 0.8425,
+      "source_count": 8,
+      "source_domain_count": 4,
+      "last_seen": "2026-10-02"
+    },
+    {
+      "claim_id": "claim:37ff41acf4ed1c01",
+      "subject": "ticker:DECK",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:NKE",
+      "status": "corroborated",
+      "confidence": 0.8262,
+      "source_count": 8,
+      "source_domain_count": 4,
+      "last_seen": "2026-10-02"
+    },
+    {
+      "claim_id": "claim:16875e02dbb1141a",
+      "subject": "ticker:ASML",
+      "predicate": "SUPPLIES_TO",
+      "object": "ticker:TSM",
+      "status": "corroborated",
+      "confidence": 0.7137,
+      "source_count": 8,
+      "source_domain_count": 4,
+      "last_seen": "2026-10-03"
+    },
+    {
+      "claim_id": "claim:9bccc14177d4c162",
       "subject": "ticker:DELL",
       "predicate": "COMPETES_WITH",
-      "object": "ticker:LNVGY",
+      "object": "ticker:SMCI",
       "status": "corroborated",
-      "confidence": 0.8117,
-      "source_count": 3,
-      "source_domain_count": 3,
-      "last_seen": "2026-08-13"
+      "confidence": 0.7943,
+      "source_count": 7,
+      "source_domain_count": 4,
+      "last_seen": "2026-10-03"
     },
     {
-      "claim_id": "claim:349759918dd06fc0",
-      "subject": "ticker:AAP",
+      "claim_id": "claim:18edeb06a957bcf7",
+      "subject": "ticker:MSFT",
       "predicate": "COMPETES_WITH",
-      "object": "ticker:AZO",
+      "object": "ticker:ORCL",
       "status": "corroborated",
-      "confidence": 0.7733,
+      "confidence": 0.7629,
+      "source_count": 7,
+      "source_domain_count": 4,
+      "last_seen": "2026-09-21"
+    },
+    {
+      "claim_id": "claim:221d0967a1a02d3d",
+      "subject": "ticker:MSFT",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:OKTA",
+      "status": "corroborated",
+      "confidence": 0.884,
+      "source_count": 5,
+      "source_domain_count": 4,
+      "last_seen": "2026-09-06"
+    },
+    {
+      "claim_id": "claim:a6c2d8d1631426bf",
+      "subject": "ticker:NVDA",
+      "predicate": "SUPPLIES_TO",
+      "object": "ticker:AMZN",
+      "status": "corroborated",
+      "confidence": 0.724,
+      "source_count": 5,
+      "source_domain_count": 4,
+      "last_seen": "2026-10-01"
+    },
+    {
+      "claim_id": "claim:dc1c2899fa6737ad",
+      "subject": "ticker:MSFT",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:SNOW",
+      "status": "corroborated",
+      "confidence": 0.82,
+      "source_count": 4,
+      "source_domain_count": 4,
+      "last_seen": "2026-09-03"
+    },
+    {
+      "claim_id": "claim:e685a7d94ec58340",
+      "subject": "ticker:TSM",
+      "predicate": "SUPPLIES_TO",
+      "object": "ticker:AMD",
+      "status": "corroborated",
+      "confidence": 0.8062,
+      "source_count": 4,
+      "source_domain_count": 4,
+      "last_seen": "2026-09-21"
+    },
+    {
+      "claim_id": "claim:69c926aa677872fe",
+      "subject": "ticker:CRM",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:MSFT",
+      "status": "corroborated",
+      "confidence": 0.74,
+      "source_count": 4,
+      "source_domain_count": 4,
+      "last_seen": "2026-09-14"
+    },
+    {
+      "claim_id": "claim:3aa828acd1ebc63d",
+      "subject": "ticker:AVGO",
+      "predicate": "SUPPLIES_TO",
+      "object": "ticker:META",
+      "status": "corroborated",
+      "confidence": 0.72,
+      "source_count": 4,
+      "source_domain_count": 4,
+      "last_seen": "2026-09-14"
+    },
+    {
+      "claim_id": "claim:0cbcafa2012b9e55",
+      "subject": "ticker:PANW",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:ZS",
+      "status": "corroborated",
+      "confidence": 0.7,
+      "source_count": 4,
+      "source_domain_count": 4,
+      "last_seen": "2026-09-14"
+    },
+    {
+      "claim_id": "claim:03e1062f0175edb9",
+      "subject": "ticker:MRVL",
+      "predicate": "SUPPLIES_TO",
+      "object": "ticker:GOOGL",
+      "status": "corroborated",
+      "confidence": 0.8383,
+      "source_count": 6,
+      "source_domain_count": 3,
+      "last_seen": "2026-09-21"
+    },
+    {
+      "claim_id": "claim:cfd1c56463751254",
+      "subject": "ticker:INTC",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:NVDA",
+      "status": "corroborated",
+      "confidence": 0.8513,
+      "source_count": 4,
+      "source_domain_count": 3,
+      "last_seen": "2026-10-07"
+    },
+    {
+      "claim_id": "claim:5f66819434ead376",
+      "subject": "ticker:KO",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:PEP",
+      "status": "corroborated",
+      "confidence": 0.8287,
+      "source_count": 4,
+      "source_domain_count": 3,
+      "last_seen": "2026-10-08"
+    },
+    {
+      "claim_id": "claim:42a5405b20d794c6",
+      "subject": "ticker:TSLA",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:VWAGY",
+      "status": "corroborated",
+      "confidence": 0.8013,
+      "source_count": 4,
+      "source_domain_count": 3,
+      "last_seen": "2026-09-21"
+    },
+    {
+      "claim_id": "claim:289ecf530641f229",
+      "subject": "ticker:NVDA",
+      "predicate": "SUPPLIES_TO",
+      "object": "ticker:CRWV",
+      "status": "corroborated",
+      "confidence": 0.71,
+      "source_count": 4,
+      "source_domain_count": 3,
+      "last_seen": "2026-10-03"
+    },
+    {
+      "claim_id": "claim:dbc507cd1f83ea06",
+      "subject": "ticker:GOOGL",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:NVDA",
+      "status": "corroborated",
+      "confidence": 0.705,
+      "source_count": 4,
+      "source_domain_count": 3,
+      "last_seen": "2026-10-01"
+    },
+    {
+      "claim_id": "claim:5f578e46563c3674",
+      "subject": "ticker:AMD",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:INTC",
+      "status": "corroborated",
+      "confidence": 0.695,
+      "source_count": 4,
+      "source_domain_count": 3,
+      "last_seen": "2026-09-21"
+    },
+    {
+      "claim_id": "claim:85a5532b0141e3a8",
+      "subject": "ticker:TSM",
+      "predicate": "SUPPLIES_TO",
+      "object": "ticker:AVGO",
+      "status": "corroborated",
+      "confidence": 0.86,
       "source_count": 3,
       "source_domain_count": 3,
-      "last_seen": "2026-08-20"
+      "last_seen": "2026-09-08"
+    },
+    {
+      "claim_id": "claim:71960d6ed4ecb5c8",
+      "subject": "ticker:FTNT",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:PANW",
+      "status": "corroborated",
+      "confidence": 0.8367,
+      "source_count": 3,
+      "source_domain_count": 3,
+      "last_seen": "2026-09-02"
+    },
+    {
+      "claim_id": "claim:b251a46a0cc0d703",
+      "subject": "ticker:GOOGL",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:TSLA",
+      "status": "corroborated",
+      "confidence": 0.76,
+      "source_count": 3,
+      "source_domain_count": 3,
+      "last_seen": "2026-09-04"
+    },
+    {
+      "claim_id": "claim:ed54c9ccee68957f",
+      "subject": "ticker:INTC",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:TSM",
+      "status": "corroborated",
+      "confidence": 0.7367,
+      "source_count": 3,
+      "source_domain_count": 3,
+      "last_seen": "2026-09-18"
+    },
+    {
+      "claim_id": "claim:c514ac717320a72d",
+      "subject": "ticker:CRWD",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:ZS",
+      "status": "corroborated",
+      "confidence": 0.7267,
+      "source_count": 3,
+      "source_domain_count": 3,
+      "last_seen": "2026-09-12"
+    },
+    {
+      "claim_id": "claim:bee9ab5f5b703084",
+      "subject": "ticker:ACN",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:IBM",
+      "status": "corroborated",
+      "confidence": 0.7233,
+      "source_count": 3,
+      "source_domain_count": 3,
+      "last_seen": "2026-10-01"
     }
   ],
   "review_queue": [
     {
-      "claim_id": "claim:539bae5349b37412",
-      "subject": "ticker:BABA",
-      "predicate": "COMPETES_WITH",
-      "object": "ticker:JD",
+      "claim_id": "claim:d15693832a8141e8",
+      "subject": "ticker:NVDA",
+      "predicate": "SUPPLIES_TO",
+      "object": "ticker:META",
       "status": "provisional",
-      "confidence": 0.8725,
-      "source_count": 4,
-      "source_domain_count": 1,
-      "last_seen": "2026-08-20"
+      "confidence": 0.648,
+      "source_count": 5,
+      "source_domain_count": 4,
+      "last_seen": "2026-10-08"
     },
     {
-      "claim_id": "claim:e126899d92e2ad37",
-      "subject": "ticker:BABA",
+      "claim_id": "claim:e9de67265243588e",
+      "subject": "ticker:F",
       "predicate": "COMPETES_WITH",
-      "object": "ticker:PDD",
+      "object": "ticker:GM",
       "status": "provisional",
-      "confidence": 0.8612,
+      "confidence": 0.6887,
       "source_count": 4,
       "source_domain_count": 1,
-      "last_seen": "2026-08-20"
+      "last_seen": "2026-09-15"
     },
     {
-      "claim_id": "claim:c4397584c1bb68d3",
-      "subject": "ticker:AS",
+      "claim_id": "claim:15e9111a3896b8ca",
+      "subject": "ticker:AMZN",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:NVDA",
+      "status": "provisional",
+      "confidence": 0.7733,
+      "source_count": 3,
+      "source_domain_count": 1,
+      "last_seen": "2026-09-18"
+    },
+    {
+      "claim_id": "claim:a0c86db91c8af0e2",
+      "subject": "ticker:CVX",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:XOM",
+      "status": "provisional",
+      "confidence": 0.72,
+      "source_count": 3,
+      "source_domain_count": 1,
+      "last_seen": "2026-09-20"
+    },
+    {
+      "claim_id": "claim:53b9ba400a334638",
+      "subject": "ticker:LULU",
       "predicate": "COMPETES_WITH",
       "object": "ticker:NKE",
       "status": "provisional",
-      "confidence": 0.875,
+      "confidence": 0.7067,
       "source_count": 3,
       "source_domain_count": 1,
-      "last_seen": "2026-08-19"
+      "last_seen": "2026-10-07"
     },
     {
-      "claim_id": "claim:9de25cf5183b03e6",
-      "subject": "ticker:AMAT",
-      "predicate": "SUPPLIES_TO",
-      "object": "ticker:MU",
+      "claim_id": "claim:8db012729bde6a31",
+      "subject": "ticker:COIN",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:HOOD",
       "status": "provisional",
-      "confidence": 0.82,
+      "confidence": 0.6267,
       "source_count": 3,
       "source_domain_count": 1,
-      "last_seen": "2026-08-14"
+      "last_seen": "2026-09-21"
     },
     {
-      "claim_id": "claim:8e4d4d2ebdcac381",
-      "subject": "ticker:COHR",
-      "predicate": "CO_DEVELOPS_WITH",
-      "object": "ticker:NVDA",
+      "claim_id": "claim:dfd0575cdede561d",
+      "subject": "ticker:DG",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:DLTR",
       "status": "provisional",
       "confidence": 0.9,
       "source_count": 2,
       "source_domain_count": 1,
-      "last_seen": "2026-08-13"
+      "last_seen": "2026-09-20"
     },
     {
-      "claim_id": "claim:c7ce86910ce803a1",
-      "subject": "ticker:REGN",
-      "predicate": "CO_DEVELOPS_WITH",
-      "object": "ticker:SNY",
-      "status": "provisional",
-      "confidence": 0.89,
-      "source_count": 2,
-      "source_domain_count": 1,
-      "last_seen": "2026-07-30"
-    },
-    {
-      "claim_id": "claim:f96152a52c5aebc8",
-      "subject": "ticker:AS",
+      "claim_id": "claim:5d62147180e28cc0",
+      "subject": "ticker:AMZN",
       "predicate": "COMPETES_WITH",
-      "object": "ticker:DECK",
+      "object": "ticker:ORCL",
       "status": "provisional",
       "confidence": 0.88,
       "source_count": 2,
       "source_domain_count": 1,
-      "last_seen": "2026-08-19"
+      "last_seen": "2026-09-10"
     },
     {
-      "claim_id": "claim:f75be1fbaf7d1ff5",
-      "subject": "ticker:MU",
+      "claim_id": "claim:78bdd32425ccae98",
+      "subject": "ticker:IMAX",
       "predicate": "SUPPLIES_TO",
-      "object": "ticker:AAPL",
-      "status": "provisional",
-      "confidence": 0.875,
-      "source_count": 2,
-      "source_domain_count": 1,
-      "last_seen": "2026-08-01"
-    },
-    {
-      "claim_id": "claim:b5b15319015cfd48",
-      "subject": "ticker:OPEN",
-      "predicate": "COMPETES_WITH",
-      "object": "ticker:Z",
-      "status": "provisional",
-      "confidence": 0.8575,
-      "source_count": 2,
-      "source_domain_count": 1,
-      "last_seen": "2026-07-09"
-    },
-    {
-      "claim_id": "claim:c226dd89dc577998",
-      "subject": "ticker:AS",
-      "predicate": "COMPETES_WITH",
-      "object": "ticker:LULU",
-      "status": "provisional",
-      "confidence": 0.85,
-      "source_count": 2,
-      "source_domain_count": 1,
-      "last_seen": "2026-08-18"
-    },
-    {
-      "claim_id": "claim:d7f2031c983a66ba",
-      "subject": "ticker:ASTS",
-      "predicate": "COMPETES_WITH",
-      "object": "ticker:SPCX",
-      "status": "provisional",
-      "confidence": 0.84,
-      "source_count": 2,
-      "source_domain_count": 1,
-      "last_seen": "2026-08-10"
-    },
-    {
-      "claim_id": "claim:8643d8eea50a02f0",
-      "subject": "ticker:ACHR",
-      "predicate": "COMPETES_WITH",
-      "object": "ticker:JOBY",
-      "status": "provisional",
-      "confidence": 0.8375,
-      "source_count": 2,
-      "source_domain_count": 1,
-      "last_seen": "2026-08-11"
-    },
-    {
-      "claim_id": "claim:acc951fbc2f0f9d0",
-      "subject": "ticker:ERIC",
-      "predicate": "COMPETES_WITH",
-      "object": "ticker:NOK",
-      "status": "provisional",
-      "confidence": 0.835,
-      "source_count": 2,
-      "source_domain_count": 1,
-      "last_seen": "2026-08-18"
-    },
-    {
-      "claim_id": "claim:0557084a719f6a02",
-      "subject": "ticker:FN",
-      "predicate": "SUPPLIES_TO",
-      "object": "ticker:NVDA",
-      "status": "provisional",
-      "confidence": 0.835,
-      "source_count": 2,
-      "source_domain_count": 1,
-      "last_seen": "2026-08-19"
-    },
-    {
-      "claim_id": "claim:759e2bb30d8be237",
-      "subject": "ticker:SPCX",
-      "predicate": "SUPPLIES_TO",
-      "object": "ticker:GOOGL",
-      "status": "provisional",
-      "confidence": 0.815,
-      "source_count": 2,
-      "source_domain_count": 1,
-      "last_seen": "2026-08-17"
-    },
-    {
-      "claim_id": "claim:1955287a4ae841ec",
-      "subject": "ticker:AMAT",
-      "predicate": "SUPPLIES_TO",
-      "object": "ticker:INTC",
+      "object": "ticker:AMC",
       "status": "provisional",
       "confidence": 0.81,
       "source_count": 2,
       "source_domain_count": 1,
-      "last_seen": "2026-08-14"
+      "last_seen": "2026-09-09"
     },
     {
-      "claim_id": "claim:073baaf0c7df6819",
-      "subject": "ticker:HXSCL",
+      "claim_id": "claim:fc79d677d851c8ba",
+      "subject": "ticker:IMAX",
       "predicate": "SUPPLIES_TO",
-      "object": "ticker:NVDA",
+      "object": "ticker:CNK",
       "status": "provisional",
       "confidence": 0.81,
       "source_count": 2,
       "source_domain_count": 1,
-      "last_seen": "2026-07-30"
+      "last_seen": "2026-09-09"
     },
     {
-      "claim_id": "claim:c8a1dc83817d93c6",
-      "subject": "ticker:BULL",
+      "claim_id": "claim:dfb701a2b0f33d47",
+      "subject": "ticker:MSFT",
       "predicate": "COMPETES_WITH",
-      "object": "ticker:HOOD",
+      "object": "ticker:PATH",
       "status": "provisional",
-      "confidence": 0.805,
+      "confidence": 0.8075,
       "source_count": 2,
       "source_domain_count": 1,
-      "last_seen": "2026-08-04"
+      "last_seen": "2026-09-04"
+    },
+    {
+      "claim_id": "claim:bb79eae32ad88a07",
+      "subject": "ticker:HOOD",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:SCHW",
+      "status": "provisional",
+      "confidence": 0.745,
+      "source_count": 2,
+      "source_domain_count": 1,
+      "last_seen": "2026-10-01"
     },
     {
       "claim_id": "claim:f7f4133adee15a73",
@@ -674,22 +607,265 @@
       "predicate": "COMPETES_WITH",
       "object": "ticker:S",
       "status": "provisional",
-      "confidence": 0.78,
+      "confidence": 0.74,
       "source_count": 2,
       "source_domain_count": 1,
-      "last_seen": "2026-08-23"
+      "last_seen": "2026-09-14"
     },
     {
-      "claim_id": "claim:f00718814e586d95",
-      "subject": "ticker:NVDA",
+      "claim_id": "claim:0a9dcc8272613f95",
+      "subject": "ticker:BA",
       "predicate": "COMPETES_WITH",
-      "object": "ticker:QCOM",
+      "object": "ticker:EADSY",
       "status": "provisional",
-      "confidence": 0.7675,
+      "confidence": 0.735,
       "source_count": 2,
       "source_domain_count": 1,
-      "last_seen": "2026-07-11"
+      "last_seen": "2026-10-02"
+    },
+    {
+      "claim_id": "claim:a7896fbd2cba516b",
+      "subject": "ticker:ABT",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:MDT",
+      "status": "provisional",
+      "confidence": 0.72,
+      "source_count": 2,
+      "source_domain_count": 1,
+      "last_seen": "2026-09-17"
+    },
+    {
+      "claim_id": "claim:9f789bc42d1fc58d",
+      "subject": "ticker:CEG",
+      "predicate": "SUPPLIES_TO",
+      "object": "ticker:MSFT",
+      "status": "provisional",
+      "confidence": 0.72,
+      "source_count": 2,
+      "source_domain_count": 1,
+      "last_seen": "2026-09-30"
+    },
+    {
+      "claim_id": "claim:db57242d1b93df34",
+      "subject": "ticker:CRWV",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:ORCL",
+      "status": "provisional",
+      "confidence": 0.715,
+      "source_count": 2,
+      "source_domain_count": 1,
+      "last_seen": "2026-09-21"
+    },
+    {
+      "claim_id": "claim:7feccce36486f6e3",
+      "subject": "ticker:PATK",
+      "predicate": "SUPPLIES_TO",
+      "object": "ticker:WGO",
+      "status": "provisional",
+      "confidence": 0.715,
+      "source_count": 2,
+      "source_domain_count": 1,
+      "last_seen": "2026-10-05"
+    },
+    {
+      "claim_id": "claim:b6b8e6baacdf4b61",
+      "subject": "ticker:TSM",
+      "predicate": "SUPPLIES_TO",
+      "object": "ticker:MRVL",
+      "status": "provisional",
+      "confidence": 0.715,
+      "source_count": 2,
+      "source_domain_count": 1,
+      "last_seen": "2026-09-21"
+    },
+    {
+      "claim_id": "claim:5da9dfce1ae5fa44",
+      "subject": "ticker:FCX",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:SCCO",
+      "status": "provisional",
+      "confidence": 0.7,
+      "source_count": 2,
+      "source_domain_count": 1,
+      "last_seen": "2026-09-10"
+    },
+    {
+      "claim_id": "claim:87150c214a67ab0e",
+      "subject": "ticker:CRDO",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:MRVL",
+      "status": "provisional",
+      "confidence": 0.695,
+      "source_count": 2,
+      "source_domain_count": 1,
+      "last_seen": "2026-09-21"
+    },
+    {
+      "claim_id": "claim:bb4aeff8a3c09244",
+      "subject": "ticker:MU",
+      "predicate": "SUPPLIES_TO",
+      "object": "ticker:AMD",
+      "status": "provisional",
+      "confidence": 0.69,
+      "source_count": 2,
+      "source_domain_count": 1,
+      "last_seen": "2026-09-21"
+    },
+    {
+      "claim_id": "claim:c178c4c21abef784",
+      "subject": "ticker:VRT",
+      "predicate": "SUPPLIES_TO",
+      "object": "ticker:MSFT",
+      "status": "provisional",
+      "confidence": 0.69,
+      "source_count": 2,
+      "source_domain_count": 1,
+      "last_seen": "2026-09-14"
+    },
+    {
+      "claim_id": "claim:bc60bcd47bff9297",
+      "subject": "ticker:ADBE",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:DOCU",
+      "status": "provisional",
+      "confidence": 0.6825,
+      "source_count": 2,
+      "source_domain_count": 1,
+      "last_seen": "2026-09-04"
+    },
+    {
+      "claim_id": "claim:590bd7cea46670d2",
+      "subject": "ticker:NOW",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:PATH",
+      "status": "provisional",
+      "confidence": 0.67,
+      "source_count": 2,
+      "source_domain_count": 1,
+      "last_seen": "2026-09-14"
+    },
+    {
+      "claim_id": "claim:cc5948a3f5e8e8b9",
+      "subject": "ticker:APTV",
+      "predicate": "SUPPLIES_TO",
+      "object": "ticker:GM",
+      "status": "provisional",
+      "confidence": 0.65,
+      "source_count": 2,
+      "source_domain_count": 1,
+      "last_seen": "2026-09-21"
+    },
+    {
+      "claim_id": "claim:987076489629aadd",
+      "subject": "ticker:DAL",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:UAL",
+      "status": "provisional",
+      "confidence": 0.6325,
+      "source_count": 2,
+      "source_domain_count": 2,
+      "last_seen": "2026-09-15"
+    },
+    {
+      "claim_id": "claim:34006e045b8b5eb5",
+      "subject": "ticker:GLD",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:SLV",
+      "status": "provisional",
+      "confidence": 0.62,
+      "source_count": 2,
+      "source_domain_count": 2,
+      "last_seen": "2026-09-15"
+    },
+    {
+      "claim_id": "claim:96b053f81728038e",
+      "subject": "ticker:SPR",
+      "predicate": "SUPPLIES_TO",
+      "object": "ticker:BA",
+      "status": "provisional",
+      "confidence": 0.62,
+      "source_count": 2,
+      "source_domain_count": 2,
+      "last_seen": "2026-09-21"
+    },
+    {
+      "claim_id": "claim:1801773192efde08",
+      "subject": "ticker:NOC",
+      "predicate": "SUPPLIES_TO",
+      "object": "ticker:LMT",
+      "status": "provisional",
+      "confidence": 0.615,
+      "source_count": 2,
+      "source_domain_count": 2,
+      "last_seen": "2026-10-01"
+    },
+    {
+      "claim_id": "claim:6d676b5e37a6fc63",
+      "subject": "ticker:MGA",
+      "predicate": "SUPPLIES_TO",
+      "object": "ticker:GM",
+      "status": "provisional",
+      "confidence": 0.6,
+      "source_count": 2,
+      "source_domain_count": 2,
+      "last_seen": "2026-09-14"
+    },
+    {
+      "claim_id": "claim:d9fdd40aa42526c5",
+      "subject": "ticker:GOLD",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:NEM",
+      "status": "provisional",
+      "confidence": 0.47,
+      "source_count": 2,
+      "source_domain_count": 1,
+      "last_seen": "2026-09-15"
     }
   ],
-  "direction_conflicts": []
+  "direction_conflicts": [
+    {
+      "pair": [
+        "ticker:FL",
+        "ticker:NKE"
+      ],
+      "claims": [
+        {
+          "claim_id": "claim:a9e649b6eaef2ba7",
+          "source": "ticker:FL",
+          "target": "ticker:NKE",
+          "status": "provisional",
+          "source_count": 1
+        },
+        {
+          "claim_id": "claim:e38bf8886f5ec7ba",
+          "source": "ticker:NKE",
+          "target": "ticker:FL",
+          "status": "provisional",
+          "source_count": 1
+        }
+      ]
+    },
+    {
+      "pair": [
+        "ticker:IREN",
+        "ticker:NVDA"
+      ],
+      "claims": [
+        {
+          "claim_id": "claim:f88d3144ffe362af",
+          "source": "ticker:IREN",
+          "target": "ticker:NVDA",
+          "status": "provisional",
+          "source_count": 1
+        },
+        {
+          "claim_id": "claim:cb4bcfde8bf9f584",
+          "source": "ticker:NVDA",
+          "target": "ticker:IREN",
+          "status": "corroborated",
+          "source_count": 2
+        }
+      ]
+    }
+  ]
 }

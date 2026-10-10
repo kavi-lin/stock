@@ -1,6 +1,6 @@
 {
-  "signature": "RISK-OFF 偏防禦|defensive_cash/software_momentum/value_defensive_rotation/crypto_fintech_riskon",
-  "ts": "2026-08-21T18:03:48+00:00",
-  "briefing_zh": "目前市場處於 RISK-OFF 偏防禦格局，操作上應嚴守 0-25% 的總曝險上限，以部位防守為主。盤面呈現結構性輪動，資金偏向原物料與醫療保健等抗跌板塊；策略主旋律聚焦相對強勢的軟體平台（如 PLTR、ORCL）及動能回升的加密金融（如 COIN、HOOD）。風險方面，鑑於近 25 日已累積 6 天出貨日且 SKEW 偏高，切忌盲目追高，須隨時提防下行尾端風險。",
-  "model_used": "gemini"
+  "signature": "RISK-OFF 偏防禦|semis_derisk/defensive_cash/event_risk_guard",
+  "ts": "2026-10-10T01:48:41+00:00",
+  "briefing_zh": "目前為 RISK-OFF 偏防禦，總曝險維持在 0–25%，以守成與事件前控部位為主。指數盤中走強，但僅 40.2% 個股上漲，近25日有8個出貨日，尚不足以支持擴大曝險。主旋律一是半導體全鏈回檔，板塊均跌 2.04%，ARM、INTC、COHR 等暫不搶反彈；二是觀察能源與必需消費的相對強勢，兩者上漲家數占比均近九成。風險提醒：能源題材多空訊號並存，且 SKEW 偏高，須防事件衝擊與盤中反轉。",
+  "model_used": "codex"
 }

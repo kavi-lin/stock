@@ -1,0 +1,359 @@
+[
+  {
+    "news_id": "n0237",
+    "headline": "Federal Reserve Board announces approval of application by Fleur Capital Corporation",
+    "url": "https://www.federalreserve.gov/newsevents/pressreleases/orders20261002a.htm",
+    "published": "2026-10-02T20:45:00+00:00",
+    "news_type": "monetary_policy",
+    "materiality_score": 5.5,
+    "lanes": {
+      "bull": {
+        "interpretation": "聯準會已批准 Fleur Capital 收購 Simmesport State Bank，移除這筆地方銀行交易的一項監管障礙。利多限於交易參與者；公告沒有公開交易代號、綜效或交易金額，不能外推為銀行業獲利改善或貨幣政策轉向。",
+        "primary_beneficiary_sectors": [
+          "地方銀行（限交易參與者）"
+        ],
+        "catalyst_type": "policy_tailwind",
+        "impact_score": 1,
+        "time_horizon": "immediate",
+        "confidence": 0.94,
+        "key_assumption": "其餘成交條件能完成；成本節省與資本效率改善均未獲公告證實，且批准已發生。"
+      },
+      "bear": {
+        "interpretation": "地方銀行收購已獲批准，未涉及利率政策。文章沒有交易價格或整合成本，無法支持銀行業出現實質利空；負面增量近零。",
+        "primary_at_risk_sectors": [],
+        "risk_type": "cost_increase",
+        "impact_score": -1,
+        "time_horizon": "mid_term",
+        "confidence": 0.9,
+        "key_assumption": "潛在整合成本僅為條件推論，並非報導事實；不外推至上市銀行或整體金融體系。",
+        "binary_risk": false
+      },
+      "sector": {
+        "primary_sectors": [
+          {
+            "sector": "區域銀行",
+            "direction": "neutral",
+            "magnitude": "weak"
+          }
+        ],
+        "supply_chain_impact": "事實：Fed已批准Fleur Capital收購Simmesport State Bank，屬個別銀行交易。公告未提供交易金額、整合效益或授信調整，無法推導產業集中度、金融供給或上市同業獲利的實質變化；亦非貨幣政策決策。",
+        "tickers_mentioned": [],
+        "tickers_reason": "公告僅列公司名稱，未明確提及股票代碼。",
+        "impact_score": 0,
+        "confidence": 0.96
+      },
+      "macro": {
+        "fed_path_delta": "已核准地方銀行併購，並非利率政策訊號；未提供足以調整聯準會路徑的新資訊。",
+        "yield_curve_impact": "無可辨識的增量影響；缺乏交易規模及系統性信用傳導證據。",
+        "fx_commodity_impact": "未見美元、能源或其他商品的直接傳導。",
+        "historical_analogue": "屬個別銀行行政審批，不能類比貨幣寬鬆或金融體系救助。",
+        "impact_score": 0,
+        "confidence": 0.97,
+        "binary_risk": false
+      }
+    },
+    "arbiter": {
+      "binary_risk": false,
+      "binary_event_date": null,
+      "within_48h": false,
+      "macro_backdrop_delta": 0,
+      "reasoning_note": "官方全文僅確認地方銀行交易獲准；packet分類保留，但不視為利率決策。四lane未見整體市場新增衝擊，保留Bull/Bear微弱分數交由finalizer處理，不提高分數或替換新聞。已核准事項不是待決二元事件。",
+      "debate_note": "利多限於移除交易障礙，整合成本未獲量化；Bull/Bear均為最小幅度，Sector/Macro均無新增影響。",
+      "evidence_urls": [
+        "https://www.federalreserve.gov/newsevents/pressreleases/orders20261002a.htm"
+      ]
+    }
+  },
+  {
+    "news_id": "n0315",
+    "headline": "Federal Reserve Board announces it will extend, until November 4, the comment period on its proposal to modernize Regulation O",
+    "url": "https://www.federalreserve.gov/newsevents/pressreleases/bcreg20261002a.htm",
+    "published": "2026-10-02T20:00:00+00:00",
+    "news_type": "monetary_policy",
+    "materiality_score": 5.5,
+    "lanes": {
+      "bull": {
+        "interpretation": "Regulation O 意見徵詢延至11月4日，讓銀行與其他參與者有更多時間提出執行意見，可能改善最終制度的可操作性。這是程序調整，尚未產生放寬授信限制、降低合規成本或增加收益的確定效果。",
+        "primary_beneficiary_sectors": [
+          "銀行（潛在程序受益）"
+        ],
+        "catalyst_type": "policy_tailwind",
+        "impact_score": 1,
+        "time_horizon": "mid_term",
+        "confidence": 0.76,
+        "key_assumption": "新增意見需實際促成較可行的最終規則；11月4日只是收件截止日，並非規則核准或生效日期。"
+      },
+      "bear": {
+        "interpretation": "Regulation O意見期延至11月4日，只延後諮詢結束；沒有新增放貸限制或最終規則。可能延長銀行對內部人授信規範的不確定性，增量風險極小。",
+        "primary_at_risk_sectors": [
+          "銀行"
+        ],
+        "risk_type": "policy_headwind",
+        "impact_score": -1,
+        "time_horizon": "short_term",
+        "confidence": 0.9,
+        "key_assumption": "只有銀行原先預期迅速完成規則調整時，延期才可能影響規劃；11月4日不是政策裁決日。",
+        "binary_risk": false
+      },
+      "sector": {
+        "primary_sectors": [
+          {
+            "sector": "銀行",
+            "direction": "neutral",
+            "magnitude": "weak"
+          }
+        ],
+        "supply_chain_impact": "事實：Regulation O提案的意見截止日延至11月4日，銀行與其他參與者取得更多準備時間。規範涉及對內部人的授信，但本次公告未實施新規；尚不能認定銀行授信能力、合規成本或獲利已改變。意見截止日不是最終決策日期。",
+        "tickers_mentioned": [],
+        "tickers_reason": "文章未明確提及任何股票代碼。",
+        "impact_score": 0,
+        "confidence": 0.95
+      },
+      "macro": {
+        "fed_path_delta": "Regulation O 意見徵詢延至11月4日；未通過最終規則，也未改變利率政策。",
+        "yield_curve_impact": "延長徵詢本身不構成新增信用刺激，無充分依據判斷殖利率方向。",
+        "fx_commodity_impact": "無直接影響。若未來最終規則實質改變內部人授信限制，才可能影響部分銀行行為；目前內容不足。",
+        "historical_analogue": "屬監管程序延期，不能視為鬆綁落地；意見截止日不是批准或否決的決策日。",
+        "impact_score": 0,
+        "confidence": 0.96,
+        "binary_risk": false
+      }
+    },
+    "arbiter": {
+      "binary_risk": false,
+      "binary_event_date": null,
+      "within_48h": false,
+      "macro_backdrop_delta": 0,
+      "reasoning_note": "只有徵詢期限延長，最終規則與施行日期均未確定。11月4日不代表批准／否決結果，binary_risk=false。保留各lane對程序事件的低增量評估。",
+      "debate_note": "額外準備時間與監管不確定性延長互抵，未證實授信或成本發生實際改變。",
+      "evidence_urls": [
+        "https://www.federalreserve.gov/newsevents/pressreleases/bcreg20261002a.htm"
+      ]
+    }
+  },
+  {
+    "news_id": "n0344",
+    "headline": "U.S. Stocks Rise as Jobs Report Tempers Rate Outlook",
+    "url": "https://www.wsj.com/finance/stocks/u-s-stocks-rise-as-jobs-report-tempers-rate-outlook-fde051d1",
+    "published": "2026-10-02T16:22:00+00:00",
+    "news_type": "monetary_policy",
+    "materiality_score": 4.9,
+    "lanes": {
+      "bull": {
+        "interpretation": "9月新增就業2.9萬人、低於預期，報導指出市場因此降低本月再升息預期；當日股市上漲，Nasdaq漲幅較大。正面傳導是利率預期帶來的估值壓力緩和，對成長股較有利，但部分反應已進入當日價格。",
+        "primary_beneficiary_sectors": [
+          "成長型科技"
+        ],
+        "catalyst_type": "sentiment_boost",
+        "impact_score": 3,
+        "time_horizon": "immediate",
+        "confidence": 0.78,
+        "key_assumption": "招聘放緩不演變為明顯獲利衰退，且通膨允許聯準會維持利率；文章未提供實際政策決定、薪資、失業率或期貨機率，不能視為降息保證。"
+      },
+      "bear": {
+        "interpretation": "新增就業僅2.9萬且低於預期，可能指向需求放緩。股市已因升息預期降溫上漲，但若招聘疲弱延續，消費與企業營收可能承壓；目前缺乏薪資、失業率及修正資料。",
+        "primary_at_risk_sectors": [
+          "非必需消費",
+          "人力派遣",
+          "區域銀行"
+        ],
+        "risk_type": "demand_destruction",
+        "impact_score": -2,
+        "time_horizon": "short_term",
+        "confidence": 0.7,
+        "key_assumption": "招聘降溫必須持續並傳導至家庭收入與支出，才會形成明顯獲利壓力；單月數據不足以確認衰退。",
+        "binary_risk": false
+      },
+      "sector": {
+        "primary_sectors": [
+          {
+            "sector": "科技與成長型產業",
+            "direction": "bullish",
+            "magnitude": "weak"
+          },
+          {
+            "sector": "景氣循環與非必需消費",
+            "direction": "bearish",
+            "magnitude": "weak"
+          }
+        ],
+        "supply_chain_impact": "事實：9月新增就業低於預期，報導稱市場降低再次升息的預期，主要股指上漲。條件推論：利率預期緩和有利成長股估值，但不是企業訂單或半導體需求改善的證據；招聘放緩若延續，可能壓抑消費及企業採購。缺少薪資、失業率、修正值與利率期貨機率，無法確認需求轉弱幅度或融資成本持續下降。",
+        "tickers_mentioned": [],
+        "tickers_reason": "可取得內容僅提及股價指數，未明確提及個股或ETF代碼。",
+        "impact_score": 1,
+        "confidence": 0.74
+      },
+      "macro": {
+        "fed_path_delta": "報導指出9月新增就業2.9萬、低於預期，市場因而降低本月再次升息預期；這是預期變化，並非聯準會決策。",
+        "yield_curve_impact": "若其他通膨與薪資資料未抵銷就業訊號，短端殖利率可能承壓；長端同受成長、通膨及期限溢酬影響，曲線方向未能確定。",
+        "fx_commodity_impact": "若美國相對利差預期收窄，美元可能偏弱、黃金受惠；原油則可能受需求疑慮壓抑。文中未提供相關資產實際反應。",
+        "historical_analogue": "符合弱就業降低緊縮預期、暫時支撐股票的傳導機制；缺少失業率、薪資與修正值，尚不能認定軟著陸或衰退。",
+        "impact_score": 1,
+        "confidence": 0.78,
+        "binary_risk": false
+      }
+    },
+    "arbiter": {
+      "binary_risk": false,
+      "binary_event_date": null,
+      "within_48h": false,
+      "macro_backdrop_delta": 0.1,
+      "reasoning_note": "短期政策預期緩和與招聘降溫的獲利風險並存；Sector與Macro均僅給有限正向影響。來源僅可取得文章片段，未提供薪資、失業率或利率期貨機率。事件是已公布資料及市場反應，無待決二元日期。",
+      "debate_note": "Bull強調估值壓力緩和，Bear關注招聘減速；股市已反應，不能把預期變化升格為Fed政策承諾。lane分歧只記錄，不轉為BINARY。",
+      "evidence_urls": [
+        "https://www.wsj.com/finance/stocks/u-s-stocks-rise-as-jobs-report-tempers-rate-outlook-fde051d1"
+      ]
+    }
+  },
+  {
+    "news_id": "n0062",
+    "headline": "Aboard the USS George Washington, young sailors adjust to war with Iran - Reuters",
+    "url": "https://news.google.com/rss/articles/CBMiuAFBVV95cUxPMmwtU1dvSVNubGRlbFl6OE9ObzN4MFVRYkUtMFVueTVRbE5KWGx5RTR4T1NFS2oyN1J3V0YxOEVhU3ZTeXAwX0ppOHNKRWE1S1NNYXl3UWt3WGQ2SWFJbkdHMmJLTVRNanp6THZ1R1VPUmRoR1lLSGRvYWtLRWk4bjJnTGJsLWlqMklpeVhPbUx2dTBpN2Z2YVpkOE83Rm8waTdaNmtDaWpxdTlHb0FzQkE5RnFiWFhk?oc=5",
+    "published": "2026-10-03T10:31:43+00:00",
+    "news_type": "geopolitical",
+    "materiality_score": 4.5,
+    "lanes": {
+      "bull": {
+        "interpretation": "持續戰備任務可支持國防維保與補給需求的條件式論點，但本文主要是9月艦上觀察，沒有新增訂單或新的10月軍事部署。對企業營收與市場價格的新增正面資訊很少；報導中的戰事本身也不能等同油價或能源企業獲利必然上升。",
+        "primary_beneficiary_sectors": [
+          "國防維保與補給（條件式）"
+        ],
+        "catalyst_type": "demand_increase",
+        "impact_score": 1,
+        "time_horizon": "short_term",
+        "confidence": 0.55,
+        "key_assumption": "持續任務須轉化為尚未被預期的追加採購或維保支出才形成企業利多；本文未證實這項轉化，也未量化新增石油供應損失。"
+      },
+      "bear": {
+        "interpretation": "九月艦上採訪重述既有戰爭危險與工作負荷，沒有證實10月3日新增攻擊或能源供應損失。可佐證航運風險持續，不能據此新增一次供應衝擊。",
+        "primary_at_risk_sectors": [
+          "航空",
+          "依賴海運的進口業"
+        ],
+        "risk_type": "cost_increase",
+        "impact_score": -1,
+        "time_horizon": "short_term",
+        "confidence": 0.85,
+        "key_assumption": "只有持續威脅實際推高保費、燃料或繞航成本，才會侵蝕利潤；本文未量化新增成本，避免重複計入既有戰事。",
+        "binary_risk": false
+      },
+      "sector": {
+        "primary_sectors": [
+          {
+            "sector": "石油與天然氣",
+            "direction": "neutral",
+            "magnitude": "weak"
+          },
+          {
+            "sector": "海運與物流",
+            "direction": "neutral",
+            "magnitude": "weak"
+          }
+        ],
+        "supply_chain_impact": "事實：報導主要呈現9月航艦訪問所見的戰時勤務與人員狀況，並回述先前油輪遭摧毀事件。既有荷姆茲航運風險仍在，但本文未證實10月3日新增攻擊、油品供應損失或航線運力變化。對今日能源供需與物流成本的新增資訊有限，不能以人物報導重複計入整場戰爭衝擊。",
+        "tickers_mentioned": [],
+        "tickers_reason": "可取得內容未明確提及股票代碼。",
+        "impact_score": 0,
+        "confidence": 0.87
+      },
+      "macro": {
+        "fed_path_delta": "主要為9月航艦訪問與既有戰事觀察，未新增可直接改變政策路徑的資訊。",
+        "yield_curve_impact": "既有戰事可能透過通膨風險推升殖利率、避險需求壓低殖利率；本文沒有新供應損失，不能將兩種可能機制當作當日新衝擊。",
+        "fx_commodity_impact": "報導支持荷姆茲附近已有軍事風險，但未證實10月3日新增攻擊或石油中斷；不據此上調油價衝擊。",
+        "historical_analogue": "屬持續衝突中的現場報導；事件發生時間早於刊登日，需避免把既有風險重複計入。",
+        "impact_score": 0,
+        "confidence": 0.87,
+        "binary_risk": false
+      }
+    },
+    "arbiter": {
+      "binary_risk": false,
+      "binary_event_date": null,
+      "within_48h": false,
+      "macro_backdrop_delta": 0,
+      "reasoning_note": "Google RSS原URL擷取失敗後，以一次搜尋找到Reuters轉載。文章刊於10月3日，但核心採訪在9月；不將既有戰事重複當作今日新增供應衝擊。保留Bull/Bear最小分數，不因地緣標題而抬分。",
+      "debate_note": "國防補給可能受益、運輸可能承壓均屬條件推論；本文沒有新訂單、新油品損失或確定決策日期。",
+      "evidence_urls": [
+        "https://news.google.com/rss/articles/CBMiuAFBVV95cUxPMmwtU1dvSVNubGRlbFl6OE9ObzN4MFVRYkUtMFVueTVRbE5KWGx5RTR4T1NFS2oyN1J3V0YxOEVhU3ZTeXAwX0ppOHNKRWE1S1NNYXl3UWt3WGQ2SWFJbkdHMmJLTVRNanp6THZ1R1VPUmRoR1lLSGRvYWtLRWk4bjJnTGJsLWlqMklpeVhPbUx2dTBpN2Z2YVpkOE83Rm8waTdaNmtDaWpxdTlHb0FzQkE5RnFiWFhk?oc=5",
+        "https://www.investing.com/news/world-news/aboard-the-uss-george-washington-young-sailors-adjust-to-war-with-iran-4930831"
+      ]
+    }
+  },
+  {
+    "news_id": "n0324",
+    "headline": "Saudis plan assault on Houthis to break Red Sea chokehold - Reuters",
+    "url": "https://news.google.com/rss/articles/CBMiqgFBVV95cUxPUVJialJyWHg0VzlHXzBiaTU3elZhbWEtQzd0TjhNOGNsWFFZNTYyMGFqODJGcVc3aVBaYVY3QkRzWWpEZDlQNEpJeVp6ZjMxYkZKYi1nZ0FUenFUSFRFRTNCb3NaTmdCaTJ1WWV1RmlqcmhSZGtsZWZobE5jSHp3RkJiVXpueWdVOHJmbDhzUEEzVXB6OF9jYkJHcnpfQklTNDVHZ20yS1J6QQ?oc=5",
+    "published": "2026-10-02T18:13:00+00:00",
+    "news_type": "geopolitical",
+    "materiality_score": 4.5,
+    "lanes": {
+      "bull": {
+        "interpretation": "沙烏地陣營據報規劃打破紅海航道封鎖；若行動成功並持續改善商船通行，可能縮短繞航、降低燃料、保險與物流成本，使依賴跨境供應鏈的企業受益。現階段只有匿名消息來源描述計畫，尚未開戰或恢復航道，利多應作為折價後的條件情境。",
+        "primary_beneficiary_sectors": [
+          "進口零售",
+          "跨境製造與供應鏈"
+        ],
+        "catalyst_type": "cost_reduction",
+        "impact_score": 2,
+        "time_horizon": "mid_term",
+        "confidence": 0.46,
+        "key_assumption": "行動需成功、避免油設施遭報復，並促使船東與保險業恢復航線及降低報價；地方部隊分裂與時程未定均削弱此情境，不能把可能開戰時間視為確定事件日期。"
+      },
+      "bear": {
+        "interpretation": "據多名消息人士，沙烏地正規劃對胡塞武裝攻勢，尚未開戰或確定日期。若行動引發油設施報復或加劇紅海封鎖，可能同時壓縮能源與物流替代路線；兵力分裂也使快速恢復通航存疑。",
+        "primary_at_risk_sectors": [
+          "航空",
+          "石化下游",
+          "進口零售",
+          "依賴紅海航線的製造業"
+        ],
+        "risk_type": "cost_increase",
+        "impact_score": -3,
+        "time_horizon": "short_term",
+        "confidence": 0.72,
+        "key_assumption": "負面情境取決於攻勢實際發動並招致報復；若計畫未執行或成功恢復通航，成本壓力可能減輕。消息來源尚無官方確認，時程不確定。",
+        "binary_risk": false
+      },
+      "sector": {
+        "primary_sectors": [
+          {
+            "sector": "海運與物流",
+            "direction": "bearish",
+            "magnitude": "moderate"
+          },
+          {
+            "sector": "航空與燃料密集運輸",
+            "direction": "bearish",
+            "magnitude": "weak"
+          }
+        ],
+        "supply_chain_impact": "事實：多名消息人士描述沙烏地領導的攻勢規劃，尚未確認啟動，規模與時間亦未定。條件推論：若開戰並引發報復，紅海通行、石油設施與貨運保險可能承受額外壓力，繞航及燃料成本可能上升；若成功恢復通行，後續物流成本反可下降。目前不足以認列航道重開、實際減產或運价變動，也不能假定所有航運公司均因風險上升受益。官方未即時回應，執行與成功機率仍不確定。",
+        "tickers_mentioned": [],
+        "tickers_reason": "可取得內容未明確提及股票代碼。",
+        "impact_score": -2,
+        "confidence": 0.7
+      },
+      "macro": {
+        "fed_path_delta": "消息涉及尚未發動的軍事計畫。若升級導致能源與運費上升，可能限制寬鬆空間；若通道恢復，則可能降低供應端通膨壓力。",
+        "yield_curve_impact": "若報復擴大供應中斷，通膨補償可能上升；若避險與成長疑慮占優，公債殖利率可能下降。現有資料不足以判定曲線淨方向。",
+        "fx_commodity_impact": "若攻勢引發油設施報復或擴大航運中斷，油價與運費可能上升，避險貨幣可能受惠；成功且持續恢復通行則可能降低風險溢酬，但尚未實現。",
+        "historical_analogue": "符合航運瓶頸與軍事升級的雙向供應衝擊機制；地方部隊分裂及報復風險，使作戰規模不能直接推導通道重開。",
+        "impact_score": -2,
+        "confidence": 0.73,
+        "binary_risk": false
+      }
+    },
+    "arbiter": {
+      "binary_risk": false,
+      "binary_event_date": null,
+      "within_48h": false,
+      "macro_backdrop_delta": -0.2,
+      "reasoning_note": "Google RSS原URL擷取失敗後，以一次搜尋取得Reuters转載全文。計畫與執行結果必須分開；近期報復與航運惡化風險，對照中期通道恢復的條件式利多。Sector與Macro皆偏負向，時間範圍不確定，未具確切事件日期，binary_risk=false。",
+      "debate_note": "Bull的成本改善依賴軍事成功及船東重返航線；Bear關注油設施報復與地方部隊分裂。顯著分歧代表情境差異，不構成BINARY。匿名消息尚待官方確認。",
+      "evidence_urls": [
+        "https://news.google.com/rss/articles/CBMiqgFBVV95cUxPUVJialJyWHg0VzlHXzBiaTU3elZhbWEtQzd0TjhNOGNsWFFZNTYyMGFqODJGcVc3aVBaYVY3QkRzWWpEZDlQNEpJeVp6ZjMxYkZKYi1nZ0FUenFUSFRFRTNCb3NaTmdCaTJ1WWV1RmlqcmhSZGtsZWZobE5jSHp3RkJiVXpueWdVOHJmbDhzUEEzVXB6OF9jYkJHcnpfQklTNDVHZ20yS1J6QQ?oc=5",
+        "https://www.defensenews.com/global/mideast-africa/2026/10/02/saudis-plan-assault-on-houthis-to-break-red-sea-chokehold/"
+      ]
+    }
+  }
+]

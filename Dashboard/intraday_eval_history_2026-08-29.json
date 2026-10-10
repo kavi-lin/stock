@@ -1,0 +1,13 @@
+{
+  "date": "2026-08-29",
+  "windows": [
+    {
+      "as_of": "2026-08-29T06:45:09+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    }
+  ]
+}

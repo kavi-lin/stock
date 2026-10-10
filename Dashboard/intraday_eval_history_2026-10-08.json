@@ -1,0 +1,90 @@
+{
+  "date": "2026-10-08",
+  "windows": [
+    {
+      "as_of": "2026-10-08T13:39:01+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "avoid_laggards",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-10-08T13:49:31+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-10-08T13:59:47+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-10-08T14:09:47+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-10-08T14:19:47+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-10-08T14:30:02+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-10-08T14:40:02+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-10-08T14:50:02+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-10-08T15:00:20+00:00",
+      "strategy_ids": [
+        "defensive_cash",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    },
+    {
+      "as_of": "2026-10-08T15:10:20+00:00",
+      "strategy_ids": [
+        "semis_derisk",
+        "defensive_cash",
+        "event_risk_guard"
+      ],
+      "regime_label": "RISK-OFF 偏防禦"
+    }
+  ]
+}

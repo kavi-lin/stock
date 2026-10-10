@@ -1,18 +1,260 @@
 {
   "version": "1.0",
-  "as_of": "2026-08-23T20:31:05.713667+00:00",
+  "as_of": "2026-10-10T01:49:42.095497+00:00",
   "lookback_hours": 24,
   "lexicon_version": "v1.3",
-  "post_count": 14,
-  "truth_social_dropped": 3,
+  "post_count": 33,
+  "truth_social_dropped": 4,
   "source_stats": {
-    "truth_social": 2,
-    "hacker_news": 11,
-    "google_trends": 1
+    "truth_social": 3,
+    "hacker_news": 30
   },
-  "tickers": [],
-  "low_confidence": [],
+  "tickers": [
+    {
+      "ticker": "RTX",
+      "sector": "Industrials",
+      "mention_count": 2,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "Metal Driver for Nvidia GeForce RTX Cards on macOS 15 Sequoia on Intel Macs",
+          "url": "https://github.com/nullmoth/nvidia-macos-driver",
+          "source": "Hacker News",
+          "engagement": 2.485,
+          "polarity": 0.0,
+          "matched_terms": []
+        },
+        {
+          "headline": "Nvidia RTX Spark Pre-Orders Open: N1X Runs 45-80W in Laptops, 140W in Desktops",
+          "url": "https://www.storagereview.com/news/nvidia-rtx-spark-pre-orders-n1x-laptop-desktop-tdp-mxc-dgx-station-for-windows",
+          "source": "Hacker News",
+          "engagement": 1.946,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 4.431,
+      "_gate": "known"
+    }
+  ],
+  "low_confidence": [
+    {
+      "ticker": "GOP",
+      "sector": null,
+      "mention_count": 1,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "Republican data center support collapses locally when sites are in GOP counties",
+          "url": "https://pressaudit.org/f/community/posts/9c163c6e-53b7-46a3-b052-2e3c6954c04f",
+          "source": "Hacker News",
+          "engagement": 7.921,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 7.921,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "GPGPU",
+      "sector": null,
+      "mention_count": 1,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "GPGPU-SIM – Cycle-Level Simulator for Nvidia GPUs with CUDA or OpenCL Workloads",
+          "url": "https://github.com/gpgpu-sim/gpgpu-sim_distribution",
+          "source": "Hacker News",
+          "engagement": 2.079,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 2.079,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "SIM",
+      "sector": null,
+      "mention_count": 1,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "GPGPU-SIM – Cycle-Level Simulator for Nvidia GPUs with CUDA or OpenCL Workloads",
+          "url": "https://github.com/gpgpu-sim/gpgpu-sim_distribution",
+          "source": "Hacker News",
+          "engagement": 2.079,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 2.079,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "CUDA",
+      "sector": null,
+      "mention_count": 1,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "GPGPU-SIM – Cycle-Level Simulator for Nvidia GPUs with CUDA or OpenCL Workloads",
+          "url": "https://github.com/gpgpu-sim/gpgpu-sim_distribution",
+          "source": "Hacker News",
+          "engagement": 2.079,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 2.079,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "OSS",
+      "sector": null,
+      "mention_count": 1,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "Agent Swarm: OSS multiplayer AI for your company",
+          "url": "https://github.com/desplega-ai/agent-swarm/releases",
+          "source": "Hacker News",
+          "engagement": 2.079,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 2.079,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "GUI",
+      "sector": null,
+      "mention_count": 1,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "Show HN: RcloneView 1.6 – A desktop GUI for rclone with 40 cloud storages",
+          "url": "https://rcloneview.com/",
+          "source": "Hacker News",
+          "engagement": 1.792,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 1.792,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "TOTAL",
+      "sector": null,
+      "mention_count": 1,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 1,
+      "matched_terms": [
+        {
+          "term": "short",
+          "side": "bear"
+        }
+      ],
+      "sample_posts": [
+        {
+          "headline": "I have just concluded a highly successful discussion with President Vladimir Putin, of Russia, wherein it was agreed that Russia will immediately supply over 300,000 Tons of Diesel",
+          "url": "https://truthsocial.com/@realDonaldTrump/117412435306815143",
+          "source": "Truth Social:@realDonaldTrump",
+          "engagement": 1.0,
+          "polarity": -0.5,
+          "matched_terms": [
+            "short"
+          ]
+        }
+      ],
+      "polarity_score": -0.5,
+      "engagement_score": 1.0,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "CLI",
+      "sector": null,
+      "mention_count": 1,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "Boro – Linux patch review and testing CLI with a multi-stage agentic workflow",
+          "url": "https://github.com/nvidia/boro",
+          "source": "Hacker News",
+          "engagement": 0.693,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 0.693,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "ARTEX",
+      "sector": null,
+      "mention_count": 1,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "Chinese developer makes ARTEX AI agent closed-source after Korean bank hack",
+          "url": "https://www.reuters.com/world/china/chinese-developer-makes-artex-ai-agent-closed-source-after-korean-bank-hack-2026-10-09/",
+          "source": "Hacker News",
+          "engagement": 0.693,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 0.693,
+      "_gate": "unknown"
+    }
+  ],
   "sectors": [
+    {
+      "sector": "Industrials",
+      "ticker_count": 1,
+      "engagement_score": 4.431,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "top_tickers": [
+        {
+          "ticker": "RTX",
+          "engagement_score": 4.431,
+          "polarity_score": 0.0,
+          "mention_count": 2
+        }
+      ],
+      "polarity_score": 0.0
+    },
     {
       "sector": "Technology",
       "ticker_count": 0,
@@ -68,15 +310,6 @@
       "top_tickers": []
     },
     {
-      "sector": "Industrials",
-      "ticker_count": 0,
-      "engagement_score": 0.0,
-      "polarity_score": 0.0,
-      "bull_hits_sum": 0,
-      "bear_hits_sum": 0,
-      "top_tickers": []
-    },
-    {
       "sector": "Materials",
       "ticker_count": 0,
       "engagement_score": 0.0,
@@ -113,5 +346,28 @@
       "top_tickers": []
     }
   ],
-  "market_wide_buzz": []
+  "market_wide_buzz": [
+    {
+      "topic": "ai_capex",
+      "post_count": 2,
+      "engagement_score": 13.594,
+      "sample_posts": [
+        {
+          "headline": "Yandex Takes a Second Data Center Hit in 48 Hours",
+          "url": "https://united24media.com/war-in-ukraine/yandex-takes-a-second-data-center-hit-in-48-hours-now-its-biggest-russian-site-is-damaged-23277",
+          "source": "Hacker News",
+          "engagement": 10.955,
+          "polarity": 0.0
+        },
+        {
+          "headline": "2nd Yandex Cloud Data Center Was Attacked",
+          "url": "https://twitter.com/yandex/status/2108482115155169544",
+          "source": "Hacker News",
+          "engagement": 2.639,
+          "polarity": 0.0
+        }
+      ],
+      "polarity_score": 0.0
+    }
+  ]
 }
