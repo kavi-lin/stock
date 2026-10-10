@@ -31,6 +31,7 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts._shared import broker_gate, llm_task_registry  # noqa: E402
+from scripts._shared.broker_client import parse_run_log  # noqa: E402
 from scripts.break_news import llm_drivers  # noqa: E402
 from scripts._shared.broker_gate import (  # noqa: E402
     BrokerError, BrokerRefused, BrokerUnavailable,
@@ -579,15 +580,32 @@ def _task_type(role: str) -> str:
 def _blocked_reason(note: str) -> str:
     """Why a run was not authorised, in the operator's terms, from `note`.
 
-    These three notes mean three unrelated things and only one of them is about
-    quota. Until V4.111.4 they shared one sentence that named the other two
-    causes ("the daemon may be down, or every provider is inside its 20% hard
-    reserve"), so a malformed request — a bug in this repo — sent the operator to
-    `lqb status`, which showed a healthy daemon with quota to spare.
+    These notes mean unrelated things and only some of them are about quota.
+    Until V4.111.4 they shared one sentence that named two causes at once ("the
+    daemon may be down, or every provider is inside its 20% hard reserve"), so a
+    malformed request — a bug in this repo — sent the operator to `lqb status`,
+    which showed a healthy daemon with quota to spare.
+
+    A refusal carries the broker's own code, and the codes are just as unlike
+    each other: on 2026-08-27 a `stale_snapshot` refusal was reported here as
+    "no provider has quota outside its hard reserve" while all three pools sat
+    above 83%, and the queue showed it as 等待額度釋放 for twenty-five minutes.
+    The cause was a sleeping laptop, and no amount of looking at quota would
+    have shown it.
     """
     if "provider_busy" in note:
         return ("all eligible provider execution slots are busy. The queue will "
                 "retry when a broker-owned slot is released.")
+    if "broker:refused(stale_snapshot)" in note:
+        return ("the broker's reading of the provider quotas is older than its "
+                "freshness limit, so it is not allowed to spend against it. This "
+                "is about the reading, not the pools — they are usually fine. The "
+                "broker re-probes on exactly this refusal, so the queued retry "
+                "should go through; if it repeats, a provider CLI is failing to "
+                "answer (`lqb refresh` shows the error, the daemon log has more).")
+    if "broker:refused(not_authenticated)" in note:
+        return ("the provider CLI is signed out, so the broker will not route to "
+                "it. Sign in, then run `lqb refresh`. Waiting does not fix this.")
     if note.startswith("broker:refused"):
         return ("no provider has quota outside its hard reserve. `lqb status` "
                 "shows what is left in each pool and when it refills.")
@@ -661,7 +679,8 @@ def protocol_provider_allowlist(cfg: dict | None = None,
 def _acquire(role: str, model: str | None, cfg: dict, *,
              prompts: tuple[str, ...] = (), protocol: bool = False,
              protocol_name: str | None = None, pinned: bool = False,
-             certification: bool = False):
+             certification: bool = False, native_model: str = "",
+             context: dict | None = None, call_id: str = ""):
     """Reserve the only authorisation that may start an LLM process.
 
     Normal calls offer every certified provider to the broker.  Ensemble turns
@@ -709,7 +728,7 @@ def _acquire(role: str, model: str | None, cfg: dict, *,
 
     try:
         lease = client.acquire(
-            task_id=broker_gate.new_task_id(role),
+            task_id=call_id or broker_gate.new_task_id(role),
             task_type=_task_type(task_id),
             estimated_input_tokens=estimated_input,
             estimated_output_tokens=estimated_output,
@@ -717,6 +736,8 @@ def _acquire(role: str, model: str | None, cfg: dict, *,
             preferred_providers=acceptable,
             forbidden_providers=forbidden,
             reservation_ttl_seconds=ttl,
+            **({"model": native_model} if native_model else {}),
+            **({"context": context, "idempotency_key": call_id} if context else {}),
         )
     except BrokerRefused as exc:
         # The broker answered. Never degrade from this: the answer is that the
@@ -755,8 +776,11 @@ def _acquire(role: str, model: str | None, cfg: dict, *,
     # calibrate each pool's burn rate, and an alias is not a pool.
     try:
         assigned = broker_gate.MODEL_FOR_PROVIDER.get(lease.provider, model or "")
-        lease.start(model=(broker_gate.assigned_model(lease) or assigned))
+        lease.start(model=(native_model or broker_gate.assigned_model(lease) or assigned))
     except BrokerError as exc:
+        if context is not None:
+            _release(lease, "research execution start was not acknowledged")
+            return None, "broker:start-unconfirmed", False
         # The hold is real and the call may proceed; only the timing is lost.
         sys.stderr.write(f"[broker] {role}: could not open the execution row ({exc})\n")
     return lease, f"broker:{lease.provider}", True
@@ -793,10 +817,11 @@ def _settle(lease, model: str, result: LLMResult, *, accepts_text: bool = False)
                 "cache_read_tokens": getattr(result, "cache_read_tokens", 0),
                 "cache_write_tokens": getattr(result, "cache_write_tokens", 0),
             }),
+            raw_stdout=result.raw_stdout,
             exit_code=result.exit_code,
             error_class=error_class,
             error_detail=(result.error or "")[:2000] or None,
-            model=model,
+            model=broker_gate.assigned_model(lease) or model,
         )
     except BrokerError as exc:
         sys.stderr.write(f"[broker] settle failed for {model}: {exc}\n")
@@ -922,6 +947,94 @@ def _run_chain(preferred: str | None, role: str, system_prompt: str,
     return result
 
 
+def run_research_call(role: str, system_prompt: str, user_prompt: str, *,
+                      context: dict, call_id: str, validate, timeout: int = 300,
+                      native_model: str = "gpt-6-luna", reasoning_effort: str = "max",
+                      output_schema: dict | None = None):
+    """One certified call: validate before durable, acknowledged settlement."""
+    from scripts._shared import research_accounting as accounting
+
+    if native_model != "gpt-6-luna" or reasoning_effort != "max":
+        raise RunBlocked("research trial must use the approved gpt-6-luna/max profile")
+    cfg = load_llm_config()
+    client = broker_gate.broker_client(cfg)
+    if client is None:
+        raise RunBlocked("research requires the broker")
+    capabilities = client.request("GET", "/v1/health").get("details", {})
+    if any(capabilities.get(k) != "1" for k in (
+            "usage_details", "task_context", "idempotent_settlement")):
+        raise RunBlocked("broker lacks research accounting capabilities")
+    if client.request("GET", "/v1/ready").get("status") != "ok":
+        raise RunBlocked("broker ledger migration/readiness has not passed")
+    accounting.flush(client)
+    record_path = accounting.CALLS / f"{call_id}.json"
+    if record_path.exists():
+        cached = json.loads(record_path.read_text())
+        if cached.get("context") != context or cached.get("task_type") != role:
+            raise RunBlocked("research call id belongs to different task metadata")
+        if cached.get("status") == "acknowledged" and cached.get("schema_valid") and cached.get("result"):
+            validate(cached["result"])
+            return cached["result"], cached
+        raise RunBlocked("research call id already exists; refusing duplicate inference")
+    lease, note, allowed = _acquire(
+        role, "codex", cfg, prompts=(system_prompt, user_prompt), pinned=True,
+        native_model=native_model, context=context, call_id=call_id)
+    if not allowed or lease is None:
+        raise RunBlocked(note)
+    record = {"call_id": call_id, "context": context, "task_type": role,
+              "reservation_id": lease.reservation_id, "status": "running",
+              "started_at": accounting.utcnow(), "requested_model": native_model,
+              "reasoning_effort": reasoning_effort}
+    accounting.atomic_json(record_path, record)
+    validation_error = None
+    def attach(pid, pgid):
+        record.update(process_pid=pid, process_pgid=pgid)
+        accounting.atomic_json(record_path, record)
+        lease.attach_process(pid, pgid)
+
+    try:
+        result = llm_drivers.run_codex(
+            system_prompt, user_prompt, timeout=timeout, model=native_model,
+            reasoning_effort=reasoning_effort, process_callback=attach, output_schema=output_schema)
+        if result.exit_code == 0:
+            try:
+                validate(result.parsed)
+            except (ValueError, TypeError, KeyError) as exc:
+                validation_error = type(exc).__name__
+        else:
+            validation_error = "process_failed"
+    except BaseException as exc:
+        # A started execution still gets a missing-usage settlement. No fake zero.
+        result = LLMResult(agent="codex", parsed=None, raw_text="", raw_stdout="",
+                           exit_code=-1, latency_ms=0, parse_status="failed",
+                           error="cancelled" if isinstance(exc, KeyboardInterrupt) else "runner_error")
+        validation_error = type(exc).__name__
+    body, observed = accounting.settlement(result, native_model, validation_error)
+    if observed and observed != native_model:
+        validation_error = "model_mismatch"
+        body.update(error_class="invalid_output", error_detail="requested model mismatch")
+    body["settlement_id"] = call_id
+    # Keep only allowlisted native error codes, never raw provider messages.
+    native_error_codes = sorted({code for code in (
+        "invalid_json_schema", "invalid_request_error", "rate_limit_exceeded",
+        "insufficient_quota", "authentication_error") if code in (result.error or "")})
+    record.update(status="pending", settlement=body, observed_model=observed,
+                  schema_valid=validation_error is None, validation_error=validation_error,
+                  latency_ms=result.latency_ms, result=result.parsed,
+                  native_error_codes=native_error_codes)
+    accounting.atomic_json(record_path, record)
+    lease._stop_heartbeat()
+    accounting.deliver(client, record)
+    _record("codex", result, cfg)
+    facts = body["usage_details"]["facts"]
+    if not facts or any(any(f["tokens"].get(k) is None for k in (
+            "input_tokens", "output_tokens")) for f in facts):
+        raise RunBlocked("research token usage missing; new calls paused")
+    if validation_error:
+        raise RunBlocked(f'research call failed: {body["error_class"]}/{validation_error}')
+    return result.parsed, record
+
+
 def pick_model(role: str = "protocol", allow: list[str] | None = None) -> str:
     """First locally-available model in the chain. Takes NO broker reservation.
 
@@ -985,7 +1098,8 @@ def acquire_protocol_lease(role: str = "agentic_protocol",
 
 
 def note_run(model: str, ok: bool, error_text: str = "", tokens: dict | None = None,
-             lease: object | None = None) -> None:
+             lease: object | None = None, *, log_path: str | None = None,
+             usage_details: dict | None = None) -> None:
     """Record a protocol / long-run subprocess and settle its broker reservation.
 
     The local counters are updated as telemetry only. When
@@ -993,6 +1107,13 @@ def note_run(model: str, ok: bool, error_text: str = "", tokens: dict | None = N
     with the tokens the run actually reported, releasing the difference between
     the estimate and reality.
     """
+    reported_model = None
+    if log_path is not None and lease is not None:
+        evidence = parse_run_log(lease.provider, log_path)
+        if evidence.usage:
+            tokens = evidence.usage
+        usage_details = evidence.usage_details
+        reported_model = evidence.model
     cfg = load_llm_config()
     with _usage_write_lock():
         usage = _load_usage(cfg)
@@ -1023,10 +1144,11 @@ def note_run(model: str, ok: bool, error_text: str = "", tokens: dict | None = N
     try:
         lease.complete(
             usage=broker_gate.usage_for_broker(tokens),
+            usage_details=usage_details or {"schema_version": 1, "status": "missing", "facts": []},
             exit_code=0 if ok else 1,
             error_class=error_class,
             error_detail=(error_text or "")[:2000] or None,
-            model=model,
+            model=reported_model or broker_gate.assigned_model(lease) or model,
         )
     except BrokerError as exc:
         sys.stderr.write(f"[broker] settle failed for protocol run on {model}: {exc}\n")

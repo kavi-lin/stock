@@ -51,6 +51,28 @@ with ds._protocol_queue_lock:
 check("hard_reserve.reason_visible", quota_entry.get("waiting_reason") == "quota_wait",
       repr(quota_entry))
 
+# A stale reading is not a quota state: the pools can be untouched and the
+# refusal still stands (2026-08-27, all three above 83%). It must not be
+# reported to the operator as "waiting for quota", and the broker re-probes on
+# it, so the retry is shorter than the hard-reserve one.
+with ds._protocol_queue_lock:
+    ds._protocol_queue.clear()
+ds._requeue_protocol_entry(
+    {"id": "retry-stale", "name": "news", "params": {}},
+    "quota broker: did not authorise (broker:refused(stale_snapshot)): the broker's "
+    "reading of the provider quotas is older than its freshness limit",
+)
+with ds._protocol_queue_lock:
+    stale_entry = ds._protocol_queue.pop(0)
+check("stale_snapshot.reason_visible",
+      stale_entry.get("waiting_reason") == "stale_snapshot", repr(stale_entry))
+check("stale_snapshot.not_reported_as_quota",
+      stale_entry.get("waiting_reason") != "quota_wait", repr(stale_entry))
+check("stale_snapshot.retryable",
+      ds._retryable_dispatch_error("broker:refused(stale_snapshot)"))
+check("stale_snapshot.retry_sooner_than_quota",
+      0 < stale_entry.get("retry_at", 0) - time.time() <= 15.1, repr(stale_entry))
+
 with ds._protocol_queue_lock:
     ds._protocol_queue.clear()
 ds._requeue_protocol_entry(

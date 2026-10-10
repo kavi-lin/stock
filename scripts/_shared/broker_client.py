@@ -98,6 +98,7 @@ __all__ = [
     "default_base_url",
     "load_token",
     "parse_run_stream",
+    "parse_run_log",
 ]
 
 #: The broker binds loopback by default (DESIGN §3); Phase 8 fronts it with a
@@ -311,8 +312,7 @@ class Lease:
         """Move the reservation to ACTIVE and open its execution row.
 
         Settlement needs that row, so :meth:`complete` calls this itself when a
-        caller has not. ``model`` is recorded here and nowhere else — the
-        settlement request has no field for it.
+        caller has not. New daemons can also accept the observed model at settlement.
 
         Defaults to :attr:`model` when the broker chose one, so the ledger
         records what the reservation is actually against. Pass ``model``
@@ -389,6 +389,8 @@ class Lease:
         error_class: str | None = None,
         error_detail: str | None = None,
         model: str | None = None,
+        usage_details: Mapping[str, Any] | None = None,
+        raw_stdout: str | None = None,
     ) -> dict[str, Any]:
         """Settle with what the run actually used, releasing the difference.
 
@@ -399,9 +401,32 @@ class Lease:
             raise ValueError(
                 f"unknown error_class {error_class!r}; expected one of {ERROR_CLASSES}"
             )
+        if raw_stdout is not None:
+            parsed = parse_run_stream(self.provider, raw_stdout)
+            if parsed.usage:
+                usage = parsed.usage
+            if parsed.model:
+                model = parsed.model
+            usage_details = parsed.usage_details
+        model = _model_identity(model)
+        if usage_details is not None:
+            # A caller's configured model is evidence of selection only.
+            usage_details = dict(usage_details)
+            usage_details["facts"] = [
+                {**fact, "model": model, "model_source": "cli_selected"}
+                if model and not fact.get("model") else dict(fact)
+                for fact in usage_details.get("facts", ())
+            ]
         if not self.started:
             self.start(model=model)
         body: dict[str, Any] = {"usage": _clean_usage(usage)}
+        if (
+            model is not None or usage_details is not None
+        ) and self.client.supports_usage_details():
+            if model is not None:
+                body["model"] = model[:256]
+            if usage_details is not None:
+                body["usage_details"] = dict(usage_details)
         if exit_code is not None:
             body["exit_code"] = int(exit_code)
         if error_class is not None:
@@ -461,6 +486,7 @@ class BrokerClient:
         self.project = project
         self.timeout = float(timeout)
         self._opener = opener or urllib.request.build_opener()
+        self._usage_capability: tuple[float, bool] | None = None
 
     # ------------------------------------------------------------------ HTTP
     def request(
@@ -523,7 +549,23 @@ class BrokerClient:
 
     # --------------------------------------------------------------- queries
     def health(self) -> dict[str, Any]:
-        return self.request("GET", "/v1/health")
+        response = self.request("GET", "/v1/health")
+        details = response.get("details")
+        supported = isinstance(details, Mapping) and details.get("usage_details") == "1"
+        self._usage_capability = (time.monotonic(), supported)
+        return response
+
+    def supports_usage_details(self) -> bool:
+        """Negotiate additive fields with old daemons before settlement."""
+        cached = self._usage_capability
+        if cached is not None and time.monotonic() - cached[0] < 60:
+            return cached[1]
+        try:
+            self.health()
+        except BrokerError:
+            # Optional telemetry negotiation must not prevent legacy settlement.
+            return False
+        return self._usage_capability is not None and self._usage_capability[1]
 
     def handshake(self) -> BrokerHandshake:
         """Compare this client with the daemon before dispatching new work."""
@@ -736,6 +778,156 @@ class RunStream:
     usage: dict[str, int] = field(default_factory=dict)
     model: str | None = None
     events_parsed: int = 0
+    usage_details: dict[str, Any] | None = None
+
+
+_CLAUDE_TOKEN_FIELDS = {
+    "input_tokens": ("input_tokens", "inputTokens"),
+    "output_tokens": ("output_tokens", "outputTokens"),
+    "cache_read_tokens": ("cache_read_input_tokens", "cacheReadInputTokens"),
+    "cache_write_tokens": ("cache_creation_input_tokens", "cacheCreationInputTokens"),
+    "thinking_tokens": ("thinking_tokens", "thinkingTokens"),
+}
+
+
+def _model_identity(value: Any) -> str | None:
+    """Provider placeholders carry no evidence of a model actually selected."""
+    if (
+        not isinstance(value, str)
+        or not value
+        or value.lower() in {"claude", "codex", "agy", "gemini", "grok", "cli-default"}
+    ):
+        return None
+    return value[:256]
+
+
+class _ClaudeAccounting:
+    """Canonical Claude usage scopes, shared by the adapter and vendored client.
+
+    A final modelUsage replaces the request observations: adding both would
+    charge the same calls twice. Without a final summary, identifiable request
+    usage is a partial lower bound. Unknown fields remain absent on the wire.
+    """
+
+    def __init__(self) -> None:
+        self.requests: dict[str, dict[str, Any]] = {}
+        self.summary: list[dict[str, Any]] | None = None
+        self.model: str | None = None
+        self.model_source = "unknown"
+        self.primary_observed = False
+        self.session: str | None = None
+        self.partial = False
+        self.serial = 0
+
+    def feed(self, event: Mapping[str, Any]) -> None:
+        self.serial += 1
+        session = event.get("session_id") or event.get("sessionId")
+        if isinstance(session, str) and session:
+            self.session = session[:256]
+        kind = event.get("type")
+        candidate = _model_identity(event.get("model"))
+        if kind in {"system", "result"} and candidate:
+            self.model = candidate
+            self.model_source = "response" if kind == "result" else "cli_selected"
+        message = event.get("message")
+        if kind == "assistant" and isinstance(message, Mapping):
+            model = _model_identity(message.get("model"))
+            if not self.primary_observed and not event.get("parent_tool_use_id") and model:
+                self.model = model
+                self.model_source = "response"
+                self.primary_observed = True
+            block = message.get("usage")
+            if isinstance(block, Mapping):
+                request = event.get("requestId")
+                message_id = message.get("id")
+                exact = isinstance(message_id, str) and bool(message_id)
+                key = f"request:{request or ''}:{message_id or self.serial}"
+                fact = self._fact(key, block, model, "request", "claude.message")
+                if not exact:
+                    fact["identity_quality"] = "local"
+                if isinstance(request, str):
+                    fact["request_id"] = request[:256]
+                previous = self.requests.get(key)
+                if previous is not None:
+                    fact["observation_count"] = previous.get("observation_count", 1) + 1
+                self.requests[key] = fact
+        if kind != "result":
+            return
+        breakdown = event.get("modelUsage")
+        if isinstance(breakdown, Mapping) and breakdown:
+            self.partial = False  # The final scope supersedes incomplete streamed fragments.
+            facts = []
+            for name, block in breakdown.items():
+                if not isinstance(name, str) or not isinstance(block, Mapping):
+                    self.partial = True
+                    continue
+                facts.append(
+                    self._fact(
+                        f"model:{name}", block, name, "model_summary", "claude.result.modelUsage"
+                    )
+                )
+            if facts:
+                self.summary = facts
+                if self.model is None and len(facts) == 1:
+                    self.model = facts[0]["model"]
+                    self.model_source = "model_usage"
+                return
+        block = event.get("usage")
+        if isinstance(block, Mapping):
+            self.partial = False
+            self.summary = [
+                self._fact(
+                    "execution", block, self.model, "execution_summary", "claude.result.usage"
+                )
+            ]
+
+    def _fact(
+        self, key: str, block: Mapping[str, Any], model: str | None, scope: str, source: str
+    ) -> dict[str, Any]:
+        tokens: dict[str, int] = {}
+        for field_name, aliases in _CLAUDE_TOKEN_FIELDS.items():
+            for alias in aliases:
+                if alias not in block:
+                    continue
+                value = block[alias]
+                if isinstance(value, int) and not isinstance(value, bool) and value >= 0:
+                    tokens[field_name] = value
+                else:
+                    self.partial = True
+                break
+        if not {"input_tokens", "output_tokens"} <= tokens.keys():
+            self.partial = True
+        return {
+            "key": key[:512],
+            "provider": "claude",
+            "source": source,
+            "scope": scope,
+            "tokens": tokens,
+            "model": model[:256] if model else None,
+            "model_source": "model_usage"
+            if scope == "model_summary"
+            else ("response" if scope == "request" and model else self.model_source),
+            "session_id": self.session,
+        }
+
+    def details(self) -> dict[str, Any]:
+        facts = self.summary if self.summary is not None else list(self.requests.values())
+        has_tokens = any(fact["tokens"] for fact in facts)
+        status = (
+            "missing"
+            if not has_tokens
+            else ("complete" if self.summary is not None and not self.partial else "partial")
+        )
+        return {"schema_version": 1, "status": status, "facts": facts}
+
+
+def _known_usage(details: Mapping[str, Any]) -> dict[str, int]:
+    totals: dict[str, int] = {}
+    for fact in details.get("facts", ()):
+        for name, value in fact.get("tokens", {}).items():
+            if value is not None:
+                totals[name] = totals.get(name, 0) + value
+    return totals
 
 
 def parse_run_stream(provider: str, stdout: str) -> RunStream:
@@ -766,7 +958,46 @@ def parse_run_stream(provider: str, stdout: str) -> RunStream:
     sits between a finished run and its settlement; refusing to parse must not
     be the reason a hold leaks.
     """
-    reader = _STREAM_READERS.get((provider or "").strip().lower())
+    # Pretty-printed JSON is emitted by some non-streaming CLI versions.
+    try:
+        whole = json.loads(stdout or "")
+    except (json.JSONDecodeError, TypeError):
+        whole = None
+    lines = [json.dumps(whole)] if isinstance(whole, dict) else (stdout or "").splitlines()
+    return _parse_run_lines(provider, lines)
+
+
+def parse_run_log(provider: str, path: str | os.PathLike[str]) -> RunStream:
+    """Read a JSONL protocol log incrementally; raw text never leaves the caller.
+
+    A line over 16 MiB is skipped and makes the evidence partial. Protocol log
+    banners and stderr are ignored by the same parser used for CLI stdout.
+    """
+    truncated = False
+
+    def lines(stream: Any) -> Iterator[str]:
+        nonlocal truncated
+        while line := stream.readline(16 * 1024 * 1024 + 1):
+            if len(line) > 16 * 1024 * 1024:
+                truncated = True
+                while line and not line.endswith("\n"):
+                    line = stream.readline(16 * 1024 * 1024 + 1)
+                continue
+            yield line
+
+    try:
+        with open(path, encoding="utf-8", errors="replace") as stream:
+            result = _parse_run_lines(provider, lines(stream))
+    except OSError:
+        return RunStream(usage_details={"schema_version": 1, "status": "missing", "facts": []})
+    if truncated and result.usage_details is not None:
+        result.usage_details["status"] = "partial"
+    return result
+
+
+def _parse_run_lines(provider: str, lines: Iterator[str] | list[str]) -> RunStream:
+    provider = (provider or "").strip().lower()
+    reader = _STREAM_READERS.get(provider)
     if reader is None:
         return RunStream()
 
@@ -774,8 +1005,9 @@ def parse_run_stream(provider: str, stdout: str) -> RunStream:
     usage: dict[str, int] = {}
     model: str | None = None
     parsed = 0
+    claude = _ClaudeAccounting() if provider.strip().lower() == "claude" else None
 
-    for line in (stdout or "").splitlines():
+    for line in lines:
         stripped = line.strip()
         if not stripped.startswith("{"):
             continue
@@ -786,6 +1018,8 @@ def parse_run_stream(provider: str, stdout: str) -> RunStream:
         if not isinstance(event, dict):
             continue
         parsed += 1
+        if claude is not None:
+            claude.feed(event)
         # Later wins for all three: these streams restate the running total and
         # end with the final answer, so the last statement is the complete one.
         found_answer, found_usage, found_model = reader(event)
@@ -796,25 +1030,55 @@ def parse_run_stream(provider: str, stdout: str) -> RunStream:
         if found_model:
             model = found_model
 
-    return RunStream(answer=answer, usage=usage, model=model, events_parsed=parsed)
+    details = claude.details() if claude is not None else None
+    if claude is not None and details is not None:
+        usage = _known_usage(details)
+        model = claude.model
+    elif details is None:
+        # These CLIs expose totals with differing session/turn semantics. Keep
+        # their observed fields, but do not claim request-level completeness.
+        details = {
+            "schema_version": 1,
+            "status": "partial" if usage else "missing",
+            "facts": [{
+                "key": "execution", "provider": provider,
+                "source": f"{provider}.stream.usage", "scope": "execution_summary",
+                "tokens": usage, "model": _model_identity(model),
+                "model_source": "unknown", "identity_quality": "local",
+            }] if usage else [],
+        }
+    return RunStream(
+        answer=answer, usage=usage, model=model, events_parsed=parsed, usage_details=details
+    )
 
 
 _StreamFields = tuple[str | None, dict[str, int] | None, str | None]
 
 
 def _codex_event(event: Mapping[str, Any]) -> _StreamFields:
-    """``codex exec --json``: session events nest their payload under ``msg``."""
+    """``codex exec --json``: session events nest their payload under ``msg``.
+
+    Two shapes are in circulation and neither is announced. Older builds emit
+    ``token_count`` messages and ``last_agent_message``; the build installed
+    here on 2026-08-26 emits neither — the turn's totals ride on a terminal
+    ``turn.completed`` event and the answer on ``item.completed``. Reading only
+    the first shape returned zero tokens for a run that had just spent 18,688 of
+    them, which downstream is indistinguishable from a run that was free.
+    """
     nested = event.get("msg")
     payload: Mapping[str, Any] = nested if isinstance(nested, Mapping) else event
 
     usage = None
     block = payload.get("total_token_usage") or payload.get("last_token_usage")
+    if block is None and payload.get("type") == "turn.completed":
+        block = payload.get("usage")
     if isinstance(block, Mapping):
         usage = _usage_fields(
             block,
             input_tokens="input_tokens",
             output_tokens="output_tokens",
             cache_read_tokens="cached_input_tokens",
+            cache_write_tokens="cache_write_input_tokens",
             reasoning_tokens="reasoning_output_tokens",
             total_tokens="total_tokens",
         )
@@ -827,6 +1091,12 @@ def _codex_event(event: Mapping[str, Any]) -> _StreamFields:
         candidate = payload.get("message")
         if isinstance(candidate, str) and candidate:
             answer = candidate
+    elif payload.get("type") == "item.completed":
+        item = payload.get("item")
+        if isinstance(item, Mapping) and item.get("type") == "agent_message":
+            candidate = item.get("text")
+            if isinstance(candidate, str) and candidate:
+                answer = candidate
 
     model = None
     for key in ("model", "model_name"):
@@ -953,10 +1223,9 @@ def _usage_fields(block: Mapping[str, Any], **sources: str) -> dict[str, int]:
     for target, source in sources.items():
         if source not in block:
             continue
-        try:
-            usage[target] = max(0, int(block.get(source) or 0))
-        except (TypeError, ValueError):
-            continue
+        value = block[source]
+        if isinstance(value, int) and not isinstance(value, bool) and value >= 0:
+            usage[target] = value
     return usage
 
 

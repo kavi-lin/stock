@@ -177,6 +177,64 @@ for _proto, _paths in ds.PROTOCOL_VALIDATORS.items():
     for _p in _paths:
         check(f"validator_exists.{_proto}", os.path.exists(os.path.join(ds.ROOT, _p)), _p)
 
+# MU completed successfully but the host used `python validate.py validate_infographic.py MU`.
+# Exercise the real subprocess dispatcher with parsers that reject merged argv.
+check("validator_args.earnings_completed",
+      ds.PROTOCOL_VALIDATOR_ARGS.get("earnings") == ["{ticker}", "--require-history"])
+check("validator_registered.earnings_pair", ds.PROTOCOL_VALIDATORS.get("earnings") == [
+    "skills/earnings-analyst/scripts/validate.py",
+    "skills/earnings-analyst/scripts/validate_infographic.py"])
+_old_root = ds.ROOT
+try:
+    with tempfile.TemporaryDirectory(prefix=".validator-test-", dir=ROOT) as _tmp:
+        ds.ROOT = _tmp
+        _marker = Path(_tmp) / "executed.txt"
+        _fixture = '''import argparse
+from pathlib import Path
+ap = argparse.ArgumentParser()
+ap.add_argument("ticker")
+ap.add_argument("--require-history", action="store_true")
+args = ap.parse_args()
+assert args.ticker == "MU" and args.require_history
+with Path("executed.txt").open("a") as f:
+    f.write(Path(__file__).name + "\\n")
+raise SystemExit({rc})
+'''
+        _scripts = [Path(_tmp) / p for p in ds.PROTOCOL_VALIDATORS["earnings"]]
+        for _codes, _expected_calls, _expected_rc in [
+            ([0, 0], ["validate.py", "validate_infographic.py"], 0),
+            ([0, 7], ["validate.py", "validate_infographic.py"], 7),
+            ([9, 0], ["validate.py"], 9),
+        ]:
+            _marker.write_text("")
+            for _script, _code in zip(_scripts, _codes):
+                _script.parent.mkdir(parents=True, exist_ok=True)
+                _script.write_text(_fixture.format(rc=_code))
+            _result = ds._run_protocol_validators("earnings", {"ticker": "mu"}, datetime(2026, 10, 4))
+            check(f"validators.dispatch.{_codes}", _result.returncode == _expected_rc,
+                  repr((_result.returncode, _result.stderr)))
+            check(f"validators.sequence.{_codes}", _marker.read_text().splitlines() == _expected_calls,
+                  _marker.read_text())
+        for _name, _argv in [
+            ("news", []),
+            ("invest", ["--history", "investment/invest_logs/session_exports/2026-10-04_MU.json",
+                        "--require-committed-to", "investment/invest_logs/history.json"]),
+        ]:
+            _script = Path(_tmp) / ds.PROTOCOL_VALIDATORS[_name][0]
+            _script.parent.mkdir(parents=True, exist_ok=True)
+            _script.write_text("import json,sys; print(json.dumps(sys.argv[1:]))\n")
+            _result = ds._run_protocol_validators(_name, {"ticker": "mu"}, datetime(2026, 10, 4))
+            check(f"validators.single.{_name}", _result.returncode == 0, _result.stderr)
+            check(f"validators.args.{_name}", json.loads(_result.stdout) == _argv, _result.stdout)
+finally:
+    ds.ROOT = _old_root
+
+check("validators.server_dispatch_wired",
+      "vr = _run_protocol_validators(name, params, start)" in inspect.getsource(ds.run_protocol))
+_manual_source = (ROOT / "investment/scripts/run_protocol_manual.py").read_text()
+check("validators.manual_dispatch_wired",
+      'ds._run_protocol_validators(args.protocol, {"ticker": args.ticker}, started)' in _manual_source)
+
 # The validator reads the last history entry, which a run that died before
 # writing did not produce — so `invest` also needs an artifact that cannot be
 # inherited from the previous session.
@@ -414,6 +472,19 @@ for _model, _ctx in (("codex", "AGENTS.md"), ("gemini", "GEMINI.md")):
           adapted)
     check(f"prompt.{_model}.original", adapted.endswith("BASE"), adapted)
 
+_pilot_before = os.environ.get("AIC_INVEST_RUNNER")
+try:
+    os.environ["AIC_INVEST_RUNNER"] = "v55"
+    _pilot = ds._adapt_protocol_prompt("codex", "BASE", "invest")
+    check("prompt.v55.bounded_schema_recovery", "修正組裝一次" in _pilot and "第二次失敗" in _pilot)
+    check("prompt.v55.source_immutable", "禁止改來源數值、來源時間、hash 或程式碼" in _pilot)
+    check("prompt.v55.phase0_assembler", "assemble_phase0.py" in _pilot)
+finally:
+    if _pilot_before is None:
+        os.environ.pop("AIC_INVEST_RUNNER", None)
+    else:
+        os.environ["AIC_INVEST_RUNNER"] = _pilot_before
+
 # An unknown protocol still gets the context + vocabulary preamble; only the
 # spec-path line drops out. Silently returning the bare prompt here would
 # reintroduce the failure for any protocol missing from PROTOCOL_DOC.
@@ -551,6 +622,43 @@ try:
     check("error.codex", ds._extract_error_from_log(error_path, 1) == "quota exhausted")
 finally:
     os.unlink(error_path)
+
+# A successful coordinator exit can still contain a failed required script.
+fd, error_path = tempfile.mkstemp(prefix="protocol_script_failure_", suffix=".jsonl")
+try:
+    failed_command = {"type": "item.completed", "item": {
+        "type": "command_execution", "command": "python3 news/scripts/finalize_digest.py --date 2026-10-03",
+        "exit_code": 1, "aggregated_output": "WARN: low impact\nERROR: missing lanes.bear\n",
+    }}
+    with os.fdopen(fd, "w", encoding="utf-8") as f:
+        f.write(json.dumps(failed_command) + "\n")
+        f.write(json.dumps({"type": "turn.completed"}) + "\n")
+        f.write("=== validator FAILED rc=1 ===\nno digest\n")
+    check("error.script_cause", ds._protocol_failure_detail(error_path, "no digest") ==
+          "finalize_digest.py rc=1: ERROR: missing lanes.bear")
+    with open(error_path, "a", encoding="utf-8") as f:
+        recovered = json.loads(json.dumps(failed_command))
+        recovered["item"]["exit_code"] = 0
+        f.write(json.dumps(recovered) + "\n")
+    check("error.successful_retry_clears", ds._protocol_failure_detail(error_path, "current validator error") == "current validator error")
+    check("error.gate_wired", "validator_err = _protocol_failure_detail(" in inspect.getsource(ds.run_protocol))
+finally:
+    os.unlink(error_path)
+
+# Every refusal used to be explained as "no provider has quota outside its hard
+# reserve". On 2026-08-27 that sentence was shown for a `stale_snapshot`
+# refusal with all three pools above 83%, and the operator went to look at a
+# quota that was fine. The codes mean different things and must read that way.
+_stale = _mr._blocked_reason("broker:refused(stale_snapshot)")
+check("refusal.stale_not_blamed_on_quota", "hard reserve" not in _stale, _stale)
+check("refusal.stale_names_the_reading", "reading" in _stale, _stale)
+check("refusal.stale_says_retry_helps", "retry" in _stale, _stale)
+_reserve = _mr._blocked_reason("broker:refused(no_capacity)")
+check("refusal.hard_reserve_still_explained", "hard reserve" in _reserve, _reserve)
+_signed_out = _mr._blocked_reason("broker:refused(not_authenticated)")
+check("refusal.signed_out_is_not_quota", "hard reserve" not in _signed_out, _signed_out)
+check("refusal.signed_out_says_waiting_wont_help",
+      "Waiting does not fix this" in _signed_out, _signed_out)
 
 if failures:
     print("FAIL")

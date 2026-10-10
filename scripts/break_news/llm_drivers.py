@@ -16,18 +16,25 @@ to disk for forensic review.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
+import signal
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts._shared.broker_client import parse_run_stream  # noqa: E402
 
 CLAUDE_BIN = os.environ.get("CLAUDE_BIN") or "/Users/kavi/.local/bin/claude"
 AGY_BIN = os.environ.get("AGY_BIN") or "agy"
@@ -62,6 +69,71 @@ class LLMResult:
     cost_usd: float = 0.0
 
 
+class _CliProcessRegistry:
+    """Own CLI process groups for the lifetime of the dashboard service."""
+
+    def __init__(self):
+        self._lock = threading.Lock()
+        self._processes: dict[int, subprocess.Popen] = {}
+        self._closed = False
+
+    def start(self, cmd: list[str], **kwargs) -> subprocess.Popen | None:
+        # Serialize the closed check and Popen so shutdown cannot miss a process
+        # created concurrently with its snapshot.
+        with self._lock:
+            if self._closed:
+                return None
+            proc = subprocess.Popen(cmd, **kwargs)
+            self._processes[proc.pid] = proc
+            return proc
+
+    def discard(self, proc: subprocess.Popen) -> None:
+        with self._lock:
+            self._processes.pop(proc.pid, None)
+
+    def shutdown(self, grace_sec: float = 1.0) -> None:
+        with self._lock:
+            self._closed = True
+            processes = list(self._processes.values())
+
+        for proc in processes:
+            if proc.poll() is not None:
+                continue
+            try:
+                os.killpg(proc.pid, signal.SIGTERM)
+            except OSError:
+                try:
+                    proc.terminate()
+                except OSError:
+                    pass
+
+        for proc in processes:
+            if proc.poll() is not None:
+                continue
+            try:
+                proc.wait(timeout=grace_sec)
+            except subprocess.TimeoutExpired:
+                try:
+                    os.killpg(proc.pid, signal.SIGKILL)
+                except OSError:
+                    try:
+                        proc.kill()
+                    except OSError:
+                        pass
+                try:
+                    proc.wait(timeout=1)
+                except subprocess.TimeoutExpired:
+                    pass
+
+
+_ACTIVE_CLI_RUNS = _CliProcessRegistry()
+
+
+def shutdown_active_cli_runs() -> None:
+    """Stop active model CLIs and prevent new ones during server shutdown."""
+    _ACTIVE_CLI_RUNS.shutdown()
+
+
 def _usage_from_envelope(envelope: dict) -> dict:
     """Pull token counts + cost out of a claude `--output-format json` envelope
     (or any dict carrying a `usage` block). Missing keys → 0."""
@@ -77,6 +149,28 @@ def _usage_from_envelope(envelope: dict) -> dict:
         "cache_write_tokens": int(u.get("cache_creation_input_tokens", 0) or 0),
         "cost_usd": float(envelope.get("total_cost_usd", 0.0) or 0.0),
     }
+
+
+#: The token fields an `LLMResult` carries. `parse_run_stream` returns more
+#: (reasoning, thinking, totals); the broker keeps those apart deliberately and
+#: this dataclass has nowhere to put them, so they are dropped rather than
+#: folded into a count they are not part of.
+_USAGE_KEYS = ("input_tokens", "output_tokens", "cache_read_tokens", "cache_write_tokens")
+
+
+def _usage_from_stream(provider: str, stdout: str) -> dict:
+    """Token counts read out of a CLI's structured stream.
+
+    The per-vendor field maps live in the vendored `broker_client` because they
+    were validated against captured live output there, and every one of them was
+    wrong at some point in a way that produced plausible small numbers instead
+    of an error. Keeping a second copy here is how this repo ended up settling
+    96% of its Agy runs and 97% of its Codex runs as "no tokens" — which the
+    broker cannot tell apart from runs that were free, and which made its
+    per-1k-token calibration read an order of magnitude cheap.
+    """
+    stream = parse_run_stream(provider, stdout or "")
+    return {key: int(stream.usage.get(key, 0) or 0) for key in _USAGE_KEYS}
 
 
 def parse_stream_log_usage(log_path: str) -> dict:
@@ -187,8 +281,9 @@ def _run_cli(
 ) -> tuple[int, str, str, int, str | None]:
     """Returns (rc, stdout, stderr, latency_ms, error)."""
     t0 = time.time()
+    proc = None
     try:
-        proc = subprocess.Popen(
+        proc = _ACTIVE_CLI_RUNS.start(
             cmd,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -197,6 +292,9 @@ def _run_cli(
             stdin=subprocess.DEVNULL,
             start_new_session=True,
         )
+        if proc is None:
+            latency = int((time.time() - t0) * 1000)
+            return -4, "", "", latency, "service shutting down"
         if process_callback is not None:
             try:
                 process_callback(proc.pid, os.getpgid(proc.pid))
@@ -216,7 +314,7 @@ def _run_cli(
         latency = int((time.time() - t0) * 1000)
         return proc.returncode, out or "", err or "", latency, None
     except subprocess.TimeoutExpired as exc:
-        if "proc" in locals():
+        if proc is not None:
             try:
                 os.killpg(os.getpgid(proc.pid), 15)
                 proc.wait(timeout=5)
@@ -225,12 +323,25 @@ def _run_cli(
                     os.killpg(os.getpgid(proc.pid), 9)
                 except (ProcessLookupError, PermissionError, OSError):
                     pass
+        # communicate() after termination drains the final usage event too.
+        # TimeoutExpired.stdout may be bytes even when text=True.
+        out, err = exc.stdout or "", exc.stderr or ""
+        if proc is not None:
+            try:
+                out, err = proc.communicate(timeout=5)
+            except (subprocess.TimeoutExpired, OSError):
+                pass
+        out = out.decode("utf-8", errors="replace") if isinstance(out, bytes) else out
+        err = err.decode("utf-8", errors="replace") if isinstance(err, bytes) else err
         latency = int((time.time() - t0) * 1000)
-        return -1, exc.stdout or "", exc.stderr or "", latency, f"timeout after {timeout}s"
+        return -1, out, err, latency, f"timeout after {timeout}s"
     except FileNotFoundError as e:
         return -2, "", "", 0, f"binary not found: {e}"
     except OSError as e:
         return -3, "", "", 0, f"os error: {e}"
+    finally:
+        if proc is not None:
+            _ACTIVE_CLI_RUNS.discard(proc)
 
 
 def run_claude(system_prompt: str, user_prompt: str,
@@ -306,6 +417,12 @@ def run_gemini(system_prompt: str, user_prompt: str,
     full_prompt = f"{system_prompt}\n\n---\n\n{user_prompt}"
     cmd = [
         AGY_BIN, "--print", full_prompt,
+        # Without this the CLI prints the answer and nothing else — no usage is
+        # printed anywhere, and no parser recovers what was never emitted. The
+        # protocol runner has asked for stream-json since V4.109.1 for exactly
+        # this reason; single-shot calls were left behind, which is most of the
+        # Agy traffic this repo produces.
+        "--output-format", "stream-json",
         "--dangerously-skip-permissions",
     ]
     # V4.129.0 — `model` is the quota broker's assigned model, and passing it is
@@ -317,9 +434,11 @@ def run_gemini(system_prompt: str, user_prompt: str,
     if model:
         cmd += ["--model", model]
     rc, out, err, latency, error = _run_cli(cmd, timeout, process_callback)
-    # agy --print returns the raw agent output directly (no JSON envelope
-    # unless specifically requested, but we handle that in _extract_json).
-    text = out.strip()
+    # The answer now arrives as the `result` event rather than as bare text.
+    # Falling back to the whole stream keeps an unparseable run readable instead
+    # of empty — `_extract_json` has always been given whatever there was.
+    stream = parse_run_stream("agy", out)
+    text = (stream.answer or out).strip()
     parsed, status = _extract_json(text)
     return LLMResult(
         agent="gemini",
@@ -330,12 +449,14 @@ def run_gemini(system_prompt: str, user_prompt: str,
         latency_ms=latency,
         parse_status=status,
         error=error or (err[:300] if rc != 0 and err else None),
+        **_usage_from_stream("agy", out),
     )
 
 
 def run_codex(system_prompt: str, user_prompt: str,
               timeout: int = LLM_TIMEOUT_SEC,
-              process_callback: Callable[[int, int], None] | None = None) -> LLMResult:
+              process_callback: Callable[[int, int], None] | None = None,
+              model: str = "", reasoning_effort: str = "", output_schema: dict | None = None) -> LLMResult:
     """Run Codex non-interactively and parse its JSONL event stream.
 
     `codex exec --json` emits JSONL events. Recent builds put the final
@@ -359,6 +480,17 @@ def run_codex(system_prompt: str, user_prompt: str,
         "--ephemeral",
         "--color", "never",
     ]
+    if model:
+        cmd.extend(["--model", model])
+    if reasoning_effort:
+        cmd.extend(["-c", f'model_reasoning_effort="{reasoning_effort}"'])
+    schema_path = None
+    if output_schema is not None:
+        from scripts._shared.research_accounting import atomic_json
+        schema_path = ROOT / "news/research_cache/schemas" / (hashlib.sha256(
+            json.dumps(output_schema, sort_keys=True).encode()).hexdigest() + ".json")
+        atomic_json(schema_path, output_schema)
+        cmd.extend(["--output-schema", str(schema_path)])
     if tmp_path:
         cmd.extend(["--output-last-message", tmp_path])
     cmd.append(full_prompt)
@@ -408,6 +540,9 @@ def run_codex(system_prompt: str, user_prompt: str,
         latency_ms=latency,
         parse_status=status,
         error=error or codex_error or (err[:300] if rc != 0 and err else None),
+        # `--json` was already being asked for; only the usage events in it were
+        # going unread.
+        **_usage_from_stream("codex", out),
     )
 
 

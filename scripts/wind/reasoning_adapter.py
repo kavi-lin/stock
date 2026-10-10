@@ -51,6 +51,7 @@ class AgentCall:
     latency_ms: int
     error: str | None
     usage: dict[str, int]
+    usage_details: dict[str, Any] | None = None
 
 
 def _extract_json(text: str) -> dict[str, Any] | None:
@@ -111,6 +112,7 @@ def _result_from_driver(result, provider: str) -> AgentCall:
         latency_ms=int(result.latency_ms),
         error=result.error,
         usage=usage,
+        usage_details=stream.usage_details,
     )
 
 
@@ -158,6 +160,7 @@ def _run_agy(prompt: str, *, assigned_model: str, timeout: int) -> AgentCall:
         latency_ms=int((time.time() - started) * 1000),
         error=error,
         usage=stream.usage,
+        usage_details=stream.usage_details,
     )
 
 
@@ -204,6 +207,8 @@ class BrokerReasoningClient:
         self.calls = 0
         self.usage: dict[str, int] = {}
         self.latency_ms = 0
+        self.usage_details: dict[str, Any] = {"schema_version": 1, "status": "missing", "facts": []}
+        self._all_usage_complete = True
 
     @property
     def model_label(self) -> str:
@@ -225,6 +230,16 @@ class BrokerReasoningClient:
         )
         self.calls += 1
         self.latency_ms += result.latency_ms
+        details = result.usage_details or {}
+        self._all_usage_complete &= details.get("status") == "complete"
+        for fact in details.get("facts", ()):
+            item = {**fact, "attempt": self.calls}
+            if not item.get("model") and self.assigned_model:
+                item.update(model=self.assigned_model, model_source="cli_selected")
+            self.usage_details["facts"].append(item)
+        self.usage_details["status"] = (
+            "complete" if self._all_usage_complete else
+            "partial" if self.usage_details["facts"] else "missing")
         for key, value in result.usage.items():
             if key in _USAGE_KEYS:
                 self.usage[key] = self.usage.get(key, 0) + int(value or 0)
@@ -387,6 +402,7 @@ def main(argv: list[str] | None = None) -> int:
                     ok=ok,
                     error_text=error,
                     tokens=client.usage,
+                    usage_details=client.usage_details,
                     lease=lease,
                 )
             except Exception as exc:

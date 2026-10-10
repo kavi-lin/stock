@@ -160,12 +160,22 @@ def _protocol_token_table(raw: object) -> dict:
     return table
 
 
+class ContextBrokerClient(BrokerClient):
+    """Add bounded task metadata without changing the shared vendored client."""
+
+    def build_task(self, *, context=None, **fields):
+        task = super().build_task(**fields)
+        if context is not None:
+            task["context"] = dict(context)
+        return task
+
+
 def broker_client(cfg: dict | None = None) -> BrokerClient | None:
     """A client, or `None` when configured off; callers must fail closed."""
     settings = broker_config(cfg)
     if not settings["enabled"]:
         return None
-    return BrokerClient(
+    return ContextBrokerClient(
         settings["base_url"],
         project=BROKER_PROJECT,
         timeout=settings["timeout_sec"],
