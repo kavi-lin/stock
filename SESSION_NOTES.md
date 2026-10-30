@@ -1,7 +1,34 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-10-10 (v4.141.1)
+> **Last Updated**: 2026-10-30 (v4.141.4)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v4.141.4 維護，無版本 bump) — 專案瘦身 3.0→1.2 GB 與 Drive 歸檔
+
+- 量測後大頭：`reference/Fincept_enhance` 802 MB（公開 repo clone，`.git` 766 MB）、`forward_expectations` 368 MB、`finnhub-client/cache` 224 MB、break_news／scan logs。已刪 Fincept `.git`、`llm-tip-format` worktree（branch 保留）、10,273 個已歸檔舊 log／cache、Finnhub >14d 快取與 pycache。
+- 歸檔在 `gdrive:ai-investment-committee-archive/`（2026-10-29 四包、10-30 三包，md5 皆驗證）；索引與逐檔 sha256 manifest 在 `archive/drive_archive/`（commit 63cc45e，10-30 追加節未提交）。tar 內 API key 值已遮成 `[REDACTED]`。
+- **本機必須保留**（有程式依賴，Drive 只是災難備份）：`forward_expectations/`（calibration glob 整個目錄）、`thematic-screener/data/recommendations/`（`build_event_index.py`／`weekly_review.py`）、`momentum-monitor/journal/` 與其引用的 60 個 `screen_*.csv`。後三者原本 untracked／gitignore、**無任何備份**。
+- 刪除動作被 auto-mode 分類器擋下，由使用者以 `!` 執行；清理腳本逐檔驗 sha256 與 Drive md5 後才刪。未 push；本輪未改程式，故未 bump 版本。
+
+## 🟢 Session Note (v4.141.4) — News Digest 翻譯覆蓋與 Finalizer 重試修復
+
+- 診斷 `news_20261021_212659_7605.log` 失敗根因：(1) `2026-10-21_debate.json` 的 `translations` 只填了 10 則 `shallow_items`，漏填 5 則 `stage2_items`（`n0407` 等）；(2) `dashboard_server.py` 與 `news_protocol_v2.md` 寫「只跑一次 `finalize_digest.py`／只允許 1 次 finalizer call」，導致 Codex 收到 `rc=1` 後直接停機不修補重跑。
+- 修正 `news/debate_input_schema.md`、`news/news_protocol_v2.md`、`dashboard_server.py` 明訂 `translations` 須同時覆蓋 `stage2_items` + `shallow_items`（≤15 則），且 `finalize_digest.py` 若 `rc=1` 須修補 `debate.json` 後重跑直到 `rc=0`；`finalize_digest.py` 改為一次列出所有缺漏翻譯 ID。
+- 補齊 `2026-10-21_debate.json` 的 5 則 Stage 2 繁中標題並執行 `finalize_digest.py`（`n0164`、`n0202` 依規則低影響降級為 shallow），產出 `2026-10-21_digest.json`、`reports/2026-10-21_news_digest.md` 並更新 `sector_intel.json` / `phase0.json`；`validate_digest_output.py` 與 16 項 pytest + routing 契約全綠。
+
+## 🟢 Session Note (v4.141.3) — Futu 新版推播偵測
+
+- 實機新版 bundle `cn.futu.niuniu.nx`，IM DB 位於 `Data/Library/Application Support/Logs/TIMLogs/*/msg_0.db`；舊版路徑仍保留。共用 parser 每次查找兩種位置、唯讀開啟並關閉連線。
+- 152 項 Futu／News／research source／Break News 測試通過；實機讀到 23:35 推播，6h Break News 12 則。News digest validator 被既有 digest 超過 2h 的新鮮度閘擋下，未改報告時間或繞過閘。
+- INTC 分析狀態 done／active_count=0 後已重啟正式 Dashboard；正式 API available=true、5 則訊息，最新 2026-10-15 23:35:33。移除新版路徑的記憶體正控制使兩項消費入口測試失敗，還原後 7 項專項全通過；既有髒檔保留，修改前副本在 `docs/agent-ops/backups/*bak-20261015-futu`。
+
+## 🟢 Session Note (v4.141.2) — 投資 Phase 0 過期快照重建
+
+- 10/15 INTC（`invest_20261015_224046_f632`）由 Codex 執行；factpack 已回傳 STALE_NEEDS_L3，但 Dashboard 通用「任何 validator 非 0 即停」與 protocol 的 L3 恢復規則衝突，驗 10/01 舊檔後中止，沒有抓取失敗的證據。
+- `_adapt_protocol_prompt()` 對所有投資 provider 注入同一份一次重建規則，保留鎖、來源時間、validator、配額／登入停止；其他 protocol 維持原指令。六組完整 Dashboard 啟動邊界測試捕捉實際 CLI argv，修正前 94 個新增檢查失敗、修正後 routing／scheduler／factpack／Phase 0 freshness 契約與 JS syntax 全通過。
+- 正式 Dashboard 閒置時重啟載入 4.141.2。從正式分析佇列啟動 INTC `invest_20261015_231036_5a0d`，broker 選 AGY `gemini-3.8-flash-medium`；新指令已送達，取得重建鎖並執行 L3 四項抓取及 FRED。
+- 新檔 `investment/invest_logs/2026-10-15_phase0.json` 由 assemble_phase0 組裝並通過 validator；另行驗同一路徑 rc=0，resolver 回傳 INVEST_CACHE／真實來源 age 0.084h，鎖已釋放並重跑 factpack。INTC 已通過 Phase 1.5 quant、啟動 Phase 2 原始 skill 取數；完整分析仍執行中，不能視為正式報告已完成。
+- 未提交／push；保留原本報表、快取、quota 與 Nexus 髒檔；維護文件原文備份在 `docs/agent-ops/backups/*bak-20261015-phase0`。
 
 ## 🟢 Session Note (v4.141.1) — Codex 配額重置倒數
 

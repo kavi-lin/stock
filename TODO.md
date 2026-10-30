@@ -1,8 +1,27 @@
 # INTEL COMMAND — Backlog & Tasks
 
-> **Last Updated**: 2026-10-10 (v4.141.1)
+> **Last Updated**: 2026-10-15 (v4.141.3)
 
 ---
+
+## 專案瘦身（2026-10-30，維護，無版本）
+
+- [x] 3.0→1.2 GB；Drive 歸檔 7 包並寫 `archive/drive_archive/INDEX.md` + manifests（10-29 節已提交 63cc45e）。
+- [ ] 提交 INDEX.md 的 2026-10-30 追加節；執行 `prune_archived.py momentum_screen_csv_unreferenced_pre_20260831 --apply`（136 檔、21.9 MB，腳本在 session scratchpad，需先複製到固定位置）。
+- [ ] 輪替曾明文出現在 scan log 的 API key（FMP／Finnhub／Alpaca 等；18 個 log 已歸檔且 Drive 副本已遮蔽）。
+- [ ] 評估對 untracked 原始紀錄（`thematic recommendations`、`momentum journal`、`forward_expectations`）做週期性增量備份（例如接進 `daily_update.sh` 的 `rclone copy`）。
+
+## V4.141.3 — Futu 新版推播
+
+- [x] 支援新版與舊版 IM DB 路徑；唯讀連線，152 項相關回歸通過，實機推播讀取恢復。
+- [x] INTC 分析結束後已重啟 Dashboard；正式 `/api/futu-notifications` 回傳 available=true、5 則訊息，最新 2026-10-15 23:35:33。
+
+## V4.141.2 — 投資 Phase 0 過期快照重建
+
+- [x] 統一 Codex／AGY／Claude 的 Phase 0 一次重建指令，完整啟動邊界測試與 routing／scheduler／factpack／freshness 回歸通過。
+- [x] 正式 Dashboard 閒置重啟；INTC 實跑已取得重建鎖、執行 L3 四項資料腳本及 FRED。
+- [x] INTC `invest_20261015_231036_5a0d`：新快照 validator rc=0、釋放鎖並重跑 factpack；通過 Phase 1.5 quant、啟動 Phase 2 原始 skill 取數。
+- [ ] INTC `invest_20261015_231036_5a0d` 完整分析仍執行中；最終 session／Markdown 與 validator 結果待 run 收尾，不將 Phase 0 驗收當成正式分析完成。
 
 ## V4.141.1 — Codex 配額重置倒數
 

@@ -2,6 +2,24 @@
 
 已回寫規則的歷史條目：[完整封存](../../archive/lessons_already_integrated_20261005.md)。
 
+## 2026-10-30 ｜「gitignore／可再生」不等於可清：先查誰 glob 整個目錄、有沒有別份備份
+- 情境：專案瘦身，要把大目錄歸檔到 Drive 並從本機移除。
+- 坑：`forward_expectations_calibration.py:67` 以 `glob("*.json")` 掃整個資料夾，歸檔舊快照會讓校準樣本無聲縮水（index 只是快取，測試照綠）；`skills/momentum-monitor/journal/` 被 `.gitignore:60` 排除、`thematic-screener/data/recommendations/` untracked，兩者都沒有任何備份；另掃出 18 個 scan log 含明文 API key。
+- 修法：清理前對每個目錄 (1) grep 讀取者與 lookback (2) `git ls-files`／`git check-ignore` 確認有無別份備份 (3) 上傳前掃 key 並遮蔽 (4) 保留清單與還原方式寫進 `archive/drive_archive/INDEX.md` (5) 刪除腳本逐檔驗 sha256 + Drive md5。
+- 已回寫規則？：否（一次性維護，保留規則已記於 INDEX.md；若要升格為 MAINTENANCE.md 規則需先問使用者）。
+
+## 2026-10-21 ｜Prompt 寫「只跑一次 finalizer」會讓模型在可修復的輸入錯誤上直接放棄
+- 情境：News V2.3 DIGEST（`news_20261021_212659_7605.log`）在 `finalize_digest.py` 因 `missing translations.n0407` 回傳 `rc=1` 後直接結束，未產出當日 digest。
+- 坑：`debate_input_schema.md:74` 寫「`translations` 另須覆蓋 shallow top 10」讓模型誤以為只需填 shallow 而漏了 5 則 `stage2_items`；同時 `dashboard_server.py:594` 寫「最後只跑一次 `finalize_digest.py`」與 `news_protocol_v2.md:218`「Phase 4 只允許 1 次 finalizer call」，模型收到 `rc=1` 後嚴格遵守「只跑一次」而拒絕修補 `debate.json` 重跑。
+- 修法：Schema 明訂集合聯集（`stage2_items` 與 `shallow_items` 共 ≤15 則）；Prompt 與 Protocol 區分「禁止手寫最終產物」與「允許修補 input JSON 重跑 idempotent finalizer 直到 `rc=0`」；finalizer 報錯時一次列出全部缺漏 ID。
+- 已回寫規則？：是（已更新 `news/debate_input_schema.md`、`news/news_protocol_v2.md`、`dashboard_server.py` 與 `finalize_digest.py`，見 v4.141.4）。
+
+## 2026-10-15 ｜通用停機指令不能蓋過過期快取恢復流程
+- 情境：Dashboard 分析 INTC，factpack 回傳 STALE_NEEDS_L3 與 phase0_validator_rc=1。
+- 坑：啟動 prompt 要求任何非零即停，protocol 卻要求 L3 重抓後再驗；模型驗舊快照後停止，完全未執行 L3。
+- 修法：在實際啟動指令明訂 Phase 0 一次重建優先，保留新來源時間、鎖及最終驗證；測試走 Dashboard 到 CLI argv 的完整呼叫點，正式實跑核對取鎖與資料腳本。
+- 已回寫規則？：否（既有 protocol 規則正確；修正 Dashboard 注入指令與回歸測試，詳見 v4.141.2）。
+
 ## 2026-10-05 ｜取得網頁與主張實際引用是兩個指標
 - 情境：六小時研究卡品質稽核，19張卡中兩張的證據包有原始網頁。
 - 坑：其中一張只引用feed標題，若把兩張都算原網頁引用，會高估證據深度；provider ticker tag亦曾把無關新聞誤標CHCO。
