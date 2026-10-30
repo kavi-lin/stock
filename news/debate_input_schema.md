@@ -71,7 +71,7 @@
 
 ## Constraints
 
-- IDs 必須完整覆蓋 compact packet 的 Stage 2；`translations` 另須覆蓋 shallow top 10。
+- `lanes` 與 `arbiter` 的 IDs 必須完整覆蓋 compact packet 的 `stage2_items`；`translations` 必須**同時完整覆蓋 `stage2_items` 與 `shallow_items`（共 ≤15 則）**，缺任一筆 Stage 2 或 shallow 翻譯 finalizer 都會 rc=1。
 - Bull score `1..5`；Bear `-5..-1`；Sector/Macro `-5..5`；confidence `0..1`。
 - LOW credibility 每 lane confidence ≤0.5。非 binary 且四 lane 皆 `|score|≤1` 時降級為 shallow；低影響不是分析缺漏，仍須完整四視角與 Arbiter metadata。Sector/Macro 有實質影響或 binary 事件保留 deep。
 - Binary 事件須有日期，且 Bear、Macro 都標 `binary_risk=true`。

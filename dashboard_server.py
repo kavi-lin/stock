@@ -446,8 +446,8 @@ PROTOCOL_DOC = {
 def _adapt_protocol_prompt(model, prompt, name=None):
     """Prefix the provider's own bootstrap without changing protocol semantics.
 
-    Claude is returned untouched: it auto-loads CLAUDE.md, and every
-    PROTOCOL_PROMPTS entry was written against that assumption. Every other CLI
+    Claude auto-loads CLAUDE.md and only receives the shared investment recovery
+    policy. Every other CLI
     gets three things the Claude-shaped prompt silently assumed — its own
     context file, this protocol's spec path, and the tool-vocabulary mapping
     that used to be codex-only.
@@ -459,8 +459,30 @@ def _adapt_protocol_prompt(model, prompt, name=None):
     if name == "invest":
         from investment.scripts.run_data import protocol_preamble
         prompt = protocol_preamble() + prompt
+    # Cache invalidation is a recovery request, not the final Phase 0 gate.
+    # Deliver the same bounded recovery policy to every investment provider.
+    if name == "invest":
+        gate_discipline = (
+            "閘門紀律：投資 Phase 0 恢復規則優先。factpack 的 phase0_source 為 "
+            "STALE_NEEDS_L3 / INCOMPLETE_NEEDS_L3 / INVALID_NEEDS_L3，或初次 "
+            "phase0_validator_rc 非 0，表示需要重建；不得直接驗舊快照後停止。"
+            "先依 protocol 執行 phase0_lock.py acquire；取得鎖後跑 L3 skill chain + "
+            "L4 FRED，以真正新抓取的資料寫入 canonical snapshot，重跑 factpack，"
+            "再驗新的 frozen path。鎖已被持有則依 protocol 等待並重新檢查，"
+            "不得繞過鎖或重複抓取；成功與失敗都必須釋放自己取得的鎖。"
+            "最多執行一輪 L3 重建；重建後仍非 0 或快照仍非 FRESH、鎖等待逾時，"
+            "就停止回報，不得進入 Phase 2。配額／登入錯誤立即停止。"
+            "其他 validator 或必跑 script 非 0 仍依 protocol 停止與回報。"
+            "**禁止為了讓檢查通過而修改輸入**（例如複製舊檔改日期、補空快取、"
+            "修改來源數值、來源時間或 hash）；必須實際重抓，禁止修改程式碼繞過 gate。")
+    else:
+        gate_discipline = (
+            "閘門紀律：任何 validator 或 protocol 指定的必跑 script 回傳非 0，就**停下來回報**，"
+            "並說明卡在哪一步。**禁止為了讓檢查通過而修改輸入**（例如複製舊檔改日期、"
+            "補一個空的快取檔、把數字改成能過的值）——「讓 gate 過」與「達成 gate 想確認的事」"
+            "是兩件不同的事，只有後者算完成。跑不完就回報跑不完，那是可接受的結果。")
     if model == "claude":
-        return prompt
+        return gate_discipline + "\n\n" + prompt if name == "invest" else prompt
     ctx = PROVIDER_CONTEXT_FILE.get(model)
     doc = PROTOCOL_DOC.get(name)
     lines = []
@@ -486,11 +508,7 @@ def _adapt_protocol_prompt(model, prompt, name=None):
     # snapshot and changing its date) instead of performing the step. Every
     # protocol doc already forbids accepting rc≠0; none of them said what to do
     # instead, and "make the check pass" is the locally cheapest reading.
-    lines.append(
-        "閘門紀律：任何 validator 或 protocol 指定的必跑 script 回傳非 0，就**停下來回報**，"
-        "並說明卡在哪一步。**禁止為了讓檢查通過而修改輸入**（例如複製舊檔改日期、"
-        "補一個空的快取檔、把數字改成能過的值）——「讓 gate 過」與「達成 gate 想確認的事」"
-        "是兩件不同的事，只有後者算完成。跑不完就回報跑不完，那是可接受的結果。")
+    lines.append(gate_discipline)
     lines.append(
         "不可變機器：本任務是 Protocol 執行（不是 Dev Session）。專案程式碼（包括 "
         "`investment/scripts/`、`skills/`、`scripts/` 等路徑下的所有 `.py` 腳本）皆為只讀基礎建設，"
@@ -498,7 +516,7 @@ def _adapt_protocol_prompt(model, prompt, name=None):
         "代表你傳入的 JSON 格式或參數有誤，請檢查並修正你的輸入資料，絕對不可修改腳本本體。")
     if name == "invest" and os.getenv("AIC_INVEST_RUNNER") == "v55":
         lines.append(
-            "V5.5 有限恢復規則優先於上面的通用停機敘述：schema/參數錯誤可根據同一份真實來源"
+            "V5.5 有限恢復規則優先於其他停機敘述：schema/參數錯誤可根據同一份真實來源"
             "修正組裝一次，再走同一道 validator；禁止改來源數值、來源時間、hash 或程式碼。"
             "來源過期或缺漏必須重新抓取；第二次失敗保存進度並停止；配額/登入錯誤立即停止。"
             "prepare 自動收集 lane 原始資料與 factpack，不要先逐支執行 Forecaster/DCF/comps。"
@@ -572,9 +590,10 @@ PROTOCOL_PROMPTS["news"] = (
     "build_digest_packet.py。之後只使用 compact packet：Stage 2 名單完全採用 "
     "stage2_items（可少於 5），直接 fetch packet URL，每篇交給四個隔離 lane 的 bundle "
     "最多 3000 chars；URL 缺失/失敗才 search。Arbiter 依 news/arbiter_rules.py，只有 "
-    "binary_risk=true 可判 BINARY。依 news/debate_input_schema.md 只寫 compact debate JSON；"
-    "禁止手寫 digest/MD/cache。最後只跑一次 finalize_digest.py，須 validator rc=0，"
-    "完成 digest、idempotent cache patch 與 report，不得停下等確認。"
+    "binary_risk=true 可判 BINARY。依 news/debate_input_schema.md 只寫 compact debate JSON"
+    "（translations 必須同時覆蓋 stage2_items 與 shallow_items 共 ≤15 則）；"
+    "禁止手寫 digest/MD/cache。最後執行 finalize_digest.py（若 rc=1 須修補 debate.json 後重跑）"
+    "直到 rc=0，完成 digest、idempotent cache patch 與 report，不得停下等確認。"
 )
 PROTOCOL_LOG_DIRS = {
     "sector":     "sector/scan_logs",

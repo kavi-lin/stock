@@ -244,3 +244,16 @@ def test_partial_fallback_caps_degraded_lane_confidence(tmp_path):
     _write(debate_path, debate)
     with pytest.raises(DebateInputError, match="degraded lane confidence"):
         finalize(DATE, debate_path, root=tmp_path, now=f"{DATE} 10:30", validate=False)
+
+
+def test_missing_translations_lists_all_missing_ids(tmp_path):
+    debate_path = _setup(tmp_path)
+    debate = json.loads(debate_path.read_text())
+    del debate["translations"]["n0000"]
+    del debate["translations"]["n0001"]
+    _write(debate_path, debate)
+    with pytest.raises(
+        DebateInputError,
+        match=r"missing translations\.n0000 \(all missing: n0000, n0001; translations must cover both stage2_items and shallow_items\)",
+    ):
+        finalize(DATE, debate_path, root=tmp_path, now=f"{DATE} 10:30", validate=False)

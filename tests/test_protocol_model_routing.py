@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import fnmatch
+import contextlib
 import inspect
 import json
 import os
@@ -10,6 +11,7 @@ import sys
 import tempfile
 from datetime import datetime
 from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -443,10 +445,10 @@ check("allowlist.survives_loader",
 # V4.114.0 — the preamble is no longer codex-only, and it now carries the two
 # things the 2026-08-09 invest failure proved were load-bearing: the provider's
 # OWN context file (agy loads none of its own accord) and this protocol's spec
-# path (a bare `分析 NOW` routes to nothing without a trigger table). Claude is
-# still returned untouched — it auto-loads CLAUDE.md, which is the assumption
-# every PROTOCOL_PROMPTS entry was written against.
-check("prompt.claude_unchanged", ds._adapt_protocol_prompt("claude", "BASE", "invest") == "BASE")
+# path (a bare `分析 NOW` routes to nothing without a trigger table). Claude
+# auto-loads CLAUDE.md; only invest adds the shared Phase 0 recovery policy.
+check("prompt.claude_other_protocol_unchanged",
+      ds._adapt_protocol_prompt("claude", "BASE", "news") == "BASE")
 
 for _model, _ctx in (("codex", "AGENTS.md"), ("gemini", "GEMINI.md")):
     adapted = ds._adapt_protocol_prompt(_model, "BASE", "invest")
@@ -484,6 +486,51 @@ finally:
         os.environ.pop("AIC_INVEST_RUNNER", None)
     else:
         os.environ["AIC_INVEST_RUNNER"] = _pilot_before
+
+# Exercise the real Dashboard launch boundary, without a model call, broker
+# reservation, real execution lock, or a write to the project's report tree.
+# Removing _adapt_protocol_prompt from run_protocol must fail these checks.
+from investment.scripts import run_data as _run_data
+
+for _runner in ("", "v55"):
+    for _provider in ("codex", "gemini", "claude"):
+        with tempfile.TemporaryDirectory() as _root, \
+                patch.dict(os.environ, {"AIC_INVEST_RUNNER": _runner}), \
+                patch.object(ds, "ROOT", _root), \
+                patch.object(ds, "_protocol_start_error", return_value=None), \
+                patch.object(ds, "_register_protocol_run"), \
+                patch.object(ds, "_select_protocol_model", return_value=(_provider, None)), \
+                patch.object(_run_data, "execution_lock", return_value=contextlib.nullcontext()), \
+                patch.object(ds.threading, "Thread") as _thread, \
+                patch.object(ds.subprocess, "Popen", side_effect=RuntimeError("fixture launch boundary")) as _popen:
+            _job, _error = ds.run_protocol("invest", {"ticker": "INTC"})
+            check(f"launch.{_runner}.{_provider}.accepted", bool(_job) and _error is None)
+            _thread.call_args.kwargs["target"]()
+            check(f"launch.{_runner}.{_provider}.reached_subprocess", _popen.call_count == 1)
+            if not _popen.called:
+                continue
+            _cmd = _popen.call_args.args[0]
+            _delivered = (_cmd[-1] if _provider == "codex" else
+                          _cmd[_cmd.index("--print" if _provider == "gemini" else "-p") + 1])
+            _label = f"launch.{_runner or 'legacy'}.{_provider}.phase0"
+            for _fragment in (
+                "投資 Phase 0 恢復規則優先", "STALE_NEEDS_L3",
+                "INCOMPLETE_NEEDS_L3", "INVALID_NEEDS_L3", "phase0_lock.py acquire",
+                "L3 skill chain", "L4 FRED", "重跑 factpack", "新的 frozen path",
+                "最多執行一輪 L3 重建", "重建後仍非 0", "鎖等待逾時",
+                "配額／登入錯誤立即停止", "禁止為了讓檢查通過而修改輸入",
+                "來源時間", "Phase 2",
+            ):
+                check(f"{_label}.{_fragment}", _fragment in _delivered)
+            check(f"{_label}.no_unconditional_stop",
+                  "任何 validator 或 protocol 指定的必跑 script 回傳非 0，就**停下來回報**" not in _delivered)
+            check(f"{_label}.ticker", "分析 INTC" in _delivered)
+
+for _provider in ("codex", "gemini"):
+    _other = ds._adapt_protocol_prompt(_provider, "BASE", "news")
+    check(f"prompt.{_provider}.other_protocol_gate_unchanged",
+          "任何 validator 或 protocol 指定的必跑 script 回傳非 0，就**停下來回報**" in _other
+          and "投資 Phase 0 恢復規則優先" not in _other)
 
 # An unknown protocol still gets the context + vocabulary preamble; only the
 # spec-path line drops out. Silently returning the bare prompt here would

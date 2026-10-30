@@ -10,6 +10,38 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.141.4] — 2026-10-21 — News Digest 翻譯覆蓋與 Finalizer 重試契約修復
+
+### Fixed
+- `news/debate_input_schema.md`、`news/news_protocol_v2.md` 與 `dashboard_server.py` (`PROTOCOL_PROMPTS["news"]`) 明訂 `translations` 必須同時完整覆蓋 `stage2_items` 與 `shallow_items`（共 ≤15 則），並解除「只跑一次 `finalize_digest.py`」的矛盾限制——若 `finalize_digest.py` 因 `debate.json` 缺漏回傳 `rc=1`，必須立即修補 `debate.json` 後重跑直到 `rc=0`。
+- `news/scripts/finalize_digest.py` 的 `_translation()` 在缺漏標題翻譯時一次列出全部缺漏的 `news_id`，避免逐筆報錯導致多次重試。
+- 補齊 `news/news_logs/2026-10-21_debate.json` 缺漏的 5 則 Stage 2 標題翻譯並完成 `2026-10-21` DIGEST finalizer、cache patch 與 Markdown 報告（validator `rc=0`）。
+
+### Why
+- 2026-10-21 News Digest 執行時，模型將「`translations` 另須覆蓋 shallow top 10」誤讀為只需填 shallow 10 則而漏填 5 則 `stage2_items`，且因 prompt 寫「最後只跑一次 `finalize_digest.py`」，在收到 `missing translations.n0407` (`rc=1`) 後直接放棄修補重跑。
+
+## [4.141.3] — 2026-10-15 — Futu 新版即時推播路徑修復
+
+### Fixed
+- 共用推播解析器同時偵測舊版 `cn.futu.Niuniu` 與新版 `cn.futu.niuniu.nx` 的 TIMLogs 資料庫；News、Break News 與研究來源沿用同一入口。
+- SQLite 改唯讀開啟並確保連線關閉；保留既有美股／廣告過濾規則與時間排序。
+
+### Why
+- Futu 重新安裝新版後移動了推播資料庫，舊路徑偵測使 Dashboard 誤報不可用。
+
+## [4.141.2] — 2026-10-15 — 投資 Phase 0 過期快照重建
+
+### Fixed
+- Dashboard 投資分析入口明訂 Phase 0 重建優先於通用非零停機指令，Codex／AGY／Claude、相容與 V5.5 入口皆收到同一份有限恢復規則。
+- 過期／缺漏／無效快照先依 protocol 取得鎖並執行一次 L3＋L4，以新來源重建後重跑 factpack 與 frozen-path validator；仍不合格、鎖逾時或配額／登入錯誤停止。禁止改來源值、來源時間、hash 或程式碼繞過閘門。
+
+### Validation
+- 六組真實 Dashboard 啟動邊界測試攔截 CLI argv，確認重建規則確實送出；修正前新增案例失敗，修正後 routing／factpack／Phase 0 freshness 契約通過。
+- 正式 Dashboard 重啟後實跑 INTC，由 AGY 取得重建鎖並完成 L3＋FRED；新 10/15 快照組裝與獨立重驗均 rc=0，resolver 回傳 INVEST_CACHE，釋放鎖後重跑 factpack 並啟動後續取數。
+
+### Why
+- 10/15 INTC 已回傳 STALE_NEEDS_L3，卻因 Dashboard 的「任何 validator 非 0 即停」指令，在驗證 10/01 舊快照後結束，完全未執行 L3。
+
 ## [4.141.1] — 2026-10-10 — Codex 配額浮動卡片重置倒數
 
 ### Fixed

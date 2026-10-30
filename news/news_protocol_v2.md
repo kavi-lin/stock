@@ -215,7 +215,7 @@ Finalizer 單次完成：
 4. 以 stable `event_id` idempotent project `sector_intel.json` / `phase0.json`；重跑不得重複加總或刷新 catalyst timestamp。
 5. deterministic render `reports/YYYY-MM-DD_news_digest.md`。
 
-**禁止**：LLM 手寫 digest/MD、Python one-liner patch cache、略過 finalizer validator。Phase 4 只允許 1 次 finalizer call；失敗時修 `debate.json` 後再跑。
+**禁止**：LLM 手寫 digest/MD、Python one-liner patch cache、略過 finalizer validator。Phase 4 執行 `finalize_digest.py` 直到 rc=0；若因 `debate.json` 缺漏或格式錯誤回傳 rc=1，**必須立即修補 `debate.json` 並重跑 `finalize_digest.py` 直到 rc=0**，禁止停在 rc=1 收尾。
 
 FLASH / REVIEW 保留既有 review/cache 語意，但只可透過 event store append + projection；不得呼叫 DIGEST finalizer 覆蓋日檔。
 

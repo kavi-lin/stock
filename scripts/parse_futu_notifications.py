@@ -8,7 +8,7 @@ parse_futu_notifications.py
   python3 parse_futu_notifications.py -n 5 -k 英偉達   # 篩選關鍵字
   python3 parse_futu_notifications.py --json -n 5      # JSON 輸出（含 ticker 辨識）
 
-資料來源: ~/Library/Containers/cn.futu.Niuniu/.../msg_0.db
+資料來源: 富途舊版 cn.futu.Niuniu / 新版 cn.futu.niuniu.nx 的 msg_0.db
 """
 
 import datetime
@@ -18,6 +18,8 @@ import os
 import re
 import sqlite3
 import sys
+from contextlib import closing
+from pathlib import Path
 
 FUTU_CONTAINER = os.path.expanduser(
     "~/Library/Containers/cn.futu.Niuniu/Data"
@@ -26,6 +28,20 @@ MSG_DB_PATTERN = os.path.join(
     FUTU_CONTAINER,
     "Documents/com_tencent_imsdk_data/*/msg_0.db"
 )
+MSG_DB_PATTERNS = (
+    MSG_DB_PATTERN,
+    os.path.expanduser(
+        "~/Library/Containers/cn.futu.niuniu.nx/Data/Library/"
+        "Application Support/Logs/TIMLogs/*/msg_0.db"
+    ),
+)
+
+
+def _find_message_dbs():
+    """Discover both client layouts on every call, including after reinstall."""
+    return sorted({os.path.realpath(path)
+                   for pattern in MSG_DB_PATTERNS
+                   for path in glob.glob(pattern)})
 
 # ── 中文公司名 → US ticker 對照表 ──────────────────────────────────────
 # 富途推播以中文簡體為主，這裡涵蓋常出現在頭條的標的。多寫法並列同一 ticker。
@@ -301,7 +317,7 @@ def load_notifications(limit=10, keyword=None, with_tickers=True,
     filter_ads=True 時丟掉廣告 / 教學 / 系統通知（_is_ad 命中）。
     require_us_ticker=True 時只保留 extract_tickers 至少一檔 US ticker 的推播。
     return_stats=True 時改回 (items, stats)，stats 含 filtered_* 各分項計數。"""
-    db_paths = glob.glob(MSG_DB_PATTERN)
+    db_paths = _find_message_dbs()
     stats = {"filtered_hk_cn": 0, "filtered_ads": 0, "filtered_no_ticker": 0, "scanned": 0}
     if not db_paths:
         return ([], stats) if return_stats else []
@@ -309,13 +325,12 @@ def load_notifications(limit=10, keyword=None, with_tickers=True,
     rows = []
     for db_path in db_paths:
         try:
-            conn = sqlite3.connect(db_path)
-            cur = conn.execute(
-                "SELECT time, sender, element_descriptions "
-                "FROM message ORDER BY time DESC LIMIT 500"
-            )
-            rows.extend(cur.fetchall())
-            conn.close()
+            with closing(sqlite3.connect(Path(db_path).as_uri() + "?mode=ro", uri=True)) as conn:
+                cur = conn.execute(
+                    "SELECT time, sender, element_descriptions "
+                    "FROM message ORDER BY time DESC LIMIT 500"
+                )
+                rows.extend(cur.fetchall())
         except sqlite3.Error:
             continue
 
@@ -507,7 +522,7 @@ def load_for_break_news(window_hours=6, max_items=50):
 
 def is_available():
     """檢查富途 DB 路徑是否存在 — 給 endpoint 區分『未安裝』 vs 『安裝但暫時無新推播』。"""
-    return bool(glob.glob(MSG_DB_PATTERN))
+    return bool(_find_message_dbs())
 
 
 def _print_cli(limit, keyword, filter_hk_cn):

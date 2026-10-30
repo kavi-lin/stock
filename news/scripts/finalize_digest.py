@@ -102,11 +102,23 @@ def _lane_item(debate: dict, lane: str, news_id: str) -> dict:
     return item
 
 
-def _translation(debate: dict, item: dict) -> str:
+def _translation(debate: dict, item: dict, all_items: list[dict] | None = None) -> str:
     news_id = item.get("news_id")
-    translated = (debate.get("translations") or {}).get(news_id)
-    translated = translated or item.get("headline_zh")
+    translations = debate.get("translations") or {}
+    translated = translations.get(news_id) or item.get("headline_zh")
     if not isinstance(translated, str) or not translated.strip():
+        if all_items:
+            missing = [
+                str(x.get("news_id"))
+                for x in all_items
+                if not isinstance(translations.get(x.get("news_id")) or x.get("headline_zh"), str)
+                or not str(translations.get(x.get("news_id")) or x.get("headline_zh")).strip()
+            ]
+            if len(missing) > 1:
+                raise DebateInputError(
+                    f"missing translations.{news_id} (all missing: {', '.join(missing)}; "
+                    "translations must cover both stage2_items and shallow_items)"
+                )
         raise DebateInputError(f"missing translations.{news_id}")
     return translated.strip()
 
@@ -284,7 +296,7 @@ def assemble_digest(date: str, debate: dict, root: Path = ROOT, now: str | None 
             "news_id": news_id,
             "event_id": _event_id(item),
             "depth": "deep", "review_status": "reviewed",
-            "headline": item.get("headline") or "", "headline_zh": _translation(debate, item),
+            "headline": item.get("headline") or "", "headline_zh": _translation(debate, item, stage2 + packet["shallow_items"]),
             "source_label": item.get("source") or "Unknown", "source_url": item.get("url") or "",
             "published": item.get("published") or "", "news_type": item.get("news_type") or "sentiment",
             "content_genre": item.get("content_genre") or "unknown",
@@ -321,7 +333,7 @@ def assemble_digest(date: str, debate: dict, root: Path = ROOT, now: str | None 
         shallow.append({
             "news_id": item["news_id"], "event_id": _event_id(item),
             "depth": "shallow", "review_status": "reviewed",
-            "headline": item.get("headline") or "", "headline_zh": _translation(debate, item),
+            "headline": item.get("headline") or "", "headline_zh": _translation(debate, item, stage2 + packet["shallow_items"]),
             "source_label": item.get("source") or "Unknown", "source_url": item.get("url") or "",
             "published": item.get("published") or "", "news_type": item.get("news_type") or "sentiment",
             "content_genre": item.get("content_genre") or "unknown",
