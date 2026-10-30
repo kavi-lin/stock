@@ -17,23 +17,30 @@ cross_sector:
   - BOTZ
   static_stocks:
   - NVDA
-  - MU
   - AMD
-  - TSM
   - INTC
+  - MU
+  - TSM
   - AVGO
   - AMAT
-  - KLAC
-  - LRCX
   - ISRG
+  - KLAC
+  - TXN
   - ASML
   - MRVL
-  - CSCO
-  - AAPL
+  - PLTR
+  - ADI
+  - LRCX
+  - MSFT
+  - SPCX
+  - META
+  - ORCL
+  - TSLA
   - CGNX
+  - AUR
   etf_count: 8
-  universe_size_estimate: 15
-  etf_holdings_last_refreshed: '2026-07-24'
+  universe_size_estimate: 22
+  etf_holdings_last_refreshed: '2026-10-22'
 - theme_name: Clean Energy & EV
   matching_keywords:
   - Solar
@@ -47,28 +54,26 @@ cross_sector:
   - TAN
   - LIT
   static_stocks:
-  - FSLR
-  - BE
   - RIO
+  - BE
   - NXT
+  - FSLR
   - TSLA
   - ENPH
-  - SEDG
   - MPWR
   - 'ON'
-  - RUN
-  - ALB
   - RIVN
-  - AEIS
-  - ALGM
-  - VICR
   - HASI
-  - TE
-  - AYI
+  - ALB
+  - AEIS
+  - SEDG
+  - RUN
+  - CWEN
+  - VICR
   - PLUG
   etf_count: 7
-  universe_size_estimate: 19
-  etf_holdings_last_refreshed: '2026-07-24'
+  universe_size_estimate: 17
+  etf_holdings_last_refreshed: '2026-10-22'
 - theme_name: Cybersecurity
   matching_keywords:
   - Software - Infrastructure
@@ -79,25 +84,23 @@ cross_sector:
   - HACK
   - BUG
   static_stocks:
+  - CRWD
   - PANW
   - FTNT
-  - CRWD
   - OKTA
-  - CSCO
   - AVGO
+  - CSCO
+  - ZS
+  - RBRK
   - NET
   - FFIV
-  - AKAM
-  - ZS
-  - TENB
-  - VRNS
   - QLYS
-  - GD
-  - RBRK
-  - NOC
+  - VRNS
+  - SAIL
+  - NTSK
   etf_count: 4
-  universe_size_estimate: 16
-  etf_holdings_last_refreshed: '2026-07-24'
+  universe_size_estimate: 14
+  etf_holdings_last_refreshed: '2026-10-22'
 - theme_name: Cloud Computing & SaaS
   matching_keywords:
   - Software - Application
@@ -112,30 +115,30 @@ cross_sector:
   - DDOG
   - TWLO
   - SNOW
-  - QLYS
   - NET
-  - ANET
-  - AKAM
-  - NOW
-  - ZS
+  - PAYC
   - P
-  - NTNX
-  - IBM
-  - GOOGL
   - WDAY
-  - AMZN
-  - MDB
+  - ZS
+  - NOW
+  - QLYS
+  - ANET
+  - NTNX
+  - GOOGL
   - MSFT
-  - FROG
-  - PANW
+  - AMZN
+  - IBM
+  - ORCL
   - CRWV
-  - CRWD
-  - TENB
   - OKTA
-  - RBRK
+  - CRWD
+  - PD
+  - NTSK
+  - DT
+  - VEEV
   etf_count: 4
   universe_size_estimate: 25
-  etf_holdings_last_refreshed: '2026-07-24'
+  etf_holdings_last_refreshed: '2026-10-22'
 - theme_name: Biotech & Genomics
   matching_keywords:
   - Biotechnology
@@ -148,33 +151,31 @@ cross_sector:
   - ARKG
   static_stocks:
   - TWST
-  - VRTX
+  - NTRA
+  - TXG
   - AMGN
   - TEM
-  - ABSI
-  - TXG
-  - NTRA
   - GILD
-  - CRSP
-  - PSNL
+  - VRTX
   - ILMN
-  - REGN
-  - BEAM
-  - GH
-  - RVMD
-  - ARGX
-  - ALNY
-  - BIIB
-  - APGE
   - MRNA
-  - ORKA
-  - KYMR
-  - VKTX
-  - PRAX
-  - ERAS
+  - REGN
+  - CRSP
+  - ABSI
+  - PSNL
+  - GH
+  - CDNA
+  - BIIB
+  - ARGX
+  - RVMD
+  - IOVA
+  - UTHR
+  - ABBV
+  - HALO
+  - SYRE
   etf_count: 5
-  universe_size_estimate: 26
-  etf_holdings_last_refreshed: '2026-07-24'
+  universe_size_estimate: 23
+  etf_holdings_last_refreshed: '2026-10-22'
 - theme_name: Infrastructure & Construction
   matching_keywords:
   - Engineering & Construction
@@ -189,22 +190,25 @@ cross_sector:
   static_stocks:
   - PWR
   - UNP
-  - CSX
-  - URI
-  - NSC
   - CAT
   - NEE
-  - ETN
-  - TT
-  - HWM
   - DE
+  - CSX
+  - FAST
+  - EMR
+  - ETN
+  - NUE
+  - PH
   - ROK
+  - TT
   - SO
+  - NSC
   - DUK
-  - CRH
+  - CEG
+  - URI
   etf_count: 3
-  universe_size_estimate: 15
-  etf_holdings_last_refreshed: '2026-07-24'
+  universe_size_estimate: 18
+  etf_holdings_last_refreshed: '2026-10-22'
 - theme_name: Gold & Precious Metals
   matching_keywords:
   - Gold
@@ -223,7 +227,7 @@ cross_sector:
   - HL
   etf_count: 4
   universe_size_estimate: 5
-  etf_holdings_last_refreshed: '2026-07-24'
+  etf_holdings_last_refreshed: '2026-10-22'
 - theme_name: Oil & Gas (Energy)
   matching_keywords:
   - Oil & Gas E&P
@@ -237,34 +241,33 @@ cross_sector:
   - XOP
   - OIH
   static_stocks:
-  - SLB
   - XOM
+  - SLB
   - CVX
   - BKR
   - VLO
+  - MPC
+  - PSX
+  - COP
   - FTI
   - HAL
-  - COP
   - TS
   - SEI
-  - WMB
-  - MPC
-  - EOG
-  - PSX
-  - KMI
   - RIG
   - WFRD
+  - WMB
+  - NOV
   - NE
-  - LBRT
-  - TPL
+  - EOG
+  - KMI
   - PBF
+  - DINO
+  - PARR
+  - MUR
   - DK
-  - EXE
-  - CNX
-  - EQT
   etf_count: 5
-  universe_size_estimate: 28
-  etf_holdings_last_refreshed: '2026-07-24'
+  universe_size_estimate: 24
+  etf_holdings_last_refreshed: '2026-10-22'
 - theme_name: Financial Services & Banks
   matching_keywords:
   - Banks - Diversified
@@ -287,25 +290,25 @@ cross_sector:
   - WFC
   - MS
   - C
-  - AUB
   - AXP
-  - PNFP
-  - UMBF
-  - CFG
-  - GBCI
-  - ASB
-  - CFR
-  - FULT
+  - UBSI
   - FIBK
-  - WBS
-  - RKT
-  - NIC
-  - TBBK
-  - NMIH
-  - AX
+  - ONB
+  - HWC
+  - EWBC
+  - EBC
+  - FULT
+  - FHB
+  - AUB
+  - COLB
+  - SYBT
+  - TRMK
+  - SFNC
+  - EQH
+  - NBTB
   etf_count: 5
   universe_size_estimate: 29
-  etf_holdings_last_refreshed: '2026-07-24'
+  etf_holdings_last_refreshed: '2026-10-22'
 - theme_name: Healthcare & Pharma
   matching_keywords:
   - Drug Manufacturers - General
@@ -319,33 +322,33 @@ cross_sector:
   - XBI
   static_stocks:
   - ABT
-  - ISRG
   - LLY
-  - SYK
+  - ISRG
+  - MDT
   - JNJ
   - ABBV
-  - UNH
   - MRK
-  - EW
-  - BDX
-  - GEHC
-  - MDT
-  - RMD
+  - UNH
+  - AMGN
   - IDXX
   - DXCM
-  - AMGN
+  - EW
+  - SYK
+  - BDX
+  - RMD
+  - BSX
   - TMO
   - GILD
-  - APGE
-  - MRNA
+  - PFE
   - TWST
-  - ORKA
-  - KYMR
-  - VKTX
-  - PRAX
+  - MRNA
+  - NTRA
+  - IOVA
+  - BIIB
+  - UTHR
   etf_count: 5
-  universe_size_estimate: 28
-  etf_holdings_last_refreshed: '2026-07-24'
+  universe_size_estimate: 27
+  etf_holdings_last_refreshed: '2026-10-22'
 - theme_name: Defense & Aerospace
   matching_keywords:
   - Aerospace & Defense
@@ -360,25 +363,22 @@ cross_sector:
   - RTX
   - BA
   - LMT
-  - GD
   - HWM
-  - NOC
-  - LHX
-  - TDG
   - HONA
+  - GD
+  - NOC
+  - TDG
+  - LHX
   - PH
   - RKLB
-  - VSEC
-  - AXON
-  - SARO
-  - FTAI
-  - CRS
+  - MOG-A
+  - AVAV
   - WWD
   - HEI
-  - MOG-A
+  - CW
   etf_count: 5
-  universe_size_estimate: 20
-  etf_holdings_last_refreshed: '2026-07-24'
+  universe_size_estimate: 17
+  etf_holdings_last_refreshed: '2026-10-22'
 - theme_name: Real Estate & REITs
   matching_keywords:
   - REIT - Diversified
@@ -398,16 +398,17 @@ cross_sector:
   - PLD
   - EQIX
   - VRTPX
-  - SPG
   - AMT
+  - SPG
   - DLR
-  - O
   - PSA
+  - VMRK
   - VTR
+  - O
   - CBRE
   etf_count: 4
-  universe_size_estimate: 11
-  etf_holdings_last_refreshed: '2026-07-24'
+  universe_size_estimate: 12
+  etf_holdings_last_refreshed: '2026-10-22'
 - theme_name: Retail & Consumer
   matching_keywords:
   - Internet Retail
@@ -426,23 +427,23 @@ cross_sector:
   - MCD
   - TJX
   - BKNG
-  - LOW
   - SBUX
+  - LOW
   - MAR
-  - RCL
-  - GRPN
-  - REAL
-  - BBWI
-  - WRBY
-  - UPBD
-  - CART
-  - CPNG
-  - RVLV
+  - ROST
+  - GME
+  - OLLI
   - VSXY
-  - HZO
+  - WRBY
+  - BURL
+  - RVLV
+  - DDS
+  - GAP
+  - M
+  - KSS
   etf_count: 3
   universe_size_estimate: 20
-  etf_holdings_last_refreshed: '2026-07-24'
+  etf_holdings_last_refreshed: '2026-10-22'
 - theme_name: Crypto & Blockchain
   matching_keywords:
   - Capital Markets
@@ -455,23 +456,25 @@ cross_sector:
   static_stocks:
   - IQMM
   - COIN
-  - CIFR
-  - GLXY
-  - IREN
-  - WULF
-  - HUT
-  - FIGR
   - MSTR
-  - RIOT
+  - CRCL
+  - HUT
+  - CIFR
+  - SECZ
+  - BMNR
+  - CLSK
+  - PURR
   - MARA
   - HOOD
-  - BBBY
+  - FIGR
   - AMD
-  - CORZ
+  - GLXY
+  - WULF
   - OPRA
+  - DELL
   etf_count: 4
-  universe_size_estimate: 16
-  etf_holdings_last_refreshed: '2026-07-24'
+  universe_size_estimate: 18
+  etf_holdings_last_refreshed: '2026-10-22'
 - theme_name: Nuclear Energy
   matching_keywords:
   - Uranium
@@ -484,22 +487,23 @@ cross_sector:
   - NLR
   - NUKZ
   static_stocks:
-  - UEC
   - OKLO
   - KAP
+  - UEC
   - CEG
   - PEG
   - BWXT
-  - SMR
+  - XE
   - GEV
   - TLN
-  - D
-  - LEU
-  - SOLS
+  - DUK
   - VST
+  - D
+  - SMR
+  - LEU
   etf_count: 4
-  universe_size_estimate: 13
-  etf_holdings_last_refreshed: '2026-07-24'
+  universe_size_estimate: 14
+  etf_holdings_last_refreshed: '2026-10-22'
 - theme_name: Uranium
   matching_keywords:
   - Uranium
@@ -510,13 +514,14 @@ cross_sector:
   - URNJ
   static_stocks:
   - NXG
-  - KAP
   - UEC
+  - KAP
   - OKLO
+  - SMR
   - LEU
   etf_count: 3
-  universe_size_estimate: 5
-  etf_holdings_last_refreshed: '2026-07-24'
+  universe_size_estimate: 6
+  etf_holdings_last_refreshed: '2026-10-22'
 - theme_name: Space Economy
   matching_keywords:
   - Aerospace & Defense
@@ -529,32 +534,32 @@ cross_sector:
   static_stocks:
   - SPCX
   - RKLB
-  - PL
+  - IRDM
   - LHX
-  - VSAT
   - DE
-  - AMD
   - KTOS
-  - ASTS
-  - SIRI
-  - TRMB
+  - NVDA
   - GRMN
-  - TER
+  - TRMB
+  - ASTS
   - ECHO
   - AVAV
-  - GOOG
+  - VSAT
+  - AMD
+  - FET
   - AMZN
+  - SIRI
+  - TER
   - DCO
-  - IRDM
-  - ESE
-  - SPIR
-  - HEI
+  - OII
+  - RTX
   - TDY
   - MOG-A
-  - HXL
+  - LMT
+  - PL
   etf_count: 3
-  universe_size_estimate: 26
-  etf_holdings_last_refreshed: '2026-07-24'
+  universe_size_estimate: 27
+  etf_holdings_last_refreshed: '2026-10-22'
 - theme_name: Quantum Computing
   matching_keywords:
   - Computer Hardware
@@ -566,27 +571,25 @@ cross_sector:
   - ARKQ
   static_stocks:
   - TSLA
-  - TER
-  - AMD
   - SPCX
+  - TER
+  - PLTR
+  - NVDA
+  - AMD
   - KTOS
   - GOOG
   - RKLB
-  - DE
   - TSM
-  - PLTR
   - ARQQ
+  - NET
+  - ESTC
   - HQ
-  - QNT
-  - ALAB
-  - AMAT
-  - KLAC
-  - MKSI
-  - ONTO
-  - LRCX
+  - NTNX
+  - SNOW
+  - HPE
   etf_count: 2
-  universe_size_estimate: 19
-  etf_holdings_last_refreshed: '2026-07-24'
+  universe_size_estimate: 17
+  etf_holdings_last_refreshed: '2026-10-22'
 - theme_name: Robotics & Automation
   matching_keywords:
   - Specialty Industrial Machinery
@@ -601,33 +604,26 @@ cross_sector:
   - ARKQ
   static_stocks:
   - NVDA
-  - AMD
   - TSLA
-  - TER
   - ISRG
-  - PLTR
+  - TER
   - SPCX
-  - ANET
   - KTOS
-  - VRT
-  - AVGO
+  - PLTR
   - GOOG
+  - AMD
   - RKLB
-  - DE
   - TSM
-  - SMCI
-  - ADSK
-  - SNOW
-  - CEG
   - CGNX
-  - AMBA
-  - OUST
+  - AUR
+  - CELT
+  - ILMN
   - ROK
+  - AMBA
   - NOVT
-  - IPGP
   etf_count: 4
-  universe_size_estimate: 26
-  etf_holdings_last_refreshed: '2026-07-24'
+  universe_size_estimate: 18
+  etf_holdings_last_refreshed: '2026-10-22'
 - theme_name: Utilities Defensive
   matching_keywords:
   - Utilities - Regulated Electric
@@ -645,15 +641,15 @@ cross_sector:
   - DUK
   - CEG
   - AEP
-  - SRE
   - D
-  - VST
+  - SRE
   - ETR
+  - VST
   - XEL
   - WM
   etf_count: 4
   universe_size_estimate: 11
-  etf_holdings_last_refreshed: '2026-07-24'
+  etf_holdings_last_refreshed: '2026-10-22'
 - theme_name: Obesity & GLP-1
   matching_keywords:
   - Drug Manufacturers - General
@@ -664,21 +660,15 @@ cross_sector:
   - SLIM
   - HRTS
   static_stocks:
-  - NVO
-  - DXCM
   - LLY
-  - PODD
-  - UNH
-  - TNDM
-  - DVA
-  - MRK
   - TMO
+  - UNH
+  - MRK
+  - RVMD
   - RHHBY
   - JNJ
   - CYTK
-  - RVMD
-  - HLF
-  - IRTC
+  - GILD
   etf_count: 2
-  universe_size_estimate: 16
-  etf_holdings_last_refreshed: '2026-07-24'
+  universe_size_estimate: 9
+  etf_holdings_last_refreshed: '2026-10-22'
