@@ -1,0 +1,212 @@
+{
+  "schema": "p5-qualitative/1.0",
+  "ticker": "INTC",
+  "date": "2026-10-15",
+  "lanes": {
+    "fundamentals": {
+      "signal": "HOLD",
+      "key_factors": [
+        "Rev YoY +25.4% and gross margin 41.5%",
+        "TTM net loss -$11.3B with -21.9% layoffs",
+        "Altman Z 3.64 and FCF margin 27.6%"
+      ],
+      "risk_flags": [
+        "GAAP net losses persistent at -$11.3B TTM",
+        "Headcount down 21.9% signals heavy restructuring"
+      ]
+    },
+    "sentiment": {
+      "signal": "BUY",
+      "key_factors": [
+        "Insider accumulating ratio 1.5",
+        "Short float low 3.16%",
+        "Positive MSPR 100"
+      ],
+      "risk_flags": [
+        "Macro backdrop volatile -1.5",
+        "Tech in cold sectors"
+      ]
+    },
+    "news": {
+      "signal": "SELL",
+      "key_factors": [
+        "Mounting foundry losses overshadow cheaper AI push",
+        "Facility explosion in Israel introduces operational pause",
+        "Broad chip sell-off on financing concerns"
+      ],
+      "risk_flags": [
+        "Foundry cash burn and persistent operating losses",
+        "Broad tech multiple compression from high rates"
+      ]
+    },
+    "technical": {
+      "signal": "HOLD",
+      "key_factors": [
+        "Above 50MA and 200MA; below 20MA",
+        "RSI at 46.8 indicates neutral consolidation",
+        "MACD histogram negative reflects momentum deceleration"
+      ],
+      "risk_flags": [
+        "Short-term momentum down 14.2% over 20d",
+        "Immediate overhead resistance at 20MA"
+      ]
+    },
+    "valuation": {
+      "signal": "SELL",
+      "key_factors": [
+        "Fair value 62.68 implies 33.4% downside",
+        "Implied 5Y FCF CAGR is 38.6%",
+        "Elevated forward PE of 63.0x"
+      ],
+      "risk_flags": [
+        "High dispersion across valuation anchors (CV=0.98)",
+        "FCF annualized growth below 19% breaks thesis"
+      ]
+    }
+  },
+  "lane_detail": {
+    "fundamentals": {
+      "moat_assessment": {
+        "level": "NARROW",
+        "type": "IP-patent",
+        "evidence_one_line": "x86 architecture duopoly and massive patent portfolio anchor base business"
+      },
+      "near_term_catalysts": [
+        {
+          "date": "2026-10-29",
+          "type": "earnings",
+          "description": "Q3 2026 earnings release and gross margin trajectory update",
+          "impact": "high"
+        },
+        {
+          "date": "2026-11-15",
+          "type": "guidance",
+          "description": "Execution update on 21.9% headcount cut and OPEX reduction",
+          "impact": "medium"
+        },
+        {
+          "date": "2027-01-20",
+          "type": "product_launch",
+          "description": "IFS foundry roadmap updates and next-gen node customer wins",
+          "impact": "high"
+        }
+      ],
+      "bull_thesis_one_line": "Rev +25.4% & Q2 FCF 27.6% show recovery",
+      "bear_thesis_one_line": "TTM loss -$11.3B & fwd PE 45x cap upside"
+    },
+    "sentiment": {
+      "market_sentiment_composite": 54.0,
+      "vix_current": 16.94,
+      "insider_signal": "accumulating",
+      "short_pct_float": 3.16,
+      "mspr_latest": 100.0
+    },
+    "news": {
+      "immediate_catalyst_5d": null,
+      "decision_point_days": 14,
+      "cross_asset_spillover": [
+        {
+          "asset": "sector_XLK",
+          "direction": "BEARISH",
+          "mechanism": "Semiconductor sell-off and mounting foundry losses weigh on tech hardware sentiment."
+        }
+      ],
+      "reasoning_one_line": "Mounting foundry losses and an operational pause at Israel facility amplify broad semiconductor sell-off pressures, leaving sentiment negative despite 350W GPU inference sampling and flat PT momentum.",
+      "analyst_consensus": "Buy",
+      "pt_revision_momentum": {
+        "direction": "FLAT",
+        "consensus_delta_pct_1m": 0.0
+      }
+    },
+    "technical": {
+      "smart_money_analysis": {
+        "label": "accumulating",
+        "narrative": "Insider net purchasing in Q3 suggests selective accumulation on pullbacks."
+      },
+      "pattern_taxonomy": {
+        "pattern": "consolidation",
+        "confirmation_criteria": "Decisive daily close above 20MA with expanding volume."
+      },
+      "market_strength": "NEUTRAL",
+      "key_levels": {
+        "support": 90.0,
+        "resistance": 98.4,
+        "pivot": 94.0
+      },
+      "high_prob_scenario": "Consolidation between 90.0 support and 98.4 resistance before attempting a breakout above the 20MA.",
+      "volatility": {
+        "atr_14": 5.575,
+        "hist_vol_20d_daily": 0.04018,
+        "momentum_20d_pct": -14.22
+      }
+    },
+    "valuation": {
+      "weighted_fair_value": 62.68,
+      "vs_current_pct": -33.4,
+      "verdict": "overvalued",
+      "valuation_explained": "DCF unlevered 2.23, Owner Earnings 25.05, PT consensus 111.72 yield weighted FV 62.68",
+      "suppression_proposals": [
+        {
+          "anchor": "dcf_unlevered",
+          "reason": "Extreme outlier due to negative historical TTM earnings",
+          "evidence": "Value $2.23 vs median $63.39"
+        }
+      ]
+    }
+  },
+  "red_team": {
+    "verdict": "STRONG_COUNTER",
+    "counter_evidence_strength": 5,
+    "thesis_break_probability": 0.75,
+    "counter_thesis": "市場多頭過度樂觀定價轉機預期，現價 $94.12 隱含高達 38.58% 的 5 年 FCF 複合增長率（當前 FCF Yield 僅 0.9%）；在實質利率 2.89% 與高收益債信用利差處於 97% 分位數的晚週期緊縮環境下，Foundry 虧損擴大疊加 TTM 淨損 -$11.3B，現價估值（內在價值 $63.39，折價 -32.65%）完全透支且缺乏任何基本面容錯緩衝。[2+1: 兩份高度共識於現價透支 38.58% 5Y FCF 增長及晚期緊縮總體壓力；主要分歧在於 A 聚焦發債成本 >6.5% 與海外擴廠延宕，B 則深入 TTM 淨損 -$11.3B 與裁員 21.9% 之製程風險。]",
+    "kill_conditions": [
+      "IF 未來 2 季 FCF 年化增速 < 19%（低於現價 $94.12 所隱含 38.58% 5 年 CAGR 之一半）WITHIN 180 DAYS THEN 現價估值論點徹底破滅，股價將向內在價值 $63.39 均值回歸",
+      "IF 美國實質利率維持於 2.80% 以上且高收益債信用利差（HY credit spread）維持於 90% 分位數以上，同時 INTC 宣告發債融資成本高於 6.5% 或縮減晶圓代工資本支出預算 WITHIN 90 DAYS THEN 總體信用緊縮重創高資本代工策略，徹底推翻多頭對其擴張與毛利率改善之共識",
+      "IF 未來 2 季營收年化增速 < 20% 且裁員 21.9% 導致關鍵產品製程延遲 WITHIN 180 DAYS THEN 現價內含的營收擴張路徑破裂，基本面轉向確認為結構性萎縮"
+    ]
+  },
+  "burry_narrative": "FCF yield 0.9% │ EV/EBITDA 31.6 │ D/E 0.49 │ 33% below 52wH │ insider=NEUTRAL. Altman Z-Score 3.64 safe, Piotroski 5 moderate.",
+  "conflict_bias": {
+    "schema": "conflict_bias.v1",
+    "tentative_decision": "HOLD",
+    "lane_signals": {
+      "fundamentals": "HOLD",
+      "sentiment": "BUY",
+      "news": "SELL",
+      "technical": "HOLD",
+      "valuation": "SELL"
+    },
+    "triggers_fired": [],
+    "conflict_summary": "No conflict triggers fired.",
+    "t4_detail": null,
+    "t5_detail": null,
+    "proceed_to_phase3": true
+  },
+  "macro_context": "總體環境處於晚週期緊縮（Late Cycle Tightening），實質利率 2.89% 偏高，高收益債利差位於 97% 分位數，信用市場緊張；大盤寬度（32.6）持續疲弱，頭部探測器亮橘燈（51.2）。",
+  "watch_conditions": {
+    "fcf_acceleration": "若未來兩季自由現金流年化增速低於 19%，現價內含的 39% 5 年 CAGR 預期將破滅。",
+    "foundry_losses": "若晶圓代工部門季度營運虧損持續擴大逾 15%，資本開支負擔將進一步壓迫資產負債表。",
+    "margin_recovery": "觀察毛利率是否能穩步回升並站穩 40% 以上，作為核心 x86 與代工業務修復的關鍵里程碑。"
+  },
+  "key_risks": [
+    "代工部門龐大虧損與資本開支在信用緊縮環境下構成嚴重流動性壓力",
+    "現價 $94.11 隱含 38.6% 5 年 FCF CAGR，估值容錯空間極低"
+  ],
+  "bias_notes": "情緒面內部人增持顯著偏多，但基本面淨損 -$11.3B 與新聞面代工虧損形成拉扯；估值模型給出折價 -32.65%，未落入熱區鬆綁，維持紀律性觀望。",
+  "phase2_fanout_mode": "PARALLEL_SUBAGENT",
+  "degraded_analysts": [],
+  "decision_point_days": 14,
+  "devils_advocate_filed": false,
+  "trade_metadata": {
+    "action_label": "觀望（HOLD）",
+    "institutional_lens": "機構法人靜待 Q3 財報檢驗 IFS 代工業務虧損收窄進度與裁員效益，目前維持中性觀望。",
+    "scenario_odds": {
+      "bull": 25,
+      "base": 45,
+      "bear": 30
+    },
+    "decision_confidence_pct": 50,
+    "contrarian_note": "Burry 評分 36.4 中性，FCF 殖利率偏低（0.9%），但無破產與高槓桿致命風險。",
+    "red_team_note": "紅隊 2+1 裁決給予 STRONG_COUNTER，指出 38.6% 隱含 FCF 增速於高實質利率環境下極為脆弱。"
+  }
+}
