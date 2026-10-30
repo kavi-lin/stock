@@ -1,0 +1,4073 @@
+{
+  "generated_at": "2026-10-18T06:01:47.232166",
+  "n": 606,
+  "source_stats": {
+    "deep-dive": {
+      "all": {
+        "n": 208,
+        "verdict": {
+          "miss": 83,
+          "neutral": 14,
+          "hit": 111
+        },
+        "miss_pct": 39.904
+      },
+      "complete": {
+        "n": 206,
+        "verdict": {
+          "miss": 82,
+          "neutral": 14,
+          "hit": 110
+        },
+        "miss_pct": 39.806
+      },
+      "incomplete": {
+        "n": 2,
+        "verdict": {
+          "miss": 1,
+          "hit": 1
+        },
+        "miss_pct": 50.0
+      },
+      "last_date": "2026-10-15",
+      "hook_nonnull": {
+        "decisive_agent": 112,
+        "decisive_agent_method": 207,
+        "sub_industry_heat": 208,
+        "macro_regime_source": 200,
+        "macro_regime": 199
+      }
+    },
+    "earnings-analyzer": {
+      "all": {
+        "n": 1,
+        "verdict": {
+          "neutral": 1
+        },
+        "miss_pct": 0.0
+      },
+      "complete": {
+        "n": 1,
+        "verdict": {
+          "neutral": 1
+        },
+        "miss_pct": 0.0
+      },
+      "incomplete": {
+        "n": 0,
+        "verdict": {},
+        "miss_pct": null
+      },
+      "last_date": "2026-04-26",
+      "hook_nonnull": {
+        "grade_a_count": 1,
+        "grade_b_count": 1,
+        "grade_c_count": 1,
+        "grade_d_count": 1,
+        "total": 1,
+        "lookback_days": 1,
+        "top_sector": 1
+      }
+    },
+    "momentum-screen": {
+      "all": {
+        "n": 24,
+        "verdict": {
+          "miss": 5,
+          "pending": 1,
+          "neutral": 14,
+          "hit": 4
+        },
+        "miss_pct": 20.833
+      },
+      "complete": {
+        "n": 24,
+        "verdict": {
+          "miss": 5,
+          "pending": 1,
+          "neutral": 14,
+          "hit": 4
+        },
+        "miss_pct": 20.833
+      },
+      "incomplete": {
+        "n": 0,
+        "verdict": {},
+        "miss_pct": null
+      },
+      "last_date": "2026-05-24",
+      "hook_nonnull": {
+        "n_total_screened": 24,
+        "n_evaluated": 24,
+        "label_distribution": 24,
+        "warning_counts": 24,
+        "score_top": 24,
+        "score_min_top_n": 24,
+        "rank_score_top": 1,
+        "rank_score_min_top_n": 1
+      }
+    },
+    "news-digest": {
+      "all": {
+        "n": 114,
+        "verdict": {
+          "miss": 3,
+          "n/a": 39,
+          "neutral": 70,
+          "hit": 1,
+          "pending": 1
+        },
+        "miss_pct": 2.632
+      },
+      "complete": {
+        "n": 111,
+        "verdict": {
+          "miss": 3,
+          "n/a": 37,
+          "neutral": 70,
+          "hit": 1
+        },
+        "miss_pct": 2.703
+      },
+      "incomplete": {
+        "n": 3,
+        "verdict": {
+          "n/a": 2,
+          "pending": 1
+        },
+        "miss_pct": 0.0
+      },
+      "last_date": "2026-10-16",
+      "hook_nonnull": {
+        "macro_delta_sign": 114,
+        "binary_count": 114,
+        "bull_score_total": 114,
+        "bear_score_total": 114,
+        "card_count": 114
+      }
+    },
+    "postmortem": {
+      "all": {
+        "n": 5,
+        "verdict": {
+          "n/a": 5
+        },
+        "miss_pct": 0.0
+      },
+      "complete": {
+        "n": 0,
+        "verdict": {},
+        "miss_pct": null
+      },
+      "incomplete": {
+        "n": 0,
+        "verdict": {},
+        "miss_pct": null
+      },
+      "last_date": "2026-08-10",
+      "hook_nonnull": {
+        "reports_parsed": 5,
+        "decision_bucket_count": 5
+      }
+    },
+    "sector-scan": {
+      "all": {
+        "n": 101,
+        "verdict": {
+          "neutral": 21,
+          "n/a": 2,
+          "hit": 39,
+          "miss": 35,
+          "pending": 4
+        },
+        "miss_pct": 34.653
+      },
+      "complete": {
+        "n": 89,
+        "verdict": {
+          "neutral": 20,
+          "n/a": 2,
+          "hit": 36,
+          "miss": 28,
+          "pending": 3
+        },
+        "miss_pct": 31.461
+      },
+      "incomplete": {
+        "n": 12,
+        "verdict": {
+          "hit": 3,
+          "neutral": 1,
+          "miss": 7,
+          "pending": 1
+        },
+        "miss_pct": 58.333
+      },
+      "last_date": "2026-10-16",
+      "hook_nonnull": {
+        "regime": 98,
+        "n_hot": 101,
+        "n_warm": 101,
+        "n_cold": 101,
+        "rating_skew": 101
+      }
+    },
+    "short-term-weekly": {
+      "all": {
+        "n": 17,
+        "verdict": {
+          "n/a": 17
+        },
+        "miss_pct": 0.0
+      },
+      "complete": {
+        "n": 16,
+        "verdict": {
+          "n/a": 16
+        },
+        "miss_pct": 0.0
+      },
+      "incomplete": {
+        "n": 1,
+        "verdict": {
+          "n/a": 1
+        },
+        "miss_pct": 0.0
+      },
+      "last_date": "2026-10-16",
+      "hook_nonnull": {
+        "pending": 17,
+        "hit_rate_band": 12
+      }
+    },
+    "thematic-screener": {
+      "all": {
+        "n": 131,
+        "verdict": {
+          "hit": 38,
+          "neutral": 46,
+          "miss": 41,
+          "pending": 6
+        },
+        "miss_pct": 31.298
+      },
+      "complete": {
+        "n": 129,
+        "verdict": {
+          "hit": 38,
+          "neutral": 46,
+          "miss": 41,
+          "pending": 4
+        },
+        "miss_pct": 31.783
+      },
+      "incomplete": {
+        "n": 2,
+        "verdict": {
+          "pending": 2
+        },
+        "miss_pct": 0.0
+      },
+      "last_date": "2026-10-15",
+      "hook_nonnull": {
+        "n_themes": 131,
+        "bullish_themes": 131,
+        "mature_lifecycle_count": 131,
+        "low_confidence_count": 131,
+        "warning_count": 131
+      }
+    },
+    "theme-detector": {
+      "all": {
+        "n": 5,
+        "verdict": {
+          "miss": 1,
+          "neutral": 1,
+          "hit": 3
+        },
+        "miss_pct": 20.0
+      },
+      "complete": {
+        "n": 5,
+        "verdict": {
+          "miss": 1,
+          "neutral": 1,
+          "hit": 3
+        },
+        "miss_pct": 20.0
+      },
+      "incomplete": {
+        "n": 0,
+        "verdict": {},
+        "miss_pct": null
+      },
+      "last_date": "2026-04-25",
+      "hook_nonnull": {
+        "lead_count": 5,
+        "lag_count": 5,
+        "high_confidence_count": 5,
+        "exhausting_count": 5,
+        "emerging_count": 5
+      }
+    }
+  },
+  "deep_stats": {
+    "complete": {
+      "n": 206,
+      "verdict": {
+        "miss": 82,
+        "neutral": 14,
+        "hit": 110
+      },
+      "miss_pct": 39.806
+    },
+    "eligible": {
+      "n": 206,
+      "verdict": {
+        "miss": 82,
+        "neutral": 14,
+        "hit": 110
+      },
+      "miss_pct": 39.806
+    },
+    "action": {
+      "CANCEL": {
+        "n": 126,
+        "verdict": {
+          "miss": 66,
+          "hit": 60
+        },
+        "miss_pct": 52.381
+      },
+      "EXECUTE": {
+        "n": 49,
+        "verdict": {
+          "neutral": 10,
+          "hit": 30,
+          "miss": 9
+        },
+        "miss_pct": 18.367
+      },
+      "HOLD": {
+        "n": 1,
+        "verdict": {
+          "hit": 1
+        },
+        "miss_pct": 0.0
+      },
+      "STAGED": {
+        "n": 30,
+        "verdict": {
+          "hit": 19,
+          "miss": 7,
+          "neutral": 4
+        },
+        "miss_pct": 23.333
+      }
+    },
+    "stance": {
+      "BUY": {
+        "n": 39,
+        "verdict": {
+          "hit": 24,
+          "miss": 6,
+          "neutral": 9
+        },
+        "miss_pct": 15.385
+      },
+      "HOLD": {
+        "n": 124,
+        "verdict": {
+          "miss": 64,
+          "hit": 60
+        },
+        "miss_pct": 51.613
+      },
+      "None": {
+        "n": 5,
+        "verdict": {
+          "miss": 2,
+          "neutral": 1,
+          "hit": 2
+        },
+        "miss_pct": 40.0
+      },
+      "STAGED_ENTRY": {
+        "n": 38,
+        "verdict": {
+          "hit": 24,
+          "miss": 10,
+          "neutral": 4
+        },
+        "miss_pct": 26.316
+      }
+    },
+    "agent": {
+      "Fundamentals": {
+        "n": 53,
+        "verdict": {
+          "miss": 23,
+          "hit": 28,
+          "neutral": 2
+        },
+        "miss_pct": 43.396
+      },
+      "News": {
+        "n": 17,
+        "verdict": {
+          "miss": 9,
+          "hit": 8
+        },
+        "miss_pct": 52.941
+      },
+      "None": {
+        "n": 96,
+        "verdict": {
+          "hit": 50,
+          "miss": 36,
+          "neutral": 10
+        },
+        "miss_pct": 37.5
+      },
+      "Sentiment": {
+        "n": 4,
+        "verdict": {
+          "miss": 1,
+          "hit": 3
+        },
+        "miss_pct": 25.0
+      },
+      "Technical": {
+        "n": 9,
+        "verdict": {
+          "neutral": 1,
+          "miss": 5,
+          "hit": 3
+        },
+        "miss_pct": 55.556
+      },
+      "Valuation": {
+        "n": 27,
+        "verdict": {
+          "hit": 18,
+          "neutral": 1,
+          "miss": 8
+        },
+        "miss_pct": 29.63
+      }
+    },
+    "regime": {
+      "BULL": {
+        "n": 16,
+        "verdict": {
+          "hit": 7,
+          "miss": 8,
+          "neutral": 1
+        },
+        "miss_pct": 50.0
+      },
+      "NEUTRAL": {
+        "n": 1,
+        "verdict": {
+          "hit": 1
+        },
+        "miss_pct": 0.0
+      },
+      "None": {
+        "n": 9,
+        "verdict": {
+          "miss": 6,
+          "neutral": 1,
+          "hit": 2
+        },
+        "miss_pct": 66.667
+      },
+      "RISK_OFF": {
+        "n": 7,
+        "verdict": {
+          "hit": 4,
+          "miss": 3
+        },
+        "miss_pct": 42.857
+      },
+      "RISK_ON": {
+        "n": 105,
+        "verdict": {
+          "miss": 41,
+          "hit": 56,
+          "neutral": 8
+        },
+        "miss_pct": 39.048
+      },
+      "SIDEWAYS": {
+        "n": 23,
+        "verdict": {
+          "miss": 8,
+          "hit": 15
+        },
+        "miss_pct": 34.783
+      },
+      "Soft Landing": {
+        "n": 2,
+        "verdict": {
+          "miss": 2
+        },
+        "miss_pct": 100.0
+      },
+      "VOLATILE": {
+        "n": 43,
+        "verdict": {
+          "hit": 25,
+          "miss": 14,
+          "neutral": 4
+        },
+        "miss_pct": 32.558
+      }
+    },
+    "score_band": {
+      "0-0.8": {
+        "n": 89,
+        "verdict": {
+          "hit": 47,
+          "miss": 42
+        },
+        "miss_pct": 47.191
+      },
+      "0.8-1.2": {
+        "n": 41,
+        "verdict": {
+          "hit": 23,
+          "miss": 14,
+          "neutral": 4
+        },
+        "miss_pct": 34.146
+      },
+      "<0": {
+        "n": 29,
+        "verdict": {
+          "miss": 16,
+          "hit": 13
+        },
+        "miss_pct": 55.172
+      },
+      ">=1.2": {
+        "n": 47,
+        "verdict": {
+          "neutral": 10,
+          "miss": 10,
+          "hit": 27
+        },
+        "miss_pct": 21.277
+      }
+    },
+    "heat": {
+      "{'ticker_sector': 'Technology', 'ticker_industry': 'Computer Hardware', 'industry_top_30pct': None}": {
+        "n": 1,
+        "verdict": {
+          "miss": 1
+        },
+        "miss_pct": 100.0
+      },
+      "{'ticker_sector': None, 'ticker_industry': None, 'industry_top_30pct': None}": {
+        "n": 207,
+        "verdict": {
+          "miss": 82,
+          "neutral": 14,
+          "hit": 111
+        },
+        "miss_pct": 39.614
+      }
+    },
+    "null_action": 0,
+    "null_score": 0,
+    "path_covered": 206,
+    "probe": [
+      {
+        "id": "sha256:e9eec97604bf2f3fa6a5e69335ef0e4ce5b51bd1c0cb416cf25ad34e81c3e354",
+        "legacy_ids": [
+          "deep-dive_MU_2026-06-21"
+        ],
+        "date": "2026-06-21",
+        "tickers": [
+          "MU"
+        ],
+        "action": "STAGED",
+        "stance": "STAGED_ENTRY",
+        "score": 0.814,
+        "agent": "Fundamentals",
+        "regime": "RISK_ON",
+        "window": 100,
+        "evaluation": {
+          "version": "investment-evaluation/2.0",
+          "evaluated_at": "2026-10-18",
+          "source": "/Users/kavi/Developer/Claude/Projects/ai-investment-committee/investment/invest_logs/history.json#160",
+          "window_complete": true,
+          "calibration_eligible": true,
+          "exclusion_reasons": []
+        },
+        "verdict": "miss",
+        "return": -19.858,
+        "drawdown": -29.919,
+        "raw_path": "/Users/kavi/Developer/Claude/Projects/ai-investment-committee/investment/invest_logs/history.json#160"
+      },
+      {
+        "id": "sha256:edbdf352821f03af0c7c1ea270a587b231feb7f1b9a01309f4f67bb8d2bd6643",
+        "legacy_ids": [
+          "deep-dive_NVDA_2026-07-08"
+        ],
+        "date": "2026-07-08",
+        "tickers": [
+          "NVDA"
+        ],
+        "action": "STAGED",
+        "stance": "STAGED_ENTRY",
+        "score": 0.399,
+        "agent": "Fundamentals",
+        "regime": "RISK_ON",
+        "window": 100,
+        "evaluation": {
+          "version": "investment-evaluation/2.0",
+          "evaluated_at": "2026-10-18",
+          "source": "/Users/kavi/Developer/Claude/Projects/ai-investment-committee/investment/invest_logs/history.json#176",
+          "window_complete": true,
+          "calibration_eligible": true,
+          "exclusion_reasons": []
+        },
+        "verdict": "hit",
+        "return": 9.72,
+        "drawdown": -6.913,
+        "raw_path": "/Users/kavi/Developer/Claude/Projects/ai-investment-committee/investment/invest_logs/history.json#176"
+      },
+      {
+        "id": "sha256:05efea9232ce30cd502fc1bc452acd086ffeb82d3b2a0b1359c4e4c99034d35e",
+        "legacy_ids": [
+          "deep-dive_AAOI_2026-08-21"
+        ],
+        "date": "2026-08-21",
+        "tickers": [
+          "AAOI"
+        ],
+        "action": "EXECUTE",
+        "stance": "STAGED_ENTRY",
+        "score": 0.7641,
+        "agent": "News",
+        "regime": "RISK_ON",
+        "window": 100,
+        "evaluation": {
+          "version": "investment-evaluation/2.0",
+          "evaluated_at": "2026-10-18",
+          "source": "/Users/kavi/Developer/Claude/Projects/ai-investment-committee/investment/invest_logs/history.json#199",
+          "window_complete": true,
+          "calibration_eligible": true,
+          "exclusion_reasons": []
+        },
+        "verdict": "miss",
+        "return": -15.743,
+        "drawdown": -23.658,
+        "raw_path": "/Users/kavi/Developer/Claude/Projects/ai-investment-committee/investment/invest_logs/history.json#199"
+      },
+      {
+        "id": "sha256:c97c133c77b09d65a8a8e73c5027453965d332782c660848d00dda334cb25012",
+        "legacy_ids": [
+          "deep-dive_BE_2026-08-21"
+        ],
+        "date": "2026-08-21",
+        "tickers": [
+          "BE"
+        ],
+        "action": "EXECUTE",
+        "stance": "STAGED_ENTRY",
+        "score": 0.546,
+        "agent": "Fundamentals",
+        "regime": "RISK_ON",
+        "window": 100,
+        "evaluation": {
+          "version": "investment-evaluation/2.0",
+          "evaluated_at": "2026-10-18",
+          "source": "/Users/kavi/Developer/Claude/Projects/ai-investment-committee/investment/invest_logs/history.json#206",
+          "window_complete": true,
+          "calibration_eligible": true,
+          "exclusion_reasons": []
+        },
+        "verdict": "hit",
+        "return": 31.859,
+        "drawdown": 0.0,
+        "raw_path": "/Users/kavi/Developer/Claude/Projects/ai-investment-committee/investment/invest_logs/history.json#206"
+      }
+    ],
+    "eval": {
+      "None": {
+        "n": 174,
+        "verdict": {
+          "miss": 65,
+          "neutral": 14,
+          "hit": 95
+        },
+        "miss_pct": 37.356
+      },
+      "fired": {
+        "n": 3,
+        "verdict": {
+          "hit": 2,
+          "miss": 1
+        },
+        "miss_pct": 33.333
+      },
+      "not_qualifying": {
+        "n": 24,
+        "verdict": {
+          "miss": 14,
+          "hit": 10
+        },
+        "miss_pct": 58.333
+      },
+      "suppressed_by_cap": {
+        "n": 7,
+        "verdict": {
+          "miss": 3,
+          "hit": 4
+        },
+        "miss_pct": 42.857
+      }
+    },
+    "eligible_exclusions": {
+      "window_incomplete": 2
+    },
+    "tickers": {
+      "AAOI": {
+        "n": 3,
+        "verdict": {
+          "miss": 2,
+          "hit": 1
+        },
+        "miss_pct": 66.667
+      },
+      "AAPL": {
+        "n": 5,
+        "verdict": {
+          "miss": 3,
+          "hit": 2
+        },
+        "miss_pct": 60.0
+      },
+      "AIZ": {
+        "n": 1,
+        "verdict": {
+          "hit": 1
+        },
+        "miss_pct": 0.0
+      },
+      "ALAB": {
+        "n": 5,
+        "verdict": {
+          "hit": 3,
+          "miss": 2
+        },
+        "miss_pct": 40.0
+      },
+      "AMD": {
+        "n": 5,
+        "verdict": {
+          "hit": 3,
+          "miss": 2
+        },
+        "miss_pct": 40.0
+      },
+      "AMZN": {
+        "n": 2,
+        "verdict": {
+          "miss": 2
+        },
+        "miss_pct": 100.0
+      },
+      "APLD": {
+        "n": 2,
+        "verdict": {
+          "miss": 2
+        },
+        "miss_pct": 100.0
+      },
+      "APP": {
+        "n": 1,
+        "verdict": {
+          "hit": 1
+        },
+        "miss_pct": 0.0
+      },
+      "ARM": {
+        "n": 2,
+        "verdict": {
+          "miss": 1,
+          "hit": 1
+        },
+        "miss_pct": 50.0
+      },
+      "AVGO": {
+        "n": 3,
+        "verdict": {
+          "hit": 2,
+          "neutral": 1
+        },
+        "miss_pct": 0.0
+      },
+      "BAC": {
+        "n": 3,
+        "verdict": {
+          "miss": 2,
+          "hit": 1
+        },
+        "miss_pct": 66.667
+      },
+      "BE": {
+        "n": 2,
+        "verdict": {
+          "miss": 1,
+          "hit": 1
+        },
+        "miss_pct": 50.0
+      },
+      "CCJ": {
+        "n": 1,
+        "verdict": {
+          "hit": 1
+        },
+        "miss_pct": 0.0
+      },
+      "CEG": {
+        "n": 1,
+        "verdict": {
+          "hit": 1
+        },
+        "miss_pct": 0.0
+      },
+      "CFG": {
+        "n": 1,
+        "verdict": {
+          "miss": 1
+        },
+        "miss_pct": 100.0
+      },
+      "CHRW": {
+        "n": 1,
+        "verdict": {
+          "hit": 1
+        },
+        "miss_pct": 0.0
+      },
+      "COIN": {
+        "n": 1,
+        "verdict": {
+          "miss": 1
+        },
+        "miss_pct": 100.0
+      },
+      "CRDO": {
+        "n": 1,
+        "verdict": {
+          "hit": 1
+        },
+        "miss_pct": 0.0
+      },
+      "CRM": {
+        "n": 1,
+        "verdict": {
+          "hit": 1
+        },
+        "miss_pct": 0.0
+      },
+      "CRWD": {
+        "n": 1,
+        "verdict": {
+          "hit": 1
+        },
+        "miss_pct": 0.0
+      },
+      "CRWV": {
+        "n": 6,
+        "verdict": {
+          "miss": 1,
+          "hit": 5
+        },
+        "miss_pct": 16.667
+      },
+      "CSCO": {
+        "n": 1,
+        "verdict": {
+          "hit": 1
+        },
+        "miss_pct": 0.0
+      },
+      "CSX": {
+        "n": 1,
+        "verdict": {
+          "miss": 1
+        },
+        "miss_pct": 100.0
+      },
+      "D": {
+        "n": 1,
+        "verdict": {
+          "hit": 1
+        },
+        "miss_pct": 0.0
+      },
+      "DLR": {
+        "n": 1,
+        "verdict": {
+          "neutral": 1
+        },
+        "miss_pct": 0.0
+      },
+      "ECHO": {
+        "n": 2,
+        "verdict": {
+          "miss": 2
+        },
+        "miss_pct": 100.0
+      },
+      "EME": {
+        "n": 2,
+        "verdict": {
+          "hit": 2
+        },
+        "miss_pct": 0.0
+      },
+      "FCX": {
+        "n": 1,
+        "verdict": {
+          "hit": 1
+        },
+        "miss_pct": 0.0
+      },
+      "FTV": {
+        "n": 1,
+        "verdict": {
+          "hit": 1
+        },
+        "miss_pct": 0.0
+      },
+      "GEV": {
+        "n": 2,
+        "verdict": {
+          "miss": 1,
+          "hit": 1
+        },
+        "miss_pct": 50.0
+      },
+      "GLW": {
+        "n": 1,
+        "verdict": {
+          "miss": 1
+        },
+        "miss_pct": 100.0
+      },
+      "GOOG": {
+        "n": 1,
+        "verdict": {
+          "neutral": 1
+        },
+        "miss_pct": 0.0
+      },
+      "GOOGL": {
+        "n": 6,
+        "verdict": {
+          "hit": 5,
+          "neutral": 1
+        },
+        "miss_pct": 0.0
+      },
+      "GSAT": {
+        "n": 1,
+        "verdict": {
+          "hit": 1
+        },
+        "miss_pct": 0.0
+      },
+      "HPE": {
+        "n": 3,
+        "verdict": {
+          "hit": 1,
+          "miss": 2
+        },
+        "miss_pct": 66.667
+      },
+      "HUBB": {
+        "n": 1,
+        "verdict": {
+          "hit": 1
+        },
+        "miss_pct": 0.0
+      },
+      "INTC": {
+        "n": 1,
+        "verdict": {
+          "miss": 1
+        },
+        "miss_pct": 100.0
+      },
+      "IONQ": {
+        "n": 2,
+        "verdict": {
+          "miss": 1,
+          "hit": 1
+        },
+        "miss_pct": 50.0
+      },
+      "IR": {
+        "n": 1,
+        "verdict": {
+          "hit": 1
+        },
+        "miss_pct": 0.0
+      },
+      "JBL": {
+        "n": 1,
+        "verdict": {
+          "hit": 1
+        },
+        "miss_pct": 0.0
+      },
+      "LITE": {
+        "n": 2,
+        "verdict": {
+          "miss": 2
+        },
+        "miss_pct": 100.0
+      },
+      "LLY": {
+        "n": 2,
+        "verdict": {
+          "hit": 2
+        },
+        "miss_pct": 0.0
+      },
+      "META": {
+        "n": 2,
+        "verdict": {
+          "miss": 2
+        },
+        "miss_pct": 100.0
+      },
+      "MRVL": {
+        "n": 10,
+        "verdict": {
+          "hit": 5,
+          "miss": 5
+        },
+        "miss_pct": 50.0
+      },
+      "MSFT": {
+        "n": 8,
+        "verdict": {
+          "hit": 4,
+          "miss": 4
+        },
+        "miss_pct": 50.0
+      },
+      "MU": {
+        "n": 19,
+        "verdict": {
+          "hit": 11,
+          "miss": 8
+        },
+        "miss_pct": 42.105
+      },
+      "NBIS": {
+        "n": 4,
+        "verdict": {
+          "miss": 2,
+          "hit": 2
+        },
+        "miss_pct": 50.0
+      },
+      "NEE": {
+        "n": 2,
+        "verdict": {
+          "miss": 1,
+          "hit": 1
+        },
+        "miss_pct": 50.0
+      },
+      "NET": {
+        "n": 1,
+        "verdict": {
+          "hit": 1
+        },
+        "miss_pct": 0.0
+      },
+      "NOK": {
+        "n": 3,
+        "verdict": {
+          "hit": 3
+        },
+        "miss_pct": 0.0
+      },
+      "NOW": {
+        "n": 1,
+        "verdict": {
+          "miss": 1
+        },
+        "miss_pct": 100.0
+      },
+      "NTRS": {
+        "n": 2,
+        "verdict": {
+          "miss": 1,
+          "neutral": 1
+        },
+        "miss_pct": 50.0
+      },
+      "NVDA": {
+        "n": 12,
+        "verdict": {
+          "hit": 6,
+          "miss": 3,
+          "neutral": 3
+        },
+        "miss_pct": 25.0
+      },
+      "NVMI": {
+        "n": 1,
+        "verdict": {
+          "miss": 1
+        },
+        "miss_pct": 100.0
+      },
+      "NVTS": {
+        "n": 1,
+        "verdict": {
+          "miss": 1
+        },
+        "miss_pct": 100.0
+      },
+      "ON": {
+        "n": 1,
+        "verdict": {
+          "miss": 1
+        },
+        "miss_pct": 100.0
+      },
+      "ORCL": {
+        "n": 4,
+        "verdict": {
+          "hit": 2,
+          "miss": 2
+        },
+        "miss_pct": 50.0
+      },
+      "PANW": {
+        "n": 1,
+        "verdict": {
+          "miss": 1
+        },
+        "miss_pct": 100.0
+      },
+      "PKG": {
+        "n": 1,
+        "verdict": {
+          "miss": 1
+        },
+        "miss_pct": 100.0
+      },
+      "PLTR": {
+        "n": 8,
+        "verdict": {
+          "miss": 5,
+          "hit": 3
+        },
+        "miss_pct": 62.5
+      },
+      "POET": {
+        "n": 1,
+        "verdict": {
+          "hit": 1
+        },
+        "miss_pct": 0.0
+      },
+      "QCOM": {
+        "n": 2,
+        "verdict": {
+          "miss": 2
+        },
+        "miss_pct": 100.0
+      },
+      "RGTI": {
+        "n": 2,
+        "verdict": {
+          "hit": 2
+        },
+        "miss_pct": 0.0
+      },
+      "RKLB": {
+        "n": 1,
+        "verdict": {
+          "hit": 1
+        },
+        "miss_pct": 0.0
+      },
+      "SLB": {
+        "n": 1,
+        "verdict": {
+          "hit": 1
+        },
+        "miss_pct": 0.0
+      },
+      "SMR": {
+        "n": 1,
+        "verdict": {
+          "hit": 1
+        },
+        "miss_pct": 0.0
+      },
+      "SNA": {
+        "n": 1,
+        "verdict": {
+          "hit": 1
+        },
+        "miss_pct": 0.0
+      },
+      "SNDK": {
+        "n": 3,
+        "verdict": {
+          "hit": 2,
+          "miss": 1
+        },
+        "miss_pct": 33.333
+      },
+      "SPCX": {
+        "n": 2,
+        "verdict": {
+          "hit": 2
+        },
+        "miss_pct": 0.0
+      },
+      "STT": {
+        "n": 1,
+        "verdict": {
+          "neutral": 1
+        },
+        "miss_pct": 0.0
+      },
+      "TEAM": {
+        "n": 2,
+        "verdict": {
+          "hit": 2
+        },
+        "miss_pct": 0.0
+      },
+      "TEL": {
+        "n": 1,
+        "verdict": {
+          "miss": 1
+        },
+        "miss_pct": 100.0
+      },
+      "TER": {
+        "n": 1,
+        "verdict": {
+          "miss": 1
+        },
+        "miss_pct": 100.0
+      },
+      "TSLA": {
+        "n": 4,
+        "verdict": {
+          "miss": 4
+        },
+        "miss_pct": 100.0
+      },
+      "TSM": {
+        "n": 13,
+        "verdict": {
+          "hit": 8,
+          "neutral": 2,
+          "miss": 3
+        },
+        "miss_pct": 23.077
+      },
+      "TXN": {
+        "n": 1,
+        "verdict": {
+          "hit": 1
+        },
+        "miss_pct": 0.0
+      },
+      "VRT": {
+        "n": 4,
+        "verdict": {
+          "neutral": 2,
+          "hit": 2
+        },
+        "miss_pct": 0.0
+      },
+      "VST": {
+        "n": 2,
+        "verdict": {
+          "neutral": 1,
+          "hit": 1
+        },
+        "miss_pct": 0.0
+      }
+    },
+    "recent": [
+      {
+        "id": "sha256:a542f826fa343a1fa437f1778b680dc93edba55d6252d95d5872b207e76ad91f",
+        "legacy_ids": [
+          "deep-dive_NVMI_2026-09-02"
+        ],
+        "date": "2026-09-02",
+        "tickers": [
+          "NVMI"
+        ],
+        "action": "CANCEL",
+        "stance": "HOLD",
+        "score": 0.7872,
+        "agent": "News",
+        "regime": "RISK_ON",
+        "window": 100,
+        "evaluation": {
+          "version": "investment-evaluation/2.0",
+          "evaluated_at": "2026-10-18",
+          "source": "/Users/kavi/Developer/Claude/Projects/ai-investment-committee/investment/invest_logs/history.json#209",
+          "window_complete": true,
+          "calibration_eligible": true,
+          "exclusion_reasons": []
+        },
+        "verdict": "miss",
+        "return": 13.307,
+        "drawdown": -4.276,
+        "raw_path": "/Users/kavi/Developer/Claude/Projects/ai-investment-committee/investment/invest_logs/history.json#209"
+      },
+      {
+        "id": "HPE_20261001T223002_25eeeee46b",
+        "legacy_ids": [
+          "deep-dive_HPE_2026-10-01"
+        ],
+        "date": "2026-10-01",
+        "tickers": [
+          "HPE"
+        ],
+        "action": "EXECUTE",
+        "stance": "STAGED_ENTRY",
+        "score": 0.9422,
+        "agent": "News",
+        "regime": "VOLATILE",
+        "window": 56,
+        "evaluation": {
+          "version": "investment-evaluation/2.0",
+          "evaluated_at": "2026-10-18",
+          "source": "/Users/kavi/Developer/Claude/Projects/ai-investment-committee/investment/invest_logs/history.json#211",
+          "window_complete": false,
+          "calibration_eligible": false,
+          "exclusion_reasons": [
+            "window_incomplete"
+          ]
+        },
+        "verdict": "miss",
+        "return": -14.633,
+        "drawdown": -14.633,
+        "raw_path": "/Users/kavi/Developer/Claude/Projects/ai-investment-committee/investment/invest_logs/history.json#211"
+      },
+      {
+        "id": "sha256:e533b9a170b349f1701ac731fe5710e5ecc57791c9cb7b90093e45ecfa335144",
+        "legacy_ids": [
+          "deep-dive_INTC_2026-10-15"
+        ],
+        "date": "2026-10-15",
+        "tickers": [
+          "INTC"
+        ],
+        "action": "CANCEL",
+        "stance": "HOLD",
+        "score": 0.0342,
+        "agent": "News",
+        "regime": "VOLATILE",
+        "window": 10,
+        "evaluation": {
+          "version": "investment-evaluation/2.0",
+          "evaluated_at": "2026-10-18",
+          "source": "/Users/kavi/Developer/Claude/Projects/ai-investment-committee/investment/invest_logs/history.json#212",
+          "window_complete": false,
+          "calibration_eligible": false,
+          "exclusion_reasons": [
+            "window_incomplete"
+          ]
+        },
+        "verdict": "hit",
+        "return": -5.788,
+        "drawdown": -5.788,
+        "raw_path": "/Users/kavi/Developer/Claude/Projects/ai-investment-committee/investment/invest_logs/history.json#212"
+      }
+    ]
+  },
+  "diagnostics": [
+    {
+      "index": 183,
+      "reason": "missing_provenance",
+      "key": [
+        "2026-08-09",
+        "NOW"
+      ]
+    },
+    {
+      "index": 184,
+      "reason": "missing_provenance",
+      "key": [
+        "2026-08-09",
+        "PLTR"
+      ]
+    },
+    {
+      "index": 185,
+      "reason": "missing_provenance",
+      "key": [
+        "2026-08-09",
+        "NOW"
+      ]
+    },
+    {
+      "index": 186,
+      "reason": "missing_provenance",
+      "key": [
+        "2026-08-09",
+        "BAC"
+      ]
+    },
+    {
+      "index": 210,
+      "reason": "run_evidence_mismatch",
+      "key": [
+        "2026-09-30",
+        "NVDA"
+      ],
+      "run_id": "NVDA_20261001T003605_0eab632f7a",
+      "errors": [
+        "V5.5 run evidence: Burry engine input is not canonical; score/veto mapping missing"
+      ]
+    }
+  ],
+  "thematic": {
+    "warning": {
+      "False": {
+        "n": 72,
+        "verdict": {
+          "hit": 21,
+          "neutral": 30,
+          "miss": 21
+        },
+        "miss_pct": 29.167
+      },
+      "True": {
+        "n": 57,
+        "verdict": {
+          "neutral": 16,
+          "miss": 20,
+          "hit": 17,
+          "pending": 4
+        },
+        "miss_pct": 35.088
+      }
+    },
+    "mature": {
+      "False": {
+        "n": 44,
+        "verdict": {
+          "neutral": 14,
+          "hit": 9,
+          "miss": 18,
+          "pending": 3
+        },
+        "miss_pct": 40.909
+      },
+      "True": {
+        "n": 85,
+        "verdict": {
+          "hit": 29,
+          "neutral": 32,
+          "miss": 23,
+          "pending": 1
+        },
+        "miss_pct": 27.059
+      }
+    },
+    "cells": {
+      "(False, False)": {
+        "n": 21,
+        "verdict": {
+          "neutral": 8,
+          "hit": 5,
+          "miss": 8
+        },
+        "miss_pct": 38.095
+      },
+      "(False, True)": {
+        "n": 51,
+        "verdict": {
+          "hit": 16,
+          "neutral": 22,
+          "miss": 13
+        },
+        "miss_pct": 25.49
+      },
+      "(True, False)": {
+        "n": 23,
+        "verdict": {
+          "neutral": 6,
+          "hit": 4,
+          "miss": 10,
+          "pending": 3
+        },
+        "miss_pct": 43.478
+      },
+      "(True, True)": {
+        "n": 34,
+        "verdict": {
+          "neutral": 10,
+          "miss": 10,
+          "hit": 13,
+          "pending": 1
+        },
+        "miss_pct": 29.412
+      }
+    }
+  },
+  "collisions": {
+    "theme-detector_2026-04-23": [
+      "reports/theme_detector_2026-04-23_204633.md",
+      "reports/theme_detector_2026-04-23_220746.md",
+      "reports/theme_detector_2026-04-23_220833.md"
+    ],
+    "thematic-screener_2026-07-30": [
+      "skills/thematic-screener/data/recommendations/2026-07-30.json",
+      "skills/thematic-screener/data/recommendations/2026-07-31.json"
+    ],
+    "thematic-screener_2026-08-05": [
+      "skills/thematic-screener/data/recommendations/2026-08-05.json",
+      "skills/thematic-screener/data/recommendations/2026-08-06.json"
+    ],
+    "thematic-screener_2026-08-16": [
+      "skills/thematic-screener/data/recommendations/2026-08-16.json",
+      "skills/thematic-screener/data/recommendations/2026-08-17.json"
+    ],
+    "thematic-screener_2026-08-20": [
+      "skills/thematic-screener/data/recommendations/2026-08-20.json",
+      "skills/thematic-screener/data/recommendations/2026-08-21.json"
+    ]
+  },
+  "news": {
+    "null": 40,
+    "strong": {
+      "n": 9,
+      "verdict": {
+        "miss": 3,
+        "neutral": 5,
+        "hit": 1
+      },
+      "miss_pct": 33.333
+    },
+    "strong_complete": {
+      "n": 9,
+      "verdict": {
+        "miss": 3,
+        "neutral": 5,
+        "hit": 1
+      },
+      "miss_pct": 33.333
+    },
+    "sub1_miss": 0
+  },
+  "changes": {
+    "old_n": 589,
+    "old_deep": {
+      "n": 207,
+      "verdict": {
+        "miss": 82,
+        "neutral": 14,
+        "hit": 111
+      },
+      "miss_pct": 39.614
+    },
+    "old_deep_complete": {
+      "n": 206,
+      "verdict": {
+        "miss": 82,
+        "neutral": 14,
+        "hit": 110
+      },
+      "miss_pct": 39.806
+    },
+    "old_news_null": 35
+  },
+  "nonfinite_rows": [],
+  "news_authority": {
+    "matched": 107,
+    "null_recoverable": 40,
+    "mismatch": 5,
+    "strong_total": 18,
+    "strong_complete_finite": 18,
+    "complete_replay": {
+      "neutral": 97,
+      "hit": 3,
+      "miss": 4
+    },
+    "rows": [
+      {
+        "id": "news-digest_2026-04-14",
+        "date": "2026-04-14",
+        "path": "news/news_logs/2026-04-14_digest.json",
+        "index_delta": -1.2,
+        "authority_delta": -0.3,
+        "spy": 2.258,
+        "complete": true,
+        "original_verdict": "miss",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-04-15",
+        "date": "2026-04-15",
+        "path": "news/news_logs/2026-04-15_digest.json",
+        "index_delta": null,
+        "authority_delta": 0.0,
+        "spy": 1.254,
+        "complete": true,
+        "original_verdict": "n/a",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-04-16",
+        "date": "2026-04-16",
+        "path": "news/news_logs/2026-04-16_digest.json",
+        "index_delta": -0.22,
+        "authority_delta": -0.3,
+        "spy": 0.345,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-04-20",
+        "date": "2026-04-20",
+        "path": "news/news_logs/2026-04-20_digest.json",
+        "index_delta": -0.4,
+        "authority_delta": -0.4,
+        "spy": 0.737,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-04-21",
+        "date": "2026-04-21",
+        "path": "news/news_logs/2026-04-21_digest.json",
+        "index_delta": -0.4,
+        "authority_delta": -0.4,
+        "spy": 1.4,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-04-22",
+        "date": "2026-04-22",
+        "path": "news/news_logs/2026-04-22_digest.json",
+        "index_delta": 0.2,
+        "authority_delta": 0.2,
+        "spy": 0.557,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-04-23",
+        "date": "2026-04-23",
+        "path": "news/news_logs/2026-04-23_digest.json",
+        "index_delta": 0.2,
+        "authority_delta": 0.2,
+        "spy": 0.457,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-04-24",
+        "date": "2026-04-24",
+        "path": "news/news_logs/2026-04-24_digest.json",
+        "index_delta": 0.1,
+        "authority_delta": 0.1,
+        "spy": -0.331,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-04-26",
+        "date": "2026-04-26",
+        "path": "news/news_logs/2026-04-26_digest.json",
+        "index_delta": -0.3,
+        "authority_delta": -0.3,
+        "spy": 0.766,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-04-27",
+        "date": "2026-04-27",
+        "path": "news/news_logs/2026-04-27_digest.json",
+        "index_delta": -0.5,
+        "authority_delta": -0.5,
+        "spy": 0.766,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-04-28",
+        "date": "2026-04-28",
+        "path": "news/news_logs/2026-04-28_digest.json",
+        "index_delta": -0.3,
+        "authority_delta": -0.3,
+        "spy": 1.259,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-04-29",
+        "date": "2026-04-29",
+        "path": "news/news_logs/2026-04-29_digest.json",
+        "index_delta": -0.4,
+        "authority_delta": -0.3,
+        "spy": 0.904,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-04-30",
+        "date": "2026-04-30",
+        "path": "news/news_logs/2026-04-30_digest.json",
+        "index_delta": -0.02,
+        "authority_delta": -0.02,
+        "spy": 0.711,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-05-01",
+        "date": "2026-05-01",
+        "path": "news/news_logs/2026-05-01_digest.json",
+        "index_delta": -0.05,
+        "authority_delta": -0.05,
+        "spy": 1.829,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-05-02",
+        "date": "2026-05-02",
+        "path": "news/news_logs/2026-05-02_digest.json",
+        "index_delta": -0.3,
+        "authority_delta": -0.3,
+        "spy": 1.89,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-05-03",
+        "date": "2026-05-03",
+        "path": "news/news_logs/2026-05-03_digest.json",
+        "index_delta": -0.9,
+        "authority_delta": -0.45,
+        "spy": 2.731,
+        "complete": true,
+        "original_verdict": "miss",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-05-04",
+        "date": "2026-05-04",
+        "path": "news/news_logs/2026-05-04_digest.json",
+        "index_delta": 0.36,
+        "authority_delta": 0.36,
+        "spy": 2.731,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-05-05",
+        "date": "2026-05-05",
+        "path": "news/news_logs/2026-05-05_digest.json",
+        "index_delta": -0.4,
+        "authority_delta": -0.4,
+        "spy": 1.914,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-05-06",
+        "date": "2026-05-06",
+        "path": "news/news_logs/2026-05-06_digest.json",
+        "index_delta": 0.8,
+        "authority_delta": 0.8,
+        "spy": 0.745,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-05-07",
+        "date": "2026-05-07",
+        "path": "news/news_logs/2026-05-07_digest.json",
+        "index_delta": 0.2,
+        "authority_delta": 0.2,
+        "spy": 0.902,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-05-08",
+        "date": "2026-05-08",
+        "path": "news/news_logs/2026-05-08_digest.json",
+        "index_delta": -0.1,
+        "authority_delta": -0.1,
+        "spy": 0.636,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-05-09",
+        "date": "2026-05-09",
+        "path": "news/news_logs/2026-05-09_digest.json",
+        "index_delta": 0.2,
+        "authority_delta": 0.2,
+        "spy": 1.2,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-05-10",
+        "date": "2026-05-10",
+        "path": "news/news_logs/2026-05-10_digest.json",
+        "index_delta": -0.2,
+        "authority_delta": -0.2,
+        "spy": -0.018,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-05-11",
+        "date": "2026-05-11",
+        "path": "news/news_logs/2026-05-11_digest.json",
+        "index_delta": -0.32,
+        "authority_delta": -0.32,
+        "spy": -0.018,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-05-13",
+        "date": "2026-05-13",
+        "path": "news/news_logs/2026-05-13_digest.json",
+        "index_delta": -0.4,
+        "authority_delta": -0.4,
+        "spy": -0.493,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-05-14",
+        "date": "2026-05-14",
+        "path": "news/news_logs/2026-05-14_digest.json",
+        "index_delta": -0.6,
+        "authority_delta": -0.6,
+        "spy": -1.93,
+        "complete": true,
+        "original_verdict": "hit",
+        "replayed": "hit"
+      },
+      {
+        "id": "news-digest_2026-05-15",
+        "date": "2026-05-15",
+        "path": "news/news_logs/2026-05-15_digest.json",
+        "index_delta": -0.35,
+        "authority_delta": -0.35,
+        "spy": 0.281,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-05-20",
+        "date": "2026-05-20",
+        "path": "news/news_logs/2026-05-20_digest.json",
+        "index_delta": 0.26,
+        "authority_delta": 0.26,
+        "spy": 0.592,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-05-21",
+        "date": "2026-05-21",
+        "path": "news/news_logs/2026-05-21_digest.json",
+        "index_delta": 0.1,
+        "authority_delta": 0.104,
+        "spy": 1.06,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-05-22",
+        "date": "2026-05-22",
+        "path": "news/news_logs/2026-05-22_digest.json",
+        "index_delta": 0.12,
+        "authority_delta": 0.12,
+        "spy": 0.646,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-05-23",
+        "date": "2026-05-23",
+        "path": "news/news_logs/2026-05-23_digest.json",
+        "index_delta": -0.55,
+        "authority_delta": -0.55,
+        "spy": 0.534,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-05-25",
+        "date": "2026-05-25",
+        "path": "news/news_logs/2026-05-25_digest.json",
+        "index_delta": 0.08,
+        "authority_delta": 0.08,
+        "spy": 0.785,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-05-26",
+        "date": "2026-05-26",
+        "path": "news/news_logs/2026-05-26_digest.json",
+        "index_delta": 0.2,
+        "authority_delta": 0.2,
+        "spy": 0.785,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-05-27",
+        "date": "2026-05-27",
+        "path": "news/news_logs/2026-05-27_digest.json",
+        "index_delta": -0.22,
+        "authority_delta": -0.22,
+        "spy": 1.077,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-05-28",
+        "date": "2026-05-28",
+        "path": "news/news_logs/2026-05-28_digest.json",
+        "index_delta": 0.15,
+        "authority_delta": 0.15,
+        "spy": 0.659,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-05-29",
+        "date": "2026-05-29",
+        "path": "news/news_logs/2026-05-29_digest.json",
+        "index_delta": 0.3,
+        "authority_delta": 0.3,
+        "spy": -0.296,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-06-01",
+        "date": "2026-06-01",
+        "path": "news/news_logs/2026-06-01_digest.json",
+        "index_delta": -0.3,
+        "authority_delta": -0.3,
+        "spy": -2.767,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-06-02",
+        "date": "2026-06-02",
+        "path": "news/news_logs/2026-06-02_digest.json",
+        "index_delta": -0.2,
+        "authority_delta": -0.2,
+        "spy": -2.899,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-06-06",
+        "date": "2026-06-06",
+        "path": "news/news_logs/2026-06-06_digest.json",
+        "index_delta": -0.6,
+        "authority_delta": -0.6,
+        "spy": -0.198,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-06-07",
+        "date": "2026-06-07",
+        "path": "news/news_logs/2026-06-07_digest.json",
+        "index_delta": -0.3,
+        "authority_delta": -0.3,
+        "spy": 0.342,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-06-08",
+        "date": "2026-06-08",
+        "path": "news/news_logs/2026-06-08_digest.json",
+        "index_delta": -0.42,
+        "authority_delta": -0.42,
+        "spy": 0.342,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-06-09",
+        "date": "2026-06-09",
+        "path": "news/news_logs/2026-06-09_digest.json",
+        "index_delta": -0.4,
+        "authority_delta": -0.4,
+        "spy": 0.638,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-06-10",
+        "date": "2026-06-10",
+        "path": "news/news_logs/2026-06-10_digest.json",
+        "index_delta": -0.7,
+        "authority_delta": -0.7,
+        "spy": 4.053,
+        "complete": true,
+        "original_verdict": "miss",
+        "replayed": "miss"
+      },
+      {
+        "id": "news-digest_2026-06-12",
+        "date": "2026-06-12",
+        "path": "news/news_logs/2026-06-12_digest.json",
+        "index_delta": -0.1,
+        "authority_delta": -0.1,
+        "spy": -0.107,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-06-15",
+        "date": "2026-06-15",
+        "path": "news/news_logs/2026-06-15_digest.json",
+        "index_delta": 0.3,
+        "authority_delta": 0.3,
+        "spy": -1.072,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-06-16",
+        "date": "2026-06-16",
+        "path": "news/news_logs/2026-06-16_digest.json",
+        "index_delta": 0.2,
+        "authority_delta": 0.2,
+        "spy": -0.478,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-06-17",
+        "date": "2026-06-17",
+        "path": "news/news_logs/2026-06-17_digest.json",
+        "index_delta": -0.3,
+        "authority_delta": -0.3,
+        "spy": 0.463,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-06-18",
+        "date": "2026-06-18",
+        "path": "news/news_logs/2026-06-18_digest.json",
+        "index_delta": -0.4,
+        "authority_delta": -0.4,
+        "spy": -1.762,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-06-19",
+        "date": "2026-06-19",
+        "path": "news/news_logs/2026-06-19_digest.json",
+        "index_delta": -0.48,
+        "authority_delta": -0.48,
+        "spy": -1.498,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-06-20",
+        "date": "2026-06-20",
+        "path": "news/news_logs/2026-06-20_digest.json",
+        "index_delta": 0.2,
+        "authority_delta": 0.2,
+        "spy": -1.355,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-06-22",
+        "date": "2026-06-22",
+        "path": "news/news_logs/2026-06-22_digest.json",
+        "index_delta": -0.2,
+        "authority_delta": -0.2,
+        "spy": -2.069,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-06-23",
+        "date": "2026-06-23",
+        "path": "news/news_logs/2026-06-23_digest.json",
+        "index_delta": null,
+        "authority_delta": -0.1,
+        "spy": -0.626,
+        "complete": true,
+        "original_verdict": "n/a",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-06-24",
+        "date": "2026-06-24",
+        "path": "news/news_logs/2026-06-24_digest.json",
+        "index_delta": null,
+        "authority_delta": -0.7,
+        "spy": 1.058,
+        "complete": true,
+        "original_verdict": "n/a",
+        "replayed": "miss"
+      },
+      {
+        "id": "news-digest_2026-06-25",
+        "date": "2026-06-25",
+        "path": "news/news_logs/2026-06-25_digest.json",
+        "index_delta": null,
+        "authority_delta": 0.16,
+        "spy": 1.698,
+        "complete": true,
+        "original_verdict": "n/a",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-06-27",
+        "date": "2026-06-27",
+        "path": "news/news_logs/2026-06-27_digest.json",
+        "index_delta": -0.2,
+        "authority_delta": -0.2,
+        "spy": 0.51,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-06-28",
+        "date": "2026-06-28",
+        "path": "news/news_logs/2026-06-28_digest.json",
+        "index_delta": -0.15,
+        "authority_delta": -0.15,
+        "spy": 0.51,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-06-29",
+        "date": "2026-06-29",
+        "path": "news/news_logs/2026-06-29_digest.json",
+        "index_delta": 0.1,
+        "authority_delta": 0.1,
+        "spy": 0.51,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-06-30",
+        "date": "2026-06-30",
+        "path": "news/news_logs/2026-06-30_digest.json",
+        "index_delta": 0.1,
+        "authority_delta": 0.1,
+        "spy": -0.266,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-07-01",
+        "date": "2026-07-01",
+        "path": "news/news_logs/2026-07-01_digest.json",
+        "index_delta": 0.2,
+        "authority_delta": 0.2,
+        "spy": 0.74,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-07-02",
+        "date": "2026-07-02",
+        "path": "news/news_logs/2026-07-02_digest.json",
+        "index_delta": -0.1,
+        "authority_delta": -0.1,
+        "spy": 0.393,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-07-06",
+        "date": "2026-07-06",
+        "path": "news/news_logs/2026-07-06_digest.json",
+        "index_delta": 0.4,
+        "authority_delta": 0.4,
+        "spy": 0.488,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-07-08",
+        "date": "2026-07-08",
+        "path": "news/news_logs/2026-07-08_digest.json",
+        "index_delta": -0.4,
+        "authority_delta": -0.4,
+        "spy": 0.506,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-07-11",
+        "date": "2026-07-11",
+        "path": "news/news_logs/2026-07-11_digest.json",
+        "index_delta": -0.1,
+        "authority_delta": -0.1,
+        "spy": 0.207,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-07-16",
+        "date": "2026-07-16",
+        "path": "news/news_logs/2026-07-16_digest.json",
+        "index_delta": 0.3,
+        "authority_delta": 0.3,
+        "spy": -0.325,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-07-20",
+        "date": "2026-07-20",
+        "path": "news/news_logs/2026-07-20_digest.json",
+        "index_delta": 0.2,
+        "authority_delta": 0.2,
+        "spy": -0.426,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-07-21",
+        "date": "2026-07-21",
+        "path": "news/news_logs/2026-07-21_digest.json",
+        "index_delta": 0.2,
+        "authority_delta": 0.2,
+        "spy": -1.25,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-07-29",
+        "date": "2026-07-29",
+        "path": "news/news_logs/2026-07-29_digest.json",
+        "index_delta": 0.05,
+        "authority_delta": 0.05,
+        "spy": 3.867,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-07-30",
+        "date": "2026-07-30",
+        "path": "news/news_logs/2026-07-30_digest.json",
+        "index_delta": -0.4,
+        "authority_delta": -0.4,
+        "spy": 3.996,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-07-31",
+        "date": "2026-07-31",
+        "path": "news/news_logs/2026-07-31_digest.json",
+        "index_delta": -0.1,
+        "authority_delta": -0.1,
+        "spy": 3.047,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-08-03",
+        "date": "2026-08-03",
+        "path": "news/news_logs/2026-08-03_digest.json",
+        "index_delta": 0.3,
+        "authority_delta": 0.3,
+        "spy": 2.058,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-08-05",
+        "date": "2026-08-05",
+        "path": "news/news_logs/2026-08-05_digest.json",
+        "index_delta": 0.0,
+        "authority_delta": 0.0,
+        "spy": 0.421,
+        "complete": true,
+        "original_verdict": "neutral",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-08-06",
+        "date": "2026-08-06",
+        "path": "news/news_logs/2026-08-06_digest.json",
+        "index_delta": null,
+        "authority_delta": -0.1,
+        "spy": 0.26,
+        "complete": true,
+        "original_verdict": "n/a",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-08-07",
+        "date": "2026-08-07",
+        "path": "news/news_logs/2026-08-07_digest.json",
+        "index_delta": null,
+        "authority_delta": -0.75,
+        "spy": -0.1,
+        "complete": true,
+        "original_verdict": "n/a",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-08-10",
+        "date": "2026-08-10",
+        "path": "news/news_logs/2026-08-10_digest.json",
+        "index_delta": null,
+        "authority_delta": 0.3,
+        "spy": 0.428,
+        "complete": true,
+        "original_verdict": "n/a",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-08-11",
+        "date": "2026-08-11",
+        "path": "news/news_logs/2026-08-11_digest.json",
+        "index_delta": null,
+        "authority_delta": -1.0,
+        "spy": 0.75,
+        "complete": true,
+        "original_verdict": "n/a",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-08-12",
+        "date": "2026-08-12",
+        "path": "news/news_logs/2026-08-12_digest.json",
+        "index_delta": null,
+        "authority_delta": 0.2,
+        "spy": 0.023,
+        "complete": true,
+        "original_verdict": "n/a",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-08-14",
+        "date": "2026-08-14",
+        "path": "news/news_logs/2026-08-14_digest.json",
+        "index_delta": null,
+        "authority_delta": -0.6,
+        "spy": -0.938,
+        "complete": true,
+        "original_verdict": "n/a",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-08-16",
+        "date": "2026-08-16",
+        "path": "news/news_logs/2026-08-16_digest.json",
+        "index_delta": null,
+        "authority_delta": -0.8,
+        "spy": -0.899,
+        "complete": true,
+        "original_verdict": "n/a",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-08-17",
+        "date": "2026-08-17",
+        "path": "news/news_logs/2026-08-17_digest.json",
+        "index_delta": null,
+        "authority_delta": 0.4,
+        "spy": -0.899,
+        "complete": true,
+        "original_verdict": "n/a",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-08-18",
+        "date": "2026-08-18",
+        "path": "news/news_logs/2026-08-18_digest.json",
+        "index_delta": null,
+        "authority_delta": -0.2,
+        "spy": -0.225,
+        "complete": true,
+        "original_verdict": "n/a",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-08-19",
+        "date": "2026-08-19",
+        "path": "news/news_logs/2026-08-19_digest.json",
+        "index_delta": null,
+        "authority_delta": -0.3,
+        "spy": -0.727,
+        "complete": true,
+        "original_verdict": "n/a",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-08-20",
+        "date": "2026-08-20",
+        "path": "news/news_logs/2026-08-20_digest.json",
+        "index_delta": null,
+        "authority_delta": -0.9,
+        "spy": 0.434,
+        "complete": true,
+        "original_verdict": "n/a",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-08-21",
+        "date": "2026-08-21",
+        "path": "news/news_logs/2026-08-21_digest.json",
+        "index_delta": null,
+        "authority_delta": -0.2,
+        "spy": 0.047,
+        "complete": true,
+        "original_verdict": "n/a",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-08-24",
+        "date": "2026-08-24",
+        "path": "news/news_logs/2026-08-24_digest.json",
+        "index_delta": null,
+        "authority_delta": -0.5,
+        "spy": 0.77,
+        "complete": true,
+        "original_verdict": "n/a",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-08-26",
+        "date": "2026-08-26",
+        "path": "news/news_logs/2026-08-26_digest.json",
+        "index_delta": null,
+        "authority_delta": -0.1,
+        "spy": 0.127,
+        "complete": true,
+        "original_verdict": "n/a",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-08-27",
+        "date": "2026-08-27",
+        "path": "news/news_logs/2026-08-27_digest.json",
+        "index_delta": null,
+        "authority_delta": -1.0,
+        "spy": -1.209,
+        "complete": true,
+        "original_verdict": "n/a",
+        "replayed": "hit"
+      },
+      {
+        "id": "news-digest_2026-09-01",
+        "date": "2026-09-01",
+        "path": "news/news_logs/2026-09-01_digest.json",
+        "index_delta": null,
+        "authority_delta": -1.0,
+        "spy": 1.104,
+        "complete": true,
+        "original_verdict": "n/a",
+        "replayed": "miss"
+      },
+      {
+        "id": "news-digest_2026-09-02",
+        "date": "2026-09-02",
+        "path": "news/news_logs/2026-09-02_digest.json",
+        "index_delta": null,
+        "authority_delta": -0.6,
+        "spy": 0.657,
+        "complete": true,
+        "original_verdict": "n/a",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-09-03",
+        "date": "2026-09-03",
+        "path": "news/news_logs/2026-09-03_digest.json",
+        "index_delta": null,
+        "authority_delta": -0.2,
+        "spy": -0.933,
+        "complete": true,
+        "original_verdict": "n/a",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-09-09",
+        "date": "2026-09-09",
+        "path": "news/news_logs/2026-09-09_digest.json",
+        "index_delta": null,
+        "authority_delta": -0.3,
+        "spy": -0.199,
+        "complete": true,
+        "original_verdict": "n/a",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-09-10",
+        "date": "2026-09-10",
+        "path": "news/news_logs/2026-09-10_digest.json",
+        "index_delta": null,
+        "authority_delta": -0.4,
+        "spy": -0.058,
+        "complete": true,
+        "original_verdict": "n/a",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-09-12",
+        "date": "2026-09-12",
+        "path": "news/news_logs/2026-09-12_digest.json",
+        "index_delta": null,
+        "authority_delta": -0.75,
+        "spy": 0.226,
+        "complete": true,
+        "original_verdict": "n/a",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-09-17",
+        "date": "2026-09-17",
+        "path": "news/news_logs/2026-09-17_digest.json",
+        "index_delta": null,
+        "authority_delta": -0.7,
+        "spy": 1.414,
+        "complete": true,
+        "original_verdict": "n/a",
+        "replayed": "miss"
+      },
+      {
+        "id": "news-digest_2026-09-22",
+        "date": "2026-09-22",
+        "path": "news/news_logs/2026-09-22_digest.json",
+        "index_delta": null,
+        "authority_delta": -0.6,
+        "spy": -0.262,
+        "complete": true,
+        "original_verdict": "n/a",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-09-30",
+        "date": "2026-09-30",
+        "path": "news/news_logs/2026-09-30_digest.json",
+        "index_delta": null,
+        "authority_delta": 0.35,
+        "spy": 1.6,
+        "complete": true,
+        "original_verdict": "n/a",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-10-01",
+        "date": "2026-10-01",
+        "path": "news/news_logs/2026-10-01_digest.json",
+        "index_delta": null,
+        "authority_delta": -0.3,
+        "spy": 1.976,
+        "complete": true,
+        "original_verdict": "n/a",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-10-02",
+        "date": "2026-10-02",
+        "path": "news/news_logs/2026-10-02_digest.json",
+        "index_delta": null,
+        "authority_delta": 0.4,
+        "spy": 0.985,
+        "complete": true,
+        "original_verdict": "n/a",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-10-04",
+        "date": "2026-10-04",
+        "path": "news/news_logs/2026-10-04_digest.json",
+        "index_delta": null,
+        "authority_delta": -0.1,
+        "spy": 0.483,
+        "complete": true,
+        "original_verdict": "n/a",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-10-05",
+        "date": "2026-10-05",
+        "path": "news/news_logs/2026-10-05_digest.json",
+        "index_delta": null,
+        "authority_delta": 0.0,
+        "spy": 0.483,
+        "complete": true,
+        "original_verdict": "n/a",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-10-06",
+        "date": "2026-10-06",
+        "path": "news/news_logs/2026-10-06_digest.json",
+        "index_delta": null,
+        "authority_delta": -0.1,
+        "spy": -0.067,
+        "complete": true,
+        "original_verdict": "n/a",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-10-07",
+        "date": "2026-10-07",
+        "path": "news/news_logs/2026-10-07_digest.json",
+        "index_delta": null,
+        "authority_delta": -0.4,
+        "spy": 0.113,
+        "complete": true,
+        "original_verdict": "n/a",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-10-10",
+        "date": "2026-10-10",
+        "path": "news/news_logs/2026-10-10_digest.json",
+        "index_delta": null,
+        "authority_delta": -0.2,
+        "spy": -0.811,
+        "complete": true,
+        "original_verdict": "n/a",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-10-12",
+        "date": "2026-10-12",
+        "path": "news/news_logs/2026-10-12_digest.json",
+        "index_delta": null,
+        "authority_delta": -0.8,
+        "spy": -1.908,
+        "complete": true,
+        "original_verdict": "n/a",
+        "replayed": "hit"
+      },
+      {
+        "id": "news-digest_2026-10-13",
+        "date": "2026-10-13",
+        "path": "news/news_logs/2026-10-13_digest.json",
+        "index_delta": null,
+        "authority_delta": -0.15,
+        "spy": -1.897,
+        "complete": true,
+        "original_verdict": "n/a",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-10-14",
+        "date": "2026-10-14",
+        "path": "news/news_logs/2026-10-14_digest.json",
+        "index_delta": null,
+        "authority_delta": -0.35,
+        "spy": -0.825,
+        "complete": false,
+        "original_verdict": "n/a",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-10-15",
+        "date": "2026-10-15",
+        "path": "news/news_logs/2026-10-15_digest.json",
+        "index_delta": null,
+        "authority_delta": -0.17,
+        "spy": -1.107,
+        "complete": false,
+        "original_verdict": "n/a",
+        "replayed": "neutral"
+      },
+      {
+        "id": "news-digest_2026-10-16",
+        "date": "2026-10-16",
+        "path": "news/news_logs/2026-10-16_digest.json",
+        "index_delta": null,
+        "authority_delta": 0.1,
+        "spy": null,
+        "complete": false,
+        "original_verdict": "pending",
+        "replayed": "pending"
+      }
+    ]
+  },
+  "thematic_terminal": {
+    "warning_count": {
+      "False": {
+        "n": 72,
+        "verdict": {
+          "hit": 21,
+          "neutral": 30,
+          "miss": 21
+        }
+      },
+      "True": {
+        "n": 53,
+        "verdict": {
+          "neutral": 16,
+          "miss": 20,
+          "hit": 17
+        }
+      }
+    },
+    "mature_lifecycle_count": {
+      "False": {
+        "n": 41,
+        "verdict": {
+          "neutral": 14,
+          "hit": 9,
+          "miss": 18
+        }
+      },
+      "True": {
+        "n": 84,
+        "verdict": {
+          "hit": 29,
+          "neutral": 32,
+          "miss": 23
+        }
+      }
+    },
+    "cells": {
+      "(False, False)": {
+        "n": 21,
+        "verdict": {
+          "neutral": 8,
+          "hit": 5,
+          "miss": 8
+        }
+      },
+      "(False, True)": {
+        "n": 51,
+        "verdict": {
+          "hit": 16,
+          "neutral": 22,
+          "miss": 13
+        }
+      },
+      "(True, False)": {
+        "n": 20,
+        "verdict": {
+          "neutral": 6,
+          "hit": 4,
+          "miss": 10
+        }
+      },
+      "(True, True)": {
+        "n": 33,
+        "verdict": {
+          "neutral": 10,
+          "miss": 10,
+          "hit": 13
+        }
+      }
+    }
+  },
+  "examples": {
+    "deep-dive": [
+      {
+        "id": "sha256:c97c133c77b09d65a8a8e73c5027453965d332782c660848d00dda334cb25012",
+        "aliases": [
+          "deep-dive_BE_2026-08-21"
+        ],
+        "date": "2026-08-21",
+        "path": "/Users/kavi/Developer/Claude/Projects/ai-investment-committee/investment/invest_logs/history.json#206",
+        "verdict": {
+          "label": "hit",
+          "rationale": "看多 → 實際 +31.86%, 命中｜trader 條件: TP 觸發",
+          "max_runup_pct": 39.37,
+          "max_drawdown_pct": 0.0
+        },
+        "action": "EXECUTE",
+        "stance": "STAGED_ENTRY",
+        "score": 0.546,
+        "hooks": {
+          "decisive_agent": "Fundamentals",
+          "decisive_agent_method": "score_x_confidence",
+          "macro_regime": "RISK_ON",
+          "macro_regime_source": "committed_json",
+          "sub_industry_heat": {
+            "ticker_sector": null,
+            "ticker_industry": null,
+            "industry_top_30pct": null
+          }
+        },
+        "authority": "committed_json"
+      },
+      {
+        "id": "sha256:a5503264f6d06a23eaf6929801566194c34b2736878056039477f9d164481638",
+        "aliases": [
+          "deep-dive_PLTR_2026-08-21"
+        ],
+        "date": "2026-08-21",
+        "path": "/Users/kavi/Developer/Claude/Projects/ai-investment-committee/investment/invest_logs/history.json#207",
+        "verdict": {
+          "label": "hit",
+          "rationale": "觀望 → 實際 -1.28% 區間內, 判讀一致｜trader 條件: TP 觸發 / SL 觸發",
+          "max_runup_pct": 3.579,
+          "max_drawdown_pct": -7.825
+        },
+        "action": "CANCEL",
+        "stance": "HOLD",
+        "score": 0.7788,
+        "hooks": {
+          "decisive_agent": "Fundamentals",
+          "decisive_agent_method": "score_x_confidence",
+          "macro_regime": "RISK_ON",
+          "macro_regime_source": "committed_json",
+          "sub_industry_heat": {
+            "ticker_sector": null,
+            "ticker_industry": null,
+            "industry_top_30pct": null
+          }
+        },
+        "authority": "committed_json"
+      },
+      {
+        "id": "sha256:ebcaa2ebd7094895abb1763bc19725a522a63e93e54f2ec788fd6ca46a030ee7",
+        "aliases": [
+          "deep-dive_MRVL_2026-08-22"
+        ],
+        "date": "2026-08-22",
+        "path": "/Users/kavi/Developer/Claude/Projects/ai-investment-committee/investment/invest_logs/history.json#208",
+        "verdict": {
+          "label": "miss",
+          "rationale": "觀望/CANCEL → 實際 +12.25%, 錯過上漲｜trader 條件: TP 觸發 / SL 觸發",
+          "max_runup_pct": 12.251,
+          "max_drawdown_pct": -9.948
+        },
+        "action": "CANCEL",
+        "stance": "HOLD",
+        "score": 0.2516,
+        "hooks": {
+          "decisive_agent": "News",
+          "decisive_agent_method": "score_x_confidence",
+          "macro_regime": "RISK_ON",
+          "macro_regime_source": "committed_json",
+          "sub_industry_heat": {
+            "ticker_sector": null,
+            "ticker_industry": null,
+            "industry_top_30pct": null
+          }
+        },
+        "authority": "committed_json"
+      },
+      {
+        "id": "sha256:a542f826fa343a1fa437f1778b680dc93edba55d6252d95d5872b207e76ad91f",
+        "aliases": [
+          "deep-dive_NVMI_2026-09-02"
+        ],
+        "date": "2026-09-02",
+        "path": "/Users/kavi/Developer/Claude/Projects/ai-investment-committee/investment/invest_logs/history.json#209",
+        "verdict": {
+          "label": "miss",
+          "rationale": "觀望/CANCEL → 實際 +13.31%, 錯過上漲｜trader 條件: TP 觸發 / SL 觸發",
+          "max_runup_pct": 13.307,
+          "max_drawdown_pct": -4.276
+        },
+        "action": "CANCEL",
+        "stance": "HOLD",
+        "score": 0.7872,
+        "hooks": {
+          "decisive_agent": "News",
+          "decisive_agent_method": "score_x_confidence",
+          "macro_regime": "RISK_ON",
+          "macro_regime_source": "committed_json",
+          "sub_industry_heat": {
+            "ticker_sector": null,
+            "ticker_industry": null,
+            "industry_top_30pct": null
+          }
+        },
+        "authority": "committed_json"
+      }
+    ],
+    "thematic-screener": [
+      {
+        "id": "thematic-screener_2026-10-10",
+        "aliases": null,
+        "date": "2026-10-10",
+        "path": "skills/thematic-screener/data/recommendations/2026-10-10.json",
+        "verdict": {
+          "label": "miss",
+          "rationale": "movers 僅 4/20 方向對"
+        },
+        "action": null,
+        "stance": null,
+        "score": null,
+        "hooks": {
+          "n_themes": 5,
+          "bullish_themes": 5,
+          "mature_lifecycle_count": 0,
+          "low_confidence_count": 1,
+          "warning_count": 1,
+          "regime_label": null
+        },
+        "authority": null
+      },
+      {
+        "id": "thematic-screener_2026-10-11",
+        "aliases": null,
+        "date": "2026-10-11",
+        "path": "skills/thematic-screener/data/recommendations/2026-10-12.json",
+        "verdict": {
+          "label": "miss",
+          "rationale": "movers 僅 3/20 方向對"
+        },
+        "action": null,
+        "stance": null,
+        "score": null,
+        "hooks": {
+          "n_themes": 5,
+          "bullish_themes": 5,
+          "mature_lifecycle_count": 0,
+          "low_confidence_count": 2,
+          "warning_count": 1,
+          "regime_label": null
+        },
+        "authority": null
+      },
+      {
+        "id": "thematic-screener_2026-10-12",
+        "aliases": null,
+        "date": "2026-10-12",
+        "path": "skills/thematic-screener/data/recommendations/2026-10-13.json",
+        "verdict": {
+          "label": "miss",
+          "rationale": "movers 僅 5/20 方向對"
+        },
+        "action": null,
+        "stance": null,
+        "score": null,
+        "hooks": {
+          "n_themes": 5,
+          "bullish_themes": 5,
+          "mature_lifecycle_count": 1,
+          "low_confidence_count": 2,
+          "warning_count": 0,
+          "regime_label": null
+        },
+        "authority": null
+      },
+      {
+        "id": "thematic-screener_2026-10-13",
+        "aliases": null,
+        "date": "2026-10-13",
+        "path": "skills/thematic-screener/data/recommendations/2026-10-14.json",
+        "verdict": {
+          "label": "miss",
+          "rationale": "movers 僅 5/20 方向對"
+        },
+        "action": null,
+        "stance": null,
+        "score": null,
+        "hooks": {
+          "n_themes": 5,
+          "bullish_themes": 5,
+          "mature_lifecycle_count": 1,
+          "low_confidence_count": 5,
+          "warning_count": 0,
+          "regime_label": null
+        },
+        "authority": null
+      }
+    ],
+    "sector-scan": [
+      {
+        "id": "sector-scan_2026-09-02",
+        "aliases": null,
+        "date": "2026-09-02",
+        "path": "reports/2026-09-02_sector_report.md",
+        "verdict": {
+          "label": "miss",
+          "rationale": "sector 評級僅 4/11 對 (vs SPY)"
+        },
+        "action": null,
+        "stance": null,
+        "score": null,
+        "hooks": {
+          "regime": "RISK_ON",
+          "breadth_score": null,
+          "n_hot": 2,
+          "n_warm": 6,
+          "n_cold": 3,
+          "rating_skew": "offensive"
+        },
+        "authority": null
+      },
+      {
+        "id": "sector-scan_2026-09-03",
+        "aliases": null,
+        "date": "2026-09-03",
+        "path": "reports/2026-09-03_sector_report.md",
+        "verdict": {
+          "label": "neutral",
+          "rationale": "sector 評級 5/11 對, 接近隨機"
+        },
+        "action": null,
+        "stance": null,
+        "score": null,
+        "hooks": {
+          "regime": "RISK_ON",
+          "breadth_score": null,
+          "n_hot": 2,
+          "n_warm": 5,
+          "n_cold": 4,
+          "rating_skew": "offensive"
+        },
+        "authority": null
+      },
+      {
+        "id": "sector-scan_2026-09-12",
+        "aliases": null,
+        "date": "2026-09-12",
+        "path": "reports/2026-09-12_sector_report.md",
+        "verdict": {
+          "label": "hit",
+          "rationale": "sector 評級 5/8 對 (vs SPY)"
+        },
+        "action": null,
+        "stance": null,
+        "score": null,
+        "hooks": {
+          "regime": "RISK_OFF",
+          "breadth_score": null,
+          "n_hot": 0,
+          "n_warm": 4,
+          "n_cold": 4,
+          "rating_skew": "offensive"
+        },
+        "authority": null
+      },
+      {
+        "id": "sector-scan_2026-09-17",
+        "aliases": null,
+        "date": "2026-09-17",
+        "path": "reports/2026-09-17_sector_report.md",
+        "verdict": {
+          "label": "neutral",
+          "rationale": "sector 評級 4/8 對, 接近隨機"
+        },
+        "action": null,
+        "stance": null,
+        "score": null,
+        "hooks": {
+          "regime": "RISK_OFF",
+          "breadth_score": null,
+          "n_hot": 0,
+          "n_warm": 5,
+          "n_cold": 3,
+          "rating_skew": "offensive"
+        },
+        "authority": null
+      }
+    ]
+  },
+  "probe_audit": [
+    {
+      "id": "sha256:e9eec97604bf2f3fa6a5e69335ef0e4ce5b51bd1c0cb416cf25ad34e81c3e354",
+      "aliases": [
+        "deep-dive_MU_2026-06-21"
+      ],
+      "eval": null,
+      "regime": "RISK_ON",
+      "complete": true,
+      "return": -19.858,
+      "dd": -29.919
+    },
+    {
+      "id": "sha256:edbdf352821f03af0c7c1ea270a587b231feb7f1b9a01309f4f67bb8d2bd6643",
+      "aliases": [
+        "deep-dive_NVDA_2026-07-08"
+      ],
+      "eval": "fired",
+      "regime": "RISK_ON",
+      "complete": true,
+      "return": 9.72,
+      "dd": -6.913
+    },
+    {
+      "id": "sha256:05efea9232ce30cd502fc1bc452acd086ffeb82d3b2a0b1359c4e4c99034d35e",
+      "aliases": [
+        "deep-dive_AAOI_2026-08-21"
+      ],
+      "eval": "fired",
+      "regime": "RISK_ON",
+      "complete": true,
+      "return": -15.743,
+      "dd": -23.658
+    },
+    {
+      "id": "sha256:c97c133c77b09d65a8a8e73c5027453965d332782c660848d00dda334cb25012",
+      "aliases": [
+        "deep-dive_BE_2026-08-21"
+      ],
+      "eval": "fired",
+      "regime": "RISK_ON",
+      "complete": true,
+      "return": 31.859,
+      "dd": 0.0
+    }
+  ],
+  "flip_helper": {
+    "rc": 0,
+    "snapshots": 32,
+    "decisions_tracked": 792,
+    "transitions": 300,
+    "flips": 51,
+    "flip_rate": 0.17,
+    "band": "observe"
+  },
+  "coverage": {
+    "hot_zone_eval": 34,
+    "hot_zone_probe": 64,
+    "authorities": {
+      "committed_json": 208
+    },
+    "weekly_hit_rate_missing": [
+      "short-term-weekly_2026-04-25",
+      "short-term-weekly_2026-06-19",
+      "short-term-weekly_2026-07-05",
+      "short-term-weekly_2026-07-15",
+      "short-term-weekly_2026-09-18"
+    ]
+  },
+  "weekly_deep_runs": {
+    "39": 0,
+    "40": 1,
+    "41": 0,
+    "42": 1
+  },
+  "sector_regimes": {
+    "NEUTRAL": {
+      "n": 1,
+      "counts": {
+        "hit": 1
+      }
+    },
+    "RISK_OFF": {
+      "n": 17,
+      "counts": {
+        "neutral": 5,
+        "miss": 6,
+        "hit": 4,
+        "pending": 2
+      }
+    },
+    "RISK_ON": {
+      "n": 61,
+      "counts": {
+        "hit": 27,
+        "neutral": 12,
+        "miss": 21,
+        "pending": 1
+      }
+    },
+    "SIDEWAYS": {
+      "n": 6,
+      "counts": {
+        "hit": 4,
+        "neutral": 1,
+        "miss": 1
+      }
+    },
+    "VOLATILE": {
+      "n": 1,
+      "counts": {
+        "neutral": 1
+      }
+    },
+    "null": {
+      "n": 0,
+      "counts": {}
+    }
+  },
+  "repeat_tickers": {
+    "MU": {
+      "n": 19,
+      "counts": {
+        "hit": 11,
+        "miss": 8
+      }
+    },
+    "NVDA": {
+      "n": 12,
+      "counts": {
+        "hit": 6,
+        "miss": 3,
+        "neutral": 3
+      }
+    },
+    "PLTR": {
+      "n": 8,
+      "counts": {
+        "miss": 5,
+        "hit": 3
+      }
+    },
+    "INTC": {
+      "n": 1,
+      "counts": {
+        "miss": 1
+      }
+    }
+  },
+  "repeat_examples": [
+    {
+      "id": "sha256:dd65d294aa07f061a6e36cf0f76ef4207c037d4f7d19ed950a69d998690c6e3a",
+      "aliases": [
+        "deep-dive_MU_2026-07-31"
+      ],
+      "action": "CANCEL",
+      "score": 0.7823,
+      "verdict": "miss",
+      "return": 13.345
+    },
+    {
+      "id": "sha256:a3725db66a78997e12e86fb995add52940c2114101ac8b03a2206da2955005b8",
+      "aliases": [
+        "deep-dive_MU_2026-08-02"
+      ],
+      "action": "CANCEL",
+      "score": -0.2963,
+      "verdict": "miss",
+      "return": 12.53
+    },
+    {
+      "id": "sha256:4d2d961ffad8b6290d98f4eeecaeedd61cecab086fad439b171993520a4fdf06",
+      "aliases": [
+        "deep-dive_PLTR_2026-08-02"
+      ],
+      "action": "CANCEL",
+      "score": -0.261,
+      "verdict": "miss",
+      "return": 43.191
+    },
+    {
+      "id": "sha256:5650815bb902219562c7b42ce5ab83049295b9b82d49d09ea4f83ca58031bc5d",
+      "aliases": [
+        "deep-dive_NVDA_2026-08-10"
+      ],
+      "action": "CANCEL",
+      "score": 1.0166,
+      "verdict": "miss",
+      "return": 2.813
+    },
+    {
+      "id": "sha256:38dd2604869bd220b615a67465e756528cc1f9516ab5c200a14ccb7dec4fa338",
+      "aliases": [
+        "deep-dive_NVDA_2026-08-21"
+      ],
+      "action": "EXECUTE",
+      "score": 1.4819,
+      "verdict": "hit",
+      "return": 3.516
+    },
+    {
+      "id": "sha256:2acfcabf7e0f105ac7b72cbb4febf81fa9eb6795dcfb5c7b515b37a76bb8801f",
+      "aliases": [
+        "deep-dive_MU_2026-08-21"
+      ],
+      "action": "EXECUTE",
+      "score": 1.2637,
+      "verdict": "hit",
+      "return": 5.07
+    },
+    {
+      "id": "sha256:32ff9b2410e6dce0793bd84e680180378416f1dbde5a0e4a2c3896fbb55b8895",
+      "aliases": [
+        "deep-dive_NVDA_2026-08-21"
+      ],
+      "action": "EXECUTE",
+      "score": 1.0588,
+      "verdict": "hit",
+      "return": 3.516
+    },
+    {
+      "id": "sha256:a5503264f6d06a23eaf6929801566194c34b2736878056039477f9d164481638",
+      "aliases": [
+        "deep-dive_PLTR_2026-08-21"
+      ],
+      "action": "CANCEL",
+      "score": 0.7788,
+      "verdict": "hit",
+      "return": -1.278
+    }
+  ],
+  "snapshot_checks": [
+    {
+      "date": "2026-10-04",
+      "deep_complete": {
+        "n": 206,
+        "counts": {
+          "miss": 82,
+          "neutral": 14,
+          "hit": 110
+        }
+      },
+      "news_hit": 1,
+      "deep_complete_ids": [
+        "sha256:0093d4484091f12a8dd1b012a6c95a97a9c0b13b445effc70290587aaf223987",
+        "sha256:01dc25b0d89fbe5a6fb0b4e3d293dda81ade5858f9c452897ba2576954f925a6",
+        "sha256:02a50e211d9d98e7b74a7da8b89893600468f10f13c9aaf8ecb19039d12e8149",
+        "sha256:02e3f0d778403e343b404a64c91de72f1298fdf002c552aa1e7f9fa976b1e732",
+        "sha256:03b2edbb699aadf8f247ed2a789d4728a88037eedcdab6de7a35572ca6fd6679",
+        "sha256:03e350497b66977cf945ddb851f246284d13a31ed9ea32fa3942cf4f6645845b",
+        "sha256:0507c306f9a54899c14c5567736f612b6cb6779a760e0fd4a435409d01e4397a",
+        "sha256:05efea9232ce30cd502fc1bc452acd086ffeb82d3b2a0b1359c4e4c99034d35e",
+        "sha256:06077f992924bec80982f460c4b37fa1ebbe66365701d29be473796e9fb3e044",
+        "sha256:063c9e9a11d53027067bb359a456c676e741e4abe9a2d59ab189e3bed6269a84",
+        "sha256:06566b74389104eee3170aa372fe2044d944bf3d381722a13f0302509628858f",
+        "sha256:07abb117816cdaf0768d87eddc80804290b26c292ae58dd67ac221b5b096d1e4",
+        "sha256:08a7ffd5139c435af76fa74e41a4c3596c48d82c1851fa87a0791167574de94f",
+        "sha256:0a20dbe4c32eba66622f85cdc0c22e40a842fbd32147cc438949dea2c1d04376",
+        "sha256:0a9e22580270b8f4bad3931ef5f87d59c990ae74f1c963a49f0879385e56997b",
+        "sha256:0aff45b8b5c3c6748b05df6481637935ba540e1aeaf9182bf61098f2c09eaecf",
+        "sha256:0d1033a31610ccc33ae020e11a8ff66bee9690ae440524d8e26b9b4f7b1482ce",
+        "sha256:0e65e227a8faa3dc300e58041115f417b024a02318ab257c482e76ef7b1fe5c1",
+        "sha256:0e67d199d35ee4568160e3baacc6cf601a8da97fe595122b7c7dd97507aa1740",
+        "sha256:0fc7c178cd8047b94d33b12a9e829dffa5b188d23dce47780503688cd81348ae",
+        "sha256:1055c3f9b32d02ea2666e12882ac3e41a69f7bca73d9f03e0fb7b5208c13440f",
+        "sha256:142786094f74946df2f69e585306ec920b6a5136d9859f0ae652e7374f749292",
+        "sha256:14d06fac67e662ff4a457889a48b6b44d31012ad5c7cd7430027fb42c0a2290f",
+        "sha256:15f550e57203cbbfb0f46a9fcc44dce5dd2e4e13c9a8c3658b3ba90f8c388e3f",
+        "sha256:179e6034c58518aac2b3579b4bbace4a9e54b0b86ca736045e35e1ad24f42f93",
+        "sha256:17fffe527eb1334ca80e73ffebd0bfff3622ec92ebd1419f56800925d56201a0",
+        "sha256:18407d1d415ced809eb05c9f4b3ca83d31789630312c9f626a2835dab4b40f00",
+        "sha256:18c0135b478ecfc4b23f2641e4a2f4c40a356b5634c424cc56e4a1c09696c19d",
+        "sha256:1911a5d92e95f0ae776a7acb47a8d42ff60487ee993bddb1bf606255d116f434",
+        "sha256:1aaf2ae4310eee667a38fa36bfbc1bc014d6905acea769ad86d68cc50513b28a",
+        "sha256:1d28a3ba39e0e8158bafc4875031c043028f189e1713797b80e757310af74687",
+        "sha256:1f420cc3fb46cd742263c126f3a7bfdecff6b4dec1524cc56e98ba2612b8e364",
+        "sha256:1f91a220a15c57125d2ee41bca6bf219987397ba8c36847cc5d31d16473b9e1f",
+        "sha256:1faf70dd495cb6371787c3146417433c74fe5e8d03b3aa934d9e6397065ea99b",
+        "sha256:21eb24d2988a22c3fc61d4961a311b4d2b8720e3a6f81e734495a54e75c2eb7f",
+        "sha256:224be490fdfae2bebc98e3bcd12ed70a2608c455bcf416e4eb9905a7c6ccc4ca",
+        "sha256:2297cdd1885894714bfc69f36edfdd68334e357b622571279561c53a7aadeefe",
+        "sha256:233af27b0212f6b4dbba0db1f0683d0832d8b9a3caa06931a6b3b0a0b8d24cf9",
+        "sha256:234d173c59f49c0bd8684bcbdd0b4270dc3a379adb0136fd509a66d21bcab665",
+        "sha256:236856fead7470dac8239684064c7ab8301f51b91d743f593443c1329bd929fa",
+        "sha256:256218f100ddc492eef9c63e9e4dd6efc72e2d124c83b3c3d81c1a230629125a",
+        "sha256:27628a92a30f8eca3e19ff3635030759cef4ad5f3059aeb3e5aa0d6d7fe54283",
+        "sha256:29f7799cd640f7b02bbedbde9293acb9a948414d6efbd176b2d9eeccf6d68561",
+        "sha256:2a042e707a7c19a75e2e00ca9aee35bece5bd8a3561fc47898a33b34dabf098f",
+        "sha256:2a9bd5ff67a97bf99c3c0d914bccfa0e79b4d64b678ad8faa5ba72a8d6b8483f",
+        "sha256:2acfcabf7e0f105ac7b72cbb4febf81fa9eb6795dcfb5c7b515b37a76bb8801f",
+        "sha256:2b841f15c4e87fd3b05075a8c1667f596529cfde36c446ebbce305e9caf72f1a",
+        "sha256:2bca96af97e358136e6f7371a8bd7e73e3a3048ae6dd5b6040970ee41e98151c",
+        "sha256:2c2499a1aea72e9bcca40b4b2a6108da9be3bfc0ae265ce79dabecd6bf266210",
+        "sha256:2ed4e9c043214404d2cc5c5ea3f7eafd958e5c00817a531cee171477f2af8c74",
+        "sha256:2efd92f4e706d2c1d3f0c5b5970f50c99782b1f1d3f8f4c27f949eb456b172fb",
+        "sha256:30bc18dfe68a7a05cfb629e71bc6d042198f25aef9429c016e38c935173c1e1a",
+        "sha256:31916770caab85827677e1ba381841e23e3cc0d07adf44acb289aefa8a2f5e9d",
+        "sha256:3217a3fa43dffebfb755bbed894eb6e405a0e5a5e3c3136a85d6153d02ee3429",
+        "sha256:32ff9b2410e6dce0793bd84e680180378416f1dbde5a0e4a2c3896fbb55b8895",
+        "sha256:342728e0fa1256176112f9ddfe352fd142cddd2cd3166990a022745c80162f32",
+        "sha256:34ef7794a6cfde7d53958739bfdf410d788492752acfbaf8e73e36e43800bea4",
+        "sha256:362e86e050ceab70d903d361566f5ca5ddeee6b6be614e7afaecc16c0d9bdeee",
+        "sha256:365f1f23153d009c4b97ae6a19ade399b944ac1e5617a71b7cea9eeb22a37074",
+        "sha256:372390c316d4f6a4257b1a0e4ba1411a819c5e1535e58700af3c436298f7f154",
+        "sha256:37477936f80b79e46efaddf1850419b478cfb0a416554856b850a8e8af1ca462",
+        "sha256:381d6bf126214e512d4676cd7e656ebde856503f203e4c1b4c6d9568fe5d86bd",
+        "sha256:38dd2604869bd220b615a67465e756528cc1f9516ab5c200a14ccb7dec4fa338",
+        "sha256:3a9beb22690080be6c24d86565e4e74a1866bf7316d35bc900aa9c3b77232e35",
+        "sha256:3ad1b1912fe02e1caf86b5c2e39d977944b1ea11dbb0d18e25687fe183ddab1e",
+        "sha256:3b5f3c12471852f7ea6a0f862ca24558a783331ad82e91b4be2fd1cf331fbaf7",
+        "sha256:3ef4c2671db354bd3425a511c2b9ebfc6aa551c0b8596d2425b8d843bf646ec7",
+        "sha256:3f690062ed034b33f52120145c532dd07042b7157e9b35b62a3a4ac62a686802",
+        "sha256:3f7cf4020b8058b69cc1f2ea4b4c2a4df437a162e7a984bb626d6dac34d00388",
+        "sha256:4264ac8ae290909cab6b56d459e97e4766e0f3d96e814beb36a6cf6388bc4fc3",
+        "sha256:4267f4f73fae4a850cd352dc7556a9628f0cdaef0ba3168064d9539a60873ac1",
+        "sha256:426d986974db7099ab2415c9c69d63b7eefd46d302c09327ccb9ebc2ea54265e",
+        "sha256:42a30bb9fe2da906dc7a9b80414955a0f2304a216fa98284767169672341b491",
+        "sha256:437345ce81e02750217b2c97d582bf768d413a6806f998a6f82d313f1b6b8424",
+        "sha256:43bdaf3c9782b52546bb6721f9f04c496035f0bcfb2acc4659d6f11659e71596",
+        "sha256:458aa21075a0a150ae22b6c86d7d766a9f82c98ef897fcd39c88193394499ffd",
+        "sha256:463b4edeb7e6e4a2ea425782b6a3c7d1213b5896ea4cac993dd3308900e29e32",
+        "sha256:477945521c5cded1f226a824fb78e4f0b1cb92f3aacfe35032cf42b8a6dbb69e",
+        "sha256:4b2fe536e38753c23e036589745a38c81d224f7d774082730c76147fb73c8ab1",
+        "sha256:4bb48887aabb53a8d1f52d59571873437d26a2e1cb9226beec23899ce6182734",
+        "sha256:4d2d961ffad8b6290d98f4eeecaeedd61cecab086fad439b171993520a4fdf06",
+        "sha256:4f4346c7fa72d30682f51a37f8233d19c2a6690792e85df3d7f662112d10a337",
+        "sha256:5076eed202b2e8ffbeed62676ac49843c8b4aab6d7ee88e24125b46dc5104d27",
+        "sha256:50de005b8f4d9ff633e6d7d0e9c0bee7399f4c64d098f97c1dee7576fa59a3cc",
+        "sha256:53dbaf8eb620571d968e314e1b6de4cf447b1caac7b266d440ee2a7f5d486791",
+        "sha256:5486fbe4b3a979baf6954b5a44aac6be3876a61108d33f75959e87873b0d3e4d",
+        "sha256:551583487979181b1b20e48668faf3b7c8168d8d8e022376c92e4707e811164d",
+        "sha256:5650815bb902219562c7b42ce5ab83049295b9b82d49d09ea4f83ca58031bc5d",
+        "sha256:56c6857d1c5f051507c25dd896cbfb476878a1926ed0c333dc3916e354bf9c47",
+        "sha256:5724aa225532e9d39bb4238d89f81b906508e964b17e67c7bb69bb5bfc678239",
+        "sha256:57e00933344d5fc2e75925d3747a1f720a6cfecced4a3a7da27fe0a94dcda6ab",
+        "sha256:5bbadf944f873fa3935415d724efe84576224eb7bad1040b2a21909011a62143",
+        "sha256:5d05ae4d6a6a9cab5b02c85190e997613b971d91bd679ee7825e4fe0373923ea",
+        "sha256:5e39991483344b01ae33e27c863f5a8c676432aa0d27249534432808ac0f4c80",
+        "sha256:5f8b712682e66a252ca825af42be5a6e6a782afd72acca6d912779d2317c5dc5",
+        "sha256:668e07a7cabeab7c07a29a7fb9145fe33dba8a9a2fea7d8e3ee7da7871fcd711",
+        "sha256:67109e5368c14e4dd6b6ecbcb8682b993678898a4e4ab8670cfcb08e5e87ce6e",
+        "sha256:683ce949585b8d54c8a8a8500855f0ebb434976cd7271913dd5706d63bcc77c5",
+        "sha256:68562df99c107869a13027a21dd738a4ab771d6ace964aaf92f1bad53a1a430f",
+        "sha256:6aa387cd14c455a0abbcbe8f17ce14e9a8f6d0f83f5ba7f60d5e75c07e06c96f",
+        "sha256:6aeccdcd8c02e5c92525a7971ccd61d2418b433095c96e697498b6a7de0d14b5",
+        "sha256:6c7a43c7acc3de2a54f3b030d994c569d3ef34716891b2ee66bfe569486c230e",
+        "sha256:6ec62033d92bcbcfefe9df89cf51f41e1c76bf0ce567d3e62e21302404ba8b6b",
+        "sha256:6f5283cfd337222e27c8689ab3952ae0c0868653a9fc87b3894f5811750f7c91",
+        "sha256:721df9eac0ba96152100d2f740ff12ca57e4bbc38bfde23137e124d7a0a47e1d",
+        "sha256:73621f8537359d911a0c8e585defe4e4d034afa9462c1a21ed22c8dad94be91d",
+        "sha256:75d699c3cceeb11491a0de443fbac9fdd38eb129a4fcb542454faea9f260bb63",
+        "sha256:797c24042202e047381b09c180400e9d39f273aab75eec250059e3dc0fd03284",
+        "sha256:7ac73eb3cc39d8f9504db2caef8fe71978bc99e3b95e5a929e7f24bfc501ece1",
+        "sha256:80e6eb6c4fa093fbc3defb810bca7af2962264f4c3a448d199fa9b259bc4341f",
+        "sha256:8170001fb527cc5a8a38183c1307ef32e96626c2498d95c7e578bd0f25a30056",
+        "sha256:81a2ee95fdf5e2f983d1c8ef257045cc31b9d8a5162c47ecac6a1c7bf55c9028",
+        "sha256:86f8fe23ed9ba0faa430175001c541a3a1bb40cf71457e3de8d3c0199f1ffefa",
+        "sha256:8a61b5ac9f0fff47d85cd186e30b19d08a64ce4c8da0ecd3755a0b1c01a31110",
+        "sha256:8bc373feae19083a92610a0ab434ed52a544bf5f0c01352665e97fc6ae1ba4cb",
+        "sha256:8cdbf7e415a6d957405d7e79fcd52f146c7b7feefb7d2770a774e908192edc70",
+        "sha256:8ded5df960ef53987f36bab69a4d04c3c9cab79edca40fb19719e0c39424f24e",
+        "sha256:8f82106df55b468922d6f733bd56f82b5a405556ddba8d6b39f2fe0e5f037981",
+        "sha256:8f98819a251eaca54388d64b4b1ef05d8fb5804c34476ccb10252a3ce7f86288",
+        "sha256:8fee63f15ea0a3197c743b79d3bfe0fc131915ca21d6ee5ada2e1e943e6e045d",
+        "sha256:904a70e5cc843bd34e687a400bb7df6b8c5b4b53a3ec4b28f6f2bada06205813",
+        "sha256:91f7b31127a2ec5bf71b93a5904a0336d9ab3f34c0dc405327d939f7109477e3",
+        "sha256:929a773b285c495cd04c487cd5017f5ffeb059a2cdcfde59dfcce5a4265143c6",
+        "sha256:936253a5146e877290cbabd397f02cc7ec6e1844684a2f9714b161103e54e03e",
+        "sha256:938ffa7d4cec9fbc35a633fd18dfe2031c4ad36d06fb5d70391894c0338ff4c8",
+        "sha256:968b3ee77a4fac4db99b75c7bc583575fd2f229dab60d311ce24c6a885f00a1f",
+        "sha256:984461a1672ab9a3704daf54e69e79a13d1fc990075ab45118bd5f3fb4e7838a",
+        "sha256:9b53bbc50e60fd1202fffea27c0be9f187f2498e887d0ebc5605b43b0b69a8af",
+        "sha256:9b5d7277443fc6f982299f425e5a3b632402cb1b57b3e23da0b1b6643df3b7d0",
+        "sha256:9cedd7945056d826f7b3e77bff4d79bab3cb40505429d0384ae01b66462659ed",
+        "sha256:9d10c6a9bc229d7837296dbd98cebf66e453d0593836736bb72a308955514564",
+        "sha256:9fe47574f14fbef024bfb7afb82a60adf492dd585a082230cc28482136d29c8b",
+        "sha256:a1cbbf5a184dd1409d540e4b239fd6720cd1033a714bb711f80e4c80329c91e4",
+        "sha256:a2b6e8ebf728ee68e36765012de44bafcbbd412e03d48fb7fd732a7ff68935eb",
+        "sha256:a3611c63fa4c329155ba6044a0a81dc1272561bce17930ab00db28b5e48b440e",
+        "sha256:a3725db66a78997e12e86fb995add52940c2114101ac8b03a2206da2955005b8",
+        "sha256:a431e909382e8dddc60af32a459c00aa0b1daaf1fb0efdc2e39c2c5bf17b0908",
+        "sha256:a542f826fa343a1fa437f1778b680dc93edba55d6252d95d5872b207e76ad91f",
+        "sha256:a5503264f6d06a23eaf6929801566194c34b2736878056039477f9d164481638",
+        "sha256:a58866bae23b44fdf27ad3c3fb711dad518e59d63c3e96e79966c7e29c9217aa",
+        "sha256:aa805af24399e8168d1df5700ca994588b215e177bedc0c88e9cd535d3a7d594",
+        "sha256:ad773f2d9932c0d4e5252d06daf48a95c3b1cc0d024b8972e3bb6fe172cfc18a",
+        "sha256:aec1c6930610d0f5cd7ac3a58f340cf051c01f06b8b357ad800d619c2462211e",
+        "sha256:af03f01baaf32e2e2eb735caa779d03a6786939cef84e4742e18987632383671",
+        "sha256:b124a447550dc5a62933e9cf1a71f1d9b69b40fbfc401efdf12c9bd989bb4083",
+        "sha256:b1f1cf308d0ee08add0f39ff5d21cbba7a70fc1616574c77b31b10dae51e2389",
+        "sha256:b30895262aba9ff2cae4b9f80ffb0f5fe9c66bfebd6580bf0faaa868aa65c55d",
+        "sha256:b3e32e7f5efb25e8a065ee8a92fa9a08dfe9e2ad06e3089f0794be4c7c75cc10",
+        "sha256:b4bbe8ddcf0410285375a3b259d0d56254901ad211f7fb27a42846fab8b9d85c",
+        "sha256:b63f37cfddb9a224d71b749af756c36cb9d714fe3ab417cf84c4660b9e2f1191",
+        "sha256:b6d6b56c2d1bab23845ed980faf149fbd4397f39ce9b6c830c6e7f3417f2606e",
+        "sha256:b74d752b8044e59873ce0b134c0e242819c419cedbc83f027976574be960df90",
+        "sha256:b7b1aa58189c09d1db0b4aa46b015f509f788d0d9ecca041b25577eabce2efcc",
+        "sha256:b7d78fef147e47cff14c5f93b881a2c892d08c2d57989a7b7c9a48475d2aad3e",
+        "sha256:b8406d2e5913f062b7536047649ed0de9ff89085a0f4a4939b7298252cb11f5d",
+        "sha256:b8527128e3727df570ed3e495c08499c9bc2a051e40697aeaec70915407c2545",
+        "sha256:ba5ab7b017108e9acfbabf24f392bf4259343e10d7327f59288800717056ea9d",
+        "sha256:baa0ef8c4c26f0729ef923756d378a081ef634dcbd668e4cd36bf2d5286f8f72",
+        "sha256:bdc7e171adf573a8d543686385253178cc2067f5df85b046609f6a8c90d2f28b",
+        "sha256:bde403032300751866d7a4686dc9ee1d59b19b93ef83050406eab8ee45e4592f",
+        "sha256:be0c2bef976e00f56205e1e63622c0021f5fde7aa507fccd681e1b5718054bba",
+        "sha256:beaea4a116086f5433a0b699db4ec5ba63b3f019fbb61a69258e87e6c41c7e2b",
+        "sha256:beb96ec564aa75b712d44a3e90f55cd918c43a5e5419f4f512e2beabdde36934",
+        "sha256:c08877e6886d6d3c9dd5a6e8407d483b8bac69845e4c3925d26e1748ca359a5e",
+        "sha256:c37d092a771404fef5e9f9c6b7dedd55d0050feca2dfb4655440f4fdd77e7c95",
+        "sha256:c43e5ca6f9c8564f42de8a9bfd6c5cc375e07cde8211d379e9d627287041f487",
+        "sha256:c764a3c7a1bafef4653448733fe0acc5460ad7b432024e9850c6099d59bd1b6e",
+        "sha256:c86efcdd206e3657bbf784b1db02d80c6afa7849a91661eb14891e5d402524cf",
+        "sha256:c8bd46091110ead6e49a4894b85d3b6564a0d39a9dd3c6a52d824f5bcf75c1ef",
+        "sha256:c8de0aa3c4cd92a2063d86864ccef51c49f7c50f43b68334aeff516225800db5",
+        "sha256:c97c133c77b09d65a8a8e73c5027453965d332782c660848d00dda334cb25012",
+        "sha256:cb55424fb65f7a46ef53ffb546c5b99933820ba31443adc211b41a6f39fa2f9a",
+        "sha256:cb772588d382e050dac791304ceb2b9197c27001c0c95847f7dfe24d0e9ef304",
+        "sha256:cc06496bb7e5ffbec4d19ffc672f116587489f6f8166e269829f258a44515e0a",
+        "sha256:ce581c6a00c0e50ab0a00248545c47385ef121d0c4676fef7860b8fc341742e8",
+        "sha256:d16b0d343f85176710b790ba579add7768dc300e037a58a6e73f4ab27dcb4dff",
+        "sha256:d17619ab514c86666bf0026de89c667c72866a86028c65447417492b17e6108f",
+        "sha256:d3d162f3abb6f9c19ef32e15445dcbf65de3cdd31f35e7ac381fff339d164aa9",
+        "sha256:d3f935e7f81078fdb75caa9e635ee85c9e267d6b4cd6cc144c327e2492682394",
+        "sha256:d705ffedf4e683722f9205e418c0268dd54758acfc27a07c9b2f793c52b932ce",
+        "sha256:d95f0b8be4e92a79302ec84b30eeffb2d141f534a422f04833f6dfaf47b861ec",
+        "sha256:d98ca1d5e359dd74bc5f7b453ea2cb927cfeaf88ffc649f8b5bc07451868bad6",
+        "sha256:dcd9954d4e6e67ead94170415740071c94b84cfffe7568206208dd1747b98516",
+        "sha256:dd65d294aa07f061a6e36cf0f76ef4207c037d4f7d19ed950a69d998690c6e3a",
+        "sha256:df3c3b189b65a9a850594c8830b190b372f8ee1919aaa38397d5dad5879407be",
+        "sha256:df3ec7ab2f896e4e601caafc9ca39700e7a7eb0b810508aae73bc5673ef5c862",
+        "sha256:e10e704e98cd2a7c2c480d6133c5ac01f7f484b9505ec41fe0a20bebd3d79a0e",
+        "sha256:e36c8c396bc2b3dcc9eb70a130b354c271840973095de347f357776ca91f9717",
+        "sha256:e441a6e73374ffef2c294481bc2b9b7171e2c30469b43cde95eef5a98bdd05f2",
+        "sha256:e60eb99d034d4438b4508c5f3c767c97dcc22cdea8de1581ccacd277701c9f32",
+        "sha256:e6589eb8c62b5b4ab04db94deedf5e3b1f31212396062ee3b8821efcbbc8ed54",
+        "sha256:e6755cbbd1f0d1900af2e187f0cee86ad298c9463abb94711b5caa731893e007",
+        "sha256:e790ee430bbe1a0638e13038c42d07e8efff44aafef415ee601a8df52bf47340",
+        "sha256:e7aa2d881821cf162dc321333f870df2a4bdc027d6afa16d19858878bb91a82f",
+        "sha256:e9104f75c1fd0f505a3aaa587da8fc425c4c626eaf1abf92903cc3efd621aa2a",
+        "sha256:e9eec97604bf2f3fa6a5e69335ef0e4ce5b51bd1c0cb416cf25ad34e81c3e354",
+        "sha256:ea87e121dd38b5ed5a5e828fb6aea2e20ce158e56382de208bb065f082bba73e",
+        "sha256:ebcaa2ebd7094895abb1763bc19725a522a63e93e54f2ec788fd6ca46a030ee7",
+        "sha256:edbdf352821f03af0c7c1ea270a587b231feb7f1b9a01309f4f67bb8d2bd6643",
+        "sha256:ef3b7a30b681894e075aba618d6dceec765d23d93b6d7332ad2d6f1c0ae95c2c",
+        "sha256:f23c31f3d05819c3573886b5e6f2cd130629bc2c62dfceffb40b315a15916799",
+        "sha256:f52cfd226dd443d74ef26a4703b99a40acff6780b4d028cf5dd36f8e256a66c5",
+        "sha256:f9d4233c51466cc95338c71b8993dd78762f9c04e96343c9cc2a75f46bbd03dd",
+        "sha256:fa456dbbea52f40018d2b4f7b7ea1c1c6528bddaa0c486af4dd989ea6478351e",
+        "sha256:fb47c5312139f114544705fa882dd394b4d6928037d3eb8fae736eb766869b97",
+        "sha256:fd03b618e727e7bd66517fcdc6a286fb274be5815b802fedd5a7f21bcdeadae5"
+      ]
+    },
+    {
+      "date": "2026-10-11",
+      "deep_complete": {
+        "n": 206,
+        "counts": {
+          "miss": 82,
+          "neutral": 14,
+          "hit": 110
+        }
+      },
+      "news_hit": 1,
+      "deep_complete_ids": [
+        "sha256:0093d4484091f12a8dd1b012a6c95a97a9c0b13b445effc70290587aaf223987",
+        "sha256:01dc25b0d89fbe5a6fb0b4e3d293dda81ade5858f9c452897ba2576954f925a6",
+        "sha256:02a50e211d9d98e7b74a7da8b89893600468f10f13c9aaf8ecb19039d12e8149",
+        "sha256:02e3f0d778403e343b404a64c91de72f1298fdf002c552aa1e7f9fa976b1e732",
+        "sha256:03b2edbb699aadf8f247ed2a789d4728a88037eedcdab6de7a35572ca6fd6679",
+        "sha256:03e350497b66977cf945ddb851f246284d13a31ed9ea32fa3942cf4f6645845b",
+        "sha256:0507c306f9a54899c14c5567736f612b6cb6779a760e0fd4a435409d01e4397a",
+        "sha256:05efea9232ce30cd502fc1bc452acd086ffeb82d3b2a0b1359c4e4c99034d35e",
+        "sha256:06077f992924bec80982f460c4b37fa1ebbe66365701d29be473796e9fb3e044",
+        "sha256:063c9e9a11d53027067bb359a456c676e741e4abe9a2d59ab189e3bed6269a84",
+        "sha256:06566b74389104eee3170aa372fe2044d944bf3d381722a13f0302509628858f",
+        "sha256:07abb117816cdaf0768d87eddc80804290b26c292ae58dd67ac221b5b096d1e4",
+        "sha256:08a7ffd5139c435af76fa74e41a4c3596c48d82c1851fa87a0791167574de94f",
+        "sha256:0a20dbe4c32eba66622f85cdc0c22e40a842fbd32147cc438949dea2c1d04376",
+        "sha256:0a9e22580270b8f4bad3931ef5f87d59c990ae74f1c963a49f0879385e56997b",
+        "sha256:0aff45b8b5c3c6748b05df6481637935ba540e1aeaf9182bf61098f2c09eaecf",
+        "sha256:0d1033a31610ccc33ae020e11a8ff66bee9690ae440524d8e26b9b4f7b1482ce",
+        "sha256:0e65e227a8faa3dc300e58041115f417b024a02318ab257c482e76ef7b1fe5c1",
+        "sha256:0e67d199d35ee4568160e3baacc6cf601a8da97fe595122b7c7dd97507aa1740",
+        "sha256:0fc7c178cd8047b94d33b12a9e829dffa5b188d23dce47780503688cd81348ae",
+        "sha256:1055c3f9b32d02ea2666e12882ac3e41a69f7bca73d9f03e0fb7b5208c13440f",
+        "sha256:142786094f74946df2f69e585306ec920b6a5136d9859f0ae652e7374f749292",
+        "sha256:14d06fac67e662ff4a457889a48b6b44d31012ad5c7cd7430027fb42c0a2290f",
+        "sha256:15f550e57203cbbfb0f46a9fcc44dce5dd2e4e13c9a8c3658b3ba90f8c388e3f",
+        "sha256:179e6034c58518aac2b3579b4bbace4a9e54b0b86ca736045e35e1ad24f42f93",
+        "sha256:17fffe527eb1334ca80e73ffebd0bfff3622ec92ebd1419f56800925d56201a0",
+        "sha256:18407d1d415ced809eb05c9f4b3ca83d31789630312c9f626a2835dab4b40f00",
+        "sha256:18c0135b478ecfc4b23f2641e4a2f4c40a356b5634c424cc56e4a1c09696c19d",
+        "sha256:1911a5d92e95f0ae776a7acb47a8d42ff60487ee993bddb1bf606255d116f434",
+        "sha256:1aaf2ae4310eee667a38fa36bfbc1bc014d6905acea769ad86d68cc50513b28a",
+        "sha256:1d28a3ba39e0e8158bafc4875031c043028f189e1713797b80e757310af74687",
+        "sha256:1f420cc3fb46cd742263c126f3a7bfdecff6b4dec1524cc56e98ba2612b8e364",
+        "sha256:1f91a220a15c57125d2ee41bca6bf219987397ba8c36847cc5d31d16473b9e1f",
+        "sha256:1faf70dd495cb6371787c3146417433c74fe5e8d03b3aa934d9e6397065ea99b",
+        "sha256:21eb24d2988a22c3fc61d4961a311b4d2b8720e3a6f81e734495a54e75c2eb7f",
+        "sha256:224be490fdfae2bebc98e3bcd12ed70a2608c455bcf416e4eb9905a7c6ccc4ca",
+        "sha256:2297cdd1885894714bfc69f36edfdd68334e357b622571279561c53a7aadeefe",
+        "sha256:233af27b0212f6b4dbba0db1f0683d0832d8b9a3caa06931a6b3b0a0b8d24cf9",
+        "sha256:234d173c59f49c0bd8684bcbdd0b4270dc3a379adb0136fd509a66d21bcab665",
+        "sha256:236856fead7470dac8239684064c7ab8301f51b91d743f593443c1329bd929fa",
+        "sha256:256218f100ddc492eef9c63e9e4dd6efc72e2d124c83b3c3d81c1a230629125a",
+        "sha256:27628a92a30f8eca3e19ff3635030759cef4ad5f3059aeb3e5aa0d6d7fe54283",
+        "sha256:29f7799cd640f7b02bbedbde9293acb9a948414d6efbd176b2d9eeccf6d68561",
+        "sha256:2a042e707a7c19a75e2e00ca9aee35bece5bd8a3561fc47898a33b34dabf098f",
+        "sha256:2a9bd5ff67a97bf99c3c0d914bccfa0e79b4d64b678ad8faa5ba72a8d6b8483f",
+        "sha256:2acfcabf7e0f105ac7b72cbb4febf81fa9eb6795dcfb5c7b515b37a76bb8801f",
+        "sha256:2b841f15c4e87fd3b05075a8c1667f596529cfde36c446ebbce305e9caf72f1a",
+        "sha256:2bca96af97e358136e6f7371a8bd7e73e3a3048ae6dd5b6040970ee41e98151c",
+        "sha256:2c2499a1aea72e9bcca40b4b2a6108da9be3bfc0ae265ce79dabecd6bf266210",
+        "sha256:2ed4e9c043214404d2cc5c5ea3f7eafd958e5c00817a531cee171477f2af8c74",
+        "sha256:2efd92f4e706d2c1d3f0c5b5970f50c99782b1f1d3f8f4c27f949eb456b172fb",
+        "sha256:30bc18dfe68a7a05cfb629e71bc6d042198f25aef9429c016e38c935173c1e1a",
+        "sha256:31916770caab85827677e1ba381841e23e3cc0d07adf44acb289aefa8a2f5e9d",
+        "sha256:3217a3fa43dffebfb755bbed894eb6e405a0e5a5e3c3136a85d6153d02ee3429",
+        "sha256:32ff9b2410e6dce0793bd84e680180378416f1dbde5a0e4a2c3896fbb55b8895",
+        "sha256:342728e0fa1256176112f9ddfe352fd142cddd2cd3166990a022745c80162f32",
+        "sha256:34ef7794a6cfde7d53958739bfdf410d788492752acfbaf8e73e36e43800bea4",
+        "sha256:362e86e050ceab70d903d361566f5ca5ddeee6b6be614e7afaecc16c0d9bdeee",
+        "sha256:365f1f23153d009c4b97ae6a19ade399b944ac1e5617a71b7cea9eeb22a37074",
+        "sha256:372390c316d4f6a4257b1a0e4ba1411a819c5e1535e58700af3c436298f7f154",
+        "sha256:37477936f80b79e46efaddf1850419b478cfb0a416554856b850a8e8af1ca462",
+        "sha256:381d6bf126214e512d4676cd7e656ebde856503f203e4c1b4c6d9568fe5d86bd",
+        "sha256:38dd2604869bd220b615a67465e756528cc1f9516ab5c200a14ccb7dec4fa338",
+        "sha256:3a9beb22690080be6c24d86565e4e74a1866bf7316d35bc900aa9c3b77232e35",
+        "sha256:3ad1b1912fe02e1caf86b5c2e39d977944b1ea11dbb0d18e25687fe183ddab1e",
+        "sha256:3b5f3c12471852f7ea6a0f862ca24558a783331ad82e91b4be2fd1cf331fbaf7",
+        "sha256:3ef4c2671db354bd3425a511c2b9ebfc6aa551c0b8596d2425b8d843bf646ec7",
+        "sha256:3f690062ed034b33f52120145c532dd07042b7157e9b35b62a3a4ac62a686802",
+        "sha256:3f7cf4020b8058b69cc1f2ea4b4c2a4df437a162e7a984bb626d6dac34d00388",
+        "sha256:4264ac8ae290909cab6b56d459e97e4766e0f3d96e814beb36a6cf6388bc4fc3",
+        "sha256:4267f4f73fae4a850cd352dc7556a9628f0cdaef0ba3168064d9539a60873ac1",
+        "sha256:426d986974db7099ab2415c9c69d63b7eefd46d302c09327ccb9ebc2ea54265e",
+        "sha256:42a30bb9fe2da906dc7a9b80414955a0f2304a216fa98284767169672341b491",
+        "sha256:437345ce81e02750217b2c97d582bf768d413a6806f998a6f82d313f1b6b8424",
+        "sha256:43bdaf3c9782b52546bb6721f9f04c496035f0bcfb2acc4659d6f11659e71596",
+        "sha256:458aa21075a0a150ae22b6c86d7d766a9f82c98ef897fcd39c88193394499ffd",
+        "sha256:463b4edeb7e6e4a2ea425782b6a3c7d1213b5896ea4cac993dd3308900e29e32",
+        "sha256:477945521c5cded1f226a824fb78e4f0b1cb92f3aacfe35032cf42b8a6dbb69e",
+        "sha256:4b2fe536e38753c23e036589745a38c81d224f7d774082730c76147fb73c8ab1",
+        "sha256:4bb48887aabb53a8d1f52d59571873437d26a2e1cb9226beec23899ce6182734",
+        "sha256:4d2d961ffad8b6290d98f4eeecaeedd61cecab086fad439b171993520a4fdf06",
+        "sha256:4f4346c7fa72d30682f51a37f8233d19c2a6690792e85df3d7f662112d10a337",
+        "sha256:5076eed202b2e8ffbeed62676ac49843c8b4aab6d7ee88e24125b46dc5104d27",
+        "sha256:50de005b8f4d9ff633e6d7d0e9c0bee7399f4c64d098f97c1dee7576fa59a3cc",
+        "sha256:53dbaf8eb620571d968e314e1b6de4cf447b1caac7b266d440ee2a7f5d486791",
+        "sha256:5486fbe4b3a979baf6954b5a44aac6be3876a61108d33f75959e87873b0d3e4d",
+        "sha256:551583487979181b1b20e48668faf3b7c8168d8d8e022376c92e4707e811164d",
+        "sha256:5650815bb902219562c7b42ce5ab83049295b9b82d49d09ea4f83ca58031bc5d",
+        "sha256:56c6857d1c5f051507c25dd896cbfb476878a1926ed0c333dc3916e354bf9c47",
+        "sha256:5724aa225532e9d39bb4238d89f81b906508e964b17e67c7bb69bb5bfc678239",
+        "sha256:57e00933344d5fc2e75925d3747a1f720a6cfecced4a3a7da27fe0a94dcda6ab",
+        "sha256:5bbadf944f873fa3935415d724efe84576224eb7bad1040b2a21909011a62143",
+        "sha256:5d05ae4d6a6a9cab5b02c85190e997613b971d91bd679ee7825e4fe0373923ea",
+        "sha256:5e39991483344b01ae33e27c863f5a8c676432aa0d27249534432808ac0f4c80",
+        "sha256:5f8b712682e66a252ca825af42be5a6e6a782afd72acca6d912779d2317c5dc5",
+        "sha256:668e07a7cabeab7c07a29a7fb9145fe33dba8a9a2fea7d8e3ee7da7871fcd711",
+        "sha256:67109e5368c14e4dd6b6ecbcb8682b993678898a4e4ab8670cfcb08e5e87ce6e",
+        "sha256:683ce949585b8d54c8a8a8500855f0ebb434976cd7271913dd5706d63bcc77c5",
+        "sha256:68562df99c107869a13027a21dd738a4ab771d6ace964aaf92f1bad53a1a430f",
+        "sha256:6aa387cd14c455a0abbcbe8f17ce14e9a8f6d0f83f5ba7f60d5e75c07e06c96f",
+        "sha256:6aeccdcd8c02e5c92525a7971ccd61d2418b433095c96e697498b6a7de0d14b5",
+        "sha256:6c7a43c7acc3de2a54f3b030d994c569d3ef34716891b2ee66bfe569486c230e",
+        "sha256:6ec62033d92bcbcfefe9df89cf51f41e1c76bf0ce567d3e62e21302404ba8b6b",
+        "sha256:6f5283cfd337222e27c8689ab3952ae0c0868653a9fc87b3894f5811750f7c91",
+        "sha256:721df9eac0ba96152100d2f740ff12ca57e4bbc38bfde23137e124d7a0a47e1d",
+        "sha256:73621f8537359d911a0c8e585defe4e4d034afa9462c1a21ed22c8dad94be91d",
+        "sha256:75d699c3cceeb11491a0de443fbac9fdd38eb129a4fcb542454faea9f260bb63",
+        "sha256:797c24042202e047381b09c180400e9d39f273aab75eec250059e3dc0fd03284",
+        "sha256:7ac73eb3cc39d8f9504db2caef8fe71978bc99e3b95e5a929e7f24bfc501ece1",
+        "sha256:80e6eb6c4fa093fbc3defb810bca7af2962264f4c3a448d199fa9b259bc4341f",
+        "sha256:8170001fb527cc5a8a38183c1307ef32e96626c2498d95c7e578bd0f25a30056",
+        "sha256:81a2ee95fdf5e2f983d1c8ef257045cc31b9d8a5162c47ecac6a1c7bf55c9028",
+        "sha256:86f8fe23ed9ba0faa430175001c541a3a1bb40cf71457e3de8d3c0199f1ffefa",
+        "sha256:8a61b5ac9f0fff47d85cd186e30b19d08a64ce4c8da0ecd3755a0b1c01a31110",
+        "sha256:8bc373feae19083a92610a0ab434ed52a544bf5f0c01352665e97fc6ae1ba4cb",
+        "sha256:8cdbf7e415a6d957405d7e79fcd52f146c7b7feefb7d2770a774e908192edc70",
+        "sha256:8ded5df960ef53987f36bab69a4d04c3c9cab79edca40fb19719e0c39424f24e",
+        "sha256:8f82106df55b468922d6f733bd56f82b5a405556ddba8d6b39f2fe0e5f037981",
+        "sha256:8f98819a251eaca54388d64b4b1ef05d8fb5804c34476ccb10252a3ce7f86288",
+        "sha256:8fee63f15ea0a3197c743b79d3bfe0fc131915ca21d6ee5ada2e1e943e6e045d",
+        "sha256:904a70e5cc843bd34e687a400bb7df6b8c5b4b53a3ec4b28f6f2bada06205813",
+        "sha256:91f7b31127a2ec5bf71b93a5904a0336d9ab3f34c0dc405327d939f7109477e3",
+        "sha256:929a773b285c495cd04c487cd5017f5ffeb059a2cdcfde59dfcce5a4265143c6",
+        "sha256:936253a5146e877290cbabd397f02cc7ec6e1844684a2f9714b161103e54e03e",
+        "sha256:938ffa7d4cec9fbc35a633fd18dfe2031c4ad36d06fb5d70391894c0338ff4c8",
+        "sha256:968b3ee77a4fac4db99b75c7bc583575fd2f229dab60d311ce24c6a885f00a1f",
+        "sha256:984461a1672ab9a3704daf54e69e79a13d1fc990075ab45118bd5f3fb4e7838a",
+        "sha256:9b53bbc50e60fd1202fffea27c0be9f187f2498e887d0ebc5605b43b0b69a8af",
+        "sha256:9b5d7277443fc6f982299f425e5a3b632402cb1b57b3e23da0b1b6643df3b7d0",
+        "sha256:9cedd7945056d826f7b3e77bff4d79bab3cb40505429d0384ae01b66462659ed",
+        "sha256:9d10c6a9bc229d7837296dbd98cebf66e453d0593836736bb72a308955514564",
+        "sha256:9fe47574f14fbef024bfb7afb82a60adf492dd585a082230cc28482136d29c8b",
+        "sha256:a1cbbf5a184dd1409d540e4b239fd6720cd1033a714bb711f80e4c80329c91e4",
+        "sha256:a2b6e8ebf728ee68e36765012de44bafcbbd412e03d48fb7fd732a7ff68935eb",
+        "sha256:a3611c63fa4c329155ba6044a0a81dc1272561bce17930ab00db28b5e48b440e",
+        "sha256:a3725db66a78997e12e86fb995add52940c2114101ac8b03a2206da2955005b8",
+        "sha256:a431e909382e8dddc60af32a459c00aa0b1daaf1fb0efdc2e39c2c5bf17b0908",
+        "sha256:a542f826fa343a1fa437f1778b680dc93edba55d6252d95d5872b207e76ad91f",
+        "sha256:a5503264f6d06a23eaf6929801566194c34b2736878056039477f9d164481638",
+        "sha256:a58866bae23b44fdf27ad3c3fb711dad518e59d63c3e96e79966c7e29c9217aa",
+        "sha256:aa805af24399e8168d1df5700ca994588b215e177bedc0c88e9cd535d3a7d594",
+        "sha256:ad773f2d9932c0d4e5252d06daf48a95c3b1cc0d024b8972e3bb6fe172cfc18a",
+        "sha256:aec1c6930610d0f5cd7ac3a58f340cf051c01f06b8b357ad800d619c2462211e",
+        "sha256:af03f01baaf32e2e2eb735caa779d03a6786939cef84e4742e18987632383671",
+        "sha256:b124a447550dc5a62933e9cf1a71f1d9b69b40fbfc401efdf12c9bd989bb4083",
+        "sha256:b1f1cf308d0ee08add0f39ff5d21cbba7a70fc1616574c77b31b10dae51e2389",
+        "sha256:b30895262aba9ff2cae4b9f80ffb0f5fe9c66bfebd6580bf0faaa868aa65c55d",
+        "sha256:b3e32e7f5efb25e8a065ee8a92fa9a08dfe9e2ad06e3089f0794be4c7c75cc10",
+        "sha256:b4bbe8ddcf0410285375a3b259d0d56254901ad211f7fb27a42846fab8b9d85c",
+        "sha256:b63f37cfddb9a224d71b749af756c36cb9d714fe3ab417cf84c4660b9e2f1191",
+        "sha256:b6d6b56c2d1bab23845ed980faf149fbd4397f39ce9b6c830c6e7f3417f2606e",
+        "sha256:b74d752b8044e59873ce0b134c0e242819c419cedbc83f027976574be960df90",
+        "sha256:b7b1aa58189c09d1db0b4aa46b015f509f788d0d9ecca041b25577eabce2efcc",
+        "sha256:b7d78fef147e47cff14c5f93b881a2c892d08c2d57989a7b7c9a48475d2aad3e",
+        "sha256:b8406d2e5913f062b7536047649ed0de9ff89085a0f4a4939b7298252cb11f5d",
+        "sha256:b8527128e3727df570ed3e495c08499c9bc2a051e40697aeaec70915407c2545",
+        "sha256:ba5ab7b017108e9acfbabf24f392bf4259343e10d7327f59288800717056ea9d",
+        "sha256:baa0ef8c4c26f0729ef923756d378a081ef634dcbd668e4cd36bf2d5286f8f72",
+        "sha256:bdc7e171adf573a8d543686385253178cc2067f5df85b046609f6a8c90d2f28b",
+        "sha256:bde403032300751866d7a4686dc9ee1d59b19b93ef83050406eab8ee45e4592f",
+        "sha256:be0c2bef976e00f56205e1e63622c0021f5fde7aa507fccd681e1b5718054bba",
+        "sha256:beaea4a116086f5433a0b699db4ec5ba63b3f019fbb61a69258e87e6c41c7e2b",
+        "sha256:beb96ec564aa75b712d44a3e90f55cd918c43a5e5419f4f512e2beabdde36934",
+        "sha256:c08877e6886d6d3c9dd5a6e8407d483b8bac69845e4c3925d26e1748ca359a5e",
+        "sha256:c37d092a771404fef5e9f9c6b7dedd55d0050feca2dfb4655440f4fdd77e7c95",
+        "sha256:c43e5ca6f9c8564f42de8a9bfd6c5cc375e07cde8211d379e9d627287041f487",
+        "sha256:c764a3c7a1bafef4653448733fe0acc5460ad7b432024e9850c6099d59bd1b6e",
+        "sha256:c86efcdd206e3657bbf784b1db02d80c6afa7849a91661eb14891e5d402524cf",
+        "sha256:c8bd46091110ead6e49a4894b85d3b6564a0d39a9dd3c6a52d824f5bcf75c1ef",
+        "sha256:c8de0aa3c4cd92a2063d86864ccef51c49f7c50f43b68334aeff516225800db5",
+        "sha256:c97c133c77b09d65a8a8e73c5027453965d332782c660848d00dda334cb25012",
+        "sha256:cb55424fb65f7a46ef53ffb546c5b99933820ba31443adc211b41a6f39fa2f9a",
+        "sha256:cb772588d382e050dac791304ceb2b9197c27001c0c95847f7dfe24d0e9ef304",
+        "sha256:cc06496bb7e5ffbec4d19ffc672f116587489f6f8166e269829f258a44515e0a",
+        "sha256:ce581c6a00c0e50ab0a00248545c47385ef121d0c4676fef7860b8fc341742e8",
+        "sha256:d16b0d343f85176710b790ba579add7768dc300e037a58a6e73f4ab27dcb4dff",
+        "sha256:d17619ab514c86666bf0026de89c667c72866a86028c65447417492b17e6108f",
+        "sha256:d3d162f3abb6f9c19ef32e15445dcbf65de3cdd31f35e7ac381fff339d164aa9",
+        "sha256:d3f935e7f81078fdb75caa9e635ee85c9e267d6b4cd6cc144c327e2492682394",
+        "sha256:d705ffedf4e683722f9205e418c0268dd54758acfc27a07c9b2f793c52b932ce",
+        "sha256:d95f0b8be4e92a79302ec84b30eeffb2d141f534a422f04833f6dfaf47b861ec",
+        "sha256:d98ca1d5e359dd74bc5f7b453ea2cb927cfeaf88ffc649f8b5bc07451868bad6",
+        "sha256:dcd9954d4e6e67ead94170415740071c94b84cfffe7568206208dd1747b98516",
+        "sha256:dd65d294aa07f061a6e36cf0f76ef4207c037d4f7d19ed950a69d998690c6e3a",
+        "sha256:df3c3b189b65a9a850594c8830b190b372f8ee1919aaa38397d5dad5879407be",
+        "sha256:df3ec7ab2f896e4e601caafc9ca39700e7a7eb0b810508aae73bc5673ef5c862",
+        "sha256:e10e704e98cd2a7c2c480d6133c5ac01f7f484b9505ec41fe0a20bebd3d79a0e",
+        "sha256:e36c8c396bc2b3dcc9eb70a130b354c271840973095de347f357776ca91f9717",
+        "sha256:e441a6e73374ffef2c294481bc2b9b7171e2c30469b43cde95eef5a98bdd05f2",
+        "sha256:e60eb99d034d4438b4508c5f3c767c97dcc22cdea8de1581ccacd277701c9f32",
+        "sha256:e6589eb8c62b5b4ab04db94deedf5e3b1f31212396062ee3b8821efcbbc8ed54",
+        "sha256:e6755cbbd1f0d1900af2e187f0cee86ad298c9463abb94711b5caa731893e007",
+        "sha256:e790ee430bbe1a0638e13038c42d07e8efff44aafef415ee601a8df52bf47340",
+        "sha256:e7aa2d881821cf162dc321333f870df2a4bdc027d6afa16d19858878bb91a82f",
+        "sha256:e9104f75c1fd0f505a3aaa587da8fc425c4c626eaf1abf92903cc3efd621aa2a",
+        "sha256:e9eec97604bf2f3fa6a5e69335ef0e4ce5b51bd1c0cb416cf25ad34e81c3e354",
+        "sha256:ea87e121dd38b5ed5a5e828fb6aea2e20ce158e56382de208bb065f082bba73e",
+        "sha256:ebcaa2ebd7094895abb1763bc19725a522a63e93e54f2ec788fd6ca46a030ee7",
+        "sha256:edbdf352821f03af0c7c1ea270a587b231feb7f1b9a01309f4f67bb8d2bd6643",
+        "sha256:ef3b7a30b681894e075aba618d6dceec765d23d93b6d7332ad2d6f1c0ae95c2c",
+        "sha256:f23c31f3d05819c3573886b5e6f2cd130629bc2c62dfceffb40b315a15916799",
+        "sha256:f52cfd226dd443d74ef26a4703b99a40acff6780b4d028cf5dd36f8e256a66c5",
+        "sha256:f9d4233c51466cc95338c71b8993dd78762f9c04e96343c9cc2a75f46bbd03dd",
+        "sha256:fa456dbbea52f40018d2b4f7b7ea1c1c6528bddaa0c486af4dd989ea6478351e",
+        "sha256:fb47c5312139f114544705fa882dd394b4d6928037d3eb8fae736eb766869b97",
+        "sha256:fd03b618e727e7bd66517fcdc6a286fb274be5815b802fedd5a7f21bcdeadae5"
+      ]
+    },
+    {
+      "date": "2026-10-18",
+      "deep_complete": {
+        "n": 206,
+        "counts": {
+          "miss": 82,
+          "neutral": 14,
+          "hit": 110
+        }
+      },
+      "news_hit": 1,
+      "deep_complete_ids": [
+        "sha256:0093d4484091f12a8dd1b012a6c95a97a9c0b13b445effc70290587aaf223987",
+        "sha256:01dc25b0d89fbe5a6fb0b4e3d293dda81ade5858f9c452897ba2576954f925a6",
+        "sha256:02a50e211d9d98e7b74a7da8b89893600468f10f13c9aaf8ecb19039d12e8149",
+        "sha256:02e3f0d778403e343b404a64c91de72f1298fdf002c552aa1e7f9fa976b1e732",
+        "sha256:03b2edbb699aadf8f247ed2a789d4728a88037eedcdab6de7a35572ca6fd6679",
+        "sha256:03e350497b66977cf945ddb851f246284d13a31ed9ea32fa3942cf4f6645845b",
+        "sha256:0507c306f9a54899c14c5567736f612b6cb6779a760e0fd4a435409d01e4397a",
+        "sha256:05efea9232ce30cd502fc1bc452acd086ffeb82d3b2a0b1359c4e4c99034d35e",
+        "sha256:06077f992924bec80982f460c4b37fa1ebbe66365701d29be473796e9fb3e044",
+        "sha256:063c9e9a11d53027067bb359a456c676e741e4abe9a2d59ab189e3bed6269a84",
+        "sha256:06566b74389104eee3170aa372fe2044d944bf3d381722a13f0302509628858f",
+        "sha256:07abb117816cdaf0768d87eddc80804290b26c292ae58dd67ac221b5b096d1e4",
+        "sha256:08a7ffd5139c435af76fa74e41a4c3596c48d82c1851fa87a0791167574de94f",
+        "sha256:0a20dbe4c32eba66622f85cdc0c22e40a842fbd32147cc438949dea2c1d04376",
+        "sha256:0a9e22580270b8f4bad3931ef5f87d59c990ae74f1c963a49f0879385e56997b",
+        "sha256:0aff45b8b5c3c6748b05df6481637935ba540e1aeaf9182bf61098f2c09eaecf",
+        "sha256:0d1033a31610ccc33ae020e11a8ff66bee9690ae440524d8e26b9b4f7b1482ce",
+        "sha256:0e65e227a8faa3dc300e58041115f417b024a02318ab257c482e76ef7b1fe5c1",
+        "sha256:0e67d199d35ee4568160e3baacc6cf601a8da97fe595122b7c7dd97507aa1740",
+        "sha256:0fc7c178cd8047b94d33b12a9e829dffa5b188d23dce47780503688cd81348ae",
+        "sha256:1055c3f9b32d02ea2666e12882ac3e41a69f7bca73d9f03e0fb7b5208c13440f",
+        "sha256:142786094f74946df2f69e585306ec920b6a5136d9859f0ae652e7374f749292",
+        "sha256:14d06fac67e662ff4a457889a48b6b44d31012ad5c7cd7430027fb42c0a2290f",
+        "sha256:15f550e57203cbbfb0f46a9fcc44dce5dd2e4e13c9a8c3658b3ba90f8c388e3f",
+        "sha256:179e6034c58518aac2b3579b4bbace4a9e54b0b86ca736045e35e1ad24f42f93",
+        "sha256:17fffe527eb1334ca80e73ffebd0bfff3622ec92ebd1419f56800925d56201a0",
+        "sha256:18407d1d415ced809eb05c9f4b3ca83d31789630312c9f626a2835dab4b40f00",
+        "sha256:18c0135b478ecfc4b23f2641e4a2f4c40a356b5634c424cc56e4a1c09696c19d",
+        "sha256:1911a5d92e95f0ae776a7acb47a8d42ff60487ee993bddb1bf606255d116f434",
+        "sha256:1aaf2ae4310eee667a38fa36bfbc1bc014d6905acea769ad86d68cc50513b28a",
+        "sha256:1d28a3ba39e0e8158bafc4875031c043028f189e1713797b80e757310af74687",
+        "sha256:1f420cc3fb46cd742263c126f3a7bfdecff6b4dec1524cc56e98ba2612b8e364",
+        "sha256:1f91a220a15c57125d2ee41bca6bf219987397ba8c36847cc5d31d16473b9e1f",
+        "sha256:1faf70dd495cb6371787c3146417433c74fe5e8d03b3aa934d9e6397065ea99b",
+        "sha256:21eb24d2988a22c3fc61d4961a311b4d2b8720e3a6f81e734495a54e75c2eb7f",
+        "sha256:224be490fdfae2bebc98e3bcd12ed70a2608c455bcf416e4eb9905a7c6ccc4ca",
+        "sha256:2297cdd1885894714bfc69f36edfdd68334e357b622571279561c53a7aadeefe",
+        "sha256:233af27b0212f6b4dbba0db1f0683d0832d8b9a3caa06931a6b3b0a0b8d24cf9",
+        "sha256:234d173c59f49c0bd8684bcbdd0b4270dc3a379adb0136fd509a66d21bcab665",
+        "sha256:236856fead7470dac8239684064c7ab8301f51b91d743f593443c1329bd929fa",
+        "sha256:256218f100ddc492eef9c63e9e4dd6efc72e2d124c83b3c3d81c1a230629125a",
+        "sha256:27628a92a30f8eca3e19ff3635030759cef4ad5f3059aeb3e5aa0d6d7fe54283",
+        "sha256:29f7799cd640f7b02bbedbde9293acb9a948414d6efbd176b2d9eeccf6d68561",
+        "sha256:2a042e707a7c19a75e2e00ca9aee35bece5bd8a3561fc47898a33b34dabf098f",
+        "sha256:2a9bd5ff67a97bf99c3c0d914bccfa0e79b4d64b678ad8faa5ba72a8d6b8483f",
+        "sha256:2acfcabf7e0f105ac7b72cbb4febf81fa9eb6795dcfb5c7b515b37a76bb8801f",
+        "sha256:2b841f15c4e87fd3b05075a8c1667f596529cfde36c446ebbce305e9caf72f1a",
+        "sha256:2bca96af97e358136e6f7371a8bd7e73e3a3048ae6dd5b6040970ee41e98151c",
+        "sha256:2c2499a1aea72e9bcca40b4b2a6108da9be3bfc0ae265ce79dabecd6bf266210",
+        "sha256:2ed4e9c043214404d2cc5c5ea3f7eafd958e5c00817a531cee171477f2af8c74",
+        "sha256:2efd92f4e706d2c1d3f0c5b5970f50c99782b1f1d3f8f4c27f949eb456b172fb",
+        "sha256:30bc18dfe68a7a05cfb629e71bc6d042198f25aef9429c016e38c935173c1e1a",
+        "sha256:31916770caab85827677e1ba381841e23e3cc0d07adf44acb289aefa8a2f5e9d",
+        "sha256:3217a3fa43dffebfb755bbed894eb6e405a0e5a5e3c3136a85d6153d02ee3429",
+        "sha256:32ff9b2410e6dce0793bd84e680180378416f1dbde5a0e4a2c3896fbb55b8895",
+        "sha256:342728e0fa1256176112f9ddfe352fd142cddd2cd3166990a022745c80162f32",
+        "sha256:34ef7794a6cfde7d53958739bfdf410d788492752acfbaf8e73e36e43800bea4",
+        "sha256:362e86e050ceab70d903d361566f5ca5ddeee6b6be614e7afaecc16c0d9bdeee",
+        "sha256:365f1f23153d009c4b97ae6a19ade399b944ac1e5617a71b7cea9eeb22a37074",
+        "sha256:372390c316d4f6a4257b1a0e4ba1411a819c5e1535e58700af3c436298f7f154",
+        "sha256:37477936f80b79e46efaddf1850419b478cfb0a416554856b850a8e8af1ca462",
+        "sha256:381d6bf126214e512d4676cd7e656ebde856503f203e4c1b4c6d9568fe5d86bd",
+        "sha256:38dd2604869bd220b615a67465e756528cc1f9516ab5c200a14ccb7dec4fa338",
+        "sha256:3a9beb22690080be6c24d86565e4e74a1866bf7316d35bc900aa9c3b77232e35",
+        "sha256:3ad1b1912fe02e1caf86b5c2e39d977944b1ea11dbb0d18e25687fe183ddab1e",
+        "sha256:3b5f3c12471852f7ea6a0f862ca24558a783331ad82e91b4be2fd1cf331fbaf7",
+        "sha256:3ef4c2671db354bd3425a511c2b9ebfc6aa551c0b8596d2425b8d843bf646ec7",
+        "sha256:3f690062ed034b33f52120145c532dd07042b7157e9b35b62a3a4ac62a686802",
+        "sha256:3f7cf4020b8058b69cc1f2ea4b4c2a4df437a162e7a984bb626d6dac34d00388",
+        "sha256:4264ac8ae290909cab6b56d459e97e4766e0f3d96e814beb36a6cf6388bc4fc3",
+        "sha256:4267f4f73fae4a850cd352dc7556a9628f0cdaef0ba3168064d9539a60873ac1",
+        "sha256:426d986974db7099ab2415c9c69d63b7eefd46d302c09327ccb9ebc2ea54265e",
+        "sha256:42a30bb9fe2da906dc7a9b80414955a0f2304a216fa98284767169672341b491",
+        "sha256:437345ce81e02750217b2c97d582bf768d413a6806f998a6f82d313f1b6b8424",
+        "sha256:43bdaf3c9782b52546bb6721f9f04c496035f0bcfb2acc4659d6f11659e71596",
+        "sha256:458aa21075a0a150ae22b6c86d7d766a9f82c98ef897fcd39c88193394499ffd",
+        "sha256:463b4edeb7e6e4a2ea425782b6a3c7d1213b5896ea4cac993dd3308900e29e32",
+        "sha256:477945521c5cded1f226a824fb78e4f0b1cb92f3aacfe35032cf42b8a6dbb69e",
+        "sha256:4b2fe536e38753c23e036589745a38c81d224f7d774082730c76147fb73c8ab1",
+        "sha256:4bb48887aabb53a8d1f52d59571873437d26a2e1cb9226beec23899ce6182734",
+        "sha256:4d2d961ffad8b6290d98f4eeecaeedd61cecab086fad439b171993520a4fdf06",
+        "sha256:4f4346c7fa72d30682f51a37f8233d19c2a6690792e85df3d7f662112d10a337",
+        "sha256:5076eed202b2e8ffbeed62676ac49843c8b4aab6d7ee88e24125b46dc5104d27",
+        "sha256:50de005b8f4d9ff633e6d7d0e9c0bee7399f4c64d098f97c1dee7576fa59a3cc",
+        "sha256:53dbaf8eb620571d968e314e1b6de4cf447b1caac7b266d440ee2a7f5d486791",
+        "sha256:5486fbe4b3a979baf6954b5a44aac6be3876a61108d33f75959e87873b0d3e4d",
+        "sha256:551583487979181b1b20e48668faf3b7c8168d8d8e022376c92e4707e811164d",
+        "sha256:5650815bb902219562c7b42ce5ab83049295b9b82d49d09ea4f83ca58031bc5d",
+        "sha256:56c6857d1c5f051507c25dd896cbfb476878a1926ed0c333dc3916e354bf9c47",
+        "sha256:5724aa225532e9d39bb4238d89f81b906508e964b17e67c7bb69bb5bfc678239",
+        "sha256:57e00933344d5fc2e75925d3747a1f720a6cfecced4a3a7da27fe0a94dcda6ab",
+        "sha256:5bbadf944f873fa3935415d724efe84576224eb7bad1040b2a21909011a62143",
+        "sha256:5d05ae4d6a6a9cab5b02c85190e997613b971d91bd679ee7825e4fe0373923ea",
+        "sha256:5e39991483344b01ae33e27c863f5a8c676432aa0d27249534432808ac0f4c80",
+        "sha256:5f8b712682e66a252ca825af42be5a6e6a782afd72acca6d912779d2317c5dc5",
+        "sha256:668e07a7cabeab7c07a29a7fb9145fe33dba8a9a2fea7d8e3ee7da7871fcd711",
+        "sha256:67109e5368c14e4dd6b6ecbcb8682b993678898a4e4ab8670cfcb08e5e87ce6e",
+        "sha256:683ce949585b8d54c8a8a8500855f0ebb434976cd7271913dd5706d63bcc77c5",
+        "sha256:68562df99c107869a13027a21dd738a4ab771d6ace964aaf92f1bad53a1a430f",
+        "sha256:6aa387cd14c455a0abbcbe8f17ce14e9a8f6d0f83f5ba7f60d5e75c07e06c96f",
+        "sha256:6aeccdcd8c02e5c92525a7971ccd61d2418b433095c96e697498b6a7de0d14b5",
+        "sha256:6c7a43c7acc3de2a54f3b030d994c569d3ef34716891b2ee66bfe569486c230e",
+        "sha256:6ec62033d92bcbcfefe9df89cf51f41e1c76bf0ce567d3e62e21302404ba8b6b",
+        "sha256:6f5283cfd337222e27c8689ab3952ae0c0868653a9fc87b3894f5811750f7c91",
+        "sha256:721df9eac0ba96152100d2f740ff12ca57e4bbc38bfde23137e124d7a0a47e1d",
+        "sha256:73621f8537359d911a0c8e585defe4e4d034afa9462c1a21ed22c8dad94be91d",
+        "sha256:75d699c3cceeb11491a0de443fbac9fdd38eb129a4fcb542454faea9f260bb63",
+        "sha256:797c24042202e047381b09c180400e9d39f273aab75eec250059e3dc0fd03284",
+        "sha256:7ac73eb3cc39d8f9504db2caef8fe71978bc99e3b95e5a929e7f24bfc501ece1",
+        "sha256:80e6eb6c4fa093fbc3defb810bca7af2962264f4c3a448d199fa9b259bc4341f",
+        "sha256:8170001fb527cc5a8a38183c1307ef32e96626c2498d95c7e578bd0f25a30056",
+        "sha256:81a2ee95fdf5e2f983d1c8ef257045cc31b9d8a5162c47ecac6a1c7bf55c9028",
+        "sha256:86f8fe23ed9ba0faa430175001c541a3a1bb40cf71457e3de8d3c0199f1ffefa",
+        "sha256:8a61b5ac9f0fff47d85cd186e30b19d08a64ce4c8da0ecd3755a0b1c01a31110",
+        "sha256:8bc373feae19083a92610a0ab434ed52a544bf5f0c01352665e97fc6ae1ba4cb",
+        "sha256:8cdbf7e415a6d957405d7e79fcd52f146c7b7feefb7d2770a774e908192edc70",
+        "sha256:8ded5df960ef53987f36bab69a4d04c3c9cab79edca40fb19719e0c39424f24e",
+        "sha256:8f82106df55b468922d6f733bd56f82b5a405556ddba8d6b39f2fe0e5f037981",
+        "sha256:8f98819a251eaca54388d64b4b1ef05d8fb5804c34476ccb10252a3ce7f86288",
+        "sha256:8fee63f15ea0a3197c743b79d3bfe0fc131915ca21d6ee5ada2e1e943e6e045d",
+        "sha256:904a70e5cc843bd34e687a400bb7df6b8c5b4b53a3ec4b28f6f2bada06205813",
+        "sha256:91f7b31127a2ec5bf71b93a5904a0336d9ab3f34c0dc405327d939f7109477e3",
+        "sha256:929a773b285c495cd04c487cd5017f5ffeb059a2cdcfde59dfcce5a4265143c6",
+        "sha256:936253a5146e877290cbabd397f02cc7ec6e1844684a2f9714b161103e54e03e",
+        "sha256:938ffa7d4cec9fbc35a633fd18dfe2031c4ad36d06fb5d70391894c0338ff4c8",
+        "sha256:968b3ee77a4fac4db99b75c7bc583575fd2f229dab60d311ce24c6a885f00a1f",
+        "sha256:984461a1672ab9a3704daf54e69e79a13d1fc990075ab45118bd5f3fb4e7838a",
+        "sha256:9b53bbc50e60fd1202fffea27c0be9f187f2498e887d0ebc5605b43b0b69a8af",
+        "sha256:9b5d7277443fc6f982299f425e5a3b632402cb1b57b3e23da0b1b6643df3b7d0",
+        "sha256:9cedd7945056d826f7b3e77bff4d79bab3cb40505429d0384ae01b66462659ed",
+        "sha256:9d10c6a9bc229d7837296dbd98cebf66e453d0593836736bb72a308955514564",
+        "sha256:9fe47574f14fbef024bfb7afb82a60adf492dd585a082230cc28482136d29c8b",
+        "sha256:a1cbbf5a184dd1409d540e4b239fd6720cd1033a714bb711f80e4c80329c91e4",
+        "sha256:a2b6e8ebf728ee68e36765012de44bafcbbd412e03d48fb7fd732a7ff68935eb",
+        "sha256:a3611c63fa4c329155ba6044a0a81dc1272561bce17930ab00db28b5e48b440e",
+        "sha256:a3725db66a78997e12e86fb995add52940c2114101ac8b03a2206da2955005b8",
+        "sha256:a431e909382e8dddc60af32a459c00aa0b1daaf1fb0efdc2e39c2c5bf17b0908",
+        "sha256:a542f826fa343a1fa437f1778b680dc93edba55d6252d95d5872b207e76ad91f",
+        "sha256:a5503264f6d06a23eaf6929801566194c34b2736878056039477f9d164481638",
+        "sha256:a58866bae23b44fdf27ad3c3fb711dad518e59d63c3e96e79966c7e29c9217aa",
+        "sha256:aa805af24399e8168d1df5700ca994588b215e177bedc0c88e9cd535d3a7d594",
+        "sha256:ad773f2d9932c0d4e5252d06daf48a95c3b1cc0d024b8972e3bb6fe172cfc18a",
+        "sha256:aec1c6930610d0f5cd7ac3a58f340cf051c01f06b8b357ad800d619c2462211e",
+        "sha256:af03f01baaf32e2e2eb735caa779d03a6786939cef84e4742e18987632383671",
+        "sha256:b124a447550dc5a62933e9cf1a71f1d9b69b40fbfc401efdf12c9bd989bb4083",
+        "sha256:b1f1cf308d0ee08add0f39ff5d21cbba7a70fc1616574c77b31b10dae51e2389",
+        "sha256:b30895262aba9ff2cae4b9f80ffb0f5fe9c66bfebd6580bf0faaa868aa65c55d",
+        "sha256:b3e32e7f5efb25e8a065ee8a92fa9a08dfe9e2ad06e3089f0794be4c7c75cc10",
+        "sha256:b4bbe8ddcf0410285375a3b259d0d56254901ad211f7fb27a42846fab8b9d85c",
+        "sha256:b63f37cfddb9a224d71b749af756c36cb9d714fe3ab417cf84c4660b9e2f1191",
+        "sha256:b6d6b56c2d1bab23845ed980faf149fbd4397f39ce9b6c830c6e7f3417f2606e",
+        "sha256:b74d752b8044e59873ce0b134c0e242819c419cedbc83f027976574be960df90",
+        "sha256:b7b1aa58189c09d1db0b4aa46b015f509f788d0d9ecca041b25577eabce2efcc",
+        "sha256:b7d78fef147e47cff14c5f93b881a2c892d08c2d57989a7b7c9a48475d2aad3e",
+        "sha256:b8406d2e5913f062b7536047649ed0de9ff89085a0f4a4939b7298252cb11f5d",
+        "sha256:b8527128e3727df570ed3e495c08499c9bc2a051e40697aeaec70915407c2545",
+        "sha256:ba5ab7b017108e9acfbabf24f392bf4259343e10d7327f59288800717056ea9d",
+        "sha256:baa0ef8c4c26f0729ef923756d378a081ef634dcbd668e4cd36bf2d5286f8f72",
+        "sha256:bdc7e171adf573a8d543686385253178cc2067f5df85b046609f6a8c90d2f28b",
+        "sha256:bde403032300751866d7a4686dc9ee1d59b19b93ef83050406eab8ee45e4592f",
+        "sha256:be0c2bef976e00f56205e1e63622c0021f5fde7aa507fccd681e1b5718054bba",
+        "sha256:beaea4a116086f5433a0b699db4ec5ba63b3f019fbb61a69258e87e6c41c7e2b",
+        "sha256:beb96ec564aa75b712d44a3e90f55cd918c43a5e5419f4f512e2beabdde36934",
+        "sha256:c08877e6886d6d3c9dd5a6e8407d483b8bac69845e4c3925d26e1748ca359a5e",
+        "sha256:c37d092a771404fef5e9f9c6b7dedd55d0050feca2dfb4655440f4fdd77e7c95",
+        "sha256:c43e5ca6f9c8564f42de8a9bfd6c5cc375e07cde8211d379e9d627287041f487",
+        "sha256:c764a3c7a1bafef4653448733fe0acc5460ad7b432024e9850c6099d59bd1b6e",
+        "sha256:c86efcdd206e3657bbf784b1db02d80c6afa7849a91661eb14891e5d402524cf",
+        "sha256:c8bd46091110ead6e49a4894b85d3b6564a0d39a9dd3c6a52d824f5bcf75c1ef",
+        "sha256:c8de0aa3c4cd92a2063d86864ccef51c49f7c50f43b68334aeff516225800db5",
+        "sha256:c97c133c77b09d65a8a8e73c5027453965d332782c660848d00dda334cb25012",
+        "sha256:cb55424fb65f7a46ef53ffb546c5b99933820ba31443adc211b41a6f39fa2f9a",
+        "sha256:cb772588d382e050dac791304ceb2b9197c27001c0c95847f7dfe24d0e9ef304",
+        "sha256:cc06496bb7e5ffbec4d19ffc672f116587489f6f8166e269829f258a44515e0a",
+        "sha256:ce581c6a00c0e50ab0a00248545c47385ef121d0c4676fef7860b8fc341742e8",
+        "sha256:d16b0d343f85176710b790ba579add7768dc300e037a58a6e73f4ab27dcb4dff",
+        "sha256:d17619ab514c86666bf0026de89c667c72866a86028c65447417492b17e6108f",
+        "sha256:d3d162f3abb6f9c19ef32e15445dcbf65de3cdd31f35e7ac381fff339d164aa9",
+        "sha256:d3f935e7f81078fdb75caa9e635ee85c9e267d6b4cd6cc144c327e2492682394",
+        "sha256:d705ffedf4e683722f9205e418c0268dd54758acfc27a07c9b2f793c52b932ce",
+        "sha256:d95f0b8be4e92a79302ec84b30eeffb2d141f534a422f04833f6dfaf47b861ec",
+        "sha256:d98ca1d5e359dd74bc5f7b453ea2cb927cfeaf88ffc649f8b5bc07451868bad6",
+        "sha256:dcd9954d4e6e67ead94170415740071c94b84cfffe7568206208dd1747b98516",
+        "sha256:dd65d294aa07f061a6e36cf0f76ef4207c037d4f7d19ed950a69d998690c6e3a",
+        "sha256:df3c3b189b65a9a850594c8830b190b372f8ee1919aaa38397d5dad5879407be",
+        "sha256:df3ec7ab2f896e4e601caafc9ca39700e7a7eb0b810508aae73bc5673ef5c862",
+        "sha256:e10e704e98cd2a7c2c480d6133c5ac01f7f484b9505ec41fe0a20bebd3d79a0e",
+        "sha256:e36c8c396bc2b3dcc9eb70a130b354c271840973095de347f357776ca91f9717",
+        "sha256:e441a6e73374ffef2c294481bc2b9b7171e2c30469b43cde95eef5a98bdd05f2",
+        "sha256:e60eb99d034d4438b4508c5f3c767c97dcc22cdea8de1581ccacd277701c9f32",
+        "sha256:e6589eb8c62b5b4ab04db94deedf5e3b1f31212396062ee3b8821efcbbc8ed54",
+        "sha256:e6755cbbd1f0d1900af2e187f0cee86ad298c9463abb94711b5caa731893e007",
+        "sha256:e790ee430bbe1a0638e13038c42d07e8efff44aafef415ee601a8df52bf47340",
+        "sha256:e7aa2d881821cf162dc321333f870df2a4bdc027d6afa16d19858878bb91a82f",
+        "sha256:e9104f75c1fd0f505a3aaa587da8fc425c4c626eaf1abf92903cc3efd621aa2a",
+        "sha256:e9eec97604bf2f3fa6a5e69335ef0e4ce5b51bd1c0cb416cf25ad34e81c3e354",
+        "sha256:ea87e121dd38b5ed5a5e828fb6aea2e20ce158e56382de208bb065f082bba73e",
+        "sha256:ebcaa2ebd7094895abb1763bc19725a522a63e93e54f2ec788fd6ca46a030ee7",
+        "sha256:edbdf352821f03af0c7c1ea270a587b231feb7f1b9a01309f4f67bb8d2bd6643",
+        "sha256:ef3b7a30b681894e075aba618d6dceec765d23d93b6d7332ad2d6f1c0ae95c2c",
+        "sha256:f23c31f3d05819c3573886b5e6f2cd130629bc2c62dfceffb40b315a15916799",
+        "sha256:f52cfd226dd443d74ef26a4703b99a40acff6780b4d028cf5dd36f8e256a66c5",
+        "sha256:f9d4233c51466cc95338c71b8993dd78762f9c04e96343c9cc2a75f46bbd03dd",
+        "sha256:fa456dbbea52f40018d2b4f7b7ea1c1c6528bddaa0c486af4dd989ea6478351e",
+        "sha256:fb47c5312139f114544705fa882dd394b4d6928037d3eb8fae736eb766869b97",
+        "sha256:fd03b618e727e7bd66517fcdc6a286fb274be5815b802fedd5a7f21bcdeadae5"
+      ]
+    }
+  ],
+  "metadata_gate_check": {
+    "deep_complete_eligible": 206,
+    "finite_guard_in_build_event_index": true,
+    "finite_guard_in_evaluation_metadata": true,
+    "heat_top30_known": 0,
+    "heat_industry_known": 1,
+    "heat_sector_known": 1
+  },
+  "probe_summary": {
+    "flag_n": 4,
+    "flag_mean_return": 1.4945000000000004,
+    "flag_worst_dd": -29.919,
+    "fired_n": 3,
+    "flag_eval_missing": 1
+  }
+}

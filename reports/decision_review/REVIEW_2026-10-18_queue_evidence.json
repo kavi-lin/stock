@@ -1,0 +1,217 @@
+{
+  "date": "2026-10-18",
+  "existing_active_evaluated": 26,
+  "rows": [
+    {
+      "id": "TODO-003",
+      "title": "momentum-screen verdict 規則重審 (Pattern F)",
+      "source_type": "accumulating_data",
+      "review_count": 16,
+      "judgement": "stalled / stale",
+      "evidence": "momentum N=24，最後05-24；完整24但1 pending，terminal23。多輪未增，建議以現有樣本描述後drop。"
+    },
+    {
+      "id": "TODO-009",
+      "title": "News-decisive deep-dive miss 偏高 (Pattern D)",
+      "source_type": "accumulating_data",
+      "review_count": 15,
+      "judgement": "stalled / stale",
+      "evidence": "News完整17，全部19；完整樣本10-04/11/18不增，未達40；96/206 agent缺值，drop單獨降News權重假設。"
+    },
+    {
+      "id": "TODO-010",
+      "title": "window_complete_pct <100% 的 verdict 可能過早 → 追蹤 verdict 翻轉率",
+      "source_type": "instrumentation_gap",
+      "review_count": 16,
+      "judgement": "ready / stale",
+      "evidence": "flip helper rc=0：32 snapshots、300 transitions、51 flips=17.0%；5組ID碰撞未解，且需核對legacy→stable identity migration。"
+    },
+    {
+      "id": "TODO-011",
+      "title": "news-digest verdict 規則結構性 0% hit(HIT_THRESHOLD_PCT 單股門檻誤套指數)",
+      "source_type": "accumulating_data",
+      "review_count": 13,
+      "judgement": "ready / stale",
+      "evidence": "權威JSON強訊號完整且finite N=18≥15；index僅9。可開始同source shadow grid，正式重標仍依賴TODO-025。"
+    },
+    {
+      "id": "TODO-012",
+      "title": "Rec 11 hot_zone_probe 活化驗收（決策層 Rec 尚未實測）",
+      "source_type": "accumulating_data",
+      "review_count": 13,
+      "judgement": "ready / stale",
+      "evidence": "probe=true共4且4筆win100；fired明示3筆。原0-fire敘事否證，合併TODO-020/023並drop舊假設。"
+    },
+    {
+      "id": "TODO-014",
+      "title": "Rec 11 regime guard 範圍重檢 (Pattern C：保守 miss 集中 SIDEWAYS 非 RISK_ON/BULL)",
+      "source_type": "accumulating_data",
+      "review_count": 11,
+      "judgement": "still_waiting / stale",
+      "evidence": "top30已知0/208，無法驗證heat×score匹配trigger；SIDEWAYS完整8/23 miss，不能據此擴大guard，建議drop原擴張假設。"
+    },
+    {
+      "id": "TODO-016",
+      "title": "surface `suppressing_risk_flags` + Rec 11 risk_flag 軟/硬分級（Rec 11 0-fire 死結）",
+      "source_type": "instrumentation_gap（第一段）→ 決策層 Rec（第二段）",
+      "review_count": 9,
+      "judgement": "ready (a); blocked (b) / stale",
+      "evidence": "權威eval覆蓋34/208；suppressing_risk_flags仍未透傳。僅推進資料傳遞，未達15筆可辨識risk-flag suppression前不評軟硬鬆綁。"
+    },
+    {
+      "id": "TODO-017",
+      "title": "`qualifying_unexplained`=1（MU 2026-07-08）+ validator §11b 漏洞",
+      "source_type": "instrumentation_gap",
+      "review_count": 9,
+      "judgement": "ready (更正原假設) / stale",
+      "evidence": "原MU07-08問題由authority優先處置；本輪208/208 committed_json，無derived影子欄參與判定，建議drop原unexplained敘事。"
+    },
+    {
+      "id": "TODO-018",
+      "title": "REVIEW_TODO schema 加 `expected_rate_per_week`（accumulating_data 樣本枯竭自動偵測）",
+      "source_type": "out_of_scope",
+      "review_count": 9,
+      "judgement": "still_waiting / stale",
+      "evidence": "本輪只更新queue內容、未改schema，原軟trigger未發生；建議與TODO-021/024合併promote為機制工作。"
+    },
+    {
+      "id": "TODO-019",
+      "title": "CANCEL 母體定義錯誤（Rec 11 target metric 測在 24.7% 偏樣本）",
+      "source_type": "instrumentation_gap",
+      "review_count": 8,
+      "judgement": "ready (驗收後close) / stale",
+      "evidence": "208/208已讀committed_json，final_action為execution verb；完整CANCEL66/126=52.4%。舊「authority未join」前提已失效。"
+    },
+    {
+      "id": "TODO-020",
+      "title": "`hot_zone_eval` 權威欄 0/164 覆蓋 + validator §11b version gate 恆不觸發",
+      "source_type": "instrumentation_gap",
+      "review_count": 8,
+      "judgement": "ready (驗收後close) / stale",
+      "evidence": "hot_zone_eval34/208、probe非null64/208，已來自committed_json；其餘含legacy缺欄不能當join全失效。對MU06-21 probe=true/eval=null明確保留缺口。"
+    },
+    {
+      "id": "TODO-021",
+      "title": "決策層產出率崩落監控（deep-dive W29–W30 = 0 run）",
+      "source_type": "out_of_scope（流程層）",
+      "review_count": 8,
+      "judgement": "still_waiting / stale",
+      "evidence": "deep W39–42=0/1/0/1，新增10-15 INTC；momentum/theme/earnings仍停產。原軟trigger未發生，合併機制promote。"
+    },
+    {
+      "id": "TODO-022",
+      "title": "`hot_zone_eval_derived` 影子欄與權威 export 欄 3/3 不符 → 降級為 fallback-only",
+      "source_type": "instrumentation_gap",
+      "review_count": 7,
+      "judgement": "ready (驗收後close) / stale",
+      "evidence": "目前208/208 committed_json且判定不依derived；舊authority=0敘事失效，先驗收fallback優先序再close，歷史缺欄另列。"
+    },
+    {
+      "id": "TODO-023",
+      "title": "Rec 11 `fired` 子集實績追蹤（反事實 vs 實測分歧）",
+      "source_type": "accumulating_data",
+      "review_count": 7,
+      "judgement": "stalled / stale",
+      "evidence": "probe flag N=4、全部完整且皆RISK_ON；fired明示N=3。仍未達N≥5且≥2 regime；總樣本持平，paused擴倉驗收，不把窗口成熟當新run。"
+    },
+    {
+      "id": "TODO-024",
+      "title": "tripwire 計數器與 REVIEW 觸發頻率解耦",
+      "source_type": "out_of_scope（REVIEW 機制層）",
+      "review_count": 7,
+      "judgement": "still_waiting / stale",
+      "evidence": "10-04/11/18完整deep集合均206且IDs相同；Rec7 top30全null，不能計三週tripwire。合併TODO-018/021。"
+    },
+    {
+      "id": "TODO-025",
+      "title": "news-digest `macro_delta` 未讀權威 JSON（7 筆 null 全可回收 + 5 筆 scraped 值錯誤）",
+      "source_type": "instrumentation_gap",
+      "review_count": 5,
+      "judgement": "ready / stale",
+      "evidence": "macro_delta null40/114=35.09%，40/40有權威值；另5個非null mismatch。authority完整重播104筆=3H/4M/97neutral。"
+    },
+    {
+      "id": "TODO-026",
+      "title": "`decision_id` 非唯一（456 rows / 452 unique），污染 flip-rate 與所有 ID join",
+      "source_type": "instrumentation_gap",
+      "review_count": 5,
+      "judgement": "ready / stale",
+      "evidence": "606 rows/600 unique，5組collision、6 surplus；deep已stable identity，殘留在theme-detector/thematic，不再建議全域重造deep ID。"
+    },
+    {
+      "id": "TODO-027",
+      "title": "非 deep-dive source（261 筆 / 57.2%）`tuning_hooks` 零覆蓋",
+      "source_type": "instrumentation_gap",
+      "review_count": 5,
+      "judgement": "still_waiting (close); ready (重定範圍) / stale",
+      "evidence": "sector原生regime98/101；thematic mature/warning131/131，但regime_label0/131。按source適用欄位驗收，勿要求非投資source有decisive_agent。"
+    },
+    {
+      "id": "TODO-028",
+      "title": "short-term-weekly / postmortem verdict 規則缺口（14/14 全 `n/a`）",
+      "source_type": "instrumentation_gap",
+      "review_count": 5,
+      "judgement": "ready (更正原假設) / stale",
+      "evidence": "weekly17與postmortem5全n/a符合retrospective設計；weekly hit_rate缺5/17（含09-18），原缺verdict規則假設應drop。"
+    },
+    {
+      "id": "TODO-029",
+      "title": "active Adjustment Ledger 缺逐週 evaluation baseline",
+      "source_type": "instrumentation_gap",
+      "review_count": 4,
+      "judgement": "ready / stale",
+      "evidence": "9 active Rec的history仍停05/06；index漏Rec11 target_metric且只擷取其餘首項。完整ledger對帳後由人類append，禁止把上週REVIEW當history。"
+    },
+    {
+      "id": "TODO-030",
+      "title": "deep-dive `decisive_agent` win100 coverage gap",
+      "source_type": "instrumentation_gap",
+      "review_count": 4,
+      "judgement": "still_waiting (close); ready (audit) / stale",
+      "evidence": "完整agent null96/206=46.60%，未達<10%；全部96/208；需區分legacy未保存與parser漏讀，不能假定全可回收。"
+    },
+    {
+      "id": "TODO-031",
+      "title": "deep-dive 樣本過度集中 Technology / Semiconductors",
+      "source_type": "accumulating_data",
+      "review_count": 4,
+      "judgement": "still_waiting / stale",
+      "evidence": "完整206筆industry/sector全Unknown；全體僅HPE有Technology分類且窗口56%。無法計Technology share或known non-Tech≥50，不以ticker常識補分類。"
+    },
+    {
+      "id": "TODO-032",
+      "title": "rebuild-date heat 重標歷史 decisions，污染 Rec 7 tripwire",
+      "source_type": "instrumentation_gap",
+      "review_count": 4,
+      "judgement": "ready / stale",
+      "evidence": "top30已知0/208、industry已知1/208；當日heat另存shadow sidecar，歷史classification缺失。只能用可驗證as-of快照補充，不回填今日熱度。"
+    },
+    {
+      "id": "TODO-033",
+      "title": "non-finite reality 值被判成 terminal verdict",
+      "source_type": "instrumentation_gap",
+      "review_count": 3,
+      "judgement": "ready (回歸驗收)",
+      "evidence": "non-finite reality0/606；build_event_index.py:155/159已有math.isfinite、evaluation_metadata也檢finite。原「無防線」前提已更正，驗證邊界後close。"
+    },
+    {
+      "id": "TODO-034",
+      "title": "thematic lifecycle／warning 原生 hooks 的時間與ticker混雜驗收",
+      "source_type": "accumulating_data",
+      "review_count": 1,
+      "judgement": "still_waiting",
+      "evidence": "terminal完整thematic125；四cell N=21/51/20/33達樣本數線，但5組collision未解、regime_label全null，且未驗證≥4不重疊窗口，仍不可調confidence。"
+    },
+    {
+      "id": "TODO-035",
+      "title": "`authority_diagnostics` 異常修復 (`NVDA_20261001` Burry 輸入非規範格式 + 4 筆缺失 provenance)",
+      "source_type": "instrumentation_gap",
+      "review_count": 1,
+      "judgement": "still_waiting (close); ready (audit)",
+      "evidence": "authority_diagnostics仍5：4 missing_provenance（NOW×2/PLTR/BAC）+1 NVDA run_evidence_mismatch，未達0；保留拒收，不合成舊provenance。"
+    }
+  ],
+  "appended": [
+    "TODO-036"
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "decision_id": "HPE_20261001T223002_25eeeee46b",
+  "evaluation": {
+    "version": "investment-evaluation/2.0",
+    "evaluated_at": "2026-10-18",
+    "source": "/Users/kavi/Developer/Claude/Projects/ai-investment-committee/investment/invest_logs/history.json#211",
+    "window_complete": false,
+    "calibration_eligible": false,
+    "exclusion_reasons": [
+      "window_incomplete"
+    ]
+  },
+  "reality": {
+    "decision_date": "2026-10-01",
+    "eval_date": "2026-10-18",
+    "today": "2026-10-18",
+    "window_days": 30,
+    "days_elapsed": 17,
+    "window_complete_pct": 56,
+    "pending": true,
+    "ticker_reality": {
+      "price_window_complete": true,
+      "price_observations": 12,
+      "price_at_decision": 64.58,
+      "price_at_decision_date": "2026-10-01",
+      "price_at_eval": 55.13,
+      "price_at_eval_date": "2026-10-16",
+      "return_pct": -14.633,
+      "max_runup_since": 73.46,
+      "max_drawdown_since": 55.13,
+      "max_runup_pct": 13.75,
+      "max_drawdown_pct": -14.633
+    },
+    "trade_condition_evaluation": {
+      "method": "daily_close_touch; no intraday ordering or execution inference",
+      "entry_price_touched": null,
+      "take_profit_touched": true,
+      "stop_loss_touched": true
+    }
+  },
+  "verdict": {
+    "label": "miss",
+    "rationale": "看多 → 實際 -14.63%, 反向｜trader 條件: TP 觸發 / SL 觸發",
+    "max_runup_pct": 13.75,
+    "max_drawdown_pct": -14.633
+  },
+  "original_label": "UNKNOWN",
+  "prior_evaluations": [
+    {
+      "label": "hit",
+      "rationale": "看多 → 實際 +13.75%, 命中｜trader 條件: TP 觸發",
+      "max_runup_pct": 13.75,
+      "max_drawdown_pct": 0.0
+    }
+  ]
+}

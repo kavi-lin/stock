@@ -114,9 +114,9 @@ Each item = level-3 heading + bullet body:
 - **target_action**: 評估是否 verdict window 對 momentum 短期屬性不適合,或 screen 本身在
   波動環境失靈;候選改 `skills/momentum-monitor/scripts/screen.py` verdict 邏輯或
   evaluation window
-- **review_count**: 15
+- **review_count**: 16
 - **status**: stalled — **建議 drop（2026-07-19）**：N=24 凍 7 輪，decided 僅 9 筆，統計上無法支持任何 verdict 規則改動
-- **last_check**: 2026-09-13
+- **last_check**: 2026-10-18
 - **evidence**:
   - 2026-05-24: hit_rate 13%, miss_rate 30% (n=23, preliminary)
   - 2026-05-31: still_waiting — n=24, hit 17% / miss 33% / neutral 50%;未到 8-12 週
@@ -141,7 +141,7 @@ Each item = level-3 heading + bullet body:
   - 2026-09-06: stalled / stale **[review_count=14]** — momentum N=24 未增長；以現有 N 評估或 drop，不再等待不存在的新 run。
 
   - 2026-09-13: stalled / stale **[review_count=15]** — momentum N=24，最後 run 05-24；W34–37皆0。以現有23筆完整窗口評估或drop，勿再等待增長。
-
+  - 2026-10-18: stalled / stale **[review_count=16]** — momentum N=24，最後05-24；完整24但1 pending，terminal23。多輪未增，建議以現有樣本描述後drop。
 
 ### TODO-004 — 拆 `final_decision` + `final_action` 兩欄 (full version)
 
@@ -290,9 +290,9 @@ Each item = level-3 heading + bullet body:
 - **target_action**: 拆 News-decisive 決策的 action 分布 (是否偏 HOLD/CANCEL),確認 miss 是
   保守性 (與 Pattern A 同根) 還是 News edge 時效衰減;若後者 → 候選在短時效 / VOLATILE
   regime 降 News agent 權重 (`investment/protocol/` agent weights 位置待查)
-- **review_count**: 14
+- **review_count**: 15
 - **status**: pending（**建議降級**：方向已 4 輪一致，改為「N≥40 時一次性確認後 close」，不再逐週追蹤）
-- **last_check**: 2026-09-13
+- **last_check**: 2026-10-18
 - **evidence**:
   - 2026-05-31: News-decisive miss 48% (15/31),vs Fundamentals 35% (19/56) / Sentiment
     33% (3/9);News 主導的 HOLD miss 62%
@@ -321,7 +321,7 @@ Each item = level-3 heading + bullet body:
   - 2026-09-06: stalled / stale **[review_count=13]** — News decisive win100 N=33，仍未達40且連續多輪不增；建議 close 原權重假設。
 
   - 2026-09-13: stalled / stale **[review_count=14]** — News decisive完整N=33、15 miss，仍低於40且多輪不增。建議drop單獨降News權重假設，待authority coverage改善再開新比較。
-
+  - 2026-10-18: stalled / stale **[review_count=15]** — News完整17，全部19；完整樣本10-04/11/18不增，未達40；96/206 agent缺值，drop單獨降News權重假設。
 
 ### TODO-010 — window_complete_pct <100% 的 verdict 可能過早 → 追蹤 verdict 翻轉率
 
@@ -337,9 +337,9 @@ Each item = level-3 heading + bullet body:
     `build_event_index.py` 為 window_complete_pct<100% 的 verdict 加 `provisional: true`,
     REVIEW Pattern 統計只計 100% 完成窗口 (或標 provisional 分開算);
     flip_rate **<10%** → close 為非問題 (早期 verdict 夠穩);10–20% → 再觀察 1 輪
-- **review_count**: 15
+- **review_count**: 16
 - **status**: in_progress（flip 13.5% 落 observe band,**四輪無漂移**；建議降頻為每 4 輪重跑一次）
-- **last_check**: 2026-09-13
+- **last_check**: 2026-10-18
 - **evidence**:
   - 2026-05-31 (補建): 0524 盲點 #2 連兩週無人接。drawdown (Rec 9) 本週剛 surface,
     與此可一起做。**N 門檻 = ≥20 筆 <100%→100% transition** (跨現有 9 snapshot,資料已備,
@@ -373,7 +373,7 @@ Each item = level-3 heading + bullet body:
   - 2026-09-06: ready / stale **[review_count=14]** — flip helper rc=0：27 snapshots、283 transitions、45 flips=15.9%；5組 ID碰撞未修，不可 close。
 
   - 2026-09-13: ready / stale **[review_count=15]** — flip helper rc=0：28 snapshots、294 transitions、48 flips=16.3%；5組ID碰撞仍在，先完成TODO-026再解讀。
-
+  - 2026-10-18: ready / stale **[review_count=16]** — flip helper rc=0：32 snapshots、300 transitions、51 flips=17.0%；5組ID碰撞未解，且需核對legacy→stable identity migration。
 
 ### TODO-011 — news-digest verdict 規則結構性 0% hit(HIT_THRESHOLD_PCT 單股門檻誤套指數)
 
@@ -393,9 +393,9 @@ Each item = level-3 heading + bullet body:
     改 `verdict_news_digest` 傳入 source-specific threshold(不動 deep-dive 的 2.0%)
   - **注**:root cause 已明,若 user 要可不等 N=15,直接套保守 ±1.0% 預設先止血,
     下輪再用累積樣本微調(exploration-phase 偏好:即時調參優於等大樣本)
-- **review_count**: 12
+- **review_count**: 13
 - **status**: **stalled (2026-07-19)** — 強訊號 N=9 凍 4 輪，「等 N≥15 再 grid 精校」路徑失效。Rec 10 的 ±1.0% 止血值維持 active；改為「以現有 N=9 直接評或無限期擱置」，不再逐週追蹤
-- **last_check**: 2026-09-13
+- **last_check**: 2026-10-18
 - **evidence**:
   - 2026-05-31 (補建): post TODO-008,news-digest evaluable 39/40,但 hit 仍 0
     (miss 2 / neutral 36)。|delta|>0.5 僅 7 筆,其中 4 筆方向正確但 SPY 動 <2% 被 neutral。
@@ -428,7 +428,7 @@ Each item = level-3 heading + bullet body:
   - 2026-09-06: still_waiting / stale **[review_count=11]** — 權威 |delta|>0.5 共14筆、win100 13筆，未達15；先完成 TODO-025 join；建議把 stale 項 promote 為明確的資料修復工作。
 
   - 2026-09-13: still_waiting / stale **[review_count=12]** — 權威強訊號總N=15但完整且有SPY值僅14；09-12窗口20%，未達15筆evaluable。與TODO-025合併為具期限驗收。
-
+  - 2026-10-18: ready / stale **[review_count=13]** — 權威JSON強訊號完整且finite N=18≥15；index僅9。可開始同source shadow grid，正式重標仍依賴TODO-025。
 
 ### TODO-012 — Rec 11 hot_zone_probe 活化驗收（決策層 Rec 尚未實測）
 
@@ -439,9 +439,9 @@ Each item = level-3 heading + bullet body:
 - **target_action**: 確認規則正確 fire — 該類標的 `hot_zone_probe=true`、`final_action=STAGED_ENTRY`、
   `position_size_pct ≤ 0.0015`(15bps)、與 decision_cap 互斥;並比對 Semis HOLD-miss / CANCEL-miss
   是否朝 <60% target 移動。資料源 `event_index.decisions[*].decision_content.hot_zone_probe`
-- **review_count**: 12
+- **review_count**: 13
 - **status**: **ready — 根因查明，驗收路徑併入 TODO-016**（0 fire 非 regime dormant，而是 risk_flag 硬閘抑制 15/18 qualifying）
-- **last_check**: 2026-09-13
+- **last_check**: 2026-10-18
 - **evidence**:
   - 2026-06-13: Rec 11 套用 6 天 0 次觸發(`hot_zone_probe` tagged = 0)。新 5 筆 deep-dive
     regime 全為 RISK_OFF/SIDEWAYS → 規則正確 dormant(符合 6 月回檔預期),但決策層 Rec
@@ -473,7 +473,7 @@ Each item = level-3 heading + bullet body:
   - 2026-09-06: ready / stale **[review_count=11]** — 權威 probe=true 共4筆、僅2筆win100；不再是0-fire，驗收與TODO-020/022/023合併，drop原0-fire假設。
 
   - 2026-09-13: ready / stale **[review_count=12]** — probe=true N=4、完整N=2；原0-fire假設已否證，建議drop原敘事並併入TODO-020/022/023。
-
+  - 2026-10-18: ready / stale **[review_count=13]** — probe=true共4且4筆win100；fired明示3筆。原0-fire敘事否證，合併TODO-020/023並drop舊假設。
 
 ### TODO-013 — 0–1 score band 內部結構不可見 (Pattern B 假設 2)
 
@@ -515,9 +515,9 @@ Each item = level-3 heading + bullet body:
 - **target_action**: 評估是否把 Rec 11 熱區鬆綁的 regime guard 從 {RISK_ON,BULL} 擴到含 SIDEWAYS;
   若 SIDEWAYS 保守 miss 持續 ≥60% 且 drawdown 仍小 → 候選改
   `investment/investment_protocol_v5_0.md` Rec 11 regime guard 條件。**嚴禁在 N<10 時動 Rec 11**
-- **review_count**: 10
+- **review_count**: 11
 - **status**: **建議 close（2026-07-19）** — 全樣本再證 regime guard 方向正確，不擴 SIDEWAYS；驗收路徑已併入 TODO-012 → TODO-016
-- **last_check**: 2026-09-13
+- **last_check**: 2026-10-18
 - **evidence**:
   - 2026-06-20: 06-07 後保守 miss (MRVL RISK_OFF / MU·ALAB·ARM SIDEWAYS) **0 筆在 RISK_ON/BULL**，
     但 Rec 11 只在 RISK_ON/BULL 觸發 → regime guard 可能把規則限制在「問題不發生的 regime」。N=4 太小，列推測
@@ -540,7 +540,7 @@ Each item = level-3 heading + bullet body:
   - 2026-09-06: stale **[review_count=9]** — regime win100 SIDEWAYS 7/25 miss、RISK_ON 24/74；未識別因果，建議 drop 擴大 guard 候選。
 
   - 2026-09-13: stale **[review_count=10]** — SIDEWAYS完整7/25 miss、RISK_ON26/77；未通過top30與分數匹配的因果確認。建議drop擴大regime guard候選。
-
+  - 2026-10-18: still_waiting / stale **[review_count=11]** — top30已知0/208，無法驗證heat×score匹配trigger；SIDEWAYS完整8/23 miss，不能據此擴大guard，建議drop原擴張假設。
 
 ### TODO-015 — surface `hot_zone_probe` + `hot_zone_eval`（Rec 11 評估結果 instrumentation）
 
@@ -590,9 +590,9 @@ Each item = level-3 heading + bullet body:
     硬閘（systemic / proceed_to_phase3=false / Auto REJECT / burry≤1）維持 100% 否決；
     軟閘（valuation warning / 單一 agent SELL / burry WARNING）不再否決 probe，但 probe 上限 15bps → **8bps**
   - **嚴禁**跳過 (a) 直接改 (b)
-- **review_count**: 8
+- **review_count**: 9
 - **status**: pending
-- **last_check**: 2026-09-13
+- **last_check**: 2026-10-18
 - **evidence**:
   - 2026-07-19: TODO-015 instrumentation 落地後首次可見 — `hot_zone_qualifying` N=**18**、`fired`=**0**、
     `suppressed_by_risk_flag`=**15**。前 3 輪「regime 不對所以正確 dormant」結論**否證**（qualifying 場景常態發生、
@@ -616,7 +616,7 @@ Each item = level-3 heading + bullet body:
   - 2026-09-06: ready (a); blocked (b) / stale **[review_count=7]** — suppressing_risk_flags 0/191；權威 eval 31筆且無risk_flag狀態；(a)可動，(b)維持禁止並建議drop。
 
   - 2026-09-13: ready (a); blocked (b) / stale **[review_count=8]** — index suppressing_risk_flags 0/191；31筆可一致判定的authority eval沒有suppressed_by_risk_flag。promote(a)資料透傳工作，drop未驗證(b)鬆綁。
-
+  - 2026-10-18: ready (a); blocked (b) / stale **[review_count=9]** — 權威eval覆蓋34/208；suppressing_risk_flags仍未透傳。僅推進資料傳遞，未達15筆可辨識risk-flag suppression前不評軟硬鬆綁。
 
 ### TODO-017 — `qualifying_unexplained`=1（MU 2026-07-08）+ validator §11b 漏洞
 
@@ -626,9 +626,9 @@ Each item = level-3 heading + bullet body:
 - **target_action**: 查 `reports/20260708_MU.md`（score 0.381 ∈ [0,0.8) × RISK_ON × Semis top30 × final_action=HOLD）
   為何 Phase 5 export 未寫 `hot_zone_eval`；補 `investment/scripts/validate_session_export.py` §11b —
   現行只強制 `probe=true ⟺ eval=fired`，**未強制「qualifying 場景必須寫 eval」** → 應加此 gate
-- **review_count**: 8
+- **review_count**: 9
 - **status**: pending
-- **last_check**: 2026-09-13
+- **last_check**: 2026-10-18
 - **evidence**:
   - 2026-07-19: deep-dive 163 筆中 `qualifying_unexplained`=1（MU 07-08，verdict=hit）。其餘分布
     not_qualifying 145 / suppressed_by_risk_flag 15 / not_evaluated_pre_rec11 2 / fired 0
@@ -647,7 +647,7 @@ Each item = level-3 heading + bullet body:
   - 2026-09-06: stale **[review_count=7]** — 原MU 07-08權威 suppressed_by_cap，原unexplained假設不成立；建議drop並合併TODO-022。
 
   - 2026-09-13: stale **[review_count=8]** — MU07-08 authority仍suppressed_by_cap而shadow為qualifying_unexplained。原假設否證，建議drop並併入TODO-022。
-
+  - 2026-10-18: ready (更正原假設) / stale **[review_count=9]** — 原MU07-08問題由authority優先處置；本輪208/208 committed_json，無derived影子欄參與判定，建議drop原unexplained敘事。
 
 ### TODO-018 — REVIEW_TODO schema 加 `expected_rate_per_week`（accumulating_data 樣本枯竭自動偵測）
 
@@ -656,9 +656,9 @@ Each item = level-3 heading + bullet body:
 - **trigger_condition**: 下次有人動 REVIEW_TODO schema 時一併做（軟條件）
 - **target_action**: 本檔 Schema 區段加選填欄 `expected_rate_per_week`；REVIEW_PROMPT.md Step -1 加規則：
   accumulating_data item 連續 3 輪 N 零成長 → 自動標 `stalled`，不再靠人工在 evidence 註記
-- **review_count**: 8
+- **review_count**: 9
 - **status**: pending
-- **last_check**: 2026-09-13
+- **last_check**: 2026-10-18
 - **evidence**:
   - 2026-07-19: 三個 accumulating_data TODO 同時樣本凍結 — TODO-003 momentum N=24 凍 **7 輪**、
     TODO-011 news 強訊號 N=9 凍 **4 輪**、TODO-009 News-decisive N=33 三週 +0。絕對 N 門檻缺上游產出率健康檢查
@@ -678,7 +678,7 @@ Each item = level-3 heading + bullet body:
   - 2026-09-06: ready / stale **[review_count=7]** — 近4週momentum/theme/earnings均0新增；與TODO-021/024合併機制工作。
 
   - 2026-09-13: stale / still_waiting **[review_count=8]** — 本輪未改queue schema，原軟trigger未發生；W34–37 momentum/theme/earnings均0。建議promote並與TODO-021/024合併成機制工作。
-
+  - 2026-10-18: still_waiting / stale **[review_count=9]** — 本輪只更新queue內容、未改schema，原軟trigger未發生；建議與TODO-021/024合併promote為機制工作。
 
 ### TODO-019 — CANCEL 母體定義錯誤（Rec 11 target metric 測在 24.7% 偏樣本）
 
@@ -691,9 +691,9 @@ Each item = level-3 heading + bullet body:
   - REVIEW 的 CANCEL / EXECUTE / STAGED metric 一律改讀 verb 欄；`ADJUSTMENT_LEDGER.md` Rec 11
     的 target_metric 量測口徑同步改寫
   - 重算後複驗 TODO-001 當年「CANCEL miss ≥70% 故應放寬」的歷史結論是否成立
-- **review_count**: 7
+- **review_count**: 8
 - **status**: pending
-- **last_check**: 2026-09-13
+- **last_check**: 2026-10-18
 - **evidence**:
   - 2026-07-31: index CANCEL bucket（MD `final_action_modifier` 口徑）n=**24**，真實 CANCEL 母體
     （export verb 口徑）n=**97**，涵蓋率 **24.7%**，且偏誤單向 — 被抓到的 24 筆 miss **70.8%**、
@@ -715,7 +715,7 @@ Each item = level-3 heading + bullet body:
   - 2026-09-06: ready / stale **[review_count=6]** — 唯一date+ticker join的完整CANCEL N=102、53 miss=52.0%；MD CANCEL僅9筆、7 miss，母體差異跨60%調整線。
 
   - 2026-09-13: ready / stale **[review_count=7]** — 含legacy top-level的唯一date+ticker join共185筆、6筆歧義；完整authority CANCEL55/106=51.9%，MD CANCEL7/9=77.8%。皆保留原verdict標籤，需再重播方向。
-
+  - 2026-10-18: ready (驗收後close) / stale **[review_count=8]** — 208/208已讀committed_json，final_action為execution verb；完整CANCEL66/126=52.4%。舊「authority未join」前提已失效。
 
 ### TODO-020 — `hot_zone_eval` 權威欄 0/164 覆蓋 + validator §11b version gate 恆不觸發
 
@@ -728,9 +728,9 @@ Each item = level-3 heading + bullet body:
     路徑**實際寫出** `hot_zone_eval`
   - 併入 TODO-017 的 gate：**qualifying 場景必須寫 `hot_zone_eval`**（現行 §11b 只強制 `probe=true ⟺ eval=fired`）
   - TODO-015 status 由 `done` 改回 `in_progress`（其唯一交付物覆蓋率為 0）
-- **review_count**: 7
+- **review_count**: 8
 - **status**: pending
-- **last_check**: 2026-09-13
+- **last_check**: 2026-10-18
 - **evidence**:
   - 2026-07-31: `decision_content.hot_zone_eval` **0/164 非 null**、`hot_zone_probe` **0/164 非 null**，
     含 V4.54.2 之後的最新 run（`2026-07-31 MU`, ver=V5.0）。history.json 版本戳分布：
@@ -753,7 +753,7 @@ Each item = level-3 heading + bullet body:
   - 2026-09-06: ready / stale **[review_count=6]** — index hot_zone_eval 0/191；history trades可一致join 31筆，需權威透傳。
 
   - 2026-09-13: ready / stale **[review_count=7]** — index hot_zone_eval/probe均0/191；唯一session eval28筆，含重複row但eval一致者31筆。先做authority來源與歧義標記。
-
+  - 2026-10-18: ready (驗收後close) / stale **[review_count=8]** — hot_zone_eval34/208、probe非null64/208，已來自committed_json；其餘含legacy缺欄不能當join全失效。對MU06-21 probe=true/eval=null明確保留缺口。
 
 ### TODO-021 — 決策層產出率崩落監控（deep-dive W29–W30 = 0 run）
 
@@ -764,9 +764,9 @@ Each item = level-3 heading + bullet body:
   - 在 REVIEW Step -1 加上游產出率健康檢查：對每個 source 計近 4 ISO 週 run 數，
     連續 2 週為 0 → 該 source 的 accumulating_data item 自動標 `stalled`，不再逐週 still_waiting
   - 與 TODO-018 合併實作於 `REVIEW_PROMPT.md` Step -1 + `REVIEW_TODO.md` Schema 區段
-- **review_count**: 7
+- **review_count**: 8
 - **status**: pending
-- **last_check**: 2026-09-13
+- **last_check**: 2026-10-18
 - **evidence**:
   - 2026-07-31: deep-dive 每 ISO 週 run 數 W16–W18 為 32/34/31，W28–W31 降為 **3/0/0/1**（降幅 >90%）。
     分層對照：自動層（thematic-screener 3/3/5/3、news-digest 3/1/2/2、sector-scan 3/1/2/2）產出穩定；
@@ -785,7 +785,7 @@ Each item = level-3 heading + bullet body:
   - 2026-09-06: ready / stale **[review_count=6]** — deep-dive W33–36產出4/14/0/1；停滯source仍需產出率監控，與TODO-018合併。
 
   - 2026-09-13: stale / still_waiting **[review_count=7]** — deep-dive W34–37為14/0/1/0，最新09-02；momentum/theme/earnings仍0。本輪軟trigger未發生，建議與TODO-018合併promote。
-
+  - 2026-10-18: still_waiting / stale **[review_count=8]** — deep W39–42=0/1/0/1，新增10-15 INTC；momentum/theme/earnings仍停產。原軟trigger未發生，合併機制promote。
 
 ### TODO-022 — `hot_zone_eval_derived` 影子欄與權威 export 欄 3/3 不符 → 降級為 fallback-only
 
@@ -802,9 +802,9 @@ Each item = level-3 heading + bullet body:
   - 加一致性 assert：權威與影子不一致時 event_index 輸出 warning 計數，REVIEW Step 0 必讀
   - 2026-04~06 的 14 筆不可查核 `suppressed_by_risk_flag` 標為 `unverifiable`，
     不可再作為決策層改動的唯一依據
-- **review_count**: 6
+- **review_count**: 7
 - **status**: pending
-- **last_check**: 2026-09-13
+- **last_check**: 2026-10-18
 - **evidence**:
   - 2026-08-02: 權威 vs 影子逐筆比對 7 筆（權威欄 2026-07-08 上線後全部）：
     PLTR 07-08 `suppressed_by_cap` vs 影子 `not_qualifying` ✗；MU 07-08 `suppressed_by_cap` vs
@@ -823,7 +823,7 @@ Each item = level-3 heading + bullet body:
   - 2026-09-06: ready / stale **[review_count=5]** — 權威可比31筆、影子12筆不符；權威優先及來源標記仍必要。
 
   - 2026-09-13: ready / stale **[review_count=6]** — field-level一致authority eval31筆中12筆與shadow不符；僅唯一session口徑為12/28。authority優先、derived僅fallback。
-
+  - 2026-10-18: ready (驗收後close) / stale **[review_count=7]** — 目前208/208 committed_json且判定不依derived；舊authority=0敘事失效，先驗收fallback優先序再close，歷史缺欄另列。
 
 ### TODO-023 — Rec 11 `fired` 子集實績追蹤（反事實 vs 實測分歧）
 
@@ -835,9 +835,9 @@ Each item = level-3 heading + bullet body:
   (b) `fired` 子集的**實測**報酬（現 N=2，avg **−10.76%**）。
   若 N≥5 後 (b) 續顯著低於 (a)，則 (a) 的超額報酬應判為選擇效應（不含滑價／實際進場時點／
   持有期間回撤觸發停損），**不足以支持鬆綁 risk_flag**；反之才 promote TODO-016 (b)
-- **review_count**: 6
+- **review_count**: 7
 - **status**: pending
-- **last_check**: 2026-09-13
+- **last_check**: 2026-10-18
 - **evidence**:
   - 2026-08-02: Rec 11 實際 fire 2 筆（皆合規：STAGED + 恰好 15bps + `decision_cap_active=false`）—
     MU 2026-06-21 ret **−19.86%** / max_dd **−29.92%**（verdict=miss, win100）；
@@ -856,7 +856,7 @@ Each item = level-3 heading + bullet body:
   - 2026-09-06: still_waiting / stale **[review_count=5]** — probe=true N=4，win100僅2筆、皆RISK_ON；未達N≥5與≥2 regime；不鬆綁risk_flag，建議promote為有期限驗收。
 
   - 2026-09-13: stalled / stale **[review_count=6]** — probe總N=4已連續三輪持平，完整N=2更長期凍結、皆RISK_ON；未達完整N≥5與≥2 regime。以現有N只做風險描述，建議paused驗收或設定期限，不鬆綁risk_flag。
-
+  - 2026-10-18: stalled / stale **[review_count=7]** — probe flag N=4、全部完整且皆RISK_ON；fired明示N=3。仍未達N≥5且≥2 regime；總樣本持平，paused擴倉驗收，不把窗口成熟當新run。
 
 ### TODO-024 — tripwire 計數器與 REVIEW 觸發頻率解耦
 
@@ -869,9 +869,9 @@ Each item = level-3 heading + bullet body:
     同批樣本重測不累加
   - `ADJUSTMENT_LEDGER.md` Rec 7 `standing_monitor` 加註上述定義 ＋ 把量測口徑書面固定為
     **win100 全 deep-dive**（避免全窗口 13.4pp / CANCEL 母體 23.0pp 的口徑漂移造成假跳閘）
-- **review_count**: 6
+- **review_count**: 7
 - **status**: pending
-- **last_check**: 2026-09-13
+- **last_check**: 2026-10-18
 - **evidence**:
   - 2026-08-02: 本輪距上輪 REVIEW 僅 **2 天**，13 筆新記錄中 deep-dive 4 筆全 pending，
     無新完成窗口 → Rec 7 gap **13.2pp** 與上輪**逐位相同**（top30 43/97、not30 14/45）。
@@ -887,7 +887,7 @@ Each item = level-3 heading + bullet body:
   - 2026-09-06: ready / stale **[review_count=5]** — 距上輪7天，deep-dive win100 164→169；heat flag本輪未翻，但history baseline仍缺；合併週計數機制。
 
   - 2026-09-13: stale / still_waiting **[review_count=6]** — 距上週7天，deep-dive完整169→175；但6筆產業映射漂移，tripwire仍不可直接累計。原schema軟trigger未發生，建議合併promote。
-
+  - 2026-10-18: still_waiting / stale **[review_count=7]** — 10-04/11/18完整deep集合均206且IDs相同；Rec7 top30全null，不能計三週tripwire。合併TODO-018/021。
 
 ### TODO-025 — news-digest `macro_delta` 未讀權威 JSON（7 筆 null 全可回收 + 5 筆 scraped 值錯誤）
 
@@ -901,9 +901,9 @@ Each item = level-3 heading + bullet body:
   - 可選（只救 3/7，非主要修法）：`scripts/extractors/news_digest_extractor.py:_MACRO_DELTA_LABEL`
     補中文 label `Session 宏觀 delta` 與全形冒號 `：`
   - join 後重算 TODO-011 的強訊號母體（|delta|>0.5）與 Rec 10 的 threshold 精校路徑
-- **review_count**: 4
+- **review_count**: 5
 - **status**: pending
-- **last_check**: 2026-09-13
+- **last_check**: 2026-10-18
 - **evidence**:
   - 2026-08-11: 逐筆 audit 7 筆 null 對應的權威 JSON — 2026-04-15 **0.0**（原判「v1 protocol legit n/a」
     **否證**）／06-23 −0.1／06-24 **−0.7**／06-25 +0.16／08-06 −0.1／08-07 **−0.75**／08-10 +0.3，
@@ -919,7 +919,7 @@ Each item = level-3 heading + bullet body:
   - 2026-09-06: ready **[review_count=3]** — news macro_delta null 22/96，22/22可回收；另5個非null mismatch；強訊號win100 13筆。
 
   - 2026-09-13: ready / stale **[review_count=4]** — macro_delta null25/99=25.3%，25/25有權威值；另5個non-null mismatch。89筆完整權威可比資料用原verdict函式重播為2H/3M/84neutral。
-
+  - 2026-10-18: ready / stale **[review_count=5]** — macro_delta null40/114=35.09%，40/40有權威值；另5個非null mismatch。authority完整重播104筆=3H/4M/97neutral。
 
 ### TODO-026 — `decision_id` 非唯一（456 rows / 452 unique），污染 flip-rate 與所有 ID join
 
@@ -931,9 +931,9 @@ Each item = level-3 heading + bullet body:
     確保唯一；或改以 `(decision_id, raw_path)` 複合 key
   - `scripts/diff_verdict_flips.py` 改用新 key 後重跑，確認 13.8% flip_rate 是否維持
   - **TODO-010 在本項落地前不可 close**
-- **review_count**: 4
+- **review_count**: 5
 - **status**: pending
-- **last_check**: 2026-09-13
+- **last_check**: 2026-10-18
 - **evidence**:
   - 2026-08-11: `decision_count`=456 但 unique `decision_id`=**452**，3 組碰撞 —
     `theme-detector_2026-04-23` ×3（`theme_detector_2026-04-23_204633.md` neutral／`…_220746.md` hit／
@@ -948,7 +948,7 @@ Each item = level-3 heading + bullet body:
   - 2026-09-06: ready **[review_count=3]** — 523 rows / 517 unique ID，5組碰撞、6 surplus；先改複合key再信flip-rate。
 
   - 2026-09-13: ready / stale **[review_count=4]** — 534 rows / 528 unique ID，5組碰撞、6 surplus；unique key未解，flip-rate只作診斷。
-
+  - 2026-10-18: ready / stale **[review_count=5]** — 606 rows/600 unique，5組collision、6 surplus；deep已stable identity，殘留在theme-detector/thematic，不再建議全域重造deep ID。
 
 ### TODO-027 — 非 deep-dive source（261 筆 / 57.2%）`tuning_hooks` 零覆蓋
 
@@ -959,9 +959,9 @@ Each item = level-3 heading + bullet body:
   注入 `tuning_hooks.sub_industry_heat`（`scripts/_sector_heat.py` helper 已存在）與 `macro_regime`
   （phase0 cache，與 deep-dive 同源）；news-digest 為市場級、僅需 `macro_regime`。
   目的：讓 deep-dive 的 heat / regime pattern 可跨 source 驗證，而非單一 source 孤證
-- **review_count**: 4
+- **review_count**: 5
 - **status**: pending
-- **last_check**: 2026-09-13
+- **last_check**: 2026-10-18
 - **evidence**:
   - 2026-08-11: `decisive_agent` / `sub_industry_heat` / `macro_regime` 覆蓋率 —
     thematic-screener 0/83、sector-scan 0/73、news-digest 0/81、momentum-screen 0/24，
@@ -974,7 +974,7 @@ Each item = level-3 heading + bullet body:
   - 2026-09-06: still_waiting (close); ready (修復) **[review_count=3]** — thematic102+sector87+news96+momentum24共309筆核心agent/heat/regime hooks無覆蓋，未達null<50%。
 
   - 2026-09-13: still_waiting (close); ready (修正範圍) / stale **[review_count=4]** — 319筆非deep四大source缺deep同名agent/heat hooks，但原生hooks不是零：sector regime85/88，thematic lifecycle/warning108/108。應按source建立適用欄位矩陣，勿把不適用欄當缺漏。
-
+  - 2026-10-18: still_waiting (close); ready (重定範圍) / stale **[review_count=5]** — sector原生regime98/101；thematic mature/warning131/131，但regime_label0/131。按source適用欄位驗收，勿要求非投資source有decisive_agent。
 
 ### TODO-028 — short-term-weekly / postmortem verdict 規則缺口（14/14 全 `n/a`）
 
@@ -985,9 +985,9 @@ Each item = level-3 heading + bullet body:
   （或明確標記為 by-design 不可評估並在 REVIEW Section 1 註記，避免每輪重列為盲點）。
   若採前者，需先定義兩者的方向欄與評估窗口（short-term-weekly 為週度標的清單、postmortem 為事後檢討，
   兩者是否適用 30d 價格窗口須先裁決）
-- **review_count**: 4
+- **review_count**: 5
 - **status**: pending
-- **last_check**: 2026-09-13
+- **last_check**: 2026-10-18
 - **evidence**:
   - 2026-08-11: short-term-weekly **9/9** 全 `n/a`、postmortem **5/5** 全 `n/a`（合計 14 筆）。
     非樣本少 —— 兩者皆有完整 `reality_at_eval`，缺的是 verdict 規則。連續 2 輪列為盲點未開 TODO
@@ -998,7 +998,7 @@ Each item = level-3 heading + bullet body:
   - 2026-09-06: ready **[review_count=3]** — short-term-weekly12/12與postmortem5/5皆n/a；應明確定義可評估性。
 
   - 2026-09-13: ready (更正／結案原假設) / stale **[review_count=4]** — 程式已有verdict_short_term_weekly及verdict_postmortem；13 weekly+5 postmortem全n/a是retrospective設計。weekly僅4筆缺摘要，另外9筆有hit_rate。drop缺規則假設，分流4筆extractor audit。
-
+  - 2026-10-18: ready (更正原假設) / stale **[review_count=5]** — weekly17與postmortem5全n/a符合retrospective設計；weekly hit_rate缺5/17（含09-18），原缺verdict規則假設應drop。
 
 ### TODO-029 — active Adjustment Ledger 缺逐週 evaluation baseline
 
@@ -1006,9 +1006,9 @@ Each item = level-3 heading + bullet body:
 - **source_type**: instrumentation_gap
 - **trigger_condition**: **立即可做** — 9 筆 active Rec 多數 evaluation_history 最後值停在 2026-05/06，無法取得可靠「上週值」
 - **target_action**: 在 `scripts/run_weekly_review.sh` 的 required-artifact gate 加 ledger coverage 檢查；每輪人類核准後，要求 `reports/decision_review/ADJUSTMENT_LEDGER.md` 對本輪 9 筆 active Rec 各 append 一筆 dated evaluation，並拒絕跨週缺口靜默延續
-- **review_count**: 3
+- **review_count**: 4
 - **status**: pending
-- **last_check**: 2026-09-13
+- **last_check**: 2026-10-18
 - **evidence**:
   - 2026-08-21: Rec 7 ledger last metric 為 2026-06-20 的 24pp；Rec 11 只有 2026-06-07「套用」紀錄；本輪只能另外引用 08-11 REVIEW，違反「對照 evaluation_history 上次值」的可重現性要求
 
@@ -1017,7 +1017,7 @@ Each item = level-3 heading + bullet body:
   - 2026-09-06: ready **[review_count=2]** — 9個active Rec沒有本週history；Rec11 target_metric甚至未被index parser帶入，需完整ledger對帳。
 
   - 2026-09-13: ready **[review_count=3]** — 9個active Rec的ledger仍缺週更基線，Rec11 index缺target_metric；live protocol t1/t2上限15/30bps與ledger單一15bps不同。人工對帳後append baseline。
-
+  - 2026-10-18: ready / stale **[review_count=4]** — 9 active Rec的history仍停05/06；index漏Rec11 target_metric且只擷取其餘首項。完整ledger對帳後由人類append，禁止把上週REVIEW當history。
 
 ### TODO-030 — deep-dive `decisive_agent` win100 coverage gap
 
@@ -1025,9 +1025,9 @@ Each item = level-3 heading + bullet body:
 - **source_type**: instrumentation_gap
 - **trigger_condition**: deep-dive win100 `tuning_hooks.decisive_agent` null rate 降至 <10% 即 close
 - **target_action**: audit `scripts/extractors/deep_dive_extractor.py` 的 decisive-agent fallback 與 `scripts/build_event_index.py` join；對 V5 export 優先讀權威 lane/decision-engine 欄，MD regex 僅 fallback，並輸出 coverage counter
-- **review_count**: 3
+- **review_count**: 4
 - **status**: pending
-- **last_check**: 2026-09-13
+- **last_check**: 2026-10-18
 - **evidence**:
   - 2026-08-21: all deep-dive decisive_agent null **46/180=25.6%**；win100 null **29/163=17.8%**。Valuation-decisive 4/6 miss 雖達形式 N≥5，仍可能受 coverage selection bias
 
@@ -1036,7 +1036,7 @@ Each item = level-3 heading + bullet body:
   - 2026-09-06: still_waiting (close); ready (修復) **[review_count=2]** — decisive_agent null：all57/191，win10035/169=20.7%，未達<10%。
 
   - 2026-09-13: still_waiting (close); ready (修復) **[review_count=3]** — decisive_agent all null57/191，完整null41/175=23.4%，未達<10%；上週35/169，新增6筆完整窗口全缺agent。
-
+  - 2026-10-18: still_waiting (close); ready (audit) / stale **[review_count=4]** — 完整agent null96/206=46.60%，未達<10%；全部96/208；需區分legacy未保存與parser漏讀，不能假定全可回收。
 
 ### TODO-031 — deep-dive 樣本過度集中 Technology / Semiconductors
 
@@ -1044,9 +1044,9 @@ Each item = level-3 heading + bullet body:
 - **source_type**: accumulating_data
 - **trigger_condition**: Technology share 降至 ≤60%，或 non-Technology win100 累積 N≥50 後重跑 sector-stratified patterns
 - **target_action**: 在 `reports/decision_review/REVIEW_PROMPT.md` Step 1 強制同時報告 sector share 與 sector-stratified effect；在樣本達門檻前，禁止把 Semiconductors/Technology 結論改成全域 agent weight 或 score threshold
-- **review_count**: 3
+- **review_count**: 4
 - **status**: pending
-- **last_check**: 2026-09-13
+- **last_check**: 2026-10-18
 - **evidence**:
   - 2026-08-21: Technology **130/180=72.2%**；Semiconductors 單一 industry **71/180=39.4%**。Consumer Electronics 60% miss 只有 AAPL N=5，顯示 industry bucket 也可能退化為單一 ticker
 
@@ -1055,7 +1055,7 @@ Each item = level-3 heading + bullet body:
   - 2026-09-06: still_waiting **[review_count=2]** — Technology137/191=71.7%；non-Technology win10044未達50；近三輪44不增，若下輪仍凍結則stalled。
 
   - 2026-09-13: still_waiting **[review_count=3]** — Technology132/191=69.1%，但5筆ALAB掉入Unknown；已知非科技完整N=46（排除Unknown），舊分類敏感度N=47，仍<50。樣本已增，不能續判stalled。
-
+  - 2026-10-18: still_waiting / stale **[review_count=4]** — 完整206筆industry/sector全Unknown；全體僅HPE有Technology分類且窗口56%。無法計Technology share或known non-Tech≥50，不以ticker常識補分類。
 
 ### TODO-032 — rebuild-date heat 重標歷史 decisions，污染 Rec 7 tripwire
 
@@ -1063,9 +1063,9 @@ Each item = level-3 heading + bullet body:
 - **source_type**: instrumentation_gap
 - **trigger_condition**: **立即可做** — 同一 win100 decided membership 下 heat flag 已可觀察到翻轉
 - **target_action**: `scripts/_sector_heat.py` / `scripts/extractors/deep_dive_extractor.py` 保存 decision-date as-of heat；`scripts/build_event_index.py` rebuild 不得用最新 heat 覆寫歷史 `industry_top_30pct`。加入 assert：既有 decision_id 的 heat `data_date` / flag 在無 backfill migration 時不可漂移；修完重設 Rec 7 baseline
-- **review_count**: 3
+- **review_count**: 4
 - **status**: pending
-- **last_check**: 2026-09-13
+- **last_check**: 2026-10-18
 - **evidence**:
   - 2026-08-21: 08-11→08-21 的 win100 decided IDs 完全相同（152，added=0/removed=0），但 `deep-dive_SMR_2026-04-15` top30 true→false、`deep-dive_FTV_2026-04-27` false→true，heat data_date 2026-08-10→2026-08-20；gap 因此 **10.83→7.64pp**，不是新 outcome evidence
 
@@ -1074,7 +1074,7 @@ Each item = level-3 heading + bullet body:
   - 2026-09-06: ready **[review_count=2]** — 本輪歷史heat flag較08-30零翻轉，但data_date已更新至09-03；舊漂移證據仍在，需as-of保存。
 
   - 2026-09-13: ready **[review_count=3]** — 相較09-06，ALAB五筆由Semiconductors→Unknown、NTRS一筆由Asset Management→Unknown；heat data_date09-03→09-12。擴及分類與heat來源保存，重設比較基線。
-
+  - 2026-10-18: ready / stale **[review_count=4]** — top30已知0/208、industry已知1/208；當日heat另存shadow sidecar，歷史classification缺失。只能用可驗證as-of快照補充，不回填今日熱度。
 
 ### TODO-033 — non-finite reality 值被判成 terminal verdict
 
@@ -1082,9 +1082,9 @@ Each item = level-3 heading + bullet body:
 - **source_type**: instrumentation_gap
 - **trigger_condition**: **立即可做** — current index 已可列舉 `NaN` reality rows；修後 non-finite terminal verdict 必須為 0
 - **target_action**: 在 `scripts/build_event_index.py` / `scripts/verdict_rules.py` 的 verdict 入口加入 `math.isfinite` gate；`return_pct` / benchmark returns 非 finite 時只可標 `pending` 或 `n/a`，並讓 event-index validator 拒絕 JSON `NaN`
-- **review_count**: 2
+- **review_count**: 3
 - **status**: pending
-- **last_check**: 2026-09-13
+- **last_check**: 2026-10-18
 - **evidence**:
   - 2026-08-30: 45 rows 含 non-finite reality：deep-dive 27（19 hit/8 neutral）、sector-scan 12（12 miss）、thematic-screener 3（3 miss）、news-digest 3（3 n/a）；其中 **2 筆 window=100** 仍非 finite（`deep-dive_MU_2026-07-31`、`sector-scan_2026-08-10`）
 
@@ -1095,6 +1095,7 @@ Each item = level-3 heading + bullet body:
   - 2026-09-06: ready (驗證回歸) **[review_count=1]** — non-finite reality本輪0/523，較上輪45筆改善；僅當週資料恢復，未證明入口math.isfinite gate已存在，不能據此close。
 
   - 2026-09-13: ready (防線驗證) **[review_count=2]** — non-finite reality0/534，但build_event_index.py/verdict_rules.py未查到isfinite/isnan入口防線；本週可用不代表缺值防線已修。SATS/BK無價格訊息另以pending/missing計。
+  - 2026-10-18: ready (回歸驗收) **[review_count=3]** — non-finite reality0/606；build_event_index.py:155/159已有math.isfinite、evaluation_metadata也檢finite。原「無防線」前提已更正，驗證邊界後close。
 
 ### TODO-034 — thematic lifecycle／warning 原生 hooks 的時間與ticker混雜驗收
 
@@ -1102,11 +1103,37 @@ Each item = level-3 heading + bullet body:
 - **source_type**: accumulating_data
 - **trigger_condition**: 解決 TODO-026 key 後，warning有/無 × mature有/無每個比較cell至少20份唯一報告；至少4組不重疊5日窗口，並有decision-date regime可分層
 - **target_action**: 用 `scripts/extractors/thematic_screener_extractor.py` 原生 `mature_lifecycle_count` / `warning_count` 與 `scripts/verdict_rules.py` 同source outcomes做時間區塊及ticker去重分析；未達條件前維持現有confidence/lifecycle規則，不調 `skills/short-term-target/config/weights.yaml`，不輸入投資決策層
-- **review_count**: 0
+- **review_count**: 1
 - **status**: pending
-- **last_check**: 2026-09-13
+- **last_check**: 2026-10-18
 - **evidence**:
   - 2026-09-13: 完整窗口thematic N=101；warning有15/39 miss、無17/62；含Mature19/70 miss、無Mature13/31。均為報告級相關性，不能將整份report verdict歸因到單一theme；regime_label108/108 null、5組ID碰撞未解。
+  - 2026-10-18: still_waiting **[review_count=1]** — terminal完整thematic125；四cell N=21/51/20/33達樣本數線，但5組collision未解、regime_label全null，且未驗證≥4不重疊窗口，仍不可調confidence。
+
+### TODO-035 — `authority_diagnostics` 異常修復 (`NVDA_20261001` Burry 輸入非規範格式 + 4 筆缺失 provenance)
+
+- **created_in**: REVIEW_2026-10-11 Section 4 系統盲點 #5 / Section 5
+- **source_type**: instrumentation_gap
+- **trigger_condition**: `event_index.authority_diagnostics` 異常清單數量 = 0（目前 5 筆）
+- **target_action**: 檢視 `NVDA_20261001` 之 V5.5 session export，修復 Burry 引擎輸入之 score/veto 映射格式，並補齊 2026-08-09（NOW, PLTR, BAC）之 provenance digest
+- **review_count**: 1
+- **status**: pending
+- **last_check**: 2026-10-18
+- **evidence**:
+  - 2026-10-11: 首發 — authority_diagnostics 出現 1 筆 run evidence mismatch (`NVDA_20261001T003605_0eab632f7a` Burry engine input not canonical) 與 4 筆 missing provenance (`2026-08-09` NOW, PLTR, BAC)。
+  - 2026-10-18: still_waiting (close); ready (audit) **[review_count=1]** — authority_diagnostics仍5：4 missing_provenance（NOW×2/PLTR/BAC）+1 NVDA run_evidence_mismatch，未達0；保留拒收，不合成舊provenance。
+
+### TODO-036 — REVIEW 報告與 Carry-over Queue 寫回一致性
+
+- **created_in**: REVIEW_2026-10-18 Section 4 / Section 5
+- **source_type**: instrumentation_gap
+- **trigger_condition**: 立即可做；每次REVIEW報告列出的全部active TODO，REVIEW_TODO.md之review_count及last_check逐筆一致率=100%，且同日重跑不重複加計
+- **target_action**: 在 `reports/decision_review/REVIEW_PROMPT.md` 加報告/queue成對驗收；未來Dev於 `dashboard_server.py` 的llm_review required-artifact gate驗證今日報告與queue欄位一致、日期重跑冪等，不回填未實際執行的歷史review_count
+- **review_count**: 0
+- **status**: pending
+- **last_check**: 2026-10-18
+- **evidence**:
+  - 2026-10-18: REVIEW_2026-10-11.md宣稱34項已更新last_check=10-11，但本輪讀取queue時TODO-003等26項中25項仍為09-13（僅TODO-035為10-11）；本輪以實檔各+1並成對驗收，未回補不存在的週次。
 
 ## Closed Items (archive)
 
