@@ -1,34 +1,235 @@
 {
   "version": "1.0",
-  "as_of": "2026-10-10T01:49:42.095497+00:00",
+  "as_of": "2026-10-29T20:31:00.959397+00:00",
   "lookback_hours": 24,
   "lexicon_version": "v1.3",
-  "post_count": 33,
-  "truth_social_dropped": 4,
+  "post_count": 55,
+  "truth_social_dropped": 1,
   "source_stats": {
-    "truth_social": 3,
-    "hacker_news": 30
+    "truth_social": 9,
+    "reddit": 8,
+    "hacker_news": 35,
+    "google_trends": 3
   },
-  "tickers": [
+  "tickers": [],
+  "low_confidence": [
     {
-      "ticker": "RTX",
-      "sector": "Industrials",
-      "mention_count": 2,
+      "ticker": "MADE",
+      "sector": null,
+      "mention_count": 5,
+      "bull_hits_sum": 1,
+      "bear_hits_sum": 0,
+      "matched_terms": [
+        {
+          "term": "loaded up",
+          "side": "bull"
+        }
+      ],
+      "sample_posts": [
+        {
+          "headline": "Congressman Mike Kelly, who has been with us from the very beginning, is a Tremendous Champion of Pennsylvania’s 16th Congressional District! As a Senior Member of the POWERFUL Hou",
+          "url": "https://truthsocial.com/@realDonaldTrump/117525804009701874",
+          "source": "Truth Social:@realDonaldTrump",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": []
+        },
+        {
+          "headline": "Congressman Glenn “GT” Thompson is a Tremendous Champion for Pennsylvania’s 15th Congressional District! As Chairman of the House Agriculture Committee, GT is a strong and effectiv",
+          "url": "https://truthsocial.com/@realDonaldTrump/117525801983876789",
+          "source": "Truth Social:@realDonaldTrump",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": []
+        },
+        {
+          "headline": "Congressman Guy Reschenthaler is doing an incredible job representing Pennsylvania’s 14th Congressional District! As the Chief Deputy Whip, Guy is working closely with me to Advanc",
+          "url": "https://truthsocial.com/@realDonaldTrump/117525800206914059",
+          "source": "Truth Social:@realDonaldTrump",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.1,
+      "engagement_score": 5.0,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "THE",
+      "sector": null,
+      "mention_count": 5,
+      "bull_hits_sum": 1,
+      "bear_hits_sum": 0,
+      "matched_terms": [
+        {
+          "term": "loaded up",
+          "side": "bull"
+        }
+      ],
+      "sample_posts": [
+        {
+          "headline": "Congressman Mike Kelly, who has been with us from the very beginning, is a Tremendous Champion of Pennsylvania’s 16th Congressional District! As a Senior Member of the POWERFUL Hou",
+          "url": "https://truthsocial.com/@realDonaldTrump/117525804009701874",
+          "source": "Truth Social:@realDonaldTrump",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": []
+        },
+        {
+          "headline": "Congressman Glenn “GT” Thompson is a Tremendous Champion for Pennsylvania’s 15th Congressional District! As Chairman of the House Agriculture Committee, GT is a strong and effectiv",
+          "url": "https://truthsocial.com/@realDonaldTrump/117525801983876789",
+          "source": "Truth Social:@realDonaldTrump",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": []
+        },
+        {
+          "headline": "Congressman Guy Reschenthaler is doing an incredible job representing Pennsylvania’s 14th Congressional District! As the Chief Deputy Whip, Guy is working closely with me to Advanc",
+          "url": "https://truthsocial.com/@realDonaldTrump/117525800206914059",
+          "source": "Truth Social:@realDonaldTrump",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.1,
+      "engagement_score": 5.0,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "PHP",
+      "sector": null,
+      "mention_count": 1,
       "bull_hits_sum": 0,
       "bear_hits_sum": 0,
       "matched_terms": [],
       "sample_posts": [
         {
-          "headline": "Metal Driver for Nvidia GeForce RTX Cards on macOS 15 Sequoia on Intel Macs",
-          "url": "https://github.com/nullmoth/nvidia-macos-driver",
+          "headline": "Show HN: phpClaw – AI agent runtime for PHP with tools, memory and guards",
+          "url": "https://github.com/phpclaw-php/phpclaw-monorepo",
           "source": "Hacker News",
-          "engagement": 2.485,
+          "engagement": 3.689,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 3.689,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "TAX",
+      "sector": null,
+      "mention_count": 3,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 1,
+      "matched_terms": [
+        {
+          "term": "puts",
+          "side": "bear"
+        }
+      ],
+      "sample_posts": [
+        {
+          "headline": "Congressman John Joyce is a fantastic Champion for Pennsylvania’s 13th Congressional District! John is fighting hard in Congress to Grow the Economy, Keep our Border SECURE, Stop M",
+          "url": "https://truthsocial.com/@realDonaldTrump/117525798353944575",
+          "source": "Truth Social:@realDonaldTrump",
+          "engagement": 1.0,
           "polarity": 0.0,
           "matched_terms": []
         },
         {
-          "headline": "Nvidia RTX Spark Pre-Orders Open: N1X Runs 45-80W in Laptops, 140W in Desktops",
-          "url": "https://www.storagereview.com/news/nvidia-rtx-spark-pre-orders-n1x-laptop-desktop-tdp-mxc-dgx-station-for-windows",
+          "headline": "Congressman Rob Bresnahan is a terrific Representative of Pennsylvania’s 8th Congressional District! A Highly Successful Businessman, Rob is working hard to Create Jobs, Cut Taxes",
+          "url": "https://truthsocial.com/@realDonaldTrump/117525794771199763",
+          "source": "Truth Social:@realDonaldTrump",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": []
+        },
+        {
+          "headline": "Congressman Scott Perry is a tremendous Representative for the Great People of Pennsylvania’s 10th Congressional District! A retired Army Brigadier General, Scott is a MAGA Warrior",
+          "url": "https://truthsocial.com/@realDonaldTrump/117525756697578269",
+          "source": "Truth Social:@realDonaldTrump",
+          "engagement": 1.0,
+          "polarity": -0.5,
+          "matched_terms": [
+            "puts"
+          ]
+        }
+      ],
+      "polarity_score": -0.1667,
+      "engagement_score": 3.0,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "AWS",
+      "sector": null,
+      "mention_count": 1,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "Ask HN: Sitting on unused OpenAI / Anthropic / AWS credits that will expire?",
+          "url": "https://news.ycombinator.com/item?id=50291687",
+          "source": "Hacker News",
+          "engagement": 2.485,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 2.485,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "TIPS",
+      "sector": null,
+      "mention_count": 2,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 1,
+      "matched_terms": [
+        {
+          "term": "puts",
+          "side": "bear"
+        }
+      ],
+      "sample_posts": [
+        {
+          "headline": "Congressman John Joyce is a fantastic Champion for Pennsylvania’s 13th Congressional District! John is fighting hard in Congress to Grow the Economy, Keep our Border SECURE, Stop M",
+          "url": "https://truthsocial.com/@realDonaldTrump/117525798353944575",
+          "source": "Truth Social:@realDonaldTrump",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": []
+        },
+        {
+          "headline": "Congressman Scott Perry is a tremendous Representative for the Great People of Pennsylvania’s 10th Congressional District! A retired Army Brigadier General, Scott is a MAGA Warrior",
+          "url": "https://truthsocial.com/@realDonaldTrump/117525756697578269",
+          "source": "Truth Social:@realDonaldTrump",
+          "engagement": 1.0,
+          "polarity": -0.5,
+          "matched_terms": [
+            "puts"
+          ]
+        }
+      ],
+      "polarity_score": -0.25,
+      "engagement_score": 2.0,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "HSBC",
+      "sector": null,
+      "mention_count": 1,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "HSBC Seeks to Hedge Data Center Debt with Credit Risk Insurance",
+          "url": "https://www.bloomberg.com/news/articles/2026-10-29/hsbc-seeks-to-hedge-data-center-debt-with-credit-risk-insurance",
           "source": "Hacker News",
           "engagement": 1.946,
           "polarity": 0.0,
@@ -36,13 +237,11 @@
         }
       ],
       "polarity_score": 0.0,
-      "engagement_score": 4.431,
-      "_gate": "known"
-    }
-  ],
-  "low_confidence": [
+      "engagement_score": 1.946,
+      "_gate": "unknown"
+    },
     {
-      "ticker": "GOP",
+      "ticker": "GPT",
       "sector": null,
       "mention_count": 1,
       "bull_hits_sum": 0,
@@ -50,20 +249,20 @@
       "matched_terms": [],
       "sample_posts": [
         {
-          "headline": "Republican data center support collapses locally when sites are in GOP counties",
-          "url": "https://pressaudit.org/f/community/posts/9c163c6e-53b7-46a3-b052-2e3c6954c04f",
+          "headline": "DeepSeek, Moonshot used OpenAI's GPT-6 Astra to train latest models",
+          "url": "https://www.reuters.com/technology/deepseek-moonshot-used-openais-gpt-6-astra-train-latest-models-information-2026-10-29/",
           "source": "Hacker News",
-          "engagement": 7.921,
+          "engagement": 1.386,
           "polarity": 0.0,
           "matched_terms": []
         }
       ],
       "polarity_score": 0.0,
-      "engagement_score": 7.921,
+      "engagement_score": 1.386,
       "_gate": "unknown"
     },
     {
-      "ticker": "GPGPU",
+      "ticker": "GREAT",
       "sector": null,
       "mention_count": 1,
       "bull_hits_sum": 0,
@@ -71,20 +270,20 @@
       "matched_terms": [],
       "sample_posts": [
         {
-          "headline": "GPGPU-SIM – Cycle-Level Simulator for Nvidia GPUs with CUDA or OpenCL Workloads",
-          "url": "https://github.com/gpgpu-sim/gpgpu-sim_distribution",
-          "source": "Hacker News",
-          "engagement": 2.079,
+          "headline": "Congressman Mike Kelly, who has been with us from the very beginning, is a Tremendous Champion of Pennsylvania’s 16th Congressional District! As a Senior Member of the POWERFUL Hou",
+          "url": "https://truthsocial.com/@realDonaldTrump/117525804009701874",
+          "source": "Truth Social:@realDonaldTrump",
+          "engagement": 1.0,
           "polarity": 0.0,
           "matched_terms": []
         }
       ],
       "polarity_score": 0.0,
-      "engagement_score": 2.079,
+      "engagement_score": 1.0,
       "_gate": "unknown"
     },
     {
-      "ticker": "SIM",
+      "ticker": "PEACE",
       "sector": null,
       "mention_count": 1,
       "bull_hits_sum": 0,
@@ -92,102 +291,39 @@
       "matched_terms": [],
       "sample_posts": [
         {
-          "headline": "GPGPU-SIM – Cycle-Level Simulator for Nvidia GPUs with CUDA or OpenCL Workloads",
-          "url": "https://github.com/gpgpu-sim/gpgpu-sim_distribution",
-          "source": "Hacker News",
-          "engagement": 2.079,
+          "headline": "Congressman John Joyce is a fantastic Champion for Pennsylvania’s 13th Congressional District! John is fighting hard in Congress to Grow the Economy, Keep our Border SECURE, Stop M",
+          "url": "https://truthsocial.com/@realDonaldTrump/117525798353944575",
+          "source": "Truth Social:@realDonaldTrump",
+          "engagement": 1.0,
           "polarity": 0.0,
           "matched_terms": []
         }
       ],
       "polarity_score": 0.0,
-      "engagement_score": 2.079,
+      "engagement_score": 1.0,
       "_gate": "unknown"
     },
     {
-      "ticker": "CUDA",
-      "sector": null,
-      "mention_count": 1,
-      "bull_hits_sum": 0,
-      "bear_hits_sum": 0,
-      "matched_terms": [],
-      "sample_posts": [
-        {
-          "headline": "GPGPU-SIM – Cycle-Level Simulator for Nvidia GPUs with CUDA or OpenCL Workloads",
-          "url": "https://github.com/gpgpu-sim/gpgpu-sim_distribution",
-          "source": "Hacker News",
-          "engagement": 2.079,
-          "polarity": 0.0,
-          "matched_terms": []
-        }
-      ],
-      "polarity_score": 0.0,
-      "engagement_score": 2.079,
-      "_gate": "unknown"
-    },
-    {
-      "ticker": "OSS",
-      "sector": null,
-      "mention_count": 1,
-      "bull_hits_sum": 0,
-      "bear_hits_sum": 0,
-      "matched_terms": [],
-      "sample_posts": [
-        {
-          "headline": "Agent Swarm: OSS multiplayer AI for your company",
-          "url": "https://github.com/desplega-ai/agent-swarm/releases",
-          "source": "Hacker News",
-          "engagement": 2.079,
-          "polarity": 0.0,
-          "matched_terms": []
-        }
-      ],
-      "polarity_score": 0.0,
-      "engagement_score": 2.079,
-      "_gate": "unknown"
-    },
-    {
-      "ticker": "GUI",
-      "sector": null,
-      "mention_count": 1,
-      "bull_hits_sum": 0,
-      "bear_hits_sum": 0,
-      "matched_terms": [],
-      "sample_posts": [
-        {
-          "headline": "Show HN: RcloneView 1.6 – A desktop GUI for rclone with 40 cloud storages",
-          "url": "https://rcloneview.com/",
-          "source": "Hacker News",
-          "engagement": 1.792,
-          "polarity": 0.0,
-          "matched_terms": []
-        }
-      ],
-      "polarity_score": 0.0,
-      "engagement_score": 1.792,
-      "_gate": "unknown"
-    },
-    {
-      "ticker": "TOTAL",
+      "ticker": "MAGA",
       "sector": null,
       "mention_count": 1,
       "bull_hits_sum": 0,
       "bear_hits_sum": 1,
       "matched_terms": [
         {
-          "term": "short",
+          "term": "puts",
           "side": "bear"
         }
       ],
       "sample_posts": [
         {
-          "headline": "I have just concluded a highly successful discussion with President Vladimir Putin, of Russia, wherein it was agreed that Russia will immediately supply over 300,000 Tons of Diesel",
-          "url": "https://truthsocial.com/@realDonaldTrump/117412435306815143",
+          "headline": "Congressman Scott Perry is a tremendous Representative for the Great People of Pennsylvania’s 10th Congressional District! A retired Army Brigadier General, Scott is a MAGA Warrior",
+          "url": "https://truthsocial.com/@realDonaldTrump/117525756697578269",
           "source": "Truth Social:@realDonaldTrump",
           "engagement": 1.0,
           "polarity": -0.5,
           "matched_terms": [
-            "short"
+            "puts"
           ]
         }
       ],
@@ -196,28 +332,35 @@
       "_gate": "unknown"
     },
     {
-      "ticker": "CLI",
+      "ticker": "FIRST",
       "sector": null,
       "mention_count": 1,
       "bull_hits_sum": 0,
-      "bear_hits_sum": 0,
-      "matched_terms": [],
-      "sample_posts": [
+      "bear_hits_sum": 1,
+      "matched_terms": [
         {
-          "headline": "Boro – Linux patch review and testing CLI with a multi-stage agentic workflow",
-          "url": "https://github.com/nvidia/boro",
-          "source": "Hacker News",
-          "engagement": 0.693,
-          "polarity": 0.0,
-          "matched_terms": []
+          "term": "puts",
+          "side": "bear"
         }
       ],
-      "polarity_score": 0.0,
-      "engagement_score": 0.693,
+      "sample_posts": [
+        {
+          "headline": "Congressman Scott Perry is a tremendous Representative for the Great People of Pennsylvania’s 10th Congressional District! A retired Army Brigadier General, Scott is a MAGA Warrior",
+          "url": "https://truthsocial.com/@realDonaldTrump/117525756697578269",
+          "source": "Truth Social:@realDonaldTrump",
+          "engagement": 1.0,
+          "polarity": -0.5,
+          "matched_terms": [
+            "puts"
+          ]
+        }
+      ],
+      "polarity_score": -0.5,
+      "engagement_score": 1.0,
       "_gate": "unknown"
     },
     {
-      "ticker": "ARTEX",
+      "ticker": "ASML",
       "sector": null,
       "mention_count": 1,
       "bull_hits_sum": 0,
@@ -225,36 +368,41 @@
       "matched_terms": [],
       "sample_posts": [
         {
-          "headline": "Chinese developer makes ARTEX AI agent closed-source after Korean bank hack",
-          "url": "https://www.reuters.com/world/china/chinese-developer-makes-artex-ai-agent-closed-source-after-korean-bank-hack-2026-10-09/",
-          "source": "Hacker News",
-          "engagement": 0.693,
+          "headline": "Vietnam's First Semiconductor Plant: 2027 Pilot Production Target Flashing Yellow as ASML Equipment Deal Still Unsigned",
+          "url": "https://www.reddit.com/r/stocks/comments/1xitk6c/vietnams_first_semiconductor_plant_2027_pilot/",
+          "source": "Reddit:r/stocks",
+          "engagement": 1.0,
           "polarity": 0.0,
           "matched_terms": []
         }
       ],
       "polarity_score": 0.0,
-      "engagement_score": 0.693,
+      "engagement_score": 1.0,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "SNDK",
+      "sector": null,
+      "mention_count": 1,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "Is SNDK Getting Too Much AI Hype?",
+          "url": "https://www.reddit.com/r/stocks/comments/1xik3sk/is_sndk_getting_too_much_ai_hype/",
+          "source": "Reddit:r/stocks",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 1.0,
       "_gate": "unknown"
     }
   ],
   "sectors": [
-    {
-      "sector": "Industrials",
-      "ticker_count": 1,
-      "engagement_score": 4.431,
-      "bull_hits_sum": 0,
-      "bear_hits_sum": 0,
-      "top_tickers": [
-        {
-          "ticker": "RTX",
-          "engagement_score": 4.431,
-          "polarity_score": 0.0,
-          "mention_count": 2
-        }
-      ],
-      "polarity_score": 0.0
-    },
     {
       "sector": "Technology",
       "ticker_count": 0,
@@ -310,6 +458,15 @@
       "top_tickers": []
     },
     {
+      "sector": "Industrials",
+      "ticker_count": 0,
+      "engagement_score": 0.0,
+      "polarity_score": 0.0,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "top_tickers": []
+    },
+    {
       "sector": "Materials",
       "ticker_count": 0,
       "engagement_score": 0.0,
@@ -348,22 +505,58 @@
   ],
   "market_wide_buzz": [
     {
-      "topic": "ai_capex",
-      "post_count": 2,
-      "engagement_score": 13.594,
+      "topic": "market_direction",
+      "post_count": 9,
+      "engagement_score": 23.076,
       "sample_posts": [
         {
-          "headline": "Yandex Takes a Second Data Center Hit in 48 Hours",
-          "url": "https://united24media.com/war-in-ukraine/yandex-takes-a-second-data-center-hit-in-48-hours-now-its-biggest-russian-site-is-damaged-23277",
+          "headline": "Alleged Chinese spy had 'close relationship' with Nvidia boss Jensen Huang",
+          "url": "https://nypost.com/2026/10/29/business/alleged-chinese-spy-had-close-relationship-with-nvidia-boss-jensen-huang-report/",
           "source": "Hacker News",
-          "engagement": 10.955,
+          "engagement": 8.243,
           "polarity": 0.0
         },
         {
-          "headline": "2nd Yandex Cloud Data Center Was Attacked",
-          "url": "https://twitter.com/yandex/status/2108482115155169544",
+          "headline": "Nvidia Chief Seen as Target of Chinese Spy Plot",
+          "url": "https://www.nytimes.com/2026/10/29/us/politics/nvidia-china-jensen-huang-trump.html",
           "source": "Hacker News",
-          "engagement": 2.639,
+          "engagement": 4.564,
+          "polarity": 0.0
+        },
+        {
+          "headline": "Vendor lists $60 milllion AI supercomputer on eBay",
+          "url": "https://www.tomshardware.com/desktops/servers/it-vendor-lists-massive-usd60-million-ai-cluster-on-ebay-300x-racks-of-decommissioned-gpus-includes-9-600-nvidia-a100-gpus-and-4-200-amd-epyc-cpus-plus-free-shipping",
+          "source": "Hacker News",
+          "engagement": 2.303,
+          "polarity": 0.0
+        }
+      ],
+      "polarity_score": 0.0
+    },
+    {
+      "topic": "ai_capex",
+      "post_count": 6,
+      "engagement_score": 9.324,
+      "sample_posts": [
+        {
+          "headline": "Vendor lists $60 milllion AI supercomputer on eBay",
+          "url": "https://www.tomshardware.com/desktops/servers/it-vendor-lists-massive-usd60-million-ai-cluster-on-ebay-300x-racks-of-decommissioned-gpus-includes-9-600-nvidia-a100-gpus-and-4-200-amd-epyc-cpus-plus-free-shipping",
+          "source": "Hacker News",
+          "engagement": 2.303,
+          "polarity": 0.0
+        },
+        {
+          "headline": "Show HN: We mapped data center regulations across 50 states and 1,462 localities",
+          "url": "https://regbase.com/datacenters",
+          "source": "Hacker News",
+          "engagement": 2.303,
+          "polarity": 0.0
+        },
+        {
+          "headline": "Voters in Texas agree: They hate data centers",
+          "url": "https://www.theverge.com/ai-artificial-intelligence/1018676/data-center-midterm-election-energy-water-texas",
+          "source": "Hacker News",
+          "engagement": 1.946,
           "polarity": 0.0
         }
       ],

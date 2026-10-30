@@ -1,6 +1,6 @@
 {
-  "signature": "RISK-OFF 偏防禦|semis_derisk/defensive_cash/event_risk_guard",
-  "ts": "2026-10-10T01:48:41+00:00",
-  "briefing_zh": "目前為 RISK-OFF 偏防禦，總曝險維持在 0–25%，以守成與事件前控部位為主。指數盤中走強，但僅 40.2% 個股上漲，近25日有8個出貨日，尚不足以支持擴大曝險。主旋律一是半導體全鏈回檔，板塊均跌 2.04%，ARM、INTC、COHR 等暫不搶反彈；二是觀察能源與必需消費的相對強勢，兩者上漲家數占比均近九成。風險提醒：能源題材多空訊號並存，且 SKEW 偏高，須防事件衝擊與盤中反轉。",
-  "model_used": "codex"
+  "signature": "中性/區間|value_defensive_rotation/event_risk_guard/smallcap_riskon",
+  "ts": "2026-10-29T19:59:02+00:00",
+  "briefing_zh": "盤面屬中性/區間，盤中分數 -4，曝險上限維持 40-60%，不宜追高。QQQ -1.47%、IWM +0.91%，上漲家數 76.6%，但軟體平台平均 -4.36%、半導體 -1.27%，科技承壓、資金外移。主旋律一是輪動至 Industrials 與 Healthcare，兩者廣度皆逾 82%，Healthcare 的 5 日預測 +1.08% 相對突出；二是小型股領漲，此訊號已延續 39 天，留意擁擠。風險提醒：SKEW 149 顯示機構買尾部避險，近25日出貨日 6 天，二元事件前宜控制部位。",
+  "model_used": "claude"
 }

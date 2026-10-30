@@ -1,0 +1,557 @@
+{
+  "as_of": "2026-10-18",
+  "week_label": "2026-10-19～2026-10-23（美股交易週）",
+  "author": "Codex",
+  "capital_per_basket": 100000,
+  "tier_weights": {
+    "core": 15000,
+    "standard": 10000,
+    "light": 5000
+  },
+  "discipline_note": "前瞻探索層，不進入或回寫investment_protocol決策。三籃為各自獨立的100k目標配置，並非同時全額買入指令。報價直接抄2026-10-18即時抓取pack的最新日線；pack未保留各檔交易時間，交易前核價。近14天委員會verdict全數缺漏，以null保留並接受degraded，不補造結論；缺估值資料，不把回檔稱作低估。",
+  "macro": {
+    "regime": "pack：FRED caution；SPY 771.79，高於MA50，RSI14=52.1；VIX 15.96 / NORMAL。thematic_source=2026-10-16.json，非10/18即時廣度。",
+    "exposure_ceiling": "pack未提供數值上限。本方案判斷：保險首批最多50%、激進首批最多25%、混合首批最多40%；確認廣度與個股止跌後才分批接近目標。Codex替代配置股票上限60%／現金40%。",
+    "breadth": "pack未提供全市場廣度；AI & Semiconductors 5日bullish breadth 13.3%、mean target -0.81%；Cloud & SaaS 52.0%；Quantum 10.5%。各題材口徑不可充作全市場廣度。",
+    "market_top": "pack無頂部判定；SPY高於MA50、RSI14=52.1，SKEW=160.4。趨勢未破與尾部風險並存是本方案推論，不能判定已見頂。",
+    "sentiment": "pack：Fear(-20)、Fear & Greed 32.1；VIX NORMAL不抵銷個股急跌風險。",
+    "real_rate_10y": "pack估計1.5%；fred_regime_label=caution，殖利率曲線未倒掛；此為pack估計而非另抓即時TIPS。",
+    "key_events": [
+      "pack未列事件日曆；以下為2026-10-18另查官方排程，非pack欄位。",
+      "10/20 10:00 ET州別就業、10/21 10:00 ET第三季通常週薪（[BLS](https://www.bls.gov/schedule/2026/home.htm)）。",
+      "10/27–28 FOMC為本適用週之後，持倉跨週須再檢查風險（[Federal Reserve](https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm)）；未查證的公司財報日期不列入。"
+    ],
+    "playbook_logic": "pack題材總榜第一為醫療56.0，並非科技；既定科技宇宙以AI與半導體47.7為首，僅Neutral／Low confidence。資安45.0但無候選報價，不硬塞標的；量子43.8但方向bearish、廣度10.5%，排除IONQ/RGTI。AI回檔先待止跌，保險偏平台質地，激進僅條件執行；ORCL/SMCI等大跌不等於便宜。"
+  },
+  "baskets": {
+    "conservative": {
+      "label_zh": "保險",
+      "label_en": "Conservative",
+      "thesis": "平台現金流質地作核心，AI供應鏈作衛星；相對激進籃保守，仍是高相關科技股票籃。完整目標100k，首批最多50k；月回檔列再進場候選，估值未驗證前不滿配。",
+      "picks": [
+        {
+          "ticker": "MSFT",
+          "tier": "core",
+          "weight_usd": 15000,
+          "price": 529.05,
+          "mom_5d": -1.1,
+          "mom_1mo": 6.3,
+          "theme": "雲端與AI平台",
+          "committee": null,
+          "reason": "以企業軟體與雲端營運現金流作核心；近月正動能，限價分批，不追跳空",
+          "data": "pack價格 $529.05；5日 -1.1%／近月 +6.3%；近14天委員會verdict缺漏，未評等；pack無估值倍數與合理價；FY26 Q4營運現金流 $55,441m、Azure收入增43%（非估值結論；[Microsoft IR](https://www.microsoft.com/en-us/investor/earnings/fy-2026-q4/press-release-webcast)）",
+          "kill": "收盤跌破 $486.73 則退出／取消待執行額度（快照價下方8%，為風控假設，非技術支撐）；或Azure或企業需求指引下修，或資本支出侵蝕現金流；跳空可能超出此損失幅度"
+        },
+        {
+          "ticker": "GOOGL",
+          "tier": "core",
+          "weight_usd": 15000,
+          "price": 340.59,
+          "mom_5d": -3.1,
+          "mom_1mo": -1.9,
+          "theme": "廣告與雲端平台",
+          "committee": null,
+          "reason": "以廣告與雲端業務分散純晶片曝險；近月小幅回檔列再進場觀察，需另驗估值",
+          "data": "pack價格 $340.59；5日 -3.1%／近月 -1.9%；近14天委員會verdict缺漏，未評等；pack無估值倍數與合理價",
+          "kill": "收盤跌破 $313.34 則退出／取消待執行額度（快照價下方8%，為風控假設，非技術支撐）；或廣告或雲端需求指引轉弱，或監管事件破壞論點；跳空可能超出此損失幅度"
+        },
+        {
+          "ticker": "META",
+          "tier": "core",
+          "weight_usd": 15000,
+          "price": 709.33,
+          "mom_5d": -1.3,
+          "mom_1mo": 4.0,
+          "theme": "廣告與AI應用",
+          "committee": null,
+          "reason": "以廣告變現作AI應用核心；近月仍上漲，先小單，不把資本支出直接當獲利",
+          "data": "pack價格 $709.33；5日 -1.3%／近月 +4.0%；近14天委員會verdict缺漏，未評等；pack無估值倍數與合理價",
+          "kill": "收盤跌破 $652.58 則退出／取消待執行額度（快照價下方8%，為風控假設，非技術支撐）；或廣告變現放緩且AI支出擴張，或需求指引下修；跳空可能超出此損失幅度"
+        },
+        {
+          "ticker": "AAPL",
+          "tier": "standard",
+          "weight_usd": 10000,
+          "price": 343.46,
+          "mom_5d": 2.0,
+          "mom_1mo": 1.9,
+          "theme": "消費科技平台",
+          "committee": null,
+          "reason": "候選宇宙少數週月雙正動能；以平台業務降低純AI設備集中，仍需估值複核",
+          "data": "pack價格 $343.46；5日 +2.0%／近月 +1.9%；近14天委員會verdict缺漏，未評等；pack無估值倍數與合理價",
+          "kill": "收盤跌破 $315.98 則退出／取消待執行額度（快照價下方8%，為風控假設，非技術支撐）；或產品需求指引轉弱或服務業務論點受損；跳空可能超出此損失幅度"
+        },
+        {
+          "ticker": "NVDA",
+          "tier": "standard",
+          "weight_usd": 10000,
+          "price": 214.13,
+          "mom_5d": -6.6,
+          "mom_1mo": -2.4,
+          "theme": "AI算力",
+          "committee": null,
+          "reason": "AI與半導體為科技宇宙最高熱度題材；月回檔提供觀察入口，週動能負值，先等止跌",
+          "data": "pack價格 $214.13；5日 -6.6%／近月 -2.4%；近14天委員會verdict缺漏，未評等；pack無估值倍數與合理價",
+          "kill": "收盤跌破 $192.72 則退出／取消待執行額度（快照價下方10%，為風控假設，非技術支撐）；或資料中心需求或毛利指引下修；跳空可能超出此損失幅度"
+        },
+        {
+          "ticker": "TSM",
+          "tier": "standard",
+          "weight_usd": 10000,
+          "price": 412.61,
+          "mom_5d": -9.0,
+          "mom_1mo": -4.1,
+          "theme": "先進晶圓代工",
+          "committee": null,
+          "reason": "以先進製程環節參與AI；近月回檔列品質再進場候選，週跌幅較大，先驗證穩定",
+          "data": "pack價格 $412.61；5日 -9.0%／近月 -4.1%；近14天委員會verdict缺漏，未評等；pack無估值倍數與合理價",
+          "kill": "收盤跌破 $371.35 則退出／取消待執行額度（快照價下方10%，為風控假設，非技術支撐）；或先進製程需求指引下修或供應鏈地緣風險升級；跳空可能超出此損失幅度"
+        },
+        {
+          "ticker": "AVGO",
+          "tier": "standard",
+          "weight_usd": 10000,
+          "price": 328.75,
+          "mom_5d": -9.1,
+          "mom_1mo": -5.2,
+          "theme": "AI客製晶片與網通",
+          "committee": null,
+          "reason": "以客製晶片與互連環節參與AI；回檔只改善價格錨點，未證明便宜",
+          "data": "pack價格 $328.75；5日 -9.1%／近月 -5.2%；近14天委員會verdict缺漏，未評等；pack無估值倍數與合理價",
+          "kill": "收盤跌破 $295.88 則退出／取消待執行額度（快照價下方10%，為風控假設，非技術支撐）；或AI客製晶片訂單或網通需求論點失效；跳空可能超出此損失幅度"
+        },
+        {
+          "ticker": "TXN",
+          "tier": "light",
+          "weight_usd": 5000,
+          "price": 276.48,
+          "mom_5d": -2.6,
+          "mom_1mo": 7.1,
+          "theme": "類比與工業晶片",
+          "committee": null,
+          "reason": "以類比業務降低加速器單一路徑依賴；近月已上漲，保留輕倉等回檔",
+          "data": "pack價格 $276.48；5日 -2.6%／近月 +7.1%；近14天委員會verdict缺漏，未評等；pack無估值倍數與合理價",
+          "kill": "收盤跌破 $251.60 則退出／取消待執行額度（快照價下方9%，為風控假設，非技術支撐）；或工業需求復甦未兌現或現金流指引惡化；跳空可能超出此損失幅度"
+        },
+        {
+          "ticker": "ASML",
+          "tier": "light",
+          "weight_usd": 5000,
+          "price": 1641.52,
+          "mom_5d": -7.8,
+          "mom_1mo": 0.7,
+          "theme": "半導體設備",
+          "committee": null,
+          "reason": "參與先進製程設備；單股價格高且缺本期估值，只留輕倉，等訂單與估值複核",
+          "data": "pack價格 $1641.52；5日 -7.8%／近月 +0.7%；近14天委員會verdict缺漏，未評等；pack無估值倍數與合理價",
+          "kill": "收盤跌破 $1477.37 則退出／取消待執行額度（快照價下方10%，為風控假設，非技術支撐）；或設備訂單指引下修或出口限制破壞訂單可見度；跳空可能超出此損失幅度"
+        },
+        {
+          "ticker": "ANET",
+          "tier": "light",
+          "weight_usd": 5000,
+          "price": 176.98,
+          "mom_5d": -18.3,
+          "mom_1mo": -11.3,
+          "theme": "AI網路",
+          "committee": null,
+          "reason": "AI網路題材保留觀察；週跌幅遠大於月跌幅，僅輕倉條件單，禁止直接承接急跌",
+          "data": "pack價格 $176.98；5日 -18.3%／近月 -11.3%；近14天委員會verdict缺漏，未評等；pack無估值倍數與合理價",
+          "kill": "收盤跌破 $155.74 則退出／取消待執行額度（快照價下方12%，為風控假設，非技術支撐）；或網路設備需求或毛利指引惡化；跳空可能超出此損失幅度"
+        }
+      ]
+    },
+    "aggressive": {
+      "label_zh": "激進",
+      "label_en": "Aggressive",
+      "thesis": "押科技宇宙最高熱度的AI算力、互連與電力；熱度僅Neutral，個股普遍週跌，故100k為條件目標，首批最多25k。所有負週動能標的先滿足止跌條件；CRDO/PLTR輕倉等回檔，NBIS未穩定前零新增。",
+      "picks": [
+        {
+          "ticker": "NVDA",
+          "tier": "core",
+          "weight_usd": 15000,
+          "price": 214.13,
+          "mom_5d": -6.6,
+          "mom_1mo": -2.4,
+          "theme": "AI算力",
+          "committee": null,
+          "reason": "AI與半導體為科技宇宙最高熱度題材；月回檔提供觀察入口，週動能負值，先等止跌",
+          "data": "pack價格 $214.13；5日 -6.6%／近月 -2.4%；近14天委員會verdict缺漏，未評等；pack無估值倍數與合理價",
+          "kill": "收盤跌破 $192.72 則退出／取消待執行額度（快照價下方10%，為風控假設，非技術支撐）；或資料中心需求或毛利指引下修；跳空可能超出此損失幅度"
+        },
+        {
+          "ticker": "AMD",
+          "tier": "core",
+          "weight_usd": 15000,
+          "price": 528.75,
+          "mom_5d": -13.0,
+          "mom_1mo": -3.0,
+          "theme": "AI算力",
+          "committee": null,
+          "reason": "押AI算力高beta；月跌幅相對週跌幅較小，需兩日不破新低才啟動分批",
+          "data": "pack價格 $528.75；5日 -13.0%／近月 -3.0%；近14天委員會verdict缺漏，未評等；pack無估值倍數與合理價",
+          "kill": "收盤跌破 $465.30 則退出／取消待執行額度（快照價下方12%，為風控假設，非技術支撐）；或AI產品需求或競爭力論點失效；跳空可能超出此損失幅度"
+        },
+        {
+          "ticker": "VRT",
+          "tier": "core",
+          "weight_usd": 15000,
+          "price": 206.42,
+          "mom_5d": -15.0,
+          "mom_1mo": -14.5,
+          "theme": "AI電力與散熱",
+          "committee": null,
+          "reason": "以機房電力與散熱參與AI基建；週月皆弱，核心屬目標權重，止跌前零新增",
+          "data": "pack價格 $206.42；5日 -15.0%／近月 -14.5%；近14天委員會verdict缺漏，未評等；pack無估值倍數與合理價",
+          "kill": "收盤跌破 $181.65 則退出／取消待執行額度（快照價下方12%，為風控假設，非技術支撐）；或資料中心設備需求指引下修或訂單取消；跳空可能超出此損失幅度"
+        },
+        {
+          "ticker": "MU",
+          "tier": "standard",
+          "weight_usd": 10000,
+          "price": 878.84,
+          "mom_5d": -14.6,
+          "mom_1mo": -10.1,
+          "theme": "AI記憶體",
+          "committee": null,
+          "reason": "押AI記憶體循環；週月同步下跌，列標準倉候選，先驗證需求與價格循環",
+          "data": "pack價格 $878.84；5日 -14.6%／近月 -10.1%；近14天委員會verdict缺漏，未評等；pack無估值倍數與合理價",
+          "kill": "收盤跌破 $773.38 則退出／取消待執行額度（快照價下方12%，為風控假設，非技術支撐）；或記憶體需求或報價循環轉弱；跳空可能超出此損失幅度"
+        },
+        {
+          "ticker": "MRVL",
+          "tier": "standard",
+          "weight_usd": 10000,
+          "price": 227.83,
+          "mom_5d": -17.2,
+          "mom_1mo": -5.3,
+          "theme": "AI客製晶片與網通",
+          "committee": null,
+          "reason": "AI題材movers列名；週跌幅大，僅在穩定後分批，避免把熱度當買點",
+          "data": "pack價格 $227.83；5日 -17.2%／近月 -5.3%；近14天委員會verdict缺漏，未評等；pack無估值倍數與合理價",
+          "kill": "收盤跌破 $200.49 則退出／取消待執行額度（快照價下方12%，為風控假設，非技術支撐）；或客製晶片量產或互連需求論點落空；跳空可能超出此損失幅度"
+        },
+        {
+          "ticker": "ALAB",
+          "tier": "standard",
+          "weight_usd": 10000,
+          "price": 285.82,
+          "mom_5d": -16.5,
+          "mom_1mo": -2.6,
+          "theme": "AI互連",
+          "committee": null,
+          "reason": "高beta互連候選；週急跌但月跌幅較小，僅在波動收斂後建立標準目標倉",
+          "data": "pack價格 $285.82；5日 -16.5%／近月 -2.6%；近14天委員會verdict缺漏，未評等；pack無估值倍數與合理價",
+          "kill": "收盤跌破 $251.52 則退出／取消待執行額度（快照價下方12%，為風控假設，非技術支撐）；或互連產品需求或客戶導入論點失效；跳空可能超出此損失幅度"
+        },
+        {
+          "ticker": "CEG",
+          "tier": "standard",
+          "weight_usd": 10000,
+          "price": 271.37,
+          "mom_5d": -9.0,
+          "mom_1mo": 3.3,
+          "theme": "AI電力供應",
+          "committee": null,
+          "reason": "以電力供應增加AI產業鏈環節；這是題材外溢推論，pack未單列核電熱度",
+          "data": "pack價格 $271.37；5日 -9.0%／近月 +3.3%；近14天委員會verdict缺漏，未評等；pack無估值倍數與合理價",
+          "kill": "收盤跌破 $244.23 則退出／取消待執行額度（快照價下方10%，為風控假設，非技術支撐）；或電力合約或營運指引破壞AI需求外溢論點；跳空可能超出此損失幅度"
+        },
+        {
+          "ticker": "CRDO",
+          "tier": "light",
+          "weight_usd": 5000,
+          "price": 169.7,
+          "mom_5d": -21.6,
+          "mom_1mo": 0.9,
+          "theme": "AI互連",
+          "committee": null,
+          "reason": "週急跌且月仍微正，反彈追價風險高；降為輕倉，等回檔且止跌後再評估",
+          "data": "pack價格 $169.70；5日 -21.6%／近月 +0.9%；近14天委員會verdict缺漏，未評等；pack無估值倍數與合理價",
+          "kill": "收盤跌破 $149.34 則退出／取消待執行額度（快照價下方12%，為風控假設，非技術支撐）；或互連需求或主要客戶論點失效；跳空可能超出此損失幅度"
+        },
+        {
+          "ticker": "PLTR",
+          "tier": "light",
+          "weight_usd": 5000,
+          "price": 186.03,
+          "mom_5d": -11.0,
+          "mom_1mo": 5.6,
+          "theme": "AI軟體",
+          "committee": null,
+          "reason": "近月仍漲且週轉弱；估值缺資料，主動限制輕倉並標等回檔，不宣稱便宜",
+          "data": "pack價格 $186.03；5日 -11.0%／近月 +5.6%；近14天委員會verdict缺漏，未評等；pack無估值倍數與合理價",
+          "kill": "收盤跌破 $163.71 則退出／取消待執行額度（快照價下方12%，為風控假設，非技術支撐）；或商業化增長或現金流論點失效；跳空可能超出此損失幅度"
+        },
+        {
+          "ticker": "NBIS",
+          "tier": "light",
+          "weight_usd": 5000,
+          "price": 165.47,
+          "mom_5d": -25.2,
+          "mom_1mo": -24.1,
+          "theme": "AI雲端高beta",
+          "committee": null,
+          "reason": "週月均大幅回落，僅保留輕倉觀察額度；未穩定前不進場，不以跌深代替資金風險分析",
+          "data": "pack價格 $165.47；5日 -25.2%／近月 -24.1%；近14天委員會verdict缺漏，未評等；pack無估值倍數與合理價",
+          "kill": "收盤跌破 $140.65 則退出／取消待執行額度（快照價下方15%，為風控假設，非技術支撐）；或融資、建設或客戶需求論點失效；跳空可能超出此損失幅度"
+        }
+      ]
+    },
+    "hybrid": {
+      "label_zh": "混合",
+      "label_en": "Hybrid",
+      "thesis": "保險65k（平台45k＋AAPL/TSM各10k）＋激進35k（NVDA/VRT各10k，AMD/MRVL/PLTR各5k）；首批最多40k。兩sleeve仍共用AI風險因子，現金需求用替代配置處理。",
+      "picks": [
+        {
+          "ticker": "MSFT",
+          "tier": "core",
+          "weight_usd": 15000,
+          "price": 529.05,
+          "mom_5d": -1.1,
+          "mom_1mo": 6.3,
+          "theme": "雲端與AI平台",
+          "committee": null,
+          "reason": "以企業軟體與雲端營運現金流作核心；近月正動能，限價分批，不追跳空",
+          "data": "pack價格 $529.05；5日 -1.1%／近月 +6.3%；近14天委員會verdict缺漏，未評等；pack無估值倍數與合理價；FY26 Q4營運現金流 $55,441m、Azure收入增43%（非估值結論；[Microsoft IR](https://www.microsoft.com/en-us/investor/earnings/fy-2026-q4/press-release-webcast)）",
+          "kill": "收盤跌破 $486.73 則退出／取消待執行額度（快照價下方8%，為風控假設，非技術支撐）；或Azure或企業需求指引下修，或資本支出侵蝕現金流；跳空可能超出此損失幅度",
+          "sleeve": "保險"
+        },
+        {
+          "ticker": "GOOGL",
+          "tier": "core",
+          "weight_usd": 15000,
+          "price": 340.59,
+          "mom_5d": -3.1,
+          "mom_1mo": -1.9,
+          "theme": "廣告與雲端平台",
+          "committee": null,
+          "reason": "以廣告與雲端業務分散純晶片曝險；近月小幅回檔列再進場觀察，需另驗估值",
+          "data": "pack價格 $340.59；5日 -3.1%／近月 -1.9%；近14天委員會verdict缺漏，未評等；pack無估值倍數與合理價",
+          "kill": "收盤跌破 $313.34 則退出／取消待執行額度（快照價下方8%，為風控假設，非技術支撐）；或廣告或雲端需求指引轉弱，或監管事件破壞論點；跳空可能超出此損失幅度",
+          "sleeve": "保險"
+        },
+        {
+          "ticker": "META",
+          "tier": "core",
+          "weight_usd": 15000,
+          "price": 709.33,
+          "mom_5d": -1.3,
+          "mom_1mo": 4.0,
+          "theme": "廣告與AI應用",
+          "committee": null,
+          "reason": "以廣告變現作AI應用核心；近月仍上漲，先小單，不把資本支出直接當獲利",
+          "data": "pack價格 $709.33；5日 -1.3%／近月 +4.0%；近14天委員會verdict缺漏，未評等；pack無估值倍數與合理價",
+          "kill": "收盤跌破 $652.58 則退出／取消待執行額度（快照價下方8%，為風控假設，非技術支撐）；或廣告變現放緩且AI支出擴張，或需求指引下修；跳空可能超出此損失幅度",
+          "sleeve": "保險"
+        },
+        {
+          "ticker": "AAPL",
+          "tier": "standard",
+          "weight_usd": 10000,
+          "price": 343.46,
+          "mom_5d": 2.0,
+          "mom_1mo": 1.9,
+          "theme": "消費科技平台",
+          "committee": null,
+          "reason": "候選宇宙少數週月雙正動能；以平台業務降低純AI設備集中，仍需估值複核",
+          "data": "pack價格 $343.46；5日 +2.0%／近月 +1.9%；近14天委員會verdict缺漏，未評等；pack無估值倍數與合理價",
+          "kill": "收盤跌破 $315.98 則退出／取消待執行額度（快照價下方8%，為風控假設，非技術支撐）；或產品需求指引轉弱或服務業務論點受損；跳空可能超出此損失幅度",
+          "sleeve": "保險"
+        },
+        {
+          "ticker": "TSM",
+          "tier": "standard",
+          "weight_usd": 10000,
+          "price": 412.61,
+          "mom_5d": -9.0,
+          "mom_1mo": -4.1,
+          "theme": "先進晶圓代工",
+          "committee": null,
+          "reason": "以先進製程環節參與AI；近月回檔列品質再進場候選，週跌幅較大，先驗證穩定",
+          "data": "pack價格 $412.61；5日 -9.0%／近月 -4.1%；近14天委員會verdict缺漏，未評等；pack無估值倍數與合理價",
+          "kill": "收盤跌破 $371.35 則退出／取消待執行額度（快照價下方10%，為風控假設，非技術支撐）；或先進製程需求指引下修或供應鏈地緣風險升級；跳空可能超出此損失幅度",
+          "sleeve": "保險"
+        },
+        {
+          "ticker": "NVDA",
+          "tier": "standard",
+          "weight_usd": 10000,
+          "price": 214.13,
+          "mom_5d": -6.6,
+          "mom_1mo": -2.4,
+          "theme": "AI算力",
+          "committee": null,
+          "reason": "AI與半導體為科技宇宙最高熱度題材；月回檔提供觀察入口，週動能負值，先等止跌",
+          "data": "pack價格 $214.13；5日 -6.6%／近月 -2.4%；近14天委員會verdict缺漏，未評等；pack無估值倍數與合理價",
+          "kill": "收盤跌破 $192.72 則退出／取消待執行額度（快照價下方10%，為風控假設，非技術支撐）；或資料中心需求或毛利指引下修；跳空可能超出此損失幅度",
+          "sleeve": "激進"
+        },
+        {
+          "ticker": "VRT",
+          "tier": "standard",
+          "weight_usd": 10000,
+          "price": 206.42,
+          "mom_5d": -15.0,
+          "mom_1mo": -14.5,
+          "theme": "AI電力與散熱",
+          "committee": null,
+          "reason": "以機房電力與散熱參與AI基建；週月皆弱，核心屬目標權重，止跌前零新增",
+          "data": "pack價格 $206.42；5日 -15.0%／近月 -14.5%；近14天委員會verdict缺漏，未評等；pack無估值倍數與合理價",
+          "kill": "收盤跌破 $181.65 則退出／取消待執行額度（快照價下方12%，為風控假設，非技術支撐）；或資料中心設備需求指引下修或訂單取消；跳空可能超出此損失幅度",
+          "sleeve": "激進"
+        },
+        {
+          "ticker": "AMD",
+          "tier": "light",
+          "weight_usd": 5000,
+          "price": 528.75,
+          "mom_5d": -13.0,
+          "mom_1mo": -3.0,
+          "theme": "AI算力",
+          "committee": null,
+          "reason": "押AI算力高beta；月跌幅相對週跌幅較小，需兩日不破新低才啟動分批",
+          "data": "pack價格 $528.75；5日 -13.0%／近月 -3.0%；近14天委員會verdict缺漏，未評等；pack無估值倍數與合理價",
+          "kill": "收盤跌破 $465.30 則退出／取消待執行額度（快照價下方12%，為風控假設，非技術支撐）；或AI產品需求或競爭力論點失效；跳空可能超出此損失幅度",
+          "sleeve": "激進"
+        },
+        {
+          "ticker": "MRVL",
+          "tier": "light",
+          "weight_usd": 5000,
+          "price": 227.83,
+          "mom_5d": -17.2,
+          "mom_1mo": -5.3,
+          "theme": "AI客製晶片與網通",
+          "committee": null,
+          "reason": "AI題材movers列名；週跌幅大，僅在穩定後分批，避免把熱度當買點",
+          "data": "pack價格 $227.83；5日 -17.2%／近月 -5.3%；近14天委員會verdict缺漏，未評等；pack無估值倍數與合理價",
+          "kill": "收盤跌破 $200.49 則退出／取消待執行額度（快照價下方12%，為風控假設，非技術支撐）；或客製晶片量產或互連需求論點落空；跳空可能超出此損失幅度",
+          "sleeve": "激進"
+        },
+        {
+          "ticker": "PLTR",
+          "tier": "light",
+          "weight_usd": 5000,
+          "price": 186.03,
+          "mom_5d": -11.0,
+          "mom_1mo": 5.6,
+          "theme": "AI軟體",
+          "committee": null,
+          "reason": "近月仍漲且週轉弱；估值缺資料，主動限制輕倉並標等回檔，不宣稱便宜",
+          "data": "pack價格 $186.03；5日 -11.0%／近月 +5.6%；近14天委員會verdict缺漏，未評等；pack無估值倍數與合理價",
+          "kill": "收盤跌破 $163.71 則退出／取消待執行額度（快照價下方12%，為風控假設，非技術支撐）；或商業化增長或現金流論點失效；跳空可能超出此損失幅度",
+          "sleeve": "激進"
+        }
+      ]
+    }
+  },
+  "codex_review": {
+    "label": "Codex Review",
+    "reviewed_on": "2026-10-18",
+    "review_mode": "committee_informed",
+    "committee_dependency": "low",
+    "dependency_note": "本次已讀完整pack，屬committee_informed，並未進行盲評或外部第二模型審查。pack的committee_verdicts為空，因此沒有可沿用或反駁的委員會個股結論；主要依行情、題材與風控判斷。MSFT營運資料與事件排程另查第一方；其他個股定位為業務推論，未完成逐股基本面／估值查證。",
+    "verdict": "本週優先以40%現金的替代配置觀察；原三籃保留作滿目標情境比較，暫不建議一次部署100%。AI廣度13.3%與多檔急跌，降低進場速度比猜底更有依據；沒有近14天委員會資料與估值錨，不宣稱任何股便宜。",
+    "comparison_notes": [
+      {
+        "title": "總曝險",
+        "original": "三籃為各自獨立的100k目標配置；保險首批最多50k、激進25k、混合40k。",
+        "note": "目標股票權重100%與當下可執行倉位有區別；替代配置僅60%股票＋40%現金，避免把完整目標當作立即交易單。"
+      },
+      {
+        "title": "集中度與相關性",
+        "original": "保險平台核心45k；激進以AI算力、互連與電力為主；混合保險65k＋激進35k。",
+        "note": "跨公司、跨sleeve不代表跨風險因子，AI資本支出收縮可同時打擊平台與供應商。替代配置單股上限12%，AI供應鏈NVDA/TSM/AVGO/VRT合計23%。"
+      },
+      {
+        "title": "動能與追價",
+        "original": "激進CRDO/PLTR輕倉等回檔，NBIS未穩定前零新增；多數標的負週動能先等止跌。",
+        "note": "沒有月漲20%以上候選；PLTR月+5.6%、CRDO+0.9%也不能推論便宜。跌得多同樣不是價值證據：NBIS週-25.2%、SMCI週-24.4%，替代配置均不持有。"
+      },
+      {
+        "title": "爭議標的與資料缺口",
+        "original": "近14天委員會verdict全數缺漏，以null保留並接受degraded，不補造結論；缺估值資料。",
+        "note": "無verdict不等於委員會通過。MSFT優先級可由第一方Azure增43%與Q4營運現金流$55,441m支持（[Microsoft IR](https://www.microsoft.com/en-us/investor/earnings/fy-2026-q4/press-release-webcast)），仍不足以證明股價便宜；其他個股在估值複核前保持條件配置。"
+      },
+      {
+        "title": "風控與執行成本",
+        "original": "每檔列快照價下方8%–15%的退出門檻；激進止跌前零新增。",
+        "note": "門檻為預設風控距離，不是回測得出的支撐；日線跳空可能超過門檻。renderer採四捨五入整股，可出現小額超支；實盤必須按資金餘額向下調整股數並留交易成本，不能融資補足。"
+      }
+    ],
+    "recommended_allocation": [
+      {
+        "ticker": "CASH",
+        "weight_pct": 40,
+        "role": "美元現金；等待廣度與估值資料，回放報酬假設0%"
+      },
+      {
+        "ticker": "MSFT",
+        "weight_pct": 12,
+        "role": "雲端現金流核心；非估值認證"
+      },
+      {
+        "ticker": "GOOGL",
+        "weight_pct": 10,
+        "role": "廣告與雲端平台"
+      },
+      {
+        "ticker": "META",
+        "weight_pct": 8,
+        "role": "廣告與AI應用"
+      },
+      {
+        "ticker": "AAPL",
+        "weight_pct": 5,
+        "role": "消費平台與相對動能"
+      },
+      {
+        "ticker": "NVDA",
+        "weight_pct": 8,
+        "role": "AI算力；止跌後分批"
+      },
+      {
+        "ticker": "TSM",
+        "weight_pct": 7,
+        "role": "先進代工；止跌後分批"
+      },
+      {
+        "ticker": "AVGO",
+        "weight_pct": 5,
+        "role": "客製晶片與網通；止跌後分批"
+      },
+      {
+        "ticker": "VRT",
+        "weight_pct": 3,
+        "role": "電力散熱；未止跌前留現金"
+      },
+      {
+        "ticker": "PLTR",
+        "weight_pct": 2,
+        "role": "AI軟體輕倉；等回檔且穩定"
+      }
+    ],
+    "execution": [
+      "三籃擇一作比較基準，不把三籃或替代配置加總成一個槓桿部位。替代配置60%股票為上限，未觸發的目標額留現金，因此實際現金可高於40%。",
+      "替代配置先建最多目標股票額的1/3（整體20%）；第2、3批各最多20%，至少隔兩個交易日，須SPY仍在MA50之上且AI廣度重新檢查改善，無新資料則不加碼。",
+      "所有負週動能股先等連續兩個交易日不破前一日低點且第二日收盤高於第一日；此條件須查新日線，當前pack不足以確認。等回檔股不得買高於pack價格的跳空，超過參考價3%則取消當次委託等待重評。",
+      "實際交易前核對最新價格與財報時間，依報告kill門檻管理；若論點失效則退出，不攤平。替代配置從首筆交易起淨值回撤達3%時停止新增，逐檔複核並優先降低高beta；單股不超12%。",
+      "整股數與成本屬快照模型；實際下單按可用資金向下取整，預留成本，不以四捨五入產生的負餘額借款。10/27–28 FOMC跨週前再核對事件，缺估值與委員會資料不視為默認核准。"
+    ],
+    "sources": [
+      {
+        "label": "Microsoft FY26 Q4官方財報：Azure、營運現金流與資本支出（2026-07-29）",
+        "url": "https://www.microsoft.com/en-us/investor/earnings/fy-2026-q4/press-release-webcast"
+      },
+      {
+        "label": "BLS 2026官方發布日曆：10/20、10/21（2026-10-18查核）",
+        "url": "https://www.bls.gov/schedule/2026/home.htm"
+      },
+      {
+        "label": "Federal Reserve 2026 FOMC官方日曆：10/27–28（2026-10-18查核）",
+        "url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm"
+      }
+    ]
+  }
+}
