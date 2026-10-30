@@ -69,3 +69,46 @@ rclone cat gdrive:ai-investment-committee-archive/2026-10-29/<bundle>.tar.gz | t
 - `forward_expectations/` 是**不可再生**的預測原始紀錄，且 `forward_expectations_calibration.py` 會 glob 整個資料夾做校準 —— **本機必須保留**，Drive 那份僅為災難備份。
 - 已進 git 的檔案不從本機刪除（git 即備份），因此各包只含 untracked 檔。
 - 刪除任何已歸檔的本機檔之前，先確認該 bundle 在上表的 md5 已驗證。
+
+## 追加歸檔（2026-10-30）
+
+Drive 目錄：`gdrive:ai-investment-committee-archive/2026-10-30/`；還原方式同上（把日期目錄換成 2026-10-30）。
+這三個來源原本都是 untracked／gitignore，**沒有任何其他備份**，所以 `RETAINED` 的兩包是唯一的災難備份。
+
+| bundle | 檔數 | 原始大小 | tar 大小 | 檔案日期範圍 | 本機狀態 |
+|---|---:|---:|---:|---|---|
+| `momentum_screen_csv_unreferenced_pre_20260831` | 136 | 21.9 MB | 6.2 MB | 2026-04-18 ~ 2026-08-31 | 本機已刪（2026-10-30，刪前逐檔 sha256 與 Drive md5 驗證） |
+| `thematic_recommendations_full` | 142 | 98.5 MB | 5.2 MB | 2026-04-25 ~ 2026-10-30 | RETAINED (backup only) |
+| `momentum_journal_full` | 3 | 14.2 MB | 1.1 MB | 2026-04-18 ~ 2026-10-27 | RETAINED (backup only) |
+
+### `momentum_screen_csv_unreferenced_pre_20260831`
+
+- **內容**：momentum-monitor/cache 的 screen_*.csv 歷史快照（>60d 且未被 journal.jsonl 引用）
+- **使用狀態**：journal.py 只會用 journal.jsonl 內 60 個 snap_id 對應的 csv（全部留在本機）；此包是未被引用的舊快照，非 point-in-time 可再生
+- **Drive**：`gdrive:ai-investment-committee-archive/2026-10-30/momentum_screen_csv_unreferenced_pre_20260831.tar.gz`（md5 `0c828f120c1e6a7fb5beda5b49e48af0`）
+- **Manifest**：`archive/drive_archive/manifests/momentum_screen_csv_unreferenced_pre_20260831.manifest.tsv.gz`
+- **遮蔽**：0 處 / 0 個檔
+- **本機狀態**：本機已刪（2026-10-30，刪前逐檔 sha256 與 Drive md5 驗證）
+
+### `thematic_recommendations_full`
+
+- **內容**：戰術雷達每日推薦 JSON 全部（2026-04-25 起；untracked 且原本無任何備份）
+- **使用狀態**：【使用中】build_event_index.py glob 全部、weekly_review.py 讀歷史、dashboard radar 讀近期 —— 本機保留，Drive 僅為災難備份，勿刪本機
+- **Drive**：`gdrive:ai-investment-committee-archive/2026-10-30/thematic_recommendations_full.tar.gz`（md5 `ebfd0a6eb3abb9cdc5b0bd4bd6699b83`）
+- **Manifest**：`archive/drive_archive/manifests/thematic_recommendations_full.manifest.tsv.gz`
+- **遮蔽**：0 處 / 0 個檔
+- **本機狀態**：RETAINED (backup only)
+
+### `momentum_journal_full`
+
+- **內容**：momentum-monitor forward-return journal（journal.jsonl，5/20/60d 報酬追蹤；untracked 且原本無任何備份）
+- **使用狀態**：【使用中】journal.py snapshot/update/stats 的唯一資料來源 —— 本機保留，Drive 僅為災難備份，勿刪本機
+- **Drive**：`gdrive:ai-investment-committee-archive/2026-10-30/momentum_journal_full.tar.gz`（md5 `e8e9627075de475f3fda491f0e7412a0`）
+- **Manifest**：`archive/drive_archive/manifests/momentum_journal_full.manifest.tsv.gz`
+- **遮蔽**：0 處 / 0 個檔
+- **本機狀態**：RETAINED (backup only)
+
+### 保留規則補充
+
+- `skills/momentum-monitor/cache/` 內被 `journal.jsonl` 引用的 60 個 `screen_*.csv` **必須留在本機**（`journal.py stats` 逐筆載入）；只有未被引用且 >60d 的才歸檔。
+- `skills/thematic-screener/data/recommendations/` 與 `skills/momentum-monitor/journal/` 是唯一原始紀錄，禁止清理，只能增量備份。
